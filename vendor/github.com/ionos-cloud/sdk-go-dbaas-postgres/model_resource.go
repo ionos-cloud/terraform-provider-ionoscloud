@@ -14,35 +14,40 @@ import (
 	"encoding/json"
 )
 
-// ClusterBackupListAllOf struct for ClusterBackupListAllOf
-type ClusterBackupListAllOf struct {
-	Type *ResourceType `json:"type,omitempty"`
+// Resource struct for Resource
+type Resource struct {
+	Type *ResourceType `json:"type"`
 	// The unique ID of the resource.
-	Id    *string           `json:"id,omitempty"`
-	Items *[]BackupResponse `json:"items,omitempty"`
+	Id *string `json:"id"`
+	// Absolute URL of the resource.
+	Href *string `json:"href"`
 }
 
-// NewClusterBackupListAllOf instantiates a new ClusterBackupListAllOf object
+// NewResource instantiates a new Resource object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewClusterBackupListAllOf() *ClusterBackupListAllOf {
-	this := ClusterBackupListAllOf{}
+func NewResource(type_ ResourceType, id string, href string) *Resource {
+	this := Resource{}
+
+	this.Type = &type_
+	this.Id = &id
+	this.Href = &href
 
 	return &this
 }
 
-// NewClusterBackupListAllOfWithDefaults instantiates a new ClusterBackupListAllOf object
+// NewResourceWithDefaults instantiates a new Resource object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewClusterBackupListAllOfWithDefaults() *ClusterBackupListAllOf {
-	this := ClusterBackupListAllOf{}
+func NewResourceWithDefaults() *Resource {
+	this := Resource{}
 	return &this
 }
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for ResourceType will be returned
-func (o *ClusterBackupListAllOf) GetType() *ResourceType {
+func (o *Resource) GetType() *ResourceType {
 	if o == nil {
 		return nil
 	}
@@ -54,7 +59,7 @@ func (o *ClusterBackupListAllOf) GetType() *ResourceType {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterBackupListAllOf) GetTypeOk() (*ResourceType, bool) {
+func (o *Resource) GetTypeOk() (*ResourceType, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -63,14 +68,14 @@ func (o *ClusterBackupListAllOf) GetTypeOk() (*ResourceType, bool) {
 }
 
 // SetType sets field value
-func (o *ClusterBackupListAllOf) SetType(v ResourceType) {
+func (o *Resource) SetType(v ResourceType) {
 
 	o.Type = &v
 
 }
 
 // HasType returns a boolean if a field has been set.
-func (o *ClusterBackupListAllOf) HasType() bool {
+func (o *Resource) HasType() bool {
 	if o != nil && o.Type != nil {
 		return true
 	}
@@ -80,7 +85,7 @@ func (o *ClusterBackupListAllOf) HasType() bool {
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *ClusterBackupListAllOf) GetId() *string {
+func (o *Resource) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -92,7 +97,7 @@ func (o *ClusterBackupListAllOf) GetId() *string {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterBackupListAllOf) GetIdOk() (*string, bool) {
+func (o *Resource) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -101,14 +106,14 @@ func (o *ClusterBackupListAllOf) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *ClusterBackupListAllOf) SetId(v string) {
+func (o *Resource) SetId(v string) {
 
 	o.Id = &v
 
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *ClusterBackupListAllOf) HasId() bool {
+func (o *Resource) HasId() bool {
 	if o != nil && o.Id != nil {
 		return true
 	}
@@ -116,45 +121,45 @@ func (o *ClusterBackupListAllOf) HasId() bool {
 	return false
 }
 
-// GetItems returns the Items field value
-// If the value is explicit nil, the zero value for []BackupResponse will be returned
-func (o *ClusterBackupListAllOf) GetItems() *[]BackupResponse {
+// GetHref returns the Href field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Resource) GetHref() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Items
+	return o.Href
 
 }
 
-// GetItemsOk returns a tuple with the Items field value
+// GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterBackupListAllOf) GetItemsOk() (*[]BackupResponse, bool) {
+func (o *Resource) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Items, true
+	return o.Href, true
 }
 
-// SetItems sets field value
-func (o *ClusterBackupListAllOf) SetItems(v []BackupResponse) {
+// SetHref sets field value
+func (o *Resource) SetHref(v string) {
 
-	o.Items = &v
+	o.Href = &v
 
 }
 
-// HasItems returns a boolean if a field has been set.
-func (o *ClusterBackupListAllOf) HasItems() bool {
-	if o != nil && o.Items != nil {
+// HasHref returns a boolean if a field has been set.
+func (o *Resource) HasHref() bool {
+	if o != nil && o.Href != nil {
 		return true
 	}
 
 	return false
 }
 
-func (o ClusterBackupListAllOf) MarshalJSON() ([]byte, error) {
+func (o Resource) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
@@ -164,45 +169,45 @@ func (o ClusterBackupListAllOf) MarshalJSON() ([]byte, error) {
 		toSerialize["id"] = o.Id
 	}
 
-	if o.Items != nil {
-		toSerialize["items"] = o.Items
+	if o.Href != nil {
+		toSerialize["href"] = o.Href
 	}
 
 	return json.Marshal(toSerialize)
 }
 
-type NullableClusterBackupListAllOf struct {
-	value *ClusterBackupListAllOf
+type NullableResource struct {
+	value *Resource
 	isSet bool
 }
 
-func (v NullableClusterBackupListAllOf) Get() *ClusterBackupListAllOf {
+func (v NullableResource) Get() *Resource {
 	return v.value
 }
 
-func (v *NullableClusterBackupListAllOf) Set(val *ClusterBackupListAllOf) {
+func (v *NullableResource) Set(val *Resource) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableClusterBackupListAllOf) IsSet() bool {
+func (v NullableResource) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableClusterBackupListAllOf) Unset() {
+func (v *NullableResource) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableClusterBackupListAllOf(val *ClusterBackupListAllOf) *NullableClusterBackupListAllOf {
-	return &NullableClusterBackupListAllOf{value: val, isSet: true}
+func NewNullableResource(val *Resource) *NullableResource {
+	return &NullableResource{value: val, isSet: true}
 }
 
-func (v NullableClusterBackupListAllOf) MarshalJSON() ([]byte, error) {
+func (v NullableResource) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableClusterBackupListAllOf) UnmarshalJSON(src []byte) error {
+func (v *NullableResource) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

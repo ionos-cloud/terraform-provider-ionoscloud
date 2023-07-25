@@ -41,6 +41,69 @@ resource "ionoscloud_logging_pipeline" "example" {
 }
 ```
 
+For re-usability, an array of **logs** can be defined in a **tfvars** file or inside the terraform
+plan, and used as presented below:
+
+The content inside **vars.tfvars** file:
+
+```hcl
+logs = [
+  {
+    source = "kubernetes"
+    tag = "firstlog"
+    protocol = "http"
+    destinations = {
+      type = "loki"
+      retention_in_days = 7
+    }},
+    {
+    source = "docker"
+    tag = "secondlog"
+    protocol = "tcp"
+    destinations = {
+      type = "loki"
+      retention_in_days = 14
+    }}]
+```
+
+The content inside the tf plan:
+
+```hcl
+variable "logs" {
+  description = "logs"
+  type        = list(object({
+    source = string
+    tag = string
+    protocol = string
+    destinations = object({
+      type = string
+      retention_in_days = number
+    } )}))
+}
+
+resource "ionoscloud_logging_pipeline" "example" {
+  name = "examplepipeline"
+  dynamic "log" {
+    for_each = var.logs
+    content {
+      source = log.value["source"]
+      tag = log.value["tag"]
+      protocol = log.value["protocol"]
+      destinations {
+        type = log.value["destinations"]["type"]
+        retention_in_days = log.value["destinations"]["retention_in_days"]
+      }
+    }
+  }
+}
+```
+The configuration can then be applied using the following commands:
+
+```shell
+terraform plan -var-file="vars.tfvars"
+terraform apply -var-file="vars.tfvars"
+```
+
 ## Argument reference
 
 * `name` - (Required)[string] The name of the Logging pipeline.

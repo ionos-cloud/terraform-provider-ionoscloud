@@ -94,25 +94,25 @@ const dataSourceAccess = DataSource + "." + DBaaSMongoTemplateResource + "." + D
 
 const validGetById = `
 data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
-	id = "3a199f09-9699-4493-a858-82d9f55a382e"
+	id = "ea320e28-b973-457a-86c5-68c19dd06d3d"
 }`
 
 const validGetByName = `
 data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
-	name = "MongoDB Business 4XL"
+	name = "MongoDB Business 4XL_S"
 }`
 
 const validGetByNamePartialMatch = `
 data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
-	name = "Business 4XL"
+	name = "Business 4XL_S"
 	partial_match = true
 }`
 
 // We are testing using the same template, so we can just define the expected values as constants
 // and re-use them.
-const expectedId = "3a199f09-9699-4493-a858-82d9f55a382e"
-const expectedName = "MongoDB Business 4XL"
+const expectedId = "ea320e28-b973-457a-86c5-68c19dd06d3d"
+const expectedName = "MongoDB Business 4XL_S"
 const expectedEdition = "business"
 const expectedCores = "32"
 const expectedRam = "131072"
-const expectedStorageSize = "1280"
+const expectedStorageSize = "2048"
