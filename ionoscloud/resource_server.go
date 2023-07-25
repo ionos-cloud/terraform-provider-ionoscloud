@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -760,11 +761,14 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 	network := map[string]interface{}{}
 	if nic.Properties != nil {
 		utils.SetPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+		utils.SetPropWithNilCheck(network, "dhcpv6", nic.Properties.Dhcpv6)
 		utils.SetPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
 		utils.SetPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
 		utils.SetPropWithNilCheck(network, "lan", nic.Properties.Lan)
 		utils.SetPropWithNilCheck(network, "name", nic.Properties.Name)
 		utils.SetPropWithNilCheck(network, "ips", nic.Properties.Ips)
+		utils.SetPropWithNilCheck(network, "ipv6_ips", nic.Properties.Ipv6Ips)
+		utils.SetPropWithNilCheck(network, "ipv6_cidr_block", nic.Properties.Ipv6CidrBlock)
 		utils.SetPropWithNilCheck(network, "mac", nic.Properties.Mac)
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ips"] = *nic.Properties.Ips
