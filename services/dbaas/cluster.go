@@ -3,15 +3,15 @@ package dbaas
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"log"
-	"strings"
-	"time"
 )
 
 func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
@@ -107,7 +107,7 @@ func (c *PsqlClient) IsClusterReady(ctx context.Context, d *schema.ResourceData)
 	}
 
 	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))
-	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
+	return strings.EqualFold(string(*cluster.Metadata.State), utils.Available), nil
 }
 
 func (c *PsqlClient) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
@@ -132,7 +132,7 @@ func (c *MongoClient) IsClusterReady(ctx context.Context, d *schema.ResourceData
 	}
 
 	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))
-	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
+	return strings.EqualFold(string(*cluster.Metadata.State), utils.Available), nil
 }
 
 func (c *MongoClient) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {

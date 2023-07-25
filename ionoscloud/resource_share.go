@@ -3,13 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -49,7 +48,7 @@ func resourceShare() *schema.Resource {
 }
 
 func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.GroupShare{
 		Properties: &ionoscloud.GroupShareProperties{},
@@ -70,9 +69,9 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	d.SetId(*rsp.Id)
 
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
+		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
@@ -84,7 +83,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(SdkBundle).CloudApiClient
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
 	logApiRequestTime(apiResponse)
@@ -109,7 +108,7 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(SdkBundle).CloudApiClient
 
 	tempSharePrivilege := d.Get("share_privilege").(bool)
 	tempEditPrivilege := d.Get("edit_privilege").(bool)
@@ -130,7 +129,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -140,7 +139,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(SdkBundle).CloudApiClient
 
 	groupId := d.Get("group_id").(string)
 	resourceId := d.Get("resource_id").(string)
@@ -167,7 +166,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 	// Wait, catching any errors
 	if apiResponse != nil && apiResponse.Header.Get("Location") != "" {
-		_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 		if errState != nil {
 			diags := diag.FromErr(errState)
 			return diags
@@ -187,7 +186,7 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 	grpId := parts[0]
 	rscId := parts[1]
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(SdkBundle).CloudApiClient
 
 	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
 	logApiRequestTime(apiResponse)

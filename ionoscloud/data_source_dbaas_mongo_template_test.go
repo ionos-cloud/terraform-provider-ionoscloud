@@ -4,7 +4,6 @@ package ionoscloud
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 )
@@ -62,7 +61,7 @@ func TestAccDataSourceDBaaSMongoTemplate(t *testing.T) {
 }
 
 const invalidMissingBothIdAndName = `
-data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
+data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
 }`
 
 // We are looking for an UUID that doesn't exist. Usually, simply generating a value wouldn't be
@@ -70,50 +69,50 @@ data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplate
 // that the UUID consists of several characters, the probability of generating an UUID that already
 // exists is very small, so we don't need any additional check.
 const invalidProvidingBothIdAndName = resourceRandomUUID + resourceRandomString + `
-data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
+data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
 	id = random_uuid.uuid.result
 	name = random_string.simple_string.result
 }`
 
 const invalidGetByIdNonExistentTemplate = resourceRandomUUID + `
-data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
+data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
 	id = random_uuid.uuid.result
 }`
 
 const invalidGetByNameNonExistentTemplate = resourceRandomString + `
-data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
+data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
 	name = random_string.simple_string.result
 }`
 
 const invalidGetByNameMultipleTemplates = `
-data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
+data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
 	name = "MongoDB"
 	partial_match = true
 }`
 
-const dataSourceAccess = constant.DataSource + "." + constant.DBaaSMongoTemplateResource + "." + constant.DBaaSMongoTemplateTestDataSource
+const dataSourceAccess = DataSource + "." + DBaaSMongoTemplateResource + "." + DBaaSMongoTemplateTestDataSource
 
 const validGetById = `
-data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
-	id = "3a199f09-9699-4493-a858-82d9f55a382e"
+data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
+	id = "ea320e28-b973-457a-86c5-68c19dd06d3d"
 }`
 
 const validGetByName = `
-data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
-	name = "MongoDB Business 4XL"
+data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
+	name = "MongoDB Business 4XL_S"
 }`
 
 const validGetByNamePartialMatch = `
-data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
-	name = "Business 4XL"
+data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
+	name = "Business 4XL_S"
 	partial_match = true
 }`
 
 // We are testing using the same template, so we can just define the expected values as constants
 // and re-use them.
-const expectedId = "3a199f09-9699-4493-a858-82d9f55a382e"
-const expectedName = "MongoDB Business 4XL"
+const expectedId = "ea320e28-b973-457a-86c5-68c19dd06d3d"
+const expectedName = "MongoDB Business 4XL_S"
 const expectedEdition = "business"
 const expectedCores = "32"
 const expectedRam = "131072"
-const expectedStorageSize = "1280"
+const expectedStorageSize = "2048"

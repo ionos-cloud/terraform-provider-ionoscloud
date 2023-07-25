@@ -2,14 +2,14 @@ package dbaas
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"runtime"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"net/http"
-	"os"
-	"runtime"
 )
 
 type PsqlClient struct {
@@ -23,11 +23,11 @@ type MongoClient struct {
 func NewPsqlClient(username, password, token, url, version, terraformVersion string) *PsqlClient {
 	newConfigDbaas := psql.NewConfiguration(username, password, token, url)
 
-	if os.Getenv(constant.IonosDebug) != "" {
+	if os.Getenv(utils.IonosDebug) != "" {
 		newConfigDbaas.Debug = true
 	}
-	newConfigDbaas.MaxRetries = constant.MaxRetries
-	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
+	newConfigDbaas.MaxRetries = utils.MaxRetries
+	newConfigDbaas.MaxWaitTime = utils.MaxWaitTime
 
 	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigDbaas.UserAgent = fmt.Sprintf(
@@ -45,8 +45,8 @@ func NewMongoClient(username, password, token, url, version, terraformVersion st
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfigDbaas.Debug = true
 	}
-	newConfigDbaas.MaxRetries = constant.MaxRetries
-	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
+	newConfigDbaas.MaxRetries = utils.MaxRetries
+	newConfigDbaas.MaxWaitTime = utils.MaxWaitTime
 
 	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigDbaas.UserAgent = fmt.Sprintf(

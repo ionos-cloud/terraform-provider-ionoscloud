@@ -2,13 +2,13 @@ package containerregistry
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	cr "github.com/ionos-cloud/sdk-go-container-registry"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"net/http"
 	"os"
 	"runtime"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	cr "github.com/ionos-cloud/sdk-go-container-registry"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 type Client struct {
@@ -21,8 +21,8 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfigRegistry.Debug = true
 	}
-	newConfigRegistry.MaxRetries = constant.MaxRetries
-	newConfigRegistry.MaxWaitTime = constant.MaxWaitTime
+	newConfigRegistry.MaxRetries = utils.MaxRetries
+	newConfigRegistry.MaxWaitTime = utils.MaxWaitTime
 
 	newConfigRegistry.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigRegistry.UserAgent = fmt.Sprintf(

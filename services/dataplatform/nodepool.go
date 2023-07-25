@@ -3,14 +3,14 @@ package dataplatform
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"log"
-	"strings"
 )
 
 var nodePoolResourceName = "Dataplatform Node Pool"
@@ -77,7 +77,7 @@ func (c *Client) IsNodePoolReady(ctx context.Context, d *schema.ResourceData) (b
 		return false, fmt.Errorf("nodepool id %s is in failed state", d.Id())
 	}
 
-	return strings.EqualFold(*subjectNodePool.Metadata.State, constant.Available), nil
+	return strings.EqualFold(*subjectNodePool.Metadata.State, utils.Available), nil
 }
 
 func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) *dataplatform.CreateNodePoolRequest {

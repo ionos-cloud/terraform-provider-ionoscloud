@@ -3,14 +3,15 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"log"
-	"regexp"
 )
 
 func resourceContainerRegistryToken() *schema.Resource {

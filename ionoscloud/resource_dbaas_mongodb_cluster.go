@@ -3,15 +3,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"log"
-	"time"
 )
 
 func resourceDbaasMongoDBCluster() *schema.Resource {
@@ -142,7 +141,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 }
 
 func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(SdkBundle).MongoClient
 
 	cluster := dbaas.SetMongoClusterCreateProperties(d)
 
@@ -163,7 +162,7 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(SdkBundle).MongoClient
 	clusterId := d.Id()
 	patchRequest := dbaas.SetMongoClusterPatchProperties(d)
 
@@ -186,7 +185,7 @@ func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(SdkBundle).MongoClient
 
 	cluster, apiResponse, err := client.GetCluster(ctx, d.Id())
 
@@ -209,7 +208,7 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(SdkBundle).MongoClient
 
 	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
 
@@ -227,13 +226,13 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(fmt.Errorf("failed checking if deleted %w", err))
 	}
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
-	time.Sleep(constant.SleepInterval * 3)
+	time.Sleep(utils.SleepInterval * 3)
 
 	return nil
 }
 
 func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(SdkBundle).MongoClient
 
 	clusterId := d.Id()
 

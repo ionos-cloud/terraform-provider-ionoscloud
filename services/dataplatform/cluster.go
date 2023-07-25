@@ -3,12 +3,12 @@ package dataplatform
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"log"
-	"strings"
 )
 
 var clusterResourceName = "Dataplatform Cluster"
@@ -22,7 +22,7 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 		return false, fmt.Errorf("expected metadata, got empty for cluster id %s", d.Id())
 	}
 	log.Printf("[DEBUG] dataplatform cluster state %s", *cluster.Metadata.State)
-	return strings.EqualFold(*cluster.Metadata.State, constant.Available), nil
+	return strings.EqualFold(*cluster.Metadata.State, utils.Available), nil
 }
 
 func (c *Client) GetClusterById(ctx context.Context, id string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {
