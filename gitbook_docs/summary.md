@@ -90,10 +90,15 @@
 * Database as a Service - Postgres
   * Resources
     * [DBaaS Postgres Cluster](../docs/resources/dbaas_pgsql_cluster.md)
+    * [DBaaS Postgres User](../docs/resources/dbaas_pgsql_user.md)
+    * [DBaaS Postgres Database](../docs/resources/dbaas_pgsql_database.md)
   * Data Sources
     * [DBaaS Postgres Backup](../docs/data-sources/dbaas_pgsql_backups.md)
     * [DBaaS Postgres Cluster](../docs/data-sources/dbaas_pgsql_cluster.md)
     * [DBaaS Postgres Versions](../docs/data-sources/dbaas_pgsql_versions.md)
+    * [DBaaS Postgres User](../docs/data-sources/dbaas_pgsql_user.md)
+    * [DBaaS Postgres Database](../docs/data-sources/dbaas_pgsql_database.md)
+    * [DBaaS Postgres Databases](../docs/data-sources/dbaas_pgsql_databases.md)
 
 * Database as a Service - MongoDB
   * Resources
