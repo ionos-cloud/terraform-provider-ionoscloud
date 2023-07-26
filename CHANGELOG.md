@@ -3,6 +3,9 @@
 - Make `nic` list in `ionoscloud_server` resource optional
 - Make `firewall` list in `ionoscloud_server` resource optional and allow multiple inline firewall rules in the list
 
+### Refactor
+- Separate `cloudapi` code from `ionoscloud` folder, to be able to write services easier.
+
 ## 6.4.4
 
 ### Features
