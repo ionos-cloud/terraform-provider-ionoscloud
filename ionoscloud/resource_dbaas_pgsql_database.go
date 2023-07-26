@@ -3,13 +3,15 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"strings"
 )
 
 func resourceDbaasPgSqlDatabase() *schema.Resource {
@@ -43,7 +45,7 @@ func resourceDbaasPgSqlDatabase() *schema.Resource {
 }
 
 func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).PsqlClient
+	client := meta.(services.SdkBundle).PsqlClient
 	clusterId := d.Get("cluster_id").(string)
 	name := d.Get("name").(string)
 	owner := d.Get("owner").(string)
@@ -65,7 +67,7 @@ func resourceDbaasPgSqlDatabaseUpdate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).PsqlClient
+	client := meta.(services.SdkBundle).PsqlClient
 	clusterId := d.Get("cluster_id").(string)
 	name := d.Get("name").(string)
 
@@ -84,7 +86,7 @@ func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceDbaasPgSqlDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).PsqlClient
+	client := meta.(services.SdkBundle).PsqlClient
 
 	clusterId := d.Get("cluster_id").(string)
 	name := d.Get("name").(string)
@@ -102,7 +104,7 @@ func resourceDbaasPgSqlDatabaseImporter(ctx context.Context, d *schema.ResourceD
 	}
 	clusterId := parts[0]
 	name := parts[1]
-	client := meta.(SdkBundle).PsqlClient
+	client := meta.(services.SdkBundle).PsqlClient
 	database, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)
 	if err != nil {
 		if apiResponse.HttpNotFound() {

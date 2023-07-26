@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dns "github.com/ionos-cloud/sdk-go-dns"
@@ -48,7 +50,7 @@ func resourceDNSZone() *schema.Resource {
 }
 
 func zoneCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 	zoneResponse, _, err := client.CreateZone(ctx, d)
 
 	if err != nil {
@@ -66,7 +68,7 @@ func zoneCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 }
 
 func zoneRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 	zoneId := d.Id()
 	zone, apiResponse, err := client.GetZoneById(ctx, zoneId)
 
@@ -88,7 +90,7 @@ func zoneRead(ctx context.Context, d *schema.ResourceData, meta interface{}) dia
 }
 
 func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 	zoneId := d.Id()
 
 	zoneResponse, _, err := client.UpdateZone(ctx, zoneId, d)
@@ -106,7 +108,7 @@ func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 }
 
 func zoneDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 	zoneId := d.Id()
 
 	apiResponse, err := client.DeleteZone(ctx, zoneId)
@@ -126,7 +128,7 @@ func zoneDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 }
 
 func zoneImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 	zoneId := d.Id()
 
 	zone, apiResponse, err := client.GetZoneById(ctx, zoneId)

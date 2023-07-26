@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
@@ -86,7 +88,7 @@ func (c *MongoClient) IsUserReady(ctx context.Context, d *schema.ResourceData) (
 		return false, fmt.Errorf("cluster metadata or state is empty for id %s", d.Id())
 	}
 	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))
-	return strings.EqualFold(string(*cluster.Metadata.State), utils.Available), nil
+	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
 }
 
 func (c *MongoClient) IsUserDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {

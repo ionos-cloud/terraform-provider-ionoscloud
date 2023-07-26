@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 )
 
@@ -122,7 +123,7 @@ func dataSourceDataplatformNodePool() *schema.Resource {
 }
 
 func dataSourceDataplatformReadNodePool(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 	idValue, idOk := d.GetOk("id")

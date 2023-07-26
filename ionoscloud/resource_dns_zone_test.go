@@ -5,11 +5,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	dns "github.com/ionos-cloud/sdk-go-dns"
-	"regexp"
-	"testing"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccDNSZone(t *testing.T) {
@@ -25,34 +28,34 @@ func TestAccDNSZone(t *testing.T) {
 			{
 				Config: DNSZoneConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDNSZoneExistenceCheck(DNSZoneResource+"."+DNSZoneTestResourceName, &Zone),
-					resource.TestCheckResourceAttr(DNSZoneResource+"."+DNSZoneTestResourceName, zoneNameAttribute, zoneNameValue),
-					resource.TestCheckResourceAttr(DNSZoneResource+"."+DNSZoneTestResourceName, zoneDescriptionAttribute, zoneDescriptionValue),
-					resource.TestCheckResourceAttr(DNSZoneResource+"."+DNSZoneTestResourceName, zoneEnabledAttribute, zoneEnabledValue),
+					testAccDNSZoneExistenceCheck(constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, &Zone),
+					resource.TestCheckResourceAttr(constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneNameAttribute, zoneNameValue),
+					resource.TestCheckResourceAttr(constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneDescriptionAttribute, zoneDescriptionValue),
+					resource.TestCheckResourceAttr(constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneEnabledAttribute, zoneEnabledValue),
 				),
 			},
 			{
 				Config: DNSZoneDataSourceMatchById,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+DNSZoneResource+"."+DNSZoneTestDataSourceName, zoneNameAttribute, DNSZoneResource+"."+DNSZoneTestResourceName, zoneNameAttribute),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DNSZoneResource+"."+DNSZoneTestDataSourceName, zoneDescriptionAttribute, DNSZoneResource+"."+DNSZoneTestResourceName, zoneDescriptionAttribute),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DNSZoneResource+"."+DNSZoneTestDataSourceName, zoneEnabledAttribute, DNSZoneResource+"."+DNSZoneTestResourceName, zoneEnabledAttribute),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DNSZoneResource+"."+constant.DNSZoneTestDataSourceName, zoneNameAttribute, constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneNameAttribute),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DNSZoneResource+"."+constant.DNSZoneTestDataSourceName, zoneDescriptionAttribute, constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneDescriptionAttribute),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DNSZoneResource+"."+constant.DNSZoneTestDataSourceName, zoneEnabledAttribute, constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneEnabledAttribute),
 				),
 			},
 			{
 				Config: DNSZoneDataSourceMatchByName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+DNSZoneResource+"."+DNSZoneTestDataSourceName, zoneNameAttribute, DNSZoneResource+"."+DNSZoneTestResourceName, zoneNameAttribute),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DNSZoneResource+"."+DNSZoneTestDataSourceName, zoneDescriptionAttribute, DNSZoneResource+"."+DNSZoneTestResourceName, zoneDescriptionAttribute),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DNSZoneResource+"."+DNSZoneTestDataSourceName, zoneEnabledAttribute, DNSZoneResource+"."+DNSZoneTestResourceName, zoneEnabledAttribute),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DNSZoneResource+"."+constant.DNSZoneTestDataSourceName, zoneNameAttribute, constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneNameAttribute),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DNSZoneResource+"."+constant.DNSZoneTestDataSourceName, zoneDescriptionAttribute, constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneDescriptionAttribute),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DNSZoneResource+"."+constant.DNSZoneTestDataSourceName, zoneEnabledAttribute, constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneEnabledAttribute),
 				),
 			},
 			{
 				Config: DNSZoneDataSourceMatchByNamePartialMatch,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+DNSZoneResource+"."+DNSZoneTestDataSourceName, zoneNameAttribute, DNSZoneResource+"."+DNSZoneTestResourceName, zoneNameAttribute),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DNSZoneResource+"."+DNSZoneTestDataSourceName, zoneDescriptionAttribute, DNSZoneResource+"."+DNSZoneTestResourceName, zoneDescriptionAttribute),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DNSZoneResource+"."+DNSZoneTestDataSourceName, zoneEnabledAttribute, DNSZoneResource+"."+DNSZoneTestResourceName, zoneEnabledAttribute),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DNSZoneResource+"."+constant.DNSZoneTestDataSourceName, zoneNameAttribute, constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneNameAttribute),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DNSZoneResource+"."+constant.DNSZoneTestDataSourceName, zoneDescriptionAttribute, constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneDescriptionAttribute),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DNSZoneResource+"."+constant.DNSZoneTestDataSourceName, zoneEnabledAttribute, constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneEnabledAttribute),
 				),
 			},
 			{
@@ -78,10 +81,10 @@ func TestAccDNSZone(t *testing.T) {
 			{
 				Config: DNSZoneConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDNSZoneExistenceCheck(DNSZoneResource+"."+DNSZoneTestResourceName, &Zone),
-					resource.TestCheckResourceAttr(DNSZoneResource+"."+DNSZoneTestResourceName, zoneNameAttribute, zoneNameValue),
-					resource.TestCheckResourceAttr(DNSZoneResource+"."+DNSZoneTestResourceName, zoneDescriptionAttribute, zoneUpdatedDescriptionValue),
-					resource.TestCheckResourceAttr(DNSZoneResource+"."+DNSZoneTestResourceName, zoneEnabledAttribute, zoneupdatedEnabledValue),
+					testAccDNSZoneExistenceCheck(constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, &Zone),
+					resource.TestCheckResourceAttr(constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneNameAttribute, zoneNameValue),
+					resource.TestCheckResourceAttr(constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneDescriptionAttribute, zoneUpdatedDescriptionValue),
+					resource.TestCheckResourceAttr(constant.DNSZoneResource+"."+constant.DNSZoneTestResourceName, zoneEnabledAttribute, zoneupdatedEnabledValue),
 				),
 			},
 		},
@@ -89,12 +92,12 @@ func TestAccDNSZone(t *testing.T) {
 }
 
 func testAccDNSZoneDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).DNSClient
+	client := testAccProvider.Meta().(services.SdkBundle).DNSClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	defer cancel()
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != DNSZoneResource {
+		if rs.Type != constant.DNSZoneResource {
 			continue
 		}
 		zoneId := rs.Primary.ID
@@ -112,7 +115,7 @@ func testAccDNSZoneDestroyCheck(s *terraform.State) error {
 
 func testAccDNSZoneExistenceCheck(path string, zone *dns.ZoneRead) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).DNSClient
+		client := testAccProvider.Meta().(services.SdkBundle).DNSClient
 		rs, ok := s.RootModule().Resources[path]
 
 		if !ok {
@@ -135,58 +138,58 @@ func testAccDNSZoneExistenceCheck(path string, zone *dns.ZoneRead) resource.Test
 }
 
 const DNSZoneDataSourceMatchById = DNSZoneConfig + `
-` + DataSource + ` ` + DNSZoneResource + ` ` + DNSZoneTestDataSourceName + ` {
-	id = ` + DNSZoneResource + `.` + DNSZoneTestResourceName + `.id
+` + constant.DataSource + ` ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestDataSourceName + ` {
+	id = ` + constant.DNSZoneResource + `.` + constant.DNSZoneTestResourceName + `.id
 }
 `
 
 const DNSZoneDataSourceMatchByName = DNSZoneConfig + `
-` + DataSource + ` ` + DNSZoneResource + ` ` + DNSZoneTestDataSourceName + ` {
-	name = ` + DNSZoneResource + `.` + DNSZoneTestResourceName + `.name
+` + constant.DataSource + ` ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestDataSourceName + ` {
+	name = ` + constant.DNSZoneResource + `.` + constant.DNSZoneTestResourceName + `.name
 }
 `
 
 var DNSZoneDataSourceMatchByNamePartialMatch = DNSZoneConfig + `
-` + DataSource + ` ` + DNSZoneResource + ` ` + DNSZoneTestDataSourceName + ` {
+` + constant.DataSource + ` ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestDataSourceName + ` {
 	name = "` + zoneNameValue[:4] + `"
 	partial_match = true
 }
 `
 
 const DNSZoneDataSourceInvalidBothIDAndName = DNSZoneConfig + `
-` + DataSource + ` ` + DNSZoneResource + ` ` + DNSZoneTestDataSourceName + ` {
-	name = ` + DNSZoneResource + `.` + DNSZoneTestResourceName + `.name
-	id = ` + DNSZoneResource + `.` + DNSZoneTestResourceName + `.id
+` + constant.DataSource + ` ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestDataSourceName + ` {
+	name = ` + constant.DNSZoneResource + `.` + constant.DNSZoneTestResourceName + `.name
+	id = ` + constant.DNSZoneResource + `.` + constant.DNSZoneTestResourceName + `.id
 }
 `
 
 const DNSZoneDataSourceInvalidNoIDNoName = `
-` + DataSource + ` ` + DNSZoneResource + ` ` + DNSZoneTestDataSourceName + ` {
+` + constant.DataSource + ` ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestDataSourceName + ` {
 }
 `
 
 const DNSZoneDataSourceInvalidPartialMatchUsedWithID = DNSZoneConfig + `
-` + DataSource + ` ` + DNSZoneResource + ` ` + DNSZoneTestDataSourceName + ` {
-	id = ` + DNSZoneResource + `.` + DNSZoneTestResourceName + `.id
+` + constant.DataSource + ` ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestDataSourceName + ` {
+	id = ` + constant.DNSZoneResource + `.` + constant.DNSZoneTestResourceName + `.id
 	partial_match = true
 }
 `
 
 const DNSZoneDataSourceWrongNameError = `
-` + DataSource + ` ` + DNSZoneResource + ` ` + DNSZoneTestDataSourceName + ` {
+` + constant.DataSource + ` ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestDataSourceName + ` {
 	name = "nonexistent"
 }
 `
 
 const DNSZoneDataSourceWrongPartialNameError = `
-` + DataSource + ` ` + DNSZoneResource + ` ` + DNSZoneTestDataSourceName + ` {
+` + constant.DataSource + ` ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestDataSourceName + ` {
 	name = "nonexistent"
 	partial_match = true
 }
 `
 
 const DNSZoneConfigUpdate = `
-resource ` + DNSZoneResource + ` ` + DNSZoneTestResourceName + ` {
+resource ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestResourceName + ` {
 	` + zoneNameAttribute + ` = "` + zoneNameValue + `"
 	` + zoneDescriptionAttribute + ` = "` + zoneUpdatedDescriptionValue + `"
     ` + zoneEnabledAttribute + ` = ` + zoneupdatedEnabledValue + `

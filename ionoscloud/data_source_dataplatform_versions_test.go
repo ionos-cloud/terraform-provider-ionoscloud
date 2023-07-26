@@ -4,8 +4,10 @@
 package ionoscloud
 
 import (
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"testing"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -20,13 +22,13 @@ func TestAccDataSourceDataplatformVersions(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDataplatformVersions,
-				Check:  utils.TestNotEmptySlice(DataSource+"."+DataplatformVersionsDataSource+"."+DataplatformVersionsTestDataSource, "versions.#"),
+				Check:  utils.TestNotEmptySlice(constant.DataSource+"."+constant.DataplatformVersionsDataSource+"."+constant.DataplatformVersionsTestDataSource, "versions.#"),
 			},
 		},
 	})
 }
 
 const testAccDataSourceDataplatformVersions = `
-data ` + DataplatformVersionsDataSource + ` ` + DataplatformVersionsTestDataSource + ` {
+data ` + constant.DataplatformVersionsDataSource + ` ` + constant.DataplatformVersionsTestDataSource + ` {
 }
 `

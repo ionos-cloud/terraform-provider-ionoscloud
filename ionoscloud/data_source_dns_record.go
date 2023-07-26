@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -66,7 +68,7 @@ func dataSourceDNSRecord() *schema.Resource {
 }
 
 func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 	partialMatch := d.Get("partial_match").(bool)
 	zoneId := d.Get("zone_id").(string)
 	idValue, idOk := d.GetOk("id")

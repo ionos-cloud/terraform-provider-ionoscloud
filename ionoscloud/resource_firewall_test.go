@@ -5,9 +5,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"regexp"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -27,41 +30,41 @@ func TestAccFirewallBasic(t *testing.T) {
 			{
 				Config: testAccCheckFirewallConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFirewallExists(FirewallResource+"."+FirewallTestResource, &firewall),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "name", FirewallTestResource),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "protocol", "ICMP"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "source_mac", "00:0a:95:9d:68:16"),
-					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock", "ips.0"),
-					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock", "ips.1"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_type", "1"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_code", "8"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "type", "INGRESS"),
+					testAccCheckFirewallExists(constant.FirewallResource+"."+constant.FirewallTestResource, &firewall),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "name", constant.FirewallTestResource),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "protocol", "ICMP"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "source_mac", "00:0a:95:9d:68:16"),
+					resource.TestCheckResourceAttrPair(constant.FirewallResource+"."+constant.FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock", "ips.0"),
+					resource.TestCheckResourceAttrPair(constant.FirewallResource+"."+constant.FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock", "ips.1"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "icmp_type", "1"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "icmp_code", "8"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "type", "INGRESS"),
 				),
 			},
 			{
 				Config: testAccDataSourceFirewallMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceById, "name", FirewallResource+"."+FirewallTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceById, "protocol", FirewallResource+"."+FirewallTestResource, "protocol"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceById, "source_mac", FirewallResource+"."+FirewallTestResource, "source_mac"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceById, "source_ip", FirewallResource+"."+FirewallTestResource, "source_ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceById, "target_ip", FirewallResource+"."+FirewallTestResource, "target_ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceById, "icmp_type", FirewallResource+"."+FirewallTestResource, "icmp_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceById, "icmp_code", FirewallResource+"."+FirewallTestResource, "icmp_code"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceById, "type", FirewallResource+"."+FirewallTestResource, "type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "name", constant.FirewallResource+"."+constant.FirewallTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "protocol", constant.FirewallResource+"."+constant.FirewallTestResource, "protocol"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "source_mac", constant.FirewallResource+"."+constant.FirewallTestResource, "source_mac"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "source_ip", constant.FirewallResource+"."+constant.FirewallTestResource, "source_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "target_ip", constant.FirewallResource+"."+constant.FirewallTestResource, "target_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "icmp_type", constant.FirewallResource+"."+constant.FirewallTestResource, "icmp_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "icmp_code", constant.FirewallResource+"."+constant.FirewallTestResource, "icmp_code"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "type", constant.FirewallResource+"."+constant.FirewallTestResource, "type"),
 				),
 			},
 			{
 				Config: testAccDataSourceFirewallMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "name", FirewallResource+"."+FirewallTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "protocol", FirewallResource+"."+FirewallTestResource, "protocol"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "source_mac", FirewallResource+"."+FirewallTestResource, "source_mac"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "source_ip", FirewallResource+"."+FirewallTestResource, "source_ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "target_ip", FirewallResource+"."+FirewallTestResource, "target_ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "icmp_type", FirewallResource+"."+FirewallTestResource, "icmp_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "icmp_code", FirewallResource+"."+FirewallTestResource, "icmp_code"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "type", FirewallResource+"."+FirewallTestResource, "type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceByName, "name", constant.FirewallResource+"."+constant.FirewallTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceByName, "protocol", constant.FirewallResource+"."+constant.FirewallTestResource, "protocol"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceByName, "source_mac", constant.FirewallResource+"."+constant.FirewallTestResource, "source_mac"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceByName, "source_ip", constant.FirewallResource+"."+constant.FirewallTestResource, "source_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceByName, "target_ip", constant.FirewallResource+"."+constant.FirewallTestResource, "target_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceByName, "icmp_type", constant.FirewallResource+"."+constant.FirewallTestResource, "icmp_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceByName, "icmp_code", constant.FirewallResource+"."+constant.FirewallTestResource, "icmp_code"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceByName, "type", constant.FirewallResource+"."+constant.FirewallTestResource, "type"),
 				),
 			},
 			{
@@ -75,22 +78,22 @@ func TestAccFirewallBasic(t *testing.T) {
 			{
 				Config: testAccCheckFirewallConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFirewallExists(FirewallResource+"."+FirewallTestResource, &firewall),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "protocol", "ICMP"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "source_mac", "00:0a:95:9d:68:17"),
-					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock_update", "ips.0"),
-					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock_update", "ips.1"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_type", "2"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_code", "7"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "type", "EGRESS"),
+					testAccCheckFirewallExists(constant.FirewallResource+"."+constant.FirewallTestResource, &firewall),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "protocol", "ICMP"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "source_mac", "00:0a:95:9d:68:17"),
+					resource.TestCheckResourceAttrPair(constant.FirewallResource+"."+constant.FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock_update", "ips.0"),
+					resource.TestCheckResourceAttrPair(constant.FirewallResource+"."+constant.FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock_update", "ips.1"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "icmp_type", "2"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "icmp_code", "7"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "type", "EGRESS"),
 				),
 			},
 			{
 				Config: testAccCheckFirewallSetICMPToZero,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_type", "0"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_code", "0"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "icmp_type", "0"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "icmp_code", "0"),
 				),
 			},
 		},
@@ -110,29 +113,29 @@ func TestAccFirewallUDP(t *testing.T) {
 			{
 				Config: testAccCheckFirewallConfigUDP,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFirewallExists(FirewallResource+"."+FirewallTestResource, &firewall),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "name", FirewallTestResource),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "protocol", "UDP"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "source_mac", "00:0a:95:9d:68:16"),
-					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock", "ips.0"),
-					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock", "ips.1"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "port_range_start", "80"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "port_range_end", "80"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "type", "INGRESS"),
+					testAccCheckFirewallExists(constant.FirewallResource+"."+constant.FirewallTestResource, &firewall),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "name", constant.FirewallTestResource),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "protocol", "UDP"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "source_mac", "00:0a:95:9d:68:16"),
+					resource.TestCheckResourceAttrPair(constant.FirewallResource+"."+constant.FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock", "ips.0"),
+					resource.TestCheckResourceAttrPair(constant.FirewallResource+"."+constant.FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock", "ips.1"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "port_range_start", "80"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "port_range_end", "80"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "type", "INGRESS"),
 				),
 			},
 			{
 				Config: testAccCheckFirewallConfigUpdateUDP,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFirewallExists(FirewallResource+"."+FirewallTestResource, &firewall),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "protocol", "UDP"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "source_mac", "00:0a:95:9d:68:17"),
-					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock_update", "ips.0"),
-					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock_update", "ips.1"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "port_range_start", "81"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "port_range_end", "82"),
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "type", "EGRESS"),
+					testAccCheckFirewallExists(constant.FirewallResource+"."+constant.FirewallTestResource, &firewall),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "protocol", "UDP"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "source_mac", "00:0a:95:9d:68:17"),
+					resource.TestCheckResourceAttrPair(constant.FirewallResource+"."+constant.FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock_update", "ips.0"),
+					resource.TestCheckResourceAttrPair(constant.FirewallResource+"."+constant.FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock_update", "ips.1"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "port_range_start", "81"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "port_range_end", "82"),
+					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "type", "EGRESS"),
 				),
 			},
 		},
@@ -140,7 +143,7 @@ func TestAccFirewallUDP(t *testing.T) {
 }
 
 func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -149,7 +152,7 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != FirewallResource {
+		if rs.Type != constant.FirewallResource {
 			continue
 		}
 
@@ -171,7 +174,7 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 
 func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -207,15 +210,15 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 }
 
 const testAccCheckFirewallConfigBasic = testAccCheckDatacenterConfigBasic + `
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "webserver"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 14
@@ -231,8 +234,8 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 ` + ServerImagePassword + `
 
 resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -240,17 +243,17 @@ resource "ionoscloud_nic" "database_nic" {
 }
 
 resource "ionoscloud_ipblock" "ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 2
   name = "firewall_ipblock"
 }
 
-resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "ICMP"
-  name = "` + FirewallTestResource + `"
+  name = "` + constant.FirewallTestResource + `"
   source_mac = "00:0a:95:9d:68:16"
   source_ip = ionoscloud_ipblock.ipblock.ips[0]
   target_ip = ionoscloud_ipblock.ipblock.ips[1]
@@ -261,9 +264,9 @@ resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
 `
 
 const testAccCheckFirewallConfigUpdate = testAccCheckDatacenterConfigBasic + `
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "webserver"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -283,8 +286,8 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 
 resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -292,16 +295,16 @@ resource "ionoscloud_nic" "database_nic" {
 }
 
 resource "ionoscloud_ipblock" "ipblock_update" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 2
   name = "firewall_ipblock"
 }
-resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + `  {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "ICMP"
-  name = "` + UpdatedResources + `"
+  name = "` + constant.UpdatedResources + `"
   source_mac = "00:0a:95:9d:68:17"
   source_ip = ionoscloud_ipblock.ipblock_update.ips[0]
   target_ip = ionoscloud_ipblock.ipblock_update.ips[1]
@@ -312,9 +315,9 @@ resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
 `
 
 const testAccCheckFirewallConfigUDP = testAccCheckDatacenterConfigBasic + `
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "webserver"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -334,8 +337,8 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 
 resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -343,16 +346,16 @@ resource "ionoscloud_nic" "database_nic" {
 }
 
 resource "ionoscloud_ipblock" "ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 2
   name = "firewall_ipblock"
 }
-resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + `  {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "UDP"
-  name = "` + FirewallTestResource + `"
+  name = "` + constant.FirewallTestResource + `"
   port_range_start = 80
   port_range_end = 80
   source_mac = "00:0a:95:9d:68:16"
@@ -363,9 +366,9 @@ resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
 `
 
 const testAccCheckFirewallConfigUpdateUDP = testAccCheckDatacenterConfigBasic + `
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "webserver"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -385,8 +388,8 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 
 resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -394,16 +397,16 @@ resource "ionoscloud_nic" "database_nic" {
 }
 
 resource "ionoscloud_ipblock" "ipblock_update" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 2
   name = "firewall_ipblock"
 }
-resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "UDP"
-  name = "` + UpdatedResources + `"
+  name = "` + constant.UpdatedResources + `"
   port_range_start = 81
   port_range_end = 82
   source_mac = "00:0a:95:9d:68:17"
@@ -414,9 +417,9 @@ resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
 `
 
 const testAccCheckFirewallSetICMPToZero = testAccCheckDatacenterConfigBasic + `
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "webserver"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -435,24 +438,24 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   }
 }
 resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
   name = "updated"
 }
 resource "ionoscloud_ipblock" "ipblock_update" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 2
   name = "firewall_ipblock"
 }
-resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + `  {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "ICMP"
-  name = "` + UpdatedResources + `"
+  name = "` + constant.UpdatedResources + `"
   source_mac = "00:0a:95:9d:68:17"
   source_ip = ionoscloud_ipblock.ipblock_update.ips[0]
   target_ip = ionoscloud_ipblock.ipblock_update.ips[1]
@@ -461,30 +464,30 @@ resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
 }
 `
 const testAccDataSourceFirewallMatchId = testAccCheckFirewallConfigBasic + `
-data ` + FirewallResource + ` ` + FirewallDataSourceById + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+data ` + constant.FirewallResource + ` ` + constant.FirewallDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   nic_id = ionoscloud_nic.database_nic.id
-  id = ` + FirewallResource + `.` + FirewallTestResource + `.id
+  id = ` + constant.FirewallResource + `.` + constant.FirewallTestResource + `.id
 }
 `
 
 const testAccDataSourceFirewallMatchName = testAccCheckFirewallConfigBasic + `
-data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+data ` + constant.FirewallResource + ` ` + constant.FirewallDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   nic_id = ionoscloud_nic.database_nic.id
-  name	= "` + FirewallTestResource + `"
+  name	= "` + constant.FirewallTestResource + `"
 }
 `
 
 const testAccDataSourceFirewallMultipleResultsError = testAccCheckFirewallConfigBasic + `
-resource ` + FirewallResource + ` ` + FirewallTestResource + `_multiple_results  {
-datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + `_multiple_results  {
+datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "ICMP"
-  name = "` + FirewallTestResource + `"
+  name = "` + constant.FirewallTestResource + `"
   source_mac = "00:0a:95:9d:68:16"
   source_ip = ionoscloud_ipblock.ipblock.ips[0]
   target_ip = ionoscloud_ipblock.ipblock.ips[1]
@@ -493,18 +496,18 @@ datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   type = "INGRESS"
 }
 
-data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+data ` + constant.FirewallResource + ` ` + constant.FirewallDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   nic_id = ionoscloud_nic.database_nic.id
-  name	= "` + FirewallTestResource + `"
+  name	= "` + constant.FirewallTestResource + `"
 }
 `
 
 const testAccDataSourceFirewallWrongNameError = testAccCheckFirewallConfigBasic + `
-data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+data ` + constant.FirewallResource + ` ` + constant.FirewallDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   nic_id = ionoscloud_nic.database_nic.id
   name	= "wrong_name"
 }

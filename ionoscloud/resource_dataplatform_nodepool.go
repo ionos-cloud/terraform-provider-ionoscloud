@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -137,7 +138,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 }
 
 func resourceDataplatformNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 
@@ -158,7 +159,7 @@ func resourceDataplatformNodePoolCreate(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceDataplatformNodePoolRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 	nodePoolId := d.Id()
@@ -184,7 +185,7 @@ func resourceDataplatformNodePoolRead(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceDataplatformNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 	nodePoolId := d.Id()
@@ -205,7 +206,7 @@ func resourceDataplatformNodePoolUpdate(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceDataplatformNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 	nodePoolId := d.Id()
@@ -228,7 +229,7 @@ func resourceDataplatformNodePoolDelete(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceDataplatformNodePoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 	nodePoolId := d.Id()

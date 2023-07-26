@@ -6,6 +6,8 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -21,8 +23,8 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfigRegistry.Debug = true
 	}
-	newConfigRegistry.MaxRetries = utils.MaxRetries
-	newConfigRegistry.MaxWaitTime = utils.MaxWaitTime
+	newConfigRegistry.MaxRetries = constant.MaxRetries
+	newConfigRegistry.MaxWaitTime = constant.MaxWaitTime
 
 	newConfigRegistry.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigRegistry.UserAgent = fmt.Sprintf(

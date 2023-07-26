@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -100,7 +101,7 @@ func resourceContainerRegistryToken() *schema.Resource {
 }
 
 func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	registryId := d.Get("registry_id").(string)
 	fileStr := d.Get("save_password_to_file").(string)
@@ -134,7 +135,7 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 
 func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()
@@ -163,7 +164,7 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()
@@ -182,7 +183,7 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 }
 
 func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()
@@ -202,7 +203,7 @@ func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.Resourc
 }
 
 func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()

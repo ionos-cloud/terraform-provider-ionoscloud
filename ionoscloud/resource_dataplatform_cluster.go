@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -71,7 +72,7 @@ func resourceDataplatformCluster() *schema.Resource {
 }
 
 func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	id, _, err := client.CreateCluster(ctx, d)
 
@@ -93,7 +94,7 @@ func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceDa
 
 func resourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	clusterId := d.Id()
 	dataplatformCluster, apiResponse, err := client.GetClusterById(ctx, clusterId)
@@ -118,7 +119,7 @@ func resourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	clusterId := d.Id()
 
@@ -138,7 +139,7 @@ func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	clusterId := d.Id()
 
@@ -162,7 +163,7 @@ func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceDataplatformClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	clusterId := d.Id()
 

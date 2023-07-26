@@ -10,6 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
@@ -30,69 +33,69 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 			{
 				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDbaasPgSqlClusterExists(PsqlClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "12"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "instances", "1"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "cores", "1"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "ram", "2048"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_size", "2048"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.0.datacenter_id", DatacenterResource+".datacenter_example", "id"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.0.lan_id", LanResource+".lan_example", "id"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.100/24"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "location", DatacenterResource+".datacenter_example", "location"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "backup_location", "de"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "display_name", DBaaSClusterTestResource),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", RandomPassword+".cluster_password", "result"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
-					resource.TestCheckResourceAttrSet(PsqlClusterResource+"."+DBaaSClusterTestResource, "dns_name"),
+					testAccCheckDbaasPgSqlClusterExists(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "1"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "2048"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "2048"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example", "id"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example", "id"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.100/24"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example", "location"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "backup_location", "de"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "display_name", constant.DBaaSClusterTestResource),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", constant.RandomPassword+".cluster_password", "result"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
+					resource.TestCheckResourceAttrSet(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "dns_name"),
 				),
 			},
 			{
 				Config: testAccDataSourceDBaaSPgSqlClusterMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "display_name", PsqlClusterResource+"."+DBaaSClusterTestResource, "display_name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "instances", PsqlClusterResource+"."+DBaaSClusterTestResource, "instances"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "cores", PsqlClusterResource+"."+DBaaSClusterTestResource, "cores"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "ram", PsqlClusterResource+"."+DBaaSClusterTestResource, "ram"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "storage_size", PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "storage_type", PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "connections.datacenter_id", PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.datacenter_id"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "connections.lan_id", PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.lan_id"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "connections.cidr", PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.cidr"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "location", PsqlClusterResource+"."+DBaaSClusterTestResource, "location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "backup_location", PsqlClusterResource+"."+DBaaSClusterTestResource, "backup_location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "display_name", PsqlClusterResource+"."+DBaaSClusterTestResource, "display_name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "maintenance_window.day_of_the_week", PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.day_of_the_week"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "maintenance_window.time", PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "credentials.username", PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.username"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "credentials.password", PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.password"),
-					resource.TestCheckResourceAttrSet(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "dns_name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "dns_name", PsqlClusterResource+"."+DBaaSClusterTestResource, "dns_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "display_name", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "display_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "instances", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "cores", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "ram", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "storage_size", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "storage_type", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connections.datacenter_id", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.datacenter_id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connections.lan_id", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.lan_id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connections.cidr", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.cidr"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "location", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "backup_location", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "backup_location"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "display_name", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "display_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "maintenance_window.day_of_the_week", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "maintenance_window.time", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.time"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "credentials.username", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.username"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "credentials.password", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.password"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "dns_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "dns_name", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "dns_name"),
 				),
 			},
 			{
 				Config: testAccDataSourceDBaaSPgSqlClusterMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "display_name", PsqlClusterResource+"."+DBaaSClusterTestResource, "display_name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "instances", PsqlClusterResource+"."+DBaaSClusterTestResource, "instances"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "cores", PsqlClusterResource+"."+DBaaSClusterTestResource, "cores"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "ram", PsqlClusterResource+"."+DBaaSClusterTestResource, "ram"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "storage_size", PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "storage_type", PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "connections.datacenter_id", PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.datacenter_id"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "connections.lan_id", PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.lan_id"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "connections.cidr", PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.cidr"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "location", PsqlClusterResource+"."+DBaaSClusterTestResource, "location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "backup_location", PsqlClusterResource+"."+DBaaSClusterTestResource, "backup_location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "display_name", PsqlClusterResource+"."+DBaaSClusterTestResource, "display_name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "maintenance_window.day_of_the_week", PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.day_of_the_week"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "maintenance_window.time", PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "credentials.username", PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.username"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceByName, "credentials.password", PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.password"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "display_name", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "display_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "instances", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "cores", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "ram", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "storage_size", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "storage_type", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connections.datacenter_id", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.datacenter_id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connections.lan_id", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.lan_id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connections.cidr", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.cidr"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "location", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "backup_location", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "backup_location"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "display_name", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "display_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "maintenance_window.day_of_the_week", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "maintenance_window.time", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.time"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "credentials.username", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.username"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "credentials.password", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.password"),
 				),
 			},
 			{
@@ -103,68 +106,68 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				PreConfig: sleepUntilBackupIsReady,
 				Config:    testAccDataSourceDbaasPgSqlClusterBackups,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.cluster_id", DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_id"),
-					resource.TestCheckResourceAttrSet(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.size"),
-					resource.TestCheckResourceAttrSet(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.location"),
-					resource.TestCheckResourceAttrSet(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.version"),
-					resource.TestCheckResourceAttrSet(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.is_active"),
-					utils.TestNotEmptySlice(PsqlBackupsResource, "cluster_backups.#"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlBackupsResource+"."+constant.PsqlBackupsTest, "cluster_backups.0.cluster_id", constant.DataSource+"."+constant.PsqlBackupsResource+"."+constant.PsqlBackupsTest, "cluster_id"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.PsqlBackupsResource+"."+constant.PsqlBackupsTest, "cluster_backups.0.size"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.PsqlBackupsResource+"."+constant.PsqlBackupsTest, "cluster_backups.0.location"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.PsqlBackupsResource+"."+constant.PsqlBackupsTest, "cluster_backups.0.version"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.PsqlBackupsResource+"."+constant.PsqlBackupsTest, "cluster_backups.0.is_active"),
+					utils.TestNotEmptySlice(constant.PsqlBackupsResource, "cluster_backups.#"),
 				),
 			},
 			{
 				Config: testAccDataSourceDbaasPgSqlVersionsByClusterId,
 				Check: resource.ComposeTestCheckFunc(
-					utils.TestNotEmptySlice(PsqlVersionsResource, "postgres_versions.#"),
+					utils.TestNotEmptySlice(constant.PsqlVersionsResource, "postgres_versions.#"),
 				),
 			},
 			{
 				Config: testAccDataSourceDbaasPgSqlAllVersions,
 				Check: resource.ComposeTestCheckFunc(
-					utils.TestNotEmptySlice(PsqlVersionsResource, "postgres_versions.#"),
+					utils.TestNotEmptySlice(constant.PsqlVersionsResource, "postgres_versions.#"),
 				),
 			},
 			{
 				Config: testAccCheckDbaasPgSqlClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDbaasPgSqlClusterExists(PsqlClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "12"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "instances", "2"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "cores", "2"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "ram", "3072"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_size", "3072"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.0.datacenter_id", DatacenterResource+".datacenter_example_update", "id"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.0.lan_id", LanResource+".lan_example_update", "id"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.101/24"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "location", DatacenterResource+".datacenter_example_update", "location"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "backup_location", "de"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "display_name", UpdatedResources),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "10:00:00"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", RandomPassword+".cluster_password", "result"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
+					testAccCheckDbaasPgSqlClusterExists(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "2"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "2"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "3072"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "3072"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example_update", "id"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example_update", "id"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.101/24"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example_update", "location"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "backup_location", "de"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "display_name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.time", "10:00:00"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", constant.RandomPassword+".cluster_password", "result"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
 				),
 			},
 			{
 				Config: testAccCheckDbaasPgSqlClusterConfigUpdateRemoveConnections,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDbaasPgSqlClusterExists(PsqlClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "12"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "instances", "2"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "cores", "2"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "ram", "3072"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_size", "3072"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
-					resource.TestCheckNoResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.%"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "location", DatacenterResource+".datacenter_example_update", "location"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "backup_location", "de"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "display_name", UpdatedResources),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "10:00:00"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", RandomPassword+".cluster_password", "result"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
+					testAccCheckDbaasPgSqlClusterExists(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "2"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "2"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "3072"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "3072"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
+					resource.TestCheckNoResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.%"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example_update", "location"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "backup_location", "de"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "display_name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.time", "10:00:00"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", constant.RandomPassword+".cluster_password", "result"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
 				),
 			},
 			{
@@ -196,30 +199,30 @@ func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 			{
 				Config: testAccFromBackup,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDbaasPgSqlClusterExists(PsqlClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "12"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "instances", "1"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "cores", "1"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "ram", "2048"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_size", "2048"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.0.datacenter_id", DatacenterResource+".datacenter_example", "id"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.0.lan_id", LanResource+".lan_example", "id"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.100/24"),
-					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "location", DatacenterResource+".datacenter_example", "location"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "display_name", DBaaSClusterTestResource),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS")),
+					testAccCheckDbaasPgSqlClusterExists(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "1"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "2048"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "2048"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example", "id"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example", "id"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.100/24"),
+					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example", "location"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "display_name", constant.DBaaSClusterTestResource),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", "password"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS")),
 			},
 		},
 	})
 }
 
 func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).PsqlClient
+	client := testAccProvider.Meta().(services.SdkBundle).PsqlClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -228,7 +231,7 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != PsqlBackupsResource {
+		if rs.Type != constant.PsqlBackupsResource {
 			continue
 		}
 
@@ -248,7 +251,7 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 
 func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).PsqlClient
+		client := testAccProvider.Meta().(services.SdkBundle).PsqlClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -281,19 +284,19 @@ func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse
 }
 
 const testAccCheckDbaasPgSqlClusterConfigBasic = `
-resource ` + DatacenterResource + ` "datacenter_example" {
+resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
   location    = "de/txl"
   description = "Datacenter for testing psql cluster"
 }
 
-resource ` + LanResource + ` "lan_example" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
+resource ` + constant.LanResource + ` "lan_example" {
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example.id 
   public        = false
   name          = "lan_example"
 }
 
-resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
+resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   postgres_version   = 12
   instances          = 1
   cores              = 1
@@ -301,25 +304,25 @@ resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
   storage_size       = 2048
   storage_type       = "HDD"
   connections   {
-	datacenter_id   =  ` + DatacenterResource + `.datacenter_example.id 
-    lan_id          =  ` + LanResource + `.lan_example.id 
+	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
+    lan_id          =  ` + constant.LanResource + `.lan_example.id 
     cidr            =  "192.168.1.100/24"
   }
-  location = ` + DatacenterResource + `.datacenter_example.location
+  location = ` + constant.DatacenterResource + `.datacenter_example.location
   backup_location = "de"
-  display_name = "` + DBaaSClusterTestResource + `"
+  display_name = "` + constant.DBaaSClusterTestResource + `"
   maintenance_window {
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
   }
   credentials {
   	username = "username"
-	password = ` + RandomPassword + `.cluster_password.result
+	password = ` + constant.RandomPassword + `.cluster_password.result
   }
   synchronization_mode = "ASYNCHRONOUS"
 }
 
-resource ` + RandomPassword + ` "cluster_password" {
+resource ` + constant.RandomPassword + ` "cluster_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -327,32 +330,32 @@ resource ` + RandomPassword + ` "cluster_password" {
 `
 
 const testAccCheckDbaasPgSqlClusterConfigUpdate = `
-resource ` + DatacenterResource + ` "datacenter_example" {
+resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
   location    = "de/txl"
   description = "Datacenter for testing psql cluster"
 }
 
-resource ` + DatacenterResource + ` "datacenter_example_update" {
+resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
   location    = "de/txl"
   description = "Datacenter for testing psql cluster"
 }
 
-resource ` + LanResource + ` "lan_example" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
+resource ` + constant.LanResource + ` "lan_example" {
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example.id 
   public        = false
   name          = "lan_example"
 }
 
-resource ` + LanResource + ` "lan_example_update" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example_update.id 
+resource ` + constant.LanResource + ` "lan_example_update" {
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example_update.id 
   public        = false
   name          = "lan_example_update"
 }
 
 
-resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
+resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   postgres_version   = 12
   instances          = 2
   cores              = 2
@@ -360,25 +363,25 @@ resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
   storage_size       = 3072
   storage_type       = "HDD"
   connections   {
-	datacenter_id   =  ` + DatacenterResource + `.datacenter_example_update.id 
-    lan_id          =  ` + LanResource + `.lan_example_update.id     
+	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example_update.id 
+    lan_id          =  ` + constant.LanResource + `.lan_example_update.id     
     cidr            =  "192.168.1.101/24"
   }
-  location = ` + DatacenterResource + `.datacenter_example_update.location
+  location = ` + constant.DatacenterResource + `.datacenter_example_update.location
   backup_location = "de"
-  display_name = "` + UpdatedResources + `"
+  display_name = "` + constant.UpdatedResources + `"
   maintenance_window {
     day_of_the_week = "Saturday"
     time            = "10:00:00"
   }
   credentials {
   	username = "username"
-	password = ` + RandomPassword + `.cluster_password.result
+	password = ` + constant.RandomPassword + `.cluster_password.result
   }
   synchronization_mode = "ASYNCHRONOUS"
 }
 
-resource ` + RandomPassword + ` "cluster_password" {
+resource ` + constant.RandomPassword + ` "cluster_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -386,118 +389,118 @@ resource ` + RandomPassword + ` "cluster_password" {
 `
 
 const testAccCheckDbaasPgSqlClusterConfigUpdateRemoveConnections = `
-resource ` + DatacenterResource + ` "datacenter_example" {
+resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
   location    = "de/txl"
   description = "Datacenter for testing psql cluster"
 }
 
-resource ` + DatacenterResource + ` "datacenter_example_update" {
+resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
   location    = "de/txl"
   description = "Datacenter for testing psql cluster"
 }
 
-resource ` + LanResource + ` "lan_example" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
+resource ` + constant.LanResource + ` "lan_example" {
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example.id 
   public        = false
   name          = "lan_example"
 }
 
-resource ` + LanResource + ` "lan_example_update" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example_update.id 
+resource ` + constant.LanResource + ` "lan_example_update" {
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example_update.id 
   public        = false
   name          = "lan_example_update"
 }
 
 
-resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
+resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   postgres_version   = 12
   instances          = 2
   cores              = 2
   ram                = 3072
   storage_size       = 3072
   storage_type       = "HDD"
-  location = ` + DatacenterResource + `.datacenter_example_update.location
+  location = ` + constant.DatacenterResource + `.datacenter_example_update.location
   backup_location = "de"
-  display_name = "` + UpdatedResources + `"
+  display_name = "` + constant.UpdatedResources + `"
   maintenance_window {
     day_of_the_week = "Saturday"
     time            = "10:00:00"
   }
   credentials {
   	username = "username"
-	password = ` + RandomPassword + `.cluster_password.result
+	password = ` + constant.RandomPassword + `.cluster_password.result
   }
   synchronization_mode = "ASYNCHRONOUS"
 }
 
-resource ` + RandomPassword + ` "cluster_password" {
+resource ` + constant.RandomPassword + ` "cluster_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 const testAccCheckDbaasPgSqlClusterConfigUpdateRemoveDBaaS = `
-resource ` + DatacenterResource + ` "datacenter_example" {
+resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
   location    = "de/txl"
   description = "Datacenter for testing psql cluster"
 }
 
-resource ` + DatacenterResource + ` "datacenter_example_update" {
+resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
   location    = "de/txl"
   description = "Datacenter for testing psql cluster"
 }
 
-resource ` + LanResource + ` "lan_example" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
+resource ` + constant.LanResource + ` "lan_example" {
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example.id 
   public        = false
   name          = "lan_example"
 }
 
-resource ` + LanResource + ` "lan_example_update" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example_update.id 
+resource ` + constant.LanResource + ` "lan_example_update" {
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example_update.id 
   public        = false
   name          = "lan_example_update"
 }
 `
 
 const testAccFromBackup = `
-resource ` + DatacenterResource + ` "datacenter_example" {
+resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
   location    = "de/txl"
   description = "Datacenter for testing psql cluster"
 }
 
-resource ` + LanResource + ` "lan_example" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
+resource ` + constant.LanResource + ` "lan_example" {
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example.id 
   public        = false
   name          = "lan_example"
 }
 
-resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
+resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   postgres_version   = 12
   instances          = 1
   cores              = 1
   ram                = 2048
   storage_size       = 2048
   storage_type       = "HDD"
-  display_name = "` + DBaaSClusterTestResource + `"
+  display_name = "` + constant.DBaaSClusterTestResource + `"
   connections   {
-	datacenter_id   =  ` + DatacenterResource + `.datacenter_example.id 
-    lan_id          =  ` + LanResource + `.lan_example.id 
+	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
+    lan_id          =  ` + constant.LanResource + `.lan_example.id 
     cidr            =  "192.168.1.100/24"
   }
-  location = ` + DatacenterResource + `.datacenter_example.location
+  location = ` + constant.DatacenterResource + `.datacenter_example.location
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "09:00:00"
   }
   credentials {
   	username = "username"
-	password = ` + RandomPassword + `.cluster_password.result
+	password = ` + constant.RandomPassword + `.cluster_password.result
   }
   synchronization_mode = "ASYNCHRONOUS"
   from_backup {
@@ -505,7 +508,7 @@ resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
     recovery_target_time = "2022-01-13T16:27:42Z"
   }
 }
-resource ` + RandomPassword + ` "cluster_password" {
+resource ` + constant.RandomPassword + ` "cluster_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -513,36 +516,36 @@ resource ` + RandomPassword + ` "cluster_password" {
 `
 
 const testAccDataSourceDBaaSPgSqlClusterMatchId = testAccCheckDbaasPgSqlClusterConfigBasic + `
-data ` + PsqlClusterResource + ` ` + DBaaSClusterTestDataSourceById + ` {
-  id	= ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id
+data ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
+  id	= ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 }
 `
 
 const testAccDataSourceDBaaSPgSqlClusterMatchName = testAccCheckDbaasPgSqlClusterConfigBasic + `
-data ` + PsqlClusterResource + ` ` + DBaaSClusterTestDataSourceByName + ` {
-  display_name	= "` + DBaaSClusterTestResource + `"
+data ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestDataSourceByName + ` {
+  display_name	= "` + constant.DBaaSClusterTestResource + `"
 }
 `
 
 const testAccDataSourceDBaaSPgSqlClusterWrongNameError = testAccCheckDbaasPgSqlClusterConfigBasic + `
-data ` + PsqlClusterResource + ` ` + DBaaSClusterTestDataSourceByName + ` {
+data ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestDataSourceByName + ` {
   display_name	= "wrong_name"
 }
 `
 
 const testAccDataSourceDbaasPgSqlClusterBackups = testAccCheckDbaasPgSqlClusterConfigBasic + `
-data ` + PsqlBackupsResource + ` ` + PsqlBackupsTest + ` {
-	cluster_id = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id
+data ` + constant.PsqlBackupsResource + ` ` + constant.PsqlBackupsTest + ` {
+	cluster_id = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 }
 `
 
 const testAccDataSourceDbaasPgSqlAllVersions = testAccCheckDbaasPgSqlClusterConfigBasic + `
-data ` + PsqlVersionsResource + ` ` + PsqlVersionsTest + ` {
+data ` + constant.PsqlVersionsResource + ` ` + constant.PsqlVersionsTest + ` {
 }
 `
 
 const testAccDataSourceDbaasPgSqlVersionsByClusterId = testAccCheckDbaasPgSqlClusterConfigBasic + `
-data ` + PsqlVersionsResource + ` ` + PsqlVersionsTest + ` {
-	cluster_id = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id
+data ` + constant.PsqlVersionsResource + ` ` + constant.PsqlVersionsTest + ` {
+	cluster_id = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 }
 `

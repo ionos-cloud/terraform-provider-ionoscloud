@@ -6,11 +6,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
-	"regexp"
-	"testing"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccPgSqlDatabase(t *testing.T) {
@@ -27,16 +30,16 @@ func TestAccPgSqlDatabase(t *testing.T) {
 			{
 				Config: PgSqlDatabaseConfig,
 				Check: resource.ComposeTestCheckFunc(
-					pgSqlDatabaseExistsCheck(PsqlDatabaseResource+"."+PsqlDatabaseTestResource, &database),
-					resource.TestCheckResourceAttr(PsqlDatabaseResource+"."+PsqlDatabaseTestResource, databaseNameAttribute, databaseNameValue),
-					resource.TestCheckResourceAttr(PsqlDatabaseResource+"."+PsqlDatabaseTestResource, databaseOwnerAttribute, databaseOwnerValue),
+					pgSqlDatabaseExistsCheck(constant.PsqlDatabaseResource+"."+constant.PsqlDatabaseTestResource, &database),
+					resource.TestCheckResourceAttr(constant.PsqlDatabaseResource+"."+constant.PsqlDatabaseTestResource, databaseNameAttribute, databaseNameValue),
+					resource.TestCheckResourceAttr(constant.PsqlDatabaseResource+"."+constant.PsqlDatabaseTestResource, databaseOwnerAttribute, databaseOwnerValue),
 				),
 			},
 			{
 				Config: PgSqlDatabaseDataSource,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlDatabaseResource+"."+PsqlDatabaseDataSourceByName, databaseNameAttribute, PsqlDatabaseResource+"."+PsqlDatabaseTestResource, databaseNameAttribute),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlDatabaseResource+"."+PsqlDatabaseDataSourceByName, databaseOwnerAttribute, PsqlDatabaseResource+"."+PsqlDatabaseTestResource, databaseOwnerAttribute),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlDatabaseResource+"."+constant.PsqlDatabaseDataSourceByName, databaseNameAttribute, constant.PsqlDatabaseResource+"."+constant.PsqlDatabaseTestResource, databaseNameAttribute),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlDatabaseResource+"."+constant.PsqlDatabaseDataSourceByName, databaseOwnerAttribute, constant.PsqlDatabaseResource+"."+constant.PsqlDatabaseTestResource, databaseOwnerAttribute),
 				),
 			},
 			{
@@ -48,15 +51,15 @@ func TestAccPgSqlDatabase(t *testing.T) {
 				// Check only the length since there are some databases that already exist in the
 				// cluster.
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(DataSource+"."+PsqlDatabasesResource+"."+PsqlDatabasesDataSource, databasesAttribute+".#", "4"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.PsqlDatabasesResource+"."+constant.PsqlDatabasesDataSource, databasesAttribute+".#", "4"),
 				),
 			},
 			{
 				Config: PgSqlAllDatabasesFilterByOwnerDataSource,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(DataSource+"."+PsqlDatabasesResource+"."+PsqlDatabasesDataSource, databasesAttribute+".#", "1"),
-					resource.TestCheckResourceAttr(DataSource+"."+PsqlDatabasesResource+"."+PsqlDatabasesDataSource, databasesAttribute+".0.name", databaseNameValue),
-					resource.TestCheckResourceAttr(DataSource+"."+PsqlDatabasesResource+"."+PsqlDatabasesDataSource, databasesAttribute+".0.owner", databaseOwnerValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.PsqlDatabasesResource+"."+constant.PsqlDatabasesDataSource, databasesAttribute+".#", "1"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.PsqlDatabasesResource+"."+constant.PsqlDatabasesDataSource, databasesAttribute+".0.name", databaseNameValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.PsqlDatabasesResource+"."+constant.PsqlDatabasesDataSource, databasesAttribute+".0.owner", databaseOwnerValue),
 				),
 			},
 		},
@@ -65,7 +68,7 @@ func TestAccPgSqlDatabase(t *testing.T) {
 
 func pgSqlDatabaseExistsCheck(path string, database *pgsql.DatabaseResource) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).PsqlClient
+		client := testAccProvider.Meta().(services.SdkBundle).PsqlClient
 		rs, ok := s.RootModule().Resources[path]
 		if !ok {
 			return fmt.Errorf("not found: %s", path)
@@ -88,12 +91,12 @@ func pgSqlDatabaseExistsCheck(path string, database *pgsql.DatabaseResource) res
 }
 
 func pgSqlDatabaseDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).PsqlClient
+	client := testAccProvider.Meta().(services.SdkBundle).PsqlClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	defer cancel()
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != PsqlDatabaseResource {
+		if rs.Type != constant.PsqlDatabaseResource {
 			continue
 		}
 		clusterId := rs.Primary.Attributes["cluster_id"]
@@ -114,36 +117,36 @@ func pgSqlDatabaseDestroyCheck(s *terraform.State) error {
 // Configurations
 
 const PgSqlDatabaseConfig = PgSqlUserConfig + `
-resource ` + PsqlDatabaseResource + ` ` + PsqlDatabaseTestResource + ` {
-  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id  
+resource ` + constant.PsqlDatabaseResource + ` ` + constant.PsqlDatabaseTestResource + ` {
+  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id  
   ` + databaseNameAttribute + ` = "` + databaseNameValue + `"
-  ` + databaseOwnerAttribute + ` = ` + PsqlUserResource + `.` + UserTestResource + `.username
+  ` + databaseOwnerAttribute + ` = ` + constant.PsqlUserResource + `.` + constant.UserTestResource + `.username
 }
 `
 
 const PgSqlDatabaseDataSource = PgSqlDatabaseConfig + `
-data ` + PsqlDatabaseResource + ` ` + PsqlDatabaseDataSourceByName + ` {
-  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id   
-  ` + databaseNameAttribute + ` = ` + PsqlDatabaseResource + `.` + PsqlDatabaseTestResource + `.name
+data ` + constant.PsqlDatabaseResource + ` ` + constant.PsqlDatabaseDataSourceByName + ` {
+  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id   
+  ` + databaseNameAttribute + ` = ` + constant.PsqlDatabaseResource + `.` + constant.PsqlDatabaseTestResource + `.name
 }
 `
 
 const PgSqlDatabaseDataSourceWrongName = PgSqlDatabaseConfig + `
-data ` + PsqlDatabaseResource + ` ` + PsqlDatabaseDataSourceByName + ` {
-  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id   
+data ` + constant.PsqlDatabaseResource + ` ` + constant.PsqlDatabaseDataSourceByName + ` {
+  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id   
   ` + databaseNameAttribute + ` = "nonexistent"
 }
 `
 
 const PgSqlAllDatabasesDataSource = PgSqlDatabaseConfig + `
-data ` + PsqlDatabasesResource + ` ` + PsqlDatabasesDataSource + ` {
-  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id   
+data ` + constant.PsqlDatabasesResource + ` ` + constant.PsqlDatabasesDataSource + ` {
+  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id   
 }
 `
 
 const PgSqlAllDatabasesFilterByOwnerDataSource = PgSqlDatabaseConfig + `
-data ` + PsqlDatabasesResource + ` ` + PsqlDatabasesDataSource + ` {
-  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id 
+data ` + constant.PsqlDatabasesResource + ` ` + constant.PsqlDatabasesDataSource + ` {
+  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id 
   ` + databaseOwnerAttribute + ` = "` + databaseOwnerValue + `"
 }
 `

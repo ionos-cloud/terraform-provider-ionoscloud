@@ -5,18 +5,21 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-var resourceNameAlb = ALBResource + "." + ALBTestResource
-var dataSourceNameAlbById = DataSource + "." + ALBResource + "." + ALBDataSourceById
-var dataSourceNameAlbByName = DataSource + "." + ALBResource + "." + ALBDataSourceByName
+var resourceNameAlb = constant.ALBResource + "." + constant.ALBTestResource
+var dataSourceNameAlbById = constant.DataSource + "." + constant.ALBResource + "." + constant.ALBDataSourceById
+var dataSourceNameAlbByName = constant.DataSource + "." + constant.ALBResource + "." + constant.ALBDataSourceByName
 
 func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 	var applicationLoadBalancer ionoscloud.ApplicationLoadBalancer
@@ -32,11 +35,11 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 				Config: testAccCheckApplicationLoadBalancerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationLoadBalancerExists(resourceNameAlb, &applicationLoadBalancer),
-					resource.TestCheckResourceAttr(resourceNameAlb, "name", ALBTestResource),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", LanResource+".alb_lan_1", "id"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", LanResource+".alb_lan_2", "id"),
-					utils.TestValueInSlice(ALBResource, "ips.#", "10.12.118.224"),
-					utils.TestValueInSlice(ALBResource, "lb_private_ips.#", "10.13.72.225/24"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "name", constant.ALBTestResource),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", constant.LanResource+".alb_lan_1", "id"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", constant.LanResource+".alb_lan_2", "id"),
+					utils.TestValueInSlice(constant.ALBResource, "ips.#", "10.12.118.224"),
+					utils.TestValueInSlice(constant.ALBResource, "lb_private_ips.#", "10.13.72.225/24"),
 				),
 			},
 			{
@@ -80,13 +83,13 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 			{
 				Config: testAccCheckApplicationLoadBalancerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceNameAlb, "name", UpdatedResources),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", LanResource+".alb_lan_3", "id"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", LanResource+".alb_lan_4", "id"),
-					utils.TestValueInSlice(ALBResource, "ips.#", "10.12.118.224"),
-					utils.TestValueInSlice(ALBResource, "ips.#", "10.12.119.224"),
-					utils.TestValueInSlice(ALBResource, "lb_private_ips.#", "10.13.72.225/24"),
-					utils.TestValueInSlice(ALBResource, "lb_private_ips.#", "10.13.73.225/24"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", constant.LanResource+".alb_lan_3", "id"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", constant.LanResource+".alb_lan_4", "id"),
+					utils.TestValueInSlice(constant.ALBResource, "ips.#", "10.12.118.224"),
+					utils.TestValueInSlice(constant.ALBResource, "ips.#", "10.12.119.224"),
+					utils.TestValueInSlice(constant.ALBResource, "lb_private_ips.#", "10.13.72.225/24"),
+					utils.TestValueInSlice(constant.ALBResource, "lb_private_ips.#", "10.13.73.225/24"),
 				),
 			},
 		},
@@ -94,7 +97,7 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 }
 
 func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
@@ -102,7 +105,7 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ALBResource {
+		if rs.Type != constant.ALBResource {
 			continue
 		}
 
@@ -126,7 +129,7 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 
 func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.ApplicationLoadBalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -163,105 +166,105 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 }
 
 const testAccCheckApplicationLoadBalancerConfigBasic = `
-resource ` + DatacenterResource + ` "alb_datacenter" {
+resource ` + constant.DatacenterResource + ` "alb_datacenter" {
   name              = "test_alb"
   location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
-resource ` + LanResource + ` "alb_lan_1" {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+resource ` + constant.LanResource + ` "alb_lan_1" {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_1"
 }
 
-resource ` + LanResource + ` "alb_lan_2" {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+resource ` + constant.LanResource + ` "alb_lan_2" {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_2"
 }
 
-resource ` + ALBResource + ` ` + ALBTestResource + ` { 
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  name          = "` + ALBTestResource + `"
-  listener_lan  = ` + LanResource + `.alb_lan_1.id
+resource ` + constant.ALBResource + ` ` + constant.ALBTestResource + ` { 
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+  name          = "` + constant.ALBTestResource + `"
+  listener_lan  = ` + constant.LanResource + `.alb_lan_1.id
   ips           = [ "10.12.118.224"]
-  target_lan    = ` + LanResource + `.alb_lan_2.id
+  target_lan    = ` + constant.LanResource + `.alb_lan_2.id
   lb_private_ips= [ "10.13.72.225/24"]
 }`
 
 const testAccCheckApplicationLoadBalancerConfigUpdate = `
-resource ` + DatacenterResource + ` "alb_datacenter" {
+resource ` + constant.DatacenterResource + ` "alb_datacenter" {
   name              = "test_alb"
   location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
-resource ` + LanResource + ` "alb_lan_1" {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+resource ` + constant.LanResource + ` "alb_lan_1" {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_1"
 }
 
-resource ` + LanResource + ` "alb_lan_2" {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+resource ` + constant.LanResource + ` "alb_lan_2" {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_2"
 }
 
-resource ` + LanResource + ` "alb_lan_3" {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+resource ` + constant.LanResource + ` "alb_lan_3" {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_3"
 }
 
-resource ` + LanResource + ` "alb_lan_4" {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+resource ` + constant.LanResource + ` "alb_lan_4" {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_4"
 }
 
-resource ` + ALBResource + ` ` + ALBTestResource + ` { 
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  name          = "` + UpdatedResources + `"
-  listener_lan    = ` + LanResource + `.alb_lan_3.id
+resource ` + constant.ALBResource + ` ` + constant.ALBTestResource + ` { 
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+  name          = "` + constant.UpdatedResources + `"
+  listener_lan    = ` + constant.LanResource + `.alb_lan_3.id
   ips           = [ "10.12.118.224", "10.12.119.224"]
-  target_lan    = ` + LanResource + `.alb_lan_4.id
+  target_lan    = ` + constant.LanResource + `.alb_lan_4.id
   lb_private_ips= [ "10.13.72.225/24", "10.13.73.225/24"]
 }`
 
 const testAccDataSourceApplicationLoadBalancerMatchId = testAccCheckApplicationLoadBalancerConfigBasic + `
-data ` + ALBResource + ` ` + ALBDataSourceById + ` {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  id			= ` + ALBResource + `.` + ALBTestResource + `.id
+data ` + constant.ALBResource + ` ` + constant.ALBDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+  id			= ` + constant.ALBResource + `.` + constant.ALBTestResource + `.id
 }
 `
 
 const testAccDataSourceApplicationLoadBalancerMatchName = testAccCheckApplicationLoadBalancerConfigBasic + `
-data ` + ALBResource + ` ` + ALBDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  name          = ` + ALBResource + `.` + ALBTestResource + `.name
+data ` + constant.ALBResource + ` ` + constant.ALBDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+  name          = ` + constant.ALBResource + `.` + constant.ALBTestResource + `.name
 }
 `
 
 const testAccDataSourceApplicationLoadBalancerPartialMatchName = testAccCheckApplicationLoadBalancerConfigBasic + `
-data ` + ALBResource + ` ` + ALBDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  name          = "` + DataSourcePartial + `"
+data ` + constant.ALBResource + ` ` + constant.ALBDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+  name          = "` + constant.DataSourcePartial + `"
   partial_match = true
 }
 `
 
 const testAccDataSourceApplicationLoadBalancerWrongNameError = testAccCheckApplicationLoadBalancerConfigBasic + `
-data ` + ALBResource + ` ` + ALBDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+data ` + constant.ALBResource + ` ` + constant.ALBDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
   name          = "wrong_name"
 }
 `
 
 const testAccDataSourceApplicationLoadBalancerWrongPartialNameError = testAccCheckApplicationLoadBalancerConfigBasic + `
-data ` + ALBResource + ` ` + ALBDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+data ` + constant.ALBResource + ` ` + constant.ALBDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
   name          = "wrong_name"
   partial_match = true
 }
