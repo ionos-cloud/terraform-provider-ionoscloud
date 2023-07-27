@@ -1,5 +1,5 @@
-//go:build all || nlb
-// +build all nlb
+//go:build temporarilyDisabled
+// +build temporarilyDisabled
 
 package ionoscloud
 

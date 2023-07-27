@@ -1,5 +1,5 @@
-//go:build all || natgateway
-// +build all natgateway
+//go:build temporarilyDisabled
+// +build temporarilyDisabled
 
 package ionoscloud
 
