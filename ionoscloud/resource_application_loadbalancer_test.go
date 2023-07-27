@@ -1,4 +1,4 @@
-//go:build all || alb
+//go:build alb
 
 package ionoscloud
 
