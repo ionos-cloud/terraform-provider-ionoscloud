@@ -9,10 +9,6 @@ func dataSourceVCPUServer() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceServerRead,
 		Schema: map[string]*schema.Schema{
-			"template_uuid": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"datacenter_id": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -43,6 +39,10 @@ func dataSourceVCPUServer() *schema.Resource {
 				Computed: true,
 			},
 			"vm_state": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"cpu_family": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -22,10 +23,6 @@ func resourceVCPUServer() *schema.Resource {
 		CustomizeDiff: checkServerImmutableFields,
 
 		Schema: map[string]*schema.Schema{
-			"template_uuid": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
@@ -53,6 +50,10 @@ func resourceVCPUServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"cpu_family": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"type": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -74,6 +75,15 @@ func resourceVCPUServer() *schema.Resource {
 			"firewallrule_id": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"firewallrule_ids": {
+				Type:       schema.TypeList,
+				Optional:   true,
+				Computed:   true,
+				ConfigMode: schema.SchemaConfigModeAttr,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"datacenter_id": {
 				Type:             schema.TypeString,
@@ -119,7 +129,8 @@ func resourceVCPUServer() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"size": {
 							Type:        schema.TypeInt,
-							Required:    true,
+							Optional:    true,
+							Computed:    true,
 							Description: "The size of the volume in GB.",
 						},
 						"disk_type": {
@@ -151,7 +162,6 @@ func resourceVCPUServer() *schema.Resource {
 							Deprecated:  "Please use ssh_key_path under server level",
 							Description: "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
 							Computed:    true,
-							ForceNew:    true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if k == "volume.0.ssh_key_path.#" {
 									if d.Get("ssh_key_path.#") == new {
@@ -162,7 +172,7 @@ func resourceVCPUServer() *schema.Resource {
 								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
 								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
 
-								difKeypath := utils.DiffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))
+								difKeypath := slice.DiffString(slice.AnyToString(sshKeyPath), slice.AnyToString(oldSshKeyPath))
 								if len(difKeypath) == 0 {
 									return true
 								}
@@ -188,7 +198,7 @@ func resourceVCPUServer() *schema.Resource {
 								sshKeys := d.Get("volume.0.ssh_keys").([]interface{})
 								oldSshKeys := d.Get("ssh_keys").([]interface{})
 
-								if len(utils.DiffSlice(convertSlice(sshKeys), convertSlice(oldSshKeys))) == 0 {
+								if len(slice.DiffString(slice.AnyToString(sshKeys), slice.AnyToString(oldSshKeys))) == 0 {
 									return true
 								}
 
@@ -264,7 +274,7 @@ func resourceVCPUServer() *schema.Resource {
 			},
 			"nic": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -316,11 +326,15 @@ func resourceVCPUServer() *schema.Resource {
 							Computed: true,
 						},
 						"firewall": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
+							Description: "Firewall rules created in the server resource. The rules can also be created as separate resources outside the server resource",
+							Type:        schema.TypeList,
+							Optional:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 									"name": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -386,6 +400,22 @@ func resourceVCPUServer() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     labelResource,
+			},
+			// When deleting the server, we need to delete the volume that was defined INSIDE the
+			// server resource. The only way to know which volume was defined INSIDE the server
+			// resource is to save the volume ID in this list.
+			// NOTE: In the current version, v6.3.6, it is required to define one volume (and only
+			// one) inside the server resource, but in the future we consider the possibility of
+			// adding more volumes within the server resource, in which case the current code should
+			// be revised as changes should also be made for the update function, as the list of
+			// inline_volume_ids can be modified.
+			"inline_volume_ids": {
+				Type:        schema.TypeList,
+				Description: "A list that contains the IDs for the volumes defined inside the server resource.",
+				Computed:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

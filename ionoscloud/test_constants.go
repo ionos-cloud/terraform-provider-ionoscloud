@@ -575,6 +575,433 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 }`
 )
 
+// VCPU Server constants
+
+const (
+	testAccCheckServerVCPUNoPwdOrSSH = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/txl"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  image_name ="ubuntu:latest"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+	firewall_type = "BIDIRECTIONAL"
+    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+	  source_mac = "00:0a:95:9d:68:17"
+	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
+	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
+	  type = "EGRESS"
+    }
+  }
+}`
+)
+
+const testAccCheckServerVCPUSshDirectly = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/txl"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  image_name ="ubuntu:latest"
+  ssh_key_path = ["` + sshKey + `"]
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+	firewall_type = "BIDIRECTIONAL"
+    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+	  source_mac = "00:0a:95:9d:68:17"
+	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
+	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
+	  type = "EGRESS"
+    }
+  }
+}`
+
+const testAccCheckServerVCPUSshKeysDirectly = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/txl"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  image_name ="ubuntu:latest"
+  ssh_keys = ["` + sshKey + `"]
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+	firewall_type = "BIDIRECTIONAL"
+    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+	  source_mac = "00:0a:95:9d:68:17"
+	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
+	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
+	  type = "EGRESS"
+    }
+  }
+}`
+
+const testAccCheckServerVCPUSshKeysAndKeyPathErr = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/txl"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  image_name ="ubuntu:latest"
+  ssh_keys = ["` + sshKey + `"]
+  ssh_key_path = ["` + sshKey + `"]
+  type = "ENTERPRISE"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+	firewall_type = "BIDIRECTIONAL"
+    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+	  source_mac = "00:0a:95:9d:68:17"
+	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
+	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
+	  type = "EGRESS"
+    }
+  }
+}`
+
+const testAccCheckServerVCPUConfigBasic = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/txl"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  image_name ="ubuntu:latest"
+  image_password = ` + RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+}
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+	firewall_type = "BIDIRECTIONAL"
+    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+	  source_mac = "00:0a:95:9d:68:17"
+	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
+	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
+	  type = "EGRESS"
+    }
+  }
+}
+` + ServerImagePassword
+
+// Solves  #372 crash when ips field in nic resource is a list with an empty string
+const testAccCheckServerVCPUConfigEmptyNicIps = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/txl"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  image_name ="ubuntu:latest"
+  image_password = ` + RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+}
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+	firewall_type = "BIDIRECTIONAL"
+    ips            = [""]
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 23
+	  source_mac = "00:0a:95:9d:68:17"
+	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
+	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
+	  type = "EGRESS"
+    }
+  }
+}
+` + ServerImagePassword
+
+const testAccCheckServerVCPUCreationWithLabels = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/txl"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource "random_password" "image_password" {
+  length = 16
+  special = false
+}
+resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  image_name = "ubuntu:latest"
+  image_password = random_password.image_password.result
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+}
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = false
+  }
+  label {
+    key = "labelkey0"
+    value = "labelvalue0"
+  }
+  label {
+    key = "labelkey1"
+    value = "labelvalue1"
+  }
+}`
+
+const (
+	testAccCheckServerVCPUNoNic = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+  name       = "server-test"
+  location   = "de/txl"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  image_name ="ubuntu:latest"
+  ssh_key_path = ["` + sshKey + `"]
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+}`
+	testAccCheckServerVCPUNoNicUpdate = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/txl"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 2
+  ram = 2048
+  availability_zone = "ZONE_1"
+  image_name ="ubuntu:latest"
+  ssh_key_path = ["` + sshKey + `"]
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+}`
+)
+
 const resourceRandomUUID = `
 resource "random_uuid" "uuid" {
 }
