@@ -42,6 +42,7 @@ func TestAccDataCenterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceById, "version", DatacenterResource+"."+DatacenterTestResource, "version"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceById, "features", DatacenterResource+"."+DatacenterTestResource, "features"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceById, "sec_auth_protection", DatacenterResource+"."+DatacenterTestResource, "sec_auth_protection"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceById, "ipv6_cidr_block", DatacenterResource+"."+DatacenterTestResource, "ipv6_cidr_block"),
 				),
 			},
 			{
@@ -53,6 +54,7 @@ func TestAccDataCenterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceByName, "version", DatacenterResource+"."+DatacenterTestResource, "version"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceByName, "features", DatacenterResource+"."+DatacenterTestResource, "features"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceByName, "sec_auth_protection", DatacenterResource+"."+DatacenterTestResource, "sec_auth_protection"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceByName, "ipv6_cidr_block", DatacenterResource+"."+DatacenterTestResource, "ipv6_cidr_block"),
 				),
 			},
 			{
@@ -64,6 +66,7 @@ func TestAccDataCenterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceMatching, "version", DatacenterResource+"."+DatacenterTestResource, "version"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceMatching, "features", DatacenterResource+"."+DatacenterTestResource, "features"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceMatching, "sec_auth_protection", DatacenterResource+"."+DatacenterTestResource, "sec_auth_protection"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceMatching, "ipv6_cidr_block", DatacenterResource+"."+DatacenterTestResource, "ipv6_cidr_block"),
 				),
 			},
 			{

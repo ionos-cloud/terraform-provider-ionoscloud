@@ -32,6 +32,8 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(fullNicResourceName, "pci_slot"),
 					resource.TestCheckResourceAttr(fullNicResourceName, "name", volumeName),
 					resource.TestCheckResourceAttr(fullNicResourceName, "dhcp", "true"),
+					resource.TestCheckResourceAttr(fullNicResourceName, "dhcpv6", "true"),
+					resource.TestCheckResourceAttrSet(fullNicResourceName, "ipv6_cidr_block"),
 					resource.TestCheckResourceAttrSet(fullNicResourceName, "mac"),
 					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_active", "true"),
 					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_type", "INGRESS"),
@@ -44,12 +46,15 @@ func TestAccNicBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcpv6", fullNicResourceName, "dhcpv6"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ipv6_cidr_block", fullNicResourceName, "ipv6_cidr_block"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", fullNicResourceName, "firewall_active"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_type", fullNicResourceName, "firewall_type"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", fullNicResourceName, "mac"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "pci_slot", fullNicResourceName, "pci_slot"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", fullNicResourceName, "lan"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", fullNicResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ipv6_ips", fullNicResourceName, "ipv6_ips"),
 				),
 			},
 			{
@@ -57,12 +62,15 @@ func TestAccNicBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcpv6", fullNicResourceName, "dhcpv6"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ipv6_cidr_block", fullNicResourceName, "ipv6_cidr_block"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", fullNicResourceName, "firewall_active"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_type", fullNicResourceName, "firewall_type"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", fullNicResourceName, "mac"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "pci_slot", fullNicResourceName, "pci_slot"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", fullNicResourceName, "lan"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", fullNicResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ipv6_ips", fullNicResourceName, "ipv6_ips"),
 				),
 			},
 			{
@@ -82,6 +90,7 @@ func TestAccNicBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(fullNicResourceName, "name", "updated"),
 					resource.TestCheckResourceAttr(fullNicResourceName, "dhcp", "false"),
+					resource.TestCheckResourceAttr(fullNicResourceName, "dhcpv6", "false"),
 					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_active", "false"),
 					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_type", "BIDIRECTIONAL"),
 				),
@@ -167,6 +176,16 @@ resource "ionoscloud_ipblock" "test_server" {
   size = 2
   name = "test_server_ipblock"
 }
+resource "ionoscloud_lan" "test_lan_1" {
+	datacenter_id = 	ionoscloud_datacenter.test_datacenter.id
+	name = 				"Lan 1"
+	ipv6_cidr_block = 	"AUTO"
+}
+resource "ionoscloud_lan" "test_lan_2" {
+	datacenter_id = 	ionoscloud_datacenter.test_datacenter.id
+	name = 				"Lan 2"
+	ipv6_cidr_block = 	"AUTO"
+}
 resource "ionoscloud_server" "test_server" {
   name = "test_server"
   datacenter_id = "${ionoscloud_datacenter.test_datacenter.id}"
@@ -182,8 +201,9 @@ resource "ionoscloud_server" "test_server" {
     disk_type = "SSD"
 }
   nic {
-    lan = "1"
+    lan = "${ionoscloud_lan.test_lan_1.id}"
     dhcp = true
+    dhcpv6 = true
     firewall_active = true
   }
 }
@@ -193,7 +213,7 @@ const testAccCheckNicConfigBasic = testCreateDataCenterAndServer + `
 resource ` + NicResource + ` "database_nic" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-  lan = 2
+  lan = "${ionoscloud_lan.test_lan_2.id}"
   firewall_active = true
   firewall_type = "INGRESS"
   ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
@@ -205,8 +225,9 @@ const testAccCheckNicConfigUpdate = testCreateDataCenterAndServer + `
 resource ` + NicResource + ` "database_nic" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-  lan = 2
+  lan = "${ionoscloud_lan.test_lan_2.id}"
   dhcp = false
+  dhcpv6 = false
   firewall_active = false
   firewall_type = "BIDIRECTIONAL"
   ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
@@ -255,7 +276,7 @@ resource "ionoscloud_ipblock" "test_server_multiple_results" {
 resource ` + NicResource + ` "database_nic_multiple_results" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-  lan = 2
+  lan = "${ionoscloud_lan.test_lan_2.id}"
   firewall_active = true
   firewall_type = "INGRESS"
   ips = [ ionoscloud_ipblock.test_server_multiple_results.ips[0], ionoscloud_ipblock.test_server_multiple_results.ips[1] ]
