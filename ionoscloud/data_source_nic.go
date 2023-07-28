@@ -49,6 +49,7 @@ func dataSourceNIC() *schema.Resource {
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"ips": {
 				Type:     schema.TypeList,
@@ -124,6 +125,7 @@ func getNicDataSourceSchema() map[string]*schema.Schema {
 		"ipv6_cidr_block": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 		},
 		"ips": {
 			Type:     schema.TypeList,

@@ -64,6 +64,13 @@ func resourceLan() *schema.Resource {
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					if old != "" && new == "AUTO" {
+						return true
+					}
+					return false
+				},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

@@ -239,6 +239,7 @@ func resourceCubeServer() *schema.Resource {
 						"ipv6_cidr_block": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"ips": {
 							Type:     schema.TypeList,

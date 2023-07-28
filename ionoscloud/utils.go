@@ -150,6 +150,7 @@ var nicServerDSResource = &schema.Resource{
 		"ipv6_cidr_block": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 		},
 		"lan": {
 			Type:     schema.TypeInt,
