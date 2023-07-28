@@ -5,19 +5,22 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"regexp"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-const fullIpBlockResourceName = IpBlockResource + "." + IpBlockTestResource
+const fullIpBlockResourceName = constant.IpBlockResource + "." + constant.IpBlockTestResource
 
-var dataSourceIpBlockNameById = fmt.Sprintf("%s.%s.%s", DataSource, IpBlockResource, IpBlockDataSourceById)
-var dataSourceIpBlockNameMatching = fmt.Sprintf("%s.%s.%s", DataSource, IpBlockResource, IpBlockDataSourceMatching)
-var dataSourceIpBlockNameMatchName = fmt.Sprintf("%s.%s.%s", DataSource, IpBlockResource, IpBlockDataSourceByName)
+var dataSourceIpBlockNameById = fmt.Sprintf("%s.%s.%s", constant.DataSource, constant.IpBlockResource, constant.IpBlockDataSourceById)
+var dataSourceIpBlockNameMatching = fmt.Sprintf("%s.%s.%s", constant.DataSource, constant.IpBlockResource, constant.IpBlockDataSourceMatching)
+var dataSourceIpBlockNameMatchName = fmt.Sprintf("%s.%s.%s", constant.DataSource, constant.IpBlockResource, constant.IpBlockDataSourceByName)
 
 const location = "us/las"
 
@@ -36,7 +39,7 @@ func TestAccIPBlockBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPBlockExists(fullIpBlockResourceName, &ipblock),
 					resource.TestCheckResourceAttr(fullIpBlockResourceName, "location", location),
-					resource.TestCheckResourceAttr(fullIpBlockResourceName, "name", IpBlockTestResource),
+					resource.TestCheckResourceAttr(fullIpBlockResourceName, "name", constant.IpBlockTestResource),
 					resource.TestCheckResourceAttr(fullIpBlockResourceName, "size", "1"),
 				),
 			}, {
@@ -94,7 +97,7 @@ func TestAccIPBlockBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPBlockExists(fullIpBlockResourceName, &ipblock),
 					testAccCheckIPBlockAttributes(fullIpBlockResourceName, location),
-					resource.TestCheckResourceAttr(fullIpBlockResourceName, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(fullIpBlockResourceName, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(fullIpBlockResourceName, "size", "2"),
 				),
 			},
@@ -103,14 +106,14 @@ func TestAccIPBlockBasic(t *testing.T) {
 }
 
 func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
 	}
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != IpBlockResource {
+		if rs.Type != constant.IpBlockResource {
 			continue
 		}
 
@@ -145,7 +148,7 @@ func testAccCheckIPBlockAttributes(n string, location string) resource.TestCheck
 
 func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -177,63 +180,63 @@ func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.T
 }
 
 const testAccCheckIPBlockConfigBasic = `
-resource ` + IpBlockResource + ` ` + IpBlockTestResource + ` {
+resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
   location = "` + location + `"
   size = 1
-  name = "` + IpBlockTestResource + `"
+  name = "` + constant.IpBlockTestResource + `"
 }`
 
 const testAccCheckIPBlockConfigUpdate = `
-resource ` + IpBlockResource + ` ` + IpBlockTestResource + `{
+resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + `{
   location = "` + location + `"
   size = 2
-  name = "` + UpdatedResources + `"
+  name = "` + constant.UpdatedResources + `"
 }`
 
 const testAccDataSourceIpBlockMatchId = testAccCheckIPBlockConfigBasic + `
-data ` + IpBlockResource + `  ` + IpBlockDataSourceById + ` {
+data ` + constant.IpBlockResource + `  ` + constant.IpBlockDataSourceById + ` {
 	id = ` + fullIpBlockResourceName + `.id 
 }
 `
 
 const testAccDataSourceIpBlockMatching = testAccCheckIPBlockConfigBasic + `
-data ` + IpBlockResource + ` ` + IpBlockDataSourceMatching + ` { 
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceMatching + ` { 
 	name = ` + fullIpBlockResourceName + `.name
 	location = ` + fullIpBlockResourceName + `.location 
 }`
 
 const testAccDataSourceIpBlockMatchName = testAccCheckIPBlockConfigBasic + `
-data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` { 
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` { 
 	name = ` + fullIpBlockResourceName + `.name
 }`
 
 const testAccDataSourceIpBlockMultipleResultsError = testAccCheckIPBlockConfigBasic + `
-resource ` + IpBlockResource + ` ` + IpBlockTestResource + `_same_name{
+resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + `_same_name{
   location = "` + location + `"
   size = 2
   name = ` + fullIpBlockResourceName + `.name
 }
 
-data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` { 
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` { 
 	name = ` + fullIpBlockResourceName + `.name
 }`
 
 const testAccDataSourceIpBlockNameError = testAccCheckIPBlockConfigBasic + `
-data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` { 
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` { 
 	name = ` + fullIpBlockResourceName + `.size
 }`
 const testAccDataSourceIpBlockMatchNameLocationError = testAccCheckIPBlockConfigBasic + `
-data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` { 
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` { 
 	name = ` + fullIpBlockResourceName + `.name
 	location = "none"
 }`
 const testAccDataSourceIpBlockLocationError = testAccCheckIPBlockConfigBasic + `
-data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` {
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` {
 	location = "none"
 }`
 
 const testIpBlockGoodIdLocationError = testAccCheckIPBlockConfigBasic + `
-data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` {
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` {
     id = ` + fullIpBlockResourceName + `.id
 	location = "none"
 }`

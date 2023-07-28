@@ -5,9 +5,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"regexp"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -27,71 +30,71 @@ func TestAccSnapshotBasic(t *testing.T) {
 			{
 				Config: testAccCheckSnapshotConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSnapshotExists(SnapshotResource+"."+SnapshotTestResource, &snapshot),
-					resource.TestCheckResourceAttr(SnapshotResource+"."+SnapshotTestResource, "name", SnapshotTestResource),
+					testAccCheckSnapshotExists(constant.SnapshotResource+"."+constant.SnapshotTestResource, &snapshot),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "name", constant.SnapshotTestResource),
 				),
 			},
 			{
 				Config: testAccDataSourceSnapshotMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "name", SnapshotResource+"."+SnapshotTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "location", SnapshotResource+"."+SnapshotTestResource, "location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "size", SnapshotResource+"."+SnapshotTestResource, "size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "description", SnapshotResource+"."+SnapshotTestResource, "description"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "licence_type", SnapshotResource+"."+SnapshotTestResource, "licence_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "sec_auth_protection", SnapshotResource+"."+SnapshotTestResource, "sec_auth_protection"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "cpu_hot_plug", SnapshotResource+"."+SnapshotTestResource, "cpu_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "cpu_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "cpu_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "ram_hot_plug", SnapshotResource+"."+SnapshotTestResource, "ram_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "ram_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "ram_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "nic_hot_plug", SnapshotResource+"."+SnapshotTestResource, "nic_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "nic_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "nic_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "disc_virtio_hot_plug", SnapshotResource+"."+SnapshotTestResource, "disc_virtio_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "disc_virtio_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "disc_virtio_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "disc_scsi_hot_plug", SnapshotResource+"."+SnapshotTestResource, "disc_scsi_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceById, "disc_scsi_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "disc_scsi_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "name", constant.SnapshotResource+"."+constant.SnapshotTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "location", constant.SnapshotResource+"."+constant.SnapshotTestResource, "location"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "size", constant.SnapshotResource+"."+constant.SnapshotTestResource, "size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "description", constant.SnapshotResource+"."+constant.SnapshotTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "licence_type", constant.SnapshotResource+"."+constant.SnapshotTestResource, "licence_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "sec_auth_protection", constant.SnapshotResource+"."+constant.SnapshotTestResource, "sec_auth_protection"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "cpu_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "cpu_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "cpu_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "cpu_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "ram_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "ram_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "ram_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "ram_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "nic_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "nic_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "nic_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "nic_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "disc_virtio_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "disc_virtio_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "disc_scsi_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "disc_scsi_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_unplug"),
 				),
 			},
 			{
 				Config: testAccDataSourceSnapshotMatching,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "name", SnapshotResource+"."+SnapshotTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "location", SnapshotResource+"."+SnapshotTestResource, "location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "size", SnapshotResource+"."+SnapshotTestResource, "size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "description", SnapshotResource+"."+SnapshotTestResource, "description"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "licence_type", SnapshotResource+"."+SnapshotTestResource, "licence_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "sec_auth_protection", SnapshotResource+"."+SnapshotTestResource, "sec_auth_protection"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "cpu_hot_plug", SnapshotResource+"."+SnapshotTestResource, "cpu_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "cpu_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "cpu_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "ram_hot_plug", SnapshotResource+"."+SnapshotTestResource, "ram_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "ram_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "ram_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "nic_hot_plug", SnapshotResource+"."+SnapshotTestResource, "nic_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "nic_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "nic_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "disc_virtio_hot_plug", SnapshotResource+"."+SnapshotTestResource, "disc_virtio_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "disc_virtio_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "disc_virtio_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "disc_scsi_hot_plug", SnapshotResource+"."+SnapshotTestResource, "disc_scsi_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "disc_scsi_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "disc_scsi_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "name", constant.SnapshotResource+"."+constant.SnapshotTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "location", constant.SnapshotResource+"."+constant.SnapshotTestResource, "location"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "size", constant.SnapshotResource+"."+constant.SnapshotTestResource, "size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "description", constant.SnapshotResource+"."+constant.SnapshotTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "licence_type", constant.SnapshotResource+"."+constant.SnapshotTestResource, "licence_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "sec_auth_protection", constant.SnapshotResource+"."+constant.SnapshotTestResource, "sec_auth_protection"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "cpu_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "cpu_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "cpu_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "cpu_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "ram_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "ram_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "ram_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "ram_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "nic_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "nic_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "nic_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "nic_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_virtio_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_virtio_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_scsi_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_scsi_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_unplug"),
 				),
 			},
 			{
 				Config: testAccDataSourceSnapshotMatching,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "name", SnapshotResource+"."+SnapshotTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "location", SnapshotResource+"."+SnapshotTestResource, "location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "size", SnapshotResource+"."+SnapshotTestResource, "size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "description", SnapshotResource+"."+SnapshotTestResource, "description"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "licence_type", SnapshotResource+"."+SnapshotTestResource, "licence_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "sec_auth_protection", SnapshotResource+"."+SnapshotTestResource, "sec_auth_protection"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "cpu_hot_plug", SnapshotResource+"."+SnapshotTestResource, "cpu_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "cpu_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "cpu_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "ram_hot_plug", SnapshotResource+"."+SnapshotTestResource, "ram_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "ram_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "ram_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "nic_hot_plug", SnapshotResource+"."+SnapshotTestResource, "nic_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "nic_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "nic_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "disc_virtio_hot_plug", SnapshotResource+"."+SnapshotTestResource, "disc_virtio_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "disc_virtio_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "disc_virtio_hot_unplug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "disc_scsi_hot_plug", SnapshotResource+"."+SnapshotTestResource, "disc_scsi_hot_plug"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "disc_scsi_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "disc_scsi_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "name", constant.SnapshotResource+"."+constant.SnapshotTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "location", constant.SnapshotResource+"."+constant.SnapshotTestResource, "location"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "size", constant.SnapshotResource+"."+constant.SnapshotTestResource, "size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "description", constant.SnapshotResource+"."+constant.SnapshotTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "licence_type", constant.SnapshotResource+"."+constant.SnapshotTestResource, "licence_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "sec_auth_protection", constant.SnapshotResource+"."+constant.SnapshotTestResource, "sec_auth_protection"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "cpu_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "cpu_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "cpu_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "cpu_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "ram_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "ram_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "ram_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "ram_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "nic_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "nic_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "nic_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "nic_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_virtio_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_virtio_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_scsi_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_scsi_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_unplug"),
 				),
 			},
 			{
@@ -109,7 +112,7 @@ func TestAccSnapshotBasic(t *testing.T) {
 			{
 				Config: testAccCheckSnapshotConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(SnapshotResource+"."+SnapshotTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "name", constant.UpdatedResources),
 				),
 			},
 		},
@@ -117,7 +120,7 @@ func TestAccSnapshotBasic(t *testing.T) {
 }
 
 func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -125,7 +128,7 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != SnapshotResource {
+		if rs.Type != constant.SnapshotResource {
 			continue
 		}
 
@@ -146,7 +149,7 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 
 func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -179,49 +182,49 @@ func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resourc
 }
 
 const testAccCheckSnapshotConfigBasic = testAccCheckServerConfigBasic + `
-resource ` + SnapshotResource + ` ` + SnapshotTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  volume_id = ` + ServerResource + `.` + ServerTestResource + `.boot_volume
-  name = "` + SnapshotTestResource + `"
+resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  volume_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.boot_volume
+  name = "` + constant.SnapshotTestResource + `"
 }
 `
 
 const testAccCheckSnapshotConfigUpdate = testAccCheckServerConfigBasic + `
-resource ` + SnapshotResource + ` ` + SnapshotTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  volume_id = ` + ServerResource + `.` + ServerTestResource + `.boot_volume
-  name = "` + UpdatedResources + `"
+resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  volume_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.boot_volume
+  name = "` + constant.UpdatedResources + `"
 }`
 
 const testAccDataSourceSnapshotMatchId = testAccCheckSnapshotConfigBasic + `
-data ` + SnapshotResource + ` ` + SnapshotDataSourceById + ` {
-  id			= ` + SnapshotResource + `.` + SnapshotTestResource + `.id
+data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceById + ` {
+  id			= ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.id
 }`
 
 const testAccDataSourceSnapshotMatching = testAccCheckSnapshotConfigBasic + `
-data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
-    name = ` + SnapshotResource + `.` + SnapshotTestResource + `.name
-    location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
-    size = ` + SnapshotResource + `.` + SnapshotTestResource + `.size
+data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceByName + ` {
+    name = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.name
+    location = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.location
+    size = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.size
 }`
 
 const testAccDataSourceSnapshotWrongNameError = testAccCheckSnapshotConfigBasic + `
-data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
+data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceByName + ` {
     name = "wrong_name"
-    location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
-    size = ` + SnapshotResource + `.` + SnapshotTestResource + `.size
+    location = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.location
+    size = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.size
 }`
 
 const testAccDataSourceSnapshotWrongLocation = testAccCheckSnapshotConfigBasic + `
-data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
-    name = ` + SnapshotResource + `.` + SnapshotTestResource + `.name
+data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceByName + ` {
+    name = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.name
     location = "wrong_location"
-    size = ` + SnapshotResource + `.` + SnapshotTestResource + `.size
+    size = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.size
 }`
 
 const testAccDataSourceSnapshotWrongSize = testAccCheckSnapshotConfigBasic + `
-data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
-    name = ` + SnapshotResource + `.` + SnapshotTestResource + `.name
-    location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
+data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceByName + ` {
+    name = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.name
+    location = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.location
     size = 1234
 }`

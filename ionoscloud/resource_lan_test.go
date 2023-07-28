@@ -5,9 +5,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"regexp"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -26,31 +29,31 @@ func TestAccLanBasic(t *testing.T) {
 			{
 				Config: testAccCheckLanConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLanExists(LanResource+"."+LanTestResource, &lan),
-					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "name", LanTestResource),
-					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "public", "true"),
+					testAccCheckLanExists(constant.LanResource+"."+constant.LanTestResource, &lan),
+					resource.TestCheckResourceAttr(constant.LanResource+"."+constant.LanTestResource, "name", constant.LanTestResource),
+					resource.TestCheckResourceAttr(constant.LanResource+"."+constant.LanTestResource, "public", "true"),
 				),
 			},
 			{
 				Config: testAccDataSourceLanMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceById, "name", LanResource+"."+LanTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceById, "ip_failover.nic_uuid", LanResource+"."+LanTestResource, "ip_failover.nic_uuid"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceById, "ip_failover.ip", LanResource+"."+LanTestResource, "ip_failover.ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceById, "pcc", LanResource+"."+LanTestResource, "pcc"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceById, "public", LanResource+"."+LanTestResource, "public"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceById, "ipv6_cidr_block", LanResource+"."+LanTestResource, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "name", constant.LanResource+"."+constant.LanTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "ip_failover.nic_uuid", constant.LanResource+"."+constant.LanTestResource, "ip_failover.nic_uuid"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "ip_failover.ip", constant.LanResource+"."+constant.LanTestResource, "ip_failover.ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "pcc", constant.LanResource+"."+constant.LanTestResource, "pcc"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "public", constant.LanResource+"."+constant.LanTestResource, "public"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "ipv6_cidr_block", constant.LanResource+"."+constant.LanTestResource, "ipv6_cidr_block"),
 				),
 			},
 			{
 				Config: testAccDataSourceLanMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "name", LanResource+"."+LanTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "ip_failover.nic_uuid", LanResource+"."+LanTestResource, "ip_failover.nic_uuid"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "ip_failover.ip", LanResource+"."+LanTestResource, "ip_failover.ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "pcc", LanResource+"."+LanTestResource, "pcc"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "public", LanResource+"."+LanTestResource, "public"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "ipv6_cidr_block", LanResource+"."+LanTestResource, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByName, "name", constant.LanResource+"."+constant.LanTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByName, "ip_failover.nic_uuid", constant.LanResource+"."+constant.LanTestResource, "ip_failover.nic_uuid"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByName, "ip_failover.ip", constant.LanResource+"."+constant.LanTestResource, "ip_failover.ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByName, "pcc", constant.LanResource+"."+constant.LanTestResource, "pcc"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByName, "public", constant.LanResource+"."+constant.LanTestResource, "public"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByName, "ipv6_cidr_block", constant.LanResource+"."+constant.LanTestResource, "ipv6_cidr_block"),
 				),
 			},
 			{
@@ -64,9 +67,9 @@ func TestAccLanBasic(t *testing.T) {
 			{
 				Config: testAccCheckLanConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "public", "false"),
-					resource.TestCheckResourceAttrPair(LanResource+"."+LanTestResource, "pcc", PCCResource+"."+PCCTestResource, "id"),
+					resource.TestCheckResourceAttr(constant.LanResource+"."+constant.LanTestResource, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.LanResource+"."+constant.LanTestResource, "public", "false"),
+					resource.TestCheckResourceAttrPair(constant.LanResource+"."+constant.LanTestResource, "pcc", constant.PCCResource+"."+constant.PCCTestResource, "id"),
 				),
 			},
 		},
@@ -74,7 +77,7 @@ func TestAccLanBasic(t *testing.T) {
 }
 
 func testAccCheckLanDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
@@ -82,7 +85,7 @@ func testAccCheckLanDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != LanResource {
+		if rs.Type != constant.LanResource {
 			continue
 		}
 
@@ -104,7 +107,7 @@ func testAccCheckLanDestroyCheck(s *terraform.State) error {
 
 func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -137,43 +140,43 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 }
 
 const testAccCheckLanConfigUpdate = testAccCheckDatacenterConfigBasic + testAccCheckPrivateCrossConnectConfigBasic + `
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = false
-  name = "` + UpdatedResources + `"
-  pcc = ` + PCCResource + `.` + PCCTestResource + `.id
+  name = "` + constant.UpdatedResources + `"
+  pcc = ` + constant.PCCResource + `.` + constant.PCCTestResource + `.id
 }`
 
 const testAccDataSourceLanMatchId = testAccCheckLanConfigBasic + `
-data ` + LanResource + ` ` + LanDataSourceById + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  id			= ` + LanResource + `.` + LanTestResource + `.id
+data ` + constant.LanResource + ` ` + constant.LanDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id			= ` + constant.LanResource + `.` + constant.LanTestResource + `.id
 }
 `
 
 const testAccDataSourceLanMatchName = testAccCheckLanConfigBasic + `
-data ` + LanResource + ` ` + LanDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  name			= "` + LanTestResource + `"
+data ` + constant.LanResource + ` ` + constant.LanDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name			= "` + constant.LanTestResource + `"
 }
 `
 
 const testAccDataSourceLanMultipleResultsError = testAccCheckLanConfigBasic + `
-resource ` + LanResource + ` ` + LanTestResource + `_multiple_results {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + `_multiple_results {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
-  name = "` + LanTestResource + `"
+  name = "` + constant.LanTestResource + `"
 }
 
-data ` + LanResource + ` ` + LanDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  name			= "` + LanTestResource + `"
+data ` + constant.LanResource + ` ` + constant.LanDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name			= "` + constant.LanTestResource + `"
 }
 `
 
 const testAccDataSourceLanWrongNameError = testAccCheckLanConfigBasic + `
-data ` + LanResource + ` ` + LanDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+data ` + constant.LanResource + ` ` + constant.LanDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   name			= "wrong_name"
 }
 `

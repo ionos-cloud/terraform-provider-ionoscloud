@@ -6,10 +6,12 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-const imageTestName = DataSource + "." + ImageResource + "." + ImageTestResource
+const imageTestName = constant.DataSource + "." + constant.ImageResource + "." + constant.ImageTestResource
 
 func TestAccDataSourceImageBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -69,22 +71,22 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 
 }
 
-const testDataSourceImageAliasLocation = `data ` + ImageResource + ` ` + ImageTestResource + ` {
+const testDataSourceImageAliasLocation = `data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
   image_alias           = "centos:latest"
   location              = "de/txl"
 }`
 
-const testDataSourceImageAliasMultipleError = `data ` + ImageResource + ` ` + ImageTestResource + ` {
+const testDataSourceImageAliasMultipleError = `data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
   image_alias           = "centos:latest"
 }`
 
-const testAccDataSourceWrongAliasError = `data ` + ImageResource + ` ` + ImageTestResource + ` {
+const testAccDataSourceWrongAliasError = `data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
   image_alias           = "doesNotExist"
   location              = "de/txl"
 }`
 
 const testAccDataSourceImageBasic = `
-	data ` + ImageResource + ` ` + ImageTestResource + ` {
+	data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
 	  name = "ubuntu"
 	  type = "CDROM"
 	  version = "22.04-live-server-amd64.iso"
@@ -94,7 +96,7 @@ const testAccDataSourceImageBasic = `
 `
 
 const testAccDataSourceImageWrongNameError = `
-	data ` + ImageResource + ` ` + ImageTestResource + ` {
+	data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
 	  name = "wrong_name"
 	  type = "CDROM"
 	  version = "18.04.3-live-server-amd64.iso"
@@ -104,7 +106,7 @@ const testAccDataSourceImageWrongNameError = `
 `
 
 const testAccDataSourceImageWrongType = `
-	data ` + ImageResource + ` ` + ImageTestResource + ` {
+	data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
 	  name = "ubuntu"
 	  type = "wrong_type"
 	  version = "18.04.3-live-server-amd64.iso"
@@ -114,7 +116,7 @@ const testAccDataSourceImageWrongType = `
 `
 
 const testAccDataSourceImageWrongVersion = `
-	data ` + ImageResource + ` ` + ImageTestResource + ` {
+	data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
 	  name = "ubuntu"
 	  type = "CDROM"
 	  version = "wrong_version"
@@ -124,7 +126,7 @@ const testAccDataSourceImageWrongVersion = `
 `
 
 const testAccDataSourceImageWrongLocation = `
-	data ` + ImageResource + ` ` + ImageTestResource + ` {
+	data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
 	  name = "ubuntu"
 	  type = "CDROM"
 	  version = "18.04.3-live-server-amd64.iso"
@@ -134,7 +136,7 @@ const testAccDataSourceImageWrongLocation = `
 `
 
 const testAccDataSourceImageWrongCloudInit = `
-	data ` + ImageResource + ` ` + ImageTestResource + ` {
+	data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
 	  name = "ubuntu"
 	  type = "CDROM"
 	  version = "18.04.3-live-server-amd64.iso"

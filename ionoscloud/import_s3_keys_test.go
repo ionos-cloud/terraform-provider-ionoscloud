@@ -4,10 +4,12 @@ package ionoscloud
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"testing"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccS3KeyImportBasic(t *testing.T) {
@@ -20,7 +22,7 @@ func TestAccS3KeyImportBasic(t *testing.T) {
 				Config: testAccImportS3KeyConfigBasic,
 			},
 			{
-				ResourceName:            S3KeyResource + "." + S3KeyTestResource,
+				ResourceName:            constant.S3KeyResource + "." + constant.S3KeyTestResource,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateIdFunc:       testAccS3KeyImportStateID,
@@ -34,7 +36,7 @@ func testAccS3KeyImportStateID(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != S3KeyResource {
+		if rs.Type != constant.S3KeyResource {
 			continue
 		}
 
@@ -45,7 +47,7 @@ func testAccS3KeyImportStateID(s *terraform.State) (string, error) {
 }
 
 var testAccImportS3KeyConfigBasic = `
-resource ` + UserResource + ` "example" {
+resource ` + constant.UserResource + ` "example" {
   first_name 	 = "terraform"
   last_name 	 = "test"
   email 		 = "` + utils.GenerateEmail() + `"
@@ -55,7 +57,7 @@ resource ` + UserResource + ` "example" {
   active 		 = false
 }
 
-resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
-  user_id    = ` + UserResource + `.example.id
+resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
+  user_id    = ` + constant.UserResource + `.example.id
   active     = true
 }`

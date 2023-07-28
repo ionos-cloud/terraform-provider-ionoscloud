@@ -2,6 +2,7 @@ package dns
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"net/http"
 	"os"
 	"runtime"
@@ -18,11 +19,11 @@ type Client struct {
 func NewClient(username, password, token, url, version, terraformVersion string) *Client {
 	newConfigDNS := dns.NewConfiguration(username, password, token, url)
 
-	if os.Getenv(utils.IonosDebug) != "" {
+	if os.Getenv(constant.IonosDebug) != "" {
 		newConfigDNS.Debug = true
 	}
-	newConfigDNS.MaxRetries = utils.MaxRetries
-	newConfigDNS.MaxWaitTime = utils.MaxWaitTime
+	newConfigDNS.MaxRetries = constant.MaxRetries
+	newConfigDNS.MaxWaitTime = constant.MaxWaitTime
 	newConfigDNS.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigDNS.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dns/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",

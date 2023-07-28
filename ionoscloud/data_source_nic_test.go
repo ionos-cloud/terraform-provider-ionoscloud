@@ -5,9 +5,10 @@ package ionoscloud
 import (
 	"context"
 	"encoding/json"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 // unit test

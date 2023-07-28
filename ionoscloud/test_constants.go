@@ -1,14 +1,18 @@
 package ionoscloud
 
+import (
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+)
+
 const (
 	testAccCheckBackupUnitConfigBasic = `
-resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
-	name        = "` + BackupUnitTestResource + `"
-	password    = ` + RandomPassword + `.backup_unit_password.result
+resource ` + constant.BackupUnitResource + ` ` + constant.BackupUnitTestResource + ` {
+	name        = "` + constant.BackupUnitTestResource + `"
+	password    = ` + constant.RandomPassword + `.backup_unit_password.result
 	email       = "example@ionoscloud.com"
 }
 
-resource ` + RandomPassword + ` "backup_unit_password" {
+resource ` + constant.RandomPassword + ` "backup_unit_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -19,8 +23,8 @@ resource ` + RandomPassword + ` "backup_unit_password" {
 // Datacenter constants
 const (
 	testAccCheckDatacenterConfigBasic = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
-	name       = "` + DatacenterTestResource + `"
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+	name       = "` + constant.DatacenterTestResource + `"
 	location = "us/las"
 	description = "Test Datacenter Description"
 	sec_auth_protection = false
@@ -30,19 +34,19 @@ resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 // Lan Constants
 const (
 	testAccCheckLanConfigBasic = testAccCheckDatacenterConfigBasic + `
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
-  name = "` + LanTestResource + `"
+  name = "` + constant.LanTestResource + `"
 }`
 )
 
 // Private Crossconnect Constants
 const (
 	testAccCheckPrivateCrossConnectConfigBasic = `
-resource ` + PCCResource + ` ` + PCCTestResource + ` {
-  name        = "` + PCCTestResource + `"
-  description = "` + PCCTestResource + `"
+resource ` + constant.PCCResource + ` ` + constant.PCCTestResource + ` {
+  name        = "` + constant.PCCTestResource + `"
+  description = "` + constant.PCCTestResource + `"
 }`
 )
 
@@ -50,23 +54,23 @@ resource ` + PCCResource + ` ` + PCCTestResource + ` {
 
 const (
 	testAccCheckServerNoPwdOrSSH = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -82,7 +86,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -105,23 +109,23 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 const sshKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC6J7UMVHrx2EztvbnH+xCVOo8i4sg40H4U5NNySxF5ZwmHXHDlOw8BCJCwFAjknDxJPZQgZMPUAvAYZh0gBWcZhqOXTNcDyPCusMBQvEbngiXyAfTJKdSe+lPkpOnoq7RGjdIbrnLzmxtnPNL6pk1Ys+eVBxoOt+FGkfbIhXwEv5zy82Kk2j96fKD6OrfJna7O7xQWDkhIa6GHa9S0LaU6NwWZmaZidbEAbf4/ntjKLtrIJLcc8C5ExquBVg36jdTjsnoW85tY95SScVH5qlk7zEpn9nFLbb3TKNItwewK0pf5jsjbAOXpRWQk+sn2IgayEZ8fOfmQe88mH3ZHrWqAMSvyBl/CXY3wBjHsUiUNy+Z4i3Rx3Gqa+vcUpx8r0ZaryfbrTWkA4WYEsX5Brg6JsgcA/oJ8HNcUY8dexSZMXPV1Ofl+AxkwLMjUjxSKHgfX1EkjdhzVgQraHihSgCbKZCjkEhAzASI/TOQjSPk0/6itX+359fbBE5mahfYzrDFTwDqbgJI295cZxrMH5JU/RHMMq3xzUHO20L02kQgz3By5lDhlLq65qqxbSHncqbWPlbfzqqNaJEfK0tCwuTfMEmKv8PcrF6KrLyaYJTAjYPvOiZUVOp1OlUoArGrsHG2smjgn+juOHPBOWVFSukRTIn869uKWkCWfA1hIjFEhjQ== My nginx key"
 
 const testAccCheckServerSshDirectly = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -138,7 +142,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -158,23 +162,23 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }`
 
 const testAccCheckServerSshKeysDirectly = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -191,7 +195,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -211,23 +215,23 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }`
 
 const testAccCheckServerSshKeysAndKeyPathErr = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -245,7 +249,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -265,29 +269,29 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }`
 
 const testAccCheckServerConfigBasic = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "system"
@@ -298,7 +302,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
 }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -320,29 +324,29 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 
 // Solves  #372 crash when ips field in nic resource is a list with an empty string
 const testAccCheckServerConfigEmptyNicIps = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "system"
@@ -353,7 +357,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
 }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -374,22 +378,22 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 ` + ServerImagePassword
 
 const testAccDataSourceDatacenterWrongNameError = testAccCheckDatacenterConfigBasic + `
-data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
     name = "wrong_name"
-    location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+    location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
 }`
 
 const ImmutableError = "attribute is immutable, therefore not allowed in update requests"
 
 const ServerImagePassword = `
-resource ` + RandomPassword + ` "server_image_password" {
+resource ` + constant.RandomPassword + ` "server_image_password" {
   length           = 16
   special          = false
 }
 `
 
 const ServerImagePasswordUpdated = `
-resource ` + RandomPassword + ` "server_image_password_updated" {
+resource ` + constant.RandomPassword + ` "server_image_password_updated" {
   length           = 16
   special          = false
 }
@@ -397,33 +401,33 @@ resource ` + RandomPassword + ` "server_image_password_updated" {
 
 // Cube Server Constants
 const testAccCheckCubeServerConfigBasic = `
-data "ionoscloud_template" ` + ServerTestResource + ` {
+data "ionoscloud_template" ` + constant.ServerTestResource + ` {
     name = "CUBES XS"
     cores = 1
     ram   = 1024
     storage_size = 30
 }
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "de/fra"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
-  template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
+  template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   
   volume {
     name = "system"
@@ -431,7 +435,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
     disk_type = "DAS"
 }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -452,12 +456,12 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 ` + ServerImagePassword
 
 const testAccCheckServerCreationWithLabels = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
@@ -465,9 +469,9 @@ resource "random_password" "image_password" {
   length = 16
   special = false
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -484,7 +488,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
 }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = false
@@ -501,23 +505,23 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 
 const (
 	testAccCheckServerNoNic = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
   location = "us/las"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -536,23 +540,23 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }`
 
 	testAccCheckServerNoNicUpdate = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
@@ -599,7 +603,7 @@ const zoneEnabledValue = "true"
 const zoneupdatedEnabledValue = "false"
 
 const DNSZoneConfig = `
-resource ` + DNSZoneResource + ` ` + DNSZoneTestResourceName + ` {
+resource ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestResourceName + ` {
 	` + zoneNameAttribute + ` = "` + zoneNameValue + `"
 	` + zoneDescriptionAttribute + ` = "` + zoneDescriptionValue + `"
     ` + zoneEnabledAttribute + ` = ` + zoneEnabledValue + `
@@ -624,8 +628,8 @@ const recordEnabledValue = "true"
 const recordUpdatedEnabledValue = "false"
 
 const DNSRecordConfig = DNSZoneConfig + `
-resource ` + DNSRecordResource + ` ` + DNSRecordTestResourceName + ` {
-	zone_id = ` + DNSZoneResource + `.` + DNSZoneTestResourceName + `.id
+resource ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestResourceName + ` {
+	zone_id = ` + constant.DNSZoneResource + `.` + constant.DNSZoneTestResourceName + `.id
 	` + recordNameAttribute + ` = "` + recordNameValue + `"
 	` + recordTypeAttribute + ` = "` + recordTypeValue + `"
 	` + recordContentAttribute + ` = "` + recordContentValue + `"
@@ -683,7 +687,7 @@ const pipelineLogUpdated = pipelineLogAttribute + `{
 
 // Standard configuration
 const LoggingPipelineConfig = `
-resource ` + LoggingPipelineResource + ` ` + LoggingPipelineTestResourceName + ` {
+resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestResourceName + ` {
 	` + pipelineNameAttribute + ` = "` + pipelineNameValue + `"
 	` + pipelineLog + `
 }

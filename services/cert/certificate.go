@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
@@ -48,7 +49,7 @@ func (c *Client) IsCertReady(ctx context.Context, d *schema.ResourceData) (bool,
 	if cert.Metadata == nil || cert.Metadata.State == nil {
 		return false, fmt.Errorf("cert metadata or state is empty for id %s", d.Id())
 	}
-	return strings.EqualFold(*cert.Metadata.State, utils.Available), nil
+	return strings.EqualFold(*cert.Metadata.State, constant.Available), nil
 }
 
 func (c *Client) IsCertDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {

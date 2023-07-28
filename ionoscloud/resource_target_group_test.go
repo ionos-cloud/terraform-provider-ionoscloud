@@ -5,17 +5,20 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"regexp"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-const resourceNameTargetGroup = TargetGroupResource + "." + TargetGroupTestResource
-const resourceNameTargetGroupById = DataSource + "." + TargetGroupResource + "." + TargetGroupDataSourceById
-const resourceNameTargetGroupByName = DataSource + "." + TargetGroupResource + "." + TargetGroupDataSourceByName
+const resourceNameTargetGroup = constant.TargetGroupResource + "." + constant.TargetGroupTestResource
+const resourceNameTargetGroupById = constant.DataSource + "." + constant.TargetGroupResource + "." + constant.TargetGroupDataSourceById
+const resourceNameTargetGroupByName = constant.DataSource + "." + constant.TargetGroupResource + "." + constant.TargetGroupDataSourceByName
 
 func TestAccTargetGroupBasic(t *testing.T) {
 	var targetGroup ionoscloud.TargetGroup
@@ -30,7 +33,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 				Config: testAccCheckTargetGroupConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckTargetGroupExists(resourceNameTargetGroup, &targetGroup),
-					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", TargetGroupTestResource),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", constant.TargetGroupTestResource),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "algorithm", "ROUND_ROBIN"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol", "HTTP"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.ip", "22.231.2.2"),
@@ -41,7 +44,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 			{
 				Config: testAccCheckTargetGroupConfigUpdateWithAllParameters,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "algorithm", "ROUND_ROBIN"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol", "HTTP"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.ip", "22.231.2.2"),
@@ -134,7 +137,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 			{
 				Config: testAccCheckTargetGroupConfigUpdateAgain,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "algorithm", "RANDOM"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol", "HTTP"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.ip", "22.232.2.3"),
@@ -158,7 +161,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 }
 
 func testAccCheckTargetGroupDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
@@ -167,7 +170,7 @@ func testAccCheckTargetGroupDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ALBResource {
+		if rs.Type != constant.ALBResource {
 			continue
 		}
 
@@ -188,7 +191,7 @@ func testAccCheckTargetGroupDestroyCheck(s *terraform.State) error {
 
 func testAccCheckTargetGroupExists(n string, targetGroup *ionoscloud.TargetGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -222,8 +225,8 @@ func testAccCheckTargetGroupExists(n string, targetGroup *ionoscloud.TargetGroup
 }
 
 const testAccCheckTargetGroupConfigBasic = `
-resource ` + TargetGroupResource + ` ` + TargetGroupTestResource + ` {
- name = "` + TargetGroupTestResource + `"
+resource ` + constant.TargetGroupResource + ` ` + constant.TargetGroupTestResource + ` {
+ name = "` + constant.TargetGroupTestResource + `"
  algorithm = "ROUND_ROBIN"
  protocol = "HTTP"
  targets {
@@ -235,8 +238,8 @@ resource ` + TargetGroupResource + ` ` + TargetGroupTestResource + ` {
 `
 
 const testAccCheckTargetGroupConfigUpdateWithAllParameters = `
-resource ` + TargetGroupResource + ` ` + TargetGroupTestResource + ` {
- name = "` + UpdatedResources + `"
+resource ` + constant.TargetGroupResource + ` ` + constant.TargetGroupTestResource + ` {
+ name = "` + constant.UpdatedResources + `"
  algorithm = "ROUND_ROBIN"
  protocol = "HTTP"
  targets {
@@ -263,8 +266,8 @@ resource ` + TargetGroupResource + ` ` + TargetGroupTestResource + ` {
 `
 
 const testAccCheckTargetGroupConfigUpdateAgain = `
-resource ` + TargetGroupResource + ` ` + TargetGroupTestResource + ` {
- name = "` + UpdatedResources + `"
+resource ` + constant.TargetGroupResource + ` ` + constant.TargetGroupTestResource + ` {
+ name = "` + constant.UpdatedResources + `"
  algorithm = "RANDOM"
  protocol = "HTTP"
  targets {
@@ -290,32 +293,32 @@ resource ` + TargetGroupResource + ` ` + TargetGroupTestResource + ` {
 }`
 
 const testAccDataSourceTargetGroupMatchId = testAccCheckTargetGroupConfigUpdateWithAllParameters + `
-data ` + TargetGroupResource + ` ` + TargetGroupDataSourceById + ` {
+data ` + constant.TargetGroupResource + ` ` + constant.TargetGroupDataSourceById + ` {
   id			= ` + resourceNameTargetGroup + `.id
 }
 `
 
 const testAccDataSourceTargetGroupMatchName = testAccCheckTargetGroupConfigUpdateWithAllParameters + `
-data ` + TargetGroupResource + ` ` + TargetGroupDataSourceByName + ` {
+data ` + constant.TargetGroupResource + ` ` + constant.TargetGroupDataSourceByName + ` {
   name			= ` + resourceNameTargetGroup + `.name
 }
 `
 
 const testAccDataSourceTargetGroupWrongNameError = testAccCheckTargetGroupConfigUpdateWithAllParameters + `
-data ` + TargetGroupResource + ` ` + TargetGroupDataSourceByName + ` {
+data ` + constant.TargetGroupResource + ` ` + constant.TargetGroupDataSourceByName + ` {
   name			= "wrong name"
 }
 `
 
 const testAccDataSourceTargetGroupPartialMatchName = testAccCheckTargetGroupConfigUpdateWithAllParameters + `
-data ` + TargetGroupResource + ` ` + TargetGroupDataSourceByName + ` {
-  name          = "` + DataSourcePartial + `"
+data ` + constant.TargetGroupResource + ` ` + constant.TargetGroupDataSourceByName + ` {
+  name          = "` + constant.DataSourcePartial + `"
   partial_match = true
 }
 `
 
 const testAccDataSourceTargetGroupWrongPartialNameError = testAccCheckTargetGroupConfigUpdateWithAllParameters + `
-data ` + TargetGroupResource + ` ` + TargetGroupDataSourceByName + ` {
+data ` + constant.TargetGroupResource + ` ` + constant.TargetGroupDataSourceByName + ` {
   name			= "wrong name"
   partial_match = true
 }

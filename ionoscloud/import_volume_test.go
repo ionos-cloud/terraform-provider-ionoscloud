@@ -5,6 +5,8 @@ package ionoscloud
 import (
 	"fmt"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -23,7 +25,7 @@ func TestAccVolumeImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:            VolumeResource + "." + VolumeTestResource,
+				ResourceName:            constant.VolumeResource + "." + constant.VolumeTestResource,
 				ImportStateIdFunc:       testAccVolumeImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -37,7 +39,7 @@ func testAccVolumeImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != VolumeResource {
+		if rs.Type != constant.VolumeResource {
 			continue
 		}
 

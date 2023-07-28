@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"gopkg.in/yaml.v3"
 )
@@ -181,7 +182,7 @@ func dataSourceDataplatformCluster() *schema.Resource {
 }
 
 func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")

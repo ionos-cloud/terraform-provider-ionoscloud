@@ -1,9 +1,11 @@
-//go:build all || alb
+//go:build alb
 
 package ionoscloud
 
 import (
 	"fmt"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"testing"
 
@@ -35,7 +37,7 @@ func testAccApplicationLoadBalancerForwardingRuleImportStateId(s *terraform.Stat
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ALBForwardingRuleResource {
+		if rs.Type != constant.ALBForwardingRuleResource {
 			continue
 		}
 

@@ -7,13 +7,12 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
@@ -21,20 +20,10 @@ import (
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 var Version = "DEV"
-
-type SdkBundle struct {
-	CloudApiClient     *ionoscloud.APIClient
-	PsqlClient         *dbaasService.PsqlClient
-	MongoClient        *dbaasService.MongoClient
-	CertManagerClient  *cert.Client
-	ContainerClient    *crService.Client
-	DataplatformClient *dataplatformService.Client
-	DNSClient          *dnsService.Client
-	LoggingClient      *loggingService.Client
-}
 
 type ClientOptions struct {
 	Username         string
@@ -81,98 +70,98 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			DatacenterResource:          resourceDatacenter(),
-			IpBlockResource:             resourceIPBlock(),
-			FirewallResource:            resourceFirewall(),
-			LanResource:                 resourceLan(),
-			"ionoscloud_loadbalancer":   resourceLoadbalancer(),
-			NicResource:                 resourceNic(),
-			ServerResource:              resourceServer(),
-			ServerCubeResource:          resourceCubeServer(),
-			VolumeResource:              resourceVolume(),
-			GroupResource:               resourceGroup(),
-			ShareResource:               resourceShare(),
-			UserResource:                resourceUser(),
-			SnapshotResource:            resourceSnapshot(),
-			ResourceIpFailover:          resourceLanIPFailover(),
-			K8sClusterResource:          resourcek8sCluster(),
-			K8sNodePoolResource:         resourceK8sNodePool(),
-			PCCResource:                 resourcePrivateCrossConnect(),
-			BackupUnitResource:          resourceBackupUnit(),
-			S3KeyResource:               resourceS3Key(),
-			NatGatewayResource:          resourceNatGateway(),
-			NatGatewayRuleResource:      resourceNatGatewayRule(),
-			NetworkLoadBalancerResource: resourceNetworkLoadBalancer(),
-			NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
-			PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
-			PsqlUserResource:                          resourceDbaasPgSqlUser(),
-			PsqlDatabaseResource:                      resourceDbaasPgSqlDatabase(),
-			DBaasMongoClusterResource:                 resourceDbaasMongoDBCluster(),
-			DBaasMongoUserResource:                    resourceDbaasMongoUser(),
-			ALBResource:                               resourceApplicationLoadBalancer(),
-			ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
-			TargetGroupResource:                       resourceTargetGroup(),
-			CertificateResource:                       resourceCertificateManager(),
-			ContainerRegistryResource:                 resourceContainerRegistry(),
-			ContainerRegistryTokenResource:            resourceContainerRegistryToken(),
-			DataplatformClusterResource:               resourceDataplatformCluster(),
-			DataplatformNodePoolResource:              resourceDataplatformNodePool(),
-			DNSZoneResource:                           resourceDNSZone(),
-			DNSRecordResource:                         resourceDNSRecord(),
-			LoggingPipelineResource:                   resourceLoggingPipeline(),
+			constant.DatacenterResource:                        resourceDatacenter(),
+			constant.IpBlockResource:                           resourceIPBlock(),
+			constant.FirewallResource:                          resourceFirewall(),
+			constant.LanResource:                               resourceLan(),
+			"ionoscloud_loadbalancer":                          resourceLoadbalancer(),
+			constant.NicResource:                               resourceNic(),
+			constant.ServerResource:                            resourceServer(),
+			constant.ServerCubeResource:                        resourceCubeServer(),
+			constant.VolumeResource:                            resourceVolume(),
+			constant.GroupResource:                             resourceGroup(),
+			constant.ShareResource:                             resourceShare(),
+			constant.UserResource:                              resourceUser(),
+			constant.SnapshotResource:                          resourceSnapshot(),
+			constant.ResourceIpFailover:                        resourceLanIPFailover(),
+			constant.K8sClusterResource:                        resourcek8sCluster(),
+			constant.K8sNodePoolResource:                       resourceK8sNodePool(),
+			constant.PCCResource:                               resourcePrivateCrossConnect(),
+			constant.BackupUnitResource:                        resourceBackupUnit(),
+			constant.S3KeyResource:                             resourceS3Key(),
+			constant.NatGatewayResource:                        resourceNatGateway(),
+			constant.NatGatewayRuleResource:                    resourceNatGatewayRule(),
+			constant.NetworkLoadBalancerResource:               resourceNetworkLoadBalancer(),
+			constant.NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
+			constant.PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
+			constant.PsqlUserResource:                          resourceDbaasPgSqlUser(),
+			constant.PsqlDatabaseResource:                      resourceDbaasPgSqlDatabase(),
+			constant.DBaasMongoClusterResource:                 resourceDbaasMongoDBCluster(),
+			constant.DBaasMongoUserResource:                    resourceDbaasMongoUser(),
+			constant.ALBResource:                               resourceApplicationLoadBalancer(),
+			constant.ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
+			constant.TargetGroupResource:                       resourceTargetGroup(),
+			constant.CertificateResource:                       resourceCertificateManager(),
+			constant.ContainerRegistryResource:                 resourceContainerRegistry(),
+			constant.ContainerRegistryTokenResource:            resourceContainerRegistryToken(),
+			constant.DataplatformClusterResource:               resourceDataplatformCluster(),
+			constant.DataplatformNodePoolResource:              resourceDataplatformNodePool(),
+			constant.DNSZoneResource:                           resourceDNSZone(),
+			constant.DNSRecordResource:                         resourceDNSRecord(),
+			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			DatacenterResource:                        dataSourceDataCenter(),
-			LocationResource:                          dataSourceLocation(),
-			ImageResource:                             dataSourceImage(),
-			ResourceResource:                          dataSourceResource(),
-			SnapshotResource:                          dataSourceSnapshot(),
-			LanResource:                               dataSourceLan(),
-			PCCResource:                               dataSourcePcc(),
-			ServerResource:                            dataSourceServer(),
-			ServerCubeResource:                        dataSourceCubeServer(),
-			ServersDataSource:                         dataSourceServers(),
-			K8sClusterResource:                        dataSourceK8sCluster(),
-			K8sNodePoolResource:                       dataSourceK8sNodePool(),
-			K8sNodePoolNodesResource:                  dataSourceK8sNodePoolNodes(),
-			NatGatewayResource:                        dataSourceNatGateway(),
-			NatGatewayRuleResource:                    dataSourceNatGatewayRule(),
-			NetworkLoadBalancerResource:               dataSourceNetworkLoadBalancer(),
-			NetworkLoadBalancerForwardingRuleResource: dataSourceNetworkLoadBalancerForwardingRule(),
-			TemplateResource:                          dataSourceTemplate(),
-			BackupUnitResource:                        dataSourceBackupUnit(),
-			FirewallResource:                          dataSourceFirewall(),
-			S3KeyResource:                             dataSourceS3Key(),
-			GroupResource:                             dataSourceGroup(),
-			UserResource:                              dataSourceUser(),
-			IpBlockResource:                           dataSourceIpBlock(),
-			VolumeResource:                            dataSourceVolume(),
-			NicResource:                               dataSourceNIC(),
-			ShareResource:                             dataSourceShare(),
-			ResourceIpFailover:                        dataSourceIpFailover(),
-			PsqlClusterResource:                       dataSourceDbaasPgSqlCluster(),
-			PsqlUserResource:                          dataSourceDbaasPgSqlUser(),
-			PsqlDatabaseResource:                      dataSourceDbaasPgSqlDatabase(),
-			PsqlDatabasesResource:                     dataSourceDbaasPgSqlDatabases(),
-			DBaasMongoClusterResource:                 dataSourceDbaasMongoCluster(),
-			DBaaSMongoTemplateResource:                dataSourceDbassMongoTemplate(),
-			PsqlVersionsResource:                      dataSourceDbaasPgSqlVersions(),
-			PsqlBackupsResource:                       dataSourceDbaasPgSqlBackups(),
-			ALBResource:                               dataSourceApplicationLoadBalancer(),
-			ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
-			TargetGroupResource:                       dataSourceTargetGroup(),
-			DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
-			CertificateResource:                       dataSourceCertificate(),
-			ContainerRegistryResource:                 dataSourceContainerRegistry(),
-			ContainerRegistryTokenResource:            dataSourceContainerRegistryToken(),
-			ContainerRegistryLocationsResource:        dataSourceContainerRegistryLocations(),
-			DataplatformClusterResource:               dataSourceDataplatformCluster(),
-			DataplatformNodePoolResource:              dataSourceDataplatformNodePool(),
-			DataplatformNodePoolsDataSource:           dataSourceDataplatformNodePools(),
-			DataplatformVersionsDataSource:            dataSourceDataplatformVersions(),
-			DNSZoneDataSource:                         dataSourceDNSZone(),
-			DNSRecordDataSource:                       dataSourceDNSRecord(),
-			LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
+			constant.DatacenterResource:                        dataSourceDataCenter(),
+			constant.LocationResource:                          dataSourceLocation(),
+			constant.ImageResource:                             dataSourceImage(),
+			constant.ResourceResource:                          dataSourceResource(),
+			constant.SnapshotResource:                          dataSourceSnapshot(),
+			constant.LanResource:                               dataSourceLan(),
+			constant.PCCResource:                               dataSourcePcc(),
+			constant.ServerResource:                            dataSourceServer(),
+			constant.ServerCubeResource:                        dataSourceCubeServer(),
+			constant.ServersDataSource:                         dataSourceServers(),
+			constant.K8sClusterResource:                        dataSourceK8sCluster(),
+			constant.K8sNodePoolResource:                       dataSourceK8sNodePool(),
+			constant.K8sNodePoolNodesResource:                  dataSourceK8sNodePoolNodes(),
+			constant.NatGatewayResource:                        dataSourceNatGateway(),
+			constant.NatGatewayRuleResource:                    dataSourceNatGatewayRule(),
+			constant.NetworkLoadBalancerResource:               dataSourceNetworkLoadBalancer(),
+			constant.NetworkLoadBalancerForwardingRuleResource: dataSourceNetworkLoadBalancerForwardingRule(),
+			constant.TemplateResource:                          dataSourceTemplate(),
+			constant.BackupUnitResource:                        dataSourceBackupUnit(),
+			constant.FirewallResource:                          dataSourceFirewall(),
+			constant.S3KeyResource:                             dataSourceS3Key(),
+			constant.GroupResource:                             dataSourceGroup(),
+			constant.UserResource:                              dataSourceUser(),
+			constant.IpBlockResource:                           dataSourceIpBlock(),
+			constant.VolumeResource:                            dataSourceVolume(),
+			constant.NicResource:                               dataSourceNIC(),
+			constant.ShareResource:                             dataSourceShare(),
+			constant.ResourceIpFailover:                        dataSourceIpFailover(),
+			constant.PsqlClusterResource:                       dataSourceDbaasPgSqlCluster(),
+			constant.PsqlUserResource:                          dataSourceDbaasPgSqlUser(),
+			constant.PsqlDatabaseResource:                      dataSourceDbaasPgSqlDatabase(),
+			constant.PsqlDatabasesResource:                     dataSourceDbaasPgSqlDatabases(),
+			constant.DBaasMongoClusterResource:                 dataSourceDbaasMongoCluster(),
+			constant.DBaaSMongoTemplateResource:                dataSourceDbassMongoTemplate(),
+			constant.PsqlVersionsResource:                      dataSourceDbaasPgSqlVersions(),
+			constant.PsqlBackupsResource:                       dataSourceDbaasPgSqlBackups(),
+			constant.ALBResource:                               dataSourceApplicationLoadBalancer(),
+			constant.ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
+			constant.TargetGroupResource:                       dataSourceTargetGroup(),
+			constant.DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
+			constant.CertificateResource:                       dataSourceCertificate(),
+			constant.ContainerRegistryResource:                 dataSourceContainerRegistry(),
+			constant.ContainerRegistryTokenResource:            dataSourceContainerRegistryToken(),
+			constant.ContainerRegistryLocationsResource:        dataSourceContainerRegistryLocations(),
+			constant.DataplatformClusterResource:               dataSourceDataplatformCluster(),
+			constant.DataplatformNodePoolResource:              dataSourceDataplatformNodePool(),
+			constant.DataplatformNodePoolsDataSource:           dataSourceDataplatformNodePools(),
+			constant.DataplatformVersionsDataSource:            dataSourceDataplatformVersions(),
+			constant.DNSZoneDataSource:                         dataSourceDNSZone(),
+			constant.DNSRecordDataSource:                       dataSourceDNSRecord(),
+			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
 		},
 	}
 
@@ -223,7 +212,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.Version = ionoscloud.Version
 	clientOpts.TerraformVersion = terraformVersion
 
-	return SdkBundle{
+	return services.SdkBundle{
 		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
@@ -235,6 +224,19 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	}, nil
 }
 
+type clientType int
+
+const (
+	ionosClient clientType = iota
+	psqlClient
+	certManagerClient
+	mongoClient
+	containerRegistryClient
+	dataplatformClient
+	dnsClient
+	loggingClient
+)
+
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
 	switch clientType {
 	case ionosClient:
@@ -243,11 +245,11 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig.UserAgent = fmt.Sprintf(
 				"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-			if os.Getenv(utils.IonosDebug) != "" {
+			if os.Getenv(constant.IonosDebug) != "" {
 				newConfig.Debug = true
 			}
-			newConfig.MaxRetries = utils.MaxRetries
-			newConfig.WaitTime = utils.MaxWaitTime
+			newConfig.MaxRetries = constant.MaxRetries
+			newConfig.WaitTime = constant.MaxWaitTime
 			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 			return ionoscloud.NewAPIClient(newConfig)
 		}
@@ -279,93 +281,6 @@ func cleanURL(url string) string {
 	}
 
 	return url
-}
-
-// getStateChangeConf gets the default configuration for tracking a request progress
-func getStateChangeConf(meta interface{}, d *schema.ResourceData, location string, timeoutType string) *resource.StateChangeConf {
-	stateConf := &resource.StateChangeConf{
-		Pending:        resourcePendingStates,
-		Target:         resourceTargetStates,
-		Refresh:        resourceStateRefreshFunc(meta, location),
-		Timeout:        d.Timeout(timeoutType),
-		MinTimeout:     5 * time.Second,
-		Delay:          0,   // Don't delay the start
-		NotFoundChecks: 600, //Setting high number, to support long timeouts
-	}
-
-	return stateConf
-}
-
-type RequestFailedError struct {
-	msg string
-}
-
-func (e RequestFailedError) Error() string {
-	return e.msg
-}
-
-func IsRequestFailed(err error) bool {
-	_, ok := err.(RequestFailedError)
-	return ok
-}
-
-// resourceStateRefreshFunc tracks progress of a request
-func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		client := meta.(SdkBundle).CloudApiClient
-
-		log.Printf("[INFO] Checking PATH %s\n", path)
-		if path == "" {
-			return nil, "", fmt.Errorf("can not check a state when path is empty")
-		}
-
-		request, apiResponse, err := client.GetRequestStatus(context.Background(), path)
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			return nil, "", fmt.Errorf("request failed with following error: %w", err)
-		}
-		if request != nil && request.Metadata != nil && request.Metadata.Status != nil {
-			if *request.Metadata.Status == "FAILED" {
-				var msg string
-				if request.Metadata.Message != nil {
-					msg = fmt.Sprintf("Request failed with following error: %s", *request.Metadata.Message)
-				} else {
-					msg = "Request failed with an unknown error"
-				}
-				return nil, "", RequestFailedError{msg}
-			}
-
-			if *request.Metadata.Status == "DONE" {
-				return request, "DONE", nil
-			}
-		} else {
-			if request == nil {
-				log.Printf("[DEBUG] request is nil")
-			} else if request.Metadata == nil {
-				log.Printf("[DEBUG] request metadata is nil")
-			}
-			if request != nil && request.Metadata != nil && request.Metadata.Message != nil {
-				log.Printf("[DEBUG] request failed with following error: %s", *request.Metadata.Message)
-			}
-			if apiResponse != nil {
-				log.Printf("[DEBUG] response message %s", apiResponse.Message)
-			}
-			return nil, "", fmt.Errorf("request metadata status is nil for path %s", path)
-		}
-
-		return nil, *request.Metadata.Status, nil
-	}
-}
-
-// resourcePendingStates defines states of working in progress
-var resourcePendingStates = []string{
-	"RUNNING",
-	"QUEUED",
-}
-
-// resourceTargetStates defines states of completion
-var resourceTargetStates = []string{
-	"DONE",
 }
 
 // resourceDefaultTimeouts sets default value for each Timeout type

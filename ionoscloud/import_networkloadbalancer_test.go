@@ -1,10 +1,12 @@
-//go:build all || nlb
-// +build all nlb
+//go:build nlb
+// +build nlb
 
 package ionoscloud
 
 import (
 	"fmt"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"testing"
 
@@ -36,7 +38,7 @@ func testAccNetworkLoadBalancerImportStateId(s *terraform.State) (string, error)
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != NetworkLoadBalancerResource {
+		if rs.Type != constant.NetworkLoadBalancerResource {
 			continue
 		}
 

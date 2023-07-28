@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 )
 
@@ -27,7 +28,7 @@ func dataSourceContainerRegistryLocations() *schema.Resource {
 }
 
 func dataSourceContainerRegistryLocationsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	locations, _, err := client.GetAllLocations(ctx)
 	if err != nil {

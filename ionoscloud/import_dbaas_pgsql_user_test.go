@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -24,7 +26,7 @@ func TestAccPgSqlUserImport(t *testing.T) {
 				Config: PgSqlUserConfig,
 			},
 			{
-				ResourceName:            PsqlUserResource + "." + UserTestResource,
+				ResourceName:            constant.PsqlUserResource + "." + constant.UserTestResource,
 				ImportStateIdFunc:       PgSqlUserImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -38,7 +40,7 @@ func PgSqlUserImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != PsqlUserResource {
+		if rs.Type != constant.PsqlUserResource {
 			continue
 		}
 

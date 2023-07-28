@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
@@ -30,7 +32,7 @@ func getMockedClient(jsonResponse string) interface{} {
 	cfg := ionoscloud.NewConfiguration("", "", "", ts.URL)
 	cfg.HTTPClient = ts.Client()
 
-	return SdkBundle{
+	return services.SdkBundle{
 		CloudApiClient: ionoscloud.NewAPIClient(cfg),
 	}
 }

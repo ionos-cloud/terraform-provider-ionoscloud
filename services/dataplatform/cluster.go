@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -22,7 +24,7 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 		return false, fmt.Errorf("expected metadata, got empty for cluster id %s", d.Id())
 	}
 	log.Printf("[DEBUG] dataplatform cluster state %s", *cluster.Metadata.State)
-	return strings.EqualFold(*cluster.Metadata.State, utils.Available), nil
+	return strings.EqualFold(*cluster.Metadata.State, constant.Available), nil
 }
 
 func (c *Client) GetClusterById(ctx context.Context, id string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {

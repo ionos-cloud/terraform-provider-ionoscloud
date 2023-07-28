@@ -5,9 +5,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"regexp"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -26,27 +29,27 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 			{
 				Config: testAccCheckPrivateCrossConnectConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPrivateCrossConnectExists(PCCResource+"."+PCCTestResource, &privateCrossConnect),
-					resource.TestCheckResourceAttr(PCCResource+"."+PCCTestResource, "name", PCCTestResource),
-					resource.TestCheckResourceAttr(PCCResource+"."+PCCTestResource, "description", PCCTestResource),
+					testAccCheckPrivateCrossConnectExists(constant.PCCResource+"."+constant.PCCTestResource, &privateCrossConnect),
+					resource.TestCheckResourceAttr(constant.PCCResource+"."+constant.PCCTestResource, "name", constant.PCCTestResource),
+					resource.TestCheckResourceAttr(constant.PCCResource+"."+constant.PCCTestResource, "description", constant.PCCTestResource),
 				),
 			},
 			{
 				Config: testAccDataSourcePccMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "name", PCCResource+"."+PCCTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "description", PCCResource+"."+PCCTestResource, "description"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "peers", PCCResource+"."+PCCTestResource, "peers"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "connectable_datacenters", PCCResource+"."+PCCTestResource, "connectable_datacenters"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceById, "name", constant.PCCResource+"."+constant.PCCTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceById, "description", constant.PCCResource+"."+constant.PCCTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceById, "peers", constant.PCCResource+"."+constant.PCCTestResource, "peers"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceById, "connectable_datacenters", constant.PCCResource+"."+constant.PCCTestResource, "connectable_datacenters"),
 				),
 			},
 			{
 				Config: testAccDataSourcePccMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "name", PCCResource+"."+PCCTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "description", PCCResource+"."+PCCTestResource, "description"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "peers", PCCResource+"."+PCCTestResource, "peers"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "connectable_datacenters", PCCResource+"."+PCCTestResource, "connectable_datacenters"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceByName, "name", constant.PCCResource+"."+constant.PCCTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceByName, "description", constant.PCCResource+"."+constant.PCCTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceByName, "peers", constant.PCCResource+"."+constant.PCCTestResource, "peers"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceByName, "connectable_datacenters", constant.PCCResource+"."+constant.PCCTestResource, "connectable_datacenters"),
 				),
 			},
 			{
@@ -60,9 +63,9 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 			{
 				Config: testAccCheckPrivateCrossConnectConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPrivateCrossConnectExists(PCCResource+"."+PCCTestResource, &privateCrossConnect),
-					resource.TestCheckResourceAttr(PCCResource+"."+PCCTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(PCCResource+"."+PCCTestResource, "description", UpdatedResources),
+					testAccCheckPrivateCrossConnectExists(constant.PCCResource+"."+constant.PCCTestResource, &privateCrossConnect),
+					resource.TestCheckResourceAttr(constant.PCCResource+"."+constant.PCCTestResource, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.PCCResource+"."+constant.PCCTestResource, "description", constant.UpdatedResources),
 				),
 			},
 		},
@@ -70,7 +73,7 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 }
 
 func testAccCheckPrivateCrossConnectDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -78,7 +81,7 @@ func testAccCheckPrivateCrossConnectDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != PCCResource {
+		if rs.Type != constant.PCCResource {
 			continue
 		}
 
@@ -99,7 +102,7 @@ func testAccCheckPrivateCrossConnectDestroyCheck(s *terraform.State) error {
 
 func testAccCheckPrivateCrossConnectExists(n string, privateCrossConnect *ionoscloud.PrivateCrossConnect) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -131,36 +134,36 @@ func testAccCheckPrivateCrossConnectExists(n string, privateCrossConnect *ionosc
 }
 
 const testAccCheckPrivateCrossConnectConfigUpdate = `
-resource ` + PCCResource + ` ` + PCCTestResource + ` {
-  name        = "` + UpdatedResources + `"
-  description = "` + UpdatedResources + `"
+resource ` + constant.PCCResource + ` ` + constant.PCCTestResource + ` {
+  name        = "` + constant.UpdatedResources + `"
+  description = "` + constant.UpdatedResources + `"
 }`
 
 const testAccDataSourcePccMatchId = testAccCheckPrivateCrossConnectConfigBasic + `
-data ` + PCCResource + ` ` + PCCDataSourceById + ` {
-  id			= ` + PCCResource + `.` + PCCTestResource + `.id
+data ` + constant.PCCResource + ` ` + constant.PCCDataSourceById + ` {
+  id			= ` + constant.PCCResource + `.` + constant.PCCTestResource + `.id
 }
 `
 
 const testAccDataSourcePccMatchName = testAccCheckPrivateCrossConnectConfigBasic + `
-data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
-  name			= "` + PCCTestResource + `"
+data ` + constant.PCCResource + ` ` + constant.PCCDataSourceByName + ` {
+  name			= "` + constant.PCCTestResource + `"
 }
 `
 
 const testAccDataSourcePccWrongNameError = testAccCheckPrivateCrossConnectConfigBasic + `
-data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
+data ` + constant.PCCResource + ` ` + constant.PCCDataSourceByName + ` {
   name			= "wrong_name"
 }
 `
 
 const testAccDataSourcePccMultipleResultsError = testAccCheckPrivateCrossConnectConfigBasic + `
-resource ` + PCCResource + ` ` + PCCTestResource + `_multiple_results {
-  name        = "` + PCCTestResource + `"
-  description = "` + PCCTestResource + `"
+resource ` + constant.PCCResource + ` ` + constant.PCCTestResource + `_multiple_results {
+  name        = "` + constant.PCCTestResource + `"
+  description = "` + constant.PCCTestResource + `"
 }
 
-data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
-  name			= "` + PCCTestResource + `"
+data ` + constant.PCCResource + ` ` + constant.PCCDataSourceByName + ` {
+  name			= "` + constant.PCCTestResource + `"
 }
 `

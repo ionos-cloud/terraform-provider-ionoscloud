@@ -6,6 +6,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -212,7 +215,7 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 }
 
 func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).PsqlClient
+	client := meta.(services.SdkBundle).PsqlClient
 
 	dbaasCluster, err := dbaasService.GetDbaasPgSqlClusterDataCreate(d)
 
@@ -238,7 +241,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 
 func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).PsqlClient
+	client := meta.(services.SdkBundle).PsqlClient
 
 	cluster, apiResponse, err := client.GetCluster(ctx, d.Id())
 
@@ -261,7 +264,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).PsqlClient
+	client := meta.(services.SdkBundle).PsqlClient
 
 	cluster, diags := dbaasService.GetDbaasPgSqlClusterDataUpdate(d)
 
@@ -278,7 +281,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 
 	d.SetId(*dbaasClusterResponse.Id)
 
-	time.Sleep(utils.SleepInterval)
+	time.Sleep(constant.SleepInterval)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
@@ -289,7 +292,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).PsqlClient
+	client := meta.(services.SdkBundle).PsqlClient
 
 	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
 
@@ -308,13 +311,13 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 	}
 
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
-	time.Sleep(utils.SleepInterval * 3)
+	time.Sleep(constant.SleepInterval * 3)
 
 	return nil
 }
 
 func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).PsqlClient
+	client := meta.(services.SdkBundle).PsqlClient
 
 	clusterId := d.Id()
 

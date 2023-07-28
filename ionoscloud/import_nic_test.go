@@ -5,6 +5,8 @@ package ionoscloud
 import (
 	"fmt"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -24,7 +26,7 @@ func TestAccNicImportBasic(t *testing.T) {
 				Config: fmt.Sprintf(testAccCheckNicConfigBasic, volumeName),
 			},
 			{
-				ResourceName:      fullNicResourceName,
+				ResourceName:      constant.FullNicResourceName,
 				ImportStateIdFunc: testAccNicImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -37,7 +39,7 @@ func testAccNicImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != NicResource {
+		if rs.Type != constant.NicResource {
 			continue
 		}
 

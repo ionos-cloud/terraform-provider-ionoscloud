@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -60,7 +62,7 @@ func dataSourceDbassMongoTemplate() *schema.Resource {
 }
 
 func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).MongoClient
+	client := meta.(services.SdkBundle).MongoClient
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 

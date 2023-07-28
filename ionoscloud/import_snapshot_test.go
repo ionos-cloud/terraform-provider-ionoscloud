@@ -3,8 +3,10 @@
 package ionoscloud
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -21,7 +23,7 @@ func TestAccSnapshotImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:            SnapshotResource + "." + SnapshotTestResource,
+				ResourceName:            constant.SnapshotResource + "." + constant.SnapshotTestResource,
 				ImportStateIdFunc:       testAccSnapshotImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -35,7 +37,7 @@ func testAccSnapshotImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != SnapshotResource {
+		if rs.Type != constant.SnapshotResource {
 			continue
 		}
 

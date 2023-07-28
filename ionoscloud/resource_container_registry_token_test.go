@@ -10,6 +10,9 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
@@ -28,35 +31,35 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 			{
 				Config: testAccCheckContainerRegistryTokenConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerRegistryTokenExists(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, &containerRegistryToken),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "expiry_date", "2023-01-13 16:27:42 +0000 UTC"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.0", "push"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.name", "Scope1"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.type", "repository"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "status", "enabled"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name", ContainerRegistryTokenTestResource),
+					testAccCheckContainerRegistryTokenExists(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, &containerRegistryToken),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "expiry_date", "2023-01-13 16:27:42 +0000 UTC"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.actions.0", "push"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.name", "Scope1"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.type", "repository"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "status", "enabled"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "name", constant.ContainerRegistryTokenTestResource),
 				),
 			},
 			{
 				Config: testAccDataSourceContainerRegistryTokenMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "expiry_date", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "expiry_date"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "scopes.0.actions.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "scopes.0.name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "scopes.0.type", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "status", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "status"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceById, "expiry_date", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "expiry_date"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceById, "scopes.0.actions.0", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceById, "scopes.0.name", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceById, "scopes.0.type", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceById, "status", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "status"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceById, "name", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "name"),
 				),
 			},
 			{
 				Config: testAccDataSourceContainerRegistryTokenMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "expiry_date", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "expiry_date"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.actions.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.type", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "status", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "status"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name")),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "expiry_date", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "expiry_date"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "scopes.0.actions.0", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "scopes.0.name", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "scopes.0.type", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "status", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "status"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "name", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "name")),
 			},
 			{
 				Config:      testAccDataSourceContainerRegistryTokenWrongNameError,
@@ -65,12 +68,12 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceContainerRegistryTokenPartialMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "expiry_date", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "expiry_date"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.actions.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.type", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "status", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "status"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name")),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "expiry_date", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "expiry_date"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "scopes.0.actions.0", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "scopes.0.name", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "scopes.0.type", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "status", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "status"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "name", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "name")),
 			},
 			{
 				Config:      testAccDataSourceContainerRegistryTokenWrongPartialNameError,
@@ -79,18 +82,18 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 			{
 				Config: testAccCheckContainerRegistryTokenConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckContainerRegistryTokenExists(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, &containerRegistryToken),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "expiry_date", "2023-01-23 16:27:42 +0000 UTC"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.0", "push"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.1", "pull"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.name", "Scope1"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.type", "repository"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.1.actions.0", "push"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.1.actions.1", "pull"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.1.name", "Scope2"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.1.type", "backup"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "status", "disabled"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name", ContainerRegistryTokenTestResource)),
+					testAccCheckContainerRegistryTokenExists(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, &containerRegistryToken),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "expiry_date", "2023-01-23 16:27:42 +0000 UTC"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.actions.0", "push"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.actions.1", "pull"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.name", "Scope1"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.type", "repository"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.1.actions.0", "push"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.1.actions.1", "pull"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.1.name", "Scope2"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.1.type", "backup"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "status", "disabled"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "name", constant.ContainerRegistryTokenTestResource)),
 			},
 			{
 				Config:      testAccDataSourceContainerRegistryTokenMultipleTokensFound,
@@ -101,7 +104,7 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 }
 
 func testAccCheckContainerRegistryTokenDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).ContainerClient
+	client := testAccProvider.Meta().(services.SdkBundle).ContainerClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -110,7 +113,7 @@ func testAccCheckContainerRegistryTokenDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ContainerRegistryTokenResource {
+		if rs.Type != constant.ContainerRegistryTokenResource {
 			continue
 		}
 
@@ -131,7 +134,7 @@ func testAccCheckContainerRegistryTokenDestroyCheck(s *terraform.State) error {
 
 func testAccCheckContainerRegistryTokenExists(n string, registry *cr.TokenResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).ContainerClient
+		client := testAccProvider.Meta().(services.SdkBundle).ContainerClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -169,24 +172,24 @@ func removeTestFile() {
 
 const testFileName = "pass.txt"
 const testAccCheckContainerRegistryTokenConfigBasic = testAccCheckContainerRegistryConfigBasic + `
-resource ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestResource + ` {
+resource ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerRegistryTokenTestResource + ` {
   expiry_date        = "2023-01-13 16:27:42Z"
-  name				 = "` + ContainerRegistryTokenTestResource + `"
+  name				 = "` + constant.ContainerRegistryTokenTestResource + `"
   scopes  {
     actions			 = ["push"]
     name             = "Scope1"
     type             = "repository"
   }
   status	         = "enabled"
-  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+  registry_id        = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
   save_password_to_file = "` + testFileName + `"
 }
 `
 
 const testAccCheckContainerRegistryTokenConfigUpdate = testAccCheckContainerRegistryConfigBasic + `
-resource ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestResource + ` {
+resource ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerRegistryTokenTestResource + ` {
   expiry_date        = "2023-01-23 16:27:42Z"
-  name				 = "` + ContainerRegistryTokenTestResource + `"
+  name				 = "` + constant.ContainerRegistryTokenTestResource + `"
   scopes  {
     actions			 = ["push", "pull"]
     name             = "Scope1"
@@ -198,71 +201,71 @@ resource ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestRe
     type             = "backup"
   }
   status	         = "disabled"
-  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+  registry_id        = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
 }
 `
 
 const testAccDataSourceContainerRegistryTokenMatchId = testAccCheckContainerRegistryTokenConfigBasic + `
-data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceById + ` {
-  id	= ` + ContainerRegistryTokenResource + `.` + ContainerRegistryTokenTestResource + `.id
-  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+data ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerRegistryTokenTestDataSourceById + ` {
+  id	= ` + constant.ContainerRegistryTokenResource + `.` + constant.ContainerRegistryTokenTestResource + `.id
+  registry_id        = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
 }
 `
 
 const testAccDataSourceContainerRegistryTokenMatchName = testAccCheckContainerRegistryTokenConfigBasic + `
-data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
-  name	= "` + ContainerRegistryTokenTestResource + `"
-  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+data ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerRegistryTokenTestDataSourceByName + ` {
+  name	= "` + constant.ContainerRegistryTokenTestResource + `"
+  registry_id        = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
 }
 `
 
 const testAccDataSourceContainerRegistryTokenMatchNameAndLocation = testAccCheckContainerRegistryTokenConfigBasic + `
-data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
-  location = "` + ContainerRegistryTokenResource + `.` + ContainerRegistryTestResource + `.location
-  name	= "` + ContainerRegistryTokenTestResource + `"
-  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+data ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerRegistryTokenTestDataSourceByName + ` {
+  location = "` + constant.ContainerRegistryTokenResource + `.` + constant.ContainerRegistryTestResource + `.location
+  name	= "` + constant.ContainerRegistryTokenTestResource + `"
+  registry_id        = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
 }
 `
 
 const testAccDataSourceContainerRegistryTokenWrongNameError = testAccCheckContainerRegistryTokenConfigBasic + `
-data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
+data ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerRegistryTokenTestDataSourceByName + ` {
   name	= "wrong_name"
-  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+  registry_id        = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
 }
 `
 
 const testAccDataSourceContainerRegistryTokenPartialMatchName = testAccCheckContainerRegistryTokenConfigBasic + `
-data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
+data ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerRegistryTokenTestDataSourceByName + ` {
   name	= "test"
   partial_match = true
-  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+  registry_id        = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
 }
 `
 
 const testAccDataSourceContainerRegistryTokenWrongPartialNameError = testAccCheckContainerRegistryTokenConfigBasic + `
-data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
+data ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerRegistryTokenTestDataSourceByName + ` {
   name	= "wrong_name"
   partial_match = true
-  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+  registry_id        = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
 }
 `
 
 const testAccDataSourceContainerRegistryTokenMultipleTokensFound = testAccCheckContainerRegistryTokenConfigBasic + `
-resource ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestResource + `1 {
+resource ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerRegistryTokenTestResource + `1 {
   expiry_date        = "2023-01-13 16:27:42Z"
-  name				 = "` + ContainerRegistryTokenTestResource + `1"
+  name				 = "` + constant.ContainerRegistryTokenTestResource + `1"
   scopes  {
     actions			 = ["push"]
     name             = "Scope1"
     type             = "repository"
   }
   status	         = "enabled"
-  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+  registry_id        = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
   save_password_to_file = "` + testFileName + `"
 }
-data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
-  name	= "` + ContainerRegistryTokenTestResource + `"
+data ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerRegistryTokenTestDataSourceByName + ` {
+  name	= "` + constant.ContainerRegistryTokenTestResource + `"
   partial_match = true
-  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+  registry_id        = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
 }
 `

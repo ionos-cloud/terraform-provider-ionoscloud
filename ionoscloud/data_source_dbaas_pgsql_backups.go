@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
 
@@ -86,7 +87,7 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadBackups(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).PsqlClient
+	client := meta.(services.SdkBundle).PsqlClient
 
 	id, idOk := d.GetOk("cluster_id")
 	idStr := id.(string)

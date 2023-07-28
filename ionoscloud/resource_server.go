@@ -8,6 +8,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/firewallSvc"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -507,7 +510,7 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 }
 
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	datacenterId := d.Get("datacenter_id").(string)
 
 	serverReq, err := initializeCreateRequests(d)
@@ -603,7 +606,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 							return diag.FromErr(fmt.Errorf("could not decode from %+v to slice of firewall rules %w", fwRulesIntf, err))
 						}
 						for idx := range fwRulesProperties {
-							FwPropUnsetSetFieldIfNotSetInSchema(&fwRulesProperties[idx], fwRulesPath, d)
+							firewallSvc.PropUnsetSetFieldIfNotSetInSchema(&fwRulesProperties[idx], fwRulesPath, d)
 							firewall := ionoscloud.FirewallRule{
 								Properties: &fwRulesProperties[idx],
 							}
@@ -628,9 +631,9 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		if IsRequestFailed(err) {
+		if cloudapi.IsRequestFailed(err) {
 			log.Printf("[DEBUG] failed to create server resource")
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
@@ -664,7 +667,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
 					sentRules := *sentFirstNic.Entities.Firewallrules.Items
 					foundRules := *foundFirstNic.Entities.Firewallrules.Items
-					orderedRuleIds = extractOrderedFirewallIds(foundRules, sentRules)
+					orderedRuleIds = firewallSvc.ExtractOrderedFirewallIds(foundRules, sentRules)
 					if len(orderedRuleIds) > 0 {
 						if err := d.Set("firewallrule_id", orderedRuleIds[0]); err != nil {
 							diags := diag.FromErr(err)
@@ -674,7 +677,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				}
 			}
 			if len(orderedRuleIds) > 0 {
-				if err := setFirewallRulesInSchema(d, orderedRuleIds); err != nil {
+				if err := firewallSvc.SetIdsInSchema(d, orderedRuleIds); err != nil {
 					diags := diag.FromErr(err)
 					return diags
 				}
@@ -734,7 +737,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Id()
@@ -813,7 +816,7 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 }
 
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
@@ -873,7 +876,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -897,7 +900,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 
 			// Wait, catching any errors
-			_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+			_, errState = cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 			if errState != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occured while waiting for a state change for dcId: %s server_id: %s ID: %s %w", dcId, d.Id(), bootVolume, err))
 				return diags
@@ -930,7 +933,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+		_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 		if errState != nil {
 			diags := diag.FromErr(errState)
 			return diags
@@ -1013,12 +1016,12 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				nicProperties.FirewallType = &vStr
 			}
 			firstNicFirewallPath := "nic.0.firewall"
-			fs := FirewallService{client: client, meta: meta, d: d}
+			fs := firewallSvc.Service{Client: client, Meta: meta, D: d}
 			nicId := ""
 			if nic != nil && nic.Id != nil {
 				nicId = *nic.Id
 			}
-			firewallRules, fwRuleIds, diagResp := fs.GetAndUpdateFirewallRules(ctx, dcId, *server.Id, nicId, firstNicFirewallPath)
+			firewallRules, fwRuleIds, diagResp := fs.GetAndUpdateFirewalls(ctx, dcId, *server.Id, nicId, firstNicFirewallPath)
 			if diagResp != nil {
 				return diagResp
 			}
@@ -1045,21 +1048,21 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 
 			// Wait, catching any errors
-			_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+			_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 			if errState != nil {
 				diags := diag.FromErr(fmt.Errorf("error getting state change for nics patch %w", errState))
 				return diags
 			}
 			if createNic {
-				fs := FirewallService{client: client, meta: meta, d: d}
-				foundRules, err := fs.firewallsGet(ctx, d.Get("datacenter_id").(string), *server.Id, *createdNic.Id, 1)
+				fs := firewallSvc.Service{Client: client, Meta: meta, D: d}
+				foundRules, err := fs.Get(ctx, d.Get("datacenter_id").(string), *server.Id, *createdNic.Id, 1)
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %w", err))
 					return diags
 				}
-				fwRuleIds = extractOrderedFirewallIds(foundRules, firewallRules)
+				fwRuleIds = firewallSvc.ExtractOrderedFirewallIds(foundRules, firewallRules)
 			}
-			if err := setFirewallRulesInSchema(d, fwRuleIds); err != nil {
+			if err := firewallSvc.SetIdsInSchema(d, fwRuleIds); err != nil {
 				return diag.FromErr(err)
 			}
 
@@ -1106,7 +1109,7 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 
 		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+		_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 		if errState != nil {
 			diags := diag.FromErr(fmt.Errorf("error getting state change for volumes delete %w", errState))
 			return diags
@@ -1117,7 +1120,7 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 	// A bigger depth is required since we need all volumes items.
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Depth(2).Execute()
@@ -1144,7 +1147,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(fmt.Errorf("error getting state change for datacenter delete %w", errState))
 		return diags
@@ -1165,7 +1168,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	datacenterId := parts[0]
 	serverId := parts[1]
 
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
@@ -1213,7 +1216,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	if len(parts) > 3 {
 		var rules []string
 		rules = append(rules, parts[3])
-		if err = setFirewallRulesInSchema(d, rules); err != nil {
+		if err = firewallSvc.SetIdsInSchema(d, rules); err != nil {
 			return nil, err
 		}
 
@@ -1374,7 +1377,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	}
 	// takes care of an upgrade from a version that does not have firewallrule_ids(pre 6.4.2)
 	// to one that has it(>=6.4.2)
-	if err := setFwRuleIdsInSchemaInCaseOfProviderUpdate(d); err != nil {
+	if err := firewallSvc.SetFwRuleIdsInSchemaInCaseOfProviderUpdate(d); err != nil {
 		return err
 	}
 
@@ -1489,7 +1492,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		if nic.Properties != nil {
 			nicEntry = SetNetworkProperties(nic)
 			nicEntry["id"] = *nic.Id
-			fs := FirewallService{client: client, d: d}
+			fs := firewallSvc.Service{Client: client, D: d}
 
 			for _, id := range firewallRuleIds {
 				firewallEntry, err := fs.AddToMapIfRuleExists(ctx, datacenterId, d.Id(), nicId, id.(string))
