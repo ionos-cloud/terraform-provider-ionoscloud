@@ -1,4 +1,5 @@
-//go:build compute || all || server
+//go:build compute || all || server || vcpu
+// +build compute all server vcpu
 
 package ionoscloud
 
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 //ToDo: add backup unit back in tests when stable
@@ -33,19 +35,9 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided`),
 			},
 			{
-				//ssh_key_path now accepts the ssh key directly too
-				Config: testAccCheckServerVCPUSshDirectly,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ssh_key_path.0", sshKey)),
-			},
-			{
 				Config: testAccCheckServerVCPUSshKeysDirectly,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ssh_keys.0", sshKey)),
-			},
-			{
-				Config:      testAccCheckServerVCPUSshKeysAndKeyPathErr,
-				ExpectError: regexp.MustCompile(`"ssh_keys": conflicts with ssh_key_path`),
 			},
 			{
 				Config: testAccCheckServerVCPUNoNic,
@@ -55,7 +47,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 				),
 			},
 			{
@@ -66,7 +58,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 				),
 			},
 			{
@@ -78,10 +70,10 @@ func TestAccServerVCPUBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					utils.TestImageNotNull(ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(ServerVCPUResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -105,7 +97,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					utils.TestImageNotNull(ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(ServerVCPUResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", "system"),
@@ -209,7 +201,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					utils.TestImageNotNull(ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(ServerVCPUResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password_updated", "result"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", UpdatedResources),
@@ -258,7 +250,7 @@ func TestAccServerVCPUNoBootVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.size", "6"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -303,7 +295,7 @@ func TestAccServerVCPUBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -327,7 +319,7 @@ func TestAccServerVCPUBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -358,7 +350,7 @@ func TestAccServerVCPUBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -386,7 +378,7 @@ func TestAccServerVCPUBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -410,7 +402,7 @@ func TestAccServerVCPUBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -446,7 +438,7 @@ func TestAccServerVCPUResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					utils.TestImageNotNull(ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(ServerVCPUResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
@@ -463,7 +455,7 @@ func TestAccServerVCPUResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					utils.TestImageNotNull(ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(ServerVCPUResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
@@ -483,7 +475,7 @@ func TestAccServerVCPUResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					utils.TestImageNotNull(ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(ServerVCPUResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
@@ -521,7 +513,7 @@ func TestAccServerVCPUResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					utils.TestImageNotNull(ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(ServerVCPUResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
@@ -563,7 +555,7 @@ func TestAccServerVCPUResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					utils.TestImageNotNull(ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(ServerVCPUResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
@@ -596,7 +588,7 @@ func TestAccServerVCPUWithSnapshotAnd5FwRulesInline(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					utils.TestImageNotNull(ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.size", "5"),
@@ -631,7 +623,7 @@ func TestAccServerVCPUWithICMP(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					utils.TestImageNotNull(ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(ServerVCPUResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", "system"),
@@ -651,7 +643,7 @@ func TestAccServerVCPUWithICMP(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					utils.TestImageNotNull(ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(ServerVCPUResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "volume.0.name", "system"),
@@ -668,7 +660,7 @@ func TestAccServerVCPUWithICMP(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerVCPUExists(ServerVCPUResource+"."+ServerTestResource, &server),
 					resource.TestCheckResourceAttrSet(ServerVCPUResource+"."+ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", "VCPU"),
+					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "type", constant.VCPUType),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
 					resource.TestCheckResourceAttr(ServerVCPUResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "ICMP"),

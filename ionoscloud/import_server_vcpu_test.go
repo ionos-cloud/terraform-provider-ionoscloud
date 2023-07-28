@@ -1,4 +1,5 @@
-//go:build compute || all || server
+//go:build compute || all || server || vcpu
+// +build compute all server vcpu
 
 package ionoscloud
 

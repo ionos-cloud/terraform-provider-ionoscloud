@@ -312,3 +312,5 @@ const (
 	CertificateResource = "ionoscloud_certificate"
 	TestCertName        = "certTest"
 )
+
+const VCPUType = "VCPU"

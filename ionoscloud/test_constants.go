@@ -755,7 +755,6 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   ssh_key_path = ["` + sshKey + `"]
-  type = "ENTERPRISE"
   volume {
     name = "system"
     size = 5
@@ -958,7 +957,7 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
   ram = 1024
   availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
-  ssh_key_path = ["` + sshKey + `"]
+  ssh_keys = ["` + sshKey + `"]
   volume {
     name = "system"
     size = 5
@@ -990,7 +989,7 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
   ram = 2048
   availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
-  ssh_key_path = ["` + sshKey + `"]
+  ssh_keys = ["` + sshKey + `"]
   volume {
     name = "system"
     size = 5

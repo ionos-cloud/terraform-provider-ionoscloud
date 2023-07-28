@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceVCPUServer() *schema.Resource {
@@ -92,34 +91,23 @@ func resourceVCPUServer() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"image_password": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Sensitive:     true,
-				Computed:      true,
-				ConflictsWith: []string{"volume.0.image_password"},
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+				Computed:  true,
 			},
 			"image_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"ssh_key_path": {
-				Type:          schema.TypeList,
-				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"volume.0.ssh_key_path", "volume.0.ssh_keys", "ssh_keys"},
-				Optional:      true,
-				Computed:      true,
-				ForceNew:      true,
-				Deprecated:    "Will be renamed to ssh_keys in the future, to allow users to set both the ssh key path or directly the ssh key",
-			},
 			"ssh_keys": {
-				Type:          schema.TypeList,
-				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"volume.0.ssh_key_path", "volume.0.ssh_keys", "ssh_key_path"},
-				Optional:      true,
-				Computed:      true,
-				ForceNew:      true,
-				Description:   "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -138,72 +126,10 @@ func resourceVCPUServer() *schema.Resource {
 							Required:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
-						"image_password": {
-							Type:          schema.TypeString,
-							Optional:      true,
-							Deprecated:    "Please use image_password under server level",
-							ConflictsWith: []string{"image_password"},
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if d.Get("image_password").(string) == new {
-									return true
-								}
-								return false
-							},
-						},
 						"licence_type": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
-						},
-						"ssh_key_path": {
-							Type:        schema.TypeList,
-							Elem:        &schema.Schema{Type: schema.TypeString},
-							Optional:    true,
-							Deprecated:  "Please use ssh_key_path under server level",
-							Description: "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
-							Computed:    true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if k == "volume.0.ssh_key_path.#" {
-									if d.Get("ssh_key_path.#") == new {
-										return true
-									}
-								}
-
-								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
-								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
-
-								difKeypath := slice.DiffString(slice.AnyToString(sshKeyPath), slice.AnyToString(oldSshKeyPath))
-								if len(difKeypath) == 0 {
-									return true
-								}
-
-								return false
-							},
-						},
-						"ssh_keys": {
-							Type:        schema.TypeList,
-							Elem:        &schema.Schema{Type: schema.TypeString},
-							Optional:    true,
-							Deprecated:  "Please use ssh_keys under server level",
-							Computed:    true,
-							ForceNew:    true,
-							Description: "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if k == "volume.0.ssh_keys.#" {
-									if d.Get("ssh_keys.#") == new {
-										return true
-									}
-								}
-
-								sshKeys := d.Get("volume.0.ssh_keys").([]interface{})
-								oldSshKeys := d.Get("ssh_keys").([]interface{})
-
-								if len(slice.DiffString(slice.AnyToString(sshKeys), slice.AnyToString(oldSshKeys))) == 0 {
-									return true
-								}
-
-								return false
-							},
 						},
 						"bus": {
 							Type:     schema.TypeString,
@@ -423,6 +349,8 @@ func resourceVCPUServer() *schema.Resource {
 }
 
 func resourceVCPUServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	d.Set("type", "vcpu")
+	if err := d.Set("type", constant.VCPUType); err != nil {
+		return diag.FromErr(err)
+	}
 	return resourceServerCreate(ctx, d, meta)
 }

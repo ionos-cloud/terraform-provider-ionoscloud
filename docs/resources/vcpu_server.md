@@ -110,16 +110,15 @@ resource "random_password" "server_image_password" {
 - `primary_ip` - (Computed) The associated IP address.
 - `firewallrule_id` - (Computed) The associated firewall rule.
 - `firewallrule_ids` - (Computed) The associated firewall rules.
-- `ssh_key_path` - (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided. Does not support `~` expansion to homedir in the given path. This property is immutable.
 - `ssh_keys` - (Optional)[list] Immutable List of absolute or relative paths to files containing public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation. Does not support `~` expansion to homedir in the given path.
-- `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
+- `image_password` - (Optional)[string] The password for the image.
 - `label` - (Optional) A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.
 - `inline_volume_ids` - (Computed) A list with the IDs for the volumes that are defined inside the server resource.
 
 > **⚠ WARNING** 
 > 
 > Image_name under volume level is deprecated, please use image_name under server level
-> ssh_key_path and ssh_keys fields are immutable.
+> ssh_keys field is immutable.
 
 ## Import
 
