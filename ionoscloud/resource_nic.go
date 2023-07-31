@@ -44,7 +44,6 @@ func resourceNic() *schema.Resource {
 			"dhcpv6": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
 			},
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
@@ -252,10 +251,14 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 	}
 
 	dhcp := d.Get(path + "dhcp").(bool)
-	dhcpv6 := d.Get(path + "dhcpv6").(bool)
+	if dhcpv6, ok := d.GetOkExists(path + "dhcpv6"); ok {
+		dhcpv6 := dhcpv6.(bool)
+		nic.Properties.Dhcpv6 = &dhcpv6
+	} else {
+		nic.Properties.SetDhcpv6Nil()
+	}
 	fwActive := d.Get(path + "firewall_active").(bool)
 	nic.Properties.Dhcp = &dhcp
-	nic.Properties.Dhcpv6 = &dhcpv6
 	nic.Properties.FirewallActive = &fwActive
 
 	if _, ok := d.GetOk(path + "firewall_type"); ok {
@@ -314,6 +317,7 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 				return fmt.Errorf("error setting dhcp %w", err)
 			}
 		}
+		log.Printf("DHCPV6: %v", nic.Properties.Dhcpv6)
 		if nic.Properties.Dhcpv6 != nil {
 			if err := d.Set("dhcpv6", *nic.Properties.Dhcpv6); err != nil {
 				return fmt.Errorf("error setting dhcpv6 %w", err)

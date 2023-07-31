@@ -45,7 +45,6 @@ func dataSourceNIC() *schema.Resource {
 			"dhcpv6": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
 			},
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
@@ -121,7 +120,6 @@ func getNicDataSourceSchema() map[string]*schema.Schema {
 		"dhcpv6": {
 			Type:     schema.TypeBool,
 			Optional: true,
-			Default:  true,
 		},
 		"ipv6_cidr_block": {
 			Type:     schema.TypeString,

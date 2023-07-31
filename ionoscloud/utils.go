@@ -145,7 +145,6 @@ var nicServerDSResource = &schema.Resource{
 		"dhcpv6": {
 			Type:     schema.TypeBool,
 			Optional: true,
-			Default:  true,
 		},
 		"ipv6_cidr_block": {
 			Type:     schema.TypeString,
