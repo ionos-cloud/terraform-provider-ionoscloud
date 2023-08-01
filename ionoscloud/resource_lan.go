@@ -104,6 +104,8 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		ipv6 := d.Get("ipv6_cidr_block").(string)
 		log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), ipv6)
 		request.Properties.Ipv6CidrBlock = &ipv6
+	} else {
+		request.Properties.SetIpv6CidrBlockNil()
 	}
 
 	dcid := d.Get("datacenter_id").(string)
@@ -216,6 +218,8 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 			log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), newIpv6.(string))
 			ipv6 := newIpv6.(string)
 			properties.Ipv6CidrBlock = &ipv6
+		} else {
+			properties.SetIpv6CidrBlockNil()
 		}
 	}
 
