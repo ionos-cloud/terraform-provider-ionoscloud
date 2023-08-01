@@ -9,6 +9,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -328,7 +329,7 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 		}
 		if lan.Properties.Ipv6CidrBlock != nil {
 			if err := d.Set("ipv6_cidr_block", *lan.Properties.Ipv6CidrBlock); err != nil {
-				return err
+				return utils.GenerateSetError("lan", "ipv6_cidr_block", err)
 			}
 		}
 	}
