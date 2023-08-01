@@ -180,14 +180,14 @@ resource "ionoscloud_ipblock" "test_server" {
   name = "test_server_ipblock"
 }
 resource "ionoscloud_lan" "test_lan_1" {
-	datacenter_id = 	ionoscloud_datacenter.test_datacenter.id
-	name = 				"Lan 1"
-	ipv6_cidr_block = 	"AUTO"
+  datacenter_id = 	ionoscloud_datacenter.test_datacenter.id
+  name = 				"Lan 1"
+  ipv6_cidr_block = 	"AUTO"
 }
 resource "ionoscloud_lan" "test_lan_2" {
-	datacenter_id = 	ionoscloud_datacenter.test_datacenter.id
-	name = 				"Lan 2"
-	ipv6_cidr_block = 	"AUTO"
+  datacenter_id = 	ionoscloud_datacenter.test_datacenter.id
+  name = 				"Lan 2"
+  ipv6_cidr_block = 	"AUTO"
 }
 resource "ionoscloud_server" "test_server" {
   name = "test_server"
