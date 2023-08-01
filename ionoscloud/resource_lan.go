@@ -100,13 +100,10 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		request.Properties.Pcc = &pccID
 	}
 
-	if d.HasChange("ipv6_cidr_block") {
-		_, newIpv6 := d.GetChange("ipv6_cidr_block")
-		if newIpv6 != nil && newIpv6.(string) != "" {
-			log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), newIpv6.(string))
-			ipv6 := newIpv6.(string)
-			request.Properties.Ipv6CidrBlock = &ipv6
-		}
+	if d.Get("ipv6_cidr_block") != nil {
+		ipv6 := d.Get("ipv6_cidr_block").(string)
+		log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), ipv6)
+		request.Properties.Ipv6CidrBlock = &ipv6
 	}
 
 	dcid := d.Get("datacenter_id").(string)
