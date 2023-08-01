@@ -82,8 +82,9 @@ func resourceDatacenter() *schema.Resource {
 				},
 			},
 			"ipv6_cidr_block": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Auto-assigned /56 IPv6 CIDR block, if IPv6 is enabled for the datacenter. Read-only",
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
