@@ -284,17 +284,10 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 
 	if v, ok := d.GetOk(path + "ipv6_ips"); ok {
 		raw := v.([]interface{})
-		if raw != nil && len(raw) > 0 {
-			ipv6_ips := make([]string, 0)
-			for _, rawIpv6 := range raw {
-				if rawIpv6 != nil {
-					ip := rawIpv6.(string)
-					ipv6_ips = append(ipv6_ips, ip)
-				}
-			}
-			if ipv6_ips != nil && len(ipv6_ips) > 0 {
-				nic.Properties.Ipv6Ips = &ipv6_ips
-			}
+		ipv6_ips := make([]string, len(raw))
+		utils.DecodeInterfaceToStruct(raw, ipv6_ips)
+		if len(ipv6_ips) > 0 {
+			nic.Properties.Ipv6Ips = &ipv6_ips
 		}
 	}
 
@@ -317,7 +310,7 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 				return fmt.Errorf("error setting dhcp %w", err)
 			}
 		}
-		log.Printf("DHCPV6: %v", nic.Properties.Dhcpv6)
+
 		if nic.Properties.Dhcpv6 != nil {
 			if err := d.Set("dhcpv6", *nic.Properties.Dhcpv6); err != nil {
 				return fmt.Errorf("error setting dhcpv6 %w", err)
