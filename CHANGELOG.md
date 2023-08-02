@@ -2,6 +2,7 @@
 ### Features
 - Make `nic` list in `ionoscloud_server` resource optional
 - Make `firewall` list in `ionoscloud_server` resource optional and allow multiple inline firewall rules in the list
+- Add ipv6 functionality for `ionoscloud_datacenter`, `ionoscloud_lan` and `ionoscloud_nic` resources
 
 ### Refactor
 - Separate `cloudapi` code from `ionoscloud` folder, to be able to write services easier.
