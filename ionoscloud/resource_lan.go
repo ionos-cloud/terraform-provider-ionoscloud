@@ -68,7 +68,8 @@ func resourceLan() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "IPv6 CIDR block assigned to the LAN.",
+				Description: "IPv6 CIDR block assigned to the LAN. Can be set to 'AUTO' for an automatically assigned address or the address can be explicitly supplied.",
+				// If a value has already been assigned by the backend, avoids reassignment if the field is set to AUTO.
 				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
 					if old != "" && new == "AUTO" {
 						return true
