@@ -587,8 +587,8 @@ resource "random_string" "simple_string" {
 }
 `
 
-const K8sVersion = "1.23.12"
-const UpgradedK8sVersion = "1.24.6"
+const K8sVersion = "1.24.6"
+const UpgradedK8sVersion = "1.24.8"
 
 // DNS test constants: configs, attributes and values.
 
