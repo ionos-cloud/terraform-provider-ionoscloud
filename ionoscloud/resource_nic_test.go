@@ -217,6 +217,7 @@ resource ` + constant.NicResource + ` "database_nic" {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   lan = "${ionoscloud_lan.test_lan_2.id}"
+  dhcpv6 = true
   firewall_active = true
   firewall_type = "INGRESS"
   ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
