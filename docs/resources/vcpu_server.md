@@ -117,7 +117,6 @@ resource "random_password" "server_image_password" {
 
 > **⚠ WARNING** 
 > 
-> Image_name under volume level is deprecated, please use image_name under server level
 > ssh_keys field is immutable.
 
 ## Import

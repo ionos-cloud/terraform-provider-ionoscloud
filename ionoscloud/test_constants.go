@@ -579,23 +579,23 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 
 const (
 	testAccCheckServerVCPUNoPwdOrSSH = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -609,7 +609,7 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -630,23 +630,23 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
 )
 
 const testAccCheckServerVCPUSshDirectly = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -661,7 +661,7 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -681,23 +681,23 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
 }`
 
 const testAccCheckServerVCPUSshKeysDirectly = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -712,7 +712,7 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -732,23 +732,23 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
 }`
 
 const testAccCheckServerVCPUSshKeysAndKeyPathErr = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -764,7 +764,7 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -784,28 +784,28 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
 }`
 
 const testAccCheckServerVCPUConfigBasic = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -815,7 +815,7 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
 }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -837,28 +837,28 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
 
 // Solves  #372 crash when ips field in nic resource is a list with an empty string
 const testAccCheckServerVCPUConfigEmptyNicIps = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -868,7 +868,7 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
 }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -889,12 +889,12 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
 ` + ServerImagePassword
 
 const testAccCheckServerVCPUCreationWithLabels = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location   = "de/txl"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
@@ -902,9 +902,9 @@ resource "random_password" "image_password" {
   length = 16
   special = false
 }
-resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -919,7 +919,7 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
 }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = false
@@ -936,23 +936,23 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
 
 const (
 	testAccCheckServerVCPUNoNic = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
   location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -968,23 +968,23 @@ resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
   }
 }`
 	testAccCheckServerVCPUNoNicUpdate = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerVCPUResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"

@@ -2,7 +2,6 @@ package ionoscloud
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -19,7 +18,6 @@ func resourceVCPUServer() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServerImport,
 		},
-		CustomizeDiff: checkServerImmutableFields,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -39,6 +37,7 @@ func resourceVCPUServer() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
 			},
 			"boot_volume": {
@@ -88,7 +87,7 @@ func resourceVCPUServer() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"image_password": {
 				Type:      schema.TypeString,
@@ -100,6 +99,7 @@ func resourceVCPUServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"ssh_keys": {
 				Type:        schema.TypeList,
@@ -124,6 +124,7 @@ func resourceVCPUServer() *schema.Resource {
 						"disk_type": {
 							Type:             schema.TypeString,
 							Required:         true,
+							ForceNew:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"licence_type": {
@@ -144,6 +145,7 @@ func resourceVCPUServer() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
+							ForceNew:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 						},
 						"cpu_hot_plug": {
@@ -179,12 +181,14 @@ func resourceVCPUServer() *schema.Resource {
 							Description: "The uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.",
 							Optional:    true,
 							Computed:    true,
+							ForceNew:    true,
 						},
 						"user_data": {
 							Type:        schema.TypeString,
 							Description: "The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' that has cloud-init compatibility in conjunction with this property.",
 							Optional:    true,
 							Computed:    true,
+							ForceNew:    true,
 						},
 						"pci_slot": {
 							Type:     schema.TypeInt,
@@ -224,6 +228,15 @@ func resourceVCPUServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
+						"dhcpv6": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"ipv6_cidr_block": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
 						"ips": {
 							Type: schema.TypeList,
 							Elem: &schema.Schema{
@@ -233,6 +246,12 @@ func resourceVCPUServer() *schema.Resource {
 							Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
 							Computed:    true,
 							Optional:    true,
+						},
+						"ipv6_ips": {
+							Type:     schema.TypeList,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Optional: true,
+							Computed: true,
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
@@ -284,24 +303,14 @@ func resourceVCPUServer() *schema.Resource {
 										Optional: true,
 									},
 									"port_range_start": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
-											if v.(int) < 1 && v.(int) > 65534 {
-												errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
-											}
-											return
-										}),
+										Type:             schema.TypeInt,
+										Optional:         true,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
 									},
 									"port_range_end": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
-											if v.(int) < 1 && v.(int) > 65534 {
-												errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
-											}
-											return
-										}),
+										Type:             schema.TypeInt,
+										Optional:         true,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
 									},
 									"icmp_type": {
 										Type:     schema.TypeString,

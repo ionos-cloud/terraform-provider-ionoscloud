@@ -19,7 +19,7 @@ When this happens, please refine your search string so that it is specific enoug
 ```hcl
 data "ionoscloud_vcpu_server" "example" {
    datacenter_id = <datacenter_id>
-   id			 = <server_id>
+   id            = <server_id>
 }
 ```
 
@@ -27,7 +27,7 @@ data "ionoscloud_vcpu_server" "example" {
 ```hcl
 data "ionoscloud_vcpu_server" "example" {
    datacenter_id = <datacenter_id>
-   name			 = "VCPU Server Example"
+   name          = "VCPU Server Example"
 }
 ```
 

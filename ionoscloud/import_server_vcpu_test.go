@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccServerVCPUImportBasic(t *testing.T) {
@@ -23,7 +24,7 @@ func TestAccServerVCPUImportBasic(t *testing.T) {
 				Config: testAccCheckServerVCPUConfigBasic,
 			},
 			{
-				ResourceName:            ServerVCPUResource + "." + ServerTestResource,
+				ResourceName:            constant.ServerVCPUResource + "." + constant.ServerTestResource,
 				ImportStateIdFunc:       testAccServerVCPUImportStateIdWithNicAndFw,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -45,7 +46,7 @@ func TestAccServerVCPUWithLabelsImport(t *testing.T) {
 				Config: testAccCheckServerVCPUCreationWithLabels,
 			},
 			{
-				ResourceName:            ServerVCPUResource + "." + ServerTestResource,
+				ResourceName:            constant.ServerVCPUResource + "." + constant.ServerTestResource,
 				ImportStateIdFunc:       testAccServerVCPUImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -58,7 +59,7 @@ func testAccServerVCPUImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ServerVCPUResource {
+		if rs.Type != constant.ServerVCPUResource {
 			continue
 		}
 
@@ -74,7 +75,7 @@ func testAccServerVCPUImportStateIdWithNicAndFw(s *terraform.State) (string, err
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ServerVCPUResource {
+		if rs.Type != constant.ServerVCPUResource {
 			continue
 		}
 
