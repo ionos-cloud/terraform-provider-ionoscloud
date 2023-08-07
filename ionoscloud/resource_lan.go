@@ -9,6 +9,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -63,6 +64,19 @@ func resourceLan() *schema.Resource {
 					},
 				},
 			},
+			"ipv6_cidr_block": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "IPv6 CIDR block assigned to the LAN. Can be set to 'AUTO' for an automatically assigned address or the address can be explicitly supplied.",
+				// If a value has already been assigned by the backend, avoids reassignment if the field is set to AUTO.
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					if old != "" && new == "AUTO" {
+						return true
+					}
+					return false
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -87,6 +101,14 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		pccID := d.Get("pcc").(string)
 		log.Printf("[INFO] Setting PCC for LAN %s to %s...", d.Id(), pccID)
 		request.Properties.Pcc = &pccID
+	}
+
+	if d.Get("ipv6_cidr_block") != nil {
+		ipv6 := d.Get("ipv6_cidr_block").(string)
+		log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), ipv6)
+		request.Properties.Ipv6CidrBlock = &ipv6
+	} else {
+		request.Properties.SetIpv6CidrBlockNil()
 	}
 
 	dcid := d.Get("datacenter_id").(string)
@@ -193,6 +215,17 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 	}
 
+	if d.HasChange("ipv6_cidr_block") {
+		_, newIpv6 := d.GetChange("ipv6_cidr_block")
+		if newIpv6 != nil && newIpv6.(string) != "" {
+			log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), newIpv6.(string))
+			ipv6 := newIpv6.(string)
+			properties.Ipv6CidrBlock = &ipv6
+		} else {
+			properties.SetIpv6CidrBlockNil()
+		}
+	}
+
 	dcid := d.Get("datacenter_id").(string)
 
 	_, apiResponse, err := client.LANsApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
@@ -294,6 +327,11 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 		if lan.Properties.Public != nil {
 			if err := d.Set("public", *lan.Properties.Public); err != nil {
 				return err
+			}
+		}
+		if lan.Properties.Ipv6CidrBlock != nil {
+			if err := d.Set("ipv6_cidr_block", *lan.Properties.Ipv6CidrBlock); err != nil {
+				return utils.GenerateSetError("lan", "ipv6_cidr_block", err)
 			}
 		}
 	}

@@ -71,7 +71,10 @@ resource "random_password" "server_image_password" {
 - `lan` - (Required)[integer] The LAN ID the NIC will sit on.
 - `name` - (Optional)[string] The name of the LAN.
 - `dhcp` - (Optional)[Boolean] Indicates if the NIC should get an IP address using DHCP (true) or not (false).
+- `dhcpv6` - (Optional)[Boolean] Indicates if the NIC should get an IPv6 address using DHCP (true) or not (false).
+- `ipv6_cidr_block` - (Computed, Optional) Automatically assigned /80 IPv6 CIDR block if the NIC is connected to an IPv6 enabled LAN. You can also specify an /80 IPv6 CIDR block for the NIC on your own, which must be inside the /64 IPv6 CIDR block of the LAN and unique.
 - `ips` - (Optional)[list] Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.
+- `ipv6_ips` - (Optional)[list] Collection of IPv6 addresses assigned to a nic. Explicitly assigned public IPs need to come from the NIC's Ipv6 CIDR block, Passing value null or empty array will assign an IPv6 address automatically from the NIC's CIDR block.
 - `firewall_active` - (Optional)[Boolean] If this resource is set to true and is nested under a server resource firewall, with open SSH port, resource must be nested under the NIC.
 - `firewall_type` - (Optional) [String] The type of firewall rules that will be allowed on the NIC. If it is not specified it will take the default value INGRESS
 - `id` - (Computed) The ID of the NIC.

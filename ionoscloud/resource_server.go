@@ -336,6 +336,15 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
+						"dhcpv6": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"ipv6_cidr_block": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
 						"ips": {
 							Type: schema.TypeList,
 							Elem: &schema.Schema{
@@ -345,6 +354,12 @@ func resourceServer() *schema.Resource {
 							Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
 							Computed:    true,
 							Optional:    true,
+						},
+						"ipv6_ips": {
+							Type:     schema.TypeList,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Optional: true,
+							Computed: true,
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
@@ -750,11 +765,14 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 	network := map[string]interface{}{}
 	if nic.Properties != nil {
 		utils.SetPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+		utils.SetPropWithNilCheck(network, "dhcpv6", nic.Properties.Dhcpv6)
 		utils.SetPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
 		utils.SetPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
 		utils.SetPropWithNilCheck(network, "lan", nic.Properties.Lan)
 		utils.SetPropWithNilCheck(network, "name", nic.Properties.Name)
 		utils.SetPropWithNilCheck(network, "ips", nic.Properties.Ips)
+		utils.SetPropWithNilCheck(network, "ipv6_ips", nic.Properties.Ipv6Ips)
+		utils.SetPropWithNilCheck(network, "ipv6_cidr_block", nic.Properties.Ipv6CidrBlock)
 		utils.SetPropWithNilCheck(network, "mac", nic.Properties.Mac)
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ips"] = *nic.Properties.Ips
@@ -987,8 +1005,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 
 			dhcp := d.Get("nic.0.dhcp").(bool)
+			dhcpv6 := d.Get("nic.0.dhcpv6").(bool)
 			fwRule := d.Get("nic.0.firewall_active").(bool)
 			nicProperties.Dhcp = &dhcp
+			nicProperties.Dhcpv6 = &dhcpv6
 			nicProperties.FirewallActive = &fwRule
 
 			if v, ok := d.GetOk("nic.0.firewall_type"); ok {

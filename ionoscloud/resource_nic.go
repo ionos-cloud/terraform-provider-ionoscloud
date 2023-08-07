@@ -41,6 +41,17 @@ func resourceNic() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"dhcpv6": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Indicates whether this NIC receives an IPv6 address through DHCP.",
+			},
+			"ipv6_cidr_block": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "IPv6 CIDR block assigned to the NIC.",
+			},
 			"ips": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
@@ -50,6 +61,13 @@ func resourceNic() *schema.Resource {
 				Computed:    true,
 				Optional:    true,
 				Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
+			},
+			"ipv6_ips": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Computed:    true,
+				Description: "Collection for IPv6 addresses assigned to a nic. Explicitly assigned IPv6 addresses need to come from inside the IPv6 CIDR block assigned to the nic.",
 			},
 			"firewall_active": {
 				Type:     schema.TypeBool,
@@ -236,6 +254,12 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 	}
 
 	dhcp := d.Get(path + "dhcp").(bool)
+	if dhcpv6, ok := d.GetOkExists(path + "dhcpv6"); ok {
+		dhcpv6 := dhcpv6.(bool)
+		nic.Properties.Dhcpv6 = &dhcpv6
+	} else {
+		nic.Properties.SetDhcpv6Nil()
+	}
 	fwActive := d.Get(path + "firewall_active").(bool)
 	nic.Properties.Dhcp = &dhcp
 	nic.Properties.FirewallActive = &fwActive
@@ -261,6 +285,15 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 		}
 	}
 
+	if v, ok := d.GetOk(path + "ipv6_ips"); ok {
+		raw := v.([]interface{})
+		ipv6_ips := make([]string, len(raw))
+		utils.DecodeInterfaceToStruct(raw, ipv6_ips)
+		if len(ipv6_ips) > 0 {
+			nic.Properties.Ipv6Ips = &ipv6_ips
+		}
+	}
+
 	return nic
 }
 
@@ -280,6 +313,12 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 				return fmt.Errorf("error setting dhcp %w", err)
 			}
 		}
+
+		if nic.Properties.Dhcpv6 != nil {
+			if err := d.Set("dhcpv6", *nic.Properties.Dhcpv6); err != nil {
+				return fmt.Errorf("error setting dhcpv6 %w", err)
+			}
+		}
 		if nic.Properties.Lan != nil {
 			if err := d.Set("lan", *nic.Properties.Lan); err != nil {
 				return fmt.Errorf("error setting lan %w", err)
@@ -293,6 +332,16 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			if err := d.Set("ips", *nic.Properties.Ips); err != nil {
 				return fmt.Errorf("error setting ips %w", err)
+			}
+		}
+		if nic.Properties.Ipv6Ips != nil && len(*nic.Properties.Ipv6Ips) > 0 {
+			if err := d.Set("ipv6_ips", *nic.Properties.Ipv6Ips); err != nil {
+				return fmt.Errorf("error setting ipv6_ips %w", err)
+			}
+		}
+		if nic.Properties.Ipv6CidrBlock != nil {
+			if err := d.Set("ipv6_cidr_block", *nic.Properties.Ipv6CidrBlock); err != nil {
+				return fmt.Errorf("error setting ipv6_cidr_block %w", err)
 			}
 		}
 		if nic.Properties.FirewallActive != nil {

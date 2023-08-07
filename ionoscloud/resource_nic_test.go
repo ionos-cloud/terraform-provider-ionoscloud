@@ -35,6 +35,8 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(constant.FullNicResourceName, "pci_slot"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "name", volumeName),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcp", "true"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcpv6", "true"),
+					resource.TestCheckResourceAttrSet(constant.FullNicResourceName, "ipv6_cidr_block"),
 					resource.TestCheckResourceAttrSet(constant.FullNicResourceName, "mac"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_active", "true"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_type", "INGRESS"),
@@ -47,12 +49,15 @@ func TestAccNicBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "name", constant.FullNicResourceName, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcp", constant.FullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcpv6", constant.FullNicResourceName, "dhcpv6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_active", constant.FullNicResourceName, "firewall_active"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_type", constant.FullNicResourceName, "firewall_type"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "mac", constant.FullNicResourceName, "mac"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "pci_slot", constant.FullNicResourceName, "pci_slot"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "lan", constant.FullNicResourceName, "lan"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ips", constant.FullNicResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
 				),
 			},
 			{
@@ -60,12 +65,15 @@ func TestAccNicBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "name", constant.FullNicResourceName, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcp", constant.FullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcpv6", constant.FullNicResourceName, "dhcpv6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_active", constant.FullNicResourceName, "firewall_active"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_type", constant.FullNicResourceName, "firewall_type"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "mac", constant.FullNicResourceName, "mac"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "pci_slot", constant.FullNicResourceName, "pci_slot"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "lan", constant.FullNicResourceName, "lan"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ips", constant.FullNicResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
 				),
 			},
 			{
@@ -85,6 +93,7 @@ func TestAccNicBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "name", "updated"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcp", "false"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcpv6", "false"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_active", "false"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_type", "BIDIRECTIONAL"),
 				),
@@ -170,6 +179,16 @@ resource "ionoscloud_ipblock" "test_server" {
   size = 2
   name = "test_server_ipblock"
 }
+resource "ionoscloud_lan" "test_lan_1" {
+  datacenter_id = ionoscloud_datacenter.test_datacenter.id
+  name = "Lan 1"
+  ipv6_cidr_block = "AUTO"
+}
+resource "ionoscloud_lan" "test_lan_2" {
+  datacenter_id = ionoscloud_datacenter.test_datacenter.id
+  name = "Lan 2"
+  ipv6_cidr_block = "AUTO"
+}
 resource "ionoscloud_server" "test_server" {
   name = "test_server"
   datacenter_id = "${ionoscloud_datacenter.test_datacenter.id}"
@@ -185,8 +204,9 @@ resource "ionoscloud_server" "test_server" {
     disk_type = "SSD"
 }
   nic {
-    lan = "1"
+    lan = "${ionoscloud_lan.test_lan_1.id}"
     dhcp = true
+    dhcpv6 = true
     firewall_active = true
   }
 }
@@ -196,7 +216,8 @@ const testAccCheckNicConfigBasic = testCreateDataCenterAndServer + `
 resource ` + constant.NicResource + ` "database_nic" {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
-  lan = 2
+  lan = "${ionoscloud_lan.test_lan_2.id}"
+  dhcpv6 = true
   firewall_active = true
   firewall_type = "INGRESS"
   ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
@@ -208,8 +229,9 @@ const testAccCheckNicConfigUpdate = testCreateDataCenterAndServer + `
 resource ` + constant.NicResource + ` "database_nic" {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
-  lan = 2
+  lan = "${ionoscloud_lan.test_lan_2.id}"
   dhcp = false
+  dhcpv6 = false
   firewall_active = false
   firewall_type = "BIDIRECTIONAL"
   ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
@@ -258,7 +280,7 @@ resource "ionoscloud_ipblock" "test_server_multiple_results" {
 resource ` + constant.NicResource + ` "database_nic_multiple_results" {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
-  lan = 2
+  lan = "${ionoscloud_lan.test_lan_2.id}"
   firewall_active = true
   firewall_type = "INGRESS"
   ips = [ ionoscloud_ipblock.test_server_multiple_results.ips[0], ionoscloud_ipblock.test_server_multiple_results.ips[1] ]

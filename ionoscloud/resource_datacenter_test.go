@@ -50,12 +50,14 @@ func TestAccDataCenterBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceDatacenterMatchName,
 				Check: resource.ComposeTestCheckFunc(
+
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "name", constant.DatacenterResource+"."+constant.DatacenterTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "location", constant.DatacenterResource+"."+constant.DatacenterTestResource, "location"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "description", constant.DatacenterResource+"."+constant.DatacenterTestResource, "description"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "version", constant.DatacenterResource+"."+constant.DatacenterTestResource, "version"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "features", constant.DatacenterResource+"."+constant.DatacenterTestResource, "features"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "sec_auth_protection", constant.DatacenterResource+"."+constant.DatacenterTestResource, "sec_auth_protection"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "ipv6_cidr_block", constant.DatacenterResource+"."+constant.DatacenterTestResource, "ipv6_cidr_block"),
 				),
 			},
 			{
@@ -67,6 +69,7 @@ func TestAccDataCenterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceMatching, "version", constant.DatacenterResource+"."+constant.DatacenterTestResource, "version"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceMatching, "features", constant.DatacenterResource+"."+constant.DatacenterTestResource, "features"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceMatching, "sec_auth_protection", constant.DatacenterResource+"."+constant.DatacenterTestResource, "sec_auth_protection"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceMatching, "ipv6_cidr_block", constant.DatacenterResource+"."+constant.DatacenterTestResource, "ipv6_cidr_block"),
 				),
 			},
 			{
