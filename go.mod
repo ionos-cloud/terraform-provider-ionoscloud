@@ -17,6 +17,8 @@ require (
 	golang.org/x/crypto v0.10.0
 	gopkg.in/yaml.v3 v3.0.1
 )
+//to do - change after mongo enterprise sdk release
+replace github.com/ionos-cloud/sdk-go-dbaas-mongo => /tmp/sdk-go
 
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230528122434-6f98819771a1 // indirect

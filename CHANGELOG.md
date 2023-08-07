@@ -1,3 +1,7 @@
+## 6.4.6
+### Features
+- Add support for mongo clusters enterprise edition
+
 ## 6.4.5
 ### Features
 - Make `nic` list in `ionoscloud_server` resource optional

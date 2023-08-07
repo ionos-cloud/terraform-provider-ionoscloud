@@ -217,7 +217,7 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).PsqlClient
 
-	dbaasCluster, err := dbaasService.GetDbaasPgSqlClusterDataCreate(d)
+	dbaasCluster, err := dbaasService.GetPgSqlClusterDataCreate(d)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -256,7 +256,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 
 	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
 
-	if err := dbaasService.SetDbaasPgSqlClusterData(d, cluster); err != nil {
+	if err := dbaasService.SetPgSqlClusterData(d, cluster); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -266,7 +266,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).PsqlClient
 
-	cluster, diags := dbaasService.GetDbaasPgSqlClusterDataUpdate(d)
+	cluster, diags := dbaasService.GetPgSqlClusterDataUpdate(d)
 
 	if diags != nil {
 		return diags
@@ -333,7 +333,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
 
-	if err := dbaasService.SetDbaasPgSqlClusterData(d, dbaasCluster); err != nil {
+	if err := dbaasService.SetPgSqlClusterData(d, dbaasCluster); err != nil {
 		return nil, err
 	}
 
