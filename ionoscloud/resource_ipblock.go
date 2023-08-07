@@ -31,10 +31,10 @@ func resourceIPBlock() *schema.Resource {
 				Optional: true,
 			},
 			"location": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"size": {
 				Type:     schema.TypeInt,

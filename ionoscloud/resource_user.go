@@ -26,26 +26,26 @@ func resourceUser() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"first_name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"last_name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"email": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				DiffSuppressFunc: utils.DiffToLower,
 			},
 			"password": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				Sensitive:    true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Sensitive:        true,
 			},
 			"administrator": {
 				Type:     schema.TypeBool,
@@ -71,8 +71,8 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type:         schema.TypeString,
-					ValidateFunc: validation.All(validation.IsUUID),
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				},
 				Description: "Ids of the groups that the user is a member of",
 			},
