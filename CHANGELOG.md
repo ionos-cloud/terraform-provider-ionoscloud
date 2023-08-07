@@ -5,7 +5,7 @@
 
 ### Refactor
 - Separate `cloudapi` code from `ionoscloud` folder, to be able to write services easier.
-
+- Refactor validation to use `ValidateDiagFunc` instead of `ValidateFunc`, remove unnecessary usage of `validation.All()`
 ## 6.4.4
 
 ### Features
