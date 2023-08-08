@@ -1051,12 +1051,21 @@ func MongoClusterCheckRequiredFieldsSet(d *schema.ResourceData) error {
 		}
 
 		if _, ok := d.GetOk("ram"); !ok {
-			return fmt.Errorf(requiredNotSet, "ram ", clusterType)
+			return fmt.Errorf(requiredNotSet, "ram", clusterType)
 		}
 
-		//if _, ok := d.GetOk("volume.0.size"); ok {
-		//	return fmt.Errorf("volume.0.size argument can not be set for %s type of mongo cluster\n", clusterType)
-		//
+		if _, ok := d.GetOk("storage_size"); !ok {
+			return fmt.Errorf(requiredNotSet, "storage_size", clusterType)
+		}
+
+		if _, ok := d.GetOk("storage_type"); !ok {
+			return fmt.Errorf(requiredNotSet, "storage_type", clusterType)
+		}
+
+		if _, ok := d.GetOk("template_id"); ok {
+			return fmt.Errorf("%s argument must NOT be set for %s edition of mongo cluster", "template_id", clusterType)
+		}
+
 	default: //playground or business
 		if _, ok := d.GetOk("template_id"); !ok {
 			return fmt.Errorf(requiredNotSet, "template_id", clusterType)

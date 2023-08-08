@@ -152,12 +152,14 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 			"type": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The cluster type, either `replicaset` or `sharded-cluster`",
 			},
 			"shards": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: "The total number of shards in the cluster.",
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Description:      "The total number of shards in the cluster.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 100)),
 			},
 			"bi_connector": {
 				Type:     schema.TypeList,
@@ -196,6 +198,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 			"storage_size": {
 				Type:             schema.TypeInt,
 				Optional:         true,
+				Computed:         true,
 				Description:      "The amount of storage per instance in megabytes. At least 5120, at most 2097152",
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.IntBetween(5120, 2097152), validation.IntDivisibleBy(1024))),
@@ -203,19 +206,23 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 			"storage_type": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				Description:      "The storage type. One of : HDD, SSD Standard, SSD Premium",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD Standard", "SSD Premium"}, false)),
 			},
 			"cores": {
 				Type:             schema.TypeInt,
 				Optional:         true,
+				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 				Description:      "The number of CPU cores per instance.",
 			},
 			"edition": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The cluster edition. Examples: playground, business, enterprise",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "The cluster edition. Must be one of: playground, business, enterprise",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"enterprise", "playground", "business"}, false)),
 			},
 			"from_backup": {
 				Type:        schema.TypeList,
