@@ -17,16 +17,16 @@ func dataSourceK8sNodePoolNodes() *schema.Resource {
 		ReadContext: dataSourceK8sReadNodePoolNodes,
 		Schema: map[string]*schema.Schema{
 			"k8s_cluster_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "The UUID of an existing kubernetes cluster",
-				ValidateFunc: validation.All(validation.IsUUID),
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "The UUID of an existing kubernetes cluster",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"node_pool_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "The UUID of an existing nodepool",
-				ValidateFunc: validation.All(validation.IsUUID),
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "The UUID of an existing nodepool",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"nodes": {
 				Type:        schema.TypeList,

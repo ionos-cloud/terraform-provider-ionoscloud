@@ -32,10 +32,10 @@ func resourceLoggingPipeline() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"source": {
-							Type:         schema.TypeString,
-							Required:     true,
-							Description:  "The source parser to be used",
-							ValidateFunc: validation.StringInSlice([]string{"kubernetes", "docker", "systemd"}, false),
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "The source parser to be used",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"kubernetes", "docker", "systemd"}, false)),
 						},
 						"tag": {
 							Type:        schema.TypeString,
@@ -43,10 +43,10 @@ func resourceLoggingPipeline() *schema.Resource {
 							Description: "The tag is used to distinguish different pipelines. Must be unique amongst the pipeline's array items.",
 						},
 						"protocol": {
-							Type:         schema.TypeString,
-							Required:     true,
-							Description:  "Protocol to use as intake. Possible values are: http, tcp.",
-							ValidateFunc: validation.StringInSlice([]string{"http", "tcp"}, false),
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Protocol to use as intake. Possible values are: http, tcp.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"http", "tcp"}, false)),
 						},
 						"public": {
 							Type:     schema.TypeBool,

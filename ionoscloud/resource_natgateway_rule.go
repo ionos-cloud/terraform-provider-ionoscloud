@@ -26,10 +26,10 @@ func resourceNatGatewayRule() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "Name of the NAT gateway rule",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "Name of the NAT gateway rule",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"type": {
 				Type:        schema.TypeString,
@@ -48,16 +48,16 @@ func resourceNatGatewayRule() *schema.Resource {
 				Type: schema.TypeString,
 				Description: "Source subnet of the NAT gateway rule. For SNAT rules it specifies which packets this " +
 					"translation rule applies to based on the packets source IP address.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"public_ip": {
 				Type: schema.TypeString,
 				Description: "Public IP address of the NAT gateway rule. Specifies the address used for masking outgoing " +
 					"packets source address field. Should be one of the customer reserved IP address already " +
 					"configured on the NAT gateway resource",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"target_subnet": {
 				Type: schema.TypeString,
@@ -93,16 +93,16 @@ func resourceNatGatewayRule() *schema.Resource {
 				},
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"natgateway_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

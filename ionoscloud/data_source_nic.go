@@ -16,14 +16,14 @@ func dataSourceNIC() *schema.Resource {
 		ReadContext: dataSourceNicRead,
 		Schema: map[string]*schema.Schema{
 			"server_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"id": {
 				Type:     schema.TypeString,
@@ -91,14 +91,14 @@ func dataSourceNIC() *schema.Resource {
 func getNicDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"server_id": {
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 		"datacenter_id": {
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 		"id": {
 			Type:     schema.TypeString,

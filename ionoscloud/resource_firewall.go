@@ -33,9 +33,9 @@ func resourceFirewall() *schema.Resource {
 			},
 
 			"protocol": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"source_mac": {
 				Type:     schema.TypeString,
@@ -54,23 +54,23 @@ func resourceFirewall() *schema.Resource {
 			"port_range_start": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+				ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
 					if v.(int) < 1 && v.(int) > 65534 {
 						errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
 					}
 					return
-				},
+				}),
 			},
 
 			"port_range_end": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+				ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
 					if v.(int) < 1 && v.(int) > 65534 {
 						errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
 					}
 					return
-				},
+				}),
 			},
 			"icmp_type": {
 				Type:     schema.TypeString,
@@ -86,22 +86,22 @@ func resourceFirewall() *schema.Resource {
 				Computed: true,
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"server_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"nic_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

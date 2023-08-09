@@ -21,9 +21,9 @@ func dataSourceServers() *schema.Resource {
 		ReadContext: dataSourceServersRead,
 		Schema: map[string]*schema.Schema{
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"filter": dataSourceFiltersSchema(),
 			"servers": {
