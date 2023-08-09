@@ -403,10 +403,12 @@ func SetMongoClusterPatchProperties(d *schema.ResourceData) *mongo.PatchClusterR
 		patchRequest.Properties.Cores = &cores
 	}
 
-	//must always be sent
+	//must always be sent for enterprise, will be taken from template_id if playground or business
 	_, val := d.GetChange("edition")
-	edition := val.(string)
-	patchRequest.Properties.Edition = &edition
+	if val.(string) == "enterprise" {
+		edition := val.(string)
+		patchRequest.Properties.Edition = &edition
+	}
 
 	if d.HasChange("bi_connector") {
 		_, val := d.GetChange("bi_connector")

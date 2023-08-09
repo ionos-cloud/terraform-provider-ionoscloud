@@ -408,13 +408,13 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     time             = "09:00:00"
   }
   mongodb_version = "5.0"
-  instances          = 3
-  display_name = "` + constant.DBaaSClusterTestResource + `update"
-  location = ` + constant.DatacenterResource + `.datacenter_example.location
+  instances       = 3
+  display_name    = "` + constant.DBaaSClusterTestResource + `update"
+  location        = ` + constant.DatacenterResource + `.datacenter_example.location
   connections   {
 	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
     lan_id          =  ` + constant.LanResource + `.lan_example.id 
-    cidr_list            =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
+    cidr_list       =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
   }
   template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
   
@@ -455,7 +455,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
   connections   {
 	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
     lan_id          =  ` + constant.LanResource + `.lan_example.id 
-    cidr_list            =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
+    cidr_list       =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
   }
   template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
   
@@ -508,11 +508,11 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
   	username = "username"
 	password = ` + constant.RandomPassword + `.dbaas_mongo_cluster_password.result
   }
-  type    = "sharded-cluster"
-  shards  = 2
-  edition = "enterprise"
-  ram     = 2048
-  cores   = 1
+  type         = "sharded-cluster"
+  shards       = 2
+  edition      = "enterprise"
+  ram          = 2048
+  cores        = 1
   storage_size = 5120
   storage_type = "HDD"
   backup {
@@ -560,11 +560,11 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
   bi_connector {
 	enabled = true
   }
-  type    = "sharded-cluster"
-  shards  = 3
-  edition = "enterprise"
-  ram = 4096
-  cores = 2
+  type         = "sharded-cluster"
+  shards       = 3
+  edition      = "enterprise"
+  ram          = 4096
+  cores        = 2
   storage_size = 5120
   storage_type = "HDD"
   backup {
