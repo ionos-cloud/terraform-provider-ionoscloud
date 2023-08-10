@@ -262,7 +262,7 @@ const (
 	DataplatformNodePoolsTestDataSource      = "test_dataplatform_node_pools"
 	DataplatformVersionsTestDataSource       = "test_dataplatform_versions"
 	// DataPlatformVersion anything lower than 22.11 throws a 500 ISE
-	DataPlatformVersion = "22.11"
+	DataPlatformVersion = "23.4"
 )
 
 // DNS Constants
