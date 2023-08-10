@@ -425,7 +425,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   

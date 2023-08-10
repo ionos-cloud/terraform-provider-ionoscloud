@@ -35,7 +35,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCubeServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
-					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
 					utils.TestImageNotNull(constant.ServerCubeResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.name", "system"),
@@ -125,7 +125,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCubeServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "name", constant.UpdatedResources),
-					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
 					utils.TestImageNotNull(constant.ServerCubeResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password_updated", "result"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
@@ -200,7 +200,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
-					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
 					utils.TestImageNotNull(constant.ServerCubeResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
@@ -386,7 +386,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.UpdatedResources + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
@@ -499,7 +499,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name              = "` + constant.ServerTestResource + `"
   datacenter_id     = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   image_name        = "ubuntu:latest"
   image_password    = ` + constant.RandomPassword + `.server_image_password.result
   volume {
