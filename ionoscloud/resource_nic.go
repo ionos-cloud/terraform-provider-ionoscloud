@@ -334,7 +334,7 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 				return fmt.Errorf("error setting ips %w", err)
 			}
 		}
-		if nic.Properties.Ipv6Ips != nil && len(*nic.Properties.Ipv6Ips) > 0 {
+		if nic.Properties.Ipv6Ips != nil {
 			if err := d.Set("ipv6_ips", *nic.Properties.Ipv6Ips); err != nil {
 				return fmt.Errorf("error setting ipv6_ips %w", err)
 			}
