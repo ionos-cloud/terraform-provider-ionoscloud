@@ -1,3 +1,7 @@
+## 6.4.6
+
+- Fix `ipv6_ips` should not request a re-apply of the plan if `ipv6_cidr_block` is not set on the lan
+
 ## 6.4.5
 ### Features
 - Make `nic` list in `ionoscloud_server` resource optional
