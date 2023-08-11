@@ -1,4 +1,4 @@
-//go:build compute || all || server
+//go:build compute || all || server || cube
 
 package ionoscloud
 
@@ -167,7 +167,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 //				Check: resource.ComposeTestCheckFunc(
 //					testAccCheckCubeServerExists(ServerCubeResource+"."+ServerTestResource, &server),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "name", ServerTestResource),
-//					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+//					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "AUTO"),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.licence_type", "OTHER"),
@@ -234,7 +234,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 //				Check: resource.ComposeTestCheckFunc(
 //					testAccCheckCubeServerExists(ServerCubeResource+"."+ServerTestResource, &server),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "name", ServerTestResource),
-//					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+//					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "AUTO"),
 //					utils.TestImageNotNull(ServerCubeResource, "boot_image"),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
@@ -263,7 +263,7 @@ func TestAccCubeServerWithICMP(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCubeServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
-					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
 					utils.TestImageNotNull(constant.ServerCubeResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.name", "system"),
@@ -458,7 +458,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   boot_cdrom = "` + bootCdromImageIdCube + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -541,7 +541,7 @@ resource ` + constant.ServerCubeResource + ` "webserver" {
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name = "webserver"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -564,7 +564,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   name = "` + constant.ServerTestResource + `"
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   image_name = "terraform_snapshot"
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -599,7 +599,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -642,7 +642,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
