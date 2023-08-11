@@ -140,6 +140,52 @@ resource "random_password" "server_image_password" {
 
 ```
 
+### Server that boots from CDROM 
+
+```hcl
+resource "ionoscloud_datacenter" "cdrom" {
+  name = "CDROM Test"
+  location = "de/txl"
+  description = "CDROM image test"
+  sec_auth_protection = false
+}
+
+resource "ionoscloud_lan" "public" {
+  datacenter_id = ionoscloud_datacenter.cdrom.id
+  public = true
+  name = "Uplink"
+}
+
+data "ionoscloud_image" "cdrom" {
+  image_alias = "ubuntu:latest_iso"
+  type        = "CDROM"
+  location    = "de/txl"
+  cloud_init  = "NONE"
+}
+
+resource "ionoscloud_server" "test" {
+  datacenter_id  = ionoscloud_datacenter.cdrom.id
+  name           = "ubuntu_latest_from_cdrom"
+  cores          = 1
+  ram            = 1024
+  cpu_family     = ionoscloud_datacenter.cdrom.cpu_architecture[0].cpu_family
+  type           = "ENTERPRISE"
+  volume {
+    name         = "hdd0"
+    disk_type    = "HDD"
+    size         = 50
+    licence_type = "OTHER"
+  }
+  boot_cdrom = data.ionoscloud_image.cdrom.id
+  nic {
+    lan    = 1
+    dhcp   = true
+    firewall_active = false
+  }
+}
+
+```
+
 ## Argument reference
 
 - `template_uuid` - (Optional)[string] The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
@@ -155,7 +201,7 @@ resource "random_password" "server_image_password" {
 - `nic` - (Optional) See the [Nic](nic.md) section.
 - `firewall` - (Optional) Allows to define firewall rules inline in the server. See the [Firewall](firewall.md) section.
 - `boot_volume` - (Computed) The associated boot volume.
-- `boot_cdrom` - (Optional)[string] The associated boot drive, if any.
+- `boot_cdrom` - (Optional)[string] The associated boot drive, if any. Must be the UUID of a bootable CDROM image that you can retrieve using the [ionoscloud_image](../data-sources/image.md) data source.
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.
