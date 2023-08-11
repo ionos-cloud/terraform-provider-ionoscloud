@@ -45,8 +45,10 @@ func resourceVCPUServer() *schema.Resource {
 				Computed: true,
 			},
 			"boot_cdrom": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "The associated boot drive, if any. Must be the UUID of a bootable CDROM image that can be retrieved using the ionoscloud_image data source.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"cpu_family": {
 				Type:     schema.TypeString,
