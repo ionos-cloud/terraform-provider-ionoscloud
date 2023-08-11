@@ -185,17 +185,17 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Description: "Backup related properties.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"snapshot_interval_hours": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: "Number of hours between snapshots.",
-						},
-						"point_in_time_window_hours": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: "Number of hours in the past for which a point-in-time snapshot can be created.",
-						},
 						//will be added at a later date
+						//"snapshot_interval_hours": {
+						//	Type:        schema.TypeInt,
+						//	Computed:    true,
+						//	Description: "Number of hours between snapshots.",
+						//},
+						//"point_in_time_window_hours": {
+						//	Type:        schema.TypeInt,
+						//	Computed:    true,
+						//	Description: "Number of hours in the past for which a point-in-time snapshot can be created.",
+						//},
 						//"backup_retention": {
 						//	Type:        schema.TypeList,
 						//	Description: "Backup retention related properties.",
