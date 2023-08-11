@@ -38,7 +38,7 @@ Either `display_name` or `id` must be provided. If none, or both are provided, t
 
 The following attributes are returned by the datasource:
 
-* `edition` - (Optional) Cluster edition. Playground, business or enterprise.
+* `edition` - Cluster edition. Playground, business or enterprise.
 * `mongodb_version` - The MongoDB version of your cluster. Updates to the value of the field force the cluster to be re-created.
 * `template_id` - The unique ID of the template, which specifies the number of cores, storage size, and memory. Updates to the value of the field force the cluster to be re-created.
 * `instances` - The total number of instances in the cluster (one master and n-1 standbys). Example: 3, 5, 7. Updates to the value of the field force the cluster to be re-created.
@@ -57,3 +57,8 @@ The following attributes are returned by the datasource:
 * `storage_size` - The amount of storage per instance in MB. Required for enterprise edition.
 * `storage_type` - The storage type used in your cluster. Required for enterprise edition.
 * `cores`        - The number of CPU cores per replica. Required for enterprise edition.
+* `backup` 
+  * `location`: The location where the cluster backups will be stored. If not set, the backup is stored in the nearest location of the cluster. Possible values are de, eu-south-2, or eu-central-2.
+* `from_backup` - The unique ID of the backup you want to restore. This attribute is immutable(disallowed in update requests).
+  * `snapshot_id` - The snapshot id that will be used.
+  * `recovery_target_time` - If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.

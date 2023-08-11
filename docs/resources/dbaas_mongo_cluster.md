@@ -130,6 +130,10 @@ resource "random_password" "cluster_password" {
 * `cores`        - (Optional)The number of CPU cores per replica. Required for enterprise edition.
 * `backup` - (Optional)
   * `location`: (Optional) - The location where the cluster backups will be stored. If not set, the backup is stored in the nearest location of the cluster. Possible values are de, eu-south-2, or eu-central-2.
+* `from_backup` - (Optional)[string] The unique ID of the backup you want to restore. This attribute is immutable(disallowed in update requests).
+  * `snapshot_id` - (Required)[string] The snapshot id that will be used.
+  * `recovery_target_time` - (Optional)[string] If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
+
 ## Import
 
 Resource DbaaS MongoDb Cluster can be imported using the `cluster_id`, e.g.

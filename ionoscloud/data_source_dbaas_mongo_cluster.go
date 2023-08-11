@@ -162,7 +162,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 			},
 			"from_backup": {
 				Type:        schema.TypeList,
-				Description: "The PostgreSQL version of your cluster.",
+				Description: "Creates the cluster based on the existing backup.",
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
