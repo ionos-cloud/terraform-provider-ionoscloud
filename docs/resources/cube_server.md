@@ -69,7 +69,7 @@ resource "random_password" "server_image_password" {
 - `volume` - (Required) See the [Volume](volume.md) section.
 - `nic` - (Required) See the [Nic](nic.md) section.
 - `boot_volume` - (Computed) The associated boot volume.
-- `boot_cdrom` - (Optional)[string] The associated boot drive, if any.
+- `boot_cdrom` - (Optional)[string] The associated boot drive, if any. Must be the UUID of a bootable CDROM image that can be retrieved using the [ionoscloud_image](../data-sources/image.md) data source.
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.

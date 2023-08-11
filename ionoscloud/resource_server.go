@@ -63,8 +63,10 @@ func resourceServer() *schema.Resource {
 				Computed: true,
 			},
 			"boot_cdrom": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Description:      "The associated boot drive, if any. Must be the UUID of a bootable CDROM image that you can retrieve using the image data source",
 			},
 			"cpu_family": {
 				Type:     schema.TypeString,
@@ -1290,7 +1292,7 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 	// create server object and populate with common attributes
 	server, err := getServerData(d)
 	if err != nil {
-		return *server, err
+		return ionoscloud.Server{}, err
 	}
 
 	if serverType != "" {
