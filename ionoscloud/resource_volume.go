@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"log"
 	"strings"
 
@@ -604,6 +605,8 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 	volumeType := d.Get(path + "disk_type").(string)
 	volume.Type = &volumeType
 
+	serverType, serverTypeOk := d.GetOk("type")
+
 	if v, ok := d.GetOk(path + "availability_zone"); ok {
 		vStr := v.(string)
 		volume.AvailabilityZone = &vStr
@@ -644,19 +647,21 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 
 	var sshKeys []interface{}
 
-	if v, ok := d.GetOk(path + "ssh_key_path"); ok {
-		sshKeys = v.([]interface{})
-		if err := d.Set("ssh_key_path", sshKeys); err != nil {
-			return nil, err
-		}
-	} else if v, ok := d.GetOk("ssh_key_path"); ok {
-		sshKeys = v.([]interface{})
-		if err := d.Set("ssh_key_path", sshKeys); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := d.Set("ssh_key_path", [][]string{}); err != nil {
-			return nil, err
+	if serverTypeOk && serverType.(string) != constant.VCPUType {
+		if v, ok := d.GetOk(path + "ssh_key_path"); ok {
+			sshKeys = v.([]interface{})
+			if err := d.Set("ssh_key_path", sshKeys); err != nil {
+				return nil, err
+			}
+		} else if v, ok := d.GetOk("ssh_key_path"); ok {
+			sshKeys = v.([]interface{})
+			if err := d.Set("ssh_key_path", sshKeys); err != nil {
+				return nil, err
+			}
+		} else {
+			if err := d.Set("ssh_key_path", [][]string{}); err != nil {
+				return nil, err
+			}
 		}
 	}
 

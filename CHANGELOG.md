@@ -7,6 +7,8 @@
 ### Documentation
 - Fix `inoscloud_image` docs to get cdrom image
 - Fix `boot_cdrom` - add description and examples
+### Features
+- Add support for `VCPU` servers
 
 ## 6.4.5
 ### Features
