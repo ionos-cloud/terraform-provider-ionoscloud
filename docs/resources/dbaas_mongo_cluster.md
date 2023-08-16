@@ -53,7 +53,7 @@ resource "random_password" "cluster_password" {
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 ```
-## Example Usage for enterprise editions. They require
+## Example Usage for enterprise edition
 
 **Enterprise Support: With MongoDB Enterprise, you gain access to professional support from the MongoDB team ensuring that you receive timely assistance and expert guidance when needed. IONOS offers enterprise-grade Service Level Agreements (SLAs), guaranteeing rapid response times and 24/7 support to address any critical issues that may arise.**
 

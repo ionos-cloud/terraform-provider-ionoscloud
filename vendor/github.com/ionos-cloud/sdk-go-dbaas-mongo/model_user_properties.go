@@ -161,15 +161,12 @@ func (o UserProperties) MarshalJSON() ([]byte, error) {
 	if o.Username != nil {
 		toSerialize["username"] = o.Username
 	}
-
 	if o.Password != nil {
 		toSerialize["password"] = o.Password
 	}
-
 	if o.Roles != nil {
 		toSerialize["roles"] = o.Roles
 	}
-
 	return json.Marshal(toSerialize)
 }
 

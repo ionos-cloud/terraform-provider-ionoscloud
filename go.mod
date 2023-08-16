@@ -9,7 +9,7 @@ require (
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
 	github.com/ionos-cloud/sdk-go-container-registry v1.0.1
 	github.com/ionos-cloud/sdk-go-dataplatform v1.0.0
-	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.2.2
+	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
 	github.com/ionos-cloud/sdk-go-logging v1.0.0
@@ -17,8 +17,6 @@ require (
 	golang.org/x/crypto v0.10.0
 	gopkg.in/yaml.v3 v3.0.1
 )
-//to do - change after mongo enterprise sdk release
-replace github.com/ionos-cloud/sdk-go-dbaas-mongo => /tmp/sdk-go
 
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230528122434-6f98819771a1 // indirect
@@ -56,7 +54,7 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect

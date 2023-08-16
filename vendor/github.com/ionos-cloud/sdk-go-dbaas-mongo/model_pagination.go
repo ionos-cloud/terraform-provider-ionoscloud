@@ -14,13 +14,13 @@ import (
 	"encoding/json"
 )
 
-// Pagination struct for Pagination
+// Pagination Pagination information in list responses.
 type Pagination struct {
 	// The offset specified in the request (if none was specified, the default offset is 0).
 	Offset *int32 `json:"offset,omitempty"`
 	// The limit specified in the request (if none was specified, the default limit is 100).
 	Limit *int32           `json:"limit,omitempty"`
-	Links *PaginationLinks `json:"links,omitempty"`
+	Links *PaginationLinks `json:"_links,omitempty"`
 }
 
 // NewPagination instantiates a new Pagination object
@@ -169,15 +169,12 @@ func (o Pagination) MarshalJSON() ([]byte, error) {
 	if o.Offset != nil {
 		toSerialize["offset"] = o.Offset
 	}
-
 	if o.Limit != nil {
 		toSerialize["limit"] = o.Limit
 	}
-
 	if o.Links != nil {
-		toSerialize["links"] = o.Links
+		toSerialize["_links"] = o.Links
 	}
-
 	return json.Marshal(toSerialize)
 }
 

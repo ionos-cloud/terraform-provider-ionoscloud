@@ -16,20 +16,35 @@ import (
 
 // ClusterProperties Properties of a database cluster.
 type ClusterProperties struct {
+	// The cluster type, either `replicaset` or `sharded-cluster`.
+	Type *string `json:"type,omitempty"`
 	// The name of your cluster.
 	DisplayName *string `json:"displayName,omitempty"`
 	// The MongoDB version of your cluster.
 	MongoDBVersion *string `json:"mongoDBVersion,omitempty"`
 	// The physical location where the cluster will be created. This is the location where all your instances will be located. This property is immutable.
-	Location *string `json:"location,omitempty"`
+	Location *string           `json:"location,omitempty"`
+	Backup   *BackupProperties `json:"backup,omitempty"`
 	// The total number of instances in the cluster (one primary and n-1 secondaries).
-	Instances         *int32             `json:"instances,omitempty"`
+	Instances *int32 `json:"instances,omitempty"`
+	// The total number of shards in the cluster.
+	Shards            *int32             `json:"shards,omitempty"`
 	Connections       *[]Connection      `json:"connections,omitempty"`
 	MaintenanceWindow *MaintenanceWindow `json:"maintenanceWindow,omitempty"`
 	// The unique ID of the template, which specifies the number of cores, storage size, and memory. You cannot downgrade to a smaller template or minor edition (e.g. from business to playground). To get a list of all templates to confirm the changes use the /templates endpoint.
 	TemplateID *string `json:"templateID,omitempty"`
 	// The connection string for your cluster.
-	ConnectionString *string `json:"connectionString,omitempty"`
+	ConnectionString *string                `json:"connectionString,omitempty"`
+	BiConnector      *BiConnectorProperties `json:"biConnector,omitempty"`
+	// The cluster edition.
+	Edition *string `json:"edition,omitempty"`
+	// The number of CPU cores per instance.
+	Cores *int32 `json:"cores,omitempty"`
+	// The amount of memory per instance in megabytes. Has to be a multiple of 1024.
+	Ram *int32 `json:"ram,omitempty"`
+	// The amount of storage per instance in megabytes.
+	StorageSize *int32       `json:"storageSize,omitempty"`
+	StorageType *StorageType `json:"storageType,omitempty"`
 }
 
 // NewClusterProperties instantiates a new ClusterProperties object
@@ -48,6 +63,44 @@ func NewClusterProperties() *ClusterProperties {
 func NewClusterPropertiesWithDefaults() *ClusterProperties {
 	this := ClusterProperties{}
 	return &this
+}
+
+// GetType returns the Type field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ClusterProperties) GetType() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Type
+
+}
+
+// GetTypeOk returns a tuple with the Type field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterProperties) GetTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Type, true
+}
+
+// SetType sets field value
+func (o *ClusterProperties) SetType(v string) {
+
+	o.Type = &v
+
+}
+
+// HasType returns a boolean if a field has been set.
+func (o *ClusterProperties) HasType() bool {
+	if o != nil && o.Type != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetDisplayName returns the DisplayName field value
@@ -164,6 +217,44 @@ func (o *ClusterProperties) HasLocation() bool {
 	return false
 }
 
+// GetBackup returns the Backup field value
+// If the value is explicit nil, the zero value for BackupProperties will be returned
+func (o *ClusterProperties) GetBackup() *BackupProperties {
+	if o == nil {
+		return nil
+	}
+
+	return o.Backup
+
+}
+
+// GetBackupOk returns a tuple with the Backup field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterProperties) GetBackupOk() (*BackupProperties, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Backup, true
+}
+
+// SetBackup sets field value
+func (o *ClusterProperties) SetBackup(v BackupProperties) {
+
+	o.Backup = &v
+
+}
+
+// HasBackup returns a boolean if a field has been set.
+func (o *ClusterProperties) HasBackup() bool {
+	if o != nil && o.Backup != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetInstances returns the Instances field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ClusterProperties) GetInstances() *int32 {
@@ -196,6 +287,44 @@ func (o *ClusterProperties) SetInstances(v int32) {
 // HasInstances returns a boolean if a field has been set.
 func (o *ClusterProperties) HasInstances() bool {
 	if o != nil && o.Instances != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetShards returns the Shards field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *ClusterProperties) GetShards() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.Shards
+
+}
+
+// GetShardsOk returns a tuple with the Shards field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterProperties) GetShardsOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Shards, true
+}
+
+// SetShards sets field value
+func (o *ClusterProperties) SetShards(v int32) {
+
+	o.Shards = &v
+
+}
+
+// HasShards returns a boolean if a field has been set.
+func (o *ClusterProperties) HasShards() bool {
+	if o != nil && o.Shards != nil {
 		return true
 	}
 
@@ -354,40 +483,287 @@ func (o *ClusterProperties) HasConnectionString() bool {
 	return false
 }
 
+// GetBiConnector returns the BiConnector field value
+// If the value is explicit nil, the zero value for BiConnectorProperties will be returned
+func (o *ClusterProperties) GetBiConnector() *BiConnectorProperties {
+	if o == nil {
+		return nil
+	}
+
+	return o.BiConnector
+
+}
+
+// GetBiConnectorOk returns a tuple with the BiConnector field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterProperties) GetBiConnectorOk() (*BiConnectorProperties, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.BiConnector, true
+}
+
+// SetBiConnector sets field value
+func (o *ClusterProperties) SetBiConnector(v BiConnectorProperties) {
+
+	o.BiConnector = &v
+
+}
+
+// HasBiConnector returns a boolean if a field has been set.
+func (o *ClusterProperties) HasBiConnector() bool {
+	if o != nil && o.BiConnector != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetEdition returns the Edition field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ClusterProperties) GetEdition() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Edition
+
+}
+
+// GetEditionOk returns a tuple with the Edition field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterProperties) GetEditionOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Edition, true
+}
+
+// SetEdition sets field value
+func (o *ClusterProperties) SetEdition(v string) {
+
+	o.Edition = &v
+
+}
+
+// HasEdition returns a boolean if a field has been set.
+func (o *ClusterProperties) HasEdition() bool {
+	if o != nil && o.Edition != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetCores returns the Cores field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *ClusterProperties) GetCores() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.Cores
+
+}
+
+// GetCoresOk returns a tuple with the Cores field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterProperties) GetCoresOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Cores, true
+}
+
+// SetCores sets field value
+func (o *ClusterProperties) SetCores(v int32) {
+
+	o.Cores = &v
+
+}
+
+// HasCores returns a boolean if a field has been set.
+func (o *ClusterProperties) HasCores() bool {
+	if o != nil && o.Cores != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetRam returns the Ram field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *ClusterProperties) GetRam() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.Ram
+
+}
+
+// GetRamOk returns a tuple with the Ram field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterProperties) GetRamOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Ram, true
+}
+
+// SetRam sets field value
+func (o *ClusterProperties) SetRam(v int32) {
+
+	o.Ram = &v
+
+}
+
+// HasRam returns a boolean if a field has been set.
+func (o *ClusterProperties) HasRam() bool {
+	if o != nil && o.Ram != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetStorageSize returns the StorageSize field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *ClusterProperties) GetStorageSize() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.StorageSize
+
+}
+
+// GetStorageSizeOk returns a tuple with the StorageSize field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterProperties) GetStorageSizeOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.StorageSize, true
+}
+
+// SetStorageSize sets field value
+func (o *ClusterProperties) SetStorageSize(v int32) {
+
+	o.StorageSize = &v
+
+}
+
+// HasStorageSize returns a boolean if a field has been set.
+func (o *ClusterProperties) HasStorageSize() bool {
+	if o != nil && o.StorageSize != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetStorageType returns the StorageType field value
+// If the value is explicit nil, the zero value for StorageType will be returned
+func (o *ClusterProperties) GetStorageType() *StorageType {
+	if o == nil {
+		return nil
+	}
+
+	return o.StorageType
+
+}
+
+// GetStorageTypeOk returns a tuple with the StorageType field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterProperties) GetStorageTypeOk() (*StorageType, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.StorageType, true
+}
+
+// SetStorageType sets field value
+func (o *ClusterProperties) SetStorageType(v StorageType) {
+
+	o.StorageType = &v
+
+}
+
+// HasStorageType returns a boolean if a field has been set.
+func (o *ClusterProperties) HasStorageType() bool {
+	if o != nil && o.StorageType != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o ClusterProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Type != nil {
+		toSerialize["type"] = o.Type
+	}
 	if o.DisplayName != nil {
 		toSerialize["displayName"] = o.DisplayName
 	}
-
 	if o.MongoDBVersion != nil {
 		toSerialize["mongoDBVersion"] = o.MongoDBVersion
 	}
-
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-
+	if o.Backup != nil {
+		toSerialize["backup"] = o.Backup
+	}
 	if o.Instances != nil {
 		toSerialize["instances"] = o.Instances
 	}
-
+	if o.Shards != nil {
+		toSerialize["shards"] = o.Shards
+	}
 	if o.Connections != nil {
 		toSerialize["connections"] = o.Connections
 	}
-
 	if o.MaintenanceWindow != nil {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
 	}
-
 	if o.TemplateID != nil {
 		toSerialize["templateID"] = o.TemplateID
 	}
-
 	if o.ConnectionString != nil {
 		toSerialize["connectionString"] = o.ConnectionString
 	}
-
+	if o.BiConnector != nil {
+		toSerialize["biConnector"] = o.BiConnector
+	}
+	if o.Edition != nil {
+		toSerialize["edition"] = o.Edition
+	}
+	if o.Cores != nil {
+		toSerialize["cores"] = o.Cores
+	}
+	if o.Ram != nil {
+		toSerialize["ram"] = o.Ram
+	}
+	if o.StorageSize != nil {
+		toSerialize["storageSize"] = o.StorageSize
+	}
+	if o.StorageType != nil {
+		toSerialize["storageType"] = o.StorageType
+	}
 	return json.Marshal(toSerialize)
 }
 

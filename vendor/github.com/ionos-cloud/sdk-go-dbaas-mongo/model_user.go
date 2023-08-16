@@ -158,15 +158,12 @@ func (o User) MarshalJSON() ([]byte, error) {
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
-
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-
 	return json.Marshal(toSerialize)
 }
 

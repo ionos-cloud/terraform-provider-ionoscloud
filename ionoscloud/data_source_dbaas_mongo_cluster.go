@@ -20,7 +20,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
-				Description:  "The id of your cluster.",
+				Description:  "The id of your cluster",
 				Optional:     true,
 				ValidateFunc: validation.All(validation.IsUUID),
 			},
@@ -43,7 +43,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 			},
 			"mongodb_version": {
 				Type:        schema.TypeString,
-				Description: "The MongoDB version of your cluster.",
+				Description: "The MongoDB version of your cluster",
 				Computed:    true,
 			},
 			"instances": {
@@ -53,7 +53,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 			},
 			"display_name": {
 				Type:        schema.TypeString,
-				Description: "The friendly name of your cluster.",
+				Description: "The friendly name of your cluster",
 				Optional:    true,
 			},
 			"location": {
@@ -64,18 +64,18 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 			},
 			"connections": {
 				Type:        schema.TypeList,
-				Description: "Details about the network connection for your cluster.",
+				Description: "Details about the network connection for your cluster",
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"datacenter_id": {
 							Type:        schema.TypeString,
-							Description: "The datacenter to connect your cluster to.",
+							Description: "The datacenter to connect your cluster to",
 							Computed:    true,
 						},
 						"lan_id": {
 							Type:        schema.TypeString,
-							Description: "The LAN to connect your cluster to.",
+							Description: "The LAN to connect your cluster to",
 							Computed:    true,
 						},
 						"cidr_list": {
@@ -91,12 +91,12 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 			},
 			"template_id": {
 				Type:        schema.TypeString,
-				Description: "The unique ID of the template, which specifies the number of cores, storage size, and memory.",
+				Description: "The unique ID of the template, which specifies the number of cores, storage size, and memory",
 				Computed:    true,
 			},
 			"connection_string": {
 				Type:        schema.TypeString,
-				Description: "The connection string for your cluster.",
+				Description: "The connection string for your cluster",
 				Computed:    true,
 			},
 			//enterprise edition below
@@ -120,17 +120,17 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 						"enabled": {
 							Type:        schema.TypeBool,
 							Computed:    true,
-							Description: "Enable or disable the BiConnector.",
+							Description: "Enable or disable the BiConnector",
 						},
 						"host": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The host where this new BI Connector is installed.",
+							Description: "The host where this new BI Connector is installed",
 						},
 						"port": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Port number used when connecting to this new BI Connector.",
+							Description: "Port number used when connecting to this new BI Connector",
 						},
 					},
 				},
@@ -168,13 +168,13 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"snapshot_id": {
 							Type:        schema.TypeString,
-							Description: "The unique ID of the snapshot you want to restore.",
+							Description: "The unique ID of the snapshot you want to restore",
 							Computed:    true,
 						},
 						"recovery_target_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: " If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp.",
+							Description: " If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp",
 						},
 					},
 				},

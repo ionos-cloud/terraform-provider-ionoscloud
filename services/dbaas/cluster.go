@@ -698,31 +698,31 @@ func GetMongoClusterBackupData(d *schema.ResourceData) *mongo.BackupProperties {
 }
 
 // GetMongoClusterBackupRetentionData will be when we have support in backend
-func GetMongoClusterBackupRetentionData(d *schema.ResourceData) *mongo.BackupRetentionProperties {
-	var backup mongo.BackupRetentionProperties
-	path := "backup.0.backup_retention.0."
-	if val, ok := d.GetOk(path + "snapshot_retention_days"); ok {
-		days := int32(val.(int))
-		backup.SnapshotRetentionDays = &days
-	}
-
-	if val, ok := d.GetOk(path + "daily_snapshot_retention_days"); ok {
-		days := int32(val.(int))
-		backup.SnapshotRetentionDays = &days
-	}
-
-	if val, ok := d.GetOk(path + "weekly_snapshot_retention_weeks"); ok {
-		weeks := int32(val.(int))
-		backup.SnapshotRetentionDays = &weeks
-	}
-
-	if val, ok := d.GetOk(path + "monthly_snapshot_retention_months"); ok {
-		months := int32(val.(int))
-		backup.SnapshotRetentionDays = &months
-	}
-
-	return &backup
-}
+//func GetMongoClusterBackupRetentionData(d *schema.ResourceData) *mongo.BackupRetentionProperties {
+//	var backup mongo.BackupRetentionProperties
+//	path := "backup.0.backup_retention.0."
+//	if val, ok := d.GetOk(path + "snapshot_retention_days"); ok {
+//		days := int32(val.(int))
+//		backup.SnapshotRetentionDays = &days
+//	}
+//
+//	if val, ok := d.GetOk(path + "daily_snapshot_retention_days"); ok {
+//		days := int32(val.(int))
+//		backup.SnapshotRetentionDays = &days
+//	}
+//
+//	if val, ok := d.GetOk(path + "weekly_snapshot_retention_weeks"); ok {
+//		weeks := int32(val.(int))
+//		backup.SnapshotRetentionDays = &weeks
+//	}
+//
+//	if val, ok := d.GetOk(path + "monthly_snapshot_retention_months"); ok {
+//		months := int32(val.(int))
+//		backup.SnapshotRetentionDays = &months
+//	}
+//
+//	return &backup
+//}
 
 func SetPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterResponse) error {
 

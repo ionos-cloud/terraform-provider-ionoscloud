@@ -22,7 +22,7 @@ type TemplateProperties struct {
 	Edition *string `json:"edition,omitempty"`
 	// The number of CPU cores.
 	Cores *int32 `json:"cores,omitempty"`
-	// The amount of memory in GB.
+	// The amount of memory in MB.
 	Ram *int32 `json:"ram,omitempty"`
 	// The amount of storage size in GB.
 	StorageSize *int32 `json:"storageSize,omitempty"`
@@ -241,23 +241,18 @@ func (o TemplateProperties) MarshalJSON() ([]byte, error) {
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Edition != nil {
 		toSerialize["edition"] = o.Edition
 	}
-
 	if o.Cores != nil {
 		toSerialize["cores"] = o.Cores
 	}
-
 	if o.Ram != nil {
 		toSerialize["ram"] = o.Ram
 	}
-
 	if o.StorageSize != nil {
 		toSerialize["storageSize"] = o.StorageSize
 	}
-
 	return json.Marshal(toSerialize)
 }
 

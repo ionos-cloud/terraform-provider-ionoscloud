@@ -15,7 +15,7 @@ import (
 	"fmt"
 )
 
-// State The current status reported by the cluster. * **AVAILABLE** Resources for this cluster exist and are healthy. * **BUSY** Resources for this cluster are being created or updated. * **DESTROYING** Delete cluster command was issued, the cluster is being deleted. * **FAILED** Failed to get the cluster status. * **UNKNOWN** The state is unknown.
+// State The current status reported by the cluster. * **AVAILABLE** Resources for this cluster exist and are healthy. * **BUSY** Resources for this cluster are being created or updated. * **DESTROYING** Delete cluster command was issued, the cluster is being deleted. * **FAILED** Failed to get the cluster status. * **UNKNOWN** The state is unknown. * **UPGRADING** The cluster is upgrading to a different edition.
 type State string
 
 // List of State
@@ -25,6 +25,7 @@ const (
 	STATE_DESTROYING State = "DESTROYING"
 	STATE_FAILED     State = "FAILED"
 	STATE_UNKNOWN    State = "UNKNOWN"
+	STATE_UPGRADING  State = "UPGRADING"
 )
 
 func (v *State) UnmarshalJSON(src []byte) error {
@@ -34,7 +35,7 @@ func (v *State) UnmarshalJSON(src []byte) error {
 		return err
 	}
 	enumTypeValue := State(value)
-	for _, existing := range []State{"AVAILABLE", "BUSY", "DESTROYING", "FAILED", "UNKNOWN"} {
+	for _, existing := range []State{"AVAILABLE", "BUSY", "DESTROYING", "FAILED", "UNKNOWN", "UPGRADING"} {
 		if existing == enumTypeValue {
 			*v = enumTypeValue
 			return nil

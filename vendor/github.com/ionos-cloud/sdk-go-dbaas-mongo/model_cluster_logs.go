@@ -80,7 +80,6 @@ func (o ClusterLogs) MarshalJSON() ([]byte, error) {
 	if o.Instances != nil {
 		toSerialize["instances"] = o.Instances
 	}
-
 	return json.Marshal(toSerialize)
 }
 

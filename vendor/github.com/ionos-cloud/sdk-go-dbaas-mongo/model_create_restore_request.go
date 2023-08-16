@@ -12,22 +12,23 @@ package ionoscloud
 
 import (
 	"encoding/json"
+	"time"
 )
 
 // CreateRestoreRequest The restore request.
 type CreateRestoreRequest struct {
 	// The unique ID of the snapshot you want to restore.
-	SnapshotId *string `json:"snapshotId"`
+	SnapshotId *string `json:"snapshotId,omitempty"`
+	// If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp.
+	RecoveryTargetTime *IonosTime `json:"recoveryTargetTime,omitempty"`
 }
 
 // NewCreateRestoreRequest instantiates a new CreateRestoreRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateRestoreRequest(snapshotId string) *CreateRestoreRequest {
+func NewCreateRestoreRequest() *CreateRestoreRequest {
 	this := CreateRestoreRequest{}
-
-	this.SnapshotId = &snapshotId
 
 	return &this
 }
@@ -78,12 +79,59 @@ func (o *CreateRestoreRequest) HasSnapshotId() bool {
 	return false
 }
 
+// GetRecoveryTargetTime returns the RecoveryTargetTime field value
+// If the value is explicit nil, the zero value for time.Time will be returned
+func (o *CreateRestoreRequest) GetRecoveryTargetTime() *time.Time {
+	if o == nil {
+		return nil
+	}
+
+	if o.RecoveryTargetTime == nil {
+		return nil
+	}
+	return &o.RecoveryTargetTime.Time
+
+}
+
+// GetRecoveryTargetTimeOk returns a tuple with the RecoveryTargetTime field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *CreateRestoreRequest) GetRecoveryTargetTimeOk() (*time.Time, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	if o.RecoveryTargetTime == nil {
+		return nil, false
+	}
+	return &o.RecoveryTargetTime.Time, true
+
+}
+
+// SetRecoveryTargetTime sets field value
+func (o *CreateRestoreRequest) SetRecoveryTargetTime(v time.Time) {
+
+	o.RecoveryTargetTime = &IonosTime{v}
+
+}
+
+// HasRecoveryTargetTime returns a boolean if a field has been set.
+func (o *CreateRestoreRequest) HasRecoveryTargetTime() bool {
+	if o != nil && o.RecoveryTargetTime != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o CreateRestoreRequest) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.SnapshotId != nil {
 		toSerialize["snapshotId"] = o.SnapshotId
 	}
-
+	if o.RecoveryTargetTime != nil {
+		toSerialize["recoveryTargetTime"] = o.RecoveryTargetTime
+	}
 	return json.Marshal(toSerialize)
 }
 

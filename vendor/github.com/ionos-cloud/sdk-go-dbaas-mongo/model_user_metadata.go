@@ -169,15 +169,12 @@ func (o UserMetadata) MarshalJSON() ([]byte, error) {
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
-
 	if o.CreatedBy != nil {
 		toSerialize["createdBy"] = o.CreatedBy
 	}
-
 	if o.CreatedByUserId != nil {
 		toSerialize["createdByUserId"] = o.CreatedByUserId
 	}
-
 	return json.Marshal(toSerialize)
 }
 
