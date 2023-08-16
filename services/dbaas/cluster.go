@@ -1072,24 +1072,6 @@ func MongoClusterCheckRequiredFieldsSet(d *schema.ResourceData) error {
 		if _, ok := d.GetOk("template_id"); !ok {
 			return fmt.Errorf(requiredNotSet, "template_id", clusterType)
 		}
-		//
-		//if v, ok := d.GetOk("cores"); ok {
-		//	vInt := int32(v.(int))
-		//	server.Properties.Cores = &vInt
-		//} else {
-		//	return *server, fmt.Errorf("cores argument is required for %s type of mongo cluster\n", clusterType)
-		//}
-		//
-		//if v, ok := d.GetOk("ram"); ok {
-		//	vInt := int32(v.(int))
-		//	server.Properties.Ram = &vInt
-		//} else {
-		//	return *server, fmt.Errorf("ram argument is required for %s type of mongo cluster\n", clusterType)
-		//}
-		//
-		//if _, ok := d.GetOk("volume.0.size"); !ok {
-		//	return *server, fmt.Errorf("volume.0.size argument is required for %s type of mongo cluster\n", clusterType)
-		//}
 	}
 	return nil
 }

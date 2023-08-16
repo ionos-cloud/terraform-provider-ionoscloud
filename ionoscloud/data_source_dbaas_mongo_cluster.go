@@ -174,7 +174,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 						"recovery_target_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: " If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp",
+							Description: "If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp",
 						},
 					},
 				},
