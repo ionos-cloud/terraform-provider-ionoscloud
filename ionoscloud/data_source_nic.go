@@ -16,14 +16,14 @@ func dataSourceNIC() *schema.Resource {
 		ReadContext: dataSourceNicRead,
 		Schema: map[string]*schema.Schema{
 			"server_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"id": {
 				Type:     schema.TypeString,
@@ -42,11 +42,26 @@ func dataSourceNIC() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"dhcpv6": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"ipv6_cidr_block": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"ips": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 				Optional: true,
+			},
+			"ipv6_ips": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				Computed: true,
 			},
 			"firewall_active": {
 				Type:     schema.TypeBool,
@@ -76,14 +91,14 @@ func dataSourceNIC() *schema.Resource {
 func getNicDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"server_id": {
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 		"datacenter_id": {
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 		"id": {
 			Type:     schema.TypeString,
@@ -102,11 +117,26 @@ func getNicDataSourceSchema() map[string]*schema.Schema {
 			Optional: true,
 			Default:  true,
 		},
+		"dhcpv6": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"ipv6_cidr_block": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
 		"ips": {
 			Type:     schema.TypeList,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Computed: true,
 			Optional: true,
+		},
+		"ipv6_ips": {
+			Type:     schema.TypeList,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Computed: true,
 		},
 		"firewall_active": {
 			Type:     schema.TypeBool,

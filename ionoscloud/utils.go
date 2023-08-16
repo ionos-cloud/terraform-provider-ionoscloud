@@ -132,8 +132,23 @@ var nicServerDSResource = &schema.Resource{
 				Type: schema.TypeString,
 			},
 		},
+		"ipv6_ips": {
+			Type:     schema.TypeList,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Computed: true,
+		},
 		"dhcp": {
 			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"dhcpv6": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"ipv6_cidr_block": {
+			Type:     schema.TypeString,
+			Optional: true,
 			Computed: true,
 		},
 		"lan": {

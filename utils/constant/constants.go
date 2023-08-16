@@ -152,6 +152,7 @@ const (
 const (
 	ServerResource         = "ionoscloud_server"
 	ServerCubeResource     = "ionoscloud_cube_server"
+	ServerVCPUResource     = "ionoscloud_vcpu_server"
 	ServerTestResource     = "test_server"
 	ServerDataSourceById   = "test_server_id"
 	ServerDataSourceByName = "test_server_name"
@@ -261,8 +262,8 @@ const (
 	DataplatformVersionsDataSource           = "ionoscloud_dataplatform_versions"
 	DataplatformNodePoolsTestDataSource      = "test_dataplatform_node_pools"
 	DataplatformVersionsTestDataSource       = "test_dataplatform_versions"
-	// DataPlatformVersion anything lower than 22.11 throws a 500 ISE
-	DataPlatformVersion = "22.11"
+	// DataPlatformVersion lowest 'available' version is now 23.4
+	DataPlatformVersion = "23.4"
 )
 
 // DNS Constants
@@ -311,3 +312,5 @@ const (
 	CertificateResource = "ionoscloud_certificate"
 	TestCertName        = "certTest"
 )
+
+const VCPUType = "VCPU"

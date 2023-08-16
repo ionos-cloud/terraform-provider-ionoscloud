@@ -235,11 +235,26 @@ func resourceCubeServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
+						"dhcpv6": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"ipv6_cidr_block": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
 						"ips": {
 							Type:     schema.TypeList,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 							Computed: true,
 							Optional: true,
+						},
+						"ipv6_ips": {
+							Type:     schema.TypeList,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Optional: true,
+							Computed: true,
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,

@@ -1,4 +1,5 @@
-//go:build compute || all || server
+//go:build compute || all || server || enterprise
+// +build compute all server enterprise
 
 package ionoscloud
 
@@ -622,7 +623,7 @@ func TestAccServerCubeServer(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "cores", "data.ionoscloud_template."+constant.ServerTestResource, "cores"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "ram", "data.ionoscloud_template."+constant.ServerTestResource, "ram"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "template_uuid", "data.ionoscloud_template."+constant.ServerTestResource, "id"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_2"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "type", "CUBE"),
 					utils.TestImageNotNull("ionoscloud_server", "boot_image"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
@@ -1524,7 +1525,7 @@ resource "ionoscloud_lan" "webserver_lan" {
 
 resource "ionoscloud_server" ` + constant.ServerTestResource + ` {
  name              = "` + constant.ServerTestResource + `"
- availability_zone = "ZONE_2"
+ availability_zone = "AUTO"
  image_name        = "ubuntu:latest"
  type              = "CUBE"
  template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id

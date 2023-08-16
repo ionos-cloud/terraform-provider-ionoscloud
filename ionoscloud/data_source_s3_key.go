@@ -19,10 +19,10 @@ func dataSourceS3Key() *schema.Resource {
 				Optional:    true,
 			},
 			"user_id": {
-				Type:         schema.TypeString,
-				Description:  "The ID of the user that owns the key.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "The ID of the user that owns the key.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"secret_key": {
 				Type:        schema.TypeString,

@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"log"
 	"strings"
 
@@ -50,9 +51,9 @@ func resourceVolume() *schema.Resource {
 				Required: true,
 			},
 			"disk_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"image_password": {
 				Type:     schema.TypeString,
@@ -87,10 +88,10 @@ func resourceVolume() *schema.Resource {
 				Optional: true,
 			},
 			"availability_zone": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 			},
 			"cpu_hot_plug": {
 				Type:     schema.TypeBool,
@@ -140,15 +141,15 @@ func resourceVolume() *schema.Resource {
 				Computed:    true,
 			},
 			"server_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -604,6 +605,8 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 	volumeType := d.Get(path + "disk_type").(string)
 	volume.Type = &volumeType
 
+	serverType, serverTypeOk := d.GetOk("type")
+
 	if v, ok := d.GetOk(path + "availability_zone"); ok {
 		vStr := v.(string)
 		volume.AvailabilityZone = &vStr
@@ -644,19 +647,21 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 
 	var sshKeys []interface{}
 
-	if v, ok := d.GetOk(path + "ssh_key_path"); ok {
-		sshKeys = v.([]interface{})
-		if err := d.Set("ssh_key_path", sshKeys); err != nil {
-			return nil, err
-		}
-	} else if v, ok := d.GetOk("ssh_key_path"); ok {
-		sshKeys = v.([]interface{})
-		if err := d.Set("ssh_key_path", sshKeys); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := d.Set("ssh_key_path", [][]string{}); err != nil {
-			return nil, err
+	if serverTypeOk && serverType.(string) != constant.VCPUType {
+		if v, ok := d.GetOk(path + "ssh_key_path"); ok {
+			sshKeys = v.([]interface{})
+			if err := d.Set("ssh_key_path", sshKeys); err != nil {
+				return nil, err
+			}
+		} else if v, ok := d.GetOk("ssh_key_path"); ok {
+			sshKeys = v.([]interface{})
+			if err := d.Set("ssh_key_path", sshKeys); err != nil {
+				return nil, err
+			}
+		} else {
+			if err := d.Set("ssh_key_path", [][]string{}); err != nil {
+				return nil, err
+			}
 		}
 	}
 

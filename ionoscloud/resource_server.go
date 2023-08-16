@@ -63,8 +63,10 @@ func resourceServer() *schema.Resource {
 				Computed: true,
 			},
 			"boot_cdrom": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Description:      "The associated boot drive, if any. Must be the UUID of a bootable CDROM image that you can retrieve using the image data source",
 			},
 			"cpu_family": {
 				Type:     schema.TypeString,
@@ -336,6 +338,15 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
+						"dhcpv6": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"ipv6_cidr_block": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
 						"ips": {
 							Type: schema.TypeList,
 							Elem: &schema.Schema{
@@ -345,6 +356,12 @@ func resourceServer() *schema.Resource {
 							Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
 							Computed:    true,
 							Optional:    true,
+						},
+						"ipv6_ips": {
+							Type:     schema.TypeList,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Optional: true,
+							Computed: true,
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
@@ -750,11 +767,14 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 	network := map[string]interface{}{}
 	if nic.Properties != nil {
 		utils.SetPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+		utils.SetPropWithNilCheck(network, "dhcpv6", nic.Properties.Dhcpv6)
 		utils.SetPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
 		utils.SetPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
 		utils.SetPropWithNilCheck(network, "lan", nic.Properties.Lan)
 		utils.SetPropWithNilCheck(network, "name", nic.Properties.Name)
 		utils.SetPropWithNilCheck(network, "ips", nic.Properties.Ips)
+		utils.SetPropWithNilCheck(network, "ipv6_ips", nic.Properties.Ipv6Ips)
+		utils.SetPropWithNilCheck(network, "ipv6_cidr_block", nic.Properties.Ipv6CidrBlock)
 		utils.SetPropWithNilCheck(network, "mac", nic.Properties.Mac)
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ips"] = *nic.Properties.Ips
@@ -990,6 +1010,12 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			fwRule := d.Get("nic.0.firewall_active").(bool)
 			nicProperties.Dhcp = &dhcp
 			nicProperties.FirewallActive = &fwRule
+			if dhcpv6, ok := d.GetOk("nic.0.dhcpv6"); ok {
+				dhcpv6 := dhcpv6.(bool)
+				nicProperties.Dhcpv6 = &dhcpv6
+			} else {
+				nicProperties.SetDhcpv6Nil()
+			}
 
 			if v, ok := d.GetOk("nic.0.firewall_type"); ok {
 				vStr := v.(string)
@@ -1266,7 +1292,7 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 	// create server object and populate with common attributes
 	server, err := getServerData(d)
 	if err != nil {
-		return *server, err
+		return ionoscloud.Server{}, err
 	}
 
 	if serverType != "" {

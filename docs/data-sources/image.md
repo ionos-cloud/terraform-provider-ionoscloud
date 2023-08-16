@@ -15,14 +15,14 @@ When this happens, please refine your search string so that it is specific enoug
 ## Example Usage
 
 ```hcl
-data "ionoscloud_image" "example" {
-  name        = "ubuntu"
+data "ionoscloud_image" "cdrom" {
+  image_alias = "ubuntu:latest_iso"
   type        = "CDROM"
-  location    = "de/fkb"
+  location    = "de/txl"
   cloud_init  = "NONE"
 }
 ```
-Finds an image that contains `ubuntu` in it's name, in location `de/fkb`, that does not support `cloud_init` and is of type `CDROM`.
+Finds an image with alias `ubuntu:latest_iso`, in location `de/txl`, that does not support `cloud_init` and is of type `CDROM`.
 ## Example Usage
 
 ```hcl

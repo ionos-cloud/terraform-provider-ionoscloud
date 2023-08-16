@@ -27,14 +27,14 @@ func resourceDatacenter() *schema.Resource {
 
 			//Datacenter parameters
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"location": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -80,6 +80,11 @@ func resourceDatacenter() *schema.Resource {
 						},
 					},
 				},
+			},
+			"ipv6_cidr_block": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Auto-assigned /56 IPv6 CIDR block, if IPv6 is enabled for the datacenter. Read-only",
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -332,6 +337,14 @@ func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter
 				}
 			}
 		}
+
+		if datacenter.Properties.Ipv6CidrBlock != nil {
+			err := d.Set("ipv6_cidr_block", *datacenter.Properties.Ipv6CidrBlock)
+			if err != nil {
+				return fmt.Errorf("error while setting ipv6_cidr_block property for datacenter %s: %w", d.Id(), err)
+			}
+		}
+
 	}
 
 	return nil

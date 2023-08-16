@@ -1,15 +1,27 @@
-## 6.4.6
+## 6.4.7
 ### Features
 - Add support for mongo clusters enterprise edition
+
+## 6.4.6
+### Fixes
+- Fix `ipv6_ips` should not request a re-apply of the plan if `ipv6_cidr_block` is not set on the lan
+- Fix `dhcpv6` should not be set on server nic if IPv6 is not enabled on the lan
+- Fix `boot_cdrom` should not crash even if not set to an UUID
+### Documentation
+- Fix `inoscloud_image` docs to get cdrom image
+- Fix `boot_cdrom` - add description and examples
+### Features
+- Add support for `VCPU` servers
 
 ## 6.4.5
 ### Features
 - Make `nic` list in `ionoscloud_server` resource optional
 - Make `firewall` list in `ionoscloud_server` resource optional and allow multiple inline firewall rules in the list
+- Add ipv6 functionality for `ionoscloud_datacenter`, `ionoscloud_lan` and `ionoscloud_nic` resources
 
 ### Refactor
 - Separate `cloudapi` code from `ionoscloud` folder, to be able to write services easier.
-
+- Refactor validation to use `ValidateDiagFunc` instead of `ValidateFunc`, remove unnecessary usage of `validation.All()`
 ## 6.4.4
 
 ### Features

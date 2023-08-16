@@ -19,10 +19,10 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 		ReadContext: dataSourceDbaasPgSqlReadCluster,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:         schema.TypeString,
-				Description:  "The id of your cluster.",
-				Optional:     true,
-				ValidateFunc: validation.All(validation.IsUUID),
+				Type:             schema.TypeString,
+				Description:      "The id of your cluster.",
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"display_name": {
 				Type:        schema.TypeString,

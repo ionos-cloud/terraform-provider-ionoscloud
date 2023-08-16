@@ -72,6 +72,10 @@ func dataSourceDataCenter() *schema.Resource {
 					},
 				},
 			},
+			"ipv6_cidr_block": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}

@@ -25,9 +25,9 @@ func dataSourceLan() *schema.Resource {
 				Optional: true,
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"ip_failover": {
 				Type:     schema.TypeList,
@@ -51,6 +51,10 @@ func dataSourceLan() *schema.Resource {
 			},
 			"public": {
 				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"ipv6_cidr_block": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},

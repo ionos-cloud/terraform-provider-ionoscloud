@@ -42,6 +42,7 @@ func TestAccLanBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "ip_failover.ip", constant.LanResource+"."+constant.LanTestResource, "ip_failover.ip"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "pcc", constant.LanResource+"."+constant.LanTestResource, "pcc"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "public", constant.LanResource+"."+constant.LanTestResource, "public"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "ipv6_cidr_block", constant.LanResource+"."+constant.LanTestResource, "ipv6_cidr_block"),
 				),
 			},
 			{
@@ -52,6 +53,7 @@ func TestAccLanBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByName, "ip_failover.ip", constant.LanResource+"."+constant.LanTestResource, "ip_failover.ip"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByName, "pcc", constant.LanResource+"."+constant.LanTestResource, "pcc"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByName, "public", constant.LanResource+"."+constant.LanTestResource, "public"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByName, "ipv6_cidr_block", constant.LanResource+"."+constant.LanTestResource, "ipv6_cidr_block"),
 				),
 			},
 			{

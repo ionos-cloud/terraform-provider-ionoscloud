@@ -32,6 +32,7 @@ The following arguments are supported:
 * `sec_auth_protection` - (Optional) [bool] Boolean value representing if the data center requires extra protection e.g. two factor protection
 * `version` - (Computed) The version of that Data Center. Gets incremented with every change
 * `features` - (Computed) List of features supported by the location this data center is part of
+* `ipv6_cidr_block` - (Computed) The automatically-assigned /56 IPv6 CIDR block if IPv6 is enabled on this virtual data center
 * `cpu_architecture` - (Computed) Array of features and CPU families available in a location
   * `cpu_family` - A valid CPU family name
   * `max_cores` - The maximum number of cores available

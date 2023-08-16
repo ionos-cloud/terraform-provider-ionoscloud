@@ -29,23 +29,23 @@ func resourceBackupUnit() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "Alphanumeric name you want assigned to the backup unit.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "Alphanumeric name you want assigned to the backup unit.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"password": {
-				Type:         schema.TypeString,
-				Description:  "The password you want assigned to the backup unit.",
-				Required:     true,
-				Sensitive:    true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "The password you want assigned to the backup unit.",
+				Required:         true,
+				Sensitive:        true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"email": {
 				Type:             schema.TypeString,
 				Description:      "The e-mail address you want assigned to the backup unit.",
 				Required:         true,
-				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				DiffSuppressFunc: utils.DiffToLower,
 			},
 			"login": {
