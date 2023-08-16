@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	ionoscloud "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -208,12 +209,13 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.IntBetween(5120, 2097152), validation.IntDivisibleBy(1024))),
 			},
 			"storage_type": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Computed:         true,
-				ConflictsWith:    []string{"template_id"},
-				Description:      "The storage type. One of : HDD, SSD Standard, SSD Premium",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD Standard", "SSD Premium"}, false)),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"template_id"},
+				Description:   "The storage type. One of : HDD, SSD, SSD Standard, SSD Premium",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(ionoscloud.STORAGETYPE_HDD), string(ionoscloud.STORAGETYPE_SSD),
+					string(ionoscloud.STORAGETYPE_SSD_STANDARD), string(ionoscloud.STORAGETYPE_SSD_PREMIUM)}, false)),
 			},
 			"cores": {
 				Type:             schema.TypeInt,
