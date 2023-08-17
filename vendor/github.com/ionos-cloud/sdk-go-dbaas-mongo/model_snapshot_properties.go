@@ -169,15 +169,12 @@ func (o SnapshotProperties) MarshalJSON() ([]byte, error) {
 	if o.Version != nil {
 		toSerialize["version"] = o.Version
 	}
-
 	if o.Size != nil {
 		toSerialize["size"] = o.Size
 	}
-
 	if o.CreationTime != nil {
 		toSerialize["creationTime"] = o.CreationTime
 	}
-
 	return json.Marshal(toSerialize)
 }
 

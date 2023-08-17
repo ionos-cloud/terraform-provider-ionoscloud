@@ -120,11 +120,9 @@ func (o ErrorResponse) MarshalJSON() ([]byte, error) {
 	if o.HttpStatus != nil {
 		toSerialize["httpStatus"] = o.HttpStatus
 	}
-
 	if o.Messages != nil {
 		toSerialize["messages"] = o.Messages
 	}
-
 	return json.Marshal(toSerialize)
 }
 

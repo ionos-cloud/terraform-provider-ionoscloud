@@ -119,11 +119,9 @@ func (o UserRoles) MarshalJSON() ([]byte, error) {
 	if o.Role != nil {
 		toSerialize["role"] = o.Role
 	}
-
 	if o.Database != nil {
 		toSerialize["database"] = o.Database
 	}
-
 	return json.Marshal(toSerialize)
 }
 

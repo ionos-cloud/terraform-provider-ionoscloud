@@ -148,7 +148,7 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 						"recovery_target_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: " If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.",
+							Description: "If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.",
 						},
 					},
 				},
@@ -216,7 +216,7 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 
 	}
 
-	if err := dbaasService.SetDbaasPgSqlClusterData(d, cluster); err != nil {
+	if err := dbaasService.SetPgSqlClusterData(d, cluster); err != nil {
 		return diag.FromErr(err)
 	}
 

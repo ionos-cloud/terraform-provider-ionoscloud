@@ -17,8 +17,8 @@ import (
 // ClusterLogsInstances struct for ClusterLogsInstances
 type ClusterLogsInstances struct {
 	// The name of the MongoDB instance.
-	Name     *string                `json:"name,omitempty"`
-	Messages *[]ClusterLogsMessages `json:"messages,omitempty"`
+	Name     *string                         `json:"name,omitempty"`
+	Messages *[]ClusterLogsInstancesMessages `json:"messages,omitempty"`
 }
 
 // NewClusterLogsInstances instantiates a new ClusterLogsInstances object
@@ -78,8 +78,8 @@ func (o *ClusterLogsInstances) HasName() bool {
 }
 
 // GetMessages returns the Messages field value
-// If the value is explicit nil, the zero value for []ClusterLogsMessages will be returned
-func (o *ClusterLogsInstances) GetMessages() *[]ClusterLogsMessages {
+// If the value is explicit nil, the zero value for []ClusterLogsInstancesMessages will be returned
+func (o *ClusterLogsInstances) GetMessages() *[]ClusterLogsInstancesMessages {
 	if o == nil {
 		return nil
 	}
@@ -91,7 +91,7 @@ func (o *ClusterLogsInstances) GetMessages() *[]ClusterLogsMessages {
 // GetMessagesOk returns a tuple with the Messages field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterLogsInstances) GetMessagesOk() (*[]ClusterLogsMessages, bool) {
+func (o *ClusterLogsInstances) GetMessagesOk() (*[]ClusterLogsInstancesMessages, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -100,7 +100,7 @@ func (o *ClusterLogsInstances) GetMessagesOk() (*[]ClusterLogsMessages, bool) {
 }
 
 // SetMessages sets field value
-func (o *ClusterLogsInstances) SetMessages(v []ClusterLogsMessages) {
+func (o *ClusterLogsInstances) SetMessages(v []ClusterLogsInstancesMessages) {
 
 	o.Messages = &v
 
@@ -120,11 +120,9 @@ func (o ClusterLogsInstances) MarshalJSON() ([]byte, error) {
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Messages != nil {
 		toSerialize["messages"] = o.Messages
 	}
-
 	return json.Marshal(toSerialize)
 }
 

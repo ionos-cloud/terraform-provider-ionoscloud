@@ -161,15 +161,12 @@ func (o PaginationLinks) MarshalJSON() ([]byte, error) {
 	if o.Prev != nil {
 		toSerialize["prev"] = o.Prev
 	}
-
 	if o.Self != nil {
 		toSerialize["self"] = o.Self
 	}
-
 	if o.Next != nil {
 		toSerialize["next"] = o.Next
 	}
-
 	return json.Marshal(toSerialize)
 }
 

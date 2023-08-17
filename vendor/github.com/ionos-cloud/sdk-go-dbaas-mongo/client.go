@@ -50,7 +50,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.2.2"
+	Version = "1.3.1"
 )
 
 // APIClient manages communication with the IONOS DBaaS MongoDB REST API API v1.0.0
@@ -303,6 +303,9 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 		case http.StatusServiceUnavailable,
 			http.StatusGatewayTimeout,
 			http.StatusBadGateway:
+			if request.Method == http.MethodPost {
+				return resp, err
+			}
 			backoffTime = c.GetConfig().WaitTime
 
 		case http.StatusTooManyRequests:

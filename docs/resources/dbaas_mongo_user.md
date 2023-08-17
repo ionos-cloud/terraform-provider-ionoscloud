@@ -81,7 +81,7 @@ resource ionoscloud_mongo_user example_mongo_user {
 * `database` - (Required)[string] The user database to use for authentication. Updates to the value of the field force the cluster to be re-created.
 * `password` - (Required)[string] User password. Updates to the value of the field force the cluster to be re-created.
 * `roles` - (Required)[string] a list of mongodb user roles. Updates to the value of the field force the cluster to be re-created.
-    * `role` - (Required)[true] Mongodb user role. Examples: read, readWrite, readAnyDatabase, readWriteAnyDatabase, dbAdmin, dbAdminAnyDatabase and clusterMonitor.
+    * `role` - (Required)[true] Mongodb user role. Examples: read, readWrite, readAnyDatabase, readWriteAnyDatabase, dbAdmin, dbAdminAnyDatabase, clusterMonitor.
     * `database` - (Required)[true] Database on which to apply the role.
 
 **NOTE:** MongoDb users do not support update at the moment. Changing any attribute will result in the user being re-created.

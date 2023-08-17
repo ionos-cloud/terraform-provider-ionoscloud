@@ -195,7 +195,7 @@ github.com/ionos-cloud/sdk-go-container-registry
 # github.com/ionos-cloud/sdk-go-dataplatform v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dataplatform
-# github.com/ionos-cloud/sdk-go-dbaas-mongo v1.2.2
+# github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dbaas-mongo
 # github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2

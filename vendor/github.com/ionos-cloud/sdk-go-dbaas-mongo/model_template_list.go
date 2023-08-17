@@ -24,7 +24,7 @@ type TemplateList struct {
 	Offset *int32 `json:"offset,omitempty"`
 	// The limit specified in the request (if none was specified, the default limit is 100).
 	Limit *int32           `json:"limit,omitempty"`
-	Links *PaginationLinks `json:"links,omitempty"`
+	Links *PaginationLinks `json:"_links,omitempty"`
 }
 
 // NewTemplateList instantiates a new TemplateList object
@@ -287,27 +287,21 @@ func (o TemplateList) MarshalJSON() ([]byte, error) {
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-
 	if o.Offset != nil {
 		toSerialize["offset"] = o.Offset
 	}
-
 	if o.Limit != nil {
 		toSerialize["limit"] = o.Limit
 	}
-
 	if o.Links != nil {
-		toSerialize["links"] = o.Links
+		toSerialize["_links"] = o.Links
 	}
-
 	return json.Marshal(toSerialize)
 }
 

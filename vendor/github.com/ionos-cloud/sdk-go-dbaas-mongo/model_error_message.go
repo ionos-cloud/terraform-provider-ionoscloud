@@ -121,11 +121,9 @@ func (o ErrorMessage) MarshalJSON() ([]byte, error) {
 	if o.ErrorCode != nil {
 		toSerialize["errorCode"] = o.ErrorCode
 	}
-
 	if o.Message != nil {
 		toSerialize["message"] = o.Message
 	}
-
 	return json.Marshal(toSerialize)
 }
 

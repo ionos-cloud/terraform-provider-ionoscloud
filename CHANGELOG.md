@@ -1,5 +1,8 @@
-## 6.4.6
+## 6.4.7
+### Features
+- Add support for mongo clusters enterprise edition
 
+## 6.4.6
 ### Fixes
 - Fix `ipv6_ips` should not request a re-apply of the plan if `ipv6_cidr_block` is not set on the lan
 - Fix `dhcpv6` should not be set on server nic if IPv6 is not enabled on the lan

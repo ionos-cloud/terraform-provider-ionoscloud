@@ -119,11 +119,9 @@ func (o APIVersion) MarshalJSON() ([]byte, error) {
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.SwaggerUrl != nil {
 		toSerialize["swaggerUrl"] = o.SwaggerUrl
 	}
-
 	return json.Marshal(toSerialize)
 }
 

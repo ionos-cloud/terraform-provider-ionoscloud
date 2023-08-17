@@ -20,7 +20,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:             schema.TypeString,
-				Description:      "The id of your cluster.",
+				Description:      "The id of your cluster",
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
@@ -43,7 +43,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 			},
 			"mongodb_version": {
 				Type:        schema.TypeString,
-				Description: "The MongoDB version of your cluster.",
+				Description: "The MongoDB version of your cluster",
 				Computed:    true,
 			},
 			"instances": {
@@ -53,7 +53,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 			},
 			"display_name": {
 				Type:        schema.TypeString,
-				Description: "The friendly name of your cluster.",
+				Description: "The friendly name of your cluster",
 				Optional:    true,
 			},
 			"location": {
@@ -64,18 +64,18 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 			},
 			"connections": {
 				Type:        schema.TypeList,
-				Description: "Details about the network connection for your cluster.",
+				Description: "Details about the network connection for your cluster",
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"datacenter_id": {
 							Type:        schema.TypeString,
-							Description: "The datacenter to connect your cluster to.",
+							Description: "The datacenter to connect your cluster to",
 							Computed:    true,
 						},
 						"lan_id": {
 							Type:        schema.TypeString,
-							Description: "The LAN to connect your cluster to.",
+							Description: "The LAN to connect your cluster to",
 							Computed:    true,
 						},
 						"cidr_list": {
@@ -91,13 +91,152 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 			},
 			"template_id": {
 				Type:        schema.TypeString,
-				Description: "The unique ID of the template, which specifies the number of cores, storage size, and memory.",
+				Description: "The unique ID of the template, which specifies the number of cores, storage size, and memory",
 				Computed:    true,
 			},
 			"connection_string": {
 				Type:        schema.TypeString,
-				Description: "The connection string for your cluster.",
+				Description: "The connection string for your cluster",
 				Computed:    true,
+			},
+			//enterprise edition below
+			"type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The cluster type, either `replicaset` or `sharded-cluster`",
+			},
+			"shards": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The total number of shards in the cluster.",
+			},
+			"bi_connector": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Description: "The MongoDB Connector for Business Intelligence allows you to " +
+					"query a MongoDB database using SQL commands to aid in data analysis.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Enable or disable the BiConnector",
+						},
+						"host": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The host where this new BI Connector is installed",
+						},
+						"port": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Port number used when connecting to this new BI Connector",
+						},
+					},
+				},
+			},
+			"ram": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The amount of memory per instance in megabytes. Multiple of 1024",
+			},
+			"storage_size": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The amount of storage per instance in megabytes. At least 5120, at most 2097152",
+			},
+			"storage_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The storage type. One of : HDD, SSD Standard, SSD Premium",
+			},
+			"cores": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The number of CPU cores per instance.",
+			},
+			"edition": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The cluster edition. Examples: playground, business, enterprise",
+			},
+			// to be added when there is api support
+			//"from_backup": {
+			//	Type:        schema.TypeList,
+			//	Description: "Creates the cluster based on the existing backup.",
+			//	Computed:    true,
+			//	Elem: &schema.Resource{
+			//		Schema: map[string]*schema.Schema{
+			//			"snapshot_id": {
+			//				Type:        schema.TypeString,
+			//				Description: "The unique ID of the snapshot you want to restore",
+			//				Computed:    true,
+			//			},
+			//			"recovery_target_time": {
+			//				Type:        schema.TypeString,
+			//				Computed:    true,
+			//				Description: "If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp",
+			//			},
+			//		},
+			//	},
+			//},
+			"backup": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Backup related properties.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						//will be added at a later date
+						//"snapshot_interval_hours": {
+						//	Type:        schema.TypeInt,
+						//	Computed:    true,
+						//	Description: "Number of hours between snapshots.",
+						//},
+						//"point_in_time_window_hours": {
+						//	Type:        schema.TypeInt,
+						//	Computed:    true,
+						//	Description: "Number of hours in the past for which a point-in-time snapshot can be created.",
+						//},
+						//"backup_retention": {
+						//	Type:        schema.TypeList,
+						//	Description: "Backup retention related properties.",
+						//	Elem: &schema.Resource{
+						//		Schema: map[string]*schema.Schema{
+						//			"snapshot_retention_days": {
+						//				Type:             schema.TypeInt,
+						//				Optional:         true,
+						//				Description:      "Number of days to keep recent snapshots.",
+						//				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(2, 5)),
+						//			},
+						//			"daily_snapshot_retention_days": {
+						//				Type:             schema.TypeInt,
+						//				Optional:         true,
+						//				Description:      "Number of days to retain daily snapshots.",
+						//				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 365)),
+						//			},
+						//			"weekly_snapshot_retention_weeks": {
+						//				Type:             schema.TypeInt,
+						//				Optional:         true,
+						//				Description:      "Number of weeks to retain weekly snapshots.",
+						//				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 52)),
+						//			},
+						//			"monthly_snapshot_retention_months": {
+						//				Type:             schema.TypeInt,
+						//				Optional:         true,
+						//				Description:      "Number of months to retain monthly snapshots.",
+						//				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 36)),
+						//			},
+						//		},
+						//	},
+						//},
+						"location": {
+							Type:     schema.TypeString,
+							Computed: true,
+							Description: "The location where the cluster backups will be stored. " +
+								"If not set, the backup is stored in the nearest location of the cluster. Examples: de, eu-sounth-2, eu-central-2",
+						},
+					},
+				},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -157,7 +296,7 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 
 	}
 
-	if err := dbaasService.SetDbaasMongoDBClusterData(d, cluster); err != nil {
+	if err := dbaasService.SetMongoDBClusterData(d, cluster); err != nil {
 		return diag.FromErr(err)
 	}
 
