@@ -160,25 +160,26 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Computed:    true,
 				Description: "The cluster edition. Examples: playground, business, enterprise",
 			},
-			"from_backup": {
-				Type:        schema.TypeList,
-				Description: "Creates the cluster based on the existing backup.",
-				Computed:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"snapshot_id": {
-							Type:        schema.TypeString,
-							Description: "The unique ID of the snapshot you want to restore",
-							Computed:    true,
-						},
-						"recovery_target_time": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp",
-						},
-					},
-				},
-			},
+			// to be added when there is api support
+			//"from_backup": {
+			//	Type:        schema.TypeList,
+			//	Description: "Creates the cluster based on the existing backup.",
+			//	Computed:    true,
+			//	Elem: &schema.Resource{
+			//		Schema: map[string]*schema.Schema{
+			//			"snapshot_id": {
+			//				Type:        schema.TypeString,
+			//				Description: "The unique ID of the snapshot you want to restore",
+			//				Computed:    true,
+			//			},
+			//			"recovery_target_time": {
+			//				Type:        schema.TypeString,
+			//				Computed:    true,
+			//				Description: "If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp",
+			//			},
+			//		},
+			//	},
+			//},
 			"backup": {
 				Type:        schema.TypeList,
 				Computed:    true,

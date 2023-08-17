@@ -311,15 +311,15 @@ func SetMongoClusterCreateProperties(d *schema.ResourceData) (*mongo.CreateClust
 		edition := edition.(string)
 		mongoCluster.Properties.Edition = &edition
 	}
-
-	if _, ok := d.GetOk("from_backup"); ok {
-		var fromBackup *mongo.CreateRestoreRequest
-		fromBackup, err := GetMongoClusterFromBackupData(d)
-		if err != nil {
-			return nil, err
-		}
-		mongoCluster.Properties.FromBackup = fromBackup
-	}
+	// to be added when there is api support
+	//if _, ok := d.GetOk("from_backup"); ok {
+	//	var fromBackup *mongo.CreateRestoreRequest
+	//	fromBackup, err := GetMongoClusterFromBackupData(d)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	mongoCluster.Properties.FromBackup = fromBackup
+	//}
 
 	if _, ok := d.GetOk("backup"); ok {
 		var backup *mongo.BackupProperties

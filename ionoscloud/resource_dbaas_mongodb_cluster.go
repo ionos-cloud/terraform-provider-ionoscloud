@@ -232,26 +232,27 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				Description:      "The cluster edition. Must be one of: playground, business, enterprise",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"enterprise", "playground", "business"}, false)),
 			},
-			"from_backup": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Description: "Creates the cluster based on the existing backup.",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"snapshot_id": {
-							Type:        schema.TypeString,
-							Description: "The unique ID of the snapshot you want to restore.",
-							Computed:    true,
-						},
-						"recovery_target_time": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: " If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp.",
-						},
-					},
-				},
-			},
+			// to be added when there is api support
+			//"from_backup": {
+			//	Type:        schema.TypeList,
+			//	MaxItems:    1,
+			//	Description: "Creates the cluster based on the existing backup.",
+			//	Optional:    true,
+			//	Elem: &schema.Resource{
+			//		Schema: map[string]*schema.Schema{
+			//			"snapshot_id": {
+			//				Type:        schema.TypeString,
+			//				Description: "The unique ID of the snapshot you want to restore.",
+			//				Computed:    true,
+			//			},
+			//			"recovery_target_time": {
+			//				Type:        schema.TypeString,
+			//				Computed:    true,
+			//				Description: " If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp.",
+			//			},
+			//		},
+			//	},
+			//},
 			"backup": {
 				Type:        schema.TypeList,
 				MaxItems:    1,

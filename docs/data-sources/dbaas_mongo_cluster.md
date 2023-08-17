@@ -59,6 +59,3 @@ The following attributes are returned by the datasource:
 * `cores`        - The number of CPU cores per replica. Required for enterprise edition.
 * `backup` 
   * `location`: The location where the cluster backups will be stored. If not set, the backup is stored in the nearest location of the cluster. Possible values are de, eu-south-2, or eu-central-2.
-* `from_backup` - The unique ID of the backup you want to restore. This attribute is immutable(disallowed in update requests).
-  * `snapshot_id` - The snapshot id that will be used.
-  * `recovery_target_time` - If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
