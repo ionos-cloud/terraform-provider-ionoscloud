@@ -116,7 +116,6 @@ resource "random_password" "cluster_password" {
     * `datacenter_id` - (Required)[true] The datacenter to connect your cluster to.
     * `lan_id` - (Required)[true] The LAN to connect your cluster to.
     * `cidr` - (Required)[true] The IP and subnet for the database. Must be same number as instances. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24. Please input in the correct format like IP/Subnet, exp: 192.168.10.0/24. See [Private IPs](https://www.ionos.com/help/server-cloud-infrastructure/private-network/private-ip-address-ranges/) and [Cluster Setup - Preparing the network](https://docs.ionos.com/reference/product-information/api-automation-guides/database-as-a-service/create-a-database#preparing-the-network).
-    * `whitelist` - (Optional)[true] List of whitelisted CIDRs
 * `maintenance_window` - (Optional)[string] A weekly 4 hour-long window, during which maintenance might occur.  Updates to the value of the field force the cluster to be re-created.
     * `time` - (Required)[string]
     * `day_of_the_week` - (Required)[string]
