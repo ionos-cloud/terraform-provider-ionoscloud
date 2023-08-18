@@ -145,6 +145,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   public = false
   name = "` + constant.UpdatedResources + `"
   pcc = ` + constant.PCCResource + `.` + constant.PCCTestResource + `.id
+  ipv6_cidr_block = cidrsubnet(` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.ipv6_cidr_block` + `,8,2)
 }`
 
 const testAccDataSourceLanMatchId = testAccCheckLanConfigBasic + `
