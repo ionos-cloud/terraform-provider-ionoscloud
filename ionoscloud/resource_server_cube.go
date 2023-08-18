@@ -232,13 +232,13 @@ func resourceCubeServer() *schema.Resource {
 							Optional: true,
 						},
 						"dhcp": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"dhcpv6": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Indicates whether this NIC receives an IPv6 address through DHCP.",
-						},
-						"dhcpv6": {
-							Type:     schema.TypeBool,
-							Optional: true,
 						},
 						"ipv6_cidr_block": {
 							Type:        schema.TypeString,
