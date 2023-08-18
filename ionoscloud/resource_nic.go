@@ -294,6 +294,11 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 		}
 	}
 
+	if v, ok := d.GetOk(path + "ipv6_cidr_block"); ok {
+		ipv6_block := v.(string)
+		nic.Properties.Ipv6CidrBlock = &ipv6_block
+	}
+
 	return nic
 }
 
