@@ -339,13 +339,15 @@ func resourceServer() *schema.Resource {
 							Optional: true,
 						},
 						"dhcpv6": {
-							Type:     schema.TypeBool,
-							Optional: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Indicates whether this NIC receives an IPv6 address through DHCP.",
 						},
 						"ipv6_cidr_block": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "IPv6 CIDR block assigned to the NIC.",
 						},
 						"ips": {
 							Type: schema.TypeList,
@@ -358,10 +360,11 @@ func resourceServer() *schema.Resource {
 							Optional:    true,
 						},
 						"ipv6_ips": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Computed:    true,
+							Description: "Collection for IPv6 addresses assigned to a nic. Explicitly assigned IPv6 addresses need to come from inside the IPv6 CIDR block assigned to the nic.",
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
