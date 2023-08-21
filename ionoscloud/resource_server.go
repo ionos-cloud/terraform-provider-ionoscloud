@@ -782,6 +782,9 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ips"] = *nic.Properties.Ips
 		}
+		if nic.Properties.Ipv6Ips != nil {
+			network["ipv6_ips"] = *nic.Properties.Ipv6Ips
+		}
 	}
 	return network
 }
@@ -995,7 +998,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			if v, ok := d.GetOk("nic.0.ipv6_cidr_block"); ok {
 				ipv6_block := v.(string)
-				nic.Properties.Ipv6CidrBlock = &ipv6_block
+				nicProperties.Ipv6CidrBlock = &ipv6_block
 			}
 
 			if v, ok := d.GetOk("nic.0.ips"); ok {
@@ -1019,7 +1022,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				ipv6_ips := make([]string, len(raw))
 				utils.DecodeInterfaceToStruct(raw, ipv6_ips)
 				if len(ipv6_ips) > 0 {
-					nic.Properties.Ipv6Ips = &ipv6_ips
+					nicProperties.Ipv6Ips = &ipv6_ips
 				}
 			}
 
