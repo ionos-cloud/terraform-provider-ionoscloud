@@ -236,6 +236,12 @@ resource ` + constant.NicResource + ` "database_nic" {
   firewall_type = "BIDIRECTIONAL"
   ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
   name = "updated"
+  ipv6_cidr_block = cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12)
+  ipv6_ips = [ 
+				cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12),1),
+				cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12),2),
+				cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12),3)
+			]
 }
 `
 const dataSourceNicById = constant.NicResource + ".test_nic_data"
