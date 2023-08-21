@@ -27,6 +27,13 @@ resource "ionoscloud_ipblock" "example" {
     name                = "IP Block Example"
 }
 
+resource "ionoscloud_lan" "example"{
+  datacenter_id     = ionoscloud_datacenter.example.id
+  public            = true
+  name              = "Lan"
+  ipv6_cidr_block   = cidrsubnet(ionoscloud_datacenter.example.ipv6_cidr_block,8,2)
+}
+
 resource "ionoscloud_server" "example" {
     name                  = "Server Example"
     datacenter_id         = ionoscloud_datacenter.example.id
@@ -51,13 +58,22 @@ resource "ionoscloud_server" "example" {
 resource "ionoscloud_nic" "example" {
     datacenter_id         = ionoscloud_datacenter.example.id
     server_id             = ionoscloud_server.example.id
-    name                  = "Nic Example"
+    lan                   = ionoscloud_lan.example.id
+    name                  = "IPv6 Enabled NIC"
     lan                   = 2
     dhcp                  = true
     firewall_active       = true
     firewall_type         = "INGRESS"
     ips                   = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
+    dhcpv6                = false
+    ipv6_cidr_block       = cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14)
+    ipv6_ips              = [ 
+                              cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),10),
+                              cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),20),
+                              cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),30)
+                            ]
 }
+
 resource "random_password" "server_image_password" {
   length           = 16
   special          = false
