@@ -96,6 +96,8 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcpv6", "false"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_active", "false"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_type", "BIDIRECTIONAL"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
 				),
 			},
 		},
@@ -242,6 +244,12 @@ resource ` + constant.NicResource + ` "database_nic" {
 				cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12),2),
 				cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12),3)
 			]
+}
+
+data ` + constant.NicResource + ` test_nic_data {
+	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+	id = ` + constant.FullNicResourceName + `.id
 }
 `
 const dataSourceNicById = constant.NicResource + ".test_nic_data"
