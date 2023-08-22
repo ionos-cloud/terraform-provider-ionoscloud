@@ -1,4 +1,8 @@
 ## 6.4.7
+### Fixes
+- Fix setting explicit `ipv6_cidr_block` on `nic` resource.
+
+## 6.4.7
 ### Features
 - Add support for mongo clusters enterprise edition
 
