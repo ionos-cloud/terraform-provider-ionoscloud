@@ -149,8 +149,8 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   ipv6_cidr_block = cidrsubnet(` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.ipv6_cidr_block` + `,8,2)
 }
 data ` + constant.LanResource + ` ` + constant.LanDataSourceById + ` {
-	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-	id			= ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
 }
 `
 
