@@ -100,6 +100,13 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
 				),
 			},
+			{
+				Config: testAccCheckNicConfigUpdateIpv6,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
+				),
+			},
 		},
 	})
 }
@@ -252,6 +259,32 @@ data ` + constant.NicResource + ` test_nic_data {
   id = ` + constant.FullNicResourceName + `.id
 }
 `
+
+const testAccCheckNicConfigUpdateIpv6 = testCreateDataCenterAndServer + `
+resource ` + constant.NicResource + ` "database_nic" {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  lan = "${ionoscloud_lan.test_lan_2.id}"
+  dhcp = false
+  dhcpv6 = false
+  firewall_active = false
+  firewall_type = "BIDIRECTIONAL"
+  ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
+  name = "updated"
+  ipv6_cidr_block = cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,16)
+  ipv6_ips = [ 
+                cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,16),10),
+                cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,16),30)
+             ]
+}
+
+data ` + constant.NicResource + ` test_nic_data {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  id = ` + constant.FullNicResourceName + `.id
+}
+`
+
 const dataSourceNicById = constant.NicResource + ".test_nic_data"
 
 const testAccDataSourceNicMatchId = testAccCheckNicConfigBasic + `
