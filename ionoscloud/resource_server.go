@@ -12,6 +12,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/firewallSvc"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -132,8 +133,6 @@ func resourceServer() *schema.Resource {
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				ConflictsWith: []string{"volume.0.ssh_key_path", "volume.0.ssh_keys", "ssh_keys"},
 				Optional:      true,
-				Computed:      true,
-				ForceNew:      true,
 				Deprecated:    "Will be renamed to ssh_keys in the future, to allow users to set both the ssh key path or directly the ssh key",
 				Description:   "Immutable List of absolute or relative paths to files containing public SSH key that will be injected into IonosCloud provided Linux images. Does not support `~` expansion to homedir in the given path. Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation. This property is immutable.",
 			},
@@ -201,7 +200,6 @@ func resourceServer() *schema.Resource {
 							Optional:    true,
 							Deprecated:  "Please use ssh_key_path under server level",
 							Description: "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
-							Computed:    true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if k == "volume.0.ssh_key_path.#" {
 									if d.Get("ssh_key_path.#") == new {
@@ -521,8 +519,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
+	serverType := d.Get("type").(string)
+
 	// create volume object with data to be used for image
-	volume, err := getVolumeData(d, "volume.0.")
+	volume, err := getVolumeData(d, "volume.0.", serverType)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -1470,7 +1470,9 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			entry := SetVolumeProperties(volume)
 			userData := d.Get("volume.0.user_data")
 			entry["user_data"] = userData
-
+			if *server.Properties.Type != constant.VCPUType {
+				entry["ssh_key_path"] = d.Get("volume.0.ssh_key_path")
+			}
 			backupUnit := d.Get("volume.0.backup_unit_id")
 			entry["backup_unit_id"] = backupUnit
 			volumes = append(volumes, entry)
