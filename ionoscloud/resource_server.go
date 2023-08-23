@@ -661,9 +661,11 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 	if foundServer.Entities.Nics.Items != nil {
 		if len(*foundServer.Entities.Nics.Items) > 0 {
+			// what we get from backend
 			foundFirstNic := (*foundServer.Entities.Nics.Items)[0]
 			var orderedRuleIds []string
 			if foundFirstNic.Entities != nil && foundFirstNic.Entities.Firewallrules != nil && foundFirstNic.Entities.Firewallrules.Items != nil {
+				// we get from schema and we to API
 				sentFirstNic := (*serverReq.Entities.Nics.Items)[0]
 
 				if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
