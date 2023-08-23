@@ -1,3 +1,8 @@
+## 6.4.8
+### Fixes
+- `primary_nic` in `ionoscloud_server` should be set on creation
+
+
 ## 6.4.7
 ### Features
 - Add support for mongo clusters enterprise edition

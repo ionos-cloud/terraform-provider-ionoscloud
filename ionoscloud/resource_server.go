@@ -692,9 +692,9 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					return diags
 				}
 			}
-			sentFirstNicProps := (*serverReq.Entities.Nics.Items)[0].Properties
-			if sentFirstNicProps != nil {
-				firstNicIps := sentFirstNicProps.Ips
+			foundNicProps := foundFirstNic.Properties
+			if foundNicProps != nil {
+				firstNicIps := foundNicProps.Ips
 				if firstNicIps != nil &&
 					len(*firstNicIps) > 0 {
 					log.Printf("[DEBUG] set primary_ip to %s", (*firstNicIps)[0])
@@ -706,7 +706,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 				volumeItems := serverReq.Entities.Volumes.Items
 				firstVolumeItem := (*volumeItems)[0]
-				if sentFirstNicProps.Ips != nil &&
+				if foundNicProps.Ips != nil &&
 					len(*firstNicIps) > 0 &&
 					volumeItems != nil &&
 					len(*volumeItems) > 0 &&
