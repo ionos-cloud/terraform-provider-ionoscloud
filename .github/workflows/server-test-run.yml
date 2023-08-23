@@ -1,0 +1,29 @@
+name: Test run for server resources
+on:
+  schedule:
+    # At 11:00:00 - UTC, every Monday, Wednesday and Friday
+    - cron: '0 11 * * MON,WED,FRI'
+
+jobs:
+  test:
+    env:
+      IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
+      IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
+      TF_ACC: true
+      TF_LOG: debug
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: master
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+      - name: Run tests with `server` tag
+        run: go test ./ionoscloud -v -failfast -timeout 240m -tags server
