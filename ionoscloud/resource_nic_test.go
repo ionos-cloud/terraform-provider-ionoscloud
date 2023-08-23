@@ -96,6 +96,15 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcpv6", "false"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_active", "false"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_type", "BIDIRECTIONAL"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
+				),
+			},
+			{
+				Config: testAccCheckNicConfigUpdateIpv6,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
 				),
 			},
 		},
@@ -171,8 +180,8 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 
 const testCreateDataCenterAndServer = `
 resource "ionoscloud_datacenter" "test_datacenter" {
-	name       = "nic-test"
-	location = "us/las"
+  name = "nic-test"
+  location = "us/las"
 }
 resource "ionoscloud_ipblock" "test_server" {
   location = ionoscloud_datacenter.test_datacenter.location
@@ -236,8 +245,46 @@ resource ` + constant.NicResource + ` "database_nic" {
   firewall_type = "BIDIRECTIONAL"
   ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
   name = "updated"
+  ipv6_cidr_block = cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12)
+  ipv6_ips = [ 
+                cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12),1),
+                cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12),2),
+                cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12),3)
+             ]
+}
+
+data ` + constant.NicResource + ` test_nic_data {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  id = ` + constant.FullNicResourceName + `.id
 }
 `
+
+const testAccCheckNicConfigUpdateIpv6 = testCreateDataCenterAndServer + `
+resource ` + constant.NicResource + ` "database_nic" {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  lan = "${ionoscloud_lan.test_lan_2.id}"
+  dhcp = false
+  dhcpv6 = false
+  firewall_active = false
+  firewall_type = "BIDIRECTIONAL"
+  ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
+  name = "updated"
+  ipv6_cidr_block = cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,16)
+  ipv6_ips = [ 
+                cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,16),10),
+                cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,16),30)
+             ]
+}
+
+data ` + constant.NicResource + ` test_nic_data {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  id = ` + constant.FullNicResourceName + `.id
+}
+`
+
 const dataSourceNicById = constant.NicResource + ".test_nic_data"
 
 const testAccDataSourceNicMatchId = testAccCheckNicConfigBasic + `
@@ -250,24 +297,24 @@ data ` + constant.NicResource + ` test_nic_data {
 
 const testAccDataSourceNicMatchName = testAccCheckNicConfigBasic + `
 data ` + constant.NicResource + ` test_nic_data {
-  	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
-	name = ` + constant.FullNicResourceName + `.name 
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  name = ` + constant.FullNicResourceName + `.name 
 }`
 
 const testAccDataSourceNicMatchNameError = testAccCheckNicConfigBasic + `
 data ` + constant.NicResource + ` test_nic_data {
-  	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
-	name = "DoesNotExist"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  name = "DoesNotExist"
 }`
 
 const testAccDataSourceNicMatchIdAndNameError = testAccCheckNicConfigBasic + `
 data ` + constant.NicResource + ` test_nic_data {
-  	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
-	id = ` + constant.FullNicResourceName + `.id
-	name = "doesNotExist"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  id = ` + constant.FullNicResourceName + `.id
+  name = "doesNotExist"
 }`
 
 const testAccDataSourceNicMultipleResultsError = testAccCheckNicConfigBasic + `
@@ -288,7 +335,7 @@ resource ` + constant.NicResource + ` "database_nic_multiple_results" {
 }
 
 data ` + constant.NicResource + ` test_nic_data {
-  	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
-	name = ` + constant.FullNicResourceName + `.name 
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  name = ` + constant.FullNicResourceName + `.name 
 }`
