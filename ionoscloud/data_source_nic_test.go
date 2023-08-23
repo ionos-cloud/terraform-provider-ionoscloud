@@ -78,10 +78,10 @@ func Test_dataSourceNicRead(t *testing.T) {
 		t.Fatalf("expected '%t', got '%s'", *nic.Properties.Dhcp, data.Get("dhcp"))
 	}
 	if *nic.Properties.Dhcpv6 != data.Get("dhcpv6").(bool) {
-		t.Fatalf("expected '%t', got '%s'", *nic.Properties.Dhcp, data.Get("dhcp"))
+		t.Fatalf("expected '%t', got '%s'", *nic.Properties.Dhcpv6, data.Get("dhcpv6"))
 	}
 	if *nic.Properties.Ipv6CidrBlock != data.Get("ipv6_cidr_block").(string) {
-		t.Fatalf("expected '%t', got '%s'", *nic.Properties.Dhcp, data.Get("dhcp"))
+		t.Fatalf("expected '%t', got '%s'", *nic.Properties.Ipv6CidrBlock, data.Get("ipv6CidrBlock"))
 	}
 	if *nic.Properties.FirewallActive != data.Get("firewall_active").(bool) {
 		t.Fatalf("expected '%t', got '%s'", *nic.Properties.FirewallActive, data.Get("firewallActive"))
