@@ -1,3 +1,8 @@
+### Fixes
+- `ssh_keys` was no longer being set if server was not vcpu.
+- `ssh_keys` will no longer be computed on any type of server
+- `ssh_key_path` will now be set to schema on creation
+
 ## 6.4.7
 ### Features
 - Add support for mongo clusters enterprise edition
