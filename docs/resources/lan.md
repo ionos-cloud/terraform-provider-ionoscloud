@@ -34,6 +34,24 @@ resource "ionoscloud_lan" "example" {
 }
 ```
 
+## Example Usage With IPv6 Enabled
+
+```hcl
+resource "ionoscloud_datacenter" "example" {
+  name                  = "Datacenter Example"
+  location              = "de/txl"
+  description           = "Datacenter Description"
+  sec_auth_protection   = false
+}
+
+resource "ionoscloud_lan" "example" {
+  datacenter_id         = ionoscloud_datacenter.example.id
+  public                = true
+  name                  = "Lan IPv6 Example"
+  ipv6_cidr_block       = "AUTO"
+}
+```
+
 ## Argument reference
 
 * `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.

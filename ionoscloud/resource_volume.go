@@ -3,9 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"log"
 	"strings"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -200,7 +201,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	serverId := d.Get("server_id").(string)
 
 	// create volume object with data to be used for image
-	volumeProperties, err := getVolumeData(d, "")
+	volumeProperties, err := getVolumeData(d, "", "")
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -599,13 +600,10 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 	return nil
 
 }
-func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumeProperties, error) {
+func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud.VolumeProperties, error) {
 	volume := ionoscloud.VolumeProperties{}
-
 	volumeType := d.Get(path + "disk_type").(string)
 	volume.Type = &volumeType
-
-	serverType, serverTypeOk := d.GetOk("type")
 
 	if v, ok := d.GetOk(path + "availability_zone"); ok {
 		vStr := v.(string)
@@ -647,38 +645,18 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 
 	var sshKeys []interface{}
 
-	if serverTypeOk && serverType.(string) != constant.VCPUType {
+	if serverType != constant.VCPUType {
 		if v, ok := d.GetOk(path + "ssh_key_path"); ok {
 			sshKeys = v.([]interface{})
-			if err := d.Set("ssh_key_path", sshKeys); err != nil {
-				return nil, err
-			}
 		} else if v, ok := d.GetOk("ssh_key_path"); ok {
 			sshKeys = v.([]interface{})
-			if err := d.Set("ssh_key_path", sshKeys); err != nil {
-				return nil, err
-			}
-		} else {
-			if err := d.Set("ssh_key_path", [][]string{}); err != nil {
-				return nil, err
-			}
 		}
 	}
 
 	if v, ok := d.GetOk(path + "ssh_keys"); ok {
 		sshKeys = v.([]interface{})
-		if err := d.Set("ssh_keys", sshKeys); err != nil {
-			return nil, err
-		}
 	} else if v, ok := d.GetOk("ssh_keys"); ok {
 		sshKeys = v.([]interface{})
-		if err := d.Set("ssh_keys", sshKeys); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := d.Set("ssh_keys", [][]string{}); err != nil {
-			return nil, err
-		}
 	}
 
 	if len(sshKeys) != 0 {
@@ -746,7 +724,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 
 			if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) && isSnapshot == false &&
 				(img == nil || (img.Properties.Public != nil && *img.Properties.Public)) {
-				return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
+				return image, imageAlias, fmt.Errorf("volume, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
 			}
 		} else {
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageName).Execute()
@@ -995,7 +973,7 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 			} else {
 				if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 					if imagePassword == "" && len(sshKeyPath) == 0 {
-						diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'sshkey' must be provided"))
+						diags := diag.FromErr(fmt.Errorf("getImageAlias either 'image_password' or 'sshkey' must be provided"))
 						return image, imageAlias, isSnapshot, diags
 					}
 				}

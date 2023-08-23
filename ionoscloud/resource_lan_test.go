@@ -70,6 +70,7 @@ func TestAccLanBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.LanResource+"."+constant.LanTestResource, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(constant.LanResource+"."+constant.LanTestResource, "public", "false"),
 					resource.TestCheckResourceAttrPair(constant.LanResource+"."+constant.LanTestResource, "pcc", constant.PCCResource+"."+constant.PCCTestResource, "id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "ipv6_cidr_block", constant.LanResource+"."+constant.LanTestResource, "ipv6_cidr_block"),
 				),
 			},
 		},
@@ -145,7 +146,13 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   public = false
   name = "` + constant.UpdatedResources + `"
   pcc = ` + constant.PCCResource + `.` + constant.PCCTestResource + `.id
-}`
+  ipv6_cidr_block = cidrsubnet(` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.ipv6_cidr_block` + `,8,2)
+}
+data ` + constant.LanResource + ` ` + constant.LanDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+}
+`
 
 const testAccDataSourceLanMatchId = testAccCheckLanConfigBasic + `
 data ` + constant.LanResource + ` ` + constant.LanDataSourceById + ` {
