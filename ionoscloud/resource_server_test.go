@@ -19,7 +19,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-const bootCdromImageId = "83f21679-3321-11eb-a681-1e659523cb7b"
+const bootCdromImageId = "aa97f2f4-ca28-11ec-925c-46570854dba1"
 
 //ToDo: add backup unit back in tests when stable
 

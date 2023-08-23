@@ -1,5 +1,8 @@
 ## 6.4.8
 ### Fixes
+- `ssh_keys` was no longer being set if server was not vcpu.
+- `ssh_keys` will no longer be computed on any type of server
+- `ssh_key_path` will now be set to schema on creation
 - Fix setting explicit `ipv6_cidr_block` on `nic` resource.
 
 ## 6.4.7
