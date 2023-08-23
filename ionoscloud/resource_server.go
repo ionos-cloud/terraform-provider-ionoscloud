@@ -661,9 +661,11 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 	if foundServer.Entities.Nics.Items != nil {
 		if len(*foundServer.Entities.Nics.Items) > 0 {
+			// what we get from backend
 			foundFirstNic := (*foundServer.Entities.Nics.Items)[0]
 			var orderedRuleIds []string
 			if foundFirstNic.Entities != nil && foundFirstNic.Entities.Firewallrules != nil && foundFirstNic.Entities.Firewallrules.Items != nil {
+				// what we get from schema and send to the API
 				sentFirstNic := (*serverReq.Entities.Nics.Items)[0]
 
 				if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
@@ -692,9 +694,9 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					return diags
 				}
 			}
-			sentFirstNicProps := (*serverReq.Entities.Nics.Items)[0].Properties
-			if sentFirstNicProps != nil {
-				firstNicIps := sentFirstNicProps.Ips
+			foundNicProps := foundFirstNic.Properties
+			if foundNicProps != nil {
+				firstNicIps := foundNicProps.Ips
 				if firstNicIps != nil &&
 					len(*firstNicIps) > 0 {
 					log.Printf("[DEBUG] set primary_ip to %s", (*firstNicIps)[0])
@@ -706,7 +708,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 				volumeItems := serverReq.Entities.Volumes.Items
 				firstVolumeItem := (*volumeItems)[0]
-				if sentFirstNicProps.Ips != nil &&
+				if foundNicProps.Ips != nil &&
 					len(*firstNicIps) > 0 &&
 					volumeItems != nil &&
 					len(*volumeItems) > 0 &&
