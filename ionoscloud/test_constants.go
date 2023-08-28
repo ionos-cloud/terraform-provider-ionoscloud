@@ -428,12 +428,80 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
       target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
       type = "EGRESS"
     }
-    dhcpv6 = false
+    dhcpv6 = true
     ipv6_cidr_block = cidrsubnet(` + constant.LanResource + `.` + constant.LanTestResource + `.ipv6_cidr_block,16,10)
     ipv6_ips        = [ 
                         cidrhost(cidrsubnet(` + constant.LanResource + `.` + constant.LanTestResource + `.ipv6_cidr_block,16,10),1),
                         cidrhost(cidrsubnet(` + constant.LanResource + `.` + constant.LanTestResource + `.ipv6_cidr_block,16,10),2),
                         cidrhost(cidrsubnet(` + constant.LanResource + `.` + constant.LanTestResource + `.ipv6_cidr_block,16,10),3)
+                      ]
+  }
+}
+` + ServerImagePassword + `
+
+data ` + constant.ServerResource + ` ` + constant.ServerDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+}
+`
+
+const testAccCheckServerConfigIpv6Update = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+  ipv6_cidr_block = cidrsubnet(` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.ipv6_cidr_block` + `,8,20)
+}
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name ="ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  type = "ENTERPRISE"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+    firewall_type = "BIDIRECTIONAL"
+    ips  = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+      source_mac = "00:0a:95:9d:68:17"
+      source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
+      target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
+      type = "EGRESS"
+    }
+    dhcpv6 = false
+    ipv6_cidr_block = cidrsubnet(` + constant.LanResource + `.` + constant.LanTestResource + `.ipv6_cidr_block,16,24)
+    ipv6_ips        = [ 
+                        cidrhost(cidrsubnet(` + constant.LanResource + `.` + constant.LanTestResource + `.ipv6_cidr_block,16,24),11),
+                        cidrhost(cidrsubnet(` + constant.LanResource + `.` + constant.LanTestResource + `.ipv6_cidr_block,16,24),12),
+                        cidrhost(cidrsubnet(` + constant.LanResource + `.` + constant.LanTestResource + `.ipv6_cidr_block,16,24),13)
                       ]
   }
 }

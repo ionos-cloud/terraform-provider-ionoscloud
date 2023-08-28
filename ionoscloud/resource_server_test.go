@@ -236,6 +236,22 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type", "INGRESS"),
 				),
 			},
+			{
+				Config: testAccCheckServerConfigIpv6Enabled,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcpv6", "true"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_cidr_block", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips"),
+				),
+			},
+			{
+				Config: testAccCheckServerConfigIpv6Update,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcpv6", "false"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_cidr_block", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips"),
+				),
+			},
 		},
 	})
 }
