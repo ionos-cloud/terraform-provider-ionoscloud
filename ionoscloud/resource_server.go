@@ -1021,10 +1021,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			if v, ok := d.GetOk("nic.0.ipv6_ips"); ok {
 				raw := v.([]interface{})
-				ipv6_ips := make([]string, len(raw))
-				utils.DecodeInterfaceToStruct(raw, ipv6_ips)
-				if len(ipv6_ips) > 0 {
-					nicProperties.Ipv6Ips = &ipv6_ips
+				ipv6Ips := make([]string, len(raw))
+				utils.DecodeInterfaceToStruct(raw, ipv6Ips)
+				if len(ipv6Ips) > 0 {
+					nicProperties.Ipv6Ips = &ipv6Ips
 				}
 			}
 
@@ -1032,11 +1032,13 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			fwRule := d.Get("nic.0.firewall_active").(bool)
 			nicProperties.Dhcp = &dhcp
 			nicProperties.FirewallActive = &fwRule
-			if dhcpv6, ok := d.GetOk("nic.0.dhcpv6"); ok {
-				dhcpv6 := dhcpv6.(bool)
-				nicProperties.Dhcpv6 = &dhcpv6
-			} else {
-				nicProperties.SetDhcpv6Nil()
+			if d.HasChange("nic.0.dhcpv6") {
+				if dhcpv6, ok := d.GetOkExists("nic.0.dhcpv6"); ok {
+					dhcpv6 := dhcpv6.(bool)
+					nicProperties.Dhcpv6 = &dhcpv6
+				} else {
+					nicProperties.SetDhcpv6Nil()
+				}
 			}
 
 			if v, ok := d.GetOk("nic.0.firewall_type"); ok {
