@@ -3,11 +3,12 @@ package cloudapi
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"log"
-	"time"
 )
 
 // GetStateChangeConf gets the default configuration for tracking a request progress
@@ -18,8 +19,8 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, location strin
 		Refresh:        resourceStateRefreshFunc(meta, location),
 		Timeout:        d.Timeout(timeoutType),
 		MinTimeout:     5 * time.Second,
-		Delay:          0,   // Don't delay the start
-		NotFoundChecks: 600, //Setting high number, to support long timeouts
+		Delay:          0,    // Don't delay the start
+		NotFoundChecks: 9999, //Setting high number, to support long timeouts
 	}
 
 	return stateConf
