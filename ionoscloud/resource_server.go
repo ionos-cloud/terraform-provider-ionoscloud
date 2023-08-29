@@ -996,8 +996,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 
 			if v, ok := d.GetOk("nic.0.ipv6_cidr_block"); ok {
-				ipv6_block := v.(string)
-				nicProperties.Ipv6CidrBlock = &ipv6_block
+				ipv6Block := v.(string)
+				nicProperties.Ipv6CidrBlock = &ipv6Block
 			}
 
 			if v, ok := d.GetOk("nic.0.ips"); ok {
