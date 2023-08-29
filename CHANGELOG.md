@@ -5,6 +5,7 @@
 - `ssh_keys` will no longer be computed on any type of server
 - `ssh_key_path` will now be set to schema on creation
 - Fix setting explicit `ipv6_cidr_block` on `nic` resource.
+- Fix setting ipv6 fields on `ionoscloud_server` and `ionoscloud_cube_server`
 
 ## 6.4.7
 ### Features
