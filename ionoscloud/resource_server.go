@@ -1019,7 +1019,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			if v, ok := d.GetOk("nic.0.ipv6_ips"); ok {
 				raw := v.([]interface{})
 				ipv6Ips := make([]string, len(raw))
-				utils.DecodeInterfaceToStruct(raw, ipv6Ips)
+				if err := utils.DecodeInterfaceToStruct(raw, ipv6Ips); err != nil {
+					diags := diag.FromErr(err)
+					return diags
+				}
 				if len(ipv6Ips) > 0 {
 					nicProperties.Ipv6Ips = &ipv6Ips
 				}
