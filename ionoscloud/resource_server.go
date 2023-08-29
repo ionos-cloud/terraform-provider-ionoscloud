@@ -784,9 +784,6 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ips"] = *nic.Properties.Ips
 		}
-		if nic.Properties.Ipv6Ips != nil {
-			network["ipv6_ips"] = *nic.Properties.Ipv6Ips
-		}
 	}
 	return network
 }
