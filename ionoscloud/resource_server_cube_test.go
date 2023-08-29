@@ -149,6 +149,28 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type", "EGRESS"),
 				),
 			},
+			{
+				Config: testAccCheckCubeServerEnableIpv6,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.dhcpv6", "true"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.dhcpv6", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.dhcpv6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_cidr_block", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.0", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.1", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.1"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.2", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.2"),
+				),
+			},
+			{
+				Config: testAccCheckCubeServerUpdateIpv6,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.dhcpv6", "false"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.dhcpv6", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.dhcpv6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_cidr_block", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.0", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.1", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.1"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.2", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.2"),
+				),
+			},
 		},
 	})
 }
