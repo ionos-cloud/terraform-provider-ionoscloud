@@ -904,7 +904,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 
-		if v, ok := d.GetOk("ic.0.ipv6_cidr_block"); ok {
+		if v, ok := d.GetOk("nic.0.ipv6_cidr_block"); ok {
 			ipv6Block := v.(string)
 			properties.Ipv6CidrBlock = &ipv6Block
 		}
