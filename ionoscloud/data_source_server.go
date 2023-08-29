@@ -374,7 +374,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				entry["ipv6_ips"] = ipv6Ips
 			}
 
-			entry["ipv6_cidr_block"] = mongo.ToValueDefault(nic.Properties.Ipv6CidrBlock)
+			entry["ipv6_cidr_block"] = ionoscloud.ToValueDefault(nic.Properties.Ipv6CidrBlock)
 			entry["dhcpv6"] = boolOrDefault(nic.Properties.Dhcpv6, false)
 			entry["dhcp"] = boolOrDefault(nic.Properties.Dhcp, false)
 			entry["lan"] = int32OrDefault(nic.Properties.Lan, 0)
