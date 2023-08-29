@@ -1013,8 +1013,9 @@ resource "random_string" "simple_string" {
 }
 `
 
-const K8sVersion = "1.24.6"
-const UpgradedK8sVersion = "1.24.8"
+const K8sVersion = "1.26.4"
+const UpgradedK8sVersion = "1.26.6"
+const K8sBucket = "test_k8s_terraform_v7"
 
 // DNS test constants: configs, attributes and values.
 
