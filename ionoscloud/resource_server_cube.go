@@ -904,6 +904,29 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 
+		if v, ok := d.GetOk("nic.0.ipv6_cidr_block"); ok {
+			ipv6_block := v.(string)
+			properties.Ipv6CidrBlock = &ipv6_block
+		}
+
+		if v, ok := d.GetOk("nic.0.ipv6_ips"); ok {
+			raw := v.([]interface{})
+			ipv6Ips := make([]string, len(raw))
+			utils.DecodeInterfaceToStruct(raw, ipv6Ips)
+			if len(ipv6Ips) > 0 {
+				properties.Ipv6Ips = &ipv6Ips
+			}
+		}
+
+		if d.HasChange("nic.0.dhcpv6") {
+			if dhcpv6, ok := d.GetOkExists("nic.0.dhcpv6"); ok {
+				dhcpv6 := dhcpv6.(bool)
+				properties.Dhcpv6 = &dhcpv6
+			} else {
+				properties.SetDhcpv6Nil()
+			}
+		}
+
 		dhcp := d.Get("nic.0.dhcp").(bool)
 		fwRule := d.Get("nic.0.firewall_active").(bool)
 		properties.Dhcp = &dhcp
