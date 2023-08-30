@@ -204,6 +204,28 @@ func TestAccServerBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`no server found with the specified criteria: name`),
 			},
 			{
+				Config: testAccCheckServerConfigIpv6Enabled,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcpv6", "true"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.dhcpv6", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcpv6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_cidr_block", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.0", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.1", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.1"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.2", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.2"),
+				),
+			},
+			{
+				Config: testAccCheckServerConfigIpv6Update,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcpv6", "false"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.dhcpv6", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcpv6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_cidr_block", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.0", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.1", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.1"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.2", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.2"),
+				),
+			},
+			{
 				Config: testAccCheckServerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(constant.ServerResource+"."+constant.ServerTestResource, &server),

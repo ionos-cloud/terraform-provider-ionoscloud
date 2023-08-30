@@ -337,13 +337,15 @@ func resourceServer() *schema.Resource {
 							Optional: true,
 						},
 						"dhcpv6": {
-							Type:     schema.TypeBool,
-							Optional: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Indicates whether this NIC receives an IPv6 address through DHCP.",
 						},
 						"ipv6_cidr_block": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "IPv6 CIDR block assigned to the NIC.",
 						},
 						"ips": {
 							Type: schema.TypeList,
@@ -356,10 +358,11 @@ func resourceServer() *schema.Resource {
 							Optional:    true,
 						},
 						"ipv6_ips": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Computed:    true,
+							Description: "Collection for IPv6 addresses assigned to a nic. Explicitly assigned IPv6 addresses need to come from inside the IPv6 CIDR block assigned to the nic.",
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
@@ -992,6 +995,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				nicProperties.Name = &vStr
 			}
 
+			if v, ok := d.GetOk("nic.0.ipv6_cidr_block"); ok {
+				ipv6Block := v.(string)
+				nicProperties.Ipv6CidrBlock = &ipv6Block
+			}
+
 			if v, ok := d.GetOk("nic.0.ips"); ok {
 				raw := v.([]interface{})
 				if raw != nil && len(raw) > 0 {
@@ -1008,15 +1016,29 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				}
 			}
 
+			if v, ok := d.GetOk("nic.0.ipv6_ips"); ok {
+				raw := v.([]interface{})
+				ipv6Ips := make([]string, len(raw))
+				if err := utils.DecodeInterfaceToStruct(raw, ipv6Ips); err != nil {
+					diags := diag.FromErr(err)
+					return diags
+				}
+				if len(ipv6Ips) > 0 {
+					nicProperties.Ipv6Ips = &ipv6Ips
+				}
+			}
+
 			dhcp := d.Get("nic.0.dhcp").(bool)
 			fwRule := d.Get("nic.0.firewall_active").(bool)
 			nicProperties.Dhcp = &dhcp
 			nicProperties.FirewallActive = &fwRule
-			if dhcpv6, ok := d.GetOk("nic.0.dhcpv6"); ok {
-				dhcpv6 := dhcpv6.(bool)
-				nicProperties.Dhcpv6 = &dhcpv6
-			} else {
-				nicProperties.SetDhcpv6Nil()
+			if d.HasChange("nic.0.dhcpv6") {
+				if dhcpv6, ok := d.GetOkExists("nic.0.dhcpv6"); ok {
+					dhcpv6 := dhcpv6.(bool)
+					nicProperties.Dhcpv6 = &dhcpv6
+				} else {
+					nicProperties.SetDhcpv6Nil()
+				}
 			}
 
 			if v, ok := d.GetOk("nic.0.firewall_type"); ok {
