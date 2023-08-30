@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -311,13 +310,13 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 		for _, volume := range *server.Entities.Volumes.Items {
 			entry := make(map[string]interface{})
 
-			entry["id"] = mongo.ToValueDefault(volume.Id)
-			entry["name"] = mongo.ToValueDefault(volume.Properties.Name)
-			entry["type"] = mongo.ToValueDefault(volume.Properties.Type)
+			entry["id"] = ionoscloud.ToValueDefault(volume.Id)
+			entry["name"] = ionoscloud.ToValueDefault(volume.Properties.Name)
+			entry["type"] = ionoscloud.ToValueDefault(volume.Properties.Type)
 			entry["size"] = float32OrDefault(volume.Properties.Size, 0)
-			entry["availability_zone"] = mongo.ToValueDefault(volume.Properties.AvailabilityZone)
-			entry["image_name"] = mongo.ToValueDefault(volume.Properties.Image)
-			entry["image_password"] = mongo.ToValueDefault(volume.Properties.ImagePassword)
+			entry["availability_zone"] = ionoscloud.ToValueDefault(volume.Properties.AvailabilityZone)
+			entry["image_name"] = ionoscloud.ToValueDefault(volume.Properties.Image)
+			entry["image_password"] = ionoscloud.ToValueDefault(volume.Properties.ImagePassword)
 
 			if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
 				var sshKeys []interface{}
@@ -327,8 +326,8 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				entry["ssh_keys"] = sshKeys
 			}
 
-			entry["bus"] = mongo.ToValueDefault(volume.Properties.Bus)
-			entry["licence_type"] = mongo.ToValueDefault(volume.Properties.LicenceType)
+			entry["bus"] = ionoscloud.ToValueDefault(volume.Properties.Bus)
+			entry["licence_type"] = ionoscloud.ToValueDefault(volume.Properties.LicenceType)
 			entry["cpu_hot_plug"] = boolOrDefault(volume.Properties.CpuHotPlug, true)
 			entry["ram_hot_plug"] = boolOrDefault(volume.Properties.RamHotPlug, true)
 			entry["nic_hot_plug"] = boolOrDefault(volume.Properties.NicHotPlug, true)
@@ -337,9 +336,9 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["disc_virtio_hot_unplug"] = boolOrDefault(volume.Properties.DiscVirtioHotUnplug, true)
 			entry["device_number"] = int64OrDefault(volume.Properties.DeviceNumber, 0)
 			entry["pci_slot"] = int32OrDefault(volume.Properties.PciSlot, 0)
-			entry["backup_unit_id"] = mongo.ToValueDefault(volume.Properties.BackupunitId)
-			entry["user_data"] = mongo.ToValueDefault(volume.Properties.UserData)
-			entry["boot_server"] = mongo.ToValueDefault(volume.Properties.BootServer)
+			entry["backup_unit_id"] = ionoscloud.ToValueDefault(volume.Properties.BackupunitId)
+			entry["user_data"] = ionoscloud.ToValueDefault(volume.Properties.UserData)
+			entry["boot_server"] = ionoscloud.ToValueDefault(volume.Properties.BootServer)
 
 			volumes = append(volumes, entry)
 		}
@@ -354,9 +353,9 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 		for _, nic := range *server.Entities.Nics.Items {
 			entry := make(map[string]interface{})
 
-			entry["id"] = mongo.ToValueDefault(nic.Id)
-			entry["name"] = mongo.ToValueDefault(nic.Properties.Name)
-			entry["mac"] = mongo.ToValueDefault(nic.Properties.Mac)
+			entry["id"] = ionoscloud.ToValueDefault(nic.Id)
+			entry["name"] = ionoscloud.ToValueDefault(nic.Properties.Name)
+			entry["mac"] = ionoscloud.ToValueDefault(nic.Properties.Mac)
 
 			if nic.Properties.Ips != nil {
 				var ips []interface{}
@@ -379,7 +378,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["dhcp"] = boolOrDefault(nic.Properties.Dhcp, false)
 			entry["lan"] = int32OrDefault(nic.Properties.Lan, 0)
 			entry["firewall_active"] = boolOrDefault(nic.Properties.FirewallActive, false)
-			entry["firewall_type"] = mongo.ToValueDefault(nic.Properties.FirewallType)
+			entry["firewall_type"] = ionoscloud.ToValueDefault(nic.Properties.FirewallType)
 			entry["device_number"] = int32OrDefault(nic.Properties.DeviceNumber, 0)
 			entry["pci_slot"] = int32OrDefault(nic.Properties.PciSlot, 0)
 
@@ -388,18 +387,18 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				for _, rule := range *nic.Entities.Firewallrules.Items {
 					ruleEntry := make(map[string]interface{})
 
-					ruleEntry["id"] = mongo.ToValueDefault(rule.Id)
+					ruleEntry["id"] = ionoscloud.ToValueDefault(rule.Id)
 					if rule.Properties != nil {
-						ruleEntry["name"] = mongo.ToValueDefault(rule.Properties.Name)
-						ruleEntry["protocol"] = mongo.ToValueDefault(rule.Properties.Protocol)
-						ruleEntry["source_mac"] = mongo.ToValueDefault(rule.Properties.SourceMac)
-						ruleEntry["source_ip"] = mongo.ToValueDefault(rule.Properties.SourceIp)
-						ruleEntry["target_ip"] = mongo.ToValueDefault(rule.Properties.TargetIp)
+						ruleEntry["name"] = ionoscloud.ToValueDefault(rule.Properties.Name)
+						ruleEntry["protocol"] = ionoscloud.ToValueDefault(rule.Properties.Protocol)
+						ruleEntry["source_mac"] = ionoscloud.ToValueDefault(rule.Properties.SourceMac)
+						ruleEntry["source_ip"] = ionoscloud.ToValueDefault(rule.Properties.SourceIp)
+						ruleEntry["target_ip"] = ionoscloud.ToValueDefault(rule.Properties.TargetIp)
 						ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
 						ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
 						ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
 						ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
-						ruleEntry["type"] = mongo.ToValueDefault(rule.Properties.Type)
+						ruleEntry["type"] = ionoscloud.ToValueDefault(rule.Properties.Type)
 					}
 					firewallRules = append(firewallRules, ruleEntry)
 				}
