@@ -4,8 +4,12 @@
 - `ssh_keys` was no longer being set if server was not vcpu.
 - `ssh_keys` will no longer be computed on any type of server
 - `ssh_key_path` will now be set to schema on creation
-- Allow setting explicit `ipv6_cidr_block` on `nic` resource.
+- setting explicit `ipv6_cidr_block` on `nic` resource.
+- ipv6 fields `dhcpv6`, `ipv6_cidr_block`, `ipv6_ips` not updating correctly on `ionoscloud_server` and `ionoscloud_cube_server`
+- issue caused by `dhcpv6` field for plans which do not enable the IPv6 feature
 - #449. Increase `NotFoundChecks` to 9999.
+### Documentation
+- Example IPv6 usage for `ionoscloud_server` and `ionoscloud_cube_server`
 
 ## 6.4.7
 ### Features

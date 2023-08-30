@@ -37,7 +37,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "s3_buckets.0.name", "test_k8s_terraform_v6"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "s3_buckets.0.name", K8sBucket),
 				),
 			},
 			{
@@ -79,7 +79,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.time", "10:30:00Z"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "api_subnet_allow_list.1", "1.2.5.6/32"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "s3_buckets.0.name", "test_k8s_terraform_v6"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "s3_buckets.0.name", K8sBucket),
 				),
 			},
 			{
@@ -92,7 +92,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.time", "10:30:00Z"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "s3_buckets.0.name", "test_k8s_terraform_v6"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "s3_buckets.0.name", K8sBucket),
 				),
 			},
 		},
@@ -118,7 +118,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 //					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 //					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
 //					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
-//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "test_k8s_terraform_v6"),
+//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", K8sBucket),
 //					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "false"),
 //				),
 //			},
@@ -201,7 +201,7 @@ resource ` + constant.K8sClusterResource + ` ` + constant.K8sClusterTestResource
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets { 
-     name = "test_k8s_terraform_v6"
+     name = "` + K8sBucket + `"
   }
 }`
 
@@ -216,7 +216,7 @@ resource ` + constant.K8sClusterResource + ` ` + constant.K8sClusterTestResource
   }
   api_subnet_allow_list = ["1.2.3.4/32", "1.2.5.6/32"]
   s3_buckets {
-		name = "test_k8s_terraform_v6"
+		name = "` + K8sBucket + `"
 	}
 }`
 
@@ -230,7 +230,7 @@ resource ` + constant.K8sClusterResource + ` ` + constant.K8sClusterTestResource
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets {
-		name = "test_k8s_terraform_v6"
+		name = "` + K8sBucket + `"
 	}
 }`
 
@@ -244,7 +244,7 @@ resource ` + constant.K8sClusterResource + ` ` + constant.K8sClusterTestResource
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets { 
-     name = "test_k8s_terraform_v6"
+     name = "` + K8sBucket + `"
   }
   //public = "false"
 }`

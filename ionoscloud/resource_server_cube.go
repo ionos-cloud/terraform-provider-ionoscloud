@@ -236,13 +236,15 @@ func resourceCubeServer() *schema.Resource {
 							Optional: true,
 						},
 						"dhcpv6": {
-							Type:     schema.TypeBool,
-							Optional: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Indicates whether this NIC receives an IPv6 address through DHCP.",
 						},
 						"ipv6_cidr_block": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "IPv6 CIDR block assigned to the NIC.",
 						},
 						"ips": {
 							Type:     schema.TypeList,
@@ -251,10 +253,11 @@ func resourceCubeServer() *schema.Resource {
 							Optional: true,
 						},
 						"ipv6_ips": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Computed:    true,
+							Description: "Collection for IPv6 addresses assigned to a nic. Explicitly assigned IPv6 addresses need to come from inside the IPv6 CIDR block assigned to the nic.",
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
@@ -898,6 +901,32 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				if ips != nil && len(ips) > 0 {
 					properties.Ips = &ips
 				}
+			}
+		}
+
+		if v, ok := d.GetOk("nic.0.ipv6_cidr_block"); ok {
+			ipv6Block := v.(string)
+			properties.Ipv6CidrBlock = &ipv6Block
+		}
+
+		if v, ok := d.GetOk("nic.0.ipv6_ips"); ok {
+			raw := v.([]interface{})
+			ipv6Ips := make([]string, len(raw))
+			if err := utils.DecodeInterfaceToStruct(raw, ipv6Ips); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+			if len(ipv6Ips) > 0 {
+				properties.Ipv6Ips = &ipv6Ips
+			}
+		}
+
+		if d.HasChange("nic.0.dhcpv6") {
+			if dhcpv6, ok := d.GetOkExists("nic.0.dhcpv6"); ok {
+				dhcpv6 := dhcpv6.(bool)
+				properties.Dhcpv6 = &dhcpv6
+			} else {
+				properties.SetDhcpv6Nil()
 			}
 		}
 
