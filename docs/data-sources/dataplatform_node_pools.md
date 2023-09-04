@@ -9,10 +9,6 @@ description: |-
 
 # ionoscloud\_dataplatform_node_pools
 
-⚠️ **Note:** Data Platform is currently in the Early Access (EA) phase.
-We recommend keeping usage and testing to non-production critical applications.
-Please contact your sales representative or support for more information.
-
 The **Dataplatform Node Pools Data Source** can be used to search for and return a list of existing Dataplatform Node Pools under a Dataplatform Cluster.
 
 ## Example Usage

@@ -9,10 +9,6 @@ description: |-
 
 # ionoscloud\_dataplatform_versions
 
-⚠️ **Note:** Data Platform is currently in the Early Access (EA) phase.
-We recommend keeping usage and testing to non-production critical applications.
-Please contact your sales representative or support for more information.
-
 The **Dataplatform Versions Data Source** can be used to search for and retrieve list of available Managed Dataplatform API versions.
 
 

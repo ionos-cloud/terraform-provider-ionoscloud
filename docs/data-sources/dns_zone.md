@@ -9,10 +9,6 @@ description: |-
 
 # ionoscloud_dns_zone
 
-⚠️ **Note:** Cloud DNS is currently in the Early Access (EA) phase.
-We recommend keeping usage and testing to non-production critical applications.
-Please contact your sales representative or support for more information.
-
 The **DNS Zone** can be used to search for and return an existing DNS Zone.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search and make sure that your resources have unique names.
