@@ -6,14 +6,14 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
 // GetStateChangeConf gets the default configuration for tracking a request progress
-func GetStateChangeConf(meta interface{}, d *schema.ResourceData, location string, timeoutType string) *resource.StateChangeConf {
-	stateConf := &resource.StateChangeConf{
+func GetStateChangeConf(meta interface{}, d *schema.ResourceData, location string, timeoutType string) *retry.StateChangeConf {
+	stateConf := &retry.StateChangeConf{
 		Pending:        resourcePendingStates,
 		Target:         resourceTargetStates,
 		Refresh:        resourceStateRefreshFunc(meta, location),
@@ -27,7 +27,7 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, location strin
 }
 
 // resourceStateRefreshFunc tracks progress of a request
-func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefreshFunc {
+func resourceStateRefreshFunc(meta interface{}, path string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		client := meta.(services.SdkBundle).CloudApiClient
 
