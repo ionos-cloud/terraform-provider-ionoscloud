@@ -74,6 +74,16 @@ The following env variables have changed:
 | PROFITBRICKS_TOKEN    | IONOS_TOKEN       |
 | PROFITBRICKS_API_URL  | IONOS_API_URL     |
 
+| Environment Variable    | Description                                                                                                                                                               |
+|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS Cloud API                                                                                           |
+| `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS Cloud API                                                                                           |
+| `IONOS_TOKEN`           | Specify the token used to login, if a token is being used instead of username and password                                                                                |
+| `IONOS_API_URL`         | Specify the API URL. It will overwrite the API endpoint default value `api.ionos.com`.  It is not necessary to override this value unless you have special routing config |
+| `IONOS_LOG_LEVEL`       | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace                                                                                            |
+| `IONOS_PINNED_CERT`     | Specify the SHA-256 public fingerprint here, enables certificate pinning                                                                                                  |
+| `IONOS_CONTRACT_NUMBER` | Specify the contract number on which you wish to provision. Only valid for reseller accounts, for other types of accounts the header will be ignored                      |
+
 ## Usage
 
 The provider needs to be configured with proper credentials before it can be used.
@@ -111,7 +121,7 @@ provider "ionoscloud" {
 }
 ```
 
-⚠️ **Note:** It's not usually necessary to set `endpoint` field. The SDKs the terraform use know how to route requests to the correct endpoints in the API. 
+⚠️ **Note:** It's not usually necessary to set `endpoint` field. The SDKs the terraform uses know how to route requests to the correct endpoints in the API. 
 
 You can either explicitly write them in the .tf file or use var.name as in the example above. For setting the var.name, environment variables can be used. The environment variables must be in the format TF_VAR_name and this will be checked last for a value. For example:
 
@@ -194,7 +204,7 @@ The following arguments are supported:
 
 - `password` - (Required) If omitted, the `IONOS_PASSWORD` environment variable is used.
 
-- `endpoint` - (Optional) If omitted, the `IONOS_API_URL` environment variable is used, or it defaults to the current Cloud API release. Usually not necessary to be set, SDks know internally how to route requests to to the API.
+- `endpoint` - (Optional) If omitted, the `IONOS_API_URL` environment variable is used, or it defaults to the current Cloud API release. Usually not necessary to be set, SDks know internally how to route requests to the API.
 
 - `retries` - (Deprecated) Number of retries while waiting for a resource to be provisioned. Default value is 50. **Note**: This argument has been deprecated and replaced by the implementation of resource timeouts described below.
 

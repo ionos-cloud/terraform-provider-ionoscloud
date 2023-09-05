@@ -1,3 +1,7 @@
+## 6.4.9
+### Features
+- update go sdk, allow `IONOS_CONTRACT_NUMBER` to be used to run terraform on different account numbers for reseller accounts
+
 ## 6.4.8
 ### Fixes
 - `primary_ip` in `ionoscloud_server` should be set on creation
