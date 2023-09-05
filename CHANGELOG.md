@@ -1,6 +1,9 @@
-## 6.4.9
+## 6.4.9 (upcoming release)
 ### Features
+- Cloud DNS is now Generally Available
+- Data Platform is now in Generally Available
 - update go sdk, allow `IONOS_CONTRACT_NUMBER` to be used to run terraform on different account numbers for reseller accounts
+
 
 ## 6.4.8
 ### Fixes
