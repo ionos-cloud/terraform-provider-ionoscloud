@@ -1,3 +1,9 @@
+## 6.4.9 (upcoming release)
+### Features
+- Cloud DNS is now Generally Available
+- Data Platform is now in Generally Available
+
+
 ## 6.4.8
 ### Fixes
 - `primary_ip` in `ionoscloud_server` should be set on creation
