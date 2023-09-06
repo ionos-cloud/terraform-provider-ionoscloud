@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/iancoleman/strcase"
@@ -238,16 +239,16 @@ func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn Re
 	if d.Id() == "" {
 		return fmt.Errorf("resource with id %s not ready, still trying ", d.Id())
 	}
-	err := resource.RetryContext(ctx, DefaultTimeout, func() *resource.RetryError {
+	err := retry.RetryContext(ctx, DefaultTimeout, func() *retry.RetryError {
 		isReady, err := fn(ctx, d)
 		if isReady == true {
 			return nil
 		}
 		if err != nil {
-			resource.NonRetryableError(err)
+			retry.NonRetryableError(err)
 		}
 		log.Printf("[DEBUG] resource with id %s not ready, still trying ", d.Id())
-		return resource.RetryableError(fmt.Errorf("resource with id %s not ready, still trying ", d.Id()))
+		return retry.RetryableError(fmt.Errorf("resource with id %s not ready, still trying ", d.Id()))
 	})
 	return err
 }
@@ -258,16 +259,16 @@ type IsResourceDeletedFunc func(ctx context.Context, d *schema.ResourceData) (bo
 // WaitForResourceToBeDeleted - keeps retrying until resource is not found(404), or until ctx is cancelled
 func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn IsResourceDeletedFunc) error {
 
-	err := resource.RetryContext(ctx, DefaultTimeout, func() *resource.RetryError {
+	err := retry.RetryContext(ctx, DefaultTimeout, func() *retry.RetryError {
 		isDeleted, err := fn(ctx, d)
 		if isDeleted {
 			return nil
 		}
 		if err != nil {
-			resource.NonRetryableError(err)
+			retry.NonRetryableError(err)
 		}
 		log.Printf("[DEBUG] resource with id %s still has not been deleted", d.Id())
-		return resource.RetryableError(fmt.Errorf("resource with id %s found, still trying ", d.Id()))
+		return retry.RetryableError(fmt.Errorf("resource with id %s found, still trying ", d.Id()))
 	})
 	return err
 }

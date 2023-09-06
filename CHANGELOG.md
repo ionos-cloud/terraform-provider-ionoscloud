@@ -3,6 +3,7 @@
 - Cloud DNS is now Generally Available
 - Data Platform is now in Generally Available
 - #451 update go sdk, allow `IONOS_CONTRACT_NUMBER` to be used to run terraform on different contract numbers for reseller accounts
+- update dependency for terraform-plugin-sdk. Stop using deprecated functions from `resource` package
 
 
 ## 6.4.8
