@@ -696,7 +696,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 			dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err)
+				return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcId, err)
 			}
 
 			img, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
@@ -755,7 +755,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err)
+					return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcId, err)
 				}
 
 				img, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
@@ -916,7 +916,7 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 			dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err))
+				diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%w)", dcId, err))
 				return image, imageAlias, isSnapshot, diags
 			}
 			img, err := resolveImageName(ctx, client, imageInput, *dc.Properties.Location)

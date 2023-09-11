@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 )
 
 func dataSourceNIC() *schema.Resource {
@@ -184,16 +185,15 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	if nameOk {
 		name = t.(string)
 	}
-	var nic ionoscloud.Nic
+	var nic *ionoscloud.Nic
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: data}
 
 	if !idOk && !nameOk {
 		return diag.FromErr(fmt.Errorf("either id, or name must be set"))
 	}
 	if idOk {
-		nic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, id.(string)).Execute()
-		logApiRequestTime(apiResponse)
+		nic, _, err = ns.FindById(ctx, datacenterId, serverId, id.(string), 0)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error getting nic with id %s %w", id.(string), err))
 		}
@@ -204,17 +204,15 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 			}
 		}
 	} else {
-		nics, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsGet(ctx, datacenterId, serverId).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-
+		nics, err := ns.Get(ctx, datacenterId, serverId, 1)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
 		}
 
 		var results []ionoscloud.Nic
 
-		if nameOk && nics.Items != nil {
-			for _, tempNic := range *nics.Items {
+		if nameOk && nics != nil {
+			for _, tempNic := range nics {
 				if tempNic.Properties != nil && tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
 					results = append(results, tempNic)
 				}
@@ -226,11 +224,11 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one nic found with the specified criteria: name = %s", name))
 		} else {
-			nic = results[0]
+			*nic = results[0]
 		}
 	}
 
-	if err := NicSetData(data, &nic); err != nil {
+	if err := NicSetData(data, nic); err != nil {
 		return diag.FromErr(err)
 	}
 

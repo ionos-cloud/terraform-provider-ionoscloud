@@ -1,3 +1,10 @@
+## 6.4.10 (upcoming release)
+### Refactor
+- Add `nic` service
+- Use `error.As` for `requestFailed` err
+- `%w` instead of `%s` for some printed errors
+
+
 ## 6.4.9 (upcoming release)
 ### Features
 - Cloud DNS is now Generally Available

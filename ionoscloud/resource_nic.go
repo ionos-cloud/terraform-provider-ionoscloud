@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -109,39 +109,30 @@ func resourceNic() *schema.Resource {
 
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
 	nic := getNicData(d, "")
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
-
-	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
-	logApiRequestTime(apiResponse)
+	createdNic, apiResponse, err := ns.Create(ctx, dcid, srvid, nic)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %w", err))
 		return diags
 	}
-	if nic.Id != nil {
-		d.SetId(*nic.Id)
+
+	if createdNic.Id != nil {
+		d.SetId(*createdNic.Id)
 	}
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
-			d.SetId("")
-		}
-		diags := diag.FromErr(errState)
-		return diags
-	}
+
 	//Sometimes there is an error because the nic is not found after it's created.
 	//Probably a read write consistency issue.
 	//We're retrying for 5 minutes. 404 - means we keep on trying.
 	var foundNic = &ionoscloud.Nic{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error
-		*foundNic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, *nic.Id).Execute()
+		foundNic, apiResponse, err = ns.FindById(ctx, dcid, srvid, *nic.Id, 0)
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] Could not find nic with Id %s , retrying...", *nic.Id)
 			return retry.RetryableError(fmt.Errorf("could not find nic, %w", err))
@@ -165,13 +156,11 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-
-	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
-	logApiRequestTime(apiResponse)
-
+	nic, apiResponse, err := ns.FindById(ctx, dcid, srvid, nicid, 0)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] nic resource with id %s not found", nicid)
@@ -182,7 +171,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 		return diags
 	}
 
-	if err := NicSetData(d, &nic); err != nil {
+	if err := NicSetData(d, nic); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -191,24 +180,16 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
-
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcId := d.Get("datacenter_id").(string)
 	srvId := d.Get("server_id").(string)
 	nicId := d.Id()
 
 	nic := getNicData(d, "")
 
-	_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, dcId, srvId, nicId).Nic(*nic.Properties).Execute()
-	logApiRequestTime(apiResponse)
+	_, _, err := ns.Update(ctx, dcId, srvId, nicId, *nic.Properties)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %w", err))
-		return diags
-	}
-
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
 		return diags
 	}
 
@@ -217,24 +198,15 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
-
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-	apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
-	logApiRequestTime(apiResponse)
-
+	_, err := ns.Delete(ctx, dcid, srvid, nicid)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
 		return diags
 	}
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
-	}
-
 	d.SetId("")
 	return nil
 }

@@ -119,7 +119,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating data center (%s) (%s)", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error creating data center (%s) (%w)", d.Id(), err))
 		return diags
 	}
 	d.SetId(*createdDatacenter.Id)
