@@ -123,3 +123,69 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 	}
 	return network
 }
+
+func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, error) {
+	nic := ionoscloud.Nic{
+		Properties: &ionoscloud.NicProperties{},
+	}
+
+	lanInt := int32(d.Get(path + "lan").(int))
+	nic.Properties.Lan = &lanInt
+
+	if v, ok := d.GetOk(path + "name"); ok {
+		vStr := v.(string)
+		nic.Properties.Name = &vStr
+	}
+
+	dhcp := d.Get(path + "dhcp").(bool)
+	if dhcpv6, ok := d.GetOkExists(path + "dhcpv6"); ok {
+		dhcpv6 := dhcpv6.(bool)
+		nic.Properties.Dhcpv6 = &dhcpv6
+	} else {
+		nic.Properties.SetDhcpv6Nil()
+	}
+
+	fwActive := d.Get(path + "firewall_active").(bool)
+	nic.Properties.Dhcp = &dhcp
+	nic.Properties.FirewallActive = &fwActive
+
+	if _, ok := d.GetOk(path + "firewall_type"); ok {
+		raw := d.Get(path + "firewall_type").(string)
+		nic.Properties.FirewallType = &raw
+	}
+
+	if v, ok := d.GetOk(path + "ips"); ok {
+		raw := v.([]interface{})
+		if raw != nil && len(raw) > 0 {
+			ips := make([]string, 0)
+			for _, rawIp := range raw {
+				if rawIp != nil {
+					ip := rawIp.(string)
+					ips = append(ips, ip)
+				}
+			}
+			if ips != nil && len(ips) > 0 {
+				nic.Properties.Ips = &ips
+			}
+		}
+	}
+
+	if v, ok := d.GetOk(path + "ipv6_ips"); ok {
+		raw := v.([]interface{})
+		ipv6Ips := make([]string, len(raw))
+		err := utils.DecodeInterfaceToStruct(raw, ipv6Ips)
+		if err != nil {
+			return nic, err
+		}
+		if len(ipv6Ips) > 0 {
+			nic.Properties.Ipv6Ips = &ipv6Ips
+		}
+	}
+
+	if v, ok := d.GetOk(path + "ipv6_cidr_block"); ok {
+		ipv6Block := v.(string)
+		nic.Properties.Ipv6CidrBlock = &ipv6Block
+	}
+
+	return nic, nil
+}

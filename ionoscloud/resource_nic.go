@@ -111,7 +111,11 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	client := meta.(services.SdkBundle).CloudApiClient
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
-	nic := getNicData(d, "")
+	nic, err := cloudapinic.GetNicFromSchema(d, "")
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error occured while getting nic from schema: %w", err))
+		return diags
+	}
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
@@ -185,9 +189,13 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	srvId := d.Get("server_id").(string)
 	nicId := d.Id()
 
-	nic := getNicData(d, "")
+	nic, err := cloudapinic.GetNicFromSchema(d, "")
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("update error occured while getting nic from schema: %w", err))
+		return diags
+	}
 
-	_, _, err := ns.Update(ctx, dcId, srvId, nicId, *nic.Properties)
+	_, _, err = ns.Update(ctx, dcId, srvId, nicId, *nic.Properties)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %w", err))
 		return diags
@@ -209,69 +217,6 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 	d.SetId("")
 	return nil
-}
-
-func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
-
-	nic := ionoscloud.Nic{
-		Properties: &ionoscloud.NicProperties{},
-	}
-
-	lanInt := int32(d.Get(path + "lan").(int))
-	nic.Properties.Lan = &lanInt
-
-	if v, ok := d.GetOk(path + "name"); ok {
-		vStr := v.(string)
-		nic.Properties.Name = &vStr
-	}
-
-	dhcp := d.Get(path + "dhcp").(bool)
-	if dhcpv6, ok := d.GetOkExists(path + "dhcpv6"); ok {
-		dhcpv6 := dhcpv6.(bool)
-		nic.Properties.Dhcpv6 = &dhcpv6
-	} else {
-		nic.Properties.SetDhcpv6Nil()
-	}
-	fwActive := d.Get(path + "firewall_active").(bool)
-	nic.Properties.Dhcp = &dhcp
-	nic.Properties.FirewallActive = &fwActive
-
-	if _, ok := d.GetOk(path + "firewall_type"); ok {
-		raw := d.Get(path + "firewall_type").(string)
-		nic.Properties.FirewallType = &raw
-	}
-
-	if v, ok := d.GetOk(path + "ips"); ok {
-		raw := v.([]interface{})
-		if raw != nil && len(raw) > 0 {
-			ips := make([]string, 0)
-			for _, rawIp := range raw {
-				if rawIp != nil {
-					ip := rawIp.(string)
-					ips = append(ips, ip)
-				}
-			}
-			if ips != nil && len(ips) > 0 {
-				nic.Properties.Ips = &ips
-			}
-		}
-	}
-
-	if v, ok := d.GetOk(path + "ipv6_ips"); ok {
-		raw := v.([]interface{})
-		ipv6Ips := make([]string, len(raw))
-		utils.DecodeInterfaceToStruct(raw, ipv6Ips)
-		if len(ipv6Ips) > 0 {
-			nic.Properties.Ipv6Ips = &ipv6Ips
-		}
-	}
-
-	if v, ok := d.GetOk(path + "ipv6_cidr_block"); ok {
-		ipv6Block := v.(string)
-		nic.Properties.Ipv6CidrBlock = &ipv6Block
-	}
-
-	return nic
 }
 
 func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
@@ -311,8 +256,8 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 				return fmt.Errorf("error setting ips %w", err)
 			}
 		}
-		//should no be checked for len, we want to set the empty slice anyway as the field is computed and it will not be set by backend
-		// if  ipv6_cidr_block is not set on the lan
+		//should not be checked for len, we want to set the empty slice anyway as the field is computed, and it will not be set by backend
+		// if ipv6_cidr_block is not set on the lan
 		if nic.Properties.Ipv6Ips != nil {
 			if err := d.Set("ipv6_ips", *nic.Properties.Ipv6Ips); err != nil {
 				return fmt.Errorf("error setting ipv6_ips %w", err)

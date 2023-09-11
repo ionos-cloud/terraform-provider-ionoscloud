@@ -518,8 +518,13 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	nic := ionoscloud.Nic{
 		Properties: &ionoscloud.NicProperties{},
 	}
+	var err error
 	if _, ok := d.GetOk("nic"); ok {
-		nic = getNicData(d, "nic.0.")
+		nic, err = cloudapinic.GetNicFromSchema(d, "nic.0.")
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("cube error occured while getting nic from schema: %w", err))
+			return diags
+		}
 	}
 
 	server.Entities.Nics = &ionoscloud.Nics{
@@ -529,7 +534,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	primaryNic = &(*server.Entities.Nics.Items)[0]
 	log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
-	log.Printf("[DEBUG] dhcp %t", *primaryNic.Properties.Dhcp)
+	log.Printf("[DEBUG] primaryNic dhcp %t", *primaryNic.Properties.Dhcp)
 
 	firewall := ionoscloud.FirewallRule{
 		Properties: &ionoscloud.FirewallruleProperties{},

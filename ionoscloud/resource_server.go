@@ -592,7 +592,11 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if nics.([]interface{}) != nil {
 			for nicIndex := range nics.([]interface{}) {
 				nicPath := fmt.Sprintf("nic.%d.", nicIndex)
-				nic := getNicData(d, nicPath)
+				nic, err := cloudapinic.GetNicFromSchema(d, nicPath)
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("create error occured while getting nic from schema: %w", err))
+					return diags
+				}
 				*serverReq.Entities.Nics.Items = append(*serverReq.Entities.Nics.Items, nic)
 				fwRulesPath := nicPath + "firewall"
 				if firewallRules, ok := d.GetOk(fwRulesPath); ok {
