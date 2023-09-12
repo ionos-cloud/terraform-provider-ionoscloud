@@ -228,7 +228,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		}
 	}
 
-	if err := NicSetData(data, nic); err != nil {
+	if err := cloudapinic.NicSetData(data, nic); err != nil {
 		return diag.FromErr(err)
 	}
 
