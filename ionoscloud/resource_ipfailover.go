@@ -35,12 +35,14 @@ func resourceLanIPFailover() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
+				Description:      "Failover IP",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.IsIPAddress)),
 			},
 			"nicuuid": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Description:      "The UUID of the master NIC",
 			},
 			"lan_id": {
 				Type:             schema.TypeString,
