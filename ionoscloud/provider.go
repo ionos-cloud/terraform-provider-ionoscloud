@@ -214,8 +214,8 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
 		// will inject x-contract-number to sdks
-		if diags := os.Setenv(ionoscloud.IonosContractNumber, contractNumber.(string)); diags != nil {
-			return nil, diag.FromErr(diags)
+		if err := os.Setenv(ionoscloud.IonosContractNumber, contractNumber.(string)); err != nil {
+			return nil, diag.FromErr(err)
 		}
 	}
 
