@@ -213,7 +213,7 @@ The following arguments are supported:
 
 - `retries` - (Deprecated) Number of retries while waiting for a resource to be provisioned. Default value is 50. **Note**: This argument has been deprecated and replaced by the implementation of resource timeouts described below.
 
-- `contract_number` - "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller accounts.",
+- `contract_number` - "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller account.",
 
 ## Resource Timeout
 

@@ -72,7 +72,7 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
-				Description: "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller accounts.",
+				Description: "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller account.",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
