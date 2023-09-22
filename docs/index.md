@@ -117,9 +117,10 @@ provider "ionoscloud" {
   username          = var.ionos_username
   password          = var.ionos_password
   token             = var.ionos_token
-#  optionals, do not need to be set usually
-#  contract_number   = var.contract_number
-#  endpoint          = var.ionos_api_url
+#  optional, to be used only for reseller accounts
+#  contract_number = "contract_number_here"
+#  optional, does not need to be configured in most cases
+#  endpoint = "ionoscloud_cloud_api_url"
 }
 ```
 
@@ -183,10 +184,10 @@ terraform {
 provider "ionoscloud" {
   username = "ionoscloud_username"
   password = "ionoscloud_password"
-#  optional, to be used only for reseller accounts
-  contract_number = "contract_number_here"
-#  optional, does not need configuring in most cases
-#  endpoint = "ionoscloud_cloud_api_url"
+  #  optional, to be used only for reseller accounts
+  #  contract_number = "contract_number_here"
+  #  optional, does not need to be configured in most cases
+  #  endpoint = "ionoscloud_cloud_api_url"
 }
 
 resource "ionoscloud_datacenter" "main" {
