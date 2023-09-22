@@ -117,7 +117,8 @@ provider "ionoscloud" {
   username          = var.ionos_username
   password          = var.ionos_password
   token             = var.ionos_token
-  endpoint          = var.ionos_api_url
+  contract_number   = var.contract_number
+#  endpoint          = var.ionos_api_url
 }
 ```
 
@@ -173,7 +174,7 @@ terraform {
   required_providers {
     ionoscloud = {
       source = "ionos-cloud/ionoscloud"
-      version = "= 6.2.1"
+      version = "= 6.4.10"
     }
   }
 }
@@ -181,7 +182,10 @@ terraform {
 provider "ionoscloud" {
   username = "ionoscloud_username"
   password = "ionoscloud_password"
-  endpoint = "ionoscloud_cloud_api_url"
+#  optional, to be used only for reseller accounts
+  contract_number = "contract_number_here"
+#  optional, does not need configuring in most cases
+#  endpoint = "ionoscloud_cloud_api_url"
 }
 
 resource "ionoscloud_datacenter" "main" {
@@ -204,9 +208,11 @@ The following arguments are supported:
 
 - `password` - (Required) If omitted, the `IONOS_PASSWORD` environment variable is used.
 
-- `endpoint` - (Optional) If omitted, the `IONOS_API_URL` environment variable is used, or it defaults to the current Cloud API release. Usually not necessary to be set, SDks know internally how to route requests to the API.
+- `endpoint` - (Optional) Usually not necessary to be set, SDks know internally how to route requests to the API. If omitted, the `IONOS_API_URL` environment variable is used, or it defaults to the current Cloud API release. 
 
 - `retries` - (Deprecated) Number of retries while waiting for a resource to be provisioned. Default value is 50. **Note**: This argument has been deprecated and replaced by the implementation of resource timeouts described below.
+
+- `contract_number` - "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller accounts.",
 
 ## Resource Timeout
 

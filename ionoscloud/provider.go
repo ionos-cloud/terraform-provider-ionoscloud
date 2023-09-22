@@ -68,6 +68,12 @@ func Provider() *schema.Provider {
 				Default:    50,
 				Deprecated: "Timeout is used instead of this functionality",
 			},
+			"contract_number": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller accounts.",
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        resourceDatacenter(),
@@ -205,6 +211,13 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 
 	cleanedUrl := cleanURL(d.Get("endpoint").(string))
+
+	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
+		// will inject x-contract-number to sdks
+		if diags := os.Setenv(ionoscloud.IonosContractNumber, contractNumber.(string)); diags != nil {
+			return nil, diag.FromErr(diags)
+		}
+	}
 
 	// Standard client configuration
 	clientOpts.Username = username.(string)
