@@ -117,12 +117,13 @@ provider "ionoscloud" {
   username          = var.ionos_username
   password          = var.ionos_password
   token             = var.ionos_token
-  contract_number   = var.contract_number
+#  optionals, do not need to be set usually
+#  contract_number   = var.contract_number
 #  endpoint          = var.ionos_api_url
 }
 ```
 
-⚠️ **Note:** It's not usually necessary to set `endpoint` field. The SDKs the terraform uses know how to route requests to the correct endpoints in the API. 
+⚠️ **Note:** It's NOT usually necessary to set `endpoint` field. The SDKs the terraform uses know how to route requests to the correct endpoints in the API. 
 
 You can either explicitly write them in the .tf file or use var.name as in the example above. For setting the var.name, environment variables can be used. The environment variables must be in the format TF_VAR_name and this will be checked last for a value. For example:
 
