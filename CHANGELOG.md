@@ -3,9 +3,11 @@
 - Add `nic` service
 - Use `error.As` for `requestFailed` err
 - `%w` instead of `%s` for some printed errors
+### Features
+- #460 add `contract_number` to provider configuration
 
+## 6.4.9
 
-## 6.4.9 (upcoming release)
 ### Features
 - Cloud DNS is now Generally Available
 - Data Platform is now in Generally Available
