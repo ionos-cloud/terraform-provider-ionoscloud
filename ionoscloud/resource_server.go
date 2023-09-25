@@ -310,6 +310,13 @@ func resourceServer() *schema.Resource {
 					},
 				},
 			},
+			"vm_state": {
+				Type:             schema.TypeString,
+				Computed:         true,
+				Optional:         true,
+				Description:      "The power states of the Server: RUNNING or SHUTOFF",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"RUNNING", "SHUTOFF"}, true)),
+			},
 			"nic": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -740,6 +747,29 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			return diag.FromErr(utils.GenerateSetError("server", "inline_volume_ids", err))
 		}
 	}
+
+	initialState := d.Get("vm_state").(string)
+	if initialState == "SHUTOFF" {
+		apiResponse, err := client.ServersApi.DatacentersServersStopPost(ctx, datacenterId, d.Id()).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		err = utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
+			ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, d.Id()).Execute()
+			if err != nil {
+				return false, err
+			}
+			return *ionoscloudServer.Properties.VmState == "SHUTOFF", nil
+		})
+
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+	}
+
 	return resourceServerRead(ctx, d, meta)
 }
 
@@ -1120,6 +1150,47 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		if err := ls.datacentersServersLabelsCreate(dcId, d.Id(), labelsToBeCreated); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("vm_state") {
+
+		datacenterId := d.Get("datacenter_id").(string)
+		oldVmState, newVmState := d.GetChange("vm_state")
+		oldVmState = oldVmState.(string)
+		newVmState = newVmState.(string)
+
+		if oldVmState != newVmState {
+			if newVmState == "RUNNING" && oldVmState != "" {
+				apiResponse, err := client.ServersApi.DatacentersServersStartPost(ctx, datacenterId, d.Id()).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(err)
+				}
+			}
+			if newVmState == "SHUTOFF" {
+				apiResponse, err := client.ServersApi.DatacentersServersStopPost(ctx, datacenterId, d.Id()).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
+
+		err := utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
+			ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, d.Id()).Execute()
+			if err != nil {
+				return false, err
+			}
+			if *ionoscloudServer.Properties.VmState != newVmState {
+				log.Printf("[INFO] State not changed for server %s yet old: %s new: %s, retrying...", d.Id(), oldVmState, newVmState)
+				return false, nil
+			}
+			return true, nil
+		})
+
+		if err != nil {
 			return diag.FromErr(err)
 		}
 	}
