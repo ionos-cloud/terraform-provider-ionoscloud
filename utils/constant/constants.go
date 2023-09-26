@@ -286,7 +286,8 @@ const (
 const (
 	ResourceIpFailover         = "ionoscloud_ipfailover"
 	IpfailoverResourceFullName = ResourceIpFailover + "." + IpfailoverName
-	IpfailoverName             = "failover-test"
+	IpfailoverName             = "failover-group"
+	SecondIpfailoverName       = "second-failover-group"
 )
 
 // General Constants

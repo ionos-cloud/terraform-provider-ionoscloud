@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/gofrs/uuid/v5"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/lanSvc"
 	"log"
 	"strings"
@@ -18,7 +19,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
 )
 
 func resourceLanIPFailover() *schema.Resource {
@@ -100,8 +100,8 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 		return diags
 	}
 
-	d.SetId(uuidgen.ResourceUuid().String())
-
+	// Use the IP in order to generate the resource ID
+	d.SetId(uuid.NewV5(uuid.NewV5(uuid.NamespaceURL, "https://github.com/ionos-cloud/terraform-provider-ionoscloud"), ip).String())
 	return nil
 }
 
@@ -276,7 +276,8 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 			// Search for the appropiate IP Failover Group using the provided IP
 			if *ipFailoverGroup.Ip == ip {
 				// Set all the information only if the IP Failover Group exists
-				d.SetId(uuidgen.ResourceUuid().String())
+				// Use the IP in order to generate the resource ID
+				d.SetId(uuid.NewV5(uuid.NewV5(uuid.NamespaceURL, "https://github.com/ionos-cloud/terraform-provider-ionoscloud"), ip).String())
 
 				if err := d.Set("datacenter_id", dcId); err != nil {
 					return nil, utils.GenerateSetError(constant.ResourceIpFailover, "datacenter_id", err)

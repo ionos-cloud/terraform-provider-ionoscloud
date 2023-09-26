@@ -75,6 +75,37 @@ resource "random_password" "server_image_password" {
 * `lan_id` - (Required)[string] The ID of a LAN.
 * `nicuuid` - (Required)[string] The ID of a NIC.
 
+> **⚠ WARNING:** Do not modify the IP for an IP failover group (that was provisioned via Terraform)
+> using the DCD, the API or other means because it may lead to unexpected behavior. If you provisioned
+> an IP failover group using Terraform, please use only Terraform in order to manage the created
+> IP failover group.
+
+> **⚠ WARNING:** For creating multiple IP failover groups at the same time, you can use one of the
+> following options:
+1. Create multiple IP failover groups resources and use `depends_on` meta-argument to specify the order
+of creation, for example:
+```hcl
+resource "ionoscloud_ipfailover" "firstexample" {
+  datacenter_id         = <datacenter ID>
+  lan_id                = <LAN ID>
+  ip                    = <IP address>
+  nicuuid               = <NIC UUID>
+}
+
+ resource "ionoscloud_ipfailover" "secondexample" {
+   depends_on = [ ionoscloud_ipfailover.example ]
+   datacenter_id         = <datacenter ID>
+   lan_id                = <LAN ID>
+   ip                    = <IP address>
+   nicuuid               = <NIC UUID>
+ }
+```
+2. Define the resources as presented above, but without using the `depends_on` meta-argument and run the apply command using
+`-parallelism=1` as presented below:
+```shell
+terraform apply -parallelism=1
+```
+
 ## Import
 
 Resource IpFailover can be imported using the `resource id`, e.g.

@@ -42,7 +42,7 @@ func testAccIpFailoverImportStateId(s *terraform.State) (string, error) {
 			continue
 		}
 
-		importID = fmt.Sprintf("%s/%s", rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["id"])
+		importID = fmt.Sprintf("%s/%s/%s", rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["lan_id"], rs.Primary.Attributes["ip"])
 	}
 
 	return importID, nil
