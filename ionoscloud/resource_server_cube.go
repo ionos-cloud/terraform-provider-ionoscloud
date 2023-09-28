@@ -628,6 +628,30 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 			"password": *(*createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword,
 		})
 	}
+
+	if d.Get("vm_state").(string) == "SUSPENDED" {
+		apiResponse, err := client.ServersApi.DatacentersServersSuspendPost(ctx, dcId, d.Id()).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		err = utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
+			ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
+			if err != nil {
+				return false, err
+			}
+			if *ionoscloudServer.Properties.VmState == "SUSPENDED" {
+				log.Printf("[INFO] Cube server vmState not yet changed to SUSPENDED: %s", d.Id())
+				return false, nil
+			}
+			return true, nil
+		})
+
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return resourceCubeServerRead(ctx, d, meta)
 }
 
@@ -1081,7 +1105,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				return false, err
 			}
 			if *ionoscloudServer.Properties.VmState == *currentVmState {
-				log.Printf("[INFO] Cube server vmState not yet changed to RUNNING: %s", d.Id())
+				log.Printf("[INFO] Cube server vmState not yet changed to SUSPENDED: %s", d.Id())
 				return false, nil
 			}
 			return true, nil
