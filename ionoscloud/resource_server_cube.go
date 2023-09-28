@@ -215,7 +215,6 @@ func resourceCubeServer() *schema.Resource {
 			},
 			"vm_state": {
 				Type:             schema.TypeString,
-				Computed:         true,
 				Optional:         true,
 				Description:      "The power states of the Cube Server: RUNNING or SUSPENDED",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"RUNNING", "SUSPENDED"}, true)),
@@ -782,6 +781,45 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
 
+	server, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
+	currentVmState := server.Properties.VmState
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("could not retrieve server vmState: %s", err))
+		return diags
+	}
+
+	if *currentVmState == "SUSPENDED" && !d.HasChange("vm_state") {
+		diags := diag.FromErr(fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"))
+		return diags
+	}
+
+	// Unsuspend a Cube server first, before applying other changes
+	if d.HasChange("vm_state") && *currentVmState == "SUSPENDED" {
+
+		apiResponse, err := client.ServersApi.DatacentersServersResumePost(ctx, dcId, d.Id()).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		err = utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
+			ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
+			if err != nil {
+				return false, err
+			}
+			if *ionoscloudServer.Properties.VmState == *currentVmState {
+				log.Printf("[INFO] Cube server vmState not yet changed to RUNNING: %s", d.Id())
+				return false, nil
+			}
+			return true, nil
+		})
+
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+	}
+
 	if d.HasChange("template_uuid") {
 		_, n := d.GetChange("template_uuid")
 		nStr := n.(string)
@@ -808,45 +846,6 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			return diags
 		}
 		/* todo: figure out a way of sending a nil bootCdrom to the API (the sdk's omitempty doesn't let us) */
-	}
-
-	if d.HasChange("vm_state") {
-
-		datacenterId := d.Get("datacenter_id").(string)
-		old, new := d.GetChange("vm_state")
-		oldVmState := old.(string)
-		newVmState := new.(string)
-
-		if newVmState == "RUNNING" && oldVmState != "" {
-			apiResponse, err := client.ServersApi.DatacentersServersResumePost(ctx, datacenterId, d.Id()).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(err)
-			}
-		}
-		if newVmState == "SUSPENDED" {
-			apiResponse, err := client.ServersApi.DatacentersServersSuspendPost(ctx, datacenterId, d.Id()).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(err)
-			}
-		}
-
-		err := utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
-			ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, d.Id()).Execute()
-			if err != nil {
-				return false, err
-			}
-			if *ionoscloudServer.Properties.VmState != newVmState {
-				log.Printf("[INFO] State not changed for cube server %s yet old: %s new: %s, retrying...", d.Id(), oldVmState, newVmState)
-				return false, nil
-			}
-			return true, nil
-		})
-
-		if err != nil {
-			return diag.FromErr(err)
-		}
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Depth(3).Execute()
@@ -1063,6 +1062,33 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		if errState != nil {
 			diags := diag.FromErr(fmt.Errorf("error getting state change for nics patch %w", errState))
 			return diags
+		}
+
+	}
+
+	// Suspend a Cube server last, after applying other changes
+	if d.HasChange("vm_state") && *currentVmState == "RUNNING" {
+
+		apiResponse, err := client.ServersApi.DatacentersServersSuspendPost(ctx, dcId, d.Id()).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		err = utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
+			ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
+			if err != nil {
+				return false, err
+			}
+			if *ionoscloudServer.Properties.VmState == *currentVmState {
+				log.Printf("[INFO] Cube server vmState not yet changed to RUNNING: %s", d.Id())
+				return false, nil
+			}
+			return true, nil
+		})
+
+		if err != nil {
+			return diag.FromErr(err)
 		}
 
 	}
