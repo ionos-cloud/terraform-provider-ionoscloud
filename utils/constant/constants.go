@@ -315,3 +315,4 @@ const (
 )
 
 const VCPUType = "VCPU"
+const RepoURL = "https://github.com/ionos-cloud/terraform-provider-ionoscloud"

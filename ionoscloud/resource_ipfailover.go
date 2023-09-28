@@ -3,11 +3,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/gofrs/uuid/v5"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/lanSvc"
 	"log"
 	"strings"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -101,7 +101,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	// Use the IP in order to generate the resource ID
-	d.SetId(uuid.NewV5(uuid.NewV5(uuid.NamespaceURL, "https://github.com/ionos-cloud/terraform-provider-ionoscloud"), ip).String())
+	d.SetId(uuidgen.GenerateUuidFromName(ip))
 	return nil
 }
 
@@ -270,14 +270,13 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	log.Printf("[INFO] lan found: %+v", lan)
 
 	ipFailoverGroups := lan.Properties.IpFailover
-	ipFailoverGroupFound := false
 	if lan.Properties != nil && ipFailoverGroups != nil && len(*ipFailoverGroups) > 0 {
 		for _, ipFailoverGroup := range *ipFailoverGroups {
 			// Search for the appropiate IP Failover Group using the provided IP
 			if *ipFailoverGroup.Ip == ip {
 				// Set all the information only if the IP Failover Group exists
 				// Use the IP in order to generate the resource ID
-				d.SetId(uuid.NewV5(uuid.NewV5(uuid.NamespaceURL, "https://github.com/ionos-cloud/terraform-provider-ionoscloud"), ip).String())
+				d.SetId(uuidgen.GenerateUuidFromName(ip))
 
 				if err := d.Set("datacenter_id", dcId); err != nil {
 					return nil, utils.GenerateSetError(constant.ResourceIpFailover, "datacenter_id", err)
@@ -291,16 +290,10 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 				if err := d.Set("nicuuid", *ipFailoverGroup.NicUuid); err != nil {
 					return nil, utils.GenerateSetError(constant.ResourceIpFailover, "nicuuid", err)
 				}
-				ipFailoverGroupFound = true
 				// After we find the IP Failover Group, we can stop searching since the IP is unique
-				break
+				return []*schema.ResourceData{d}, nil
 			}
 		}
 	}
-
-	if !ipFailoverGroupFound {
-		return nil, fmt.Errorf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanId, dcId)
-	}
-
-	return []*schema.ResourceData{d}, nil
+	return nil, fmt.Errorf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanId, dcId)
 }

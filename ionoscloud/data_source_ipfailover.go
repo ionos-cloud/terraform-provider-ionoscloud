@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/gofrs/uuid/v5"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -72,7 +72,7 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 			if *ipFailoverGroup.Ip == ip {
 				// Set the information only if the IP Failover Group exists
 				// Use the IP in order to generate the resource ID
-				d.SetId(uuid.NewV5(uuid.NewV5(uuid.NamespaceURL, "https://github.com/ionos-cloud/terraform-provider-ionoscloud"), ip).String())
+				d.SetId(uuidgen.GenerateUuidFromName(ip))
 
 				if err := d.Set("nicuuid", *ipFailoverGroup.NicUuid); err != nil {
 					return diag.FromErr(utils.GenerateSetError(constant.ResourceIpFailover, "nicuuid", err))

@@ -102,17 +102,12 @@ func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 		if lan.Properties.IpFailover == nil {
 			return fmt.Errorf("LAN with ID: %s has no IP failover groups", lanId)
 		}
-		found := false
 		for _, failoverGroup := range *lan.Properties.IpFailover {
 			if *failoverGroup.Ip == ip {
-				found = true
-				break
+				return nil
 			}
 		}
-		if !found {
-			return fmt.Errorf("IP failover group with IP: %s was not found in LAN: %s, datacenter ID: %s", ip, lanId, dcId)
-		}
-		return nil
+		return fmt.Errorf("IP failover group with IP: %s was not found in LAN: %s, datacenter ID: %s", ip, lanId, dcId)
 	}
 }
 
@@ -171,14 +166,14 @@ resource "ionoscloud_ipblock" "webserver_ip" {
 }
 
 resource "ionoscloud_lan" "webserver_lan1" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   public = true
   name = "terraform test"
 }
 
 resource "ionoscloud_server" "webserver" {
   name = "server"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -191,17 +186,17 @@ resource "ionoscloud_server" "webserver" {
     disk_type = "SSD"
   }
   nic {
-    lan = "${ionoscloud_lan.webserver_lan1.id}"
+    lan = ionoscloud_lan.webserver_lan1.id
     dhcp = true
     firewall_active = true
-     ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
+     ips =[ionoscloud_ipblock.webserver_ip.ips[0]]
   }
 }
 
 resource "ionoscloud_server" "secondwebserver" {
   depends_on = [ionoscloud_server.webserver]
   name = "secondserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -214,26 +209,26 @@ resource "ionoscloud_server" "secondwebserver" {
     disk_type = "SSD"
   }
   nic {
-    lan = "${ionoscloud_lan.webserver_lan1.id}"
+    lan = ionoscloud_lan.webserver_lan1.id
     dhcp = true
     firewall_active = true
-     ips =["${ionoscloud_ipblock.webserver_ip.ips[1]}"]
+     ips =[ionoscloud_ipblock.webserver_ip.ips[1]]
   }
 }
  
 resource "` + constant.ResourceIpFailover + `" "` + constant.IpfailoverName + `" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  lan_id="${ionoscloud_lan.webserver_lan1.id}"
-  ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
-  nicuuid= "${ionoscloud_server.webserver.primary_nic}"
+  lan_id=ionoscloud_lan.webserver_lan1.id
+  ip =ionoscloud_ipblock.webserver_ip.ips[0]
+  nicuuid= ionoscloud_server.webserver.primary_nic
 }
 
 resource "` + constant.ResourceIpFailover + `" "` + constant.SecondIpfailoverName + `" {
   depends_on = [ ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + ` ]
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  lan_id="${ionoscloud_lan.webserver_lan1.id}"
-  ip ="${ionoscloud_ipblock.webserver_ip.ips[1]}"
-  nicuuid= "${ionoscloud_server.secondwebserver.primary_nic}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id = ionoscloud_lan.webserver_lan1.id
+  ip = ionoscloud_ipblock.webserver_ip.ips[1]
+  nicuuid = ionoscloud_server.secondwebserver.primary_nic
 }
 
 ` + ServerImagePassword
@@ -251,14 +246,14 @@ resource "ionoscloud_ipblock" "webserver_ip" {
 }
 
 resource "ionoscloud_lan" "webserver_lan1" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   public = true
   name = "terraform test"
 }
 
 resource "ionoscloud_server" "webserver" {
   name = "server"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -271,17 +266,17 @@ resource "ionoscloud_server" "webserver" {
     disk_type = "SSD"
   }
   nic {
-    lan = "${ionoscloud_lan.webserver_lan1.id}"
+    lan = ionoscloud_lan.webserver_lan1.id
     dhcp = true
     firewall_active = true
-     ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}", "${ionoscloud_ipblock.webserver_ip.ips[1]}"]
+     ips = [ionoscloud_ipblock.webserver_ip.ips[0], ionoscloud_ipblock.webserver_ip.ips[1]]
   }
 }
 
 resource "ionoscloud_server" "secondwebserver" {
   depends_on = [ionoscloud_server.webserver]
   name = "secondserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -294,26 +289,26 @@ resource "ionoscloud_server" "secondwebserver" {
     disk_type = "SSD"
   }
   nic {
-    lan = "${ionoscloud_lan.webserver_lan1.id}"
+    lan = ionoscloud_lan.webserver_lan1.id
     dhcp = true
     firewall_active = true
-     ips =["${ionoscloud_ipblock.webserver_ip.ips[2]}"]
+     ips =[ionoscloud_ipblock.webserver_ip.ips[2]]
   }
 }
 
 resource "` + constant.ResourceIpFailover + `" "` + constant.IpfailoverName + `" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  lan_id="${ionoscloud_lan.webserver_lan1.id}"
-  ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
-  nicuuid= "${ionoscloud_server.webserver.primary_nic}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id = ionoscloud_lan.webserver_lan1.id
+  ip = ionoscloud_ipblock.webserver_ip.ips[0]
+  nicuuid = ionoscloud_server.webserver.primary_nic
 }
 
 resource "` + constant.ResourceIpFailover + `" "` + constant.SecondIpfailoverName + `" {
   depends_on = [ ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + ` ]
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  lan_id="${ionoscloud_lan.webserver_lan1.id}"
-  ip ="${ionoscloud_ipblock.webserver_ip.ips[1]}"
-  nicuuid= "${ionoscloud_server.webserver.primary_nic}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id = ionoscloud_lan.webserver_lan1.id
+  ip = ionoscloud_ipblock.webserver_ip.ips[1]
+  nicuuid = ionoscloud_server.webserver.primary_nic
 }
 
 ` + ServerImagePassword
@@ -331,14 +326,14 @@ resource "ionoscloud_ipblock" "webserver_ip" {
 }
 
 resource "ionoscloud_lan" "webserver_lan1" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   public = true
   name = "terraform test"
 }
 
 resource "ionoscloud_server" "webserver" {
   name = "server"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -351,17 +346,17 @@ resource "ionoscloud_server" "webserver" {
     disk_type = "SSD"
   }
   nic {
-    lan = "${ionoscloud_lan.webserver_lan1.id}"
+    lan = ionoscloud_lan.webserver_lan1.id
     dhcp = true
     firewall_active = true
-     ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
+     ips = [ionoscloud_ipblock.webserver_ip.ips[0]]
   }
 }
 
 resource "ionoscloud_server" "secondwebserver" {
   depends_on = [ionoscloud_server.webserver]
   name = "secondserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -374,26 +369,26 @@ resource "ionoscloud_server" "secondwebserver" {
     disk_type = "SSD"
   }
   nic {
-    lan = "${ionoscloud_lan.webserver_lan1.id}"
+    lan = ionoscloud_lan.webserver_lan1.id
     dhcp = true
     firewall_active = true
-     ips =["${ionoscloud_ipblock.webserver_ip.ips[2]}"]
+     ips =[ionoscloud_ipblock.webserver_ip.ips[2]]
   }
 }
 
 resource "` + constant.ResourceIpFailover + `" "` + constant.IpfailoverName + `" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  lan_id="${ionoscloud_lan.webserver_lan1.id}"
-  ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
-  nicuuid= "${ionoscloud_server.webserver.primary_nic}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id = ionoscloud_lan.webserver_lan1.id
+  ip = ionoscloud_ipblock.webserver_ip.ips[0]
+  nicuuid = ionoscloud_server.webserver.primary_nic
 }
 
 resource "` + constant.ResourceIpFailover + `" "` + constant.SecondIpfailoverName + `" {
   depends_on = [ ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + ` ]
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  lan_id="${ionoscloud_lan.webserver_lan1.id}"
-  ip ="${ionoscloud_ipblock.webserver_ip.ips[2]}"
-  nicuuid= "${ionoscloud_server.secondwebserver.primary_nic}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id = ionoscloud_lan.webserver_lan1.id
+  ip = ionoscloud_ipblock.webserver_ip.ips[2]
+  nicuuid = ionoscloud_server.secondwebserver.primary_nic
 }
 
 ` + ServerImagePassword
@@ -411,14 +406,14 @@ resource "ionoscloud_ipblock" "webserver_ip" {
 }
 
 resource "ionoscloud_lan" "webserver_lan1" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   public = true
   name = "terraform test"
 }
 
 resource "ionoscloud_server" "webserver" {
   name = "server"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -434,13 +429,13 @@ resource "ionoscloud_server" "webserver" {
     lan = "1"
     dhcp = true
     firewall_active = true
-     ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
+     ips =[ionoscloud_ipblock.webserver_ip.ips[0]]
   }
 }
 
 resource "ionoscloud_server" "secondwebserver" {
   name = "secondserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -453,17 +448,17 @@ resource "ionoscloud_server" "secondwebserver" {
     disk_type = "SSD"
   }
   nic {
-    lan = "${ionoscloud_lan.webserver_lan1.id}"
+    lan = ionoscloud_lan.webserver_lan1.id
     dhcp = true
     firewall_active = true
-     ips =["${ionoscloud_ipblock.webserver_ip.ips[2]}"]
+     ips =[ionoscloud_ipblock.webserver_ip.ips[2]]
   }
 }
 ` + ServerImagePassword
 
 var testAccDataSourceIpFailoverConfigBasic = testAccCheckLanIPFailoverConfig + `
 data ` + constant.ResourceIpFailover + " " + constant.IpfailoverName + `{
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   lan_id = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.lan_id
   ip = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.ip
 }

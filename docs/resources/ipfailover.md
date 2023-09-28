@@ -93,7 +93,7 @@ resource "ionoscloud_ipfailover" "firstexample" {
 }
 
  resource "ionoscloud_ipfailover" "secondexample" {
-   depends_on = [ ionoscloud_ipfailover.example ]
+   depends_on = [ ionoscloud_ipfailover.firstexample ]
    datacenter_id         = <datacenter ID>
    lan_id                = <LAN ID>
    ip                    = <IP address>
