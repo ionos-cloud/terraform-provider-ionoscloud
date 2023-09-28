@@ -312,7 +312,6 @@ func resourceServer() *schema.Resource {
 			},
 			"vm_state": {
 				Type:             schema.TypeString,
-				Computed:         true,
 				Optional:         true,
 				Description:      "The power states of the Server: RUNNING or SHUTOFF",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"RUNNING", "SHUTOFF"}, true)),
