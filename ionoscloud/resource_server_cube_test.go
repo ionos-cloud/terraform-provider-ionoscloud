@@ -171,6 +171,20 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.2", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.2"),
 				),
 			},
+			{
+				Config: testAccCheckCubeServerSuspend,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", "SUSPENDED"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state"),
+				),
+			},
+			{
+				Config: testAccCheckCubeServerResume,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", "RUNNING"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state"),
+				),
+			},
 		},
 	})
 }

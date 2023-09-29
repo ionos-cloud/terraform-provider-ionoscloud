@@ -226,6 +226,20 @@ func TestAccServerBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccCheckServerConfigShutdown,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "vm_state", "SHUTOFF"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerResource+"."+constant.ServerTestResource, "vm_state"),
+				),
+			},
+			{
+				Config: testAccCheckServerConfigPowerOn,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "vm_state", "RUNNING"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerResource+"."+constant.ServerTestResource, "vm_state"),
+				),
+			},
+			{
 				Config: testAccCheckServerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(constant.ServerResource+"."+constant.ServerTestResource, &server),
