@@ -629,7 +629,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		})
 	}
 
-	if d.Get("vm_state").(string) == "SUSPENDED" {
+	if vmState, ok := d.GetOk("vm_state"); ok && vmState.(string) == "SUSPENDED" {
 		apiResponse, err := client.ServersApi.DatacentersServersSuspendPost(ctx, dcId, d.Id()).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
