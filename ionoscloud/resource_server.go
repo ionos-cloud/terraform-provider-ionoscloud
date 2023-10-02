@@ -1140,6 +1140,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		oldVmState = oldVmState.(string)
 		newVmState = newVmState.(string)
 
+		if newVmState == "" {
+			newVmState = oldVmState
+		}
+
 		if oldVmState != newVmState {
 			if newVmState == "RUNNING" && oldVmState != "" {
 				apiResponse, err := client.ServersApi.DatacentersServersStartPost(ctx, datacenterId, d.Id()).Execute()
@@ -1155,23 +1159,25 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 					return diag.FromErr(err)
 				}
 			}
-		}
 
-		err := utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
-			ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, d.Id()).Execute()
+			err := utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
+				ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, d.Id()).Execute()
+				if err != nil {
+					return false, err
+				}
+				if *ionoscloudServer.Properties.VmState != newVmState {
+					log.Printf("[INFO] State not changed for server %s yet old: %s new: %s, retrying...", d.Id(), oldVmState, newVmState)
+					return false, nil
+				}
+				return true, nil
+			})
+
 			if err != nil {
-				return false, err
+				return diag.FromErr(err)
 			}
-			if *ionoscloudServer.Properties.VmState != newVmState {
-				log.Printf("[INFO] State not changed for server %s yet old: %s new: %s, retrying...", d.Id(), oldVmState, newVmState)
-				return false, nil
-			}
-			return true, nil
-		})
 
-		if err != nil {
-			return diag.FromErr(err)
 		}
+
 	}
 	return resourceServerRead(ctx, d, meta)
 }
