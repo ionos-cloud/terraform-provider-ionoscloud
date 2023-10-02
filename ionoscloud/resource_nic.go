@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -109,41 +109,35 @@ func resourceNic() *schema.Resource {
 
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
-	nic := getNicData(d, "")
+	nic, err := cloudapinic.GetNicFromSchema(d, "")
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error occured while getting nic from schema: %w", err))
+		return diags
+	}
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
-
-	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
-	logApiRequestTime(apiResponse)
-
+	createdNic, apiResponse, err := ns.Create(ctx, dcid, srvid, nic)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %w", err))
 		return diags
 	}
-	if nic.Id != nil {
-		d.SetId(*nic.Id)
+
+	if createdNic.Id != nil {
+		d.SetId(*createdNic.Id)
 	}
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
-			d.SetId("")
-		}
-		diags := diag.FromErr(errState)
-		return diags
-	}
+
 	//Sometimes there is an error because the nic is not found after it's created.
 	//Probably a read write consistency issue.
 	//We're retrying for 5 minutes. 404 - means we keep on trying.
 	var foundNic = &ionoscloud.Nic{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error
-		*foundNic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, *nic.Id).Execute()
+		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 0)
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Could not find nic with Id %s , retrying...", *nic.Id)
+			log.Printf("[INFO] Could not find nic with Id %s , retrying...", *createdNic.Id)
 			return retry.RetryableError(fmt.Errorf("could not find nic, %w", err))
 		}
 		if err != nil {
@@ -160,18 +154,16 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.FromErr(fmt.Errorf("could not find nic with id %s after creation ", *nic.Id))
 	}
 
-	return diag.FromErr(NicSetData(d, foundNic))
+	return diag.FromErr(cloudapinic.NicSetData(d, foundNic))
 }
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-
-	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
-	logApiRequestTime(apiResponse)
-
+	nic, apiResponse, err := ns.Get(ctx, dcid, srvid, nicid, 0)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] nic resource with id %s not found", nicid)
@@ -182,7 +174,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 		return diags
 	}
 
-	if err := NicSetData(d, &nic); err != nil {
+	if err := cloudapinic.NicSetData(d, nic); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -191,24 +183,20 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
-
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcId := d.Get("datacenter_id").(string)
 	srvId := d.Get("server_id").(string)
 	nicId := d.Id()
 
-	nic := getNicData(d, "")
-
-	_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, dcId, srvId, nicId).Nic(*nic.Properties).Execute()
-	logApiRequestTime(apiResponse)
+	nic, err := cloudapinic.GetNicFromSchema(d, "")
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %w", err))
+		diags := diag.FromErr(fmt.Errorf("update error occured while getting nic from schema: %w", err))
 		return diags
 	}
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
+	_, _, err = ns.Update(ctx, dcId, srvId, nicId, *nic.Properties)
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %w", err))
 		return diags
 	}
 
@@ -217,167 +205,16 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
-
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-	apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
-	logApiRequestTime(apiResponse)
-
+	_, err := ns.Delete(ctx, dcid, srvid, nicid)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
 		return diags
 	}
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
-	}
-
 	d.SetId("")
-	return nil
-}
-
-func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
-
-	nic := ionoscloud.Nic{
-		Properties: &ionoscloud.NicProperties{},
-	}
-
-	lanInt := int32(d.Get(path + "lan").(int))
-	nic.Properties.Lan = &lanInt
-
-	if v, ok := d.GetOk(path + "name"); ok {
-		vStr := v.(string)
-		nic.Properties.Name = &vStr
-	}
-
-	dhcp := d.Get(path + "dhcp").(bool)
-	if dhcpv6, ok := d.GetOkExists(path + "dhcpv6"); ok {
-		dhcpv6 := dhcpv6.(bool)
-		nic.Properties.Dhcpv6 = &dhcpv6
-	} else {
-		nic.Properties.SetDhcpv6Nil()
-	}
-	fwActive := d.Get(path + "firewall_active").(bool)
-	nic.Properties.Dhcp = &dhcp
-	nic.Properties.FirewallActive = &fwActive
-
-	if _, ok := d.GetOk(path + "firewall_type"); ok {
-		raw := d.Get(path + "firewall_type").(string)
-		nic.Properties.FirewallType = &raw
-	}
-
-	if v, ok := d.GetOk(path + "ips"); ok {
-		raw := v.([]interface{})
-		if raw != nil && len(raw) > 0 {
-			ips := make([]string, 0)
-			for _, rawIp := range raw {
-				if rawIp != nil {
-					ip := rawIp.(string)
-					ips = append(ips, ip)
-				}
-			}
-			if ips != nil && len(ips) > 0 {
-				nic.Properties.Ips = &ips
-			}
-		}
-	}
-
-	if v, ok := d.GetOk(path + "ipv6_ips"); ok {
-		raw := v.([]interface{})
-		ipv6Ips := make([]string, len(raw))
-		utils.DecodeInterfaceToStruct(raw, ipv6Ips)
-		if len(ipv6Ips) > 0 {
-			nic.Properties.Ipv6Ips = &ipv6Ips
-		}
-	}
-
-	if v, ok := d.GetOk(path + "ipv6_cidr_block"); ok {
-		ipv6Block := v.(string)
-		nic.Properties.Ipv6CidrBlock = &ipv6Block
-	}
-
-	return nic
-}
-
-func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
-	if nic == nil {
-		return fmt.Errorf("nic is empty")
-	}
-
-	if nic.Id != nil {
-		d.SetId(*nic.Id)
-	}
-
-	if nic.Properties != nil {
-		log.Printf("[INFO] LAN ON NIC: %d", nic.Properties.Lan)
-		if nic.Properties.Dhcp != nil {
-			if err := d.Set("dhcp", *nic.Properties.Dhcp); err != nil {
-				return fmt.Errorf("error setting dhcp %w", err)
-			}
-		}
-
-		if nic.Properties.Dhcpv6 != nil {
-			if err := d.Set("dhcpv6", *nic.Properties.Dhcpv6); err != nil {
-				return fmt.Errorf("error setting dhcpv6 %w", err)
-			}
-		}
-		if nic.Properties.Lan != nil {
-			if err := d.Set("lan", *nic.Properties.Lan); err != nil {
-				return fmt.Errorf("error setting lan %w", err)
-			}
-		}
-		if nic.Properties.Name != nil {
-			if err := d.Set("name", *nic.Properties.Name); err != nil {
-				return fmt.Errorf("error setting name %w", err)
-			}
-		}
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("ips", *nic.Properties.Ips); err != nil {
-				return fmt.Errorf("error setting ips %w", err)
-			}
-		}
-		//should no be checked for len, we want to set the empty slice anyway as the field is computed and it will not be set by backend
-		// if  ipv6_cidr_block is not set on the lan
-		if nic.Properties.Ipv6Ips != nil {
-			if err := d.Set("ipv6_ips", *nic.Properties.Ipv6Ips); err != nil {
-				return fmt.Errorf("error setting ipv6_ips %w", err)
-			}
-		}
-		if nic.Properties.Ipv6CidrBlock != nil {
-			if err := d.Set("ipv6_cidr_block", *nic.Properties.Ipv6CidrBlock); err != nil {
-				return fmt.Errorf("error setting ipv6_cidr_block %w", err)
-			}
-		}
-		if nic.Properties.FirewallActive != nil {
-			if err := d.Set("firewall_active", *nic.Properties.FirewallActive); err != nil {
-				return fmt.Errorf("error setting firewall_active %w", err)
-			}
-		}
-		if nic.Properties.FirewallType != nil {
-			if err := d.Set("firewall_type", *nic.Properties.FirewallType); err != nil {
-				return fmt.Errorf("error setting firewall_type %w", err)
-			}
-		}
-		if nic.Properties.Mac != nil {
-			if err := d.Set("mac", *nic.Properties.Mac); err != nil {
-				return fmt.Errorf("error setting mac %w", err)
-			}
-		}
-		if nic.Properties.DeviceNumber != nil {
-			if err := d.Set("device_number", *nic.Properties.DeviceNumber); err != nil {
-				return fmt.Errorf("error setting device_number %w", err)
-			}
-		}
-		if nic.Properties.PciSlot != nil {
-			if err := d.Set("pci_slot", *nic.Properties.PciSlot); err != nil {
-				return fmt.Errorf("error setting pci_slot %w", err)
-			}
-		}
-	}
-
 	return nil
 }
 
@@ -412,7 +249,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 		return nil, err
 	}
 
-	if err := NicSetData(d, &nic); err != nil {
+	if err := cloudapinic.NicSetData(d, &nic); err != nil {
 		return nil, err
 	}
 

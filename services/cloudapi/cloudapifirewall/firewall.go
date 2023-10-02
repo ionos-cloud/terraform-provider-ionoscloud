@@ -1,4 +1,4 @@
-package firewallSvc
+package cloudapifirewall
 
 import (
 	"context"

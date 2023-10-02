@@ -9,6 +9,7 @@
 - Fix `ionoscloud_ipfailover` resource
 
 ## 6.4.9
+
 ### Features
 - Cloud DNS is now Generally Available
 - Data Platform is now in Generally Available

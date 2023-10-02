@@ -11,6 +11,7 @@ import (
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -306,7 +307,7 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 			if nicItems != nil && len(*nicItems) > 0 {
 				var nics []interface{}
 				for _, nic := range *server.Entities.Nics.Items {
-					nicMap := SetNetworkProperties(nic)
+					nicMap := cloudapinic.SetNetworkProperties(nic)
 					fw := setFirewallRules(nic)
 					nicMap["firewall_rules"] = fw
 					utils.SetPropWithNilCheck(nicMap, "id", nic.Id)
