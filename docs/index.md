@@ -117,11 +117,14 @@ provider "ionoscloud" {
   username          = var.ionos_username
   password          = var.ionos_password
   token             = var.ionos_token
-  endpoint          = var.ionos_api_url
+#  optional, to be used only for reseller accounts
+#  contract_number = "contract_number_here"
+#  optional, does not need to be configured in most cases
+#  endpoint = "ionoscloud_cloud_api_url"
 }
 ```
 
-⚠️ **Note:** It's not usually necessary to set `endpoint` field. The SDKs the terraform uses know how to route requests to the correct endpoints in the API. 
+⚠️ **Note:** It's NOT usually necessary to set `endpoint` field. The SDKs the terraform uses know how to route requests to the correct endpoints in the API. 
 
 You can either explicitly write them in the .tf file or use var.name as in the example above. For setting the var.name, environment variables can be used. The environment variables must be in the format TF_VAR_name and this will be checked last for a value. For example:
 
@@ -173,7 +176,7 @@ terraform {
   required_providers {
     ionoscloud = {
       source = "ionos-cloud/ionoscloud"
-      version = "= 6.2.1"
+      version = "= 6.4.10"
     }
   }
 }
@@ -181,7 +184,10 @@ terraform {
 provider "ionoscloud" {
   username = "ionoscloud_username"
   password = "ionoscloud_password"
-  endpoint = "ionoscloud_cloud_api_url"
+  #  optional, to be used only for reseller accounts
+  #  contract_number = "contract_number_here"
+  #  optional, does not need to be configured in most cases
+  #  endpoint = "ionoscloud_cloud_api_url"
 }
 
 resource "ionoscloud_datacenter" "main" {
@@ -204,9 +210,11 @@ The following arguments are supported:
 
 - `password` - (Required) If omitted, the `IONOS_PASSWORD` environment variable is used.
 
-- `endpoint` - (Optional) If omitted, the `IONOS_API_URL` environment variable is used, or it defaults to the current Cloud API release. Usually not necessary to be set, SDks know internally how to route requests to the API.
+- `endpoint` - (Optional) Usually not necessary to be set, SDks know internally how to route requests to the API. If omitted, the `IONOS_API_URL` environment variable is used, or it defaults to the current Cloud API release. 
 
 - `retries` - (Deprecated) Number of retries while waiting for a resource to be provisioned. Default value is 50. **Note**: This argument has been deprecated and replaced by the implementation of resource timeouts described below.
+
+- `contract_number` - "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller account.",
 
 ## Resource Timeout
 
