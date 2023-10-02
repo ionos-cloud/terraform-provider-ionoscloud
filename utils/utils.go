@@ -237,7 +237,7 @@ type ResourceReadyFunc func(ctx context.Context, d *schema.ResourceData) (bool, 
 // WaitForResourceToBeReady - keeps retrying until resource is ready(true is returned), or until err is thrown, or ctx is cancelled
 func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn ResourceReadyFunc) error {
 	if d.Id() == "" {
-		return fmt.Errorf("resource with id %s not ready, still trying ", d.Id())
+		return fmt.Errorf("id requd to check if resource is ready")
 	}
 	err := retry.RetryContext(ctx, DefaultTimeout, func() *retry.RetryError {
 		isReady, err := fn(ctx, d)
