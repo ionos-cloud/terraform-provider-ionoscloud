@@ -5,6 +5,8 @@
 - `%w` instead of `%s` for some printed errors
 ### Features
 - #460 add `contract_number` to provider configuration
+### Fixes
+- Fix `ionoscloud_ipfailover` resource
 
 ## 6.4.9
 ### Features
