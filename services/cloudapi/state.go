@@ -2,6 +2,7 @@ package cloudapi
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -67,7 +68,7 @@ func resourceStateRefreshFunc(meta interface{}, path string) retry.StateRefreshF
 			if apiResponse != nil {
 				log.Printf("[DEBUG] response message %s", apiResponse.Message)
 			}
-			return nil, "", fmt.Errorf("request metadata status is nil for path %s", path)
+			return nil, "", RequestFailedError{fmt.Sprintf("request metadata status is nil for path %s", path)}
 		}
 
 		return nil, *request.Metadata.Status, nil
@@ -94,6 +95,7 @@ func (e RequestFailedError) Error() string {
 }
 
 func IsRequestFailed(err error) bool {
-	_, ok := err.(RequestFailedError)
+	var requestFailedError RequestFailedError
+	ok := errors.As(err, &requestFailedError)
 	return ok
 }

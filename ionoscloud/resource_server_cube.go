@@ -13,7 +13,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/firewallSvc"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -523,8 +524,13 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	nic := ionoscloud.Nic{
 		Properties: &ionoscloud.NicProperties{},
 	}
+	var err error
 	if _, ok := d.GetOk("nic"); ok {
-		nic = getNicData(d, "nic.0.")
+		nic, err = cloudapinic.GetNicFromSchema(d, "nic.0.")
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("cube error occured while getting nic from schema: %w", err))
+			return diags
+		}
 	}
 
 	server.Entities.Nics = &ionoscloud.Nics{
@@ -534,7 +540,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	primaryNic = &(*server.Entities.Nics.Items)[0]
 	log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
-	log.Printf("[DEBUG] dhcp %t", *primaryNic.Properties.Dhcp)
+	log.Printf("[DEBUG] primaryNic dhcp %t", *primaryNic.Properties.Dhcp)
 
 	firewall := ionoscloud.FirewallRule{
 		Properties: &ionoscloud.FirewallruleProperties{},
@@ -708,9 +714,9 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			diags := diag.FromErr(err)
 			return diags
 		}
+		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
-		nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, primarynic.(string)).Execute()
-		logApiRequestTime(apiResponse)
+		nic, _, err := ns.Get(ctx, dcId, serverId, primarynic.(string), 0)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error occured while fetching nic %s for server ID %s %s", primarynic.(string), d.Id(), err))
 			return diags
@@ -723,7 +729,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			}
 		}
 
-		network := SetNetworkProperties(nic)
+		network := cloudapinic.SetNetworkProperties(*nic)
 
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ips"] = *nic.Properties.Ips
@@ -737,7 +743,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 				return diags
 			}
 
-			fw := firewallSvc.SetProperties(firewall)
+			fw := cloudapifirewall.SetProperties(firewall)
 
 			network["firewall"] = []map[string]interface{}{fw}
 		}
@@ -771,7 +777,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 
 			volumesList := []map[string]interface{}{volumeItem}
 			if err := d.Set("volume", volumesList); err != nil {
-				diags := diag.FromErr(fmt.Errorf("[DEBUG] Error saving volume to state for IonosCloud server (%s): %s", d.Id(), err))
+				diags := diag.FromErr(fmt.Errorf("[DEBUG] Error saving volume to state for IonosCloud server (%s): %w", d.Id(), err))
 				return diags
 			}
 		}
@@ -926,7 +932,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error patching volume (%s) (%s)", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error patching volume (%s) (%w)", d.Id(), err))
 			return diags
 		}
 
@@ -1073,21 +1079,12 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		mProp, _ := json.Marshal(properties)
 
 		log.Printf("[DEBUG] Updating props: %s", string(mProp))
-
-		_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(properties).Execute()
-		logApiRequestTime(apiResponse)
+		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
+		_, _, err := ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error updating nic (%s)", err))
+			diags := diag.FromErr(fmt.Errorf("error updating nic (%w)", err))
 			return diags
 		}
-
-		// Wait, catching any errors
-		_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(fmt.Errorf("error getting state change for nics patch %w", errState))
-			return diags
-		}
-
 	}
 
 	// Suspend a Cube server last, after applying other changes
@@ -1237,9 +1234,9 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		if err := d.Set("primary_nic", primaryNic); err != nil {
 			return nil, fmt.Errorf("error setting primary_nic %w", err)
 		}
+		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
-		nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, primaryNic).Execute()
-		logApiRequestTime(apiResponse)
+		nic, apiResponse, err := ns.Get(ctx, datacenterId, serverId, primaryNic, 0)
 		if err != nil {
 			return nil, err
 		}
@@ -1250,7 +1247,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 
-		network := SetNetworkProperties(nic)
+		network := cloudapinic.SetNetworkProperties(*nic)
 		firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, primaryNic).Execute()
 		logApiRequestTime(apiResponse)
 
@@ -1273,7 +1270,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 				return nil, err
 			}
 
-			fw := firewallSvc.SetProperties(firewall)
+			fw := cloudapifirewall.SetProperties(firewall)
 
 			network["firewall"] = []map[string]interface{}{fw}
 		}
