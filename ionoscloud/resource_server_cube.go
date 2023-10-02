@@ -686,7 +686,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
-		nic, _, err := ns.FindById(ctx, dcId, serverId, primarynic.(string), 0)
+		nic, _, err := ns.Get(ctx, dcId, serverId, primarynic.(string), 0)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error occured while fetching nic %s for server ID %s %s", primarynic.(string), d.Id(), err))
 			return diags
@@ -1140,7 +1140,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
-		nic, apiResponse, err := ns.FindById(ctx, datacenterId, serverId, primaryNic, 0)
+		nic, apiResponse, err := ns.Get(ctx, datacenterId, serverId, primaryNic, 0)
 		if err != nil {
 			return nil, err
 		}

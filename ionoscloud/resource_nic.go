@@ -135,7 +135,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	var foundNic = &ionoscloud.Nic{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error
-		foundNic, apiResponse, err = ns.FindById(ctx, dcid, srvid, *createdNic.Id, 0)
+		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 0)
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] Could not find nic with Id %s , retrying...", *createdNic.Id)
 			return retry.RetryableError(fmt.Errorf("could not find nic, %w", err))
@@ -163,7 +163,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-	nic, apiResponse, err := ns.FindById(ctx, dcid, srvid, nicid, 0)
+	nic, apiResponse, err := ns.Get(ctx, dcid, srvid, nicid, 0)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] nic resource with id %s not found", nicid)

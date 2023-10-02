@@ -17,20 +17,16 @@ type Service struct {
 	D      *schema.ResourceData
 }
 
-func (fs *Service) Get(ctx context.Context, datacenterID, serverID string, depth int32) ([]ionoscloud.Nic, error) {
+func (fs *Service) List(ctx context.Context, datacenterID, serverID string, depth int32) ([]ionoscloud.Nic, error) {
 	nics, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsGet(ctx, datacenterID, serverID).Depth(depth).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		return nil, err
 	}
-	if apiResponse.HttpNotFound() || nics.Items == nil || len(*nics.Items) == 0 {
-		log.Printf("[DEBUG] no nics found for datacenter %s, server %s", datacenterID, serverID)
-		return nil, nil
-	}
 	return *nics.Items, nil
 }
 
-func (fs *Service) FindById(ctx context.Context, datacenterId, serverId, ID string, depth int32) (*ionoscloud.Nic, *ionoscloud.APIResponse, error) {
+func (fs *Service) Get(ctx context.Context, datacenterId, serverId, ID string, depth int32) (*ionoscloud.Nic, *ionoscloud.APIResponse, error) {
 	nic, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, ID).Depth(depth).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -51,7 +47,7 @@ func (fs *Service) Delete(ctx context.Context, datacenterID, serverID, ID string
 	// Wait, catching any errors
 	_, errState := cloudapi.GetStateChangeConf(fs.Meta, fs.D, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		return apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
+		return apiResponse, fmt.Errorf("an error occured while waiting for nic state change on delete dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
 	}
 	return apiResponse, nil
 }
@@ -61,7 +57,7 @@ func (fs *Service) Create(ctx context.Context, datacenterID, serverID string, ni
 	val, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, datacenterID, serverID).Nic(nic).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while creating val rule for dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, err)
+		return nil, apiResponse, fmt.Errorf("an error occured while creating nic for dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, err)
 	}
 	// Wait, catching any errors
 	_, errState := cloudapi.GetStateChangeConf(fs.Meta, fs.D, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
@@ -70,7 +66,7 @@ func (fs *Service) Create(ctx context.Context, datacenterID, serverID string, ni
 			// Request failed, so resource was not created, delete resource from state file
 			fs.D.SetId("")
 		}
-		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+		return nil, apiResponse, fmt.Errorf("an error occured while waiting for nic state change on create dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 	}
 	return &val, apiResponse, nil
 }
@@ -84,7 +80,7 @@ func (fs *Service) Update(ctx context.Context, datacenterID, serverID, ID string
 	// Wait, catching any errors
 	_, errState := cloudapi.GetStateChangeConf(fs.Meta, fs.D, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
+		return nil, apiResponse, fmt.Errorf("an error occured while waiting for nic state change on update dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
 	}
 	return &updatedNic, apiResponse, nil
 }

@@ -193,7 +193,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		return diag.FromErr(fmt.Errorf("either id, or name must be set"))
 	}
 	if idOk {
-		nic, _, err = ns.FindById(ctx, datacenterId, serverId, id.(string), 0)
+		nic, _, err = ns.Get(ctx, datacenterId, serverId, id.(string), 0)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error getting nic with id %s %w", id.(string), err))
 		}
@@ -204,7 +204,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 			}
 		}
 	} else {
-		nics, err := ns.Get(ctx, datacenterId, serverId, 1)
+		nics, err := ns.List(ctx, datacenterId, serverId, 1)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
 		}

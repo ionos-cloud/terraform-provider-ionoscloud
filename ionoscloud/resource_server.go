@@ -1491,7 +1491,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	if nicIntf, primaryNicOk := d.GetOk("primary_nic"); primaryNicOk {
 		nicId = nicIntf.(string)
 		ns := cloudapinic.Service{Client: client, Meta: nil, D: d}
-		nic, _, err := ns.FindById(ctx, datacenterId, d.Id(), nicId, 2)
+		nic, _, err := ns.Get(ctx, datacenterId, d.Id(), nicId, 2)
 		if err != nil {
 			return err
 		}
