@@ -6,7 +6,9 @@
 ### Features
 - #460 add `contract_number` to provider configuration
 ### Fixes
-- Fix `ionoscloud_ipfailover` resource
+- Fix `ionoscloud_ipfailover` resource and solve the problems presented at #432. Now
+it is possible to create and delete multiple `ionoscloud_ipfailover` resources at the same time. The UUID is generated based on the IP of the 
+failover group. The resources that are created using Terraform cannot be modified/deleted outside Terraform.
 
 ## 6.4.9
 
