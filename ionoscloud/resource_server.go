@@ -629,7 +629,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, datacenterId).Server(serverReq).Execute()
+	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, datacenterId).Depth(4).Server(serverReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error creating server: (%w)", err))
@@ -659,85 +659,147 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(err)
 	}
 
-	// get additional data for schema
-	foundServer, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, *postServer.Id).Depth(4).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error fetching server: %w", err))
+	if diags := setEntitiesServerData(d, postServer); diags != nil {
 		return diags
 	}
-	if foundServer.Entities.Nics.Items != nil {
-		if len(*foundServer.Entities.Nics.Items) > 0 {
-			// what we get from backend
-			foundFirstNic := (*foundServer.Entities.Nics.Items)[0]
-			var orderedRuleIds []string
-			if foundFirstNic.Entities != nil && foundFirstNic.Entities.Firewallrules != nil && foundFirstNic.Entities.Firewallrules.Items != nil {
-				// what we get from schema and send to the API
-				sentFirstNic := (*serverReq.Entities.Nics.Items)[0]
 
-				if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
-					sentRules := *sentFirstNic.Entities.Firewallrules.Items
+	//return diag.FromErr(setResourceServerData(ctx, client, d, &postServer))
+	return resourceServerRead(ctx, d, meta)
+}
+
+func setEntitiesServerData(d *schema.ResourceData, server ionoscloud.Server) diag.Diagnostics {
+	if server.Entities.Nics != nil {
+		var orderedRuleIds []string
+
+		if server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 {
+			// what we get from backend
+			foundFirstNic := (*server.Entities.Nics.Items)[0]
+			var nicEntry map[string]interface{}
+			var fwRulesEntries []map[string]interface{}
+
+			if foundFirstNic.Properties != nil {
+				nicEntry = cloudapinic.SetNetworkProperties(foundFirstNic)
+				nicEntry["id"] = *foundFirstNic.Id
+				if foundFirstNic.Entities != nil && foundFirstNic.Entities.Firewallrules != nil && foundFirstNic.Entities.Firewallrules.Items != nil {
 					foundRules := *foundFirstNic.Entities.Firewallrules.Items
-					orderedRuleIds = cloudapifirewall.ExtractOrderedFirewallIds(foundRules, sentRules)
-					if len(orderedRuleIds) > 0 {
-						if err := d.Set("firewallrule_id", orderedRuleIds[0]); err != nil {
-							diags := diag.FromErr(err)
-							return diags
+					for _, rule := range foundRules {
+						firewallEntry := cloudapifirewall.SetProperties(rule)
+						if firewallEntry != nil && len(firewallEntry) != 0 {
+							fwRulesEntries = append(fwRulesEntries, firewallEntry)
 						}
 					}
 				}
 			}
-			if len(orderedRuleIds) > 0 {
-				if err := cloudapifirewall.SetIdsInSchema(d, orderedRuleIds); err != nil {
-					diags := diag.FromErr(err)
-					return diags
-				}
+			nics := []map[string]interface{}{}
+			if fwRulesEntries != nil {
+				nicEntry["firewall"] = fwRulesEntries
 			}
+			if len(nicEntry) > 0 {
+				nics = []map[string]interface{}{nicEntry}
+			}
+			if err := d.Set("nic", nics); err != nil {
+				return diag.FromErr(fmt.Errorf("error settings nics %w", err))
+			}
+		}
+		// what we get from backend
+		foundFirstNic := (*server.Entities.Nics.Items)[0]
+		//var orderedRuleIds []string
+		var nicEntry map[string]interface{}
+		if foundFirstNic.Properties != nil {
+			nicEntry = cloudapinic.SetNetworkProperties(foundFirstNic)
+			nicEntry["id"] = *foundFirstNic.Id
+		}
+		var fwRulesEntries []map[string]interface{}
 
-			if foundFirstNic.Id != nil {
-				err := d.Set("primary_nic", *foundFirstNic.Id)
-				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
-					return diags
+		if foundFirstNic.Entities != nil && foundFirstNic.Entities.Firewallrules != nil && foundFirstNic.Entities.Firewallrules.Items != nil {
+			foundRules := *foundFirstNic.Entities.Firewallrules.Items
+			for idx, foundRule := range foundRules {
+				//nu par ca se seteaza toate id-urile
+				firewallEntry := cloudapifirewall.SetProperties(foundRule)
+				firewallEntry["id"] = *foundRule.Id
+				// computed, make equal for comparison
+				if idx == 0 {
+					if err := d.Set("firewallrule_id", foundRule.Id); err != nil {
+						return diag.FromErr(err)
+					}
+				}
+				if firewallEntry != nil && len(firewallEntry) != 0 {
+					fwRulesEntries = append(fwRulesEntries, firewallEntry)
 				}
 			}
-			foundNicProps := foundFirstNic.Properties
-			if foundNicProps != nil {
-				firstNicIps := foundNicProps.Ips
-				if firstNicIps != nil &&
-					len(*firstNicIps) > 0 {
-					log.Printf("[DEBUG] set primary_ip to %s", (*firstNicIps)[0])
-					if err := d.Set("primary_ip", (*firstNicIps)[0]); err != nil {
-						diags := diag.FromErr(utils.GenerateSetError("ionoscloud_server", "primary_ip", err))
+			// what we get from schema and send to the API
+			sentFirstNic := (*server.Entities.Nics.Items)[0]
+
+			if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
+				sentRules := *sentFirstNic.Entities.Firewallrules.Items
+				//foundRules := *foundFirstNic.Entities.Firewallrules.Items
+				orderedRuleIds = cloudapifirewall.ExtractOrderedFirewallIds(foundRules, sentRules)
+				if len(orderedRuleIds) > 0 {
+					if err := d.Set("firewallrule_id", orderedRuleIds[0]); err != nil {
+						diags := diag.FromErr(err)
 						return diags
 					}
 				}
-
-				volumeItems := serverReq.Entities.Volumes.Items
-				firstVolumeItem := (*volumeItems)[0]
-				if foundNicProps.Ips != nil &&
-					len(*firstNicIps) > 0 &&
-					volumeItems != nil &&
-					len(*volumeItems) > 0 &&
-					firstVolumeItem.Properties != nil &&
-					firstVolumeItem.Properties.ImagePassword != nil {
-
-					d.SetConnInfo(map[string]string{
-						"type":     "ssh",
-						"host":     (*firstNicIps)[0],
-						"password": *firstVolumeItem.Properties.ImagePassword,
-					})
-				}
+			}
+		}
+		nics := []map[string]interface{}{}
+		if fwRulesEntries != nil {
+			nicEntry["firewall"] = fwRulesEntries
+		}
+		if len(nicEntry) > 0 {
+			nics = []map[string]interface{}{nicEntry}
+		}
+		if err := d.Set("nic", nics); err != nil {
+			return diag.FromErr(fmt.Errorf("error settings nics %w", err))
+		}
+		if len(orderedRuleIds) > 0 {
+			if err := cloudapifirewall.SetIdsInSchema(d, orderedRuleIds); err != nil {
+				diags := diag.FromErr(err)
+				return diags
 			}
 		}
 
+		if foundFirstNic.Id != nil {
+			err := d.Set("primary_nic", *foundFirstNic.Id)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
+				return diags
+			}
+		}
+		foundNicProps := foundFirstNic.Properties
+		if foundNicProps != nil {
+			firstNicIps := foundNicProps.Ips
+			if firstNicIps != nil &&
+				len(*firstNicIps) > 0 {
+				log.Printf("[DEBUG] set primary_ip to %s", (*firstNicIps)[0])
+				if err := d.Set("primary_ip", (*firstNicIps)[0]); err != nil {
+					diags := diag.FromErr(utils.GenerateSetError("ionoscloud_server", "primary_ip", err))
+					return diags
+				}
+			}
+
+			volumeItems := server.Entities.Volumes.Items
+			firstVolumeItem := (*volumeItems)[0]
+			if foundNicProps.Ips != nil &&
+				len(*firstNicIps) > 0 &&
+				volumeItems != nil &&
+				len(*volumeItems) > 0 &&
+				firstVolumeItem.Properties != nil &&
+				firstVolumeItem.Properties.ImagePassword != nil {
+
+				d.SetConnInfo(map[string]string{
+					"type":     "ssh",
+					"host":     (*firstNicIps)[0],
+					"password": *firstVolumeItem.Properties.ImagePassword,
+				})
+			}
+		}
 	}
 
 	// Set inline volumes
-	if foundServer.Entities.Volumes != nil && foundServer.Entities.Volumes.Items != nil {
+	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil {
 		var inlineVolumeIds []string
-		for _, volume := range *foundServer.Entities.Volumes.Items {
+		for _, volume := range *server.Entities.Volumes.Items {
 			inlineVolumeIds = append(inlineVolumeIds, *volume.Id)
 		}
 
@@ -745,7 +807,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			return diag.FromErr(utils.GenerateSetError("server", "inline_volume_ids", err))
 		}
 	}
-	return resourceServerRead(ctx, d, meta)
+	return nil
 }
 
 func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
