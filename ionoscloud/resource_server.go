@@ -12,6 +12,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -753,52 +754,19 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if initialState, ok := d.GetOk("vm_state"); ok {
+		ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 		initialState := initialState.(string)
-		if initialState == "SHUTOFF" {
-			if serverType == "CUBE" {
-				diags := diag.FromErr(fmt.Errorf("cannot shut down a cube server, set to SUSPENDED instead"))
-				return diags
-			}
-			apiResponse, err := client.ServersApi.DatacentersServersStopPost(ctx, datacenterId, d.Id()).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(err)
-			}
-
-			err = utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
-				ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, d.Id()).Execute()
-				if err != nil {
-					return false, err
-				}
-				return *ionoscloudServer.Properties.VmState == "SHUTOFF", nil
-			})
-
-			if err != nil {
-				return diag.FromErr(err)
-			}
+		if initialState == "SHUTOFF" && serverType == "CUBE" {
+			diags := diag.FromErr(fmt.Errorf("cannot shut down a cube server, set to SUSPENDED instead"))
+			return diags
 		}
-		if initialState == "SUSPENDED" {
-			if serverType == "ENTERPRISE" {
-				diags := diag.FromErr(fmt.Errorf("cannot suspend an enterprise server, set to SHUTOFF instead"))
-				return diags
-			}
-			apiResponse, err := client.ServersApi.DatacentersServersSuspendPost(ctx, datacenterId, d.Id()).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(err)
-			}
-
-			err = utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
-				ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, d.Id()).Execute()
-				if err != nil {
-					return false, err
-				}
-				return *ionoscloudServer.Properties.VmState == "SUSPENDED", nil
-			})
-
-			if err != nil {
-				return diag.FromErr(err)
-			}
+		if initialState == "SUSPENDED" && serverType == "ENTERPRISE" {
+			diags := diag.FromErr(fmt.Errorf("cannot suspend an enterprise server, set to SHUTOFF instead"))
+			return diags
+		}
+		ss.Stop(ctx, datacenterId, d.Id(), serverType)
+		if err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
@@ -865,6 +833,7 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
+	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
@@ -891,45 +860,13 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				return diags
 			}
 			if newVmState == "RUNNING" && *currentVmState == "SHUTOFF" {
-				apiResponse, err := client.ServersApi.DatacentersServersStartPost(ctx, dcId, d.Id()).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(err)
-				}
-				err = utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
-					ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
-					if err != nil {
-						return false, err
-					}
-					if *ionoscloudServer.Properties.VmState == *currentVmState {
-						log.Printf("[INFO] Enterprise server vmState not yet changed to RUNNING: %s", d.Id())
-						return false, nil
-					}
-					return true, nil
-				})
-
+				err := ss.Start(ctx, dcId, d.Id(), "ENTERPRISE")
 				if err != nil {
 					return diag.FromErr(err)
 				}
 			}
 			if newVmState == "SHUTOFF" && *currentVmState == "RUNNING" {
-				apiResponse, err := client.ServersApi.DatacentersServersStopPost(ctx, dcId, d.Id()).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(err)
-				}
-				err = utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
-					ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
-					if err != nil {
-						return false, err
-					}
-					if *ionoscloudServer.Properties.VmState == *currentVmState {
-						log.Printf("[INFO] Enterprise server vmState not yet changed to SHUTOFF: %s", d.Id())
-						return false, nil
-					}
-					return true, nil
-				})
-
+				err := ss.Stop(ctx, dcId, d.Id(), "ENTERPRISE")
 				if err != nil {
 					return diag.FromErr(err)
 				}
@@ -945,24 +882,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 			// Unsuspend a Cube server first, before applying other changes
 			if newVmState == "RUNNING" && *currentVmState == "SUSPENDED" {
-				apiResponse, err := client.ServersApi.DatacentersServersResumePost(ctx, dcId, d.Id()).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(err)
-				}
-
-				err = utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
-					ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
-					if err != nil {
-						return false, err
-					}
-					if *ionoscloudServer.Properties.VmState == *currentVmState {
-						log.Printf("[INFO] Cube server vmState not yet changed to RUNNING: %s", d.Id())
-						return false, nil
-					}
-					return true, nil
-				})
-
+				err := ss.Start(ctx, dcId, d.Id(), "CUBE")
 				if err != nil {
 					return diag.FromErr(err)
 				}
@@ -1264,24 +1184,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	if d.HasChange("vm_state") && *serverType == "CUBE" {
 		_, newVmState := d.GetChange("vm_state")
 		if newVmState.(string) == "SUSPENDED" && *currentVmState == "RUNNING" {
-			apiResponse, err := client.ServersApi.DatacentersServersSuspendPost(ctx, dcId, d.Id()).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(err)
-			}
-
-			err = utils.WaitForResourceToBeReady(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
-				ionoscloudServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
-				if err != nil {
-					return false, err
-				}
-				if *ionoscloudServer.Properties.VmState == *currentVmState {
-					log.Printf("[INFO] Cube server vmState not yet changed to SUSPENDED: %s", d.Id())
-					return false, nil
-				}
-				return true, nil
-			})
-
+			err := ss.Stop(ctx, dcId, d.Id(), "CUBE")
 			if err != nil {
 				return diag.FromErr(err)
 			}
