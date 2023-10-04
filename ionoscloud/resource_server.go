@@ -315,7 +315,7 @@ func resourceServer() *schema.Resource {
 			"vm_state": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "The power states of the Server: RUNNING, SHUTOFF, SUSPENDED (cube)",
+				Description:      "The power states of the Server: RUNNING, SHUTOFF, SUSPENDED. SUSPENDED state is only valid for cube",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"RUNNING", "SHUTOFF", "SUSPENDED"}, true)),
 			},
 			"nic": {
@@ -756,17 +756,12 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	if initialState, ok := d.GetOk("vm_state"); ok {
 		ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 		initialState := initialState.(string)
-		if initialState == "SHUTOFF" && serverType == "CUBE" {
-			diags := diag.FromErr(fmt.Errorf("cannot shut down a cube server, set to SUSPENDED instead"))
-			return diags
-		}
-		if initialState == "SUSPENDED" && serverType == "ENTERPRISE" {
-			diags := diag.FromErr(fmt.Errorf("cannot suspend an enterprise server, set to SHUTOFF instead"))
-			return diags
-		}
-		ss.Stop(ctx, datacenterId, d.Id(), serverType)
-		if err != nil {
-			return diag.FromErr(err)
+
+		if !strings.EqualFold(initialState, "RUNNING") {
+			ss.Stop(ctx, datacenterId, d.Id(), serverType)
+			if err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
@@ -838,55 +833,22 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
 
-	server, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
-	currentVmState := server.Properties.VmState
-	serverType := server.Properties.Type
+	currentVmState, err := ss.GetVmState(ctx, dcId, d.Id())
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("could not retrieve server vmState: %s", err))
 		return diags
 	}
-	if *currentVmState == "SUSPENDED" && !d.HasChange("vm_state") {
+	if strings.EqualFold(currentVmState, cloudapiserver.CUBE_VMSTATE_STOP) && !d.HasChange("vm_state") {
 		diags := diag.FromErr(fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"))
 		return diags
 	}
 
 	if d.HasChange("vm_state") {
 		_, newState := d.GetChange("vm_state")
-		newVmState := newState.(string)
-		switch *serverType {
-		case "ENTERPRISE":
-			if newVmState == "SUSPENDED" {
-				diags := diag.FromErr(fmt.Errorf("cannot suspend an enterprise server, set to SHUTOFF instead"))
-				return diags
-			}
-			if newVmState == "RUNNING" && *currentVmState == "SHUTOFF" {
-				err := ss.Start(ctx, dcId, d.Id(), "ENTERPRISE")
-				if err != nil {
-					return diag.FromErr(err)
-				}
-			}
-			if newVmState == "SHUTOFF" && *currentVmState == "RUNNING" {
-				err := ss.Stop(ctx, dcId, d.Id(), "ENTERPRISE")
-				if err != nil {
-					return diag.FromErr(err)
-				}
-			}
-		case "CUBE":
-			if newVmState == "SHUTOFF" {
-				diags := diag.FromErr(fmt.Errorf("cannot shut down a cube server, set to SUSPENDED instead"))
-				return diags
-			}
-			if newVmState == "" {
-				diags := diag.FromErr(fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"))
-				return diags
-			}
-			// Unsuspend a Cube server first, before applying other changes
-			if newVmState == "RUNNING" && *currentVmState == "SUSPENDED" {
-				err := ss.Start(ctx, dcId, d.Id(), "CUBE")
-				if err != nil {
-					return diag.FromErr(err)
-				}
-			}
+		err := ss.UpdateVmState(ctx, dcId, d.Id(), newState.(string))
+		if err != nil && err != cloudapiserver.SuspendCubeLast {
+			diags := diag.FromErr(err)
+			return diags
 		}
 	}
 
@@ -1181,10 +1143,15 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Suspend a Cube server last, after applying other changes
-	if d.HasChange("vm_state") && *serverType == "CUBE" {
+	if d.HasChange("vm_state") {
+		serverType, err := ss.GetServerType(ctx, dcId, d.Id())
 		_, newVmState := d.GetChange("vm_state")
-		if newVmState.(string) == "SUSPENDED" && *currentVmState == "RUNNING" {
-			err := ss.Stop(ctx, dcId, d.Id(), "CUBE")
+
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if strings.EqualFold(serverType, cloudapiserver.CUBE_SERVER_TYPE) && strings.EqualFold(newVmState.(string), cloudapiserver.CUBE_VMSTATE_STOP) {
+			err := ss.Stop(ctx, dcId, d.Id(), cloudapiserver.CUBE_SERVER_TYPE)
 			if err != nil {
 				return diag.FromErr(err)
 			}
