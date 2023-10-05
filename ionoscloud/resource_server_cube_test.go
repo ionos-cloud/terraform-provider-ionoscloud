@@ -11,6 +11,7 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -174,14 +175,14 @@ func TestAccCubeServerBasic(t *testing.T) {
 			{
 				Config: testAccCheckCubeServerSuspend,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", "SUSPENDED"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.CUBE_VMSTATE_STOP),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state"),
 				),
 			},
 			{
 				Config: testAccCheckCubeServerResume,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", "RUNNING"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.CUBE_VMSTATE_START),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state"),
 				),
 			},
