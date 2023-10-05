@@ -175,14 +175,14 @@ func TestAccCubeServerBasic(t *testing.T) {
 			{
 				Config: testAccCheckCubeServerSuspend,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.CUBE_VMSTATE_STOP),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.CubeVMStateStop),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state"),
 				),
 			},
 			{
 				Config: testAccCheckCubeServerResume,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.CUBE_VMSTATE_START),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.VMStateStart),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state"),
 				),
 			},

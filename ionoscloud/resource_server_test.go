@@ -229,14 +229,14 @@ func TestAccServerBasic(t *testing.T) {
 			{
 				Config: testAccCheckServerConfigShutdown,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.ENTERPRISE_VMSTATE_STOP),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.EnterpriseServerStop),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerResource+"."+constant.ServerTestResource, "vm_state"),
 				),
 			},
 			{
 				Config: testAccCheckServerConfigPowerOn,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.ENTERPRISE_VMSTATE_START),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.VMStateStart),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerResource+"."+constant.ServerTestResource, "vm_state"),
 				),
 			},

@@ -18,16 +18,17 @@ type Service struct {
 	D      *schema.ResourceData
 }
 
+// The caller should ignore this error, it only informs that the CUBE server should be suspended after all other updates have been applied.
 var ErrSuspendCubeLast error
 
 const (
-	CUBE_SERVER_TYPE   = "CUBE"
-	CUBE_VMSTATE_STOP  = "SUSPENDED"
-	CUBE_VMSTATE_START = "RUNNING"
+	CubeServerType  = "CUBE"
+	CubeVMStateStop = "SUSPENDED"
 
-	ENTERPRISE_SERVER_TYPE   = "ENTERPRISE"
-	ENTERPRISE_VMSTATE_STOP  = "SHUTOFF"
-	ENTERPRISE_VMSTATE_START = "RUNNING"
+	EnterpriseServerType = "ENTERPRISE"
+	EnterpriseServerStop = "SHUTOFF"
+
+	VMStateStart = "RUNNING"
 )
 
 func (ss *Service) FindById(ctx context.Context, datacenterID, serverID string, depth int32) (*ionoscloud.Server, error) {
@@ -98,28 +99,28 @@ func (ss *Service) UpdateVmState(ctx context.Context, datacenterID, serverID, ne
 	}
 
 	switch serverType {
-	case ENTERPRISE_SERVER_TYPE:
-		if strings.EqualFold(newVmState, CUBE_VMSTATE_STOP) {
-			return fmt.Errorf("cannot suspend an enterprise server, set to %s instead", ENTERPRISE_VMSTATE_STOP)
+	case EnterpriseServerType:
+		if strings.EqualFold(newVmState, CubeVMStateStop) {
+			return fmt.Errorf("cannot suspend an enterprise server, set to %s instead", EnterpriseServerStop)
 		}
-		if strings.EqualFold(newVmState, ENTERPRISE_VMSTATE_START) && strings.EqualFold(currentVmState, ENTERPRISE_VMSTATE_STOP) {
+		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, EnterpriseServerStop) {
 			return ss.Start(ctx, datacenterID, serverID, serverType)
 		}
-		if strings.EqualFold(newVmState, ENTERPRISE_VMSTATE_STOP) && strings.EqualFold(currentVmState, ENTERPRISE_VMSTATE_START) {
+		if strings.EqualFold(newVmState, EnterpriseServerStop) && strings.EqualFold(currentVmState, VMStateStart) {
 			return ss.Stop(ctx, datacenterID, serverID, serverType)
 		}
 
-	case CUBE_SERVER_TYPE:
-		if strings.EqualFold(newVmState, ENTERPRISE_VMSTATE_STOP) {
-			return fmt.Errorf("cannot shut down a cube server, set to %s instead", CUBE_VMSTATE_STOP)
+	case CubeServerType:
+		if strings.EqualFold(newVmState, EnterpriseServerStop) {
+			return fmt.Errorf("cannot shut down a cube server, set to %s instead", CubeVMStateStop)
 		}
 		if newVmState == "" {
-			return fmt.Errorf("cannot update a suspended Cube Server, must change the state to %s first", CUBE_VMSTATE_START)
+			return fmt.Errorf("cannot update a suspended Cube Server, must change the state to %s first", VMStateStart)
 		}
-		if strings.EqualFold(newVmState, CUBE_VMSTATE_START) && strings.EqualFold(currentVmState, CUBE_VMSTATE_STOP) {
+		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, CubeVMStateStop) {
 			return ss.Start(ctx, datacenterID, serverID, serverType)
 		}
-		if strings.EqualFold(newVmState, CUBE_VMSTATE_STOP) && strings.EqualFold(currentVmState, CUBE_VMSTATE_START) {
+		if strings.EqualFold(newVmState, CubeVMStateStop) && strings.EqualFold(currentVmState, VMStateStart) {
 			return ErrSuspendCubeLast
 		}
 
@@ -154,21 +155,21 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 
 	switch serverType {
 
-	case ENTERPRISE_SERVER_TYPE:
+	case EnterpriseServerType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersStartPost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
 			return err
 		}
-		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, ENTERPRISE_VMSTATE_START))
+		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, VMStateStart))
 
-	case CUBE_SERVER_TYPE:
+	case CubeServerType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersResumePost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
 			return err
 		}
-		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, CUBE_VMSTATE_START))
+		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, VMStateStart))
 	}
 
 	return fmt.Errorf("cannot start unknown server type: %s", serverType)
@@ -179,21 +180,21 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 
 	switch serverType {
 
-	case ENTERPRISE_SERVER_TYPE:
+	case EnterpriseServerType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersStopPost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
 			return err
 		}
-		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, ENTERPRISE_VMSTATE_STOP))
+		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, EnterpriseServerStop))
 
-	case CUBE_SERVER_TYPE:
+	case CubeServerType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersSuspendPost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
 			return err
 		}
-		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, CUBE_VMSTATE_STOP))
+		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, CubeVMStateStop))
 	}
 
 	return fmt.Errorf("cannot stop unknown server type: %s", serverType)
