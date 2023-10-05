@@ -201,6 +201,8 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 
 }
 
+// checkExpectedVmStateFn wraps over the ResourceReadyFunc to allow passing expectedState
+// TODO: change ResourceReadyFunc sig to support passing an expectedState param
 func (ss *Service) checkExpectedVmStateFn(ctx context.Context, dcId, expectedState string) utils.ResourceReadyFunc {
 
 	return func(ctx context.Context, d *schema.ResourceData) (bool, error) {
