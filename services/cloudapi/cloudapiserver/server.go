@@ -194,15 +194,16 @@ func (fs *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 
 }
 
-func (fs *Service) checkExpectedVmStateFn(ctx context.Context, dcId, expectedState string) func(ctx context.Context, d *schema.ResourceData) (bool, error) {
+func (fs *Service) checkExpectedVmStateFn(ctx context.Context, dcId, expectedState string) utils.ResourceReadyFunc {
 
 	return func(ctx context.Context, d *schema.ResourceData) (bool, error) {
 		ionoscloudServer, _, err := fs.Client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
-		serverType := *ionoscloudServer.Properties.Type
 		if err != nil {
 			return false, err
 		}
-		if *ionoscloudServer.Properties.VmState != expectedState {
+
+		serverType := *ionoscloudServer.Properties.Type
+		if !strings.EqualFold(*ionoscloudServer.Properties.VmState, expectedState) {
 			log.Printf("[INFO] Server (type: %s) vmState not yet changed to %s: %s", serverType, expectedState, d.Id())
 			return false, nil
 		}
