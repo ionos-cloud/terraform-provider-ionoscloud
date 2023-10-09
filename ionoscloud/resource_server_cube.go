@@ -804,7 +804,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	currentVmState, err := ss.GetVmState(ctx, dcId, d.Id())
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("could not retrieve server vmState: %s", err))
+		diags := diag.FromErr(fmt.Errorf("could not retrieve server vmState: %w", err))
 		return diags
 	}
 	if strings.EqualFold(currentVmState, cloudapiserver.CubeVMStateStop) && !d.HasChange("vm_state") {
