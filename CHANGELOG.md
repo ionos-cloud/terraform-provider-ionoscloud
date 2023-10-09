@@ -5,7 +5,7 @@
 - `%w` instead of `%s` for some printed errors
 ### Features
 - #460 add `contract_number` to provider configuration
-- #412 add support for power state in `ionoscloud_server` and `ionoscloud_cube_server`
+- #412 add support to set power state of Enterprise and Cube servers, by adding new field `vm_state`  in `ionoscloud_server` and `ionoscloud_cube_server` resources
 ### Fixes
 - Fix `ionoscloud_ipfailover` resource
 
