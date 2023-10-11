@@ -114,9 +114,6 @@ func (ss *Service) UpdateVmState(ctx context.Context, datacenterID, serverID, ne
 		if strings.EqualFold(newVmState, EnterpriseServerStop) {
 			return fmt.Errorf("cannot shut down a cube server, set to %s instead", CubeVMStateStop)
 		}
-		if newVmState == "" {
-			return fmt.Errorf("cannot update a suspended Cube Server, must change the state to %s first", VMStateStart)
-		}
 		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, CubeVMStateStop) {
 			return ss.Start(ctx, datacenterID, serverID, serverType)
 		}

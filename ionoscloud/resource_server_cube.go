@@ -218,6 +218,7 @@ func resourceCubeServer() *schema.Resource {
 			"vm_state": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				Description:      "The power states of the Cube Server: RUNNING or SUSPENDED",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{cloudapiserver.VMStateStart, cloudapiserver.CubeVMStateStop}, true)),
 			},
@@ -689,6 +690,13 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 				return diags
 			}
 		}
+
+		if server.Properties.VmState != nil {
+			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
 	}
 
 	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
@@ -814,11 +822,6 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	// Unsuspend a Cube server first, before applying other changes
 	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, cloudapiserver.CubeVMStateStop) {
-		_, newVmState := d.GetChange("vm_state")
-		if !strings.EqualFold(newVmState.(string), cloudapiserver.VMStateStart) {
-			diags := diag.FromErr(fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"))
-			return diags
-		}
 		err := ss.Start(ctx, dcId, d.Id(), cloudapiserver.CubeServerType)
 		if err != nil {
 			diags := diag.FromErr(err)

@@ -316,6 +316,7 @@ func resourceServer() *schema.Resource {
 			"vm_state": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				Description:      "The power states of the Server: RUNNING, SHUTOFF, SUSPENDED. SUSPENDED state is only valid for cube",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{cloudapiserver.VMStateStart, cloudapiserver.EnterpriseServerStop, cloudapiserver.CubeVMStateStop}, true)),
 			},
@@ -1495,6 +1496,12 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		if server.Properties.Type != nil {
 			if err := d.Set("type", *server.Properties.Type); err != nil {
 				return fmt.Errorf("error setting type %w", err)
+			}
+		}
+
+		if server.Properties.VmState != nil {
+			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
+				return fmt.Errorf("error setting vm_state %w", err)
 			}
 		}
 
