@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/lanSvc"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilan"
 	"log"
 	"strings"
 
@@ -69,7 +69,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 	nicUuid := d.Get("nicuuid").(string)
 
 	// First, retrieve the existing IP Failover groups
-	lan, apiResponse, err := lanSvc.FindLanById(*client, ctx, dcId, lanId)
+	lan, apiResponse, err := cloudapilan.FindLanById(*client, ctx, dcId, lanId)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return diag.FromErr(fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId))
@@ -112,7 +112,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	ip := d.Get("ip").(string)
 
 	// Retrieve the existing IP Failover groups
-	lan, apiResponse, err := lanSvc.FindLanById(*client, ctx, dcId, lanId)
+	lan, apiResponse, err := cloudapilan.FindLanById(*client, ctx, dcId, lanId)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -162,7 +162,7 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 		oldNicUuid := oldValue.(string)
 
 		// First, retrieve the existing IP Failover groups
-		lan, apiResponse, err := lanSvc.FindLanById(*client, ctx, dcId, lanId)
+		lan, apiResponse, err := cloudapilan.FindLanById(*client, ctx, dcId, lanId)
 		if err != nil {
 			if apiResponse.HttpNotFound() {
 				return diag.FromErr(fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId))
@@ -210,7 +210,7 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 	nicUuid := d.Get("nicuuid").(string)
 
 	// First, retrieve the existing IP Failover groups
-	lan, apiResponse, err := lanSvc.FindLanById(*client, ctx, dcId, lanId)
+	lan, apiResponse, err := cloudapilan.FindLanById(*client, ctx, dcId, lanId)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return diag.FromErr(fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId))
