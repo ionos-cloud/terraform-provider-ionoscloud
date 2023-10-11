@@ -219,7 +219,7 @@ func resourceCubeServer() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				Description:      "The power states of the Cube Server: RUNNING or SUSPENDED",
+				Description:      "Sets the power state of the cube server. Possible values: `RUNNING` or `SUSPENDED`.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{cloudapiserver.VMStateStart, cloudapiserver.CubeVMStateStop}, true)),
 			},
 			"nic": {
