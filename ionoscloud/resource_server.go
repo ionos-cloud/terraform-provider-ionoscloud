@@ -317,7 +317,7 @@ func resourceServer() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				Description:      "The power states of the Server: RUNNING, SHUTOFF, SUSPENDED. SUSPENDED state is only valid for cube",
+				Description:      "Sets the power state of the server. Possible values: `RUNNING`, `SHUTOFF` or `SUSPENDED`. SUSPENDED state is only valid for cube. SHUTOFF state is only valid for enterprise",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{cloudapiserver.VMStateStart, cloudapiserver.EnterpriseServerStop, cloudapiserver.CubeVMStateStop}, true)),
 			},
 			"nic": {
