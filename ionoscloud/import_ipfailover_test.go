@@ -9,11 +9,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccIpFailoverImportBasic(t *testing.T) {
-	resourceName := "failover-test"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ExternalProviders: randomProviderVersion343(),
@@ -23,9 +22,8 @@ func TestAccIpFailoverImportBasic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig),
 			},
-
 			{
-				ResourceName:      fmt.Sprintf("ionoscloud_ipfailover.%s", resourceName),
+				ResourceName:      fmt.Sprintf("ionoscloud_ipfailover.%s", constant.IpfailoverName),
 				ImportStateIdFunc: testAccIpFailoverImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
