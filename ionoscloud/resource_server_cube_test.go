@@ -11,6 +11,7 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -169,6 +170,24 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.0", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.0"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.1", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.1"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.2", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.2"),
+				),
+			},
+			{
+				Config: testAccCheckCubeServerSuspend,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.CubeVMStateStop),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state"),
+				),
+			},
+			{
+				Config:      testAccCheckCubeServerUpdateWhenSuspended,
+				ExpectError: regexp.MustCompile(`cannot update a suspended Cube Server, must change the state to RUNNING first`),
+			},
+			{
+				Config: testAccCheckCubeServerResume,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.VMStateStart),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state"),
 				),
 			},
 		},

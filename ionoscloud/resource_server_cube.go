@@ -15,6 +15,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -214,6 +215,13 @@ func resourceCubeServer() *schema.Resource {
 					},
 				},
 			},
+			"vm_state": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "Sets the power state of the cube server. Possible values: `RUNNING` or `SUSPENDED`.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{cloudapiserver.VMStateStart, cloudapiserver.CubeVMStateStop}, true)),
+			},
 			"nic": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -377,7 +385,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		server.Properties.AvailabilityZone = &vStr
 	}
 
-	serverType := "CUBE"
+	serverType := cloudapiserver.CubeServerType
 	server.Properties.Type = &serverType
 
 	volumeType := d.Get("volume.0.disk_type").(string)
@@ -628,6 +636,19 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 			"password": *(*createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword,
 		})
 	}
+
+	if initialState, ok := d.GetOk("vm_state"); ok {
+		ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
+		initialState := initialState.(string)
+
+		if strings.EqualFold(initialState, cloudapiserver.CubeVMStateStop) {
+			ss.Stop(ctx, dcId, d.Id(), serverType)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
 	return resourceCubeServerRead(ctx, d, meta)
 }
 
@@ -665,6 +686,13 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if server.Properties.AvailabilityZone != nil {
 			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+
+		if server.Properties.VmState != nil {
+			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
 				diags := diag.FromErr(err)
 				return diags
 			}
@@ -777,9 +805,29 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
+	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
+
+	currentVmState, err := ss.GetVmState(ctx, dcId, d.Id())
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("could not retrieve server vmState: %w", err))
+		return diags
+	}
+	if strings.EqualFold(currentVmState, cloudapiserver.CubeVMStateStop) && !d.HasChange("vm_state") {
+		diags := diag.FromErr(fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"))
+		return diags
+	}
+
+	// Unsuspend a Cube server first, before applying other changes
+	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, cloudapiserver.CubeVMStateStop) {
+		err := ss.Start(ctx, dcId, d.Id(), cloudapiserver.CubeServerType)
+		if err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
+	}
 
 	if d.HasChange("template_uuid") {
 		_, n := d.GetChange("template_uuid")
@@ -1015,6 +1063,18 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error updating nic (%w)", err))
 			return diags
+		}
+	}
+
+	// Suspend a Cube server last, after applying other changes
+	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, cloudapiserver.VMStateStart) {
+		_, newVmState := d.GetChange("vm_state")
+		if strings.EqualFold(newVmState.(string), cloudapiserver.CubeVMStateStop) {
+			err := ss.Stop(ctx, dcId, d.Id(), cloudapiserver.CubeServerType)
+			if err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
 		}
 	}
 

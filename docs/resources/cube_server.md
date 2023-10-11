@@ -123,6 +123,7 @@ resource "random_password" "server_image_password" {
 - `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
+- `vm_state` - (Optional)[string] Sets the power state of the cube server. E.g: `RUNNING` or `SUSPENDED`.
 - `volume` - (Required) See the [Volume](volume.md) section.
 - `nic` - (Required) See the [Nic](nic.md) section.
 - `boot_volume` - (Computed) The associated boot volume.

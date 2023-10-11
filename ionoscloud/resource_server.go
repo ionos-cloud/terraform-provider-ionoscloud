@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -310,6 +312,13 @@ func resourceServer() *schema.Resource {
 						},
 					},
 				},
+			},
+			"vm_state": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "Sets the power state of the server. Possible values: `RUNNING`, `SHUTOFF` or `SUSPENDED`. SUSPENDED state is only valid for cube. SHUTOFF state is only valid for enterprise",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{cloudapiserver.VMStateStart, cloudapiserver.EnterpriseServerStop, cloudapiserver.CubeVMStateStop}, true)),
 			},
 			"nic": {
 				Type:     schema.TypeList,
@@ -745,6 +754,19 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			return diag.FromErr(utils.GenerateSetError("server", "inline_volume_ids", err))
 		}
 	}
+
+	if initialState, ok := d.GetOk("vm_state"); ok {
+		ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
+		initialState := initialState.(string)
+
+		if !strings.EqualFold(initialState, cloudapiserver.VMStateStart) {
+			ss.Stop(ctx, datacenterId, d.Id(), serverType)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
 	return resourceServerRead(ctx, d, meta)
 }
 
@@ -808,9 +830,29 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
+	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
+
+	currentVmState, err := ss.GetVmState(ctx, dcId, d.Id())
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("could not retrieve server vmState: %w", err))
+		return diags
+	}
+	if strings.EqualFold(currentVmState, cloudapiserver.CubeVMStateStop) && !d.HasChange("vm_state") {
+		diags := diag.FromErr(fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"))
+		return diags
+	}
+
+	if d.HasChange("vm_state") {
+		_, newState := d.GetChange("vm_state")
+		err := ss.UpdateVmState(ctx, dcId, d.Id(), newState.(string))
+		if err != nil && !errors.Is(err, cloudapiserver.ErrSuspendCubeLast) {
+			diags := diag.FromErr(err)
+			return diags
+		}
+	}
 
 	if d.HasChange("template_uuid") {
 		_, n := d.GetChange("template_uuid")
@@ -1100,6 +1142,23 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		if err := ls.datacentersServersLabelsCreate(dcId, d.Id(), labelsToBeCreated); err != nil {
 			return diag.FromErr(err)
 		}
+	}
+
+	// Suspend a Cube server last, after applying other changes
+	if d.HasChange("vm_state") {
+		serverType, err := ss.GetServerType(ctx, dcId, d.Id())
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		_, newVmState := d.GetChange("vm_state")
+		if strings.EqualFold(serverType, cloudapiserver.CubeServerType) && strings.EqualFold(newVmState.(string), cloudapiserver.CubeVMStateStop) {
+			err := ss.Stop(ctx, dcId, d.Id(), cloudapiserver.CubeServerType)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+
 	}
 	return resourceServerRead(ctx, d, meta)
 }
@@ -1437,6 +1496,12 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		if server.Properties.Type != nil {
 			if err := d.Set("type", *server.Properties.Type); err != nil {
 				return fmt.Errorf("error setting type %w", err)
+			}
+		}
+
+		if server.Properties.VmState != nil {
+			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
+				return fmt.Errorf("error setting vm_state %w", err)
 			}
 		}
 
