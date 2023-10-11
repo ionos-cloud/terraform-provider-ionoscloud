@@ -976,6 +976,64 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 }
 `
 
+const testAccCheckCubeServerUpdateWhenSuspended = `
+data "ionoscloud_template" ` + constant.ServerTestResource + ` {
+  name = "CUBES XS"
+  cores = 1
+  ram   = 1024
+  storage_size = 30
+}
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+  name       = "server-test"
+  location   = "de/fra"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+  ipv6_cidr_block = cidrsubnet(` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.ipv6_cidr_block` + `,8,10)
+}
+resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
+  template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
+  vm_state = "SUSPENDED"
+  name = "` + constant.UpdatedResources + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  availability_zone = "AUTO"
+  image_name ="ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  
+  volume {
+    name = "system"
+    licence_type    = "LINUX"
+    disk_type = "DAS"
+}
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+    firewall_type = "BIDIRECTIONAL"
+    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
+
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+      source_mac = "00:0a:95:9d:68:17"
+      source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
+      target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
+      type = "EGRESS"
+    }
+  }
+}
+` + ServerImagePassword
+
 const testAccCheckServerCreationWithLabels = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"

@@ -180,6 +180,10 @@ func TestAccCubeServerBasic(t *testing.T) {
 				),
 			},
 			{
+				Config:      testAccCheckCubeServerUpdateWhenSuspended,
+				ExpectError: regexp.MustCompile(`cannot update a suspended Cube Server, must change the state to RUNNING first`),
+			},
+			{
 				Config: testAccCheckCubeServerResume,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.VMStateStart),
