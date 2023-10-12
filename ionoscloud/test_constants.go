@@ -1580,6 +1580,74 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
 }`
 )
 
+const testAccCheckServerVCPUShutDown = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+  name       = "server-test"
+  location   = "de/txl"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  vm_state = "SHUTOFF"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  image_name ="ubuntu:latest"
+  ssh_keys = ["` + sshKey + `"]
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+}`
+
+const testAccCheckServerVCPUPowerOn = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+  name       = "server-test"
+  location   = "de/txl"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  vm_state = "RUNNING"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  image_name ="ubuntu:latest"
+  ssh_keys = ["` + sshKey + `"]
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+}`
+
 const resourceRandomUUID = `
 resource "random_uuid" "uuid" {
 }
