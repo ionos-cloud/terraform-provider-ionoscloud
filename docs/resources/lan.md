@@ -22,8 +22,8 @@ resource "ionoscloud_datacenter" "example" {
 }
 
 resource "ionoscloud_private_crossconnect" "example" {
-  name                  = "PCC Example"
-  description           = "PCC Description"
+  name                  = "Cross Connect Example"
+  description           = "Cross Connect Description"
 }
 
 resource "ionoscloud_lan" "example" {

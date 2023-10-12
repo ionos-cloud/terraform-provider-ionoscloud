@@ -25,7 +25,7 @@ data "ionoscloud_private_crossconnect" "example" {
 ### By Name
 ```hcl
 data "ionoscloud_private_crossconnect" "example" {
-  name     = "PCC Example"
+  name     = "Cross Connect Example"
 }
 ```
 

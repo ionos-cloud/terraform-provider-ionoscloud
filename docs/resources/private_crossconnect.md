@@ -21,9 +21,9 @@ The IP addresses of the NICs used for the Cross Connect connection may not be us
 To connect two datacenters we need 2 lans defined, one in each datacenter. After, we reference the cross-connect through which we want the connection to be established.
 
 ```hcl
-resource ionoscloud_private_crossconnect PCCTestResource {
-  name        = "PCCTestResource"
-  description = "PCCTestResource"
+resource ionoscloud_private_crossconnect CrossConnectTestResource {
+  name        = "CrossConnectTestResource"
+  description = "CrossConnectTestResource"
 }
 
 resource ionoscloud_datacenter dc1 {
@@ -40,14 +40,14 @@ resource ionoscloud_lan dc1lan {
   datacenter_id = ionoscloud_datacenter.dc1.id
   public = false
   name = "dc1lan"
-  pcc = ionoscloud_private_crossconnect.PCCTestResource.id
+  pcc = ionoscloud_private_crossconnect.CrossConnectTestResource.id
 }
 
 resource ionoscloud_lan dc2lan {
   datacenter_id = ionoscloud_datacenter.dc2.id
   public = false
   name = "dc2lan"
-  pcc = ionoscloud_private_crossconnect.PCCTestResource.id
+  pcc = ionoscloud_private_crossconnect.CrossConnectTestResource.id
 }
 ```
 

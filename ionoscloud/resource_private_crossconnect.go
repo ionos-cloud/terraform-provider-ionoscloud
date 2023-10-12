@@ -28,13 +28,13 @@ func resourcePrivateCrossConnect() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:             schema.TypeString,
-				Description:      "The desired name for the private cross-connect",
+				Description:      "The desired name",
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"description": {
 				Type:        schema.TypeString,
-				Description: "The desired description for the private cross-connect",
+				Description: "The desired description",
 				Optional:    true,
 			},
 			"connectable_datacenters": {
@@ -64,7 +64,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 			},
 			"peers": {
 				Type:        schema.TypeList,
-				Description: "A list containing the details of all datacenter cross-connected through this private cross-connect",
+				Description: "A list containing the details of all datacenter cross-connected through this cross-connect",
 				Computed:    true,
 				Optional:    true,
 				Elem: &schema.Resource{
@@ -123,7 +123,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating private PCC: %w", err))
+		diags := diag.FromErr(fmt.Errorf("error creating cross connect: %w", err))
 		return diags
 	}
 

@@ -70,7 +70,7 @@ resource "random_password" "user2_password" {
 * `create_snapshot` - (Optional) [Boolean] The group will be allowed to create snapshots.
 * `reserve_ip` - (Optional) [Boolean] The group will be allowed to reserve IP addresses.
 * `access_activity_log` - (Optional) [Boolean] The group will be allowed to access the activity log.
-* `create_pcc` - (Optional) [Boolean] The group will be allowed to create pcc privilege.
+* `create_pcc` - (Optional) [Boolean] The group will be allowed to create Cross Connects privilege.
 * `s3_privilege` - (Optional) [Boolean] The group will have S3 privilege.
 * `create_backup_unit` - (Optional) [Boolean] The group will be allowed to create backup unit privilege.
 * `create_internet_access` - (Optional) [Boolean] The group will be allowed to create internet access privilege.
