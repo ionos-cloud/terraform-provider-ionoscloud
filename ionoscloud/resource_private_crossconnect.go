@@ -64,7 +64,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 			},
 			"peers": {
 				Type:        schema.TypeList,
-				Description: "A list containing the details of all datacenter cross-connected through this cross-connect",
+				Description: "A list containing the details of all cross-connected datacenters",
 				Computed:    true,
 				Optional:    true,
 				Elem: &schema.Resource{
