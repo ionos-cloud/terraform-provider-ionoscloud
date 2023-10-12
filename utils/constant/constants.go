@@ -140,7 +140,9 @@ const (
 	NetworkLoadBalancerForwardingRuleDataSourceByName = "test_networkloadbalancer_forwardingrule_name"
 )
 
-// Private Crossconnect Constants
+// Private Cross Connect Constants
+// The resource name was changed from Private Cross Connect to Cross Connect
+// But the terraform resources names did not change for backwards compatibility reasons
 const (
 	PCCResource         = "ionoscloud_private_crossconnect"
 	PCCTestResource     = "test_private_crossconnect"

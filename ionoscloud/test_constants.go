@@ -42,6 +42,9 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 )
 
 // Private Crossconnect Constants
+// The resource name was changed from Private Cross Connect to Cross Connect
+// But the terraform resources names did not change for backwards compatibility reasons
+
 const (
 	testAccCheckPrivateCrossConnectConfigBasic = `
 resource ` + constant.PCCResource + ` ` + constant.PCCTestResource + ` {
