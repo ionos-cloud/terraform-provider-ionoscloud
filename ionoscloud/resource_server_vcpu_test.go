@@ -209,7 +209,6 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				Config:      testAccDataSourceServerVCPUWrongNameError,
 				ExpectError: regexp.MustCompile(`no server found with the specified criteria: name`),
 			},
-
 			{
 				Config: testAccCheckServerVCPUConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
