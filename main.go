@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"log"
 
@@ -18,17 +17,12 @@ func main() {
 	flag.Parse()
 	//log levels need to be shown correctly in terraform when enabling TF_LOG
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
-	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/ionos-cloud/ionoscloud",
-			&plugin.ServeOpts{
-				ProviderFunc: ionoscloud.Provider,
-			})
-		if err != nil {
-			log.Println(err.Error())
-		}
-	} else {
-		plugin.Serve(&plugin.ServeOpts{
-			ProviderFunc: ionoscloud.Provider,
-		})
+	var serveOpts = plugin.ServeOpts{
+		ProviderFunc: ionoscloud.Provider,
 	}
+	if debugMode {
+		serveOpts.ProviderAddr = "registry.terraform.io/ionos-cloud/ionoscloud"
+		serveOpts.Debug = debugMode
+	}
+	plugin.Serve(&serveOpts)
 }
