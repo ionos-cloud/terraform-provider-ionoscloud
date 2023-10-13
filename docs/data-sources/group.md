@@ -46,7 +46,7 @@ The following attributes are returned by the datasource:
 * `create_snapshot` - The group will be allowed to create snapshots.
 * `reserve_ip` - The group will be allowed to reserve IP addresses.
 * `access_activity_log` - The group will be allowed to access the activity log.
-* `create_pcc` - The group will be allowed to create pcc privilege.
+* `create_pcc` - The group will be allowed to create Cross Connects privilege.
 * `s3_privilege` - The group will have S3 privilege.
 * `create_backup_unit` - The group will be allowed to create backup unit privilege.
 * `create_internet_access` - The group will be allowed to create internet access privilege.
