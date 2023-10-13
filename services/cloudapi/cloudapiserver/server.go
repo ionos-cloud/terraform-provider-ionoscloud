@@ -22,12 +22,13 @@ type Service struct {
 var ErrSuspendCubeLast error
 
 const (
-	CubeServerType  = "CUBE"
-	CubeVMStateStop = "SUSPENDED"
-
+	CubeServerType       = "CUBE"
 	EnterpriseServerType = "ENTERPRISE"
 	VCPUServerType       = "VCPU"
 
+	CubeVMStateStop = "SUSPENDED"
+
+	// These are the vm_state values that are available for VCPU and ENTERPRISE servers
 	VMStateStart = "RUNNING"
 	VMStateStop  = "SHUTOFF"
 )
@@ -100,9 +101,9 @@ func (ss *Service) UpdateVmState(ctx context.Context, datacenterID, serverID, ne
 	}
 
 	switch serverType {
-	case EnterpriseServerType:
+	case EnterpriseServerType, VCPUServerType:
 		if strings.EqualFold(newVmState, CubeVMStateStop) {
-			return fmt.Errorf("cannot suspend an enterprise server, set to %s instead", VMStateStop)
+			return fmt.Errorf("cannot suspend a %s server, set to %s instead", serverType, VMStateStop)
 		}
 		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, VMStateStop) {
 			return ss.Start(ctx, datacenterID, serverID, serverType)
@@ -113,7 +114,7 @@ func (ss *Service) UpdateVmState(ctx context.Context, datacenterID, serverID, ne
 
 	case CubeServerType:
 		if strings.EqualFold(newVmState, VMStateStop) {
-			return fmt.Errorf("cannot shut down a cube server, set to %s instead", CubeVMStateStop)
+			return fmt.Errorf("cannot shut down a %s server, set to %s instead", serverType, CubeVMStateStop)
 		}
 		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, CubeVMStateStop) {
 			return ss.Start(ctx, datacenterID, serverID, serverType)
@@ -153,7 +154,7 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 
 	switch serverType {
 
-	case EnterpriseServerType:
+	case EnterpriseServerType, VCPUServerType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersStartPost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
@@ -178,7 +179,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 
 	switch serverType {
 
-	case EnterpriseServerType:
+	case EnterpriseServerType, VCPUServerType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersStopPost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {

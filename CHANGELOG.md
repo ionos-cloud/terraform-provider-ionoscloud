@@ -5,7 +5,7 @@
 - `%w` instead of `%s` for some printed errors
 ### Features
 - #460 add `contract_number` to provider configuration
-- #412 add support to set power state of Enterprise and Cube servers, by adding new field `vm_state`  in `ionoscloud_server` and `ionoscloud_cube_server` resources
+- #412 add support to set power state of Enterprise and Cube servers, by adding the new field `vm_state` in `ionoscloud_server`, `ionoscloud_cube_server` and `ionoscloud_vcpu_server `resources
 ### Fixes
 - Fix `ionoscloud_ipfailover` resource and solve the problems presented at #432. Now
 it is possible to create and delete multiple `ionoscloud_ipfailover` resources at the same time. The UUID is generated based on the IP of the 
