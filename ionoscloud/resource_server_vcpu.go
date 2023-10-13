@@ -210,7 +210,7 @@ func resourceVCPUServer() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Description:      "Sets the power state of the vcpu server. Possible values: `RUNNING` or `SHUTOFF`.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{cloudapiserver.VMStateStart, cloudapiserver.EnterpriseServerStop}, true)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{cloudapiserver.VMStateStart, cloudapiserver.VMStateStop}, true)),
 			},
 			"nic": {
 				Type:     schema.TypeList,

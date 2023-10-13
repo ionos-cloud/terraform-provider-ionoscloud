@@ -26,9 +26,10 @@ const (
 	CubeVMStateStop = "SUSPENDED"
 
 	EnterpriseServerType = "ENTERPRISE"
-	EnterpriseServerStop = "SHUTOFF"
+	VCPUServerType       = "VCPU"
 
 	VMStateStart = "RUNNING"
+	VMStateStop  = "SHUTOFF"
 )
 
 func (ss *Service) FindById(ctx context.Context, datacenterID, serverID string, depth int32) (*ionoscloud.Server, error) {
@@ -101,17 +102,17 @@ func (ss *Service) UpdateVmState(ctx context.Context, datacenterID, serverID, ne
 	switch serverType {
 	case EnterpriseServerType:
 		if strings.EqualFold(newVmState, CubeVMStateStop) {
-			return fmt.Errorf("cannot suspend an enterprise server, set to %s instead", EnterpriseServerStop)
+			return fmt.Errorf("cannot suspend an enterprise server, set to %s instead", VMStateStop)
 		}
-		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, EnterpriseServerStop) {
+		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, VMStateStop) {
 			return ss.Start(ctx, datacenterID, serverID, serverType)
 		}
-		if strings.EqualFold(newVmState, EnterpriseServerStop) && strings.EqualFold(currentVmState, VMStateStart) {
+		if strings.EqualFold(newVmState, VMStateStop) && strings.EqualFold(currentVmState, VMStateStart) {
 			return ss.Stop(ctx, datacenterID, serverID, serverType)
 		}
 
 	case CubeServerType:
-		if strings.EqualFold(newVmState, EnterpriseServerStop) {
+		if strings.EqualFold(newVmState, VMStateStop) {
 			return fmt.Errorf("cannot shut down a cube server, set to %s instead", CubeVMStateStop)
 		}
 		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, CubeVMStateStop) {
@@ -183,7 +184,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 		if err != nil {
 			return err
 		}
-		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, EnterpriseServerStop))
+		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, VMStateStop))
 
 	case CubeServerType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersSuspendPost(ctx, datacenterID, serverID).Execute()
