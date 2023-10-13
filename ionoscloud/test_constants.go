@@ -1,6 +1,7 @@
 package ionoscloud
 
 import (
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -531,7 +532,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  vm_state = "SHUTOFF"
+  vm_state = "` + cloudapiserver.VMStateStop + `"
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -592,7 +593,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  vm_state = "RUNNING"
+  vm_state = "` + cloudapiserver.VMStateStart + `"
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -875,7 +876,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
-  vm_state = "SUSPENDED"
+  vm_state = "` + cloudapiserver.CubeVMStateStop + `"
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
@@ -938,7 +939,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name = "` + constant.ServerTestResource + `"
-  vm_state = "RUNNING"
+  vm_state = "` + cloudapiserver.VMStateStart + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
   image_name ="ubuntu:latest"
@@ -1000,7 +1001,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
-  vm_state = "SUSPENDED"
+  vm_state = "` + cloudapiserver.CubeVMStateStop + `"
   name = "` + constant.UpdatedResources + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
@@ -1598,7 +1599,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  vm_state = "SHUTOFF"
+  vm_state = "` + cloudapiserver.VMStateStop + `"
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -1632,7 +1633,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  vm_state = "RUNNING"
+  vm_state = "` + cloudapiserver.VMStateStart + `"
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
