@@ -185,24 +185,23 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	if nameOk {
 		name = t.(string)
 	}
-	var nic *ionoscloud.Nic
-	var err error
+	var nic ionoscloud.Nic
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: data}
-
 	if !idOk && !nameOk {
 		return diag.FromErr(fmt.Errorf("either id, or name must be set"))
 	}
 	if idOk {
-		nic, _, err = ns.Get(ctx, datacenterId, serverId, id.(string), 0)
+		foundNic, _, err := ns.Get(ctx, datacenterId, serverId, id.(string), 0)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error getting nic with id %s %w", id.(string), err))
 		}
 		if nameOk {
-			if *nic.Properties.Name != name {
+			if foundNic.Properties != nil && *foundNic.Properties.Name != name {
 				return diag.FromErr(fmt.Errorf("name of nic (UUID=%s, name=%s) does not match expected name: %s",
-					*nic.Id, *nic.Properties.Name, name))
+					*foundNic.Id, *foundNic.Properties.Name, name))
 			}
 		}
+		nic = *foundNic
 	} else {
 		nics, err := ns.List(ctx, datacenterId, serverId, 1)
 		if err != nil {
@@ -224,11 +223,11 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one nic found with the specified criteria: name = %s", name))
 		} else {
-			*nic = results[0]
+			nic = results[0]
 		}
 	}
 
-	if err := cloudapinic.NicSetData(data, nic); err != nil {
+	if err := cloudapinic.NicSetData(data, &nic); err != nil {
 		return diag.FromErr(err)
 	}
 
