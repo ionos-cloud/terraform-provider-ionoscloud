@@ -7,6 +7,7 @@
 - #460 add `contract_number` to provider configuration
 - #412 add support to set power state of Enterprise and Cube servers, by adding new field `vm_state`  in `ionoscloud_server` and `ionoscloud_cube_server` resources
 ### Fixes
+- #467 removing an inline `nic` of the `server` resource from dcd should not throw 404 when running plan or apply after
 - Fix `ionoscloud_ipfailover` resource and solve the problems presented at #432. Now
 it is possible to create and delete multiple `ionoscloud_ipfailover` resources at the same time. The UUID is generated based on the IP of the 
 failover group. The resources that are created using Terraform cannot be modified/deleted outside Terraform.
