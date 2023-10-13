@@ -23,6 +23,9 @@ func (fs *Service) List(ctx context.Context, datacenterID, serverID string, dept
 	if err != nil {
 		return nil, err
 	}
+	if nics.Items == nil {
+		return make([]ionoscloud.Nic, 0), fmt.Errorf("nic list is empty for datacenter %s, server %s", datacenterID, serverID)
+	}
 	return *nics.Items, nil
 }
 
