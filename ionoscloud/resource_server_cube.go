@@ -642,7 +642,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		initialState := initialState.(string)
 
 		if strings.EqualFold(initialState, cloudapiserver.CubeVMStateStop) {
-			ss.Stop(ctx, dcId, d.Id(), serverType)
+			err := ss.Stop(ctx, dcId, d.Id(), serverType)
 			if err != nil {
 				return diag.FromErr(err)
 			}

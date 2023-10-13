@@ -760,7 +760,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		initialState := initialState.(string)
 
 		if !strings.EqualFold(initialState, cloudapiserver.VMStateStart) {
-			ss.Stop(ctx, datacenterId, d.Id(), serverType)
+			err := ss.Stop(ctx, datacenterId, d.Id(), serverType)
 			if err != nil {
 				return diag.FromErr(err)
 			}
