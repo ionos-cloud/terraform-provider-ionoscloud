@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -52,14 +53,29 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccCheckServerVCPUShutDown,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.VMStateStop),
+				),
+			},
+			{
 				Config: testAccCheckServerVCPUNoNicUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "ram", "2048"),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.VMStateStop),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cpu_family"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "type", constant.VCPUType),
+				),
+			},
+			{
+				Config: testAccCheckServerVCPUPowerOn,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.VMStateStart),
 				),
 			},
 			{

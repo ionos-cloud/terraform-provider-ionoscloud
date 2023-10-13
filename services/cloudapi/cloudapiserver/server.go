@@ -22,13 +22,15 @@ type Service struct {
 var ErrSuspendCubeLast error
 
 const (
-	CubeServerType  = "CUBE"
+	CubeServerType       = "CUBE"
+	EnterpriseServerType = "ENTERPRISE"
+	VCPUServerType       = "VCPU"
+
 	CubeVMStateStop = "SUSPENDED"
 
-	EnterpriseServerType = "ENTERPRISE"
-	EnterpriseServerStop = "SHUTOFF"
-
+	// These are the vm_state values that are available for VCPU and ENTERPRISE servers
 	VMStateStart = "RUNNING"
+	VMStateStop  = "SHUTOFF"
 )
 
 func (ss *Service) FindById(ctx context.Context, datacenterID, serverID string, depth int32) (*ionoscloud.Server, error) {
@@ -99,20 +101,20 @@ func (ss *Service) UpdateVmState(ctx context.Context, datacenterID, serverID, ne
 	}
 
 	switch serverType {
-	case EnterpriseServerType:
+	case EnterpriseServerType, VCPUServerType:
 		if strings.EqualFold(newVmState, CubeVMStateStop) {
-			return fmt.Errorf("cannot suspend an enterprise server, set to %s instead", EnterpriseServerStop)
+			return fmt.Errorf("cannot suspend a %s server, set to %s instead", serverType, VMStateStop)
 		}
-		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, EnterpriseServerStop) {
+		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, VMStateStop) {
 			return ss.Start(ctx, datacenterID, serverID, serverType)
 		}
-		if strings.EqualFold(newVmState, EnterpriseServerStop) && strings.EqualFold(currentVmState, VMStateStart) {
+		if strings.EqualFold(newVmState, VMStateStop) && strings.EqualFold(currentVmState, VMStateStart) {
 			return ss.Stop(ctx, datacenterID, serverID, serverType)
 		}
 
 	case CubeServerType:
-		if strings.EqualFold(newVmState, EnterpriseServerStop) {
-			return fmt.Errorf("cannot shut down a cube server, set to %s instead", CubeVMStateStop)
+		if strings.EqualFold(newVmState, VMStateStop) {
+			return fmt.Errorf("cannot shut down a %s server, set to %s instead", serverType, CubeVMStateStop)
 		}
 		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, CubeVMStateStop) {
 			return ss.Start(ctx, datacenterID, serverID, serverType)
@@ -152,7 +154,7 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 
 	switch serverType {
 
-	case EnterpriseServerType:
+	case EnterpriseServerType, VCPUServerType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersStartPost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
@@ -177,13 +179,13 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 
 	switch serverType {
 
-	case EnterpriseServerType:
+	case EnterpriseServerType, VCPUServerType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersStopPost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
 			return err
 		}
-		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, EnterpriseServerStop))
+		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, VMStateStop))
 
 	case CubeServerType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersSuspendPost(ctx, datacenterID, serverID).Execute()
