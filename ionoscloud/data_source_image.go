@@ -150,8 +150,14 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s and version %s (%s)", name, version, nameVer))
 		}
 	} else if nameOk && name != "" {
+		var exactMatch []ionoscloud.Image
 		if images.Items != nil {
 			for _, img := range *images.Items {
+				// if the name value is an exact match, only return that image instead of a list of matches
+				if img.Properties != nil && img.Properties.Name != nil && strings.EqualFold(*img.Properties.Name, name) {
+					results = append(exactMatch, img)
+					break
+				}
 				if img.Properties != nil && img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
 					results = append(results, img)
 				}
