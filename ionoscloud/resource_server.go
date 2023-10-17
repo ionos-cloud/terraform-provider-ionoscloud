@@ -1579,8 +1579,10 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 
 		if nic != nil && nic.Properties != nil {
 			//fixes #467
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
-				return err
+			if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+				if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+					return err
+				}
 			}
 			nicEntry = cloudapinic.SetNetworkProperties(*nic)
 			nicEntry["id"] = *nic.Id
