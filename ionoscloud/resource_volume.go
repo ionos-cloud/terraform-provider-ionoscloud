@@ -1005,20 +1005,28 @@ func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, i
 	}
 
 	if len(*images.Items) > 0 {
-		for _, i := range *images.Items {
+		var partialMatch *ionoscloud.Image
+		for _, image := range *images.Items {
 			imgName := ""
-			if i.Properties != nil && i.Properties.Name != nil && *i.Properties.Name != "" {
-				imgName = *i.Properties.Name
+			image := image
+
+			if image.Properties != nil && image.Properties.Name != nil && *image.Properties.Name != "" {
+				imgName = *image.Properties.Name
 			}
 
-			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
-				return &i, err
+			// Pick the first partial match, which will be returned after iterating through all the available images, if an exact match is not found
+			if partialMatch == nil && imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *image.Properties.ImageType == "HDD" && *image.Properties.Location == location {
+				partialMatch = &image
 			}
 
-			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(*i.Id) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
-				return &i, err
+			// Return the the exact match if one exists.
+			if imgName != "" && (strings.EqualFold(imageName, *image.Id) || strings.EqualFold(imgName, imageName)) && *image.Properties.ImageType == "HDD" && *image.Properties.Location == location {
+				return &image, err
 			}
 
+		}
+		if partialMatch != nil {
+			return partialMatch, err
 		}
 	}
 	return nil, err

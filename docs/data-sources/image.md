@@ -33,16 +33,28 @@ data "ionoscloud_image" "example" {
 ```
 
 Finds an image with alias `ubuntu:latest` in location `de/txl`. Uses exact matching on both fields.
+## Example Usage
+
+```hcl
+data "ionoscloud_image" "example" {
+  name               = "ubuntu"
+  version            = "20.04.6
+  location           = "de/txl"
+}
+```
+Finds an image named `ubuntu-20.04.6` in location `de/txl`. Uses exact matching.
 
 ## Argument Reference
 
- * `name` - (Required) Name of an existing image that you want to search for. Partial match.
+ * `name` - (Required) Name of an existing image that you want to search for. It will return an exact match if one exists, otherwise it will retrieve partial matches.
  * `location` - (Optional) Id of the existing image's location. Exact match. Possible values: `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `us/ewr`, `us/las`
  * `type` - (Optional) The image type, HDD or CD-ROM. Exact match.
  * `cloud_init` - (Optional) Cloud init compatibility ("NONE" or "V1"). Exact match.
  * `image_alias` - (Optional) Image alias of the image you are searching for. Exact match. E.g. =`centos:latest`, `ubuntu:latest`
+ * `version` - (Optional) The version of the image that you want to search for.
 
 If both "name" and "version" are provided the plugin will concatenate the two strings in this format [name]-[version].
+The resulting string will be used to search for an exact match. An error will be thrown if one is not found.
 
 ## Attributes Reference
 
