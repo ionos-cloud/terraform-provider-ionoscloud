@@ -18,10 +18,15 @@ type Service struct {
 }
 
 func (fs *Service) List(ctx context.Context, datacenterID, serverID string, depth int32) ([]ionoscloud.Nic, error) {
+	emptyNicList := make([]ionoscloud.Nic, 0)
 	nics, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsGet(ctx, datacenterID, serverID).Depth(depth).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, err
+		return emptyNicList, err
+	}
+	if nics.Items == nil {
+		log.Printf("[DEBUG] empty nic list for datacenter %s, server %s", datacenterID, serverID)
+		return emptyNicList, nil
 	}
 	return *nics.Items, nil
 }
