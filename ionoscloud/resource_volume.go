@@ -1014,10 +1014,12 @@ func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, i
 				imgName = *image.Properties.Name
 			}
 
+			// Pick the first partial match, which will be returned after iterating through all the available images, if an exact match is not found
 			if partialMatch == nil && imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *image.Properties.ImageType == "HDD" && *image.Properties.Location == location {
 				partialMatch = &image
 			}
 
+			// Return the the exact match if one exists.
 			if imgName != "" && (strings.EqualFold(imageName, *image.Id) || strings.EqualFold(imgName, imageName)) && *image.Properties.ImageType == "HDD" && *image.Properties.Location == location {
 				return &image, err
 			}
