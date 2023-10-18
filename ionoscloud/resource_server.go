@@ -1556,14 +1556,34 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	if nicIntf, primaryNicOk := d.GetOk("primary_nic"); primaryNicOk {
 		nicId = nicIntf.(string)
 		ns := cloudapinic.Service{Client: client, Meta: nil, D: d}
-		nic, _, err := ns.Get(ctx, datacenterId, d.Id(), nicId, 2)
+		nic, apiResponse, err := ns.Get(ctx, datacenterId, d.Id(), nicId, 2)
 		if err != nil {
-			return err
+			//fixes #467
+			if apiResponse.HttpNotFound() {
+				log.Printf("[DEBUG] Nic %s not found, might have been removed from dcd, setting primary_nic, primary_ip and nic to empty", nicId)
+				if err := d.Set("primary_nic", ""); err != nil {
+					return err
+				}
+				if err := d.Set("primary_ip", ""); err != nil {
+					return err
+				}
+				if err := d.Set("nic", nil); err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
 		}
 		var nicEntry map[string]interface{}
 		var fwRulesEntries []map[string]interface{}
 
-		if nic.Properties != nil {
+		if nic != nil && nic.Properties != nil {
+			//fixes #467
+			if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+				if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+					return err
+				}
+			}
 			nicEntry = cloudapinic.SetNetworkProperties(*nic)
 			nicEntry["id"] = *nic.Id
 			fs := cloudapifirewall.Service{Client: client, D: d}
