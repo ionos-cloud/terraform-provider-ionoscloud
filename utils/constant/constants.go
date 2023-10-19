@@ -316,5 +316,9 @@ const (
 	TestCertName        = "certTest"
 )
 
+const (
+	FlowlogBucket = "flowlog-acceptance-test"
+)
+
 const VCPUType = "VCPU"
 const RepoURL = "https://github.com/ionos-cloud/terraform-provider-ionoscloud"

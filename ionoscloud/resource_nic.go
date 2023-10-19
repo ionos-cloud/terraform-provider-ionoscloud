@@ -102,6 +102,16 @@ func resourceNic() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"flowlog": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     cloudapinic.FlowlogSchemaResource,
+				MaxItems: 1,
+				Description: `Flow logs holistically capture network information such as source and destination 
+							IP addresses, source and destination ports, number of packets, amount of bytes, 
+							the start and end time of the recording, and the type of protocol – 
+							and log the extent to which your instances are being accessed.`,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -135,7 +145,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	var foundNic = &ionoscloud.Nic{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error
-		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 0)
+		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 3)
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] Could not find nic with Id %s , retrying...", *createdNic.Id)
 			return retry.RetryableError(fmt.Errorf("could not find nic, %w", err))
@@ -163,7 +173,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-	nic, apiResponse, err := ns.Get(ctx, dcid, srvid, nicid, 0)
+	nic, apiResponse, err := ns.Get(ctx, dcid, srvid, nicid, 3)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] nic resource with id %s not found", nicid)

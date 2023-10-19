@@ -6,10 +6,77 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
+
+var FlowlogSchemaResource = &schema.Resource{
+	Schema: map[string]*schema.Schema{
+
+		"id": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The resource's unique identifier.",
+		},
+		"action": {
+			Type:        schema.TypeString,
+			Description: "Specifies the traffic direction pattern. Valid values: ACCEPTED, REJECTED, ALL.",
+			Required:    true,
+			ForceNew:    true,
+		},
+		"bucket": {
+			Type:        schema.TypeString,
+			Description: "The S3 bucket name of an existing IONOS Cloud S3 bucket.",
+			Required:    true,
+			ForceNew:    true,
+		},
+		"direction": {
+			Type:        schema.TypeString,
+			Description: "Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL.",
+			Required:    true,
+			ForceNew:    true,
+		},
+		"name": {
+			Type:             schema.TypeString,
+			Description:      "The resource name.",
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			ForceNew:         true,
+		},
+	},
+}
+
+var FlowlogSchemaDatasource = &schema.Resource{
+	Schema: map[string]*schema.Schema{
+		"id": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The resource's unique identifier.",
+		},
+		"action": {
+			Type:        schema.TypeString,
+			Description: "Specifies the traffic direction pattern. Valid values: ACCEPTED, REJECTED, ALL.",
+			Computed:    true,
+		},
+		"bucket": {
+			Type:        schema.TypeString,
+			Description: "The S3 bucket name of an existing IONOS Cloud S3 bucket.",
+			Computed:    true,
+		},
+		"direction": {
+			Type:        schema.TypeString,
+			Description: "Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL.",
+			Computed:    true,
+		},
+		"name": {
+			Type:        schema.TypeString,
+			Description: "The resource name.",
+			Computed:    true,
+		},
+	},
+}
 
 type Service struct {
 	Client *ionoscloud.APIClient
@@ -187,8 +254,38 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 		ipv6Block := v.(string)
 		nic.Properties.Ipv6CidrBlock = &ipv6Block
 	}
-
+	if flowLogs, ok := d.GetOk("flowlog"); ok {
+		nic.Entities = &ionoscloud.NicEntities{
+			Flowlogs: &ionoscloud.FlowLogs{
+				Items: &[]ionoscloud.FlowLog{},
+			},
+		}
+		if flowLogSet, ok := flowLogs.(*schema.Set); ok {
+			for _, flowLogData := range flowLogSet.List() {
+				if flowLog, ok := flowLogData.(map[string]interface{}); ok {
+					//err := utils.DecodeInterfaceToStruct(newValues, newNicProps)
+					//if err != nil {
+					//	return nil, nil, fmt.Errorf("could not decode from %+v to new values of nic rules %w", newValues, err)
+					//}
+					*nic.Entities.Flowlogs.Items = append(*nic.Entities.Flowlogs.Items, GetFlowlogFromMap(flowLog))
+				}
+			}
+		}
+	}
 	return nic, nil
+}
+
+func GetUpdatedFlowLogFromSchema(d *schema.ResourceData, path string) (ionoscloud.FlowLog, error) {
+	return ionoscloud.FlowLog{}, nil
+}
+
+func GetFlowlogFromMap(flowLogMap map[string]any) ionoscloud.FlowLog {
+	flowlog := ionoscloud.NewFlowLog(*ionoscloud.NewFlowLogProperties("", "", "", ""))
+	*flowlog.Properties.Action = flowLogMap["action"].(string)
+	*flowlog.Properties.Bucket = flowLogMap["bucket"].(string)
+	*flowlog.Properties.Direction = flowLogMap["direction"].(string)
+	*flowlog.Properties.Name = flowLogMap["name"].(string)
+	return *flowlog
 }
 
 func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
@@ -264,6 +361,22 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 			if err := d.Set("pci_slot", *nic.Properties.PciSlot); err != nil {
 				return fmt.Errorf("error setting pci_slot %w", err)
 			}
+		}
+	}
+
+	if nic.Entities != nil && nic.Entities.Flowlogs != nil && nic.Entities.Flowlogs.Items != nil && len(*nic.Entities.Flowlogs.Items) > 0 {
+		var flowlogs []map[string]interface{}
+		for _, flowLog := range *nic.Entities.Flowlogs.Items {
+			result := map[string]interface{}{}
+			result, err := utils.DecodeStructToMap(flowLog.Properties)
+			if err != nil {
+				return err
+			}
+			result["id"] = *flowLog.Id
+			flowlogs = append(flowlogs, result)
+		}
+		if err := d.Set("flowlog", flowlogs); err != nil {
+			return fmt.Errorf("error setting flowlog %w", err)
 		}
 	}
 
