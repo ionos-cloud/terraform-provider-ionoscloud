@@ -107,10 +107,11 @@ func resourceNic() *schema.Resource {
 				Optional: true,
 				Elem:     cloudapinic.FlowlogSchemaResource,
 				MaxItems: 1,
-				Description: `Flow logs holistically capture network information such as source and destination 
-							IP addresses, source and destination ports, number of packets, amount of bytes, 
-							the start and end time of the recording, and the type of protocol – 
-							and log the extent to which your instances are being accessed.`,
+				Description: `Only 1 flow log can be configured. After configuration, the flowlog's fields cannot be updated without re-creating the resource. 
+Flow logs holistically capture network information such as source and destination 
+IP addresses, source and destination ports, number of packets, amount of bytes, 
+the start and end time of the recording, and the type of protocol – 
+and log the extent to which your instances are being accessed.`,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

@@ -317,6 +317,7 @@ const (
 )
 
 const (
+	// FlowlogBucket created on account that runs CI
 	FlowlogBucket = "flowlog-acceptance-test"
 )
 

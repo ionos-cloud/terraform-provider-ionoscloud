@@ -150,10 +150,10 @@ resource "random_password" "server_image_password" {
 * `device_number`- (Computed) The Logical Unit Number (LUN) of the storage volume. Null if this NIC was created from CloudAPI and no DCD changes were done on the Datacenter.
 * `pci_slot`- (Computed) The PCI slot number of the Nic.
 * `flowlog` - (Optional) Only 1 flow log can be configured. After configuration, the flowlog's fields cannot be updated without re-creating the resource. Flow logs holistically capture network information such as source and destination IP addresses, source and destination ports, number of packets, amount of bytes, the start and end time of the recording, and the type of protocol – and log the extent to which your instances are being accessed.
-  - `action` - (Required) Specifies the action to be taken when the rule is matched. Possible values: ACCEPTED, REJECTED, ALL.
-  - `bucket` - (Required) Specifies the S3 IONOS bucket where the flow log data will be stored. The bucket must exist.
-  - `direction` - (Required) Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL.
-  - `name` - (Required) Specifies the name of the flow log.
+  - `action` - (Required) Specifies the action to be taken when the rule is matched. Possible values: ACCEPTED, REJECTED, ALL. Immutable, forces re-creation.
+  - `bucket` - (Required) Specifies the S3 IONOS bucket where the flow log data will be stored. The bucket must exist. Immutable, forces re-creation.
+  - `direction` - (Required) Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL. Immutable, forces re-creation.
+  - `name` - (Required) Specifies the name of the flow log. Immutable, forces re-creation.
 ## Import
 
 Resource **Nic** can be imported using the `resource id`, e.g.

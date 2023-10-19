@@ -14,7 +14,6 @@ import (
 
 var FlowlogSchemaResource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
-
 		"id": {
 			Type:        schema.TypeString,
 			Computed:    true,
@@ -22,25 +21,25 @@ var FlowlogSchemaResource = &schema.Resource{
 		},
 		"action": {
 			Type:        schema.TypeString,
-			Description: "Specifies the traffic direction pattern. Valid values: ACCEPTED, REJECTED, ALL.",
+			Description: "Specifies the traffic direction pattern. Valid values: ACCEPTED, REJECTED, ALL. Immutable, forces re-recreation of the nic resource.",
 			Required:    true,
 			ForceNew:    true,
 		},
 		"bucket": {
 			Type:        schema.TypeString,
-			Description: "The S3 bucket name of an existing IONOS Cloud S3 bucket.",
+			Description: "The S3 bucket name of an existing IONOS Cloud S3 bucket. Immutable, forces re-recreation of the nic resource.",
 			Required:    true,
 			ForceNew:    true,
 		},
 		"direction": {
 			Type:        schema.TypeString,
-			Description: "Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL.",
+			Description: "Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL. Immutable, forces re-recreation of the nic resource.",
 			Required:    true,
 			ForceNew:    true,
 		},
 		"name": {
 			Type:             schema.TypeString,
-			Description:      "The resource name.",
+			Description:      "The resource name. Immutable, forces re-recreation of the nic resource.",
 			Required:         true,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			ForceNew:         true,
@@ -269,10 +268,6 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 		}
 	}
 	return nic, nil
-}
-
-func GetUpdatedFlowLogFromSchema(d *schema.ResourceData, path string) (ionoscloud.FlowLog, error) {
-	return ionoscloud.FlowLog{}, nil
 }
 
 func GetFlowlogFromMap(flowLogMap map[string]any) ionoscloud.FlowLog {
