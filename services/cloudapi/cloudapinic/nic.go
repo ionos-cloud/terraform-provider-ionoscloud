@@ -263,10 +263,6 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 		if flowLogSet, ok := flowLogs.(*schema.Set); ok {
 			for _, flowLogData := range flowLogSet.List() {
 				if flowLog, ok := flowLogData.(map[string]interface{}); ok {
-					//err := utils.DecodeInterfaceToStruct(newValues, newNicProps)
-					//if err != nil {
-					//	return nil, nil, fmt.Errorf("could not decode from %+v to new values of nic rules %w", newValues, err)
-					//}
 					*nic.Entities.Flowlogs.Items = append(*nic.Entities.Flowlogs.Items, GetFlowlogFromMap(flowLog))
 				}
 			}
