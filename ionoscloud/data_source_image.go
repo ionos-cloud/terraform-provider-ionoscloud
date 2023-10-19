@@ -150,17 +150,20 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s and version %s (%s)", name, version, nameVer))
 		}
 	} else if nameOk && name != "" {
-		var exactMatch []ionoscloud.Image
+		var exactMatches []ionoscloud.Image
 		if images.Items != nil {
 			for _, img := range *images.Items {
-				// if the name value is an exact match, only return that image instead of a list of matches
-				if img.Properties != nil && img.Properties.Name != nil && strings.EqualFold(*img.Properties.Name, name) {
-					results = append(exactMatch, img)
-					break
-				}
 				if img.Properties != nil && img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
 					results = append(results, img)
+					// if the image name is an exact match, store it in a separate list of exact matches
+					if strings.EqualFold(*img.Properties.Name, name) {
+						exactMatches = append(exactMatches, img)
+					}
 				}
+			}
+			// if exact matches have been found, only continue filtering with these
+			if len(exactMatches) > 0 {
+				results = exactMatches
 			}
 		}
 		if results == nil {
