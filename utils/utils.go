@@ -341,15 +341,17 @@ func DecodeStructToMap(input interface{}) (map[string]interface{}, error) {
 	if err != nil {
 		return result, err
 	}
-	// convert camelcase to snake-case
-	for k, v := range result {
-		if !strings.EqualFold(k, strcase.ToSnake(k)) {
-			result[strcase.ToSnake(k)] = v
-			delete(result, k)
-		}
+	err = decoder.Decode(input)
+	if err != nil {
+		return nil, err
 	}
 
-	return result, decoder.Decode(input)
+	newResult := make(map[string]interface{})
+	for k, v := range result {
+		newResult[strcase.ToSnake(k)] = v
+	}
+
+	return newResult, nil
 }
 
 func IsCamelCaseEqualToSnakeCase(a, b string) bool {
