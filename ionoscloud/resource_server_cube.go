@@ -18,6 +18,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceCubeServer() *schema.Resource {
@@ -363,14 +364,8 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	server := ionoscloud.Server{
 		Properties: &ionoscloud.ServerProperties{},
 	}
-	volume := ionoscloud.VolumeProperties{}
 
-	var sshKeyPath []interface{}
-	var publicKeys []string
-	var image, imageAlias, imageInput string
-	var isSnapshot bool
-	var diags diag.Diagnostics
-	var password, licenceType string
+	var image, imageAlias string
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -388,72 +383,6 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	serverType := cloudapiserver.CubeServerType
 	server.Properties.Type = &serverType
 
-	volumeType := d.Get("volume.0.disk_type").(string)
-	volume.Type = &volumeType
-
-	if v, ok := d.GetOk("volume.0.image_password"); ok {
-		vStr := v.(string)
-		volume.ImagePassword = &vStr
-		if err := d.Set("image_password", password); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if v, ok := d.GetOk("image_password"); ok {
-		password = v.(string)
-		volume.ImagePassword = &password
-	}
-
-	if v, ok := d.GetOk("volume.0.licence_type"); ok {
-		licenceType = v.(string)
-		volume.LicenceType = &licenceType
-	}
-
-	if v, ok := d.GetOk("volume.0.availability_zone"); ok {
-		vStr := v.(string)
-		volume.AvailabilityZone = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.name"); ok {
-		vStr := v.(string)
-		volume.Name = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.bus"); ok {
-		vStr := v.(string)
-		volume.Bus = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.backup_unit_id"); ok {
-		vStr := v.(string)
-		volume.BackupunitId = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.user_data"); ok {
-		vStr := v.(string)
-		volume.UserData = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.ssh_key_path"); ok {
-		sshKeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	} else if v, ok := d.GetOk("ssh_key_path"); ok {
-		sshKeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	} else {
-		if err := d.Set("ssh_key_path", [][]string{}); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
 	if _, ok := d.GetOk("boot_cdrom"); ok {
 		resId := d.Get("boot_cdrom").(string)
 		server.Properties.BootCdrom = &ionoscloud.ResourceReference{
@@ -466,36 +395,14 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
-	if len(sshKeyPath) != 0 {
-		for _, path := range sshKeyPath {
-			log.Printf("[DEBUG] Reading file %s", path)
-			publicKey, err := readPublicKey(path.(string))
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) %w", path, err))
-				return diags
-			}
-			publicKeys = append(publicKeys, publicKey)
-		}
-		if len(publicKeys) > 0 {
-			volume.SshKeys = &publicKeys
-		}
-	}
-
-	if v, ok := d.GetOk("image_name"); ok {
-		imageInput = v.(string)
-	}
-
-	if imageInput != "" {
-		image, imageAlias, isSnapshot, diags = checkImage(ctx, client, imageInput, password, licenceType, dcId, sshKeyPath)
-		if diags != nil {
-			return diags
-		}
-	}
-
-	if isSnapshot == true && (volume.ImagePassword != nil && *volume.ImagePassword != "" || len(publicKeys) > 0) {
-		diags := diag.FromErr(fmt.Errorf("you can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot"))
+	var err error
+	var volume *ionoscloud.VolumeProperties
+	volume, err = getVolumeData(d, "volume.0.", constant.CubeType)
+	if err != nil {
+		diags := diag.FromErr(err)
 		return diags
 	}
+	image, imageAlias, err = getImage(ctx, client, d, *volume)
 
 	if image != "" {
 		volume.Image = &image
@@ -513,7 +420,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		Volumes: &ionoscloud.AttachedVolumes{
 			Items: &[]ionoscloud.Volume{
 				{
-					Properties: &volume,
+					Properties: volume,
 				},
 			},
 		},
@@ -526,7 +433,6 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	nic := ionoscloud.Nic{
 		Properties: &ionoscloud.NicProperties{},
 	}
-	var err error
 	if _, ok := d.GetOk("nic"); ok {
 		nic, err = cloudapinic.GetNicFromSchema(d, "nic.0.")
 		if err != nil {

@@ -316,5 +316,9 @@ const (
 	TestCertName        = "certTest"
 )
 
-const VCPUType = "VCPU"
+const (
+	VCPUType       = "VCPU"
+	CubeType       = "CUBE"
+	EnterpriseType = "ENTERPRISE"
+)
 const RepoURL = "https://github.com/ionos-cloud/terraform-provider-ionoscloud"
