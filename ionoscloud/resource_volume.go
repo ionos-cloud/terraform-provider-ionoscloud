@@ -1014,7 +1014,7 @@ func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, i
 
 			if imageEntry.Properties != nil && imageEntry.Properties.Name != nil && *imageEntry.Properties.Name != "" {
 
-				if *imageEntry.Properties.ImageType != HDDImage && *imageEntry.Properties.Location != location {
+				if *imageEntry.Properties.ImageType != HDDImage || *imageEntry.Properties.Location != location {
 					continue
 				}
 				// Return the image entry if the name is an exact match
