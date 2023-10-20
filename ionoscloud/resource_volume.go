@@ -18,6 +18,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+const HDDImage = "HDD"
+
 func resourceVolume() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceVolumeCreate,
@@ -834,11 +836,11 @@ func resolveImageName(ctx context.Context, client *ionoscloud.APIClient, imageNa
 				imgName = *i.Properties.Name
 			}
 
-			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
+			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *i.Properties.ImageType == HDDImage && *i.Properties.Location == location {
 				return &i, err
 			}
 
-			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(*i.Id) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
+			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(*i.Id) && *i.Properties.ImageType == HDDImage && *i.Properties.Location == location {
 				return &i, err
 			}
 
@@ -1007,27 +1009,25 @@ func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, i
 	if len(*images.Items) > 0 {
 		var partialMatch *ionoscloud.Image
 		for _, image := range *images.Items {
-			imgName := ""
-			image := image
+			// go for loop variable semantics workaround: https://github.com/golang/go/discussions/56010
+			imageEntry := image
 
-			if image.Properties != nil && image.Properties.Name != nil && *image.Properties.Name != "" {
-				imgName = *image.Properties.Name
+			if imageEntry.Properties != nil && imageEntry.Properties.Name != nil && *imageEntry.Properties.Name != "" {
+
+				if *imageEntry.Properties.ImageType != HDDImage || *imageEntry.Properties.Location != location {
+					continue
+				}
+				// Return the image entry if the name is an exact match
+				if strings.EqualFold(imageName, *imageEntry.Id) || strings.EqualFold(*imageEntry.Properties.Name, imageName) {
+					return &imageEntry, err
+				}
+				// Save the first image entry which is a partial match and return it if no exact matches were found
+				if partialMatch == nil && strings.Contains(strings.ToLower(*imageEntry.Properties.Name), strings.ToLower(imageName)) {
+					partialMatch = &imageEntry
+				}
 			}
-
-			// Pick the first partial match, which will be returned after iterating through all the available images, if an exact match is not found
-			if partialMatch == nil && imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *image.Properties.ImageType == "HDD" && *image.Properties.Location == location {
-				partialMatch = &image
-			}
-
-			// Return the the exact match if one exists.
-			if imgName != "" && (strings.EqualFold(imageName, *image.Id) || strings.EqualFold(imgName, imageName)) && *image.Properties.ImageType == "HDD" && *image.Properties.Location == location {
-				return &image, err
-			}
-
 		}
-		if partialMatch != nil {
-			return partialMatch, err
-		}
+		return partialMatch, err
 	}
 	return nil, err
 }
