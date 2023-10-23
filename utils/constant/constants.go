@@ -316,9 +316,17 @@ const (
 	TestCertName        = "certTest"
 )
 
+// Server type constants
 const (
 	VCPUType       = "VCPU"
 	CubeType       = "CUBE"
 	EnterpriseType = "ENTERPRISE"
+)
+
+// Server power state constants
+const (
+	CubeVMStateStop = "SUSPENDED"
+	VMStateStart    = "RUNNING"
+	VMStateStop     = "SHUTOFF"
 )
 const RepoURL = "https://github.com/ionos-cloud/terraform-provider-ionoscloud"

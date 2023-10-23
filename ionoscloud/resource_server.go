@@ -318,7 +318,7 @@ func resourceServer() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Description:      "Sets the power state of the server. Possible values: `RUNNING`, `SHUTOFF` or `SUSPENDED`. SUSPENDED state is only valid for cube. SHUTOFF state is only valid for enterprise",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{cloudapiserver.VMStateStart, cloudapiserver.VMStateStop, cloudapiserver.CubeVMStateStop}, true)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.VMStateStart, constant.VMStateStop, constant.CubeVMStateStop}, true)),
 			},
 			"nic": {
 				Type:     schema.TypeList,
@@ -759,7 +759,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 		initialState := initialState.(string)
 
-		if !strings.EqualFold(initialState, cloudapiserver.VMStateStart) {
+		if !strings.EqualFold(initialState, constant.VMStateStart) {
 			err := ss.Stop(ctx, datacenterId, d.Id(), serverType)
 			if err != nil {
 				return diag.FromErr(err)
@@ -840,7 +840,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		diags := diag.FromErr(fmt.Errorf("could not retrieve server vmState: %w", err))
 		return diags
 	}
-	if strings.EqualFold(currentVmState, cloudapiserver.CubeVMStateStop) && !d.HasChange("vm_state") {
+	if strings.EqualFold(currentVmState, constant.CubeVMStateStop) && !d.HasChange("vm_state") {
 		diags := diag.FromErr(fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"))
 		return diags
 	}
@@ -1152,8 +1152,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		_, newVmState := d.GetChange("vm_state")
-		if strings.EqualFold(serverType, cloudapiserver.CubeServerType) && strings.EqualFold(newVmState.(string), cloudapiserver.CubeVMStateStop) {
-			err := ss.Stop(ctx, dcId, d.Id(), cloudapiserver.CubeServerType)
+		if strings.EqualFold(serverType, constant.CubeType) && strings.EqualFold(newVmState.(string), constant.CubeVMStateStop) {
+			err := ss.Stop(ctx, dcId, d.Id(), constant.CubeType)
 			if err != nil {
 				return diag.FromErr(err)
 			}

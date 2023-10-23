@@ -221,7 +221,7 @@ func resourceCubeServer() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Description:      "Sets the power state of the cube server. Possible values: `RUNNING` or `SUSPENDED`.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{cloudapiserver.VMStateStart, cloudapiserver.CubeVMStateStop}, true)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.VMStateStart, constant.CubeVMStateStop}, true)),
 			},
 			"nic": {
 				Type:     schema.TypeList,
@@ -380,7 +380,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		server.Properties.AvailabilityZone = &vStr
 	}
 
-	serverType := cloudapiserver.CubeServerType
+	serverType := constant.CubeType
 	server.Properties.Type = &serverType
 
 	if _, ok := d.GetOk("boot_cdrom"); ok {
@@ -547,7 +547,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 		initialState := initialState.(string)
 
-		if strings.EqualFold(initialState, cloudapiserver.CubeVMStateStop) {
+		if strings.EqualFold(initialState, constant.CubeVMStateStop) {
 			err := ss.Stop(ctx, dcId, d.Id(), serverType)
 			if err != nil {
 				return diag.FromErr(err)
@@ -721,14 +721,14 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		diags := diag.FromErr(fmt.Errorf("could not retrieve server vmState: %w", err))
 		return diags
 	}
-	if strings.EqualFold(currentVmState, cloudapiserver.CubeVMStateStop) && !d.HasChange("vm_state") {
+	if strings.EqualFold(currentVmState, constant.CubeVMStateStop) && !d.HasChange("vm_state") {
 		diags := diag.FromErr(fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"))
 		return diags
 	}
 
 	// Unsuspend a Cube server first, before applying other changes
-	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, cloudapiserver.CubeVMStateStop) {
-		err := ss.Start(ctx, dcId, d.Id(), cloudapiserver.CubeServerType)
+	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, constant.CubeVMStateStop) {
+		err := ss.Start(ctx, dcId, d.Id(), constant.CubeType)
 		if err != nil {
 			diags := diag.FromErr(err)
 			return diags
@@ -973,10 +973,10 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Suspend a Cube server last, after applying other changes
-	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, cloudapiserver.VMStateStart) {
+	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, constant.VMStateStart) {
 		_, newVmState := d.GetChange("vm_state")
-		if strings.EqualFold(newVmState.(string), cloudapiserver.CubeVMStateStop) {
-			err := ss.Stop(ctx, dcId, d.Id(), cloudapiserver.CubeServerType)
+		if strings.EqualFold(newVmState.(string), constant.CubeVMStateStop) {
+			err := ss.Stop(ctx, dcId, d.Id(), constant.CubeType)
 			if err != nil {
 				diags := diag.FromErr(err)
 				return diags
