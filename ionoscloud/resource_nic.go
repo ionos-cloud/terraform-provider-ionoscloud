@@ -137,6 +137,7 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ inte
 		if (oldFLowLogs == nil || len(oldFLowLogs) == 0) && (newFlowLogs != nil || len(newFlowLogs) > 0) {
 			return nil
 		}
+		// flowlog deleted from resource
 		if (oldFLowLogs != nil || len(oldFLowLogs) > 0) && (newFlowLogs == nil || len(newFlowLogs) == 0) {
 			return d.ForceNew("flowlog")
 		}
@@ -148,9 +149,9 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ inte
 		if newFlowLogs != nil && len(newFlowLogs) > 0 {
 			newFlowLogMap = newFlowLogs[0].(map[string]any)
 		}
-		// find the diff between the old and new value.
+		// find the diff between the old and new value of the fields.
 		// name should not force re-creation
-		// all other values should force re-creation, but case does not matter
+		// all other values should force re-creation, case does not matter
 		for k, v := range newFlowLogMap {
 			if k != "name" && k != "id" {
 				if !strings.EqualFold(strings.ToUpper(v.(string)), strings.ToUpper(oldFlowlogMap[k].(string))) {
