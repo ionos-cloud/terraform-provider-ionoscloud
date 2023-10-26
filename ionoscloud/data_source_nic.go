@@ -10,6 +10,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 )
 
 func dataSourceNIC() *schema.Resource {
@@ -86,9 +87,9 @@ func dataSourceNIC() *schema.Resource {
 				Computed: true,
 			},
 			"flowlog": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     cloudapinic.FlowlogSchemaDatasource,
+				Elem:     cloudapiflowlog.FlowlogSchemaDatasource,
 				Description: `Flow logs holistically capture network information such as source and destination 
 							IP addresses, source and destination ports, number of packets, amount of bytes, 
 							the start and end time of the recording, and the type of protocol – 

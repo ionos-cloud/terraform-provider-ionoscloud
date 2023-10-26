@@ -318,7 +318,8 @@ const (
 
 const (
 	// FlowlogBucket created on account that runs CI
-	FlowlogBucket = "flowlog-acceptance-test"
+	FlowlogBucket        = "flowlog-acceptance-test"
+	FlowlogBucketUpdated = "flowlog-acceptance-test-updated"
 )
 
 const VCPUType = "VCPU"
