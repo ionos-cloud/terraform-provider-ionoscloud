@@ -133,7 +133,7 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ inte
 		oldFLowLogs := oldVal.([]any)
 		newFlowLogs := newVal.([]any)
 
-		// new flowlog added during an upgrade
+		// "this check is for the scenario in which we have 0 initial flowlogs and we add a new one during a nic update
 		if (oldFLowLogs == nil || len(oldFLowLogs) == 0) && (newFlowLogs != nil || len(newFlowLogs) > 0) {
 			return nil
 		}
