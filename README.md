@@ -37,7 +37,7 @@ See the [IonosCloud Provider documentation](https://registry.terraform.io/provid
 
 The provider needs to be configured with proper credentials before it can be used.
 
-You can use token authentication. We strongly suggest to use token authentication. Details on how to generate your token [here](https://github.com/ionos-cloud/sdk-go#token-authentication):
+You can use token authentication. We strongly suggest to use token authentication for security reasons. Details on how to generate your token [here](https://github.com/ionos-cloud/sdk-go#token-authentication):
 
 ```bash
 export IONOS_TOKEN="token"

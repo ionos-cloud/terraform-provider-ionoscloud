@@ -57,9 +57,9 @@ provider "ionoscloud" {
 You can either explicitly write them in the .tf file or use var.name as in the example above. For setting the var.name, environment variables can be used. The environment variables must be in the format TF_VAR_name and this will be checked last for a value. For example:
 
 ```bash
+export TF_VAR_ionos_token="token"
 #export TF_VAR_ionos_username="username"
 #export TF_VAR_ionos_password="password"
-export TF_VAR_ionos_token="token"
 ```
 
 
@@ -101,11 +101,11 @@ resource "ionoscloud_datacenter" "main" {
 
 The following arguments are supported:
 
-- `username` - (Required) If omitted, the `IONOS_USERNAME` environment variable is used. The username is generally an e-mail address in 'username@domain.tld' format.
+- `token`    - Required if username and password are not set. If omitted, the `IONOS_TOKEN` environment variable is used.
 
-- `password` - (Required) If omitted, the `IONOS_PASSWORD` environment variable is used.
-- 
-- `token`    - (Required) If omitted, the `IONOS_TOKEN` environment variable is used.
+- `username` - Required if token is not set. If omitted, the `IONOS_USERNAME` environment variable is used. The username is generally an e-mail address in 'username@domain.tld' format.
+
+- `password` - Required if token is not set. If omitted, the `IONOS_PASSWORD` environment variable is used.
 
 - `endpoint` - (Optional) Usually not necessary to be set, SDks know internally how to route requests to the API. If omitted, the `IONOS_API_URL` environment variable is used, or it defaults to the current Cloud API release.
 
