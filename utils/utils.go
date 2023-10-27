@@ -322,3 +322,38 @@ func IsValueInSliceOfMap[T comparable](sliceOfMaps []interface{}, key string, va
 	}
 	return false
 }
+
+// DecodeStructToMap SDK struct to map[string]interface{}
+func DecodeStructToMap(input interface{}) (map[string]interface{}, error) {
+	var result map[string]interface{}
+	config := &mapstructure.DecoderConfig{
+		Metadata:         nil,
+		TagName:          "json",
+		MatchName:        IsCamelCaseEqualToSnakeCase,
+		WeaklyTypedInput: true,
+		ErrorUnused:      false,
+		DecodeHook:       PointerEmptyToNil(),
+		ErrorUnset:       false,
+		ZeroFields:       false,
+		Result:           &result,
+	}
+	decoder, err := mapstructure.NewDecoder(config)
+	if err != nil {
+		return result, err
+	}
+	err = decoder.Decode(input)
+	if err != nil {
+		return nil, err
+	}
+
+	newResult := make(map[string]interface{})
+	for k, v := range result {
+		newResult[strcase.ToSnake(k)] = v
+	}
+
+	return newResult, nil
+}
+
+func IsCamelCaseEqualToSnakeCase(a, b string) bool {
+	return strings.EqualFold(strcase.ToSnake(a), b)
+}

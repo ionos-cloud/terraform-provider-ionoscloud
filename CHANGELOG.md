@@ -7,6 +7,7 @@
 ### Features
 - #460 add `contract_number` to provider configuration
 - #412 add support to set power state of Enterprise and Cube servers, by adding the new field `vm_state` in `ionoscloud_server`, `ionoscloud_cube_server` and `ionoscloud_vcpu_server `resources
+- add `flowlog` field to `ionoscloud_nic` resource
 ### Fixes
 - #467 removing an inline `nic` of the `server` resource from dcd should not throw 404 when running plan or apply after
 - Fix `ionoscloud_ipfailover` resource and solve the problems presented at #432. Now

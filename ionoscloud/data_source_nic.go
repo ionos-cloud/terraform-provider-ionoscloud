@@ -10,6 +10,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 )
 
 func dataSourceNIC() *schema.Resource {
@@ -84,6 +85,15 @@ func dataSourceNIC() *schema.Resource {
 			"pci_slot": {
 				Type:     schema.TypeInt,
 				Computed: true,
+			},
+			"flowlog": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     cloudapiflowlog.FlowlogSchemaDatasource,
+				Description: `Flow logs holistically capture network information such as source and destination 
+							IP addresses, source and destination ports, number of packets, amount of bytes, 
+							the start and end time of the recording, and the type of protocol – 
+							and log the extent to which your instances are being accessed.`,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -191,7 +201,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		return diag.FromErr(fmt.Errorf("either id, or name must be set"))
 	}
 	if idOk {
-		foundNic, _, err := ns.Get(ctx, datacenterId, serverId, id.(string), 0)
+		foundNic, _, err := ns.Get(ctx, datacenterId, serverId, id.(string), 3)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error getting nic with id %s %w", id.(string), err))
 		}
@@ -203,7 +213,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		}
 		nic = *foundNic
 	} else {
-		nics, err := ns.List(ctx, datacenterId, serverId, 1)
+		nics, err := ns.List(ctx, datacenterId, serverId, 3)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
 		}

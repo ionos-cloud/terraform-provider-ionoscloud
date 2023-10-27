@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -187,7 +188,20 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 		ipv6Block := v.(string)
 		nic.Properties.Ipv6CidrBlock = &ipv6Block
 	}
-
+	if flowLogs, ok := d.GetOk("flowlog"); ok {
+		nic.Entities = &ionoscloud.NicEntities{
+			Flowlogs: &ionoscloud.FlowLogs{
+				Items: &[]ionoscloud.FlowLog{},
+			},
+		}
+		if flowLogList, ok := flowLogs.([]any); ok {
+			for _, flowLogData := range flowLogList {
+				if flowLog, ok := flowLogData.(map[string]any); ok {
+					*nic.Entities.Flowlogs.Items = append(*nic.Entities.Flowlogs.Items, cloudapiflowlog.GetFlowlogFromMap(flowLog))
+				}
+			}
+		}
+	}
 	return nic, nil
 }
 
@@ -264,6 +278,22 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 			if err := d.Set("pci_slot", *nic.Properties.PciSlot); err != nil {
 				return fmt.Errorf("error setting pci_slot %w", err)
 			}
+		}
+	}
+
+	if nic.Entities != nil && nic.Entities.Flowlogs != nil && nic.Entities.Flowlogs.Items != nil && len(*nic.Entities.Flowlogs.Items) > 0 {
+		var flowlogs []map[string]any
+		for _, flowLog := range *nic.Entities.Flowlogs.Items {
+			result := map[string]any{}
+			result, err := utils.DecodeStructToMap(flowLog.Properties)
+			if err != nil {
+				return err
+			}
+			result["id"] = *flowLog.Id
+			flowlogs = append(flowlogs, result)
+		}
+		if err := d.Set("flowlog", flowlogs); err != nil {
+			return fmt.Errorf("error setting flowlog %w", err)
 		}
 	}
 

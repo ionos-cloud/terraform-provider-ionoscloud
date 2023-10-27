@@ -14,6 +14,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
+	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -102,11 +103,70 @@ func resourceNic() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"flowlog": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     cloudapiflowlog.FlowlogSchemaResource,
+				MaxItems: 1,
+				Description: `Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination 
+IP addresses, source and destination ports, number of packets, amount of bytes, 
+the start and end time of the recording, and the type of protocol – 
+and log the extent to which your instances are being accessed.`,
+			},
 		},
-		Timeouts: &resourceDefaultTimeouts,
+		Timeouts:      &resourceDefaultTimeouts,
+		CustomizeDiff: ForceNewForFlowlogChanges,
 	}
 }
 
+// ForceNewForFlowlogChanges - sets ForceNew either on `flowlog` if it is being deleted, or
+// on the field that changes. This is needed because the API does not support PATCH for all flowlog fields except name.
+// The API also does not support DELETE on the flowlog, so the whole resource needs to be re-created.
+func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	//we do not want to check in case of resource creation
+	if d.Id() == "" {
+		return nil
+	}
+
+	if d.HasChange("flowlog") {
+		oldVal, newVal := d.GetChange("flowlog")
+		oldFLowLogs := oldVal.([]any)
+		newFlowLogs := newVal.([]any)
+
+		// "this check is for the scenario in which we have 0 initial flowlogs and we add a new one during a nic update
+		if (oldFLowLogs == nil || len(oldFLowLogs) == 0) && (newFlowLogs != nil || len(newFlowLogs) > 0) {
+			return nil
+		}
+		// flowlog deleted from resource
+		if (oldFLowLogs != nil || len(oldFLowLogs) > 0) && (newFlowLogs == nil || len(newFlowLogs) == 0) {
+			return d.ForceNew("flowlog")
+		}
+		var oldFlowlogMap map[string]any
+		var newFlowLogMap map[string]any
+		if oldFLowLogs != nil && len(oldFLowLogs) > 0 {
+			oldFlowlogMap = oldFLowLogs[0].(map[string]any)
+		}
+		if newFlowLogs != nil && len(newFlowLogs) > 0 {
+			newFlowLogMap = newFlowLogs[0].(map[string]any)
+		}
+		// find the diff between the old and new value of the fields.
+		// name should not force re-creation
+		// all other values should force re-creation, case does not matter
+		for k, v := range newFlowLogMap {
+			if k != "name" && k != "id" {
+				if !strings.EqualFold(strings.ToUpper(v.(string)), strings.ToUpper(oldFlowlogMap[k].(string))) {
+					// set ForceNew manually only if a field changes. only set on the field that changes, setting on the entire `flowlog` list does nothing
+					err := d.ForceNew("flowlog.0." + k)
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+		return nil
+	}
+	return nil
+}
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
@@ -135,7 +195,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	var foundNic = &ionoscloud.Nic{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error
-		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 0)
+		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 3)
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] Could not find nic with Id %s , retrying...", *createdNic.Id)
 			return retry.RetryableError(fmt.Errorf("could not find nic, %w", err))
@@ -163,7 +223,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-	nic, apiResponse, err := ns.Get(ctx, dcid, srvid, nicid, 0)
+	nic, apiResponse, err := ns.Get(ctx, dcid, srvid, nicid, 3)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] nic resource with id %s not found", nicid)
@@ -187,6 +247,35 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	dcId := d.Get("datacenter_id").(string)
 	srvId := d.Get("server_id").(string)
 	nicId := d.Id()
+	var err error
+	if d.HasChange("flowlog") {
+		old, newV := d.GetChange("flowlog")
+		var firstFlowLogId = ""
+		if old != nil && len(old.([]any)) > 0 {
+			firstFlowLogId = old.([]any)[0].(map[string]any)["id"].(string)
+		}
+
+		if newV.([]any) != nil && len(newV.([]any)) > 0 {
+			for _, val := range newV.([]any) {
+				if flowLogMap, ok := val.(map[string]any); ok {
+					flowLog := cloudapiflowlog.GetFlowlogFromMap(flowLogMap)
+					fw := cloudapiflowlog.Service{
+						D:      d,
+						Client: client,
+					}
+					err = fw.CreateOrPatch(ctx, dcId, srvId, nicId, firstFlowLogId, flowLog)
+					if err != nil {
+						//if we have a create that failed, we do not want to save in state
+						// saving in state would mean a diff that would force a re-create
+						if firstFlowLogId == "" {
+							_ = d.Set("flowlog", nil)
+						}
+						return diag.FromErr(err)
+					}
+				}
+			}
+		}
+	}
 
 	nic, err := cloudapinic.GetNicFromSchema(d, "")
 	if err != nil {
