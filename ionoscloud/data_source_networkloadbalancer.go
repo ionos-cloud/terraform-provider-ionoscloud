@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 )
 
 func dataSourceNetworkLoadBalancer() *schema.Resource {
@@ -60,6 +60,15 @@ func dataSourceNetworkLoadBalancer() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"flowlog": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     cloudapiflowlog.FlowlogSchemaDatasource,
+				Description: `Flow logs holistically capture network information such as source and destination 
+							IP addresses, source and destination ports, number of packets, amount of bytes, 
+							the start and end time of the recording, and the type of protocol – 
+							and log the extent to which your instances are being accessed.`,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -72,6 +81,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 	if !dcIdOk {
 		return diag.FromErr(errors.New("no datacenter_id was specified"))
 	}
+	dcID := datacenterId.(string)
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -88,26 +98,26 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 
 	if idOk {
 		/* search by ID */
-		networkLoadBalancer, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), id.(string)).Execute()
+		networkLoadBalancer, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcID, id.(string)).Depth(4).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the network loadbalancer %s: %w", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the network loadbalancer %s dcID %s : %w", id.(string), dcID, err))
 		}
 	} else {
 		/* search by name */
 		var networkLoadBalancers ionoscloud.NetworkLoadBalancers
 
-		networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId.(string)).Depth(1).Execute()
+		networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, dcID).Depth(4).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %w", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers dcID %s : %w", dcID, err))
 		}
 
 		var results []ionoscloud.NetworkLoadBalancer
 		if networkLoadBalancers.Items != nil {
 			for _, nlb := range *networkLoadBalancers.Items {
 				if nlb.Properties != nil && nlb.Properties.Name != nil && strings.EqualFold(*nlb.Properties.Name, name.(string)) {
-					tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), *nlb.Id).Execute()
+					tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcID, *nlb.Id).Depth(4).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
 						return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %w", *nlb.Id, err))

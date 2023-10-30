@@ -41,6 +41,10 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(networkLoadBalancerResource, "lb_private_ips.0"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", constant.LanResource+".nlb_lan_1", "id"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", constant.LanResource+".nlb_lan_2", "id"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.name", "test_flowlog"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.action", "ALL"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.direction", "INGRESS"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.bucket", constant.FlowlogBucket),
 				),
 			},
 			{
@@ -52,6 +56,10 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.0", "10.13.72.225/24"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", constant.LanResource+".nlb_lan_1", "id"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", constant.LanResource+".nlb_lan_2", "id"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.name", "test_flowlog"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.action", "ALL"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.direction", "INGRESS"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.bucket", constant.FlowlogBucket),
 				),
 			},
 			{
@@ -62,6 +70,10 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "ips", dataSourceNetworkLoadBalancerId, "ips"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", dataSourceNetworkLoadBalancerId, "target_lan"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "lb_private_ips", dataSourceNetworkLoadBalancerId, "lb_private_ips"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.name", networkLoadBalancerResource, "flowlog.0.name"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.action", networkLoadBalancerResource, "flowlog.0.action"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.direction", networkLoadBalancerResource, "flowlog.0.direction"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.direction", networkLoadBalancerResource, "flowlog.0.direction"),
 				),
 			},
 			{
@@ -88,6 +100,10 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.1", "10.13.73.225/24"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", constant.LanResource+".nlb_lan_3", "id"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", constant.LanResource+".nlb_lan_4", "id"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.name", "test_flowlog_updated"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.action", "REJECTED"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.direction", "EGRESS"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.bucket", constant.FlowlogBucketUpdated),
 				),
 			},
 		},
@@ -184,6 +200,12 @@ resource ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBa
   listener_lan  = ` + constant.LanResource + `.nlb_lan_1.id
   target_lan    = ` + constant.LanResource + `.nlb_lan_2.id
   ips           = ["10.12.118.224"]
+  flowlog {
+    name = "test_flowlog"
+    action = "ALL"
+    direction = "INGRESS"
+    bucket = "` + constant.FlowlogBucket + `"
+  }
 }
 `
 
@@ -214,6 +236,12 @@ resource ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBa
   target_lan    = ` + constant.LanResource + `.nlb_lan_2.id
   ips           = ["10.12.118.224"]
   lb_private_ips = ["10.13.72.225/24"]
+  flowlog {
+    name = "test_flowlog"
+    action = "ALL"
+    direction = "INGRESS"
+    bucket = "` + constant.FlowlogBucket + `"
+  }
 }
 `
 
@@ -255,26 +283,32 @@ resource ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBa
   target_lan    = ` + constant.LanResource + `.nlb_lan_4.id
   ips           = ["10.12.118.224", "10.12.119.224"]
   lb_private_ips = ["10.13.72.225/24", "10.13.73.225/24"]
+  flowlog {
+    name = "test_flowlog_updated"
+    action = "REJECTED"
+    direction = "EGRESS"
+    bucket = "` + constant.FlowlogBucketUpdated + `"
+  }
 }
 `
 
 const testAccDataSourceNetworkLoadBalancerMatchId = testAccCheckNetworkLoadBalancerConfigBasic + `
 data ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBalancerDataSourceById + ` {
   datacenter_id = ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.datacenter_id
-  id			= ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.id
+  id            = ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.id
 }
 `
 
 const testAccDataSourceNetworkLoadBalancerMatchName = testAccCheckNetworkLoadBalancerConfigBasic + `
 data ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBalancerDataSourceByName + ` {
   datacenter_id = ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.datacenter_id
-  name			= ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.name
+  name          = ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.name
 }
 `
 
 const testAccDataSourceNetworkLoadBalancerWrongNameError = testAccCheckNetworkLoadBalancerConfigBasic + `
 data ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBalancerDataSourceByName + ` {
   datacenter_id = ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.datacenter_id
-  name			= "wrong_name"
+  name          = "wrong_name"
 }
 `
