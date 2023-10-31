@@ -29,9 +29,6 @@ provider "ionoscloud" {
 }
 ```
 
-## Using the provider
-
-See the [IonosCloud Provider documentation](https://registry.terraform.io/providers/ionos-cloud/ionoscloud/latest/docs) to get started using the IonosCloud provider.
 
 ## Using the provider
 
@@ -50,7 +47,7 @@ export IONOS_USERNAME="username"
 export IONOS_PASSWORD="password"
 ```
 
-Another way of configuring it, is by providing your credentials/api_url in a `.tf` configuration file in the `provider` block as shown in the below example.
+Another way of configuring it is by providing your credentials/api_url in a `.tf` configuration file in the `provider` block as shown in the below example.
 
 ```hcl
 provider "ionoscloud" {
@@ -75,6 +72,7 @@ export TF_VAR_ionos_username="username"
 export TF_VAR_ionos_password="password"
 ```
 
+See the [IonosCloud Provider documentation](https://registry.terraform.io/providers/ionos-cloud/ionoscloud/latest/docs) for more details.
 
 ## Environment Variables
 
