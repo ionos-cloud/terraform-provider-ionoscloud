@@ -56,6 +56,9 @@ resource "ionoscloud_networkloadbalancer" "example" {
     - `bucket` - (Required) Specifies the S3 IONOS bucket where the flow log data will be stored. The bucket must exist. Immutable, forces re-creation.
     - `direction` - (Required) Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL. Immutable, forces re-creation.
     - `name` - (Required) Specifies the name of the flow log.
+
+⚠️ **Note:**: Removing the `flowlog` forces re-creation of the network load balancer resource.
+
 ## Import
 
 A Network Load Balancer resource can be imported using its `resource id` and the `datacenter id` e.g.
