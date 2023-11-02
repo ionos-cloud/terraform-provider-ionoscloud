@@ -1,3 +1,6 @@
+//go:build all || autoscaling
+// +build all autoscaling
+
 package ionoscloud
 
 import (
@@ -5,10 +8,11 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-const dataSourceAutoscalingGroupId = DataSource + "." + AutoscalingGroupResource + "." + AutoscalingGroupDataSourceById
-const dataSourceAutoscalingGroupName = DataSource + "." + AutoscalingGroupResource + "." + AutoscalingGroupDataSourceByName
+const dataSourceAutoscalingGroupId = constant.DataSource + "." + constant.AutoscalingGroupResource + "." + constant.AutoscalingGroupDataSourceById
+const dataSourceAutoscalingGroupName = constant.DataSource + "." + constant.AutoscalingGroupResource + "." + constant.AutoscalingGroupDataSourceByName
 
 func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -18,10 +22,10 @@ func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckAutoscalingGroupConfigBasic, AutoscalingGroupTestResource),
+				Config: fmt.Sprintf(testAccCheckAutoscalingGroupConfigBasic, constant.AutoscalingGroupTestResource),
 			},
 			{
-				Config: fmt.Sprintf(testAccDataSourceAutoscalingGroupMatchId, AutoscalingGroupTestResource),
+				Config: fmt.Sprintf(testAccDataSourceAutoscalingGroupMatchId, constant.AutoscalingGroupTestResource),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "name", resourceAutoscalingGroupName, "name"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "datacenter_id", resourceAutoscalingGroupName, "datacenter_id"),
@@ -56,7 +60,7 @@ func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccDataSourceAutoscalingGroupMatchName, AutoscalingGroupTestResource),
+				Config: fmt.Sprintf(testAccDataSourceAutoscalingGroupMatchName, constant.AutoscalingGroupTestResource),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "name", resourceAutoscalingGroupName, "name"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "datacenter_id", resourceAutoscalingGroupName, "datacenter_id"),
@@ -95,13 +99,13 @@ func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 }
 
 const testAccDataSourceAutoscalingGroupMatchId = testAccCheckAutoscalingGroupConfigBasic + `
-data ` + AutoscalingGroupResource + ` ` + AutoscalingGroupDataSourceById + ` {
-  id			= ` + resourceAutoscalingGroupName + `.id
+data ` + constant.AutoscalingGroupResource + ` ` + constant.AutoscalingGroupDataSourceById + ` {
+  id = ` + resourceAutoscalingGroupName + `.id
 }
 `
 
 const testAccDataSourceAutoscalingGroupMatchName = testAccCheckAutoscalingGroupConfigBasic + `
-data ` + AutoscalingGroupResource + ` ` + AutoscalingGroupDataSourceByName + ` {
-  name			= ` + resourceAutoscalingGroupName + `.name
+data ` + constant.AutoscalingGroupResource + ` ` + constant.AutoscalingGroupDataSourceByName + ` {
+  name = ` + resourceAutoscalingGroupName + `.name
 }
 `

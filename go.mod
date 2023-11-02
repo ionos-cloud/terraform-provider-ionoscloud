@@ -13,6 +13,7 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
 	github.com/ionos-cloud/sdk-go-logging v1.0.0
+	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 	github.com/ionos-cloud/sdk-go/v6 v6.1.9
 	golang.org/x/crypto v0.14.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -35,7 +36,7 @@ require (
 	github.com/hashicorp/go-hclog v1.5.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-plugin v1.4.10 // indirect
-	github.com/hashicorp/go-uuid v1.0.3 // indirect
+	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/hc-install v0.5.2 // indirect
 	github.com/hashicorp/hcl/v2 v2.17.0 // indirect

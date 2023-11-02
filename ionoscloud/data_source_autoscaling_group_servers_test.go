@@ -1,9 +1,14 @@
+//go:build all || autoscaling
+// +build all autoscaling
+
 package ionoscloud
 
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccDataSourceAutoscalingGroupServers(t *testing.T) {
@@ -19,7 +24,7 @@ func TestAccDataSourceAutoscalingGroupServers(t *testing.T) {
 			{
 				Config: testAccDataSourceAutoscalingGroupServers,
 				Check: resource.ComposeTestCheckFunc(
-					testNotEmptySlice(AutoscalingGroupServersResource+"."+AutoscalingGroupServersTestDataSource, "servers.#"),
+					utils.TestNotEmptySlice(constant.AutoscalingGroupServersResource+"."+constant.AutoscalingGroupServersTestDataSource, "servers.#"),
 				),
 			},
 		},

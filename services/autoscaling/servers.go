@@ -3,10 +3,11 @@ package autoscaling
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	autoscaling "github.com/ionos-cloud/sdk-go-autoscaling"
+	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
 )
 
 type ServersService interface {
@@ -15,7 +16,7 @@ type ServersService interface {
 }
 
 func (c *Client) GetGroupServer(ctx context.Context, groupId string, serverId string) (autoscaling.Server, *autoscaling.APIResponse, error) {
-	server, apiResponse, err := c.GroupsApi.AutoscalingGroupsServersFindById(ctx, serverId, groupId).Execute()
+	server, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsServersFindById(ctx, serverId, groupId).Execute()
 	if apiResponse != nil {
 		return server, apiResponse, err
 
@@ -24,7 +25,7 @@ func (c *Client) GetGroupServer(ctx context.Context, groupId string, serverId st
 }
 
 func (c *Client) GetAllGroupServers(ctx context.Context, groupId string) (autoscaling.ServerCollection, *autoscaling.APIResponse, error) {
-	servers, apiResponse, err := c.GroupsApi.AutoscalingGroupsServersGet(ctx, groupId).Execute()
+	servers, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsServersGet(ctx, groupId).Execute()
 	if apiResponse != nil {
 		return servers, apiResponse, err
 	}
@@ -44,7 +45,7 @@ func SetAutoscalingServersData(d *schema.ResourceData, groupServers autoscaling.
 		}
 		err := d.Set("servers", servers)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting group servers data: %s", err))
+			diags := diag.FromErr(fmt.Errorf("error while setting group servers data: %w", err))
 			return diags
 		}
 	}

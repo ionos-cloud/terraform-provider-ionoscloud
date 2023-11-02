@@ -3,9 +3,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 )
 
@@ -34,7 +36,7 @@ func dataSourceAutoscalingGroupServers() *schema.Resource {
 }
 
 func dataSourceAutoscalingServersRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).AutoscalingClient
+	client := meta.(services.SdkBundle).AutoscalingClient
 
 	id, idOk := d.GetOk("group_id")
 

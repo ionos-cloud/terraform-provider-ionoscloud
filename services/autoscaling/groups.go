@@ -3,21 +3,22 @@ package autoscaling
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	autoscaling "github.com/ionos-cloud/sdk-go-autoscaling"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
 )
 
 type GroupService interface {
 	GetGroup(ctx context.Context, groupId string) (autoscaling.Group, *autoscaling.APIResponse, error)
 	ListGroups(ctx context.Context) (autoscaling.GroupCollection, *autoscaling.APIResponse, error)
 	CreateGroup(ctx context.Context, group autoscaling.Group) (autoscaling.GroupPostResponse, *autoscaling.APIResponse, error)
-	UpdateGroup(ctx context.Context, groupId string, group autoscaling.GroupUpdate) (autoscaling.Group, *autoscaling.APIResponse, error)
+	UpdateGroup(ctx context.Context, groupId string, group autoscaling.GroupPut) (autoscaling.Group, *autoscaling.APIResponse, error)
 	DeleteGroup(ctx context.Context, groupId string) (*autoscaling.APIResponse, error)
 }
 
 func (c *Client) GetGroup(ctx context.Context, groupId string) (autoscaling.Group, *autoscaling.APIResponse, error) {
-	group, apiResponse, err := c.GroupsApi.AutoscalingGroupsFindById(ctx, groupId).Execute()
+	group, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsFindById(ctx, groupId).Execute()
 	if apiResponse != nil {
 		return group, apiResponse, err
 
@@ -26,23 +27,23 @@ func (c *Client) GetGroup(ctx context.Context, groupId string) (autoscaling.Grou
 }
 
 func (c *Client) ListGroups(ctx context.Context) (autoscaling.GroupCollection, *autoscaling.APIResponse, error) {
-	groups, apiResponse, err := c.GroupsApi.AutoscalingGroupsGet(ctx).Execute()
+	groups, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsGet(ctx).Execute()
 	if apiResponse != nil {
 		return groups, apiResponse, err
 	}
 	return groups, nil, err
 }
 
-func (c *Client) CreateGroup(ctx context.Context, group autoscaling.Group) (autoscaling.GroupPostResponse, *autoscaling.APIResponse, error) {
-	groupResponse, apiResponse, err := c.GroupsApi.AutoscalingGroupsPost(ctx).Group(group).Execute()
+func (c *Client) CreateGroup(ctx context.Context, group autoscaling.GroupPost) (autoscaling.GroupPostResponse, *autoscaling.APIResponse, error) {
+	groupResponse, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsPost(ctx).GroupPost(group).Execute()
 	if apiResponse != nil {
 		return groupResponse, apiResponse, err
 	}
 	return groupResponse, nil, err
 }
 
-func (c *Client) UpdateGroup(ctx context.Context, groupId string, group autoscaling.GroupUpdate) (autoscaling.Group, *autoscaling.APIResponse, error) {
-	groupResponse, apiResponse, err := c.GroupsApi.AutoscalingGroupsPut(ctx, groupId).GroupUpdate(group).Execute()
+func (c *Client) UpdateGroup(ctx context.Context, groupId string, group autoscaling.GroupPut) (autoscaling.Group, *autoscaling.APIResponse, error) {
+	groupResponse, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsPut(ctx, groupId).GroupPut(group).Execute()
 	if apiResponse != nil {
 		return groupResponse, apiResponse, err
 	}
@@ -50,16 +51,16 @@ func (c *Client) UpdateGroup(ctx context.Context, groupId string, group autoscal
 }
 
 func (c *Client) DeleteGroup(ctx context.Context, groupId string) (*autoscaling.APIResponse, error) {
-	apiResponse, err := c.GroupsApi.AutoscalingGroupsDelete(ctx, groupId).Execute()
+	apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsDelete(ctx, groupId).Execute()
 	if apiResponse != nil {
 		return apiResponse, err
 	}
 	return nil, err
 }
 
-func GetAutoscalingGroupDataCreate(d *schema.ResourceData) (*autoscaling.Group, error) {
+func GetAutoscalingGroupDataCreate(d *schema.ResourceData) (*autoscaling.GroupPost, error) {
 
-	group := autoscaling.Group{
+	group := autoscaling.GroupPost{
 		Properties: &autoscaling.GroupProperties{},
 	}
 
@@ -73,10 +74,10 @@ func GetAutoscalingGroupDataCreate(d *schema.ResourceData) (*autoscaling.Group, 
 		group.Properties.MinReplicaCount = &value
 	}
 
-	if value, ok := d.GetOk("target_replica_count"); ok {
-		value := int64(value.(int))
-		group.Properties.TargetReplicaCount = &value
-	}
+	//if value, ok := d.GetOk("target_replica_count"); ok {
+	//	value := int64(value.(int))
+	//	group.Properties.TargetReplicaCount = &value
+	//}
 
 	if value, ok := d.GetOk("name"); ok {
 		value := value.(string)
@@ -93,7 +94,7 @@ func GetAutoscalingGroupDataCreate(d *schema.ResourceData) (*autoscaling.Group, 
 
 	if value, ok := d.GetOk("datacenter_id"); ok {
 		value := value.(string)
-		datacenter := autoscaling.Resource{
+		datacenter := autoscaling.GroupPropertiesDatacenter{
 			Id: &value,
 		}
 		group.Properties.Datacenter = &datacenter
@@ -101,10 +102,10 @@ func GetAutoscalingGroupDataCreate(d *schema.ResourceData) (*autoscaling.Group, 
 	return &group, nil
 }
 
-func GetAutoscalingGroupDataUpdate(d *schema.ResourceData) (*autoscaling.GroupUpdate, error) {
+func GetAutoscalingGroupDataUpdate(d *schema.ResourceData) (*autoscaling.GroupPut, error) {
 
-	group := autoscaling.GroupUpdate{
-		Properties: &autoscaling.GroupUpdatableProperties{},
+	group := autoscaling.GroupPut{
+		Properties: &autoscaling.GroupPutProperties{},
 	}
 
 	if value, ok := d.GetOk("max_replica_count"); ok {
@@ -117,12 +118,12 @@ func GetAutoscalingGroupDataUpdate(d *schema.ResourceData) (*autoscaling.GroupUp
 		group.Properties.MinReplicaCount = &value
 	}
 
-	if value, ok := d.GetOk("target_replica_count"); ok {
-		value := int64(value.(int))
-		group.Properties.TargetReplicaCount = &value
-	} else {
-		group.Properties.TargetReplicaCount = nil
-	}
+	//if value, ok := d.GetOk("target_replica_count"); ok {
+	//	value := int64(value.(int))
+	//	group.Properties.TargetReplicaCount = &value
+	//} else {
+	//	group.Properties.TargetReplicaCount = nil
+	//}
 
 	if value, ok := d.GetOk("name"); ok {
 		value := value.(string)
@@ -138,11 +139,11 @@ func GetAutoscalingGroupDataUpdate(d *schema.ResourceData) (*autoscaling.GroupUp
 	}
 
 	if d.HasChange("datacenter_id") {
-		return nil, fmt.Errorf("datacenter_id property is immutable and can pe used only in create requests")
+		return nil, fmt.Errorf("datacenter_id property is immutable and can be used only in create requests")
 	} else {
 		if value, ok := d.GetOk("datacenter_id"); ok {
 			value := value.(string)
-			datacenter := autoscaling.Resource{
+			datacenter := autoscaling.GroupPutPropertiesDatacenter{
 				Id: &value,
 			}
 			group.Properties.Datacenter = &datacenter
@@ -411,11 +412,11 @@ func SetAutoscalingGroupData(d *schema.ResourceData, group autoscaling.Group) er
 			}
 		}
 
-		if group.Properties.TargetReplicaCount != nil {
-			if err := d.Set("target_replica_count", *group.Properties.TargetReplicaCount); err != nil {
-				return generateSetError(resourceName, "target_replica_count", err)
-			}
-		}
+		//if group.Properties.TargetReplicaCount != nil {
+		//	if err := d.Set("target_replica_count", *group.Properties.TargetReplicaCount); err != nil {
+		//		return generateSetError(resourceName, "target_replica_count", err)
+		//	}
+		//}
 
 		if group.Properties.Name != nil {
 			if err := d.Set("name", *group.Properties.Name); err != nil {

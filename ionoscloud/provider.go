@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
@@ -116,6 +117,7 @@ func Provider() *schema.Provider {
 			constant.DNSZoneResource:                           resourceDNSZone(),
 			constant.DNSRecordResource:                         resourceDNSRecord(),
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
+			constant.AutoscalingGroupResource:                  resourceAutoscalingGroup(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -170,6 +172,8 @@ func Provider() *schema.Provider {
 			constant.DNSZoneDataSource:                         dataSourceDNSZone(),
 			constant.DNSRecordDataSource:                       dataSourceDNSRecord(),
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
+			constant.AutoscalingGroupResource:                  dataSourceAutoscalingGroup(),
+			constant.AutoscalingGroupServersResource:           dataSourceAutoscalingGroupServers(),
 		},
 	}
 
@@ -250,6 +254,7 @@ const (
 	dataplatformClient
 	dnsClient
 	loggingClient
+	autoscalingClient
 )
 
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
@@ -282,6 +287,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case loggingClient:
 		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case autoscalingClient:
+		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}

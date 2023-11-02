@@ -3,12 +3,16 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
-	"log"
-	"time"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceAutoscalingGroup() *schema.Resource {
@@ -22,29 +26,29 @@ func resourceAutoscalingGroup() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"max_replica_count": {
-				Type:         schema.TypeInt,
-				Description:  "Maximum replica count value for `targetReplicaCount`. Will be enforced for both automatic and manual changes.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.IntBetween(0, 200)),
+				Type:             schema.TypeInt,
+				Description:      "Maximum replica count value for `targetReplicaCount`. Will be enforced for both automatic and manual changes.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
 			},
 			"min_replica_count": {
-				Type:         schema.TypeInt,
-				Description:  "Minimum replica count value for `targetReplicaCount`. Will be enforced for both automatic and manual changes.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.IntBetween(0, 200)),
+				Type:             schema.TypeInt,
+				Description:      "Minimum replica count value for `targetReplicaCount`. Will be enforced for both automatic and manual changes.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
 			},
 			"target_replica_count": {
-				Type:         schema.TypeInt,
-				Description:  "The target number of VMs in this Group. Depending on the scaling policy, this number will be adjusted automatically. VMs will be created or destroyed automatically in order to adjust the actual number of VMs to this number. If targetReplicaCount is given in the request body then it must be >= minReplicaCount and <= maxReplicaCount.",
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.All(validation.IntBetween(0, 200)),
+				Type:             schema.TypeInt,
+				Description:      "The target number of VMs in this Group. Depending on the scaling policy, this number will be adjusted automatically. VMs will be created or destroyed automatically in order to adjust the actual number of VMs to this number. If targetReplicaCount is given in the request body then it must be >= minReplicaCount and <= maxReplicaCount.",
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "User-defined name for the Autoscaling Group.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringLenBetween(0, 255)),
+				Type:             schema.TypeString,
+				Description:      "User-defined name for the Autoscaling Group.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(0, 255)),
 			},
 			"policy": {
 				Type:        schema.TypeList,
@@ -54,10 +58,10 @@ func resourceAutoscalingGroup() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"metric": {
-							Required:     true,
-							Type:         schema.TypeString,
-							Description:  "The Metric that should trigger the scaling actions. Metric values are checked at fixed intervals.",
-							ValidateFunc: validation.All(validation.StringInSlice([]string{"INSTANCE_CPU_UTILIZATION_AVERAGE", "INSTANCE_NETWORK_IN_BYTES", "INSTANCE_NETWORK_IN_PACKETS", "INSTANCE_NETWORK_OUT_BYTES", "INSTANCE_NETWORK_OUT_PACKETS"}, true)),
+							Required:         true,
+							Type:             schema.TypeString,
+							Description:      "The Metric that should trigger the scaling actions. Metric values are checked at fixed intervals.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"INSTANCE_CPU_UTILIZATION_AVERAGE", "INSTANCE_NETWORK_IN_BYTES", "INSTANCE_NETWORK_IN_PACKETS", "INSTANCE_NETWORK_OUT_BYTES", "INSTANCE_NETWORK_OUT_PACKETS"}, true)),
 						},
 						"range": {
 							Optional:    true,
@@ -261,10 +265,10 @@ func resourceAutoscalingGroup() *schema.Resource {
 				},
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Description:  "Unique identifier for the resource",
-				Required:     true,
-				ValidateFunc: validation.All(validation.IsUUID),
+				Type:             schema.TypeString,
+				Description:      "Unique identifier for the resource",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -277,7 +281,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 }
 
 func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).AutoscalingClient
+	client := meta.(services.SdkBundle).AutoscalingClient
 
 	group, err := autoscalingService.GetAutoscalingGroupDataCreate(d)
 
@@ -308,7 +312,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 
 func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).AutoscalingClient
+	client := meta.(services.SdkBundle).AutoscalingClient
 
 	group, apiResponse, err := client.GetGroup(ctx, d.Id())
 
@@ -318,7 +322,7 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 			d.SetId("")
 			return nil
 		} else {
-			diags := diag.FromErr(fmt.Errorf("error while retrieving autoscaling group with id %v, %+v", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error while retrieving autoscaling group with id %v, %w", d.Id(), err))
 			return diags
 		}
 	}
@@ -336,7 +340,7 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 
 func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).AutoscalingClient
+	client := meta.(services.SdkBundle).AutoscalingClient
 
 	group, err := autoscalingService.GetAutoscalingGroupDataUpdate(d)
 
@@ -349,12 +353,12 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 	_, _, err = client.UpdateGroup(ctx, d.Id(), *group)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating autoscaling group %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating autoscaling group %s: %w", d.Id(), err))
 		return diags
 	}
 	log.Printf("[INFO] autoscaling Group updated.")
 
-	time.Sleep(SleepInterval * 20)
+	time.Sleep(constant.SleepInterval * 20)
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diag.FromErr(err)
@@ -364,12 +368,12 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).AutoscalingClient
+	client := meta.(services.SdkBundle).AutoscalingClient
 
 	_, err := client.DeleteGroup(ctx, d.Id())
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting an autoscaling group %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting an autoscaling group %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -381,18 +385,18 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).AutoscalingClient
+	client := meta.(services.SdkBundle).AutoscalingClient
 
 	groupId := d.Id()
 
 	group, apiResponse, err := client.GetGroup(ctx, d.Id())
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find autoscaling group %q", groupId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieveing autoscaling grouo %q, %q", groupId, err)
+		return nil, fmt.Errorf("an error occured while retrieveing autoscaling grouo %q, %w", groupId, err)
 	}
 
 	log.Printf("[INFO] autoscaling group found: %+v", group)
@@ -407,24 +411,21 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 func actionReady(ctx context.Context, client *autoscalingService.Client, d *schema.ResourceData, actionId string) (bool, error) {
 
 	action, _, err := client.GetAction(ctx, d.Id(), actionId)
-
 	if err != nil {
-		return true, fmt.Errorf("error checking action status: %s", err)
+		return true, fmt.Errorf("error checking action status: %w", err)
 	}
 
-	if *action.Properties.ActionStatus == "FAILED" {
+	if *action.Properties.ActionStatus == autoscaling.ACTIONSTATUS_FAILED {
 		return false, fmt.Errorf("action failed")
 	}
-
-	return *action.Properties.ActionStatus == "SUCCESSFUL", nil
+	return *action.Properties.ActionStatus == autoscaling.ACTIONSTATUS_SUCCESSFUL, nil
 }
 
 // checkAction gets the triggered action and waits for it to be ready
 func checkAction(ctx context.Context, client *autoscalingService.Client, d *schema.ResourceData) error {
 	actions, _, err := client.GetAllActions(ctx, d.Id())
-
 	if err != nil {
-		return fmt.Errorf("error fetching group actions: %s", err)
+		return fmt.Errorf("error fetching group actions: %w", err)
 	}
 
 	var actionId string
@@ -443,7 +444,7 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 		actionSuccessful, rsErr := actionReady(ctx, client, d, actionId)
 
 		if rsErr != nil {
-			return fmt.Errorf("error while checking status of action %s: %s", actionId, rsErr)
+			return fmt.Errorf("error while checking status of action %s: %w", actionId, rsErr)
 		}
 
 		if actionSuccessful {
@@ -452,7 +453,7 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")

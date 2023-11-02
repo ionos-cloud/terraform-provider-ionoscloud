@@ -3,10 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	autoscaling "github.com/ionos-cloud/sdk-go-autoscaling"
+	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 )
 
@@ -234,7 +236,7 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 }
 
 func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).AutoscalingClient
+	client := meta.(services.SdkBundle).AutoscalingClient
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -253,15 +255,16 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 
 	if idOk {
 		/* search by ID */
-		group, _, err = client.GroupsApi.AutoscalingGroupsFindById(ctx, id.(string)).Execute()
+
+		group, _, err = client.GetGroup(ctx, id.(string))
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %s", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
 			return diags
 		}
 	} else {
-		groups, _, err := client.GroupsApi.AutoscalingGroupsGet(ctx).Execute()
+		groups, _, err := client.ListGroups(ctx)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group: %w", err.Error()))
 			return diags
 		}
 
@@ -269,7 +272,7 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 
 		if groups.Items != nil {
 			for _, g := range *groups.Items {
-				tmpGroup, _, err := client.GroupsApi.AutoscalingGroupsFindById(ctx, *g.Id).Execute()
+				tmpGroup, _, err := client.GetGroup(ctx, id.(string))
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %s", *g.Id, err))
 					return diags
