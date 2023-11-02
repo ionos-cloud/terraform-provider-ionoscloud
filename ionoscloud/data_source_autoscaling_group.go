@@ -264,7 +264,7 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	} else {
 		groups, _, err := client.ListGroups(ctx)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group: %w", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group: %w", err))
 			return diags
 		}
 

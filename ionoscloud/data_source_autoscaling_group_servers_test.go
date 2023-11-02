@@ -33,7 +33,7 @@ func TestAccDataSourceAutoscalingGroupServers(t *testing.T) {
 }
 
 const testAccDataSourceAutoscalingGroupServers = testAccCheckAutoscalingGroupConfigBasic + `
-data ` + AutoscalingGroupServersResource + ` ` + AutoscalingGroupServersTestDataSource + ` {
-	group_id = ` + AutoscalingGroupResource + `.` + AutoscalingGroupTestResource + `.id
+data ` + constant.AutoscalingGroupServersResource + ` ` + constant.AutoscalingGroupServersTestDataSource + ` {
+	group_id = ` + constant.AutoscalingGroupResource + `.` + constant.AutoscalingGroupTestResource + `.id
 }
 `

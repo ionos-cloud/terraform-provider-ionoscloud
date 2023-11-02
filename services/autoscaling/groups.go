@@ -344,7 +344,7 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 							log.Printf("[DEBUG] Reading file %s", path)
 							publicKey, err := readPublicKey(path.(string))
 							if err != nil {
-								return nil, fmt.Errorf("error fetching sshkey from file (%s) (%s)", path, err.Error())
+								return nil, fmt.Errorf("error fetching sshkey from file (%s) (%w)", path, err)
 							}
 							publicKeys = append(publicKeys, publicKey)
 						}

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccAutoscalingGroupImportBasic(t *testing.T) {
@@ -20,7 +21,7 @@ func TestAccAutoscalingGroupImportBasic(t *testing.T) {
 				Config: testAccCheckAutoscalingGroupConfigBasic,
 			},
 			{
-				ResourceName:            AutoscalingGroupResource + "." + AutoscalingGroupTestResource,
+				ResourceName:            constant.AutoscalingGroupResource + "." + constant.AutoscalingGroupTestResource,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"replica_configuration.0.volume.0.ssh_key_paths", "replica_configuration.0.volume.0.ssh_key_values", "replica_configuration.0.volume.0.password"},

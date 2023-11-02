@@ -150,8 +150,7 @@ func testAccCheckAutoscalingGroupDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.AutoscalingGroupResource {
 			continue
 		}
-		_, apiResponse, err := client.AutoScalingGroupsApi.GroupsFindById(ctx, rs.Primary.ID).Execute()
-
+		_, apiResponse, err := client.GetGroup(ctx, rs.Primary.ID)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
 				return fmt.Errorf("an error occurred while checking for the destruction of autoscaling group %s: %w",
@@ -186,7 +185,7 @@ func testAccCheckAutoscalingGroupExists(n string, autoscalingGroup *autoscaling.
 			defer cancel()
 		}
 
-		foundGroup, _, err := client.AutoScalingGroupsApi.GroupsFindById(ctx, rs.Primary.ID).Execute()
+		foundGroup, _, err := client.GetGroup(ctx, rs.Primary.ID)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching backup unit: %s", rs.Primary.ID)
