@@ -46,13 +46,21 @@ resource "ionoscloud_networkloadbalancer" "example" {
 ## Example configuring Flowlog
 
 ```hcl
-flowlog {
+resource "ionoscloud_networkloadbalancer" "example" {
+  datacenter_id           = ionoscloud_datacenter.example.id
+  name                    = "nlb with flowlog"
+  listener_lan            = ionoscloud_lan.example1.id
+  target_lan              = ionoscloud_lan.example2.id
+  ips                     = ["10.12.118.224"]
+  lb_private_ips          = ["10.13.72.225/24"]
+  flowlog {
     action    = "ALL"
     bucket    = "flowlog-bucket"
     direction = "INGRESS"
     name      = "flowlog"
+  }  
 }
- 
+
 ```
 
 This will configure flowlog for ALL(rejected and accepted) ingress traffic and will log it into an existing ionos s3 bucket named `flowlog-bucket`. Any s3 compatible client can be used to create it. Adding a flowlog does not force re-creation or the nic, but changing any other field than
