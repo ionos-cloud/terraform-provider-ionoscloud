@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
@@ -22,7 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"golang.org/x/crypto/ssh"
 )
 
 func resourceServer() *schema.Resource {
@@ -1296,27 +1294,6 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
-}
-
-// Reads public key from file or directly provided and returns key string if valid
-func readPublicKey(pathOrKey string) (string, error) {
-	var bytes []byte
-	var err error
-	if utils.CheckFileExists(pathOrKey) {
-		bytes, err = os.ReadFile(pathOrKey)
-		if err != nil {
-
-			return "", err
-		}
-	} else {
-		log.Printf("[DEBUG] error opening file, key must have been provided directly %s ", pathOrKey)
-		bytes = []byte(pathOrKey)
-	}
-	pubKey, _, _, _, err := ssh.ParseAuthorizedKey(bytes)
-	if err != nil {
-		return "", fmt.Errorf("error for public key %s, check if path is correct or key is in correct format", pathOrKey)
-	}
-	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
 }
 
 func SetCdromProperties(image ionoscloud.Image) map[string]interface{} {

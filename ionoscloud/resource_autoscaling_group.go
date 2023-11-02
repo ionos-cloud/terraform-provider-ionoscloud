@@ -27,33 +27,33 @@ func resourceAutoscalingGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"max_replica_count": {
 				Type:             schema.TypeInt,
-				Description:      "Maximum replica count value for `targetReplicaCount`. Will be enforced for both automatic and manual changes.",
+				Description:      "The maximum value for the number of replicas. Must be >= 0 and <= 100.",
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
 			},
 			"min_replica_count": {
 				Type:             schema.TypeInt,
-				Description:      "Minimum replica count value for `targetReplicaCount`. Will be enforced for both automatic and manual changes.",
+				Description:      "The minimum value for the number of replicas. Must be >= 0 and <= 100.",
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
 			},
-			"target_replica_count": {
-				Type:             schema.TypeInt,
-				Description:      "The target number of VMs in this Group. Depending on the scaling policy, this number will be adjusted automatically. VMs will be created or destroyed automatically in order to adjust the actual number of VMs to this number. If targetReplicaCount is given in the request body then it must be >= minReplicaCount and <= maxReplicaCount.",
-				Optional:         true,
-				Computed:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
-			},
+			//"target_replica_count": {
+			//	Type:             schema.TypeInt,
+			//	Description:      "The target number of VMs in this Group. Depending on the scaling policy, this number will be adjusted automatically. VMs will be created or destroyed automatically in order to adjust the actual number of VMs to this number. If targetReplicaCount is given in the request body then it must be >= minReplicaCount and <= maxReplicaCount.",
+			//	Optional:         true,
+			//	Computed:         true,
+			//	ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
+			//},
 			"name": {
 				Type:             schema.TypeString,
 				Description:      "User-defined name for the Autoscaling Group.",
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(0, 255)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(1, 255)),
 			},
 			"policy": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
-				Description: "Specifies the behavior of this Autoscaling Group. A policy consists of Triggers and Actions, whereby an Action is some kind of automated behavior, and a Trigger is defined by the circumstances under which the Action is triggered. Currently, two separate Actions, namely Scaling In and Out are supported, triggered through Thresholds defined on a given Metric.",
+				Description: "Defines the behavior of this VM Auto Scaling Group. A policy consists of triggers and actions, where an action is an automated behavior, and the trigger defines the circumstances under which the action is triggered. Currently, two separate actions are supported, namely scaling inward and outward, triggered by the thresholds defined for a particular metric.",
 				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -67,7 +67,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 							Optional:    true,
 							Computed:    true,
 							Type:        schema.TypeString,
-							Description: "Defines the time range, for which the samples will be aggregated. Default is 120s.",
+							Description: "Specifies the time range for which the samples are to be aggregated. Must be >= 2 minutes.",
 						},
 						"scale_in_action": {
 							Required:    true,
@@ -82,17 +82,17 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Description: "When `amountType == ABSOLUTE`, this is the number of VMs added or removed in one step. When `amountType == PERCENTAGE`, this is a percentage value, which will be applied to the autoscaling group's current `targetReplicaCount` in order to derive the number of VMs that will be added or removed in one step. There will always be at least one VM added or removed. For SCALE_IN operation now volumes are NOT deleted after the server deletion.",
 									},
 									"amount_type": {
-										Required:     true,
-										Type:         schema.TypeString,
-										Description:  "The type for the given amount. Possible values are: [ABSOLUTE, PERCENTAGE].",
-										ValidateFunc: validation.All(validation.StringInSlice([]string{"ABSOLUTE", "PERCENTAGE"}, true)),
+										Required:         true,
+										Type:             schema.TypeString,
+										Description:      "The type for the given amount. Possible values are: [ABSOLUTE, PERCENTAGE].",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ABSOLUTE", "PERCENTAGE"}, true)),
 									},
 									"termination_policy_type": {
-										Optional:     true,
-										Computed:     true,
-										Type:         schema.TypeString,
-										Description:  "The type of the termination policy for the autoscaling group so that a specific pattern is followed for Scaling-In instances. Default termination policy is OLDEST_SERVER_FIRST.",
-										ValidateFunc: validation.All(validation.StringInSlice([]string{"OLDEST_SERVER_FIRST", "NEWEST_SERVER_FIRST", "RANDOM"}, true)),
+										Optional:         true,
+										Computed:         true,
+										Type:             schema.TypeString,
+										Description:      "The type of the termination policy for the autoscaling group so that a specific pattern is followed for Scaling-In instances. Default termination policy is OLDEST_SERVER_FIRST.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"OLDEST_SERVER_FIRST", "NEWEST_SERVER_FIRST", "RANDOM"}, true)),
 									},
 									"cooldown_period": {
 										Optional:    true,
@@ -106,31 +106,32 @@ func resourceAutoscalingGroup() *schema.Resource {
 						"scale_in_threshold": {
 							Required:    true,
 							Type:        schema.TypeInt,
-							Description: "The lower threshold for the value of the `metric`. Will be used with `less than` (<) operator. Exceeding this will start a Scale-In action as specified by the `scaleInAction` property. The value must have a higher minimum delta to the `scaleOutThreshold` depending on the `metric` to avoid competitive actions at the same time.",
+							Description: "The lower threshold for the value of the 'metric'. Used with the `less than` (<) operator. When this value is exceeded, a scale-in action is triggered, specified by the 'scaleInAction' property. The value must have a higher minimum delta to the 'scaleOutThreshold', depending on the 'metric', to avoid competing for actions at the same time.",
 						},
 						"scale_out_action": {
 							Required:    true,
 							Type:        schema.TypeList,
 							MaxItems:    1,
-							Description: "Specifies the action to take when the `scaleOutThreshold` is exceeded. Hereby, scaling out is always about adding new VMs to this autoscaling group.",
+							Description: "Defines the action to be performed when the 'scaleOutThreshold' is exceeded. Here, scaling is always about adding new VMs to this VM Auto Scaling Group.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"amount": {
 										Required:    true,
 										Type:        schema.TypeInt,
-										Description: "When `amountType == ABSOLUTE`, this is the number of VMs added or removed in one step. When `amountType == PERCENTAGE`, this is a percentage value, which will be applied to the autoscaling group's current `targetReplicaCount` in order to derive the number of VMs that will be added or removed in one step. There will always be at least one VM added or removed. For SCALE_IN operation now volumes are NOT deleted after the server deletion.",
+										Description: "When 'amountType=ABSOLUTE' specifies the absolute number of VMs that are added or removed. The value must be between 1 to 10.   'amountType=PERCENTAGE' specifies the percentage value that is applied to the current number of replicas of the VM Auto Scaling Group. The value must be between 1 to 200.   At least one VM is always added or removed.   Note that for 'SCALE_IN' operations, volumes are not deleted after the server is deleted.",
 									},
 									"amount_type": {
-										Required:     true,
-										Type:         schema.TypeString,
-										Description:  "The type for the given amount. Possible values are: [ABSOLUTE, PERCENTAGE].",
-										ValidateFunc: validation.All(validation.StringInSlice([]string{"ABSOLUTE", "PERCENTAGE"}, true)),
+										Required:         true,
+										Type:             schema.TypeString,
+										Description:      "The type for the given amount. Possible values are: [ABSOLUTE, PERCENTAGE].",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(autoscaling.ACTIONAMOUNT_ABSOLUTE), string(autoscaling.ACTIONAMOUNT_PERCENTAGE)}, true)),
 									},
 									"cooldown_period": {
-										Optional:    true,
-										Computed:    true,
+										Optional: true,
+										//Computed:    true,
+										Default:     "PT5M",
 										Type:        schema.TypeString,
-										Description: "Minimum time to pass after this Scaling action has started, until the next Scaling action will be started. Additionally, if a Scaling action is currently in progress, no second Scaling action will be started for the same autoscaling group. Instead, the Metric will be re-evaluated after the current Scaling action is completed (either successfully or with failures). This is validated with a minimum value of 2 minutes and a maximum of 24 hours currently. Default value is 5 minutes if not given.",
+										Description: "The minimum time that elapses after the start of this scaling action until the following scaling action is started. While a scaling action is in progress, no second action is initiated for the same VM Auto Scaling Group. Instead, the metric is re-evaluated after the current scaling action completes (either successfully or with errors). This is currently validated with a minimum value of 2 minutes and a maximum of 24 hours. The default value is 5 minutes if not specified.",
 									},
 								},
 							},
@@ -141,10 +142,10 @@ func resourceAutoscalingGroup() *schema.Resource {
 							Description: "The upper threshold for the value of the `metric`. Will be used with `greater than` (>) operator. Exceeding this will start a Scale-Out action as specified by the `scaleOutAction` property. The value must have a lower minimum delta to the `scaleInThreshold` depending on the `metric` to avoid competitive actions at the same time.",
 						},
 						"unit": {
-							Required:     true,
-							Type:         schema.TypeString,
-							Description:  "Units of the applied Metric. Possible values are: PER_HOUR, PER_MINUTE, PER_SECOND, TOTAL.",
-							ValidateFunc: validation.All(validation.StringInSlice([]string{"PER_HOUR", "PER_MINUTE", "PER_SECOND", "TOTAL"}, true)),
+							Required:         true,
+							Type:             schema.TypeString,
+							Description:      "Units of the applied Metric. Possible values are: PER_HOUR, PER_MINUTE, PER_SECOND, TOTAL.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"PER_HOUR", "PER_MINUTE", "PER_SECOND", "TOTAL"}, true)),
 						},
 					},
 				},
@@ -156,22 +157,22 @@ func resourceAutoscalingGroup() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"availability_zone": {
-							Required:     true,
-							Type:         schema.TypeString,
-							Description:  "The zone where the VMs are created using this configuration.",
-							ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
+							Required:         true,
+							Type:             schema.TypeString,
+							Description:      "The zone where the VMs are created using this configuration.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
 						},
 						"cores": {
-							Required:     true,
-							Type:         schema.TypeInt,
-							Description:  "The total number of cores for the VMs.",
-							ValidateFunc: validation.All(validation.IntAtLeast(1)),
+							Required:         true,
+							Type:             schema.TypeInt,
+							Description:      "The total number of cores for the VMs.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 						},
 						"cpu_family": {
-							Optional:     true,
-							Type:         schema.TypeString,
-							Description:  "The zone where the VMs are created using this configuration.",
-							ValidateFunc: validation.All(validation.StringInSlice([]string{"AMD_OPTERON", "INTEL_SKYLAKE", "INTEL_XEON"}, true)),
+							Optional:         true,
+							Type:             schema.TypeString,
+							Description:      "The zone where the VMs are created using this configuration.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AMD_OPTERON", "INTEL_SKYLAKE", "INTEL_XEON"}, true)),
 						},
 						"nics": {
 							Type:        schema.TypeList,
@@ -179,17 +180,21 @@ func resourceAutoscalingGroup() *schema.Resource {
 							Optional:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 									"lan": {
-										Required:     true,
-										Type:         schema.TypeInt,
-										Description:  "Lan ID for this replica Nic.",
-										ValidateFunc: validation.All(validation.IntAtLeast(1)),
+										Required:         true,
+										Type:             schema.TypeInt,
+										Description:      "Lan ID for this replica Nic.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 									},
 									"name": {
-										Required:     true,
-										Type:         schema.TypeString,
-										Description:  "Name for this replica NIC.",
-										ValidateFunc: validation.All(validation.StringLenBetween(0, 255)),
+										Required:         true,
+										Type:             schema.TypeString,
+										Description:      "Name for this replica NIC.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(0, 255)),
 									},
 									"dhcp": {
 										Optional:    true,
@@ -210,44 +215,38 @@ func resourceAutoscalingGroup() *schema.Resource {
 							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 									"image": {
-										Required:     true,
-										Type:         schema.TypeString,
-										Description:  "The image installed on the volume. Only the UUID of the image is presently supported.",
-										ValidateFunc: validation.All(validation.IsUUID),
+										Required:         true,
+										Type:             schema.TypeString,
+										Description:      "The image installed on the disk. Currently, only the UUID of the image is supported.  >Note that either 'image' or 'imageAlias' must be specified, but not both.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 									},
 									"name": {
-										Required:     true,
-										Type:         schema.TypeString,
-										Description:  "Name for this replica volume.",
-										ValidateFunc: validation.All(validation.StringLenBetween(0, 255)),
+										Required:         true,
+										Type:             schema.TypeString,
+										Description:      "Name for this replica volume.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(0, 255)),
 									},
 									"size": {
-										Required:     true,
-										Type:         schema.TypeInt,
-										Description:  "User-defined size for this replica volume in GB.",
-										ValidateFunc: validation.All(validation.IntAtLeast(1)),
-									},
-									"ssh_key_paths": {
-										Type:     schema.TypeList,
-										Elem:     &schema.Schema{Type: schema.TypeString},
-										Optional: true,
-									},
-									"ssh_key_values": {
-										Type:     schema.TypeList,
-										Elem:     &schema.Schema{Type: schema.TypeString},
-										Optional: true,
+										Required:         true,
+										Type:             schema.TypeInt,
+										Description:      "User-defined size for this replica volume in GB.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 									},
 									"ssh_keys": {
 										Type:     schema.TypeList,
 										Elem:     &schema.Schema{Type: schema.TypeString},
-										Computed: true,
+										Optional: true,
 									},
 									"type": {
-										Required:     true,
-										Type:         schema.TypeString,
-										Description:  "Storage Type for this replica volume. Possible values: SSD, HDD, SSD_STANDARD or SSD_PREMIUM",
-										ValidateFunc: validation.All(validation.StringInSlice([]string{"HDD", "SSD", "SSD_PREMIUM", "SSD_STANDARD"}, true)),
+										Required:         true,
+										Type:             schema.TypeString,
+										Description:      "Storage Type for this replica volume. Possible values: SSD, HDD, SSD_STANDARD or SSD_PREMIUM",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD", "SSD_PREMIUM", "SSD_STANDARD"}, true)),
 									},
 									"user_data": {
 										Optional:    true,
@@ -259,6 +258,12 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Type:        schema.TypeString,
 										Description: "Image password for this replica volume.",
 									},
+									//	TODO - add BUS, BackupunitId, BootOrder
+									//	Bus      *BusType `json:"bus,omitempty"`
+									//	// The ID of the backup unit that the user has access to. The property is immutable and is only allowed to be set on creation of a new a volume. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.
+									//	BackupunitId *string `json:"backupunitId,omitempty"`
+									//	// Determines whether the volume will be used as a boot volume. Set to NONE, the volume will not be used as boot volume. Set to PRIMARY, the volume will be used as boot volume and set to AUTO will delegate the decision to the provisioning engine to decide whether to use the voluem as boot volume. Notice that exactly one volume can be set to PRIMARY or all of them set to AUTO.
+									//	BootOrder *string `json:"bootOrder"`
 								}},
 						},
 					},
@@ -289,14 +294,15 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 		diags := diag.FromErr(fmt.Errorf("an error occured at getting data from the provided schema: %q", err))
 		return diags
 	}
-
-	log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties)
+	if group.Properties != nil {
+		log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties)
+	}
 
 	autoscalingGroup, _, err := client.CreateGroup(ctx, *group)
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating autoscaling group: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error creating autoscaling group: %w", err))
 		return diags
 	}
 
@@ -327,7 +333,7 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	log.Printf("[INFO] successfully retreived autoscaling group %s: %+v", d.Id(), group)
+	log.Printf("[INFO] successfully retrieved autoscaling group %s: %+v", d.Id(), group)
 
 	if err := autoscalingService.SetAutoscalingGroupData(d, group); err != nil {
 		return diag.FromErr(err)

@@ -469,7 +469,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if len(sshKeyPath) != 0 {
 		for _, path := range sshKeyPath {
 			log.Printf("[DEBUG] Reading file %s", path)
-			publicKey, err := readPublicKey(path.(string))
+			publicKey, err := utils.ReadPublicKey(path.(string))
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) %w", path, err))
 				return diags

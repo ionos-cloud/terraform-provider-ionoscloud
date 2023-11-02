@@ -240,6 +240,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		DataplatformClient: NewClientByType(clientOpts, dataplatformClient).(*dataplatformService.Client),
 		DNSClient:          NewClientByType(clientOpts, dnsClient).(*dnsService.Client),
 		LoggingClient:      NewClientByType(clientOpts, loggingClient).(*loggingService.Client),
+		AutoscalingClient:  NewClientByType(clientOpts, autoscalingClient).(*autoscalingService.Client),
 	}, nil
 }
 

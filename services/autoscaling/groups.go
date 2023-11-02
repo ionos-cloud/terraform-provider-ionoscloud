@@ -3,10 +3,10 @@ package autoscaling
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 type GroupService interface {
@@ -284,7 +284,7 @@ func GetNicsData(d *schema.ResourceData) *[]autoscaling.ReplicaNic {
 	var nics []autoscaling.ReplicaNic
 
 	if nicsValue, ok := d.GetOk("replica_configuration.0.nics"); ok {
-		nicsValue := nicsValue.([]interface{})
+		nicsValue := nicsValue.([]any)
 		if nicsValue != nil {
 			for index := range nicsValue {
 				var nicEntry autoscaling.ReplicaNic
@@ -315,7 +315,7 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 	var volumes []autoscaling.ReplicaVolumePost
 
 	if volumesValue, ok := d.GetOk("replica_configuration.0.volumes"); ok {
-		volumesValue := volumesValue.([]interface{})
+		volumesValue := volumesValue.([]any)
 		if volumesValue != nil {
 			for index := range volumesValue {
 				var volumeEntry autoscaling.ReplicaVolumePost
@@ -337,25 +337,16 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 
 				var publicKeys []string
 
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.ssh_key_paths", index)); ok {
-					sshKeyPaths := value.([]interface{})
-					if len(sshKeyPaths) != 0 {
-						for _, path := range sshKeyPaths {
-							log.Printf("[DEBUG] Reading file %s", path)
-							publicKey, err := readPublicKey(path.(string))
+				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.ssh_keys", index)); ok {
+					sshKeys := value.([]any)
+					if len(sshKeys) != 0 {
+						for _, keyOrPath := range sshKeys {
+							//log.Printf("[DEBUG] Reading file %s", keyOrPath)
+							publicKey, err := utils.ReadPublicKey(keyOrPath.(string))
 							if err != nil {
-								return nil, fmt.Errorf("error fetching sshkey from file (%s) (%w)", path, err)
+								return nil, fmt.Errorf("error reading sshkey (%s) (%w)", keyOrPath, err)
 							}
 							publicKeys = append(publicKeys, publicKey)
-						}
-					}
-				}
-
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.ssh_key_values", index)); ok {
-					sshKeys := value.([]interface{})
-					if len(sshKeys) != 0 {
-						for _, key := range sshKeys {
-							publicKeys = append(publicKeys, key.(string))
 						}
 					}
 				}
@@ -431,7 +422,7 @@ func SetAutoscalingGroupData(d *schema.ResourceData, group autoscaling.Group) er
 		}
 
 		if group.Properties.Policy != nil {
-			var policies []interface{}
+			var policies []any
 			policy := setPolicyProperties(*group.Properties.Policy)
 			policies = append(policies, policy)
 			if err := d.Set("policy", policies); err != nil {
@@ -440,7 +431,7 @@ func SetAutoscalingGroupData(d *schema.ResourceData, group autoscaling.Group) er
 		}
 
 		if group.Properties.ReplicaConfiguration != nil {
-			var replicaConfigurations []interface{}
+			var replicaConfigurations []any
 			replicaConfiguration := setReplicaConfiguration(d, *group.Properties.ReplicaConfiguration)
 			replicaConfigurations = append(replicaConfigurations, replicaConfiguration)
 			if err := d.Set("replica_configuration", replicaConfigurations); err != nil {
@@ -464,9 +455,9 @@ func SetAutoscalingGroupData(d *schema.ResourceData, group autoscaling.Group) er
 	return nil
 }
 
-func setPolicyProperties(groupPolicy autoscaling.GroupPolicy) map[string]interface{} {
+func setPolicyProperties(groupPolicy autoscaling.GroupPolicy) map[string]any {
 
-	policy := map[string]interface{}{}
+	policy := map[string]any{}
 
 	setPropWithNilCheck(policy, "metric", groupPolicy.Metric)
 	setPropWithNilCheck(policy, "range", groupPolicy.Range)
@@ -475,13 +466,13 @@ func setPolicyProperties(groupPolicy autoscaling.GroupPolicy) map[string]interfa
 	setPropWithNilCheck(policy, "unit", groupPolicy.Unit)
 
 	if groupPolicy.ScaleInAction != nil {
-		var scaleInActions []interface{}
+		var scaleInActions []any
 		scaleInAction := setScaleInActionProperties(*groupPolicy.ScaleInAction)
 		scaleInActions = append(scaleInActions, scaleInAction)
 		policy["scale_in_action"] = scaleInActions
 	}
 	if groupPolicy.ScaleOutAction != nil {
-		var scaleOutActions []interface{}
+		var scaleOutActions []any
 		scaleOutAction := setScaleOutActionProperties(*groupPolicy.ScaleOutAction)
 		scaleOutActions = append(scaleOutActions, scaleOutAction)
 		policy["scale_out_action"] = scaleOutActions
@@ -490,9 +481,9 @@ func setPolicyProperties(groupPolicy autoscaling.GroupPolicy) map[string]interfa
 	return policy
 }
 
-func setScaleInActionProperties(scaleInAction autoscaling.GroupPolicyScaleInAction) map[string]interface{} {
+func setScaleInActionProperties(scaleInAction autoscaling.GroupPolicyScaleInAction) map[string]any {
 
-	scaleIn := map[string]interface{}{}
+	scaleIn := map[string]any{}
 
 	setPropWithNilCheck(scaleIn, "amount", scaleInAction.Amount)
 	setPropWithNilCheck(scaleIn, "amount_type", scaleInAction.AmountType)
@@ -502,9 +493,9 @@ func setScaleInActionProperties(scaleInAction autoscaling.GroupPolicyScaleInActi
 	return scaleIn
 }
 
-func setScaleOutActionProperties(scaleOutAction autoscaling.GroupPolicyScaleOutAction) map[string]interface{} {
+func setScaleOutActionProperties(scaleOutAction autoscaling.GroupPolicyScaleOutAction) map[string]any {
 
-	scaleOut := map[string]interface{}{}
+	scaleOut := map[string]any{}
 
 	setPropWithNilCheck(scaleOut, "amount", scaleOutAction.Amount)
 	setPropWithNilCheck(scaleOut, "amount_type", scaleOutAction.AmountType)
@@ -513,9 +504,9 @@ func setScaleOutActionProperties(scaleOutAction autoscaling.GroupPolicyScaleOutA
 	return scaleOut
 }
 
-func setReplicaConfiguration(d *schema.ResourceData, replicaConfiguration autoscaling.ReplicaPropertiesPost) map[string]interface{} {
+func setReplicaConfiguration(d *schema.ResourceData, replicaConfiguration autoscaling.ReplicaPropertiesPost) map[string]any {
 
-	replica := map[string]interface{}{}
+	replica := map[string]any{}
 
 	setPropWithNilCheck(replica, "availability_zone", replicaConfiguration.AvailabilityZone)
 	setPropWithNilCheck(replica, "cores", replicaConfiguration.Cores)
@@ -523,7 +514,7 @@ func setReplicaConfiguration(d *schema.ResourceData, replicaConfiguration autosc
 	setPropWithNilCheck(replica, "ram", replicaConfiguration.Ram)
 
 	if replicaConfiguration.Nics != nil {
-		var nics []interface{}
+		var nics []any
 		for _, nic := range *replicaConfiguration.Nics {
 			nicEntry := setNicProperties(nic)
 			nics = append(nics, nicEntry)
@@ -532,7 +523,7 @@ func setReplicaConfiguration(d *schema.ResourceData, replicaConfiguration autosc
 	}
 
 	if replicaConfiguration.Volumes != nil {
-		var volumes []interface{}
+		var volumes []any
 		for _, volume := range *replicaConfiguration.Volumes {
 			volumeEntry := setVolumeProperties(d, volume)
 			volumes = append(volumes, volumeEntry)
@@ -543,8 +534,8 @@ func setReplicaConfiguration(d *schema.ResourceData, replicaConfiguration autosc
 	return replica
 }
 
-func setNicProperties(replicaNic autoscaling.ReplicaNic) map[string]interface{} {
-	nic := map[string]interface{}{}
+func setNicProperties(replicaNic autoscaling.ReplicaNic) map[string]any {
+	nic := map[string]any{}
 
 	setPropWithNilCheck(nic, "lan", replicaNic.Lan)
 	setPropWithNilCheck(nic, "name", replicaNic.Name)
@@ -553,23 +544,23 @@ func setNicProperties(replicaNic autoscaling.ReplicaNic) map[string]interface{} 
 	return nic
 }
 
-func setVolumeProperties(d *schema.ResourceData, replicaVolume autoscaling.ReplicaVolumePost) map[string]interface{} {
-	volume := map[string]interface{}{}
+func setVolumeProperties(d *schema.ResourceData, replicaVolume autoscaling.ReplicaVolumePost) map[string]any {
+	volume := map[string]any{}
 
 	setPropWithNilCheck(volume, "image", replicaVolume.Image)
 	setPropWithNilCheck(volume, "name", replicaVolume.Name)
 	setPropWithNilCheck(volume, "size", replicaVolume.Size)
-	setPropWithNilCheck(volume, "ssh_keys", replicaVolume.SshKeys)
+	//setPropWithNilCheck(volume, "ssh_keys", replicaVolume.SshKeys)
 	setPropWithNilCheck(volume, "type", replicaVolume.Type)
 	setPropWithNilCheck(volume, "user_data", replicaVolume.UserData)
 
-	if paths, ok := d.GetOk("replica_configuration.0.volumes.0.ssh_key_paths"); ok {
-		volume["ssh_key_paths"] = paths
+	if keys, ok := d.GetOk("replica_configuration.0.volumes.0.ssh_keys"); ok {
+		volume["ssh_keys"] = keys
 	}
 
-	if paths, ok := d.GetOk("replica_configuration.0.volumes.0.ssh_key_values"); ok {
-		volume["ssh_key_values"] = paths
-	}
+	//if paths, ok := d.GetOk("replica_configuration.0.volumes.0.ssh_key_values"); ok {
+	//	volume["ssh_key_values"] = paths
+	//}
 
 	if password, ok := d.GetOk("replica_configuration.0.volumes.0.image_password"); ok {
 		volume["image_password"] = password
