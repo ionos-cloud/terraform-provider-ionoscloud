@@ -1,4 +1,8 @@
-## 6.4.10 (upcoming release)
+## 6.4.11 (upcoming release)
+### Documentation
+- Refactor readme files to better explain the usage of the provider
+
+## 6.4.10
 ### Refactor
 - Add `nic` service
 - Use `error.As` for `requestFailed` err
