@@ -3,11 +3,15 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -32,14 +36,14 @@ func resourceShare() *schema.Resource {
 				Optional: true,
 			},
 			"group_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"resource_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -47,30 +51,30 @@ func resourceShare() *schema.Resource {
 }
 
 func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.GroupShare{
 		Properties: &ionoscloud.GroupShareProperties{},
 	}
 
-	tempSharePrivilege := d.Get("edit_privilege").(bool)
+	tempSharePrivilege := d.Get("share_privilege").(bool)
 	request.Properties.SharePrivilege = &tempSharePrivilege
-	tempEditPrivilege := d.Get("share_privilege").(bool)
+	tempEditPrivilege := d.Get("edit_privilege").(bool)
 	request.Properties.EditPrivilege = &tempEditPrivilege
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a share: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a share: %w", err))
 		return diags
 	}
 	d.SetId(*rsp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		if IsRequestFailed(err) {
+		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
@@ -82,16 +86,16 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Share ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Share ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -107,7 +111,7 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	tempSharePrivilege := d.Get("share_privilege").(bool)
 	tempEditPrivilege := d.Get("edit_privilege").(bool)
@@ -123,12 +127,12 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a share ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a share ID %s %w", d.Id(), err))
 		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -138,7 +142,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	groupId := d.Get("group_id").(string)
 	resourceId := d.Get("resource_id").(string)
@@ -146,7 +150,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			diags := diag.FromErr(err)
 			return diags
 		}
@@ -156,8 +160,8 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %s", d.Id(), err))
+			if !httpNotFound(apiResponse) {
+				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %w", d.Id(), err))
 				return diags
 			}
 		}
@@ -165,7 +169,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 	// Wait, catching any errors
 	if apiResponse != nil && apiResponse.Header.Get("Location") != "" {
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+		_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 		if errState != nil {
 			diags := diag.FromErr(errState)
 			return diags
@@ -185,13 +189,13 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 	grpId := parts[0]
 	rscId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the share of resource %q for group %q", rscId, grpId)
 		}

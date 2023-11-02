@@ -5,9 +5,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"gopkg.in/yaml.v3"
 )
 
@@ -210,18 +212,9 @@ func dataSourceK8sCluster() *schema.Resource {
 				Computed: true,
 			},
 			//"public": {
-			//	Type: schema.TypeBool,
-			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
-			//		"currently in beta phase.",
-			//	Optional: true,
-			//	Computed: true,
-			//},
-			//"gateway_ip": {
-			//	Type: schema.TypeString,
-			//	Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
-			//		"to `false` and should not be provided otherwise.",
-			//	Optional: true,
-			//	Computed: true,
+			//	Type:        schema.TypeBool,
+			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
+			//	Computed:    true,
 			//},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
@@ -253,7 +246,7 @@ func dataSourceK8sCluster() *schema.Resource {
 }
 
 func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -262,7 +255,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the lan id or name"))
+		return diag.FromErr(errors.New("please provide either the k8s cluster id or name"))
 	}
 	var cluster ionoscloud.KubernetesCluster
 	var err error
@@ -273,37 +266,40 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		cluster, apiResponse, err = client.KubernetesApi.K8sFindByClusterId(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %w", id.(string), err))
 		}
 	} else {
 		/* search by name */
 		var clusters ionoscloud.KubernetesClusters
 
-		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Execute()
+		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %w", err))
 		}
 
-		found := false
 		if clusters.Items != nil {
+			var results []ionoscloud.KubernetesCluster
+
 			for _, c := range *clusters.Items {
-				tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error()))
-				}
-				if tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
-					/* lan found */
-					cluster = tmpCluster
-					found = true
+				if c.Properties != nil && c.Properties.Name != nil && *c.Properties.Name == name.(string) {
+					tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %w", *c.Id, err))
+					}
+					results = append(results, tmpCluster)
 					break
 				}
-
 			}
-		}
-		if !found {
-			return diag.FromErr(errors.New("k8s cluster not found"))
+
+			if results == nil || len(results) == 0 {
+				return diag.FromErr(fmt.Errorf("no cluster found with the specified name %s", name.(string)))
+			} else if len(results) > 1 {
+				return diag.FromErr(fmt.Errorf("more than one cluster found with the specified name %s", name.(string)))
+			} else {
+				cluster = results[0]
+			}
 		}
 
 	}
@@ -431,7 +427,7 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 		kubeConfig, apiResponse, err := client.KubernetesApi.K8sKubeconfigGet(ctx, *cluster.Id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %s", *cluster.Id, err)
+			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %w", *cluster.Id, err)
 		}
 
 		if err := d.Set("kube_config", kubeConfig); err != nil {
@@ -446,7 +442,7 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 		clusterNodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %s", *cluster.Id, err)
+			return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %w", *cluster.Id, err)
 		}
 
 		if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {

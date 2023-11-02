@@ -3,13 +3,18 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -33,10 +38,10 @@ func resourceLan() *schema.Resource {
 				Optional: true,
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"pcc": {
 				Type:     schema.TypeString,
@@ -59,13 +64,26 @@ func resourceLan() *schema.Resource {
 					},
 				},
 			},
+			"ipv6_cidr_block": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "IPv6 CIDR block assigned to the LAN. Can be set to 'AUTO' for an automatically assigned address or the address can be explicitly supplied.",
+				// If a value has already been assigned by the backend, avoids reassignment if the field is set to AUTO.
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					if old != "" && new == "AUTO" {
+						return true
+					}
+					return false
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	public := d.Get("public").(bool)
 	request := ionoscloud.LanPost{
 		Properties: &ionoscloud.LanPropertiesPost{
@@ -85,6 +103,14 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		request.Properties.Pcc = &pccID
 	}
 
+	if d.Get("ipv6_cidr_block") != nil {
+		ipv6 := d.Get("ipv6_cidr_block").(string)
+		log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), ipv6)
+		request.Properties.Ipv6CidrBlock = &ipv6
+	} else {
+		request.Properties.SetIpv6CidrBlockNil()
+	}
+
 	dcid := d.Get("datacenter_id").(string)
 	rsp, apiResponse, err := client.LANsApi.DatacentersLansPost(ctx, dcid).Lan(request).Execute()
 	logApiRequestTime(apiResponse)
@@ -97,12 +123,12 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	d.SetId(*rsp.Id)
 
-	log.Printf("[INFO] LAN ID set to: %s", d.Id())
+	log.Printf("[INFO] LAN ID: %s", d.Id())
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		if IsRequestFailed(err) {
+		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
@@ -126,7 +152,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] lan creation timed out")
@@ -134,11 +160,12 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 			return diags
 		}
 	}
+
 	return resourceLanRead(ctx, d, meta)
 }
 
 func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 
@@ -166,7 +193,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	properties := &ionoscloud.LanProperties{}
 	newValue := d.Get("public")
 	public := newValue.(bool)
@@ -188,6 +215,17 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 	}
 
+	if d.HasChange("ipv6_cidr_block") {
+		_, newIpv6 := d.GetChange("ipv6_cidr_block")
+		if newIpv6 != nil && newIpv6.(string) != "" {
+			log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), newIpv6.(string))
+			ipv6 := newIpv6.(string)
+			properties.Ipv6CidrBlock = &ipv6
+		} else {
+			properties.SetIpv6CidrBlockNil()
+		}
+	}
+
 	dcid := d.Get("datacenter_id").(string)
 
 	_, apiResponse, err := client.LANsApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
@@ -198,7 +236,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -208,7 +246,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 
 	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
@@ -233,7 +271,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 
@@ -291,28 +329,36 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 				return err
 			}
 		}
+		if lan.Properties.Ipv6CidrBlock != nil {
+			if err := d.Set("ipv6_cidr_block", *lan.Properties.Ipv6CidrBlock); err != nil {
+				return utils.GenerateSetError("lan", "ipv6_cidr_block", err)
+			}
+		}
 	}
 
 	return nil
 }
 
 func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	dcId := d.Get("datacenter_id").(string)
+	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
-
-	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
 
 	if err != nil {
 		return true, fmt.Errorf("error checking LAN status: %w", err)
 	}
-	return *rsp.Metadata.State == "AVAILABLE", nil
+
+	if rsp.Metadata == nil || rsp.Metadata.State == nil {
+		return false, fmt.Errorf("could not retrieve state of lan %s", d.Id())
+	}
+
+	return strings.EqualFold(*rsp.Metadata.State, constant.Available), nil
 }
 
 func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcid := d.Get("datacenter_id").(string)
+	dcId := d.Get("datacenter_id").(string)
 
-	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	_, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -320,11 +366,10 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 			log.Printf("[INFO] LAN deleted %s", d.Id())
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking LAN deletion status: %w", err)
+		return false, fmt.Errorf("error checking LAN deletion status: %w", err)
 	}
-	if rsp.Metadata != nil && rsp.Metadata.State != nil {
-		log.Printf("[INFO] LAN %s not deleted yet; LAN status: %+v", d.Id(), *rsp.Metadata.State)
-	}
+
+	log.Printf("[INFO] LAN %s not deleted yet deleted from the datacenter %s", d.Id(), dcId)
 
 	return false, nil
 }
@@ -345,7 +390,7 @@ func waitForLanDeletion(ctx context.Context, client *ionoscloud.APIClient, d *sc
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] lan deletion timed out")
@@ -389,7 +434,7 @@ func waitForLanNicsDeletion(ctx context.Context, client *ionoscloud.APIClient, d
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] nics deletion check timed out")

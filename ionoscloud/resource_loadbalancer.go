@@ -3,11 +3,16 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func resourceLoadbalancer() *schema.Resource {
@@ -22,9 +27,9 @@ func resourceLoadbalancer() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 
 			"ip": {
@@ -37,16 +42,17 @@ func resourceLoadbalancer() *schema.Resource {
 				Optional: true,
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"nic_ids": {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Schema{
-					Type:         schema.TypeString,
-					ValidateFunc: validation.All(validation.StringIsNotWhiteSpace)},
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace)},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -54,7 +60,7 @@ func resourceLoadbalancer() *schema.Resource {
 }
 
 func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	rawIds := d.Get("nic_ids").([]interface{})
 	var nicIds []ionoscloud.Nic
@@ -82,16 +88,16 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %s", err))
+		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %w", err))
 		return diags
 	}
 
 	d.SetId(*resp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		if IsRequestFailed(err) {
+		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
@@ -103,16 +109,16 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	lb, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -141,7 +147,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	properties := &ionoscloud.LoadbalancerProperties{}
 
@@ -169,7 +175,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 		_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while updating loadbalancer %s: %s ", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error while updating loadbalancer %s: %w ", d.Id(), err))
 			return diags
 		}
 	}
@@ -184,17 +190,17 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 				d.Get("datacenter_id").(string), d.Id(), o.(string)).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+				if httpNotFound(apiResponse) {
 					/* 404 - nic was not found - in case the nic is removed, VDC removes the nic from load balancers
 					that contain it, behind the scenes - therefore our call will yield 404 */
-					log.Printf("[WARNING] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
+					log.Printf("[WARN] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
 				} else {
-					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %s", err))
+					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %w", err))
 					return diags
 				}
 			} else {
 				// Wait, catching any errors
-				_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+				_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 				if errState != nil {
 					diags := diag.FromErr(errState)
 					return diags
@@ -210,11 +216,11 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %s", err))
+				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %w", err))
 				return diags
 			}
 			// Wait, catching any errors
-			_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+			_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 			if errState != nil {
 				diags := diag.FromErr(errState)
 				return diags
@@ -228,19 +234,19 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 	apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %s", err))
+		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %w", err))
 		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -248,4 +254,69 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 
 	d.SetId("")
 	return nil
+}
+
+func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{loadbalancer}", d.Id())
+	}
+
+	dcId := parts[0]
+	lbId := parts[1]
+
+	client := meta.(services.SdkBundle).CloudApiClient
+
+	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the loadbalancer %q", lbId)
+		}
+		return nil, fmt.Errorf("loadbalancer does not exist %q", lbId)
+	}
+
+	log.Printf("[INFO] loadbalancer found: %+v", loadbalancer)
+
+	d.SetId(*loadbalancer.Id)
+
+	if err := d.Set("datacenter_id", dcId); err != nil {
+		return nil, err
+	}
+
+	if loadbalancer.Properties.Name != nil {
+		if err := d.Set("name", *loadbalancer.Properties.Name); err != nil {
+			return nil, err
+		}
+	}
+
+	if loadbalancer.Properties.Ip != nil {
+		if err := d.Set("ip", *loadbalancer.Properties.Ip); err != nil {
+			return nil, err
+		}
+	}
+
+	if loadbalancer.Properties.Dhcp != nil {
+		if err := d.Set("dhcp", *loadbalancer.Properties.Dhcp); err != nil {
+			return nil, err
+		}
+	}
+
+	if loadbalancer.Entities != nil && loadbalancer.Entities.Balancednics != nil &&
+		loadbalancer.Entities.Balancednics.Items != nil && len(*loadbalancer.Entities.Balancednics.Items) > 0 {
+
+		var lans []string
+		for _, lan := range *loadbalancer.Entities.Balancednics.Items {
+			if *lan.Id != "" {
+				lans = append(lans, *lan.Id)
+			}
+		}
+		if err := d.Set("nic_ids", lans); err != nil {
+			return nil, err
+		}
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

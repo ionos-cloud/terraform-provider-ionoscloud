@@ -3,11 +3,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 )
 
 func dataSourceNIC() *schema.Resource {
@@ -15,14 +18,14 @@ func dataSourceNIC() *schema.Resource {
 		ReadContext: dataSourceNicRead,
 		Schema: map[string]*schema.Schema{
 			"server_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"id": {
 				Type:     schema.TypeString,
@@ -41,11 +44,26 @@ func dataSourceNIC() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"dhcpv6": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"ipv6_cidr_block": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"ips": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 				Optional: true,
+			},
+			"ipv6_ips": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				Computed: true,
 			},
 			"firewall_active": {
 				Type:     schema.TypeBool,
@@ -68,6 +86,15 @@ func dataSourceNIC() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"flowlog": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     cloudapiflowlog.FlowlogSchemaDatasource,
+				Description: `Flow logs holistically capture network information such as source and destination 
+							IP addresses, source and destination ports, number of packets, amount of bytes, 
+							the start and end time of the recording, and the type of protocol – 
+							and log the extent to which your instances are being accessed.`,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -75,14 +102,14 @@ func dataSourceNIC() *schema.Resource {
 func getNicDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"server_id": {
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 		"datacenter_id": {
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 		"id": {
 			Type:     schema.TypeString,
@@ -101,11 +128,26 @@ func getNicDataSourceSchema() map[string]*schema.Schema {
 			Optional: true,
 			Default:  true,
 		},
+		"dhcpv6": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"ipv6_cidr_block": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
 		"ips": {
 			Type:     schema.TypeList,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Computed: true,
 			Optional: true,
+		},
+		"ipv6_ips": {
+			Type:     schema.TypeList,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Computed: true,
 		},
 		"firewall_active": {
 			Type:     schema.TypeBool,
@@ -131,7 +173,7 @@ func getNicDataSourceSchema() map[string]*schema.Schema {
 	}
 }
 func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	t, dIdOk := data.GetOk("datacenter_id")
 	st, sIdOk := data.GetOk("server_id")
@@ -154,49 +196,48 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		name = t.(string)
 	}
 	var nic ionoscloud.Nic
-	var err error
-	var apiResponse *ionoscloud.APIResponse
-
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: data}
 	if !idOk && !nameOk {
 		return diag.FromErr(fmt.Errorf("either id, or name must be set"))
 	}
 	if idOk {
-		nic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, id.(string)).Execute()
-		logApiRequestTime(apiResponse)
+		foundNic, _, err := ns.Get(ctx, datacenterId, serverId, id.(string), 3)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting nic with id %s %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("error getting nic with id %s %w", id.(string), err))
 		}
 		if nameOk {
-			if *nic.Properties.Name != name {
+			if foundNic.Properties != nil && *foundNic.Properties.Name != name {
 				return diag.FromErr(fmt.Errorf("name of nic (UUID=%s, name=%s) does not match expected name: %s",
-					*nic.Id, *nic.Properties.Name, name))
+					*foundNic.Id, *foundNic.Properties.Name, name))
 			}
 		}
+		nic = *foundNic
 	} else {
-		nics, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsGet(ctx, datacenterId, serverId).Execute()
-		logApiRequestTime(apiResponse)
-
+		nics, err := ns.List(ctx, datacenterId, serverId, 3)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %s ", err))
+			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
 		}
 
-		if nameOk && nics.Items != nil {
-			if len(*nics.Items) > 1 {
-				log.Printf("[WARNING] found multiple nic results for name %s\n", name)
-			}
-			for _, tempNic := range *nics.Items {
-				if tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
-					nic = tempNic
-					break
+		var results []ionoscloud.Nic
+
+		if nameOk && nics != nil {
+			for _, tempNic := range nics {
+				if tempNic.Properties != nil && tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
+					results = append(results, tempNic)
 				}
 			}
 		}
-	}
-	if nic.Id == nil {
-		return diag.FromErr(fmt.Errorf("there are no nics that match the search criteria id = %s, name = %s", id, name))
+
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no nic found with the specified criteria: name = %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one nic found with the specified criteria: name = %s", name))
+		} else {
+			nic = results[0]
+		}
 	}
 
-	if err := NicSetData(data, &nic); err != nil {
+	if err := cloudapinic.NicSetData(data, &nic); err != nil {
 		return diag.FromErr(err)
 	}
 

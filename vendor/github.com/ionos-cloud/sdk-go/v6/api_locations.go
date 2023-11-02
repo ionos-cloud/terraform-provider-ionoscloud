@@ -54,8 +54,8 @@ func (r ApiLocationsFindByRegionIdRequest) Execute() (Locations, *APIResponse, e
 }
 
 /*
- * LocationsFindByRegionId List locations within regions
- * List locations by the region ID.
+ * LocationsFindByRegionId Get Locations within a Region
+ * Retrieves the available locations in a region specified by its ID. The 'regionId' consists of the two character identifier of the region (country), e.g., 'de'.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param regionId The unique ID of the region.
  * @return ApiLocationsFindByRegionIdRequest
@@ -96,9 +96,19 @@ func (a *LocationsApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindB
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -170,7 +180,7 @@ func (a *LocationsApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindB
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -218,8 +228,8 @@ func (r ApiLocationsFindByRegionIdAndIdRequest) Execute() (Location, *APIRespons
 }
 
 /*
- * LocationsFindByRegionIdAndId Retrieve specified locations
- * Retrieve the properties of the specified location
+ * LocationsFindByRegionIdAndId Get Location by ID
+ * Retrieves the information about the location specified by its ID. The 'locationId' consists of the three-digit identifier of the city according to the IATA code.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param regionId The unique ID of the region.
  * @param locationId The unique ID of the location.
@@ -263,9 +273,19 @@ func (a *LocationsApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocations
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -337,7 +357,7 @@ func (a *LocationsApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocations
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -384,7 +404,7 @@ func (r ApiLocationsGetRequest) XContractNumber(xContractNumber int32) ApiLocati
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiLocationsGetRequest) Filter(key string, value string) ApiLocationsGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -405,11 +425,19 @@ func (r ApiLocationsGetRequest) Execute() (Locations, *APIResponse, error) {
 }
 
 /*
- * LocationsGet List locations
- * List the available locations for provisioning your virtual data centers.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @return ApiLocationsGetRequest
- */
+* LocationsGet Get Locations
+* Retrieves the available physical locations where you can deploy cloud resources in a VDC.
+
+A location is identified by a combination of the following characters:
+
+* a two-character **regionId**, which represents a country (example: 'de')
+
+* a three-character **locationId**, which represents a city. The 'locationId' is typically based on the IATA code of the city's airport (example: 'txl').
+
+>Note that 'locations' are read-only and cannot be changed.
+* @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+* @return ApiLocationsGetRequest
+*/
 func (a *LocationsApiService) LocationsGet(ctx _context.Context) ApiLocationsGetRequest {
 	return ApiLocationsGetRequest{
 		ApiService: a,
@@ -445,9 +473,19 @@ func (a *LocationsApiService) LocationsGetExecute(r ApiLocationsGetRequest) (Loc
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -532,7 +570,7 @@ func (a *LocationsApiService) LocationsGetExecute(r ApiLocationsGetRequest) (Loc
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v

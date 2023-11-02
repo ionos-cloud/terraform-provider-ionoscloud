@@ -1,71 +1,26 @@
+//go:build compute || all || nic
+
 package ionoscloud
 
 import (
 	"context"
 	"encoding/json"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
-	"regexp"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
-func TestAccDataSourceNic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testCreateDataCenterAndServer,
-			},
-			{
-				Config: testAccDataSourceNicMatchId,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", fullNicResourceName, "firewall_active"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_type", fullNicResourceName, "firewall_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", fullNicResourceName, "mac"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "pci_slot", fullNicResourceName, "pci_slot"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", fullNicResourceName, "lan"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", fullNicResourceName, "ips"),
-				),
-			},
-			{
-				Config: testAccDataSourceNicMatchName,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", fullNicResourceName, "firewall_active"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_type", fullNicResourceName, "firewall_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", fullNicResourceName, "mac"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "pci_slot", fullNicResourceName, "pci_slot"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", fullNicResourceName, "lan"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", fullNicResourceName, "ips"),
-				),
-			},
-			{
-				Config:      testAccDataSourceNicMatchNameError,
-				ExpectError: regexp.MustCompile(`there are no nics that match the search criteria`),
-			},
-			{
-				Config:      testAccDataSourceNicMatchIdAndNameError,
-				ExpectError: regexp.MustCompile(`does not match expected name`),
-			},
-		},
-	})
-}
-
-//unit test
+// unit test
 func Test_dataSourceNicRead(t *testing.T) {
 	id := "id"
 	mac := "testMac"
 	testName := "testname"
 	dhcp := true
+	dhcpv6 := false
 	firewallActive := true
 	firewallType := "Bidirectional"
+	ipv6CidrBlock := "AUTO"
 	nic := ionoscloud.Nic{
 		Id:       &id,
 		Type:     nil,
@@ -75,7 +30,10 @@ func Test_dataSourceNicRead(t *testing.T) {
 			Name:           &testName,
 			Mac:            &mac,
 			Ips:            nil,
+			Ipv6Ips:        nil,
 			Dhcp:           &dhcp,
+			Dhcpv6:         &dhcpv6,
+			Ipv6CidrBlock:  &ipv6CidrBlock,
 			Lan:            nil,
 			FirewallActive: &firewallActive,
 			FirewallType:   &firewallType,
@@ -119,6 +77,12 @@ func Test_dataSourceNicRead(t *testing.T) {
 	if *nic.Properties.Dhcp != data.Get("dhcp").(bool) {
 		t.Fatalf("expected '%t', got '%s'", *nic.Properties.Dhcp, data.Get("dhcp"))
 	}
+	if *nic.Properties.Dhcpv6 != data.Get("dhcpv6").(bool) {
+		t.Fatalf("expected '%t', got '%s'", *nic.Properties.Dhcpv6, data.Get("dhcpv6"))
+	}
+	if *nic.Properties.Ipv6CidrBlock != data.Get("ipv6_cidr_block").(string) {
+		t.Fatalf("expected '%s', got '%s'", *nic.Properties.Ipv6CidrBlock, data.Get("ipv6CidrBlock"))
+	}
 	if *nic.Properties.FirewallActive != data.Get("firewall_active").(bool) {
 		t.Fatalf("expected '%t', got '%s'", *nic.Properties.FirewallActive, data.Get("firewallActive"))
 	}
@@ -126,35 +90,3 @@ func Test_dataSourceNicRead(t *testing.T) {
 		t.Fatalf("expected '%s', got '%s'", *nic.Properties.FirewallType, data.Get("firewallType"))
 	}
 }
-
-const dataSourceNicById = NicResource + ".test_nic_data"
-
-const testAccDataSourceNicMatchId = testAccCheckNicConfigBasic + `
-data ` + NicResource + ` test_nic_data {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-  id = ` + fullNicResourceName + `.id
-}
-`
-
-const testAccDataSourceNicMatchName = testAccCheckNicConfigBasic +
-	`data ` + NicResource + ` test_nic_data {
-  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-	name = ` + fullNicResourceName + `.name 
-}`
-
-const testAccDataSourceNicMatchNameError = testAccCheckNicConfigBasic +
-	`data ` + NicResource + ` test_nic_data {
-  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-	name = "DoesNotExist"
-}`
-
-const testAccDataSourceNicMatchIdAndNameError = testAccCheckNicConfigBasic +
-	`data ` + NicResource + ` test_nic_data {
-  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-	id = ` + fullNicResourceName + `.id
-	name = "doesNotExist"
-}`

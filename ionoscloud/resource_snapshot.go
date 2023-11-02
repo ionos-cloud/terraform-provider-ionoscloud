@@ -3,12 +3,17 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
+	"strings"
 	"time"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -23,10 +28,10 @@ func resourceSnapshot() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "A name of that resource",
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "A name of that resource",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -94,16 +99,16 @@ func resourceSnapshot() *schema.Resource {
 				Computed: true,
 			},
 			"volume_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -111,7 +116,7 @@ func resourceSnapshot() *schema.Resource {
 }
 
 func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	volumeId := d.Get("volume_id").(string)
@@ -120,15 +125,15 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Name(name).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a snapshot: %s ", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a snapshot: %w ", err))
 		return diags
 	}
 
 	d.SetId(*rsp.Id)
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		if IsRequestFailed(err) {
+		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
@@ -140,17 +145,17 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a snapshot ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a snapshot ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -162,7 +167,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	name := d.Get("name").(string)
 	input := ionoscloud.SnapshotProperties{
@@ -177,7 +182,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -187,22 +192,22 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	rsp, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %w", d.Id(), err))
 		return diags
 	}
 
-	for *rsp.Metadata.State != "AVAILABLE" {
+	for !strings.EqualFold(*rsp.Metadata.State, constant.Available) {
 		time.Sleep(30 * time.Second)
 		_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %w", d.Id(), err))
 			return diags
 		}
 	}
@@ -216,7 +221,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	for *dc.Metadata.State != "AVAILABLE" {
+	for !strings.EqualFold(*dc.Metadata.State, constant.Available) {
 		time.Sleep(30 * time.Second)
 		_, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 		logApiRequestTime(apiResponse)
@@ -230,12 +235,12 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	apiResponse, err = client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a snapshot ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a snapshot ID %s %w", d.Id(), err))
 		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -246,14 +251,14 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	snapshotId := d.Id()
 	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find snapshot %q", snapshotId)
 		}

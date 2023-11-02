@@ -1,21 +1,33 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_server"
 sidebar_current: "docs-ionoscloud-datasource-server"
 description: |-
-Get information on a Ionos Cloud Servers
+  Get information on a Ionos Cloud Servers
 ---
 
 # ionoscloud\_server
 
-The server data source can be used to search for and return existing servers.
+The **Server data source** can be used to search for and return existing servers. 
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_server" "server_example" {
-   datacenter_id = ionoscloud_datacenter.datacenter_example.id
-   name			 = "example_"
+data "ionoscloud_server" "example" {
+   datacenter_id = <datacenter_id>
+   id			 = <server_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_server" "example" {
+   datacenter_id = <datacenter_id>
+   name			 = "Server Example"
 }
 ```
 
@@ -34,11 +46,11 @@ The following attributes are returned by the datasource:
 * `template_uuid` - The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
 * `id` - The id of that resource
 * `name` - The name of that resource
-* `type` - Server usages: ENTERPRISE or CUBE
+* `type` - Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes)
 * `vm_state`- Status of the virtual Machine
 * `datacenter_id` - The id of the datacenter
 * `cores` - The total number of cores for the server
-* `cpu_family` - CPU architecture on which server gets provisione
+* `cpu_family` - CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource.
 * `ram` - The amount of memory for the server in MB
 * `availability_zone` - The availability zone in which the server should exist
 * `vm_state` - Status of the virtual Machine
@@ -112,4 +124,7 @@ The following attributes are returned by the datasource:
     * `port_range_start` - Defines the start range of the allowed port (from 1 to 65534) if protocol TCP or UDP is chosen
     * `port_range_end` - Defines the end range of the allowed port (from 1 to 65534) if the protocol TCP or UDP is chosen
     * `type` - The type of firewall rule
-  
+* `labels` - list of
+  * `id` - The Id of the label
+  * `key` - The key of the label
+  * `value` - The value of the label

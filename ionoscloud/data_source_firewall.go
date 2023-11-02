@@ -3,10 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
 func dataSourceFirewall() *schema.Resource {
@@ -58,19 +60,19 @@ func dataSourceFirewall() *schema.Resource {
 				Computed: true,
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"server_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"nic_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -78,7 +80,7 @@ func dataSourceFirewall() *schema.Resource {
 }
 
 func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
@@ -97,47 +99,47 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 	var err error
 	var apiResponse *ionoscloud.APIResponse
 
-	found := false
-
 	if idOk {
 		/* search by ID */
 		firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the firewall rule %s: %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the firewall rule %s: %w", id.(string), err))
 		}
-		found = true
 	} else {
 		/* search by name */
 		var firewalls ionoscloud.FirewallRules
 
-		firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Execute()
+		firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %w", err))
 		}
+
+		var results []ionoscloud.FirewallRule
 
 		if firewalls.Items != nil {
 			for _, fr := range *firewalls.Items {
-				tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %s", *fr.Id, err.Error()))
+				if fr.Properties != nil && fr.Properties.Name != nil && *fr.Properties.Name == name.(string) {
+					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %w", *fr.Id, err))
+					}
+					results = append(results, tmpFirewall)
 				}
-				if tmpFirewall.Properties.Name != nil && *tmpFirewall.Properties.Name == name.(string) {
-					firewall = tmpFirewall
-					found = true
-					break
-				}
-
 			}
 		}
 
-	}
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no firewall rule found with the specified name = %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one firewall rule found with the specified criteria name = %s", name))
+		} else {
+			firewall = results[0]
+		}
 
-	if !found {
-		return diag.FromErr(fmt.Errorf("firewall rule not found"))
 	}
 
 	if err := setFirewallData(d, &firewall); err != nil {

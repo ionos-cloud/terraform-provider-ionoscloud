@@ -16,16 +16,72 @@ import (
 
 // PaginationLinks struct for PaginationLinks
 type PaginationLinks struct {
+	// URL (with offset and limit parameters) of the next page; only present if offset + limit is less than the total number of elements.
+	Next *string `json:"next,omitempty"`
 	// URL (with offset and limit parameters) of the previous page; only present if offset is greater than 0.
 	Prev *string `json:"prev,omitempty"`
 	// URL (with offset and limit parameters) of the current page.
 	Self *string `json:"self,omitempty"`
-	// URL (with offset and limit parameters) of the next page; only present if offset + limit is less than the total number of elements.
-	Next *string `json:"next,omitempty"`
+}
+
+// NewPaginationLinks instantiates a new PaginationLinks object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewPaginationLinks() *PaginationLinks {
+	this := PaginationLinks{}
+
+	return &this
+}
+
+// NewPaginationLinksWithDefaults instantiates a new PaginationLinks object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewPaginationLinksWithDefaults() *PaginationLinks {
+	this := PaginationLinks{}
+	return &this
+}
+
+// GetNext returns the Next field value
+// If the value is explicit nil, nil is returned
+func (o *PaginationLinks) GetNext() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Next
+
+}
+
+// GetNextOk returns a tuple with the Next field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *PaginationLinks) GetNextOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Next, true
+}
+
+// SetNext sets field value
+func (o *PaginationLinks) SetNext(v string) {
+
+	o.Next = &v
+
+}
+
+// HasNext returns a boolean if a field has been set.
+func (o *PaginationLinks) HasNext() bool {
+	if o != nil && o.Next != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetPrev returns the Prev field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *PaginationLinks) GetPrev() *string {
 	if o == nil {
 		return nil
@@ -63,7 +119,7 @@ func (o *PaginationLinks) HasPrev() bool {
 }
 
 // GetSelf returns the Self field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *PaginationLinks) GetSelf() *string {
 	if o == nil {
 		return nil
@@ -100,46 +156,11 @@ func (o *PaginationLinks) HasSelf() bool {
 	return false
 }
 
-// GetNext returns the Next field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *PaginationLinks) GetNext() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.Next
-
-}
-
-// GetNextOk returns a tuple with the Next field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *PaginationLinks) GetNextOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Next, true
-}
-
-// SetNext sets field value
-func (o *PaginationLinks) SetNext(v string) {
-
-	o.Next = &v
-
-}
-
-// HasNext returns a boolean if a field has been set.
-func (o *PaginationLinks) HasNext() bool {
-	if o != nil && o.Next != nil {
-		return true
-	}
-
-	return false
-}
-
 func (o PaginationLinks) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Next != nil {
+		toSerialize["next"] = o.Next
+	}
 
 	if o.Prev != nil {
 		toSerialize["prev"] = o.Prev
@@ -149,9 +170,6 @@ func (o PaginationLinks) MarshalJSON() ([]byte, error) {
 		toSerialize["self"] = o.Self
 	}
 
-	if o.Next != nil {
-		toSerialize["next"] = o.Next
-	}
 	return json.Marshal(toSerialize)
 }
 

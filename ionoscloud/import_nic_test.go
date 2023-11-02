@@ -1,7 +1,11 @@
+//go:build compute || all || nic
+
 package ionoscloud
 
 import (
 	"fmt"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"testing"
 
@@ -14,6 +18,7 @@ func TestAccNicImportBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckNicDestroyCheck,
 		Steps: []resource.TestStep{
@@ -21,7 +26,7 @@ func TestAccNicImportBasic(t *testing.T) {
 				Config: fmt.Sprintf(testAccCheckNicConfigBasic, volumeName),
 			},
 			{
-				ResourceName:      fullNicResourceName,
+				ResourceName:      constant.FullNicResourceName,
 				ImportStateIdFunc: testAccNicImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -34,7 +39,7 @@ func testAccNicImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != NicResource {
+		if rs.Type != constant.NicResource {
 			continue
 		}
 

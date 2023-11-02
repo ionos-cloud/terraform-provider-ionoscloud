@@ -19,8 +19,26 @@ type LanEntities struct {
 	Nics *LanNics `json:"nics,omitempty"`
 }
 
+// NewLanEntities instantiates a new LanEntities object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewLanEntities() *LanEntities {
+	this := LanEntities{}
+
+	return &this
+}
+
+// NewLanEntitiesWithDefaults instantiates a new LanEntities object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewLanEntitiesWithDefaults() *LanEntities {
+	this := LanEntities{}
+	return &this
+}
+
 // GetNics returns the Nics field value
-// If the value is explicit nil, the zero value for LanNics will be returned
+// If the value is explicit nil, nil is returned
 func (o *LanEntities) GetNics() *LanNics {
 	if o == nil {
 		return nil
@@ -59,10 +77,10 @@ func (o *LanEntities) HasNics() bool {
 
 func (o LanEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Nics != nil {
 		toSerialize["nics"] = o.Nics
 	}
+
 	return json.Marshal(toSerialize)
 }
 

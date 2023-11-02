@@ -16,94 +16,38 @@ import (
 
 // FirewallRule struct for FirewallRule
 type FirewallRule struct {
-	// The resource's unique identifier.
-	Id *string `json:"id,omitempty"`
-	// The type of object that has been created.
-	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path).
-	Href       *string                    `json:"href,omitempty"`
+	Href *string `json:"href,omitempty"`
+	// The resource's unique identifier.
+	Id         *string                    `json:"id,omitempty"`
 	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
 	Properties *FirewallruleProperties    `json:"properties"`
+	// The type of object that has been created.
+	Type *Type `json:"type,omitempty"`
 }
 
-// GetId returns the Id field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *FirewallRule) GetId() *string {
-	if o == nil {
-		return nil
-	}
+// NewFirewallRule instantiates a new FirewallRule object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewFirewallRule(properties FirewallruleProperties) *FirewallRule {
+	this := FirewallRule{}
 
-	return o.Id
+	this.Properties = &properties
 
+	return &this
 }
 
-// GetIdOk returns a tuple with the Id field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *FirewallRule) GetIdOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Id, true
-}
-
-// SetId sets field value
-func (o *FirewallRule) SetId(v string) {
-
-	o.Id = &v
-
-}
-
-// HasId returns a boolean if a field has been set.
-func (o *FirewallRule) HasId() bool {
-	if o != nil && o.Id != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetType returns the Type field value
-// If the value is explicit nil, the zero value for Type will be returned
-func (o *FirewallRule) GetType() *Type {
-	if o == nil {
-		return nil
-	}
-
-	return o.Type
-
-}
-
-// GetTypeOk returns a tuple with the Type field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *FirewallRule) GetTypeOk() (*Type, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Type, true
-}
-
-// SetType sets field value
-func (o *FirewallRule) SetType(v Type) {
-
-	o.Type = &v
-
-}
-
-// HasType returns a boolean if a field has been set.
-func (o *FirewallRule) HasType() bool {
-	if o != nil && o.Type != nil {
-		return true
-	}
-
-	return false
+// NewFirewallRuleWithDefaults instantiates a new FirewallRule object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewFirewallRuleWithDefaults() *FirewallRule {
+	this := FirewallRule{}
+	return &this
 }
 
 // GetHref returns the Href field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *FirewallRule) GetHref() *string {
 	if o == nil {
 		return nil
@@ -140,8 +84,46 @@ func (o *FirewallRule) HasHref() bool {
 	return false
 }
 
+// GetId returns the Id field value
+// If the value is explicit nil, nil is returned
+func (o *FirewallRule) GetId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Id
+
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *FirewallRule) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Id, true
+}
+
+// SetId sets field value
+func (o *FirewallRule) SetId(v string) {
+
+	o.Id = &v
+
+}
+
+// HasId returns a boolean if a field has been set.
+func (o *FirewallRule) HasId() bool {
+	if o != nil && o.Id != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetMetadata returns the Metadata field value
-// If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
+// If the value is explicit nil, nil is returned
 func (o *FirewallRule) GetMetadata() *DatacenterElementMetadata {
 	if o == nil {
 		return nil
@@ -179,7 +161,7 @@ func (o *FirewallRule) HasMetadata() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for FirewallruleProperties will be returned
+// If the value is explicit nil, nil is returned
 func (o *FirewallRule) GetProperties() *FirewallruleProperties {
 	if o == nil {
 		return nil
@@ -216,19 +198,52 @@ func (o *FirewallRule) HasProperties() bool {
 	return false
 }
 
+// GetType returns the Type field value
+// If the value is explicit nil, nil is returned
+func (o *FirewallRule) GetType() *Type {
+	if o == nil {
+		return nil
+	}
+
+	return o.Type
+
+}
+
+// GetTypeOk returns a tuple with the Type field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *FirewallRule) GetTypeOk() (*Type, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Type, true
+}
+
+// SetType sets field value
+func (o *FirewallRule) SetType(v Type) {
+
+	o.Type = &v
+
+}
+
+// HasType returns a boolean if a field has been set.
+func (o *FirewallRule) HasType() bool {
+	if o != nil && o.Type != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o FirewallRule) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Href != nil {
+		toSerialize["href"] = o.Href
+	}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
-	}
-
-	if o.Type != nil {
-		toSerialize["type"] = o.Type
-	}
-
-	if o.Href != nil {
-		toSerialize["href"] = o.Href
 	}
 
 	if o.Metadata != nil {
@@ -238,6 +253,11 @@ func (o FirewallRule) MarshalJSON() ([]byte, error) {
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
+
+	if o.Type != nil {
+		toSerialize["type"] = o.Type
+	}
+
 	return json.Marshal(toSerialize)
 }
 

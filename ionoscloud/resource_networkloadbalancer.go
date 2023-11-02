@@ -3,11 +3,16 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func resourceNetworkLoadBalancer() *schema.Resource {
@@ -22,9 +27,10 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"name": {
-				Type:        schema.TypeString,
-				Description: "A name of that Network Load Balancer",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "A name of that Network Load Balancer",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"listener_lan": {
 				Type:        schema.TypeInt,
@@ -52,14 +58,16 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 					"must contain valid subnet mask. If user will not provide any IP then the system will " +
 					"generate one IP with /24 subnet.",
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -67,7 +75,7 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 }
 
 func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	networkLoadBalancer := ionoscloud.NetworkLoadBalancer{
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
@@ -126,16 +134,16 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %s, %s", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %w, %s", err, responseBody(apiResponse)))
 		return diags
 	}
 
 	d.SetId(*networkLoadBalancerResp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		if IsRequestFailed(err) {
+		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
@@ -147,7 +155,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -156,7 +164,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -172,7 +180,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	request := ionoscloud.NetworkLoadBalancer{
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
 	}
@@ -239,7 +247,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		return diags
 	}
 
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -249,7 +257,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -257,12 +265,12 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network loadbalancer %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network loadbalancer %s %w", d.Id(), err))
 		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -274,7 +282,7 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
@@ -289,7 +297,7 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find network load balancer %q", networkLoadBalancerId)
 		}

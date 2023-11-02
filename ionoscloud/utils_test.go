@@ -1,10 +1,9 @@
 package ionoscloud
 
 import (
-	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func TestSetPropWithNilCheck(t *testing.T) {
@@ -20,12 +19,12 @@ func TestSetPropWithNilCheck(t *testing.T) {
 	pS := &s
 	pB := &b
 
-	setPropWithNilCheck(m, "bool_nil", pBnil)
-	setPropWithNilCheck(m, "string_nil", pSnil)
-	setPropWithNilCheck(m, "bool_ok", pB)
-	setPropWithNilCheck(m, "string_ok", pS)
-	setPropWithNilCheck(m, "string_simple", s2)
-	setPropWithNilCheck(m, "bool_simple", b2)
+	utils.SetPropWithNilCheck(m, "bool_nil", pBnil)
+	utils.SetPropWithNilCheck(m, "string_nil", pSnil)
+	utils.SetPropWithNilCheck(m, "bool_ok", pB)
+	utils.SetPropWithNilCheck(m, "string_ok", pS)
+	utils.SetPropWithNilCheck(m, "string_simple", s2)
+	utils.SetPropWithNilCheck(m, "bool_simple", b2)
 
 	if _, ok := m["bool_nil"]; ok {
 		t.Error("bool_nil was set")
@@ -51,20 +50,4 @@ func TestSetPropWithNilCheck(t *testing.T) {
 		t.Errorf("string_simple != %+v", s2)
 	}
 
-}
-func testNotEmptySlice(resource, attribute string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != resource {
-				continue
-			}
-
-			lengthOfSlice := rs.Primary.Attributes[attribute]
-
-			if lengthOfSlice == "0" {
-				return fmt.Errorf("returned version slice is empty")
-			}
-		}
-		return nil
-	}
 }

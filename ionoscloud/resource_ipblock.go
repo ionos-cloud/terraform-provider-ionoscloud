@@ -3,10 +3,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -27,10 +31,10 @@ func resourceIPBlock() *schema.Resource {
 				Optional: true,
 			},
 			"location": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"size": {
 				Type:     schema.TypeInt,
@@ -93,7 +97,7 @@ func resourceIPBlock() *schema.Resource {
 }
 
 func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	size := d.Get("size").(int)
 	sizeConverted := int32(size)
@@ -111,15 +115,15 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while reserving an ip block: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while reserving an ip block: %w", err))
 		return diags
 	}
 	d.SetId(*ipblock.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		if IsRequestFailed(err) {
+		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
@@ -131,17 +135,17 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching an ip block ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching an ip block ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -154,7 +158,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.IpBlockProperties{}
 
@@ -168,7 +172,7 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating an ip block ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating an ip block ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -177,17 +181,17 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while releasing an ipblock ID: %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while releasing an ipblock ID: %s %w", d.Id(), err))
 		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -198,7 +202,7 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	ipBlockId := d.Id()
 
@@ -206,7 +210,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta i
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the ipBlock %q", ipBlockId)
 		}
@@ -261,15 +265,15 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
 		var ipConsumers []interface{}
 		for _, ipConsumer := range *ipBlock.Properties.IpConsumers {
 			ipConsumerEntry := make(map[string]interface{})
-			setPropWithNilCheck(ipConsumerEntry, "ip", ipConsumer.Ip)
-			setPropWithNilCheck(ipConsumerEntry, "mac", ipConsumer.Mac)
-			setPropWithNilCheck(ipConsumerEntry, "nic_id", ipConsumer.NicId)
-			setPropWithNilCheck(ipConsumerEntry, "server_id", ipConsumer.ServerId)
-			setPropWithNilCheck(ipConsumerEntry, "server_name", ipConsumer.ServerName)
-			setPropWithNilCheck(ipConsumerEntry, "datacenter_id", ipConsumer.DatacenterId)
-			setPropWithNilCheck(ipConsumerEntry, "datacenter_name", ipConsumer.DatacenterName)
-			setPropWithNilCheck(ipConsumerEntry, "k8s_nodepool_uuid", ipConsumer.K8sNodePoolUuid)
-			setPropWithNilCheck(ipConsumerEntry, "k8s_cluster_uuid", ipConsumer.K8sClusterUuid)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "ip", ipConsumer.Ip)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "mac", ipConsumer.Mac)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "nic_id", ipConsumer.NicId)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "server_id", ipConsumer.ServerId)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "server_name", ipConsumer.ServerName)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "datacenter_id", ipConsumer.DatacenterId)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "datacenter_name", ipConsumer.DatacenterName)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "k8s_nodepool_uuid", ipConsumer.K8sNodePoolUuid)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "k8s_cluster_uuid", ipConsumer.K8sClusterUuid)
 
 			ipConsumers = append(ipConsumers, ipConsumerEntry)
 		}

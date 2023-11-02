@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
 func dataSourceGroup() *schema.Resource {
@@ -57,15 +59,36 @@ func dataSourceGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"user_id": {
-				Type:     schema.TypeString,
+			"create_flow_log": {
+				Type:        schema.TypeBool,
+				Description: "Create Flow Logs privilege.",
+				Computed:    true,
+			},
+			"access_and_manage_monitoring": {
+				Type: schema.TypeBool,
+				Description: "Privilege for a group to access and manage monitoring related functionality " +
+					"(access metrics, CRUD on alarms, alarm-actions etc) using Monotoring-as-a-Service (MaaS).",
 				Computed: true,
+			},
+			"access_and_manage_certificates": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage certificates.",
+				Computed:    true,
+			},
+			"manage_dbaas": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to manage DBaaS related functionality",
+				Computed:    true,
 			},
 			"users": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"first_name": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -95,7 +118,7 @@ func dataSourceGroup() *schema.Resource {
 }
 
 func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -117,41 +140,45 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %s", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
 			return diags
 		}
 	} else {
 		/* search by name */
 		var groups ionoscloud.Groups
-		var apiResponse *ionoscloud.APIResponse
-		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Execute()
+
+		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching groups: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching groups: %w", err))
 			return diags
 		}
 
-		found := false
+		var results []ionoscloud.Group
+
 		if groups.Items != nil {
 			for _, g := range *groups.Items {
-				if g.Properties.Name != nil && *g.Properties.Name == name.(string) {
+				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == name.(string) {
 					/* group found */
 					group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %s", *g.Id, err))
+						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err))
 						return diags
 					}
-					found = true
-					break
+					results = append(results, g)
 				}
 			}
 		}
 
-		if !found {
-			diags := diag.FromErr(fmt.Errorf("group not found"))
-			return diags
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no group found with the specified name = %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one group found with the specified criteria name = %s", name))
+		} else {
+			group = results[0]
 		}
+
 	}
 
 	if err = setGroupData(ctx, client, d, &group); err != nil {

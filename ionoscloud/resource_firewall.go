@@ -3,13 +3,17 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
-	"strconv"
-	"strings"
 )
 
 func resourceFirewall() *schema.Resource {
@@ -29,8 +33,9 @@ func resourceFirewall() *schema.Resource {
 			},
 
 			"protocol": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"source_mac": {
 				Type:     schema.TypeString,
@@ -49,23 +54,23 @@ func resourceFirewall() *schema.Resource {
 			"port_range_start": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+				ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
 					if v.(int) < 1 && v.(int) > 65534 {
 						errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
 					}
 					return
-				},
+				}),
 			},
 
 			"port_range_end": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+				ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
 					if v.(int) < 1 && v.(int) > 65534 {
 						errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
 					}
 					return
-				},
+				}),
 			},
 			"icmp_type": {
 				Type:     schema.TypeString,
@@ -81,22 +86,22 @@ func resourceFirewall() *schema.Resource {
 				Computed: true,
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"server_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"nic_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -104,7 +109,7 @@ func resourceFirewall() *schema.Resource {
 }
 
 func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	firewall, diags := getFirewallData(d, "", false)
 	if diags != nil {
@@ -114,15 +119,15 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %w", err))
 		return diags
 	}
 	d.SetId(*fw.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		if IsRequestFailed(err) {
+		if cloudapi.IsRequestFailed(err) {
 			log.Printf("[DEBUG] firewall resource failed to be created")
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
@@ -136,14 +141,14 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, d.Get("datacenter_id").(string),
 		d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			log.Printf("[DEBUG] could not find firewall rule datacenter_id = %s server_id = %s with id = %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
 			d.SetId("")
 			return nil
@@ -161,7 +166,7 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	firewall, diags := getFirewallData(d, "", true)
 	if diags != nil {
@@ -171,12 +176,12 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule ID %s %w", d.Id(), err))
 		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(fmt.Errorf("error getting state change for firewall patch %w", errState))
 		return diags
@@ -186,7 +191,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.FirewallRulesApi.
 		DatacentersServersNicsFirewallrulesDelete(
@@ -195,12 +200,12 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 		Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a firewall rule ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a firewall rule ID %s %w", d.Id(), err))
 		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(fmt.Errorf("error getting state change for firewall delete %w", errState))
 		return diags
@@ -213,7 +218,7 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 4 || parts[0] == "" || parts[1] == "" || parts[2] == "" || parts[3] == "" {
@@ -230,7 +235,7 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find firewall rule %q", firewallId)
 		}
@@ -334,70 +339,70 @@ func setFirewallData(d *schema.ResourceData, firewall *ionoscloud.FirewallRule) 
 		if firewall.Properties.Protocol != nil {
 			err := d.Set("protocol", *firewall.Properties.Protocol)
 			if err != nil {
-				return fmt.Errorf("error while setting protocol property for firewall %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting protocol property for firewall %s: %w", d.Id(), err)
 			}
 		}
 
 		if firewall.Properties.Name != nil {
 			err := d.Set("name", *firewall.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("error while setting name property for firewall %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for firewall %s: %w", d.Id(), err)
 			}
 		}
 
 		if firewall.Properties.SourceMac != nil {
 			err := d.Set("source_mac", *firewall.Properties.SourceMac)
 			if err != nil {
-				return fmt.Errorf("error while setting source_mac property for firewall %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting source_mac property for firewall %s: %w", d.Id(), err)
 			}
 		}
 
 		if firewall.Properties.SourceIp != nil {
 			err := d.Set("source_ip", *firewall.Properties.SourceIp)
 			if err != nil {
-				return fmt.Errorf("error while setting source_ip property for firewall %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting source_ip property for firewall %s: %w", d.Id(), err)
 			}
 		}
 
 		if firewall.Properties.TargetIp != nil {
 			err := d.Set("target_ip", *firewall.Properties.TargetIp)
 			if err != nil {
-				return fmt.Errorf("error while setting target_ip property for firewall %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting target_ip property for firewall %s: %w", d.Id(), err)
 			}
 		}
 
 		if firewall.Properties.PortRangeStart != nil {
 			err := d.Set("port_range_start", *firewall.Properties.PortRangeStart)
 			if err != nil {
-				return fmt.Errorf("error while setting port_range_start property for firewall %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting port_range_start property for firewall %s: %w", d.Id(), err)
 			}
 		}
 
 		if firewall.Properties.PortRangeEnd != nil {
 			err := d.Set("port_range_end", *firewall.Properties.PortRangeEnd)
 			if err != nil {
-				return fmt.Errorf("error while setting port_range_end property for firewall %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting port_range_end property for firewall %s: %w", d.Id(), err)
 			}
 		}
 
 		if firewall.Properties.IcmpType != nil {
 			err := d.Set("icmp_type", strconv.Itoa(int(*firewall.Properties.IcmpType)))
 			if err != nil {
-				return fmt.Errorf("error while setting icmp_type property for firewall %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting icmp_type property for firewall %s: %w", d.Id(), err)
 			}
 		}
 
 		if firewall.Properties.IcmpCode != nil {
 			err := d.Set("icmp_code", strconv.Itoa(int(*firewall.Properties.IcmpCode)))
 			if err != nil {
-				return fmt.Errorf("error while setting icmp_code property for firewall %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting icmp_code property for firewall %s: %w", d.Id(), err)
 			}
 		}
 
 		if firewall.Properties.Type != nil {
 			err := d.Set("type", *firewall.Properties.Type)
 			if err != nil {
-				return fmt.Errorf("error while setting type property for firewall %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting type property for firewall %s: %w", d.Id(), err)
 			}
 		}
 	}

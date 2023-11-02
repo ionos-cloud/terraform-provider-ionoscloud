@@ -1,7 +1,11 @@
+//go:build compute || all || lan
+
 package ionoscloud
 
 import (
 	"fmt"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"testing"
 
@@ -20,7 +24,7 @@ func TestAccLanImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      LanResource + "." + LanTestResource,
+				ResourceName:      constant.LanResource + "." + constant.LanTestResource,
 				ImportStateIdFunc: testAccLanImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -33,7 +37,7 @@ func testAccLanImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != LanResource {
+		if rs.Type != constant.LanResource {
 			continue
 		}
 

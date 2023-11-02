@@ -1,5 +1,5 @@
-//go:build waiting_for_vdc
-// +build waiting_for_vdc
+//go:build all || waiting_for_vdc
+// +build all waiting_for_vdc
 
 package ionoscloud
 
@@ -17,6 +17,7 @@ func TestAccLoadbalancerImportBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckLoadbalancerDestroyCheck,
 		Steps: []resource.TestStep{

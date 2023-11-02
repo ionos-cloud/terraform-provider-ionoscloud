@@ -1,7 +1,12 @@
+//go:build compute || all || group
+
 package ionoscloud
 
 import (
 	"testing"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -11,6 +16,7 @@ func TestAccGroupImportBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckGroupDestroyCheck,
 		Steps: []resource.TestStep{
@@ -19,7 +25,7 @@ func TestAccGroupImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:            GroupResource + "." + GroupTestResource,
+				ResourceName:            constant.GroupResource + "." + constant.GroupTestResource,
 				ImportStateIdFunc:       testAccGroupImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -33,7 +39,7 @@ func testAccGroupImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != GroupResource {
+		if rs.Type != constant.GroupResource {
 			continue
 		}
 
@@ -44,18 +50,18 @@ func testAccGroupImportStateId(s *terraform.State) (string, error) {
 }
 
 var testAccImportGroupConfigBasic = `
-resource ` + UserResource + ` ` + UserTestResource + ` {
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
   first_name = "user"
   last_name = "test"
-  email = "` + GenerateEmail() + `"
+  email = "` + utils.GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
   active = false
 }
 
-resource ` + GroupResource + ` ` + GroupTestResource + ` {
-  name = "` + GroupTestResource + `"
+resource ` + constant.GroupResource + ` ` + constant.GroupTestResource + ` {
+  name = "` + constant.GroupTestResource + `"
   create_datacenter = true
   create_snapshot = true
   reserve_ip = true
@@ -65,6 +71,6 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = true
   create_internet_access = true
   create_k8s_cluster = true
-  user_id = ` + UserResource + `.` + UserTestResource + `.id
+  user_ids = [` + constant.UserResource + `.` + constant.UserTestResource + `.id]
 }
 `

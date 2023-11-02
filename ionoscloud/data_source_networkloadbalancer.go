@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"strings"
 )
 
 func dataSourceNetworkLoadBalancer() *schema.Resource {
@@ -63,7 +66,7 @@ func dataSourceNetworkLoadBalancer() *schema.Resource {
 }
 
 func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -88,44 +91,38 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		networkLoadBalancer, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the network loadbalancer %s: %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the network loadbalancer %s: %w", id.(string), err))
 		}
 	} else {
 		/* search by name */
 		var networkLoadBalancers ionoscloud.NetworkLoadBalancers
 
-		networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId.(string)).Execute()
+		networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %w", err))
 		}
 
+		var results []ionoscloud.NetworkLoadBalancer
 		if networkLoadBalancers.Items != nil {
-			for _, c := range *networkLoadBalancers.Items {
-				tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *c.Id, err.Error()))
-				}
-				if tmpNetworkLoadBalancer.Properties.Name != nil {
-					if strings.Contains(*tmpNetworkLoadBalancer.Properties.Name, name.(string)) {
-						networkLoadBalancer = tmpNetworkLoadBalancer
-						break
+			for _, nlb := range *networkLoadBalancers.Items {
+				if nlb.Properties != nil && nlb.Properties.Name != nil && strings.EqualFold(*nlb.Properties.Name, name.(string)) {
+					tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), *nlb.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %w", *nlb.Id, err))
 					}
+					results = append(results, tmpNetworkLoadBalancer)
 				}
-
 			}
 		}
 
-	}
-
-	if &networkLoadBalancer == nil {
-		return diag.FromErr(errors.New("network loadbalancer not found"))
-	}
-
-	if networkLoadBalancer.Id != nil {
-		if err := d.Set("id", *networkLoadBalancer.Id); err != nil {
-			return diag.FromErr(err)
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no network load balancer found with the specified criteria: name = %s", name.(string)))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one network load balancer found with the specified criteria: name = %s", name.(string)))
+		} else {
+			networkLoadBalancer = results[0]
 		}
 	}
 

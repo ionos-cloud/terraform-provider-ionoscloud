@@ -1,28 +1,35 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud: nic"
 sidebar_current: "docs-ionoscloud-datasource-nic"
 description: |-
-Get information on a Ionos Cloud NIC
+  Get information on a Ionos Cloud NIC
 ---
 
 # ionoscloud_nic
 
-The nic data source can be used to search for and return existing nics.
+The **Nic data source** can be used to search for and return existing nics.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_nic" "lan_example" {
-  datacenter_id = ionoscloud_datacenter.example.id
-  server_id = ionoscloud_server.example.id
-  id			= "nic_id"
+data "ionoscloud_nic" "example" {
+  datacenter_id   = <datancenter_id>
+  server_id       = <server_id>
+  id			  = <nic_id>
 }
+```
 
-data "ionoscloud_nic" "lan_example" {
-  datacenter_id = ionoscloud_datacenter.example.id
-  server_id = ionoscloud_server.example.id
-  name			= "nic_name"
+### By Name
+```hcl
+data "ionoscloud_nic" "example" {
+  datacenter_id   = <datancenter_id>
+  server_id       = <server_id>
+  name            = "Nic Example"
 }
 ```
 
@@ -55,3 +62,8 @@ The following attributes are returned by the datasource:
 * `mac` - The MAC address of the NIC.
 * `device_number`- The Logical Unit Number (LUN) of the storage volume. Null if this NIC was created from CloudAPI and no DCD changes were done on the Datacenter.
 * `pci_slot`- The PCI slot number of the Nic.
+* `flowlog` - Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination IP addresses, source and destination ports, number of packets, amount of bytes, the start and end time of the recording, and the type of protocol – and log the extent to which your instances are being accessed.
+    - `action` - Specifies the action to be taken when the rule is matched. Possible values: ACCEPTED, REJECTED, ALL.
+    - `bucket` - Specifies the S3 IONOS bucket where the flow log data will be stored. The bucket must exist.
+    - `direction` - Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL.
+    - `name` - Specifies the name of the flow log.

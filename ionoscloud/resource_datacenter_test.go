@@ -1,10 +1,16 @@
+//go:build compute || all || datacenter
+
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -23,21 +29,73 @@ func TestAccDataCenterBasic(t *testing.T) {
 			{
 				Config: testAccCheckDatacenterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDatacenterExists(DatacenterResource+"."+DatacenterTestResource, &datacenter),
-					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "name", DatacenterTestResource),
-					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "location", "us/las"),
-					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "description", "Test Datacenter Description"),
-					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "sec_auth_protection", "false"),
+					testAccCheckDatacenterExists(constant.DatacenterResource+"."+constant.DatacenterTestResource, &datacenter),
+					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "name", constant.DatacenterTestResource),
+					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "location", "us/las"),
+					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "description", "Test Datacenter Description"),
+					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "sec_auth_protection", "false"),
 				),
+			},
+			{
+				Config: testAccDataSourceDatacenterMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceById, "name", constant.DatacenterResource+"."+constant.DatacenterTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceById, "location", constant.DatacenterResource+"."+constant.DatacenterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceById, "description", constant.DatacenterResource+"."+constant.DatacenterTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceById, "version", constant.DatacenterResource+"."+constant.DatacenterTestResource, "version"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceById, "features", constant.DatacenterResource+"."+constant.DatacenterTestResource, "features"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceById, "sec_auth_protection", constant.DatacenterResource+"."+constant.DatacenterTestResource, "sec_auth_protection"),
+				),
+			},
+			{
+				Config: testAccDataSourceDatacenterMatchName,
+				Check: resource.ComposeTestCheckFunc(
+
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "name", constant.DatacenterResource+"."+constant.DatacenterTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "location", constant.DatacenterResource+"."+constant.DatacenterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "description", constant.DatacenterResource+"."+constant.DatacenterTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "version", constant.DatacenterResource+"."+constant.DatacenterTestResource, "version"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "features", constant.DatacenterResource+"."+constant.DatacenterTestResource, "features"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "sec_auth_protection", constant.DatacenterResource+"."+constant.DatacenterTestResource, "sec_auth_protection"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "ipv6_cidr_block", constant.DatacenterResource+"."+constant.DatacenterTestResource, "ipv6_cidr_block"),
+				),
+			},
+			{
+				Config: testAccDataSourceDatacenterMatching,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceMatching, "name", constant.DatacenterResource+"."+constant.DatacenterTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceMatching, "location", constant.DatacenterResource+"."+constant.DatacenterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceMatching, "description", constant.DatacenterResource+"."+constant.DatacenterTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceMatching, "version", constant.DatacenterResource+"."+constant.DatacenterTestResource, "version"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceMatching, "features", constant.DatacenterResource+"."+constant.DatacenterTestResource, "features"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceMatching, "sec_auth_protection", constant.DatacenterResource+"."+constant.DatacenterTestResource, "sec_auth_protection"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceMatching, "ipv6_cidr_block", constant.DatacenterResource+"."+constant.DatacenterTestResource, "ipv6_cidr_block"),
+				),
+			},
+			{
+				Config:      testAccDataSourceDatacenterMultipleResultsError,
+				ExpectError: regexp.MustCompile("more than one datacenter found with the specified criteria"),
+			},
+			{
+				Config:      testAccDataSourceDatacenterWrongNameError,
+				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
+			},
+			{
+				Config:      testAccDataSourceDatacenterWrongLocationError,
+				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
+			},
+			{
+				Config:      testAccDataSourceDatacenterWrongNameAndLocationError,
+				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
 			},
 			{
 				Config: testAccCheckDatacenterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDatacenterExists(DatacenterResource+"."+DatacenterTestResource, &datacenter),
-					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "location", "us/las"),
-					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "description", "Test Datacenter Description Updated"),
-					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "sec_auth_protection", "false"),
+					testAccCheckDatacenterExists(constant.DatacenterResource+"."+constant.DatacenterTestResource, &datacenter),
+					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "location", "us/las"),
+					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "description", "Test Datacenter Description Updated"),
+					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "sec_auth_protection", "false"),
 				),
 			},
 		},
@@ -45,7 +103,7 @@ func TestAccDataCenterBasic(t *testing.T) {
 }
 
 func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -54,7 +112,7 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != DatacenterResource {
+		if rs.Type != constant.DatacenterResource {
 			continue
 		}
 
@@ -62,8 +120,8 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while checking the destruction of datacenter %s: %s", rs.Primary.ID, err)
+			if !httpNotFound(apiResponse) {
+				return fmt.Errorf("an error occurred while checking the destruction of datacenter %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("datacenter %s still exists", rs.Primary.ID)
@@ -75,7 +133,7 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 
 func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -100,7 +158,7 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 			return fmt.Errorf("error occured while fetching DC: %s", rs.Primary.ID)
 		}
 		if *foundDC.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 		datacenter = &foundDC
 
@@ -108,18 +166,51 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 	}
 }
 
-const testAccCheckDatacenterConfigBasic = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
-	name       = "` + DatacenterTestResource + `"
-	location = "us/las"
-	description = "Test Datacenter Description"
-	sec_auth_protection = false
-}`
-
 const testAccCheckDatacenterConfigUpdate = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
-	name       =  "` + UpdatedResources + `"
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+	name       =  "` + constant.UpdatedResources + `"
 	location = "us/las"
 	description = "Test Datacenter Description Updated"
 	sec_auth_protection = false
+}`
+
+const testAccDataSourceDatacenterMatchId = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceById + ` {
+  id			= ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}`
+
+const testAccDataSourceDatacenterMatchName = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceByName + ` {
+    name = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.name
+}`
+
+const testAccDataSourceDatacenterMatching = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
+    name = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.name
+    location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
+}`
+
+const testAccDataSourceDatacenterMultipleResultsError = testAccCheckDatacenterConfigBasic + `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + `_multiple_results {
+	name       = "` + constant.DatacenterTestResource + `"
+	location = "us/las"
+	description = "Test Datacenter Description Updated"
+	sec_auth_protection = false
+}
+
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
+    name = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.name
+    location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
+}`
+
+const testAccDataSourceDatacenterWrongLocationError = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
+    name = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.name
+    location =  "wrong_location"
+}`
+
+const testAccDataSourceDatacenterWrongNameAndLocationError = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
+    name =  "wrong_name"
+    location =  "wrong_location"
 }`

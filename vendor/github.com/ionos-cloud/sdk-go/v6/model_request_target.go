@@ -16,50 +16,30 @@ import (
 
 // RequestTarget struct for RequestTarget
 type RequestTarget struct {
-	Target *ResourceReference `json:"target,omitempty"`
 	Status *string            `json:"status,omitempty"`
+	Target *ResourceReference `json:"target,omitempty"`
 }
 
-// GetTarget returns the Target field value
-// If the value is explicit nil, the zero value for ResourceReference will be returned
-func (o *RequestTarget) GetTarget() *ResourceReference {
-	if o == nil {
-		return nil
-	}
+// NewRequestTarget instantiates a new RequestTarget object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewRequestTarget() *RequestTarget {
+	this := RequestTarget{}
 
-	return o.Target
-
+	return &this
 }
 
-// GetTargetOk returns a tuple with the Target field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RequestTarget) GetTargetOk() (*ResourceReference, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Target, true
-}
-
-// SetTarget sets field value
-func (o *RequestTarget) SetTarget(v ResourceReference) {
-
-	o.Target = &v
-
-}
-
-// HasTarget returns a boolean if a field has been set.
-func (o *RequestTarget) HasTarget() bool {
-	if o != nil && o.Target != nil {
-		return true
-	}
-
-	return false
+// NewRequestTargetWithDefaults instantiates a new RequestTarget object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewRequestTargetWithDefaults() *RequestTarget {
+	this := RequestTarget{}
+	return &this
 }
 
 // GetStatus returns the Status field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *RequestTarget) GetStatus() *string {
 	if o == nil {
 		return nil
@@ -96,16 +76,54 @@ func (o *RequestTarget) HasStatus() bool {
 	return false
 }
 
+// GetTarget returns the Target field value
+// If the value is explicit nil, nil is returned
+func (o *RequestTarget) GetTarget() *ResourceReference {
+	if o == nil {
+		return nil
+	}
+
+	return o.Target
+
+}
+
+// GetTargetOk returns a tuple with the Target field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *RequestTarget) GetTargetOk() (*ResourceReference, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Target, true
+}
+
+// SetTarget sets field value
+func (o *RequestTarget) SetTarget(v ResourceReference) {
+
+	o.Target = &v
+
+}
+
+// HasTarget returns a boolean if a field has been set.
+func (o *RequestTarget) HasTarget() bool {
+	if o != nil && o.Target != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o RequestTarget) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Status != nil {
+		toSerialize["status"] = o.Status
+	}
 
 	if o.Target != nil {
 		toSerialize["target"] = o.Target
 	}
 
-	if o.Status != nil {
-		toSerialize["status"] = o.Status
-	}
 	return json.Marshal(toSerialize)
 }
 

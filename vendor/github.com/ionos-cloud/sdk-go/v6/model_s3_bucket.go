@@ -16,12 +16,32 @@ import (
 
 // S3Bucket struct for S3Bucket
 type S3Bucket struct {
-	// Name of the S3 bucket
+	// The name of the S3 bucket.
 	Name *string `json:"name"`
 }
 
+// NewS3Bucket instantiates a new S3Bucket object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewS3Bucket(name string) *S3Bucket {
+	this := S3Bucket{}
+
+	this.Name = &name
+
+	return &this
+}
+
+// NewS3BucketWithDefaults instantiates a new S3Bucket object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewS3BucketWithDefaults() *S3Bucket {
+	this := S3Bucket{}
+	return &this
+}
+
 // GetName returns the Name field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *S3Bucket) GetName() *string {
 	if o == nil {
 		return nil
@@ -60,10 +80,10 @@ func (o *S3Bucket) HasName() bool {
 
 func (o S3Bucket) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
+
 	return json.Marshal(toSerialize)
 }
 

@@ -16,14 +16,35 @@ import (
 
 // KubernetesMaintenanceWindow struct for KubernetesMaintenanceWindow
 type KubernetesMaintenanceWindow struct {
-	// The day of the week for a maintenance window.
+	// The weekday for a maintenance window.
 	DayOfTheWeek *string `json:"dayOfTheWeek"`
-	// The time to use for a maintenance window. Accepted formats are: HH:mm:ss; HH:mm:ss\"Z\"; HH:mm:ssZ. This time may varies by 15 minutes.
+	// The time to use for a maintenance window. Accepted formats are: HH:mm:ss; HH:mm:ss\"Z\"; HH:mm:ssZ. This time may vary by 15 minutes.
 	Time *string `json:"time"`
 }
 
+// NewKubernetesMaintenanceWindow instantiates a new KubernetesMaintenanceWindow object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewKubernetesMaintenanceWindow(dayOfTheWeek string, time string) *KubernetesMaintenanceWindow {
+	this := KubernetesMaintenanceWindow{}
+
+	this.DayOfTheWeek = &dayOfTheWeek
+	this.Time = &time
+
+	return &this
+}
+
+// NewKubernetesMaintenanceWindowWithDefaults instantiates a new KubernetesMaintenanceWindow object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewKubernetesMaintenanceWindowWithDefaults() *KubernetesMaintenanceWindow {
+	this := KubernetesMaintenanceWindow{}
+	return &this
+}
+
 // GetDayOfTheWeek returns the DayOfTheWeek field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *KubernetesMaintenanceWindow) GetDayOfTheWeek() *string {
 	if o == nil {
 		return nil
@@ -61,7 +82,7 @@ func (o *KubernetesMaintenanceWindow) HasDayOfTheWeek() bool {
 }
 
 // GetTime returns the Time field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *KubernetesMaintenanceWindow) GetTime() *string {
 	if o == nil {
 		return nil
@@ -100,7 +121,6 @@ func (o *KubernetesMaintenanceWindow) HasTime() bool {
 
 func (o KubernetesMaintenanceWindow) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.DayOfTheWeek != nil {
 		toSerialize["dayOfTheWeek"] = o.DayOfTheWeek
 	}
@@ -108,6 +128,7 @@ func (o KubernetesMaintenanceWindow) MarshalJSON() ([]byte, error) {
 	if o.Time != nil {
 		toSerialize["time"] = o.Time
 	}
+
 	return json.Marshal(toSerialize)
 }
 

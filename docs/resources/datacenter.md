@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud: datacenter"
 sidebar_current: "docs-resource-datacenter"
@@ -8,15 +9,16 @@ description: |-
 
 # ionoscloud\_datacenter
 
-Manages a Virtual Data Center on IonosCloud.
+Manages a Virtual **Data Center** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
 resource "ionoscloud_datacenter" "example" {
-  name        = "datacenter name"
-  location    = "us/las"
-  description = "datacenter description"
+  name                = "Datacenter Example"
+  location            = "us/las"
+  description         = "datacenter description"
+  sec_auth_protection = false
 }
 ```
 
@@ -30,6 +32,7 @@ The following arguments are supported:
 * `sec_auth_protection` - (Optional) [bool] Boolean value representing if the data center requires extra protection e.g. two factor protection
 * `version` - (Computed) The version of that Data Center. Gets incremented with every change
 * `features` - (Computed) List of features supported by the location this data center is part of
+* `ipv6_cidr_block` - (Computed) The automatically-assigned /56 IPv6 CIDR block if IPv6 is enabled on this virtual data center
 * `cpu_architecture` - (Computed) Array of features and CPU families available in a location
   * `cpu_family` - A valid CPU family name
   * `max_cores` - The maximum number of cores available

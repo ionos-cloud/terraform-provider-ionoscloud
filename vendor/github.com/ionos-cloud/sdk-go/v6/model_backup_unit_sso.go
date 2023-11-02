@@ -20,8 +20,26 @@ type BackupUnitSSO struct {
 	SsoUrl *string `json:"ssoUrl,omitempty"`
 }
 
+// NewBackupUnitSSO instantiates a new BackupUnitSSO object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewBackupUnitSSO() *BackupUnitSSO {
+	this := BackupUnitSSO{}
+
+	return &this
+}
+
+// NewBackupUnitSSOWithDefaults instantiates a new BackupUnitSSO object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewBackupUnitSSOWithDefaults() *BackupUnitSSO {
+	this := BackupUnitSSO{}
+	return &this
+}
+
 // GetSsoUrl returns the SsoUrl field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *BackupUnitSSO) GetSsoUrl() *string {
 	if o == nil {
 		return nil
@@ -60,10 +78,10 @@ func (o *BackupUnitSSO) HasSsoUrl() bool {
 
 func (o BackupUnitSSO) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.SsoUrl != nil {
 		toSerialize["ssoUrl"] = o.SsoUrl
 	}
+
 	return json.Marshal(toSerialize)
 }
 

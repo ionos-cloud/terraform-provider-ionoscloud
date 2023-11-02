@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -25,6 +26,9 @@ const (
 	IonosPasswordEnvVar   = "IONOS_PASSWORD"
 	IonosTokenEnvVar      = "IONOS_TOKEN"
 	IonosApiUrlEnvVar     = "IONOS_API_URL"
+	IonosPinnedCertEnvVar = "IONOS_PINNED_CERT"
+	IonosLogLevelEnvVar   = "IONOS_LOG_LEVEL"
+	IonosContractNumber   = "IONOS_CONTRACT_NUMBER"
 	DefaultIonosServerUrl = "https://api.ionos.com/cloudapi/v6"
 	DefaultIonosBasePath  = "/cloudapi/v6"
 	defaultMaxRetries     = 3
@@ -107,16 +111,19 @@ type Configuration struct {
 	DefaultHeader      map[string]string `json:"defaultHeader,omitempty"`
 	DefaultQueryParams url.Values        `json:"defaultQueryParams,omitempty"`
 	UserAgent          string            `json:"userAgent,omitempty"`
-	Debug              bool              `json:"debug,omitempty"`
-	Servers            ServerConfigurations
-	OperationServers   map[string]ServerConfigurations
-	HTTPClient         *http.Client
-	Username           string        `json:"username,omitempty"`
-	Password           string        `json:"password,omitempty"`
-	Token              string        `json:"token,omitempty"`
-	MaxRetries         int           `json:"maxRetries,omitempty"`
-	WaitTime           time.Duration `json:"waitTime,omitempty"`
-	MaxWaitTime        time.Duration `json:"maxWaitTime,omitempty"`
+	// Debug is deprecated, will be replaced by LogLevel
+	Debug            bool `json:"debug,omitempty"`
+	Servers          ServerConfigurations
+	OperationServers map[string]ServerConfigurations
+	HTTPClient       *http.Client
+	Username         string        `json:"username,omitempty"`
+	Password         string        `json:"password,omitempty"`
+	Token            string        `json:"token,omitempty"`
+	MaxRetries       int           `json:"maxRetries,omitempty"`
+	WaitTime         time.Duration `json:"waitTime,omitempty"`
+	MaxWaitTime      time.Duration `json:"maxWaitTime,omitempty"`
+	LogLevel         LogLevel
+	Logger           Logger
 }
 
 // NewConfiguration returns a new Configuration object
@@ -124,7 +131,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go/6.0.0",
+		UserAgent:          "ionos-cloud-sdk-go/v6.1.9",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -132,6 +139,8 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		MaxRetries:         defaultMaxRetries,
 		MaxWaitTime:        defaultMaxWaitTime,
 		WaitTime:           defaultWaitTime,
+		Logger:             NewDefaultLogger(),
+		LogLevel:           getLogLevelFromEnv(),
 		Servers: ServerConfigurations{
 			{
 				URL:         getServerUrl(hostUrl),
@@ -145,6 +154,11 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 
 func NewConfigurationFromEnv() *Configuration {
 	return NewConfiguration(os.Getenv(IonosUsernameEnvVar), os.Getenv(IonosPasswordEnvVar), os.Getenv(IonosTokenEnvVar), os.Getenv(IonosApiUrlEnvVar))
+}
+
+// SetDepth sets the depth query param for all the requests
+func (c *Configuration) SetDepth(depth int32) {
+	c.DefaultQueryParams["depth"] = []string{strconv.Itoa(int(depth))}
 }
 
 // AddDefaultHeader adds a new HTTP header to the default header in the request

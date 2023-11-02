@@ -3,9 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -35,7 +38,7 @@ func dataSourceDataCenter() *schema.Resource {
 				Computed: true,
 			},
 			"features": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -69,13 +72,17 @@ func dataSourceDataCenter() *schema.Resource {
 					},
 				},
 			},
+			"ipv6_cidr_block": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	var name, location string
 	id, idOk := d.GetOk("id")
@@ -102,7 +109,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		datacenter, apiResponse, err = client.DataCentersApi.DatacentersFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting datacenter with id %s %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("error getting datacenter with id %s %w", id.(string), err))
 		}
 		if nameOk {
 			if *datacenter.Properties.Name != name {
@@ -116,13 +123,16 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 					*datacenter.Id, *datacenter.Properties.Location, location))
 			}
 		}
-		log.Printf("[INFO] Got dc [Name=%s, Location=%s]", *datacenter.Properties.Name, *datacenter.Properties.Location)
+		if datacenter.Properties != nil {
+			log.Printf("[INFO] Got dc [Name=%s, Location=%s]", *datacenter.Properties.Name, *datacenter.Properties.Location)
+		}
+
 	} else {
-		datacenters, apiResponse, err := client.DataCentersApi.DatacentersGet(ctx).Execute()
+		datacenters, apiResponse, err := client.DataCentersApi.DatacentersGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching datacenters: %s ", err))
+			return diag.FromErr(fmt.Errorf("an error occured while fetching datacenters: %w ", err))
 		}
 
 		var results []ionoscloud.Datacenter
@@ -130,13 +140,13 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		if nameOk && datacenters.Items != nil {
 			var resultsByDatacenter []ionoscloud.Datacenter
 			for _, dc := range *datacenters.Items {
-				if dc.Properties.Name != nil && *dc.Properties.Name == name {
+				if dc.Properties != nil && dc.Properties.Name != nil && *dc.Properties.Name == name {
 					resultsByDatacenter = append(resultsByDatacenter, dc)
 				}
 			}
 
 			if resultsByDatacenter == nil {
-				return diag.FromErr(fmt.Errorf("could not find a datacenter with name %s", name))
+				return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: name = %s", name))
 			} else {
 				results = resultsByDatacenter
 			}
@@ -148,7 +158,6 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 				for _, dc := range results {
 					if dc.Properties.Location != nil && *dc.Properties.Location == location {
 						resultsByLocation = append(resultsByLocation, dc)
-						break
 					}
 				}
 			} else if datacenters.Items != nil {
@@ -156,21 +165,22 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 				for _, dc := range *datacenters.Items {
 					if dc.Properties.Location != nil && *dc.Properties.Location == location {
 						resultsByLocation = append(resultsByLocation, dc)
-						break
 					}
 				}
 			}
 			if resultsByLocation == nil {
-				return diag.FromErr(fmt.Errorf("could not find a datacenter with location %s", location))
+				return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: location = %s", location))
 			} else {
 				results = resultsByLocation
 			}
 		}
 
-		if results != nil {
-			datacenter = results[0]
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: name = %s location = %s", name, location))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one datacenter found with the specified criteria: name = %s location = %s", name, location))
 		} else {
-			return diag.FromErr(fmt.Errorf("there are no datacenters that match the search criteria"))
+			datacenter = results[0]
 		}
 
 	}

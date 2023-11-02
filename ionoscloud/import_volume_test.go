@@ -1,7 +1,11 @@
+//go:build compute || all || volume
+
 package ionoscloud
 
 import (
 	"fmt"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"testing"
 
@@ -12,6 +16,7 @@ import (
 func TestAccVolumeImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
@@ -20,7 +25,7 @@ func TestAccVolumeImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:            VolumeResource + "." + VolumeTestResource,
+				ResourceName:            constant.VolumeResource + "." + constant.VolumeTestResource,
 				ImportStateIdFunc:       testAccVolumeImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -34,7 +39,7 @@ func testAccVolumeImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != VolumeResource {
+		if rs.Type != constant.VolumeResource {
 			continue
 		}
 

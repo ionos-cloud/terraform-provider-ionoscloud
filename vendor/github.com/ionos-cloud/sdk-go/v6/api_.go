@@ -53,7 +53,7 @@ func (r ApiApiInfoGetRequest) XContractNumber(xContractNumber int32) ApiApiInfoG
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiApiInfoGetRequest) Filter(key string, value string) ApiApiInfoGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -74,8 +74,8 @@ func (r ApiApiInfoGetRequest) Execute() (Info, *APIResponse, error) {
 }
 
 /*
- * ApiInfoGet Display API information
- * Display API information
+ * ApiInfoGet Get API information
+ * Retrieves the API information such as API version.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @return ApiApiInfoGetRequest
  */
@@ -114,9 +114,19 @@ func (a *DefaultApiService) ApiInfoGetExecute(r ApiApiInfoGetRequest) (Info, *AP
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -187,7 +197,7 @@ func (a *DefaultApiService) ApiInfoGetExecute(r ApiApiInfoGetRequest) (Info, *AP
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v

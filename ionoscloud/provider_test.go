@@ -2,10 +2,12 @@ package ionoscloud
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"os"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -44,11 +46,6 @@ func testAccPreCheck(t *testing.T) {
 		if pbUsername == "" || pbPassword == "" {
 			t.Fatalf("%s/%s or %s must be set for acceptance tests", ionoscloud.IonosUsernameEnvVar, ionoscloud.IonosPasswordEnvVar, ionoscloud.IonosTokenEnvVar)
 		}
-	} else {
-		if pbUsername != "" || pbPassword != "" {
-			t.Fatalf("%s/%s can not be set together with %s", ionoscloud.IonosUsernameEnvVar, ionoscloud.IonosPasswordEnvVar, ionoscloud.IonosTokenEnvVar)
-		}
-
 	}
 
 	diags := testAccProvider.Configure(context.TODO(), terraform.NewResourceConfigRaw(nil))
@@ -57,4 +54,13 @@ func testAccPreCheck(t *testing.T) {
 	}
 
 	return
+}
+
+func randomProviderVersion343() map[string]resource.ExternalProvider {
+	return map[string]resource.ExternalProvider{
+		"random": {
+			VersionConstraint: "3.4.3",
+			Source:            "hashicorp/random",
+		},
+	}
 }

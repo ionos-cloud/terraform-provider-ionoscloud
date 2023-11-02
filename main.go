@@ -1,11 +1,11 @@
 package main
 
 import (
-	"context"
 	"flag"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud"
-	"log"
 )
 
 func main() {
@@ -15,18 +15,14 @@ func main() {
 	//this will enable you to debug when running plans from cli.
 	flag.BoolVar(&debugMode, "debuggable", false, "set to true to run the provider with support for debuggers like delve/goland")
 	flag.Parse()
-
-	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/ionos-cloud/ionoscloud",
-			&plugin.ServeOpts{
-				ProviderFunc: ionoscloud.Provider,
-			})
-		if err != nil {
-			log.Println(err.Error())
-		}
-	} else {
-		plugin.Serve(&plugin.ServeOpts{
-			ProviderFunc: ionoscloud.Provider,
-		})
+	//log levels need to be shown correctly in terraform when enabling TF_LOG
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+	var serveOpts = plugin.ServeOpts{
+		ProviderFunc: ionoscloud.Provider,
 	}
+	if debugMode {
+		serveOpts.ProviderAddr = "registry.terraform.io/ionos-cloud/ionoscloud"
+		serveOpts.Debug = debugMode
+	}
+	plugin.Serve(&serveOpts)
 }

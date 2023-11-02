@@ -3,12 +3,17 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
-	"time"
 )
 
 func resourcePrivateCrossConnect() *schema.Resource {
@@ -22,14 +27,14 @@ func resourcePrivateCrossConnect() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "The desired name for the private cross-connect",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "The desired name",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"description": {
 				Type:        schema.TypeString,
-				Description: "The desired description for the private cross-connect",
+				Description: "The desired description",
 				Optional:    true,
 			},
 			"connectable_datacenters": {
@@ -59,7 +64,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 			},
 			"peers": {
 				Type:        schema.TypeList,
-				Description: "A list containing the details of all datacenter cross-connected through this private cross-connect",
+				Description: "A list containing the details of all cross-connected datacenters",
 				Computed:    true,
 				Optional:    true,
 				Elem: &schema.Resource{
@@ -98,7 +103,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 }
 
 func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	name := d.Get("name").(string)
 	pcc := ionoscloud.PrivateCrossConnect{
@@ -118,7 +123,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating private PCC: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error creating cross connect: %w", err))
 		return diags
 	}
 
@@ -132,17 +137,17 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching PCC %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching PCC %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -155,7 +160,7 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.PrivateCrossConnect{}
 	name := d.Get("name").(string)
@@ -185,11 +190,11 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating PCC %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while updating PCC %s: %w", d.Id(), err))
 		return diags
 	}
 	if diags := waitForPCCToBeReady(ctx, d, client); diags != nil {
@@ -200,17 +205,17 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.PrivateCrossConnectsApi.PccsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting PCC %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting PCC %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -220,7 +225,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 		pccDeleted, dsErr := privateCrossConnectDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while deleting PCC %s: %s", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error while deleting PCC %s: %w", d.Id(), err))
 			return diags
 		}
 
@@ -230,7 +235,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] delete timed out")
@@ -243,7 +248,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	pccId := d.Id()
 
@@ -251,7 +256,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find PCC %q", pccId)
 		}
@@ -282,9 +287,9 @@ func privateCrossConnectReady(ctx context.Context, client *ionoscloud.APIClient,
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking PCC status: %s", err)
+		return true, fmt.Errorf("error checking PCC status: %w", err)
 	}
-	return *rsp.Metadata.State == "AVAILABLE", nil
+	return strings.EqualFold(*rsp.Metadata.State, constant.Available), nil
 }
 
 func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
@@ -292,10 +297,10 @@ func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClien
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking PCC deletion status: %s", err)
+		return true, fmt.Errorf("error checking PCC deletion status: %w", err)
 	}
 	return false, nil
 }
@@ -307,7 +312,7 @@ func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *io
 		pccReady, rsErr := privateCrossConnectReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of PCC %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of PCC %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
@@ -317,7 +322,7 @@ func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *io
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] update timed out")

@@ -1,4 +1,5 @@
 ---
+subcategory: "NAT Gateway"
 layout: "ionoscloud"
 page_title: "IonosCloud: natgateway"
 sidebar_current: "docs-resource-natgateway"
@@ -8,19 +9,38 @@ description: |-
 
 # ionoscloud_natgateway
 
-Manages a Nat Gateway on IonosCloud.
+Manages a **Nat Gateway** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
+resource "ionoscloud_datacenter" "example" {
+    name                    = "Datacenter Example"
+    location                = "us/las"
+    description             = "Datacenter Description"
+    sec_auth_protection     = false
+}
+
+resource "ionoscloud_ipblock" "example" {
+    location                = "us/las"
+    size                    = 2
+    name                    = "IP Block Example"
+}
+
+resource "ionoscloud_lan" "example" {
+    datacenter_id           = ionoscloud_datacenter.example.id
+    public                  = true
+    name                    = "Lan Example"
+}
+
 resource "ionoscloud_natgateway" "example" {
-  datacenter_id = ionoscloud_datacenter.example.id
-  name          = "example"
-  public_ips    =  ["${ionoscloud_ipblock.example.ips[0]}", "${ionoscloud_ipblock.example.ips[1]}"]
-  lans {
-     id          = ionoscloud_lan.example.id
-     gateway_ips = [ "10.11.2.5/32"]
-  }
+    datacenter_id           = ionoscloud_datacenter.example.id
+    name                    = "example"
+    public_ips              = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
+     lans {
+        id                  = ionoscloud_lan.example.id
+        gateway_ips         = [ "10.11.2.5"]
+     }
 }
 ```
 

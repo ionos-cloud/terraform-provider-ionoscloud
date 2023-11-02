@@ -1,13 +1,16 @@
-//go:build waiting_for_vdc
-// +build waiting_for_vdc
+//go:build all || waiting_for_vdc
+// +build all waiting_for_vdc
 
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -21,6 +24,7 @@ func TestAccLoadbalancerBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckLoadbalancerDestroyCheck,
 		Steps: []resource.TestStep{
@@ -44,7 +48,7 @@ func TestAccLoadbalancerBasic(t *testing.T) {
 }
 
 func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -62,8 +66,8 @@ func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while checking the destruction of load balancer %s: %s",
+			if !httpNotFound(apiResponse) {
+				return fmt.Errorf("an error occurred while checking the destruction of load balancer %s: %w",
 					rs.Primary.ID, err)
 			}
 		} else {
@@ -90,7 +94,7 @@ func testAccCheckLoadbalancerAttributes(n string, name string) resource.TestChec
 
 func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -135,8 +139,8 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "ubuntu-16.04"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
   volume {
     name = "system"
     size = 14
@@ -166,7 +170,8 @@ resource "ionoscloud_loadbalancer" "loadbalancer" {
   nic_ids = ["${ionoscloud_nic.database_nic.id}"]
   name = "%s"
   dhcp = true
-}`
+}
+` + ServerImagePasswordUpdated
 
 const testAccCheckLoadbalancerConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
@@ -181,8 +186,8 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "ubuntu-16.04"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 14
@@ -195,17 +200,7 @@ resource "ionoscloud_server" "webserver" {
   }
 }
 
-resource "ionoscloud_nic" "database_nic1" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
-  lan = "2"
-  dhcp = true
-  firewall_active = true
-  name = "updated"
-  lifecycle {
-    ignore_changes = [ lan ]
-  }
-}
+` + ServerImagePassword + `
 
 resource "ionoscloud_nic" "database_nic2" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
@@ -219,9 +214,9 @@ resource "ionoscloud_nic" "database_nic2" {
   }
 }
 
-resource "ionoscloud_loadbalancer" "example" {
+resource "ionoscloud_loadbalancer" "loadbalancer" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  nic_ids = ["${ionoscloud_nic.database_nic1.id}","${ionoscloud_nic.database_nic2.id}"]
+  nic_ids = ["${ionoscloud_nic.database_nic2.id}"]
   name = "updated"
   dhcp = true
 }`

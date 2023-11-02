@@ -1,13 +1,20 @@
+//go:build compute || all || s3key
+
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"testing"
 )
 
 func TestAccS3KeyBasic(t *testing.T) {
@@ -23,29 +30,38 @@ func TestAccS3KeyBasic(t *testing.T) {
 			{
 				Config: testAccChecks3KeyConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
-					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "secret_key"),
-					resource.TestCheckResourceAttr(S3KeyResource+"."+S3KeyTestResource, "active", "false"),
+					testAccChecks3KeyExists(constant.S3KeyResource+"."+constant.S3KeyTestResource, &s3Key),
+					resource.TestCheckResourceAttrSet(constant.S3KeyResource+"."+constant.S3KeyTestResource, "secret_key"),
+					resource.TestCheckResourceAttr(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", "true"),
 				),
 			},
 			{
-				Config: testAccChecks3KeyConfigUpdate,
+				Config: testAccDataSourceS3KeyMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
-					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "secret_key"),
-					resource.TestCheckResourceAttr(S3KeyResource+"."+S3KeyTestResource, "active", "true"),
+					resource.TestCheckResourceAttrSet(constant.S3KeyResource+"."+constant.S3KeyTestResource, "id"),
+					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "id", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "id"),
+					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "secret", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "secret"),
+					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "active"),
 				),
 			},
+			//{
+			//	Config: testAccChecks3KeyConfigUpdate,
+			//	Check: resource.ComposeTestCheckFunc(
+			//		testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
+			//		resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "secret_key"),
+			//		resource.TestCheckResourceAttr(S3KeyResource+"."+S3KeyTestResource, "active", "true"),
+			//	),
+			//},
 		},
 	})
 }
 
 func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != S3KeyResource {
+		if rs.Type != constant.S3KeyResource {
 			continue
 		}
 
@@ -54,8 +70,8 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while fetching s3 key %s: %s", rs.Primary.ID, err)
+			if !httpNotFound(apiResponse) {
+				return fmt.Errorf("an error occurred while fetching s3 key %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("s3 Key still exists %s", rs.Primary.ID)
@@ -68,7 +84,7 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -99,31 +115,41 @@ func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestChe
 }
 
 var testAccChecks3KeyConfigBasic = `
-resource ` + UserResource + ` "example" {
+resource ` + constant.UserResource + ` "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "` + GenerateEmail() + `"
+  email = "` + utils.GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
 }
 
-resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
-  user_id    = ` + UserResource + `.example.id
-  active     = false
-}`
-
-var testAccChecks3KeyConfigUpdate = `
-resource ` + UserResource + ` "example" {
-  first_name = "terraform"
-  last_name = "test"
-  email = "` + GenerateEmail() + `"
-  password = "abc123-321CBA"
-  administrator = false
-  force_sec_auth= false
-}
-
-resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
-  user_id    = ` + UserResource + `.example.id
+resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
+  user_id    = ` + constant.UserResource + `.example.id
   active     = true
 }`
+
+// this step is commented since the current behaviour of s3 keys is that when you create an s3 key with active set on false
+// it is set to true by the API, so an update from false to true can not be done
+
+// var testAccChecks3KeyConfigUpdate = `
+//
+//	resource ` + UserResource + ` "example" {
+//	 first_name = "terraform"
+//	 last_name = "test"
+//	 email = "` + utils.GenerateEmail() + `"
+//	 password = "abc123-321CBA"
+//	 administrator = false
+//	 force_sec_auth= false
+//	}
+//
+//	resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
+//	 user_id    = ` + UserResource + `.example.id
+//	 active     = true
+//	}`
+var testAccDataSourceS3KeyMatchId = testAccChecks3KeyConfigBasic + `
+data ` + constant.S3KeyResource + ` ` + constant.S3KeyDataSourceById + ` {
+user_id    	= ` + constant.UserResource + `.example.id
+id			= ` + constant.S3KeyResource + `.` + constant.S3KeyTestResource + `.id
+}
+`

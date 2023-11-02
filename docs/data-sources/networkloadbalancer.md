@@ -1,21 +1,33 @@
 ---
+subcategory: "Network Load Balancer"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_networkloadbalancer"
 sidebar_current: "docs-ionoscloud-datasource-networkloadbalancer"
 description: |-
-Get information on a Network Load Balancer
+  Get information on a Network Load Balancer
 ---
 
 # ionoscloud_networkloadbalancer
 
-The network load balancer data source can be used to search for and return existing network load balancers.
+The **Network Load Balancer data source** can be used to search for and return existing network load balancers.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
 data "ionoscloud_networkloadbalancer" "example" {
   datacenter_id = ionoscloud_datacenter.example.id
-  name			= "example_"
+  id			= <networkloadbalancer_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_networkloadbalancer" "example" {
+  datacenter_id = ionoscloud_datacenter.example.id
+  name			= "Network Load Balancer Example"
 }
 ```
 

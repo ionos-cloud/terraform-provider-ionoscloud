@@ -1,26 +1,36 @@
 ---
+subcategory: "Managed Kubernetes"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_k8s_cluster"
 sidebar_current: "docs-ionoscloud-datasource-k8s-cluster"
 description: |-
-Get information on a IonosCloud K8s Cluster
+  Get information on a IonosCloud K8s Cluster
 ---
 
 # ionoscloud\_k8s\_cluster
 
-The k8s cluster data source can be used to search for and return existing k8s clusters.
+The **k8s Cluster data source** can be used to search for and return existing k8s clusters.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
-
+### By ID
 ```hcl
-data "ionoscloud_k8s_cluster" "k8s_cluster_example" {
-  name     = "My_Cluster"
+data "ionoscloud_k8s_cluster" "example" {
+  id      = <cluster_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_k8s_cluster" "example" {
+  name     = "K8s Cluster Example"
 }
 ```
 
 ## Argument Reference
 
-* `name` - (Optional) Name or an existing cluster that you want to search for.
+* `name` - (Optional) Name of an existing cluster that you want to search for.
 * `id` - (Optional) ID of the cluster you want to search for.
 
 Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.
@@ -37,8 +47,6 @@ The following attributes are returned by the datasource:
   * `day_of_the_week` - Day of the week when maintenance is allowed
 * `available_upgrade_versions` - A list of available versions for upgrading the cluster
 * `viable_node_pool_versions` - A list of versions that may be used for node pools under this cluster
-* `public` - The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase
-* `gateway_ip` - The IP address of the gateway used by the cluster. This is mandatory when `public` is set to `false` and should not be provided otherwise.
 * `state` - one of "AVAILABLE",
   "INACTIVE",
   "BUSY",
@@ -129,14 +137,16 @@ provider "kubernetes" {
 
 **NOTE**: Dumping `kube_config` data into files poses a security risk.
 
+**NOTE**: Using `sensitive_content` for `local_file` does not show the data written to the file during the plan phase.
+
 ```
 data "ionoscloud_k8s_cluster" "k8s_cluster_example" {
   name     = "k8s-demo"
 }
 
-resource "null_resource" "getcfg" {
-  provisioner "local-exec" {
-    command = "echo \"${yamlencode(data.ionoscloud_k8s_cluster.k8s_cluster_example.kube_config)}\" > kubecfg.yaml"
-  }
+resource "local_file" "kubeconfig" {
+    sensitive_content     = yamlencode(jsondecode(data.ionoscloud_k8s_cluster.k8s_cluster_example.kube_config))
+    filename              = "kubeconfig.yaml"
 }
+
 ```

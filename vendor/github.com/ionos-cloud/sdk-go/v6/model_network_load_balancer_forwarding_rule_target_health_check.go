@@ -16,16 +16,34 @@ import (
 
 // NetworkLoadBalancerForwardingRuleTargetHealthCheck struct for NetworkLoadBalancerForwardingRuleTargetHealthCheck
 type NetworkLoadBalancerForwardingRuleTargetHealthCheck struct {
-	// Check specifies whether the target VM's health is checked. If turned off, a target VM is always considered available. If turned on, the target VM is available when accepting periodic TCP connections, to ensure that it is really able to serve requests. The address and port to send the tests to are those of the target VM. The health check only consists of a connection attempt.
+	// Makes the target available only if it accepts periodic health check TCP connection attempts; when turned off, the target is considered always available. The health check only consists of a connection attempt to the address and port of the target.
 	Check *bool `json:"check,omitempty"`
-	// CheckInterval determines the duration (in milliseconds) between consecutive health checks. If unspecified a default of 2000 ms is used.
+	// The interval in milliseconds between consecutive health checks; default is 2000.
 	CheckInterval *int32 `json:"checkInterval,omitempty"`
-	// Maintenance specifies if a target VM should be marked as down, even if it is not.
+	// Maintenance mode prevents the target from receiving balanced traffic.
 	Maintenance *bool `json:"maintenance,omitempty"`
 }
 
+// NewNetworkLoadBalancerForwardingRuleTargetHealthCheck instantiates a new NetworkLoadBalancerForwardingRuleTargetHealthCheck object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNetworkLoadBalancerForwardingRuleTargetHealthCheck() *NetworkLoadBalancerForwardingRuleTargetHealthCheck {
+	this := NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
+
+	return &this
+}
+
+// NewNetworkLoadBalancerForwardingRuleTargetHealthCheckWithDefaults instantiates a new NetworkLoadBalancerForwardingRuleTargetHealthCheck object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNetworkLoadBalancerForwardingRuleTargetHealthCheckWithDefaults() *NetworkLoadBalancerForwardingRuleTargetHealthCheck {
+	this := NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
+	return &this
+}
+
 // GetCheck returns the Check field value
-// If the value is explicit nil, the zero value for bool will be returned
+// If the value is explicit nil, nil is returned
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheck() *bool {
 	if o == nil {
 		return nil
@@ -63,7 +81,7 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) HasCheck() bool {
 }
 
 // GetCheckInterval returns the CheckInterval field value
-// If the value is explicit nil, the zero value for int32 will be returned
+// If the value is explicit nil, nil is returned
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheckInterval() *int32 {
 	if o == nil {
 		return nil
@@ -101,7 +119,7 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) HasCheckInterval() 
 }
 
 // GetMaintenance returns the Maintenance field value
-// If the value is explicit nil, the zero value for bool will be returned
+// If the value is explicit nil, nil is returned
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetMaintenance() *bool {
 	if o == nil {
 		return nil
@@ -140,7 +158,6 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) HasMaintenance() bo
 
 func (o NetworkLoadBalancerForwardingRuleTargetHealthCheck) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Check != nil {
 		toSerialize["check"] = o.Check
 	}
@@ -152,6 +169,7 @@ func (o NetworkLoadBalancerForwardingRuleTargetHealthCheck) MarshalJSON() ([]byt
 	if o.Maintenance != nil {
 		toSerialize["maintenance"] = o.Maintenance
 	}
+
 	return json.Marshal(toSerialize)
 }
 

@@ -20,8 +20,26 @@ type NetworkLoadBalancerEntities struct {
 	Forwardingrules *NetworkLoadBalancerForwardingRules `json:"forwardingrules,omitempty"`
 }
 
+// NewNetworkLoadBalancerEntities instantiates a new NetworkLoadBalancerEntities object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNetworkLoadBalancerEntities() *NetworkLoadBalancerEntities {
+	this := NetworkLoadBalancerEntities{}
+
+	return &this
+}
+
+// NewNetworkLoadBalancerEntitiesWithDefaults instantiates a new NetworkLoadBalancerEntities object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNetworkLoadBalancerEntitiesWithDefaults() *NetworkLoadBalancerEntities {
+	this := NetworkLoadBalancerEntities{}
+	return &this
+}
+
 // GetFlowlogs returns the Flowlogs field value
-// If the value is explicit nil, the zero value for FlowLogs will be returned
+// If the value is explicit nil, nil is returned
 func (o *NetworkLoadBalancerEntities) GetFlowlogs() *FlowLogs {
 	if o == nil {
 		return nil
@@ -59,7 +77,7 @@ func (o *NetworkLoadBalancerEntities) HasFlowlogs() bool {
 }
 
 // GetForwardingrules returns the Forwardingrules field value
-// If the value is explicit nil, the zero value for NetworkLoadBalancerForwardingRules will be returned
+// If the value is explicit nil, nil is returned
 func (o *NetworkLoadBalancerEntities) GetForwardingrules() *NetworkLoadBalancerForwardingRules {
 	if o == nil {
 		return nil
@@ -98,7 +116,6 @@ func (o *NetworkLoadBalancerEntities) HasForwardingrules() bool {
 
 func (o NetworkLoadBalancerEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Flowlogs != nil {
 		toSerialize["flowlogs"] = o.Flowlogs
 	}
@@ -106,6 +123,7 @@ func (o NetworkLoadBalancerEntities) MarshalJSON() ([]byte, error) {
 	if o.Forwardingrules != nil {
 		toSerialize["forwardingrules"] = o.Forwardingrules
 	}
+
 	return json.Marshal(toSerialize)
 }
 

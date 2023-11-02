@@ -3,11 +3,15 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func resourceDatacenter() *schema.Resource {
@@ -23,14 +27,14 @@ func resourceDatacenter() *schema.Resource {
 
 			//Datacenter parameters
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"location": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -47,7 +51,7 @@ func resourceDatacenter() *schema.Resource {
 				Computed: true,
 			},
 			"features": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -77,6 +81,11 @@ func resourceDatacenter() *schema.Resource {
 					},
 				},
 			},
+			"ipv6_cidr_block": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Auto-assigned /56 IPv6 CIDR block, if IPv6 is enabled for the datacenter. Read-only",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -84,7 +93,7 @@ func resourceDatacenter() *schema.Resource {
 
 func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterName := d.Get("name").(string)
 	datacenterLocation := d.Get("location").(string)
@@ -110,7 +119,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating data center (%s) (%s)", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error creating data center (%s) (%w)", d.Id(), err))
 		return diags
 	}
 	d.SetId(*createdDatacenter.Id)
@@ -118,10 +127,10 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	log.Printf("[INFO] DataCenter Id: %s", d.Id())
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 
 	if errState != nil {
-		if IsRequestFailed(err) {
+		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
@@ -134,17 +143,17 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching a data center ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching a data center ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -157,7 +166,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	obj := ionoscloud.DatacenterProperties{}
 
 	if d.HasChange("name") {
@@ -187,12 +196,12 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while update the data center ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while update the data center ID %s %w", d.Id(), err))
 		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -203,7 +212,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -214,7 +223,7 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -225,7 +234,7 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Id()
 
@@ -233,7 +242,7 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find datacenter %q", dcId)
 		}
@@ -259,42 +268,42 @@ func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter
 		if datacenter.Properties.Location != nil {
 			err := d.Set("location", *datacenter.Properties.Location)
 			if err != nil {
-				return fmt.Errorf("error while setting location property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting location property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
 		if datacenter.Properties.Description != nil {
 			err := d.Set("description", *datacenter.Properties.Description)
 			if err != nil {
-				return fmt.Errorf("error while setting description property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting description property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
 		if datacenter.Properties.Name != nil {
 			err := d.Set("name", *datacenter.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
 		if datacenter.Properties.Version != nil {
 			err := d.Set("version", *datacenter.Properties.Version)
 			if err != nil {
-				return fmt.Errorf("error while setting version property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting version property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
 		if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
 			err := d.Set("features", *datacenter.Properties.Features)
 			if err != nil {
-				return fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting features property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
 		if datacenter.Properties.SecAuthProtection != nil {
 			err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
 			if err != nil {
-				return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
@@ -323,11 +332,19 @@ func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter
 
 				if len(cpuArchitectures) > 0 {
 					if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-						return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
+						return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %w", d.Id(), err)
 					}
 				}
 			}
 		}
+
+		if datacenter.Properties.Ipv6CidrBlock != nil {
+			err := d.Set("ipv6_cidr_block", *datacenter.Properties.Ipv6CidrBlock)
+			if err != nil {
+				return fmt.Errorf("error while setting ipv6_cidr_block property for datacenter %s: %w", d.Id(), err)
+			}
+		}
+
 	}
 
 	return nil

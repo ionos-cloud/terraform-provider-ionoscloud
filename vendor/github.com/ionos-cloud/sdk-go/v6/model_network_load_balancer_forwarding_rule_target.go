@@ -16,17 +16,77 @@ import (
 
 // NetworkLoadBalancerForwardingRuleTarget struct for NetworkLoadBalancerForwardingRuleTarget
 type NetworkLoadBalancerForwardingRuleTarget struct {
-	// IP of a balanced target VM
-	Ip *string `json:"ip"`
-	// Port of the balanced target service. (range: 1 to 65535)
-	Port *int32 `json:"port"`
-	// Weight parameter is used to adjust the target VM's weight relative to other target VMs. All target VMs will receive a load proportional to their weight relative to the sum of all weights, so the higher the weight, the higher the load. The default weight is 1, and the maximal value is 256. A value of 0 means the target VM will not participate in load-balancing but will still accept persistent connections. If this parameter is used to distribute the load according to target VM's capacity, it is recommended to start with values which can both grow and shrink, for instance between 10 and 100 to leave enough room above and below for later adjustments.
-	Weight      *int32                                              `json:"weight"`
 	HealthCheck *NetworkLoadBalancerForwardingRuleTargetHealthCheck `json:"healthCheck,omitempty"`
+	// The IP of the balanced target VM.
+	Ip *string `json:"ip"`
+	// The port of the balanced target service; valid range is 1 to 65535.
+	Port *int32 `json:"port"`
+	// Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1. Targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best to assign weights in the middle of the range to leave room for later adjustments.
+	Weight *int32 `json:"weight"`
+}
+
+// NewNetworkLoadBalancerForwardingRuleTarget instantiates a new NetworkLoadBalancerForwardingRuleTarget object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNetworkLoadBalancerForwardingRuleTarget(ip string, port int32, weight int32) *NetworkLoadBalancerForwardingRuleTarget {
+	this := NetworkLoadBalancerForwardingRuleTarget{}
+
+	this.Ip = &ip
+	this.Port = &port
+	this.Weight = &weight
+
+	return &this
+}
+
+// NewNetworkLoadBalancerForwardingRuleTargetWithDefaults instantiates a new NetworkLoadBalancerForwardingRuleTarget object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNetworkLoadBalancerForwardingRuleTargetWithDefaults() *NetworkLoadBalancerForwardingRuleTarget {
+	this := NetworkLoadBalancerForwardingRuleTarget{}
+	return &this
+}
+
+// GetHealthCheck returns the HealthCheck field value
+// If the value is explicit nil, nil is returned
+func (o *NetworkLoadBalancerForwardingRuleTarget) GetHealthCheck() *NetworkLoadBalancerForwardingRuleTargetHealthCheck {
+	if o == nil {
+		return nil
+	}
+
+	return o.HealthCheck
+
+}
+
+// GetHealthCheckOk returns a tuple with the HealthCheck field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NetworkLoadBalancerForwardingRuleTarget) GetHealthCheckOk() (*NetworkLoadBalancerForwardingRuleTargetHealthCheck, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.HealthCheck, true
+}
+
+// SetHealthCheck sets field value
+func (o *NetworkLoadBalancerForwardingRuleTarget) SetHealthCheck(v NetworkLoadBalancerForwardingRuleTargetHealthCheck) {
+
+	o.HealthCheck = &v
+
+}
+
+// HasHealthCheck returns a boolean if a field has been set.
+func (o *NetworkLoadBalancerForwardingRuleTarget) HasHealthCheck() bool {
+	if o != nil && o.HealthCheck != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetIp returns the Ip field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *NetworkLoadBalancerForwardingRuleTarget) GetIp() *string {
 	if o == nil {
 		return nil
@@ -64,7 +124,7 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasIp() bool {
 }
 
 // GetPort returns the Port field value
-// If the value is explicit nil, the zero value for int32 will be returned
+// If the value is explicit nil, nil is returned
 func (o *NetworkLoadBalancerForwardingRuleTarget) GetPort() *int32 {
 	if o == nil {
 		return nil
@@ -102,7 +162,7 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasPort() bool {
 }
 
 // GetWeight returns the Weight field value
-// If the value is explicit nil, the zero value for int32 will be returned
+// If the value is explicit nil, nil is returned
 func (o *NetworkLoadBalancerForwardingRuleTarget) GetWeight() *int32 {
 	if o == nil {
 		return nil
@@ -139,46 +199,11 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasWeight() bool {
 	return false
 }
 
-// GetHealthCheck returns the HealthCheck field value
-// If the value is explicit nil, the zero value for NetworkLoadBalancerForwardingRuleTargetHealthCheck will be returned
-func (o *NetworkLoadBalancerForwardingRuleTarget) GetHealthCheck() *NetworkLoadBalancerForwardingRuleTargetHealthCheck {
-	if o == nil {
-		return nil
-	}
-
-	return o.HealthCheck
-
-}
-
-// GetHealthCheckOk returns a tuple with the HealthCheck field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *NetworkLoadBalancerForwardingRuleTarget) GetHealthCheckOk() (*NetworkLoadBalancerForwardingRuleTargetHealthCheck, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.HealthCheck, true
-}
-
-// SetHealthCheck sets field value
-func (o *NetworkLoadBalancerForwardingRuleTarget) SetHealthCheck(v NetworkLoadBalancerForwardingRuleTargetHealthCheck) {
-
-	o.HealthCheck = &v
-
-}
-
-// HasHealthCheck returns a boolean if a field has been set.
-func (o *NetworkLoadBalancerForwardingRuleTarget) HasHealthCheck() bool {
-	if o != nil && o.HealthCheck != nil {
-		return true
-	}
-
-	return false
-}
-
 func (o NetworkLoadBalancerForwardingRuleTarget) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.HealthCheck != nil {
+		toSerialize["healthCheck"] = o.HealthCheck
+	}
 
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
@@ -192,9 +217,6 @@ func (o NetworkLoadBalancerForwardingRuleTarget) MarshalJSON() ([]byte, error) {
 		toSerialize["weight"] = o.Weight
 	}
 
-	if o.HealthCheck != nil {
-		toSerialize["healthCheck"] = o.HealthCheck
-	}
 	return json.Marshal(toSerialize)
 }
 

@@ -20,8 +20,26 @@ type RemoteConsoleUrl struct {
 	Url *string `json:"url,omitempty"`
 }
 
+// NewRemoteConsoleUrl instantiates a new RemoteConsoleUrl object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewRemoteConsoleUrl() *RemoteConsoleUrl {
+	this := RemoteConsoleUrl{}
+
+	return &this
+}
+
+// NewRemoteConsoleUrlWithDefaults instantiates a new RemoteConsoleUrl object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewRemoteConsoleUrlWithDefaults() *RemoteConsoleUrl {
+	this := RemoteConsoleUrl{}
+	return &this
+}
+
 // GetUrl returns the Url field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *RemoteConsoleUrl) GetUrl() *string {
 	if o == nil {
 		return nil
@@ -60,10 +78,10 @@ func (o *RemoteConsoleUrl) HasUrl() bool {
 
 func (o RemoteConsoleUrl) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Url != nil {
 		toSerialize["url"] = o.Url
 	}
+
 	return json.Marshal(toSerialize)
 }
 

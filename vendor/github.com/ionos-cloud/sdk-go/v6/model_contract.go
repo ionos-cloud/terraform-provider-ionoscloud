@@ -16,51 +16,33 @@ import (
 
 // Contract struct for Contract
 type Contract struct {
-	// The type of the resource.
-	Type       *Type               `json:"type,omitempty"`
 	Properties *ContractProperties `json:"properties"`
+	// The type of the resource.
+	Type *Type `json:"type,omitempty"`
 }
 
-// GetType returns the Type field value
-// If the value is explicit nil, the zero value for Type will be returned
-func (o *Contract) GetType() *Type {
-	if o == nil {
-		return nil
-	}
+// NewContract instantiates a new Contract object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewContract(properties ContractProperties) *Contract {
+	this := Contract{}
 
-	return o.Type
+	this.Properties = &properties
 
+	return &this
 }
 
-// GetTypeOk returns a tuple with the Type field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Contract) GetTypeOk() (*Type, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Type, true
-}
-
-// SetType sets field value
-func (o *Contract) SetType(v Type) {
-
-	o.Type = &v
-
-}
-
-// HasType returns a boolean if a field has been set.
-func (o *Contract) HasType() bool {
-	if o != nil && o.Type != nil {
-		return true
-	}
-
-	return false
+// NewContractWithDefaults instantiates a new Contract object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewContractWithDefaults() *Contract {
+	this := Contract{}
+	return &this
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for ContractProperties will be returned
+// If the value is explicit nil, nil is returned
 func (o *Contract) GetProperties() *ContractProperties {
 	if o == nil {
 		return nil
@@ -97,16 +79,54 @@ func (o *Contract) HasProperties() bool {
 	return false
 }
 
+// GetType returns the Type field value
+// If the value is explicit nil, nil is returned
+func (o *Contract) GetType() *Type {
+	if o == nil {
+		return nil
+	}
+
+	return o.Type
+
+}
+
+// GetTypeOk returns a tuple with the Type field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Contract) GetTypeOk() (*Type, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Type, true
+}
+
+// SetType sets field value
+func (o *Contract) SetType(v Type) {
+
+	o.Type = &v
+
+}
+
+// HasType returns a boolean if a field has been set.
+func (o *Contract) HasType() bool {
+	if o != nil && o.Type != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o Contract) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Properties != nil {
+		toSerialize["properties"] = o.Properties
+	}
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
 
-	if o.Properties != nil {
-		toSerialize["properties"] = o.Properties
-	}
 	return json.Marshal(toSerialize)
 }
 

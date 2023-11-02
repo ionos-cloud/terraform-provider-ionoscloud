@@ -1,10 +1,17 @@
+//go:build compute || all || volume
+
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -17,31 +24,85 @@ func TestAccVolumeBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
+				//added to test - #266. crash when using image_alias on volume
+				Config:      testAccCheckVolumeConfigBasicErrorNoPassOrSSHPath,
+				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided`),
+			},
+			{
 				Config: testAccCheckVolumeConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVolumeExists(VolumeResource+"."+VolumeTestResource, &volume),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "name", VolumeTestResource),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "size", "5"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "Debian-10-cloud-init.qcow2"),
-					testImageNotNull(VolumeResource, "image")),
+					testAccCheckVolumeExists(constant.VolumeResource+"."+constant.VolumeTestResource, &volume),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "name", constant.VolumeTestResource),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "size", "5"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "bus", "VIRTIO"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttrSet(constant.VolumeResource+"."+constant.VolumeTestResource, "image_name"),
+					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_server", constant.ServerResource+"."+constant.ServerTestResource, "id"),
+					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
+					utils.TestImageNotNull(constant.VolumeResource, "image")),
+			},
+			{
+				Config: testAccDataSourceVolumeMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "name", constant.VolumeResource+"."+constant.VolumeTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "image", constant.VolumeResource+"."+constant.VolumeTestResource, "image"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "image_alias", constant.VolumeResource+"."+constant.VolumeTestResource, "image_alias"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "disk_type", constant.VolumeResource+"."+constant.VolumeTestResource, "disk_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "sshkey", constant.VolumeResource+"."+constant.VolumeTestResource, "sshkey"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "bus", constant.VolumeResource+"."+constant.VolumeTestResource, "bus"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "availability_zone", constant.VolumeResource+"."+constant.VolumeTestResource, "availability_zone"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "cpu_hot_plug", constant.VolumeResource+"."+constant.VolumeTestResource, "cpu_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "ram_hot_plug", constant.VolumeResource+"."+constant.VolumeTestResource, "ram_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "nic_hot_plug", constant.VolumeResource+"."+constant.VolumeTestResource, "nic_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "nic_hot_unplug", constant.VolumeResource+"."+constant.VolumeTestResource, "nic_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "disc_virtio_hot_plug", constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "disc_virtio_hot_unplug", constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "device_number", constant.VolumeResource+"."+constant.VolumeTestResource, "device_number"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "boot_server", constant.ServerResource+"."+constant.ServerTestResource, "id"),
+				),
+			},
+			{
+				Config: testAccDataSourceVolumeMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "name", constant.VolumeResource+"."+constant.VolumeTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "image", constant.VolumeResource+"."+constant.VolumeTestResource, "image"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "image_alias", constant.VolumeResource+"."+constant.VolumeTestResource, "image_alias"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "disk_type", constant.VolumeResource+"."+constant.VolumeTestResource, "disk_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "sshkey", constant.VolumeResource+"."+constant.VolumeTestResource, "sshkey"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "bus", constant.VolumeResource+"."+constant.VolumeTestResource, "bus"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "availability_zone", constant.VolumeResource+"."+constant.VolumeTestResource, "availability_zone"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "cpu_hot_plug", constant.VolumeResource+"."+constant.VolumeTestResource, "cpu_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "ram_hot_plug", constant.VolumeResource+"."+constant.VolumeTestResource, "ram_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "nic_hot_plug", constant.VolumeResource+"."+constant.VolumeTestResource, "nic_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "nic_hot_unplug", constant.VolumeResource+"."+constant.VolumeTestResource, "nic_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "disc_virtio_hot_plug", constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_plug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "disc_virtio_hot_unplug", constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "device_number", constant.VolumeResource+"."+constant.VolumeTestResource, "device_number"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "boot_server", constant.ServerResource+"."+constant.ServerTestResource, "id"),
+				),
+			},
+			{
+				Config:      testAccDataSourceVolumeWrongNameError,
+				ExpectError: regexp.MustCompile(`no volume found with the specified criteria: name`),
 			},
 			{
 				Config: testAccCheckVolumeConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "size", "6"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "Debian-10-cloud-init.qcow2"),
-					testImageNotNull(VolumeResource, "image")),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "size", "6"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "bus", "VIRTIO"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttrSet(constant.VolumeResource+"."+constant.VolumeTestResource, "image_name"),
+					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_server", constant.ServerResource+"."+constant.ServerTestResource+"updated", "id"),
+					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "image_password", constant.RandomPassword+".server_image_password_updated", "result"),
+					utils.TestImageNotNull(constant.VolumeResource, "image")),
 			},
 		},
 	})
@@ -54,24 +115,25 @@ func TestAccVolumeNoPassword(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckVolumeConfigNoPassword,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVolumeExists(VolumeResource+"."+VolumeTestResource, &volume),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "name", VolumeTestResource),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "size", "4"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "licence_type", "unknown"),
+					testAccCheckVolumeExists(constant.VolumeResource+"."+constant.VolumeTestResource, &volume),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "name", constant.VolumeTestResource),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "size", "4"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "licence_type", "unknown"),
 				)},
 			{
 				Config: testAccCheckVolumeConfigNoPasswordUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVolumeExists(VolumeResource+"."+VolumeTestResource, &volume),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "size", "5"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "licence_type", "other"),
+					testAccCheckVolumeExists(constant.VolumeResource+"."+constant.VolumeTestResource, &volume),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "size", "5"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "licence_type", "other"),
 				)},
 		},
 	})
@@ -84,25 +146,28 @@ func TestAccVolumeResolveImageName(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckVolumeResolveImageName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVolumeExists(VolumeResource+"."+VolumeTestResource, &volume),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "name", VolumeTestResource),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "size", "5"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
-					testImageNotNull(VolumeResource, "image"))},
+					testAccCheckVolumeExists(constant.VolumeResource+"."+constant.VolumeTestResource, &volume),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "name", constant.VolumeTestResource),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "size", "5"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "bus", "VIRTIO"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
+					utils.TestImageNotNull(constant.VolumeResource, "image"))},
 		},
 	})
 }
 
 func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
@@ -110,7 +175,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != VolumeResource {
+		if rs.Type != constant.VolumeResource {
 			continue
 		}
 
@@ -118,7 +183,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("volume still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -131,7 +196,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 
 func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -165,186 +230,223 @@ func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.Test
 	}
 }
 
-func testImageNotNull(resource, attribute string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != resource {
-				continue
-			}
-
-			image := rs.Primary.Attributes[attribute]
-
-			if image == "" {
-				return fmt.Errorf("%s is empty, expected an UUID", attribute)
-			} else if !IsValidUUID(image) {
-				return fmt.Errorf("%s should be a valid UUID, got: %#v", attribute, image)
-			}
-
-		}
-		return nil
-	}
-}
-
-const testAccCheckVolumeConfigBasic = testAccCheckLanConfigBasic + testAccCheckBackupUnitConfigBasic + `
-resource ` + ServerResource + ` ` + ServerTestResource + `{
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+const testAccCheckVolumeConfigBasic = testAccCheckLanConfigBasic + `
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + `{
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
     disk_type = "HDD"
   }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     dhcp = true
     firewall_active = true
   }
 }
-resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
-	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
+	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
 	availability_zone = "ZONE_1"
-	name = "` + VolumeTestResource + `"
+	name = "` + constant.VolumeTestResource + `"
 	size = 5
 	disk_type = "SSD Standard"
 	bus = "VIRTIO"
-	image_name ="Debian-10-cloud-init.qcow2"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
-	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
+	image_name ="ubuntu:latest"
+	image_password = ` + constant.RandomPassword + `.server_image_password.result
 	user_data = "foo"
-}`
+}
+` + ServerImagePassword
 
-const testAccCheckVolumeConfigUpdate = testAccCheckBackupUnitConfigBasic + testAccCheckLanConfigBasic + `
-resource ` + ServerResource + ` ` + ServerTestResource + `updated {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+const testAccCheckVolumeConfigBasicErrorNoPassOrSSHPath = testAccCheckLanConfigBasic + `
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + `{
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
     disk_type = "HDD"
   }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     dhcp = true
     firewall_active = true
   }
 }
-resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
-	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-	server_id = ` + ServerResource + `.` + ServerTestResource + `updated.id
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
+	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
 	availability_zone = "ZONE_1"
-	name = "` + UpdatedResources + `"
+	name = "` + constant.VolumeTestResource + `"
+	size = 5
+	disk_type = "SSD Standard"
+	bus = "VIRTIO"
+	image_name ="ubuntu:latest"
+	user_data = "foo"
+}
+` + ServerImagePassword
+
+const testAccCheckVolumeConfigUpdate = testAccCheckLanConfigBasic + `
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + `updated {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "HDD"
+  }
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    dhcp = true
+    firewall_active = true
+  }
+}
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
+	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `updated.id
+	availability_zone = "ZONE_1"
+	name = "` + constant.UpdatedResources + `"
 	size = 6
 	disk_type = "SSD Standard"
 	bus = "VIRTIO"
-	image_name ="Debian-10-cloud-init.qcow2"
-	image_password = "K3tTj8G14a3EgKyNeeiYupdated"
-	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
+	image_name ="ubuntu:latest"
+	image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
 	user_data = "foo"
-}`
+}
+` + ServerImagePassword + ServerImagePasswordUpdated
+
+var testAccDataSourceVolumeMatchId = testAccCheckVolumeConfigBasic + `
+data ` + constant.VolumeResource + ` ` + constant.VolumeDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id			= ` + constant.VolumeResource + `.` + constant.VolumeTestResource + `.id
+}
+`
+
+var testAccDataSourceVolumeMatchName = testAccCheckVolumeConfigBasic + `
+data ` + constant.VolumeResource + ` ` + constant.VolumeDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name			= ` + constant.VolumeResource + `.` + constant.VolumeTestResource + `.name
+}
+`
+
+var testAccDataSourceVolumeWrongNameError = testAccCheckVolumeConfigBasic + `
+data ` + constant.VolumeResource + ` ` + constant.VolumeDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name			= "wrong_name"
+}
+`
 
 const testAccCheckVolumeConfigNoPassword = testAccCheckLanConfigBasic + `
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password =  ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
     disk_type = "HDD"
 }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     dhcp = true
     firewall_active = true
   }
 }
-resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-  name = "` + VolumeTestResource + `"
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  name = "` + constant.VolumeTestResource + `"
   size           = 4
   disk_type      = "HDD"
   licence_type   = "unknown"
-}`
+}
+` + ServerImagePassword
 
 const testAccCheckVolumeConfigNoPasswordUpdate = testAccCheckLanConfigBasic + `
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
     disk_type = "HDD"
 }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     dhcp = true
     firewall_active = true
   }
 }
-resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-  name = "` + UpdatedResources + `"
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  name = "` + constant.UpdatedResources + `"
   size           = 5
   disk_type      = "HDD"
   licence_type   = "other"
-}`
+}
+` + ServerImagePassword
 
 const testAccCheckVolumeResolveImageName = testAccCheckLanConfigBasic + `
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
     disk_type = "HDD"
 }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     dhcp = true
     firewall_active = true
   }
 }
-resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   availability_zone = "ZONE_1"
-  name = "` + VolumeTestResource + `"
+  name = "` + constant.VolumeTestResource + `"
   size = 5
   disk_type = "SSD Standard"
   bus = "VIRTIO"
-  image_name = "Ubuntu-20.04-LTS"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
 }
-`
+` + ServerImagePassword

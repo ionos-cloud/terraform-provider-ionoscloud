@@ -16,87 +16,69 @@ import (
 
 // Server struct for Server
 type Server struct {
-	// The resource's unique identifier.
-	Id *string `json:"id,omitempty"`
-	// The type of object that has been created.
-	Type *Type `json:"type,omitempty"`
+	Entities *ServerEntities `json:"entities,omitempty"`
 	// URL to the object representation (absolute path).
-	Href       *string                    `json:"href,omitempty"`
+	Href *string `json:"href,omitempty"`
+	// The resource's unique identifier.
+	Id         *string                    `json:"id,omitempty"`
 	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
 	Properties *ServerProperties          `json:"properties"`
-	Entities   *ServerEntities            `json:"entities,omitempty"`
+	// The type of object that has been created.
+	Type *Type `json:"type,omitempty"`
 }
 
-// GetId returns the Id field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *Server) GetId() *string {
+// NewServer instantiates a new Server object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewServer(properties ServerProperties) *Server {
+	this := Server{}
+
+	this.Properties = &properties
+
+	return &this
+}
+
+// NewServerWithDefaults instantiates a new Server object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewServerWithDefaults() *Server {
+	this := Server{}
+	return &this
+}
+
+// GetEntities returns the Entities field value
+// If the value is explicit nil, nil is returned
+func (o *Server) GetEntities() *ServerEntities {
 	if o == nil {
 		return nil
 	}
 
-	return o.Id
+	return o.Entities
 
 }
 
-// GetIdOk returns a tuple with the Id field value
+// GetEntitiesOk returns a tuple with the Entities field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Server) GetIdOk() (*string, bool) {
+func (o *Server) GetEntitiesOk() (*ServerEntities, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Id, true
+	return o.Entities, true
 }
 
-// SetId sets field value
-func (o *Server) SetId(v string) {
+// SetEntities sets field value
+func (o *Server) SetEntities(v ServerEntities) {
 
-	o.Id = &v
-
-}
-
-// HasId returns a boolean if a field has been set.
-func (o *Server) HasId() bool {
-	if o != nil && o.Id != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetType returns the Type field value
-// If the value is explicit nil, the zero value for Type will be returned
-func (o *Server) GetType() *Type {
-	if o == nil {
-		return nil
-	}
-
-	return o.Type
+	o.Entities = &v
 
 }
 
-// GetTypeOk returns a tuple with the Type field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Server) GetTypeOk() (*Type, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Type, true
-}
-
-// SetType sets field value
-func (o *Server) SetType(v Type) {
-
-	o.Type = &v
-
-}
-
-// HasType returns a boolean if a field has been set.
-func (o *Server) HasType() bool {
-	if o != nil && o.Type != nil {
+// HasEntities returns a boolean if a field has been set.
+func (o *Server) HasEntities() bool {
+	if o != nil && o.Entities != nil {
 		return true
 	}
 
@@ -104,7 +86,7 @@ func (o *Server) HasType() bool {
 }
 
 // GetHref returns the Href field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *Server) GetHref() *string {
 	if o == nil {
 		return nil
@@ -141,8 +123,46 @@ func (o *Server) HasHref() bool {
 	return false
 }
 
+// GetId returns the Id field value
+// If the value is explicit nil, nil is returned
+func (o *Server) GetId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Id
+
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Server) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Id, true
+}
+
+// SetId sets field value
+func (o *Server) SetId(v string) {
+
+	o.Id = &v
+
+}
+
+// HasId returns a boolean if a field has been set.
+func (o *Server) HasId() bool {
+	if o != nil && o.Id != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetMetadata returns the Metadata field value
-// If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
+// If the value is explicit nil, nil is returned
 func (o *Server) GetMetadata() *DatacenterElementMetadata {
 	if o == nil {
 		return nil
@@ -180,7 +200,7 @@ func (o *Server) HasMetadata() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for ServerProperties will be returned
+// If the value is explicit nil, nil is returned
 func (o *Server) GetProperties() *ServerProperties {
 	if o == nil {
 		return nil
@@ -217,38 +237,38 @@ func (o *Server) HasProperties() bool {
 	return false
 }
 
-// GetEntities returns the Entities field value
-// If the value is explicit nil, the zero value for ServerEntities will be returned
-func (o *Server) GetEntities() *ServerEntities {
+// GetType returns the Type field value
+// If the value is explicit nil, nil is returned
+func (o *Server) GetType() *Type {
 	if o == nil {
 		return nil
 	}
 
-	return o.Entities
+	return o.Type
 
 }
 
-// GetEntitiesOk returns a tuple with the Entities field value
+// GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Server) GetEntitiesOk() (*ServerEntities, bool) {
+func (o *Server) GetTypeOk() (*Type, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Entities, true
+	return o.Type, true
 }
 
-// SetEntities sets field value
-func (o *Server) SetEntities(v ServerEntities) {
+// SetType sets field value
+func (o *Server) SetType(v Type) {
 
-	o.Entities = &v
+	o.Type = &v
 
 }
 
-// HasEntities returns a boolean if a field has been set.
-func (o *Server) HasEntities() bool {
-	if o != nil && o.Entities != nil {
+// HasType returns a boolean if a field has been set.
+func (o *Server) HasType() bool {
+	if o != nil && o.Type != nil {
 		return true
 	}
 
@@ -257,17 +277,16 @@ func (o *Server) HasEntities() bool {
 
 func (o Server) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
-	if o.Id != nil {
-		toSerialize["id"] = o.Id
-	}
-
-	if o.Type != nil {
-		toSerialize["type"] = o.Type
+	if o.Entities != nil {
+		toSerialize["entities"] = o.Entities
 	}
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
+	}
+
+	if o.Id != nil {
+		toSerialize["id"] = o.Id
 	}
 
 	if o.Metadata != nil {
@@ -278,9 +297,10 @@ func (o Server) MarshalJSON() ([]byte, error) {
 		toSerialize["properties"] = o.Properties
 	}
 
-	if o.Entities != nil {
-		toSerialize["entities"] = o.Entities
+	if o.Type != nil {
+		toSerialize["type"] = o.Type
 	}
+
 	return json.Marshal(toSerialize)
 }
 

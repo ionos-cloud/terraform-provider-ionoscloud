@@ -16,52 +16,32 @@ import (
 
 // S3KeyProperties struct for S3KeyProperties
 type S3KeyProperties struct {
-	// Secret of the S3 key.
-	SecretKey *string `json:"secretKey,omitempty"`
 	// Denotes weather the S3 key is active.
 	Active *bool `json:"active,omitempty"`
+	// Secret of the S3 key.
+	SecretKey *string `json:"secretKey,omitempty"`
 }
 
-// GetSecretKey returns the SecretKey field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *S3KeyProperties) GetSecretKey() *string {
-	if o == nil {
-		return nil
-	}
+// NewS3KeyProperties instantiates a new S3KeyProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewS3KeyProperties() *S3KeyProperties {
+	this := S3KeyProperties{}
 
-	return o.SecretKey
-
+	return &this
 }
 
-// GetSecretKeyOk returns a tuple with the SecretKey field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *S3KeyProperties) GetSecretKeyOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.SecretKey, true
-}
-
-// SetSecretKey sets field value
-func (o *S3KeyProperties) SetSecretKey(v string) {
-
-	o.SecretKey = &v
-
-}
-
-// HasSecretKey returns a boolean if a field has been set.
-func (o *S3KeyProperties) HasSecretKey() bool {
-	if o != nil && o.SecretKey != nil {
-		return true
-	}
-
-	return false
+// NewS3KeyPropertiesWithDefaults instantiates a new S3KeyProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewS3KeyPropertiesWithDefaults() *S3KeyProperties {
+	this := S3KeyProperties{}
+	return &this
 }
 
 // GetActive returns the Active field value
-// If the value is explicit nil, the zero value for bool will be returned
+// If the value is explicit nil, nil is returned
 func (o *S3KeyProperties) GetActive() *bool {
 	if o == nil {
 		return nil
@@ -98,16 +78,54 @@ func (o *S3KeyProperties) HasActive() bool {
 	return false
 }
 
+// GetSecretKey returns the SecretKey field value
+// If the value is explicit nil, nil is returned
+func (o *S3KeyProperties) GetSecretKey() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.SecretKey
+
+}
+
+// GetSecretKeyOk returns a tuple with the SecretKey field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *S3KeyProperties) GetSecretKeyOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.SecretKey, true
+}
+
+// SetSecretKey sets field value
+func (o *S3KeyProperties) SetSecretKey(v string) {
+
+	o.SecretKey = &v
+
+}
+
+// HasSecretKey returns a boolean if a field has been set.
+func (o *S3KeyProperties) HasSecretKey() bool {
+	if o != nil && o.SecretKey != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o S3KeyProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Active != nil {
+		toSerialize["active"] = o.Active
+	}
 
 	if o.SecretKey != nil {
 		toSerialize["secretKey"] = o.SecretKey
 	}
 
-	if o.Active != nil {
-		toSerialize["active"] = o.Active
-	}
 	return json.Marshal(toSerialize)
 }
 

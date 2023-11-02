@@ -1,4 +1,5 @@
 ---
+subcategory: "Managed Kubernetes"
 layout: "ionoscloud"
 page_title: "IonosCloud: k8s_cluster"
 sidebar_current: "docs-resource-k8s-cluster"
@@ -8,17 +9,21 @@ description: |-
 
 # ionoscloud_k8s_cluster
 
-Manages a Managed Kubernetes cluster on IonosCloud.
+Manages a **Managed Kubernetes Cluster** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
 resource "ionoscloud_k8s_cluster" "example" {
-  name        = "example"
-  k8s_version = "1.18.5"
+  name                  = "k8sClusterExample"
+  k8s_version           = "1.20.10"
   maintenance_window {
-    day_of_the_week = "Monday"
-    time            = "09:30:00Z"
+    day_of_the_week     = "Sunday"
+    time                = "09:00:00Z"
+  }
+  api_subnet_allow_list = ["1.2.3.4/32"]
+  s3_buckets { 
+     name               = <your_s3_bucket>
   }
 }
 ```
@@ -28,7 +33,7 @@ resource "ionoscloud_k8s_cluster" "example" {
 The following arguments are supported:
 
 - `name` - (Required)[string] The name of the Kubernetes Cluster.
-- `k8s_version` - (Optional)[string] The desired Kubernetes Version. For supported values, please check the API documentation. The provider will ignore changes of patch level.
+- `k8s_version` - (Optional)[string] The desired Kubernetes Version. For supported values, please check the API documentation. Downgrades are not supported. The provider will ignore downgrades of patch level.
 - `maintenance_window` - (Optional) A maintenance window comprise of a day of the week and a time for maintenance to be allowed
   - `time` - (Required)[string] A clock time in the day when maintenance is allowed
   - `day_of_the_week` - (Required)[string] Day of the week when maintenance is allowed
@@ -45,3 +50,6 @@ terraform import ionoscloud_k8s_cluster.demo {k8s_cluster uuid}
 ```
 
 This can be helpful when you want to import kubernetes clusters which you have already created manually or using other means, outside of terraform.
+
+⚠️ **_Warning: **During a maintenance window, k8s can update your `k8s_version` if the old one reaches end of life. This upgrade will not be shown in the plan, as we prevent
+terraform from doing a downgrade, as downgrading `k8s_version` is not supported._**

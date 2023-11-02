@@ -20,8 +20,26 @@ type IPFailover struct {
 	NicUuid *string `json:"nicUuid,omitempty"`
 }
 
+// NewIPFailover instantiates a new IPFailover object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewIPFailover() *IPFailover {
+	this := IPFailover{}
+
+	return &this
+}
+
+// NewIPFailoverWithDefaults instantiates a new IPFailover object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewIPFailoverWithDefaults() *IPFailover {
+	this := IPFailover{}
+	return &this
+}
+
 // GetIp returns the Ip field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *IPFailover) GetIp() *string {
 	if o == nil {
 		return nil
@@ -59,7 +77,7 @@ func (o *IPFailover) HasIp() bool {
 }
 
 // GetNicUuid returns the NicUuid field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *IPFailover) GetNicUuid() *string {
 	if o == nil {
 		return nil
@@ -98,7 +116,6 @@ func (o *IPFailover) HasNicUuid() bool {
 
 func (o IPFailover) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
@@ -106,6 +123,7 @@ func (o IPFailover) MarshalJSON() ([]byte, error) {
 	if o.NicUuid != nil {
 		toSerialize["nicUuid"] = o.NicUuid
 	}
+
 	return json.Marshal(toSerialize)
 }
 

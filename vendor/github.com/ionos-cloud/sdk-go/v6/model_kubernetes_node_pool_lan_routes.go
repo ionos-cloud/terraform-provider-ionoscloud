@@ -16,52 +16,32 @@ import (
 
 // KubernetesNodePoolLanRoutes struct for KubernetesNodePoolLanRoutes
 type KubernetesNodePoolLanRoutes struct {
-	// IPv4 or IPv6 CIDR to be routed via the interface.
-	Network *string `json:"network,omitempty"`
 	// IPv4 or IPv6 Gateway IP for the route.
 	GatewayIp *string `json:"gatewayIp,omitempty"`
+	// IPv4 or IPv6 CIDR to be routed via the interface.
+	Network *string `json:"network,omitempty"`
 }
 
-// GetNetwork returns the Network field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *KubernetesNodePoolLanRoutes) GetNetwork() *string {
-	if o == nil {
-		return nil
-	}
+// NewKubernetesNodePoolLanRoutes instantiates a new KubernetesNodePoolLanRoutes object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewKubernetesNodePoolLanRoutes() *KubernetesNodePoolLanRoutes {
+	this := KubernetesNodePoolLanRoutes{}
 
-	return o.Network
-
+	return &this
 }
 
-// GetNetworkOk returns a tuple with the Network field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *KubernetesNodePoolLanRoutes) GetNetworkOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Network, true
-}
-
-// SetNetwork sets field value
-func (o *KubernetesNodePoolLanRoutes) SetNetwork(v string) {
-
-	o.Network = &v
-
-}
-
-// HasNetwork returns a boolean if a field has been set.
-func (o *KubernetesNodePoolLanRoutes) HasNetwork() bool {
-	if o != nil && o.Network != nil {
-		return true
-	}
-
-	return false
+// NewKubernetesNodePoolLanRoutesWithDefaults instantiates a new KubernetesNodePoolLanRoutes object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewKubernetesNodePoolLanRoutesWithDefaults() *KubernetesNodePoolLanRoutes {
+	this := KubernetesNodePoolLanRoutes{}
+	return &this
 }
 
 // GetGatewayIp returns the GatewayIp field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *KubernetesNodePoolLanRoutes) GetGatewayIp() *string {
 	if o == nil {
 		return nil
@@ -98,16 +78,54 @@ func (o *KubernetesNodePoolLanRoutes) HasGatewayIp() bool {
 	return false
 }
 
+// GetNetwork returns the Network field value
+// If the value is explicit nil, nil is returned
+func (o *KubernetesNodePoolLanRoutes) GetNetwork() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Network
+
+}
+
+// GetNetworkOk returns a tuple with the Network field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *KubernetesNodePoolLanRoutes) GetNetworkOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Network, true
+}
+
+// SetNetwork sets field value
+func (o *KubernetesNodePoolLanRoutes) SetNetwork(v string) {
+
+	o.Network = &v
+
+}
+
+// HasNetwork returns a boolean if a field has been set.
+func (o *KubernetesNodePoolLanRoutes) HasNetwork() bool {
+	if o != nil && o.Network != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o KubernetesNodePoolLanRoutes) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.GatewayIp != nil {
+		toSerialize["gatewayIp"] = o.GatewayIp
+	}
 
 	if o.Network != nil {
 		toSerialize["network"] = o.Network
 	}
 
-	if o.GatewayIp != nil {
-		toSerialize["gatewayIp"] = o.GatewayIp
-	}
 	return json.Marshal(toSerialize)
 }
 

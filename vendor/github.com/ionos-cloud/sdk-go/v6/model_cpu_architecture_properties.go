@@ -26,8 +26,26 @@ type CpuArchitectureProperties struct {
 	Vendor *string `json:"vendor,omitempty"`
 }
 
+// NewCpuArchitectureProperties instantiates a new CpuArchitectureProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewCpuArchitectureProperties() *CpuArchitectureProperties {
+	this := CpuArchitectureProperties{}
+
+	return &this
+}
+
+// NewCpuArchitecturePropertiesWithDefaults instantiates a new CpuArchitectureProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewCpuArchitecturePropertiesWithDefaults() *CpuArchitectureProperties {
+	this := CpuArchitectureProperties{}
+	return &this
+}
+
 // GetCpuFamily returns the CpuFamily field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *CpuArchitectureProperties) GetCpuFamily() *string {
 	if o == nil {
 		return nil
@@ -65,7 +83,7 @@ func (o *CpuArchitectureProperties) HasCpuFamily() bool {
 }
 
 // GetMaxCores returns the MaxCores field value
-// If the value is explicit nil, the zero value for int32 will be returned
+// If the value is explicit nil, nil is returned
 func (o *CpuArchitectureProperties) GetMaxCores() *int32 {
 	if o == nil {
 		return nil
@@ -103,7 +121,7 @@ func (o *CpuArchitectureProperties) HasMaxCores() bool {
 }
 
 // GetMaxRam returns the MaxRam field value
-// If the value is explicit nil, the zero value for int32 will be returned
+// If the value is explicit nil, nil is returned
 func (o *CpuArchitectureProperties) GetMaxRam() *int32 {
 	if o == nil {
 		return nil
@@ -141,7 +159,7 @@ func (o *CpuArchitectureProperties) HasMaxRam() bool {
 }
 
 // GetVendor returns the Vendor field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *CpuArchitectureProperties) GetVendor() *string {
 	if o == nil {
 		return nil
@@ -180,7 +198,6 @@ func (o *CpuArchitectureProperties) HasVendor() bool {
 
 func (o CpuArchitectureProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.CpuFamily != nil {
 		toSerialize["cpuFamily"] = o.CpuFamily
 	}
@@ -196,6 +213,7 @@ func (o CpuArchitectureProperties) MarshalJSON() ([]byte, error) {
 	if o.Vendor != nil {
 		toSerialize["vendor"] = o.Vendor
 	}
+
 	return json.Marshal(toSerialize)
 }
 

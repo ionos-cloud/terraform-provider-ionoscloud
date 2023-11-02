@@ -3,11 +3,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func dataSourceIpBlock() *schema.Resource {
@@ -23,10 +26,10 @@ func dataSourceIpBlock() *schema.Resource {
 				Optional: true,
 			},
 			"location": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"size": {
 				Type:     schema.TypeInt,
@@ -105,7 +108,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 	}
 	var ipBlock ionoscloud.IpBlock
 	var err error
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 	var apiResponse *ionoscloud.APIResponse
 
 	if !idOk && !nameOk && !locationOk {
@@ -115,16 +118,16 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		ipBlock, apiResponse, err = client.IPBlocksApi.IpblocksFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting ip block with id %s %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("error getting ip block with id %s %w", id.(string), err))
 		}
 		if nameOk {
-			if *ipBlock.Properties.Name != name {
+			if ipBlock.Properties != nil && *ipBlock.Properties.Name != name {
 				return diag.FromErr(fmt.Errorf("name of ip block (UUID=%s, name=%s) does not match expected name: %s",
 					*ipBlock.Id, *ipBlock.Properties.Name, name))
 			}
 		}
 		if locationOk {
-			if *ipBlock.Properties.Location != location {
+			if ipBlock.Properties != nil && *ipBlock.Properties.Location != location {
 				return diag.FromErr(fmt.Errorf("location of ip block (UUID=%s, location=%s) does not match expected location: %s",
 					*ipBlock.Id, *ipBlock.Properties.Location, location))
 			}
@@ -132,54 +135,54 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
 	} else {
 
-		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Execute()
+		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))
+			return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %w ", err))
 		}
 
 		var results []ionoscloud.IpBlock
 
 		if nameOk && ipBlocks.Items != nil {
 			for _, block := range *ipBlocks.Items {
-				if block.Properties.Name != nil && *block.Properties.Name == name {
+				if block.Properties != nil && block.Properties.Name != nil && *block.Properties.Name == name {
 					results = append(results, block)
-					//found based on name only, save this in case we don't find based on location
-					if !locationOk {
-						ipBlock = results[0]
-					}
 				}
 			}
 
 			if results == nil {
-				return diag.FromErr(fmt.Errorf("could not find an ip block with name %s", name))
+				return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria name %s", name))
 			}
 		}
 
 		if locationOk {
 			if results != nil {
+				var locationResults []ionoscloud.IpBlock
 				for _, block := range results {
-					if block.Properties.Location != nil && *block.Properties.Location == location {
-						ipBlock = block
-						break
+					if block.Properties != nil && block.Properties.Location != nil && *block.Properties.Location == location {
+						locationResults = append(locationResults, block)
 					}
 				}
+				results = locationResults
 			} else if ipBlocks.Items != nil {
 				/* find the first ipblock matching the location */
 				for _, block := range *ipBlocks.Items {
-					if block.Properties.Location != nil && *block.Properties.Location == location {
-						ipBlock = block
-						break
+					if block.Properties != nil && block.Properties.Location != nil && *block.Properties.Location == location {
+						results = append(results, block)
 					}
 				}
 			}
 		}
 
-	}
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria name = %s, location = %s", name, location))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one ip block found with the specified criteria name = %s, location = %s", name, location))
+		} else {
+			ipBlock = results[0]
+		}
 
-	if ipBlock.Id == nil {
-		return diag.FromErr(fmt.Errorf("there are no ip blocks that match the search criteria id = %s, name = %s, location = %s", id, name, location))
 	}
 
 	if err := IpBlockSetData(data, &ipBlock); err != nil {

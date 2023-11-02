@@ -1,25 +1,45 @@
 ---
+subcategory: "Network Load Balancer"
 layout: "ionoscloud"
 page_title: "IonosCloud: networkloadbalancer"
 sidebar_current: "docs-resource-networkloadbalancer"
 description: |-
-Creates and manages Network Load Balancer objects.
+  Creates and manages Network Load Balancer objects.
 ---
 
 # ionoscloud_networkloadbalancer
 
-Manages a Network Load Balancer  on IonosCloud.
+Manages a **Network Load Balancer**  on IonosCloud.
 
 ## Example Usage
 
 ```hcl
+resource "ionoscloud_datacenter" "example" {
+	name                    = "Datacenter Example"
+	location                = "us/las"
+	description             = "Datacenter Description"
+	sec_auth_protection     = false
+}
+
+resource "ionoscloud_lan" "example1" {
+    datacenter_id           = ionoscloud_datacenter.example.id
+    public                  = false
+    name                    = "Lan Example 1"
+}
+
+resource "ionoscloud_lan" "example2" {
+    datacenter_id           = ionoscloud_datacenter.example.id
+    public                  = false
+    name                    = "Lan Example 2"
+}
+
 resource "ionoscloud_networkloadbalancer" "example" {
-  datacenter_id = ionoscloud_datacenter.example.id
-  name          = "example"
-  listener_lan  = ionoscloud_lan.example1.id
-  target_lan    = ionoscloud_lan.example2.id
-  ips           = ["10.12.118.224"]
-  lb_private_ips = ["10.13.72.225/24"]
+    datacenter_id           = ionoscloud_datacenter.example.id
+    name                    = "example"
+    listener_lan            = ionoscloud_lan.example1.id
+    target_lan              = ionoscloud_lan.example2.id
+    ips                     = ["10.12.118.224"]
+    lb_private_ips          = ["10.13.72.225/24"]
 }
 ```
 

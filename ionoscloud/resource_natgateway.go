@@ -3,11 +3,16 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func resourceNatGateway() *schema.Resource {
@@ -21,12 +26,13 @@ func resourceNatGateway() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Description: "Name of the NAT gateway",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "Name of the NAT gateway",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"public_ips": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "Collection of public IP addresses of the NAT gateway. Should be customer reserved IP addresses in that location",
 				Required:    true,
 				Elem: &schema.Schema{
@@ -53,14 +59,16 @@ func resourceNatGateway() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
+							DiffSuppressFunc: DiffCidr,
 						},
 					},
 				},
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -68,7 +76,7 @@ func resourceNatGateway() *schema.Resource {
 }
 
 func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	name := d.Get("name").(string)
 
@@ -79,11 +87,11 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if publicIpsVal, publicIpsOk := d.GetOk("public_ips"); publicIpsOk {
-		publicIpsVal := publicIpsVal.([]interface{})
+		publicIpsVal := publicIpsVal.(*schema.Set).List()
 		if publicIpsVal != nil {
-			publicIps := make([]string, len(publicIpsVal), len(publicIpsVal))
-			for idx := range publicIpsVal {
-				publicIps[idx] = fmt.Sprint(publicIpsVal[idx])
+			publicIps := make([]string, 0)
+			for _, publicIp := range publicIpsVal {
+				publicIps = append(publicIps, publicIp.(string))
 			}
 			natGateway.Properties.PublicIps = &publicIps
 		} else {
@@ -142,16 +150,16 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating natGateway: %s, %s", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating natGateway: %w, %s", err, responseBody(apiResponse)))
 		return diags
 	}
 
 	d.SetId(*natGatewayResp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		if IsRequestFailed(err) {
+		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
@@ -163,7 +171,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -172,7 +180,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -189,7 +197,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	request := ionoscloud.NatGateway{
 		Properties: &ionoscloud.NatGatewayProperties{},
 	}
@@ -205,11 +213,11 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("public_ips") {
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
 		log.Printf("[INFO] nat gateway public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
-		publicIpsVal := newPublicIps.([]interface{})
+		publicIpsVal := newPublicIps.(*schema.Set).List()
 		if publicIpsVal != nil {
-			publicIps := make([]string, len(publicIpsVal), len(publicIpsVal))
-			for idx := range publicIpsVal {
-				publicIps[idx] = fmt.Sprint(publicIpsVal[idx])
+			publicIps := make([]string, 0)
+			for _, publicIp := range publicIpsVal {
+				publicIps = append(publicIps, publicIp.(string))
 			}
 			request.Properties.PublicIps = &publicIps
 		}
@@ -232,9 +240,9 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				if lanGatewayIps, lanGatewayIpsOk := d.GetOk(fmt.Sprintf("lans.%d.gateway_ips", lanIndex)); lanGatewayIpsOk {
 					lanGatewayIps := lanGatewayIps.([]interface{})
 					if lanGatewayIps != nil {
-						gatewayIps := make([]string, len(lanGatewayIps), len(lanGatewayIps))
-						for idx := range lanGatewayIps {
-							gatewayIps[idx] = fmt.Sprint(lanGatewayIps[idx])
+						gatewayIps := make([]string, 0)
+						for _, lanGatewayIp := range lanGatewayIps {
+							gatewayIps = append(gatewayIps, lanGatewayIp.(string))
 						}
 						lan.GatewayIps = &gatewayIps
 					}
@@ -259,11 +267,11 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a nat gateway ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a nat gateway ID %s %w", d.Id(), err))
 		return diags
 	}
 
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -273,7 +281,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -281,12 +289,12 @@ func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nat gateway %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nat gateway %s %w", d.Id(), err))
 		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -298,7 +306,7 @@ func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
@@ -313,7 +321,7 @@ func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find nat gateway  %q", natGatewayId)
 		}
@@ -341,14 +349,14 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 		if natGateway.Properties.Name != nil {
 			err := d.Set("name", *natGateway.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 
 		if natGateway.Properties.PublicIps != nil {
 			err := d.Set("public_ips", *natGateway.Properties.PublicIps)
 			if err != nil {
-				return fmt.Errorf("error while setting public_ips property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting public_ips property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 
@@ -375,7 +383,7 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 
 			if len(natGatewayLans) > 0 {
 				if err := d.Set("lans", natGatewayLans); err != nil {
-					return fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err)
+					return fmt.Errorf("error while setting lans property for nat gateway %s: %w", d.Id(), err)
 				}
 			}
 		}

@@ -16,94 +16,38 @@ import (
 
 // KubernetesNodePoolForPost struct for KubernetesNodePoolForPost
 type KubernetesNodePoolForPost struct {
+	// The URL to the object representation (absolute path).
+	Href *string `json:"href,omitempty"`
 	// The resource's unique identifier.
-	Id *string `json:"id,omitempty"`
-	// The type of object.
-	Type *string `json:"type,omitempty"`
-	// URL to the object representation (absolute path).
-	Href       *string                              `json:"href,omitempty"`
+	Id         *string                              `json:"id,omitempty"`
 	Metadata   *DatacenterElementMetadata           `json:"metadata,omitempty"`
 	Properties *KubernetesNodePoolPropertiesForPost `json:"properties"`
+	// The object type.
+	Type *string `json:"type,omitempty"`
 }
 
-// GetId returns the Id field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *KubernetesNodePoolForPost) GetId() *string {
-	if o == nil {
-		return nil
-	}
+// NewKubernetesNodePoolForPost instantiates a new KubernetesNodePoolForPost object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewKubernetesNodePoolForPost(properties KubernetesNodePoolPropertiesForPost) *KubernetesNodePoolForPost {
+	this := KubernetesNodePoolForPost{}
 
-	return o.Id
+	this.Properties = &properties
 
+	return &this
 }
 
-// GetIdOk returns a tuple with the Id field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *KubernetesNodePoolForPost) GetIdOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Id, true
-}
-
-// SetId sets field value
-func (o *KubernetesNodePoolForPost) SetId(v string) {
-
-	o.Id = &v
-
-}
-
-// HasId returns a boolean if a field has been set.
-func (o *KubernetesNodePoolForPost) HasId() bool {
-	if o != nil && o.Id != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetType returns the Type field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *KubernetesNodePoolForPost) GetType() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.Type
-
-}
-
-// GetTypeOk returns a tuple with the Type field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *KubernetesNodePoolForPost) GetTypeOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Type, true
-}
-
-// SetType sets field value
-func (o *KubernetesNodePoolForPost) SetType(v string) {
-
-	o.Type = &v
-
-}
-
-// HasType returns a boolean if a field has been set.
-func (o *KubernetesNodePoolForPost) HasType() bool {
-	if o != nil && o.Type != nil {
-		return true
-	}
-
-	return false
+// NewKubernetesNodePoolForPostWithDefaults instantiates a new KubernetesNodePoolForPost object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewKubernetesNodePoolForPostWithDefaults() *KubernetesNodePoolForPost {
+	this := KubernetesNodePoolForPost{}
+	return &this
 }
 
 // GetHref returns the Href field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *KubernetesNodePoolForPost) GetHref() *string {
 	if o == nil {
 		return nil
@@ -140,8 +84,46 @@ func (o *KubernetesNodePoolForPost) HasHref() bool {
 	return false
 }
 
+// GetId returns the Id field value
+// If the value is explicit nil, nil is returned
+func (o *KubernetesNodePoolForPost) GetId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Id
+
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *KubernetesNodePoolForPost) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Id, true
+}
+
+// SetId sets field value
+func (o *KubernetesNodePoolForPost) SetId(v string) {
+
+	o.Id = &v
+
+}
+
+// HasId returns a boolean if a field has been set.
+func (o *KubernetesNodePoolForPost) HasId() bool {
+	if o != nil && o.Id != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetMetadata returns the Metadata field value
-// If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
+// If the value is explicit nil, nil is returned
 func (o *KubernetesNodePoolForPost) GetMetadata() *DatacenterElementMetadata {
 	if o == nil {
 		return nil
@@ -179,7 +161,7 @@ func (o *KubernetesNodePoolForPost) HasMetadata() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for KubernetesNodePoolPropertiesForPost will be returned
+// If the value is explicit nil, nil is returned
 func (o *KubernetesNodePoolForPost) GetProperties() *KubernetesNodePoolPropertiesForPost {
 	if o == nil {
 		return nil
@@ -216,19 +198,52 @@ func (o *KubernetesNodePoolForPost) HasProperties() bool {
 	return false
 }
 
+// GetType returns the Type field value
+// If the value is explicit nil, nil is returned
+func (o *KubernetesNodePoolForPost) GetType() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Type
+
+}
+
+// GetTypeOk returns a tuple with the Type field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *KubernetesNodePoolForPost) GetTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Type, true
+}
+
+// SetType sets field value
+func (o *KubernetesNodePoolForPost) SetType(v string) {
+
+	o.Type = &v
+
+}
+
+// HasType returns a boolean if a field has been set.
+func (o *KubernetesNodePoolForPost) HasType() bool {
+	if o != nil && o.Type != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o KubernetesNodePoolForPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Href != nil {
+		toSerialize["href"] = o.Href
+	}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
-	}
-
-	if o.Type != nil {
-		toSerialize["type"] = o.Type
-	}
-
-	if o.Href != nil {
-		toSerialize["href"] = o.Href
 	}
 
 	if o.Metadata != nil {
@@ -238,6 +253,11 @@ func (o KubernetesNodePoolForPost) MarshalJSON() ([]byte, error) {
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
+
+	if o.Type != nil {
+		toSerialize["type"] = o.Type
+	}
+
 	return json.Marshal(toSerialize)
 }
 

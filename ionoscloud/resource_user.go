@@ -3,11 +3,16 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func resourceUser() *schema.Resource {
@@ -21,26 +26,26 @@ func resourceUser() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"first_name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"last_name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"email": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
-				DiffSuppressFunc: DiffToLower,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				DiffSuppressFunc: utils.DiffToLower,
 			},
 			"password": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				Sensitive:    true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Sensitive:        true,
 			},
 			"administrator": {
 				Type:     schema.TypeBool,
@@ -62,13 +67,22 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"group_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				},
+				Description: "Ids of the groups that the user is a member of",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	request := ionoscloud.UserPost{
 		Properties: &ionoscloud.UserPropertiesPost{},
 	}
@@ -110,27 +124,42 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a user: %w", err))
 		return diags
 	}
 
 	d.SetId(*rsp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		if IsRequestFailed(err) {
+		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
 		diags := diag.FromErr(errState)
 		return diags
 	}
+
+	// Add the user to the specified groups, if any.
+	if groupsVal, groupsOk := d.GetOk("group_ids"); groupsOk {
+		groupsList := groupsVal.(*schema.Set).List()
+		log.Printf("[INFO] Adding group_ids %+v ", groupsList)
+		if groupsList != nil {
+			for _, groupsItem := range groupsList {
+				groupId := groupsItem.(string)
+				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
+	}
+
 	return resourceUserRead(ctx, d, meta)
 }
 
 func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -140,7 +169,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -152,12 +181,12 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -211,15 +240,42 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		userReq.Properties.Password = &password
 	}
 
+	if d.HasChange("group_ids") {
+		oldValues, newValues := d.GetChange("group_ids")
+		oldGroupsList := slice.AnyToString(oldValues.(*schema.Set).List())
+		newGroupsList := slice.AnyToString(newValues.(*schema.Set).List())
+
+		newGroups := utils.DiffSliceOneWay(newGroupsList, oldGroupsList)
+		deletedGroups := utils.DiffSliceOneWay(oldGroupsList, newGroupsList)
+
+		if newGroups != nil && len(newGroups) > 0 {
+			log.Printf("[INFO] New groups to add: %+v", newGroups)
+			for _, groupId := range newGroups {
+				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
+
+		if deletedGroups != nil && len(deletedGroups) > 0 {
+			log.Printf("[INFO] Groups to delete: %+v", deletedGroups)
+			for _, groupId := range deletedGroups {
+				if err := deleteUserFromGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
+	}
+
 	_, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %w", d.Id(), err))
 		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -229,7 +285,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -239,7 +295,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -251,7 +307,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	userId := d.Id()
 

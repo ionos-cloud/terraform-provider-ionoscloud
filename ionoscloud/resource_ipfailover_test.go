@@ -1,24 +1,25 @@
+//go:build compute || all || ipfailover
+
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccLanIPFailoverBasic(t *testing.T) {
-	var lan ionoscloud.Lan
-	var ipfailover ionoscloud.IPFailover
-
 	testDeleted := func(n string) resource.TestCheckFunc {
 		return func(s *terraform.State) error {
 			_, ok := s.RootModule().Resources[n]
 			if ok {
-				return fmt.Errorf("Expected Failover group  %s to be deleted.", n)
+				return fmt.Errorf("Expected IP failover group %s to be deleted.", n)
 			}
 			return nil
 		}
@@ -28,31 +29,54 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig),
+				Config: testAccCheckLanIPFailoverConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLanIPFailoverGroupExists("ionoscloud_ipfailover.failover-test", &lan, &ipfailover),
+					testAccCheckLanIPFailoverGroupExists(constant.ResourceIpFailover+"."+constant.IpfailoverName),
+					testAccCheckLanIPFailoverGroupExists(constant.ResourceIpFailover+"."+constant.SecondIpfailoverName),
+					// We can only check that the IP and NIC UUID are set in the state, we can't
+					// use values to compare them since both of them are computed.
+					// Checks for the first IP failover group
+					resource.TestCheckResourceAttrSet(constant.ResourceIpFailover+"."+constant.IpfailoverName, "ip"),
+					resource.TestCheckResourceAttrSet(constant.ResourceIpFailover+"."+constant.IpfailoverName, "nicuuid"),
+					// Checks for the second IP failover group
+					resource.TestCheckResourceAttrSet(constant.ResourceIpFailover+"."+constant.SecondIpfailoverName, "ip"),
+					resource.TestCheckResourceAttrSet(constant.ResourceIpFailover+"."+constant.SecondIpfailoverName, "nicuuid"),
 				),
 			},
 			{
-				Config: testAccCheckLanIPFailoverConfigUpdate,
+				Config: testAccDataSourceIpFailoverConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testDeleted("ionoscloud_ipfailover.failover-test"),
+					resource.TestCheckResourceAttrSet(constant.IpfailoverResourceFullName, "id"),
+					resource.TestCheckResourceAttrPair(constant.IpfailoverResourceFullName, "id", constant.DataSource+"."+constant.ResourceIpFailover+"."+constant.IpfailoverName, "id"),
+					resource.TestCheckResourceAttrPair(constant.IpfailoverResourceFullName, "nicuuid", constant.DataSource+"."+constant.ResourceIpFailover+"."+constant.IpfailoverName, "nicuuid"),
+					resource.TestCheckResourceAttrPair(constant.IpfailoverResourceFullName, "lan_id", constant.DataSource+"."+constant.ResourceIpFailover+"."+constant.IpfailoverName, "lan_id"),
+					resource.TestCheckResourceAttrPair(constant.IpfailoverResourceFullName, "datacenter_id", constant.DataSource+"."+constant.ResourceIpFailover+"."+constant.IpfailoverName, "datacenter_id"),
 				),
 			},
 			{
-				Config: `/* */`,
+				Config: testAccCheckLanIPFailoverGroupUpdateIp,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(constant.ResourceIpFailover+"."+constant.SecondIpfailoverName, "ip"),
+					resource.TestCheckResourceAttrSet(constant.ResourceIpFailover+"."+constant.SecondIpfailoverName, "nicuuid")),
+			},
+			{
+				Config: testAccCheckLanIPFailoverGroupDeletion,
+				Check: resource.ComposeTestCheckFunc(
+					testDeleted("ionoscloud_ipfailover." + constant.IpfailoverName),
+				),
 			},
 		},
 	})
 }
 
-func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionoscloud.IPFailover) resource.TestCheckFunc {
+func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -65,45 +89,33 @@ func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionosc
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		lanId := rs.Primary.Attributes["lan_id"]
-		nicUuid := rs.Primary.Attributes["nicuuid"]
+		ip := rs.Primary.Attributes["ip"]
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
+		defer cancel()
 
 		lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("lan %s not found.", lanId)
+			return fmt.Errorf("LAN with ID: %s not found, datacenter ID: %s", lanId, dcId)
 		}
-
 		if lan.Properties.IpFailover == nil {
-			return fmt.Errorf("lan %s has no failover groups.", lanId)
+			return fmt.Errorf("LAN with ID: %s has no IP failover groups", lanId)
 		}
-		found := false
-		for _, fo := range *lan.Properties.IpFailover {
-			if *fo.NicUuid == nicUuid {
-				found = true
+		for _, failoverGroup := range *lan.Properties.IpFailover {
+			if *failoverGroup.Ip == ip {
+				return nil
 			}
 		}
-		if !found {
-			return fmt.Errorf("expected NIC %s to be a part of a failover group, but not found in lans %s failover groups", nicUuid, lanId)
-		}
-
-		return nil
+		return fmt.Errorf("IP failover group with IP: %s was not found in LAN: %s, datacenter ID: %s", ip, lanId, dcId)
 	}
 }
 
 func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
+	defer cancel()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_ipfailover" {
@@ -113,28 +125,26 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		lanId := rs.Primary.Attributes["lan_id"]
 		nicUuid := rs.Primary.Attributes["nicuuid"]
+		ip := rs.Primary.Attributes["ip"]
 
 		lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("an error occured while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
 			}
 		} else {
 			found := false
 			if lan.Properties.IpFailover != nil {
-				for _, fo := range *lan.Properties.IpFailover {
-					if *fo.NicUuid == nicUuid {
+				for _, failoverGroup := range *lan.Properties.IpFailover {
+					if *failoverGroup.Ip == ip {
 						found = true
+						break
 					}
 				}
 				if found {
-					apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, dcId).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return fmt.Errorf("IP failover group with nicId %s still exists %s %s, removing datacenter", nicUuid, rs.Primary.ID, err)
-					}
+					return fmt.Errorf("IP failover group with IP: %s, NIC UUID: %s, LAN: %s, datacenter ID: %s still exists", ip, nicUuid, lanId, dcId)
 				}
 			}
 		}
@@ -151,47 +161,79 @@ resource "ionoscloud_datacenter" "foobar" {
 
 resource "ionoscloud_ipblock" "webserver_ip" {
   location = "us/las"
-  size = 1
+  size = 3
   name = "failover test"
 }
 
 resource "ionoscloud_lan" "webserver_lan1" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   public = true
   name = "terraform test"
 }
 
 resource "ionoscloud_server" "webserver" {
   name = "server"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 15
     disk_type = "SSD"
   }
   nic {
-    lan = "${ionoscloud_lan.webserver_lan1.id}"
+    lan = ionoscloud_lan.webserver_lan1.id
     dhcp = true
     firewall_active = true
-     ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
+     ips =[ionoscloud_ipblock.webserver_ip.ips[0]]
   }
 }
-resource "ionoscloud_ipfailover" "failover-test" {
-  depends_on = [ ionoscloud_lan.webserver_lan1 ]
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  lan_id="${ionoscloud_lan.webserver_lan1.id}"
-  ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
-  nicuuid= "${ionoscloud_server.webserver.primary_nic}"
-}
-`
 
-const testAccCheckLanIPFailoverConfigUpdate = `
+resource "ionoscloud_server" "secondwebserver" {
+  depends_on = [ionoscloud_server.webserver]
+  name = "secondserver"
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    size = 15
+    disk_type = "SSD"
+  }
+  nic {
+    lan = ionoscloud_lan.webserver_lan1.id
+    dhcp = true
+    firewall_active = true
+     ips =[ionoscloud_ipblock.webserver_ip.ips[1]]
+  }
+}
+ 
+resource "` + constant.ResourceIpFailover + `" "` + constant.IpfailoverName + `" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  lan_id=ionoscloud_lan.webserver_lan1.id
+  ip =ionoscloud_ipblock.webserver_ip.ips[0]
+  nicuuid= ionoscloud_server.webserver.primary_nic
+}
+
+resource "` + constant.ResourceIpFailover + `" "` + constant.SecondIpfailoverName + `" {
+  depends_on = [ ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + ` ]
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id = ionoscloud_lan.webserver_lan1.id
+  ip = ionoscloud_ipblock.webserver_ip.ips[1]
+  nicuuid = ionoscloud_server.secondwebserver.primary_nic
+}
+
+` + ServerImagePassword
+
+const testAccCheckLanIPFailoverGroupUpdateNic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "ipfailover-test"
 	location = "us/las"
@@ -199,25 +241,185 @@ resource "ionoscloud_datacenter" "foobar" {
 
 resource "ionoscloud_ipblock" "webserver_ip" {
   location = "us/las"
-  size = 1
+  size = 3
   name = "failover test"
 }
 
 resource "ionoscloud_lan" "webserver_lan1" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   public = true
   name = "terraform test"
 }
 
 resource "ionoscloud_server" "webserver" {
   name = "server"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ionoscloud_datacenter.foobar.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    size = 15
+    disk_type = "SSD"
+  }
+  nic {
+    lan = ionoscloud_lan.webserver_lan1.id
+    dhcp = true
+    firewall_active = true
+     ips = [ionoscloud_ipblock.webserver_ip.ips[0], ionoscloud_ipblock.webserver_ip.ips[1]]
+  }
+}
+
+resource "ionoscloud_server" "secondwebserver" {
+  depends_on = [ionoscloud_server.webserver]
+  name = "secondserver"
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    size = 15
+    disk_type = "SSD"
+  }
+  nic {
+    lan = ionoscloud_lan.webserver_lan1.id
+    dhcp = true
+    firewall_active = true
+     ips =[ionoscloud_ipblock.webserver_ip.ips[2]]
+  }
+}
+
+resource "` + constant.ResourceIpFailover + `" "` + constant.IpfailoverName + `" {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id = ionoscloud_lan.webserver_lan1.id
+  ip = ionoscloud_ipblock.webserver_ip.ips[0]
+  nicuuid = ionoscloud_server.webserver.primary_nic
+}
+
+resource "` + constant.ResourceIpFailover + `" "` + constant.SecondIpfailoverName + `" {
+  depends_on = [ ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + ` ]
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id = ionoscloud_lan.webserver_lan1.id
+  ip = ionoscloud_ipblock.webserver_ip.ips[1]
+  nicuuid = ionoscloud_server.webserver.primary_nic
+}
+
+` + ServerImagePassword
+
+const testAccCheckLanIPFailoverGroupUpdateIp = `
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "ipfailover-test"
+	location = "us/las"
+}
+
+resource "ionoscloud_ipblock" "webserver_ip" {
+  location = "us/las"
+  size = 3
+  name = "failover test"
+}
+
+resource "ionoscloud_lan" "webserver_lan1" {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  public = true
+  name = "terraform test"
+}
+
+resource "ionoscloud_server" "webserver" {
+  name = "server"
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    size = 15
+    disk_type = "SSD"
+  }
+  nic {
+    lan = ionoscloud_lan.webserver_lan1.id
+    dhcp = true
+    firewall_active = true
+     ips = [ionoscloud_ipblock.webserver_ip.ips[0]]
+  }
+}
+
+resource "ionoscloud_server" "secondwebserver" {
+  depends_on = [ionoscloud_server.webserver]
+  name = "secondserver"
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    size = 15
+    disk_type = "SSD"
+  }
+  nic {
+    lan = ionoscloud_lan.webserver_lan1.id
+    dhcp = true
+    firewall_active = true
+     ips =[ionoscloud_ipblock.webserver_ip.ips[2]]
+  }
+}
+
+resource "` + constant.ResourceIpFailover + `" "` + constant.IpfailoverName + `" {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id = ionoscloud_lan.webserver_lan1.id
+  ip = ionoscloud_ipblock.webserver_ip.ips[0]
+  nicuuid = ionoscloud_server.webserver.primary_nic
+}
+
+resource "` + constant.ResourceIpFailover + `" "` + constant.SecondIpfailoverName + `" {
+  depends_on = [ ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + ` ]
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id = ionoscloud_lan.webserver_lan1.id
+  ip = ionoscloud_ipblock.webserver_ip.ips[2]
+  nicuuid = ionoscloud_server.secondwebserver.primary_nic
+}
+
+` + ServerImagePassword
+
+const testAccCheckLanIPFailoverGroupDeletion = `
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "ipfailover-test"
+	location = "us/las"
+}
+
+resource "ionoscloud_ipblock" "webserver_ip" {
+  location = "us/las"
+  size = 3
+  name = "failover test"
+}
+
+resource "ionoscloud_lan" "webserver_lan1" {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  public = true
+  name = "terraform test"
+}
+
+resource "ionoscloud_server" "webserver" {
+  name = "server"
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 15
@@ -227,7 +429,37 @@ resource "ionoscloud_server" "webserver" {
     lan = "1"
     dhcp = true
     firewall_active = true
-     ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
+     ips =[ionoscloud_ipblock.webserver_ip.ips[0]]
   }
+}
+
+resource "ionoscloud_server" "secondwebserver" {
+  name = "secondserver"
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    size = 15
+    disk_type = "SSD"
+  }
+  nic {
+    lan = ionoscloud_lan.webserver_lan1.id
+    dhcp = true
+    firewall_active = true
+     ips =[ionoscloud_ipblock.webserver_ip.ips[2]]
+  }
+}
+` + ServerImagePassword
+
+var testAccDataSourceIpFailoverConfigBasic = testAccCheckLanIPFailoverConfig + `
+data ` + constant.ResourceIpFailover + " " + constant.IpfailoverName + `{
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.lan_id
+  ip = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.ip
 }
 `

@@ -16,16 +16,34 @@ import (
 
 // Info struct for Info
 type Info struct {
-	// API entry point
+	// The API entry point.
 	Href *string `json:"href,omitempty"`
-	// Name of the API
+	// The API name.
 	Name *string `json:"name,omitempty"`
-	// Version of the API
+	// The API version.
 	Version *string `json:"version,omitempty"`
 }
 
+// NewInfo instantiates a new Info object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewInfo() *Info {
+	this := Info{}
+
+	return &this
+}
+
+// NewInfoWithDefaults instantiates a new Info object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewInfoWithDefaults() *Info {
+	this := Info{}
+	return &this
+}
+
 // GetHref returns the Href field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *Info) GetHref() *string {
 	if o == nil {
 		return nil
@@ -63,7 +81,7 @@ func (o *Info) HasHref() bool {
 }
 
 // GetName returns the Name field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *Info) GetName() *string {
 	if o == nil {
 		return nil
@@ -101,7 +119,7 @@ func (o *Info) HasName() bool {
 }
 
 // GetVersion returns the Version field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *Info) GetVersion() *string {
 	if o == nil {
 		return nil
@@ -140,7 +158,6 @@ func (o *Info) HasVersion() bool {
 
 func (o Info) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
@@ -152,6 +169,7 @@ func (o Info) MarshalJSON() ([]byte, error) {
 	if o.Version != nil {
 		toSerialize["version"] = o.Version
 	}
+
 	return json.Marshal(toSerialize)
 }
 

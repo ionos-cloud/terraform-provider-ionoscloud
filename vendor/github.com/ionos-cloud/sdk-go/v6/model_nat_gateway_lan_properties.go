@@ -16,52 +16,34 @@ import (
 
 // NatGatewayLanProperties struct for NatGatewayLanProperties
 type NatGatewayLanProperties struct {
-	// Id for the LAN connected to the NAT Gateway
-	Id *int32 `json:"id"`
 	// Collection of gateway IP addresses of the NAT Gateway. Will be auto-generated if not provided. Should ideally be an IP belonging to the same subnet as the LAN
 	GatewayIps *[]string `json:"gatewayIps,omitempty"`
+	// Id for the LAN connected to the NAT Gateway
+	Id *int32 `json:"id"`
 }
 
-// GetId returns the Id field value
-// If the value is explicit nil, the zero value for int32 will be returned
-func (o *NatGatewayLanProperties) GetId() *int32 {
-	if o == nil {
-		return nil
-	}
+// NewNatGatewayLanProperties instantiates a new NatGatewayLanProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNatGatewayLanProperties(id int32) *NatGatewayLanProperties {
+	this := NatGatewayLanProperties{}
 
-	return o.Id
+	this.Id = &id
 
+	return &this
 }
 
-// GetIdOk returns a tuple with the Id field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *NatGatewayLanProperties) GetIdOk() (*int32, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Id, true
-}
-
-// SetId sets field value
-func (o *NatGatewayLanProperties) SetId(v int32) {
-
-	o.Id = &v
-
-}
-
-// HasId returns a boolean if a field has been set.
-func (o *NatGatewayLanProperties) HasId() bool {
-	if o != nil && o.Id != nil {
-		return true
-	}
-
-	return false
+// NewNatGatewayLanPropertiesWithDefaults instantiates a new NatGatewayLanProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNatGatewayLanPropertiesWithDefaults() *NatGatewayLanProperties {
+	this := NatGatewayLanProperties{}
+	return &this
 }
 
 // GetGatewayIps returns the GatewayIps field value
-// If the value is explicit nil, the zero value for []string will be returned
+// If the value is explicit nil, nil is returned
 func (o *NatGatewayLanProperties) GetGatewayIps() *[]string {
 	if o == nil {
 		return nil
@@ -98,16 +80,54 @@ func (o *NatGatewayLanProperties) HasGatewayIps() bool {
 	return false
 }
 
+// GetId returns the Id field value
+// If the value is explicit nil, nil is returned
+func (o *NatGatewayLanProperties) GetId() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.Id
+
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NatGatewayLanProperties) GetIdOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Id, true
+}
+
+// SetId sets field value
+func (o *NatGatewayLanProperties) SetId(v int32) {
+
+	o.Id = &v
+
+}
+
+// HasId returns a boolean if a field has been set.
+func (o *NatGatewayLanProperties) HasId() bool {
+	if o != nil && o.Id != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o NatGatewayLanProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.GatewayIps != nil {
+		toSerialize["gatewayIps"] = o.GatewayIps
+	}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
 
-	if o.GatewayIps != nil {
-		toSerialize["gatewayIps"] = o.GatewayIps
-	}
 	return json.Marshal(toSerialize)
 }
 

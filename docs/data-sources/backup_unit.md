@@ -1,20 +1,32 @@
 ---
+subcategory: "Managed Backup"
 layout: "ionoscloud"
 page_title: "IonosCloud: backup_unit"
 sidebar_current: "docs-datasource-backup-unit"
 description: |-
-Get Information on a IonosCloud Backup Unit
+  Get Information on a IonosCloud Backup Unit
 ---
 
 # ionoscloud\_backup_unit
 
-The backup unit data source can be used to search for and return an existing Backup Unit. You can provide a string for either id or name parameters which will be compared with provisioned Backup Units. If a single match is found, it will be returned. If your search results in multiple matches, an error will be generated. When this happens, please refine your search string so that it is specific enough to return only one result.
+The **Backup Unit data source** can be used to search for and return an existing Backup Unit.
+You can provide a string for either id or name parameters which will be compared with provisioned Backup Units. 
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. 
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_backup_unit" "test_backup_unit" {
-  name			= "test backup unit"
+data "ionoscloud_backup_unit" "example" {
+  id			= <backup_unit_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_backup_unit" "example" {
+  name			= "Backup Unit Example"
 }
 ```
 

@@ -3,13 +3,19 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
+	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func resourceNic() *schema.Resource {
@@ -36,11 +42,33 @@ func resourceNic() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
+			"dhcpv6": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Indicates whether this NIC receives an IPv6 address through DHCP.",
+			},
+			"ipv6_cidr_block": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "IPv6 CIDR block assigned to the NIC.",
+			},
 			"ips": {
-				Type:     schema.TypeList,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-				Optional: true,
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					DiffSuppressFunc: utils.DiffEmptyIps,
+				},
+				Computed:    true,
+				Optional:    true,
+				Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
+			},
+			"ipv6_ips": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Computed:    true,
+				Description: "Collection for IPv6 addresses assigned to a nic. Explicitly assigned IPv6 addresses need to come from inside the IPv6 CIDR block assigned to the nic.",
 			},
 			"firewall_active": {
 				Type:     schema.TypeBool,
@@ -52,16 +80,16 @@ func resourceNic() *schema.Resource {
 				Computed: true,
 			},
 			"server_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"mac": {
 				Type:     schema.TypeString,
@@ -75,62 +103,138 @@ func resourceNic() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"flowlog": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     cloudapiflowlog.FlowlogSchemaResource,
+				MaxItems: 1,
+				Description: `Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination 
+IP addresses, source and destination ports, number of packets, amount of bytes, 
+the start and end time of the recording, and the type of protocol – 
+and log the extent to which your instances are being accessed.`,
+			},
 		},
-		Timeouts: &resourceDefaultTimeouts,
+		Timeouts:      &resourceDefaultTimeouts,
+		CustomizeDiff: ForceNewForFlowlogChanges,
 	}
 }
 
-func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+// ForceNewForFlowlogChanges - sets ForceNew either on `flowlog` if it is being deleted, or
+// on the field that changes. This is needed because the API does not support PATCH for all flowlog fields except name.
+// The API also does not support DELETE on the flowlog, so the whole resource needs to be re-created.
+func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	//we do not want to check in case of resource creation
+	if d.Id() == "" {
+		return nil
+	}
 
-	nic := getNicData(d, "")
+	if d.HasChange("flowlog") {
+		oldVal, newVal := d.GetChange("flowlog")
+		oldFLowLogs := oldVal.([]any)
+		newFlowLogs := newVal.([]any)
+
+		// "this check is for the scenario in which we have 0 initial flowlogs and we add a new one during a nic update
+		if (oldFLowLogs == nil || len(oldFLowLogs) == 0) && (newFlowLogs != nil || len(newFlowLogs) > 0) {
+			return nil
+		}
+		// flowlog deleted from resource
+		if (oldFLowLogs != nil || len(oldFLowLogs) > 0) && (newFlowLogs == nil || len(newFlowLogs) == 0) {
+			return d.ForceNew("flowlog")
+		}
+		var oldFlowlogMap map[string]any
+		var newFlowLogMap map[string]any
+		if oldFLowLogs != nil && len(oldFLowLogs) > 0 {
+			oldFlowlogMap = oldFLowLogs[0].(map[string]any)
+		}
+		if newFlowLogs != nil && len(newFlowLogs) > 0 {
+			newFlowLogMap = newFlowLogs[0].(map[string]any)
+		}
+		// find the diff between the old and new value of the fields.
+		// name should not force re-creation
+		// all other values should force re-creation, case does not matter
+		for k, v := range newFlowLogMap {
+			if k != "name" && k != "id" {
+				if !strings.EqualFold(strings.ToUpper(v.(string)), strings.ToUpper(oldFlowlogMap[k].(string))) {
+					// set ForceNew manually only if a field changes. only set on the field that changes, setting on the entire `flowlog` list does nothing
+					err := d.ForceNew("flowlog.0." + k)
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+		return nil
+	}
+	return nil
+}
+func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).CloudApiClient
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
+
+	nic, err := cloudapinic.GetNicFromSchema(d, "")
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error occured while getting nic from schema: %w", err))
+		return diags
+	}
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
+	createdNic, apiResponse, err := ns.Create(ctx, dcid, srvid, nic)
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %w", err))
+		return diags
+	}
 
-	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
-	logApiRequestTime(apiResponse)
+	if createdNic.Id != nil {
+		d.SetId(*createdNic.Id)
+	}
+
+	//Sometimes there is an error because the nic is not found after it's created.
+	//Probably a read write consistency issue.
+	//We're retrying for 5 minutes. 404 - means we keep on trying.
+	var foundNic = &ionoscloud.Nic{}
+	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
+		var err error
+		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 3)
+		if apiResponse.HttpNotFound() {
+			log.Printf("[INFO] Could not find nic with Id %s , retrying...", *createdNic.Id)
+			return retry.RetryableError(fmt.Errorf("could not find nic, %w", err))
+		}
+		if err != nil {
+			retry.NonRetryableError(err)
+		}
+		return nil
+	})
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %s", err))
-		return diags
+		return diag.FromErr(err)
 	}
-	if nic.Id != nil {
-		d.SetId(*nic.Id)
+
+	if foundNic == nil || *foundNic.Id == "" {
+		return diag.FromErr(fmt.Errorf("could not find nic with id %s after creation ", *nic.Id))
 	}
-	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
-			d.SetId("")
-		}
-		diags := diag.FromErr(errState)
-		return diags
-	}
-	return resourceNicRead(ctx, d, meta)
+
+	return diag.FromErr(cloudapinic.NicSetData(d, foundNic))
 }
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
-
+	client := meta.(services.SdkBundle).CloudApiClient
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-
-	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
-	logApiRequestTime(apiResponse)
-
+	nic, apiResponse, err := ns.Get(ctx, dcid, srvid, nicid, 3)
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
+			log.Printf("[INFO] nic resource with id %s not found", nicid)
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a nic ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a nic ID %s %w", d.Id(), err))
 		return diags
 	}
 
-	if err := NicSetData(d, &nic); err != nil {
+	if err := cloudapinic.NicSetData(d, nic); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -138,25 +242,50 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
-
+	client := meta.(services.SdkBundle).CloudApiClient
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcId := d.Get("datacenter_id").(string)
 	srvId := d.Get("server_id").(string)
 	nicId := d.Id()
+	var err error
+	if d.HasChange("flowlog") {
+		old, newV := d.GetChange("flowlog")
+		var firstFlowLogId = ""
+		if old != nil && len(old.([]any)) > 0 {
+			firstFlowLogId = old.([]any)[0].(map[string]any)["id"].(string)
+		}
 
-	nic := getNicData(d, "")
+		if newV.([]any) != nil && len(newV.([]any)) > 0 {
+			for _, val := range newV.([]any) {
+				if flowLogMap, ok := val.(map[string]any); ok {
+					flowLog := cloudapiflowlog.GetFlowlogFromMap(flowLogMap)
+					fw := cloudapiflowlog.Service{
+						D:      d,
+						Client: client,
+					}
+					err = fw.CreateOrPatch(ctx, dcId, srvId, nicId, firstFlowLogId, flowLog)
+					if err != nil {
+						//if we have a create that failed, we do not want to save in state
+						// saving in state would mean a diff that would force a re-create
+						if firstFlowLogId == "" {
+							_ = d.Set("flowlog", nil)
+						}
+						return diag.FromErr(err)
+					}
+				}
+			}
+		}
+	}
 
-	_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, dcId, srvId, nicId).Nic(*nic.Properties).Execute()
-	logApiRequestTime(apiResponse)
+	nic, err := cloudapinic.GetNicFromSchema(d, "")
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %s", err))
+		diags := diag.FromErr(fmt.Errorf("update error occured while getting nic from schema: %w", err))
 		return diags
 	}
 
-	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
+	_, _, err = ns.Update(ctx, dcId, srvId, nicId, *nic.Properties)
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %w", err))
 		return diags
 	}
 
@@ -164,23 +293,16 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
-
-	dcId := d.Get("datacenter_id").(string)
-	srvId := d.Get("server_id").(string)
-	nicId := d.Id()
-	apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, dcId, srvId, nicId).Execute()
-	logApiRequestTime(apiResponse)
-
+	client := meta.(services.SdkBundle).CloudApiClient
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
+	dcid := d.Get("datacenter_id").(string)
+	srvid := d.Get("server_id").(string)
+	nicid := d.Id()
+	_, err := ns.Delete(ctx, dcid, srvid, nicid)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
 		return diags
 	}
-
-	if err := waitForNicDeletion(ctx, client, d); err != nil {
-		return diag.FromErr(err)
-	}
-
 	d.SetId("")
 	return nil
 }
@@ -194,13 +316,13 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	sId := parts[1]
 	nicId := parts[2]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, sId, nicId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if !httpNotFound(apiResponse) {
+		if !apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the nic %q", nicId)
 		}
@@ -216,156 +338,11 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 		return nil, err
 	}
 
-	if err := NicSetData(d, &nic); err != nil {
+	if err := cloudapinic.NicSetData(d, &nic); err != nil {
 		return nil, err
 	}
 
 	log.Printf("[INFO] nic found: %+v", nic)
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
-
-	nic := ionoscloud.Nic{
-		Properties: &ionoscloud.NicProperties{},
-	}
-
-	lanInt := int32(d.Get(path + "lan").(int))
-	nic.Properties.Lan = &lanInt
-
-	if v, ok := d.GetOk(path + "name"); ok {
-		vStr := v.(string)
-		nic.Properties.Name = &vStr
-	}
-
-	nic.Properties.Dhcp = boolAddr(d.Get(path + "dhcp").(bool))
-	nic.Properties.FirewallActive = boolAddr(d.Get(path + "firewall_active").(bool))
-
-	if _, ok := d.GetOk("firewall_type"); ok {
-		raw := d.Get("firewall_type").(string)
-		nic.Properties.FirewallType = &raw
-	}
-
-	if v, ok := d.GetOk(path + "ips"); ok {
-		raw := v.([]interface{})
-		if raw != nil && len(raw) > 0 {
-			ips := make([]string, 0)
-			for _, rawIp := range raw {
-				ip := rawIp.(string)
-				ips = append(ips, ip)
-			}
-			if ips != nil && len(ips) > 0 {
-				nic.Properties.Ips = &ips
-			}
-		}
-	}
-
-	return nic
-}
-
-func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
-	if nic == nil {
-		return fmt.Errorf("nic is empty")
-	}
-
-	if nic.Id != nil {
-		d.SetId(*nic.Id)
-	}
-
-	if nic.Properties != nil {
-		log.Printf("[INFO] LAN ON NIC: %d", nic.Properties.Lan)
-		if nic.Properties.Dhcp != nil {
-			if err := d.Set("dhcp", *nic.Properties.Dhcp); err != nil {
-				return fmt.Errorf("error setting dhcp %w", err)
-			}
-		}
-		if nic.Properties.Lan != nil {
-			if err := d.Set("lan", *nic.Properties.Lan); err != nil {
-				return fmt.Errorf("error setting lan %w", err)
-			}
-		}
-		if nic.Properties.Name != nil {
-			if err := d.Set("name", *nic.Properties.Name); err != nil {
-				return fmt.Errorf("error setting name %w", err)
-			}
-		}
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("ips", *nic.Properties.Ips); err != nil {
-				return fmt.Errorf("error setting ips %w", err)
-			}
-		}
-		if nic.Properties.FirewallActive != nil {
-			if err := d.Set("firewall_active", *nic.Properties.FirewallActive); err != nil {
-				return fmt.Errorf("error setting firewall_active %w", err)
-			}
-		}
-		if nic.Properties.FirewallType != nil {
-			if err := d.Set("firewall_type", *nic.Properties.FirewallType); err != nil {
-				return fmt.Errorf("error setting firewall_type %w", err)
-			}
-		}
-		if nic.Properties.Mac != nil {
-			if err := d.Set("mac", *nic.Properties.Mac); err != nil {
-				return fmt.Errorf("error setting mac %w", err)
-			}
-		}
-		if nic.Properties.DeviceNumber != nil {
-			if err := d.Set("device_number", *nic.Properties.DeviceNumber); err != nil {
-				return fmt.Errorf("error setting device_number %w", err)
-			}
-		}
-		if nic.Properties.PciSlot != nil {
-			if err := d.Set("pci_slot", *nic.Properties.PciSlot); err != nil {
-				return fmt.Errorf("error setting pci_slot %w", err)
-			}
-		}
-	}
-
-	return nil
-}
-
-func waitForNicDeletion(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) error {
-	for {
-		log.Printf("[INFO] waiting for nic %s to be deleted...", d.Id())
-
-		nDeleted, dsErr := nicDeleted(ctx, client, d)
-
-		if dsErr != nil {
-			return fmt.Errorf("error while checking deletion status of nic %s: %s", d.Id(), dsErr)
-		}
-
-		if nDeleted {
-			log.Printf("[INFO] successfully deleted nic: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] nic deletion timed out")
-			return fmt.Errorf("nic deletion timed out! WARNING: your nic will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
-		}
-	}
-	return nil
-}
-
-func nicDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcId := d.Get("datacenter_id").(string)
-	srvId := d.Get("server_id").(string)
-	nicId := d.Id()
-
-	rsp, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, srvId, nicId).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			log.Printf("[INFO] nic deleted %s", d.Id())
-			return true, nil
-		}
-		return true, fmt.Errorf("error checking nic deletion status: %s", err)
-	}
-	log.Printf("[INFO] nic %s not deleted yet; nic status: %+v", d.Id(), *rsp.Metadata.State)
-	return false, nil
 }

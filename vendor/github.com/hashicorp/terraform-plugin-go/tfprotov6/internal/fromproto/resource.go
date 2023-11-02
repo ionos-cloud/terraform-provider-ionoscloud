@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package fromproto
 
 import (
@@ -103,7 +106,8 @@ func PlanResourceChangeRequest(in *tfplugin6.PlanResourceChange_Request) (*tfpro
 
 func PlanResourceChangeResponse(in *tfplugin6.PlanResourceChange_Response) (*tfprotov6.PlanResourceChangeResponse, error) {
 	resp := &tfprotov6.PlanResourceChangeResponse{
-		PlannedPrivate: in.PlannedPrivate,
+		PlannedPrivate:              in.PlannedPrivate,
+		UnsafeToUseLegacyTypeSystem: in.LegacyTypeSystem,
 	}
 	attributePaths, err := AttributePaths(in.RequiresReplace)
 	if err != nil {
@@ -143,7 +147,8 @@ func ApplyResourceChangeRequest(in *tfplugin6.ApplyResourceChange_Request) (*tfp
 
 func ApplyResourceChangeResponse(in *tfplugin6.ApplyResourceChange_Response) (*tfprotov6.ApplyResourceChangeResponse, error) {
 	resp := &tfprotov6.ApplyResourceChangeResponse{
-		Private: in.Private,
+		Private:                     in.Private,
+		UnsafeToUseLegacyTypeSystem: in.LegacyTypeSystem,
 	}
 	diags, err := Diagnostics(in.Diagnostics)
 	if err != nil {

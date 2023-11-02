@@ -1,11 +1,13 @@
-//go:build k8s
-// +build k8s
+//go:build all || k8s
+// +build all k8s
 
 package ionoscloud
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -20,7 +22,7 @@ func TestAcck8sClusterImportBasic(t *testing.T) {
 				Config: testAccCheckK8sClusterConfigBasic,
 			},
 			{
-				ResourceName:      K8sClusterResource + "." + K8sClusterTestResource,
+				ResourceName:      constant.K8sClusterResource + "." + constant.K8sClusterTestResource,
 				ImportStateIdFunc: testAccK8sClusterImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -33,7 +35,7 @@ func testAccK8sClusterImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != K8sClusterResource {
+		if rs.Type != constant.K8sClusterResource {
 			continue
 		}
 

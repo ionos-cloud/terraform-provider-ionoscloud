@@ -22,8 +22,26 @@ type GroupShareProperties struct {
 	SharePrivilege *bool `json:"sharePrivilege,omitempty"`
 }
 
+// NewGroupShareProperties instantiates a new GroupShareProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewGroupShareProperties() *GroupShareProperties {
+	this := GroupShareProperties{}
+
+	return &this
+}
+
+// NewGroupSharePropertiesWithDefaults instantiates a new GroupShareProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewGroupSharePropertiesWithDefaults() *GroupShareProperties {
+	this := GroupShareProperties{}
+	return &this
+}
+
 // GetEditPrivilege returns the EditPrivilege field value
-// If the value is explicit nil, the zero value for bool will be returned
+// If the value is explicit nil, nil is returned
 func (o *GroupShareProperties) GetEditPrivilege() *bool {
 	if o == nil {
 		return nil
@@ -61,7 +79,7 @@ func (o *GroupShareProperties) HasEditPrivilege() bool {
 }
 
 // GetSharePrivilege returns the SharePrivilege field value
-// If the value is explicit nil, the zero value for bool will be returned
+// If the value is explicit nil, nil is returned
 func (o *GroupShareProperties) GetSharePrivilege() *bool {
 	if o == nil {
 		return nil
@@ -100,7 +118,6 @@ func (o *GroupShareProperties) HasSharePrivilege() bool {
 
 func (o GroupShareProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.EditPrivilege != nil {
 		toSerialize["editPrivilege"] = o.EditPrivilege
 	}
@@ -108,6 +125,7 @@ func (o GroupShareProperties) MarshalJSON() ([]byte, error) {
 	if o.SharePrivilege != nil {
 		toSerialize["sharePrivilege"] = o.SharePrivilege
 	}
+
 	return json.Marshal(toSerialize)
 }
 

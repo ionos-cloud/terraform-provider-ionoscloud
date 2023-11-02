@@ -19,8 +19,28 @@ type UserPost struct {
 	Properties *UserPropertiesPost `json:"properties"`
 }
 
+// NewUserPost instantiates a new UserPost object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewUserPost(properties UserPropertiesPost) *UserPost {
+	this := UserPost{}
+
+	this.Properties = &properties
+
+	return &this
+}
+
+// NewUserPostWithDefaults instantiates a new UserPost object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewUserPostWithDefaults() *UserPost {
+	this := UserPost{}
+	return &this
+}
+
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for UserPropertiesPost will be returned
+// If the value is explicit nil, nil is returned
 func (o *UserPost) GetProperties() *UserPropertiesPost {
 	if o == nil {
 		return nil
@@ -59,10 +79,10 @@ func (o *UserPost) HasProperties() bool {
 
 func (o UserPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
+
 	return json.Marshal(toSerialize)
 }
 

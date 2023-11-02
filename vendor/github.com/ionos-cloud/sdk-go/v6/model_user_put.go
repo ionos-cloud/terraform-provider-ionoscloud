@@ -21,8 +21,28 @@ type UserPut struct {
 	Properties *UserPropertiesPut `json:"properties"`
 }
 
+// NewUserPut instantiates a new UserPut object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewUserPut(properties UserPropertiesPut) *UserPut {
+	this := UserPut{}
+
+	this.Properties = &properties
+
+	return &this
+}
+
+// NewUserPutWithDefaults instantiates a new UserPut object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewUserPutWithDefaults() *UserPut {
+	this := UserPut{}
+	return &this
+}
+
 // GetId returns the Id field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *UserPut) GetId() *string {
 	if o == nil {
 		return nil
@@ -60,7 +80,7 @@ func (o *UserPut) HasId() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for UserPropertiesPut will be returned
+// If the value is explicit nil, nil is returned
 func (o *UserPut) GetProperties() *UserPropertiesPut {
 	if o == nil {
 		return nil
@@ -99,7 +119,6 @@ func (o *UserPut) HasProperties() bool {
 
 func (o UserPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
@@ -107,6 +126,7 @@ func (o UserPut) MarshalJSON() ([]byte, error) {
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
+
 	return json.Marshal(toSerialize)
 }
 
