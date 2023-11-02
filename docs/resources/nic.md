@@ -131,6 +131,20 @@ resource "random_password" "server_image_password" {
   special          = false
 }
 ```
+## Example configuring Flowlog
+
+```hcl
+flowlog {
+    action    = "ACCEPTED"
+    bucket    = "flowlog-bucket"
+    direction = "INGRESS"
+    name      = "flowlog"
+}
+ 
+```
+
+This will configure flowlog for accepted ingress traffic and will log it into an existing ionos s3 bucket named `flowlog-bucket`. Any s3 compatible client can be used to create it. Adding a flowlog does not force re-creation or the nic, but changing any other field than 
+`name` will. Deleting a flowlog will also force nic re-creation.
 
 ## Argument reference
 
