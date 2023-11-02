@@ -65,9 +65,9 @@ func dataSourceNetworkLoadBalancer() *schema.Resource {
 				Computed: true,
 				Elem:     cloudapiflowlog.FlowlogSchemaDatasource,
 				Description: `Flow logs holistically capture network information such as source and destination 
-							IP addresses, source and destination ports, number of packets, amount of bytes, 
-							the start and end time of the recording, and the type of protocol – 
-							and log the extent to which your instances are being accessed.`,
+IP addresses, source and destination ports, number of packets, amount of bytes, 
+the start and end time of the recording, and the type of protocol – 
+and log the extent to which your instances are being accessed.`,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -101,7 +101,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		networkLoadBalancer, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcID, id.(string)).Depth(4).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the network loadbalancer %s dcID %s : %w", id.(string), dcID, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the network loadbalancer %s, dcID %s : %w", id.(string), dcID, err))
 		}
 	} else {
 		/* search by name */
@@ -110,7 +110,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, dcID).Depth(4).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers dcID %s : %w", dcID, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers, dcID %s : %w", dcID, err))
 		}
 
 		var results []ionoscloud.NetworkLoadBalancer

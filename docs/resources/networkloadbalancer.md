@@ -51,11 +51,11 @@ resource "ionoscloud_networkloadbalancer" "example" {
 - `target_lan` - (Required)[int] Id of the balanced private target LAN. (outbound)
 - `lb_private_ips` - (Optional)[list] Collection of private IP addresses with subnet mask of the Network Load Balancer. IPs must contain valid subnet mask. If user will not provide any IP then the system will generate one IP with /24 subnet.
 - `datacenter_id` - (Required)[string] A Datacenter's UUID.
-- `flowlog` - (Optional) Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination IP addresses, source and destination ports, number of packets, amount of bytes, the start and end time of the recording, and the type of protocol – and log the extent to which your instances are being accessed.
-    - `action` - (Required) Specifies the action to be taken when the rule is matched. Possible values: ACCEPTED, REJECTED, ALL. Immutable, forces re-creation.
-    - `bucket` - (Required) Specifies the S3 IONOS bucket where the flow log data will be stored. The bucket must exist. Immutable, forces re-creation.
-    - `direction` - (Required) Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL. Immutable, forces re-creation.
-    - `name` - (Required) Specifies the name of the flow log.
+- `flowlog` - (Optional)[list] Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination IP addresses, source and destination ports, number of packets, amount of bytes, the start and end time of the recording, and the type of protocol – and log the extent to which your instances are being accessed.
+    - `action` - (Required)[string] Specifies the action to be taken when the rule is matched. Possible values: ACCEPTED, REJECTED, ALL. Immutable, forces re-creation.
+    - `bucket` - (Required)[string] Specifies the S3 IONOS bucket where the flow log data will be stored. The bucket must exist. Immutable, forces re-creation.
+    - `direction` - (Required)[string] Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL. Immutable, forces re-creation.
+    - `name` - (Required)[string] Specifies the name of the flow log.
 
 ⚠️ **Note:**: Removing the `flowlog` forces re-creation of the network load balancer resource.
 
