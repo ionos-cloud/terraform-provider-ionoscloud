@@ -40,6 +40,10 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", constant.LanResource+".alb_lan_2", "id"),
 					utils.TestValueInSlice(constant.ALBResource, "ips.#", "10.12.118.224"),
 					utils.TestValueInSlice(constant.ALBResource, "lb_private_ips.#", "10.13.72.225/24"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "flowlog.0.name", "test_flowlog"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "flowlog.0.action", "ALL"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "flowlog.0.direction", "INGRESS"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "flowlog.0.bucket", constant.FlowlogBucket),
 				),
 			},
 			{
@@ -50,6 +54,10 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", dataSourceNameAlbById, "target_lan"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "ips.0", dataSourceNameAlbById, "ips.0"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "lb_private_ips.0", dataSourceNameAlbById, "lb_private_ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.name", dataSourceNameAlbById, "flowlog.0.name"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.action", dataSourceNameAlbById, "flowlog.0.action"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.direction", dataSourceNameAlbById, "flowlog.0.direction"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.direction", dataSourceNameAlbById, "flowlog.0.direction"),
 				),
 			},
 			{
@@ -90,6 +98,10 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 					utils.TestValueInSlice(constant.ALBResource, "ips.#", "10.12.119.224"),
 					utils.TestValueInSlice(constant.ALBResource, "lb_private_ips.#", "10.13.72.225/24"),
 					utils.TestValueInSlice(constant.ALBResource, "lb_private_ips.#", "10.13.73.225/24"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "flowlog.0.name", "test_flowlog_updated"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "flowlog.0.action", "REJECTED"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "flowlog.0.direction", "EGRESS"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "flowlog.0.bucket", constant.FlowlogBucketUpdated),
 				),
 			},
 		},
@@ -191,6 +203,12 @@ resource ` + constant.ALBResource + ` ` + constant.ALBTestResource + ` {
   ips           = [ "10.12.118.224"]
   target_lan    = ` + constant.LanResource + `.alb_lan_2.id
   lb_private_ips= [ "10.13.72.225/24"]
+  flowlog {
+    name = "test_flowlog"
+    action = "ALL"
+    direction = "INGRESS"
+    bucket = "` + constant.FlowlogBucket + `"
+  }
 }`
 
 const testAccCheckApplicationLoadBalancerConfigUpdate = `
@@ -231,6 +249,12 @@ resource ` + constant.ALBResource + ` ` + constant.ALBTestResource + ` {
   ips           = [ "10.12.118.224", "10.12.119.224"]
   target_lan    = ` + constant.LanResource + `.alb_lan_4.id
   lb_private_ips= [ "10.13.72.225/24", "10.13.73.225/24"]
+  flowlog {
+    name = "test_flowlog_updated"
+    action = "REJECTED"
+    direction = "EGRESS"
+    bucket = "` + constant.FlowlogBucketUpdated + `"
+  }
 }`
 
 const testAccDataSourceApplicationLoadBalancerMatchId = testAccCheckApplicationLoadBalancerConfigBasic + `

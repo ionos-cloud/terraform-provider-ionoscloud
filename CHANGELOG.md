@@ -1,6 +1,10 @@
 ## 6.4.11 (upcoming release)
 ### Documentation
 - Refactor readme files to better explain the usage of the provider
+### Features
+- Add `flowlog` to `ionoscloud_nic` resource
+- Add `flowlog` to `ionoscloud_networkloadbalancer` resource
+- Add `flowlog` to `ionoscloud_application_loadbalancer` resource
 
 ## 6.4.10
 ### Refactor
