@@ -81,7 +81,7 @@ type Service struct {
 	D      *schema.ResourceData
 }
 
-func (fw *Service) CreateOrPatch(ctx context.Context, dcId, srvID, nicID, ID string, flowLog ionoscloud.FlowLog) error {
+func (fw *Service) CreateOrPatchForServer(ctx context.Context, dcId, srvID, nicID, ID string, flowLog ionoscloud.FlowLog) error {
 	if ID == "" {
 		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPost(ctx, dcId, srvID, nicID).Flowlog(flowLog).Execute()
 		if err != nil {
@@ -91,6 +91,21 @@ func (fw *Service) CreateOrPatch(ctx context.Context, dcId, srvID, nicID, ID str
 		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPatch(ctx, dcId, srvID, nicID, ID).Flowlog(*flowLog.Properties).Execute()
 		if err != nil {
 			return fmt.Errorf("error occured while updating flowlog %s datacenter %s, server %s nic %s : %w", ID, dcId, srvID, nicID, err)
+		}
+	}
+	return nil
+}
+
+func (fw *Service) CreateOrPatchForNLB(ctx context.Context, dcId, nlbID, ID string, flowLog ionoscloud.FlowLog) error {
+	if ID == "" {
+		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPost(ctx, dcId, nlbID).NetworkLoadBalancerFlowLog(flowLog).Execute()
+		if err != nil {
+			return fmt.Errorf("error occured while creating flowlog in datacenter %s, nlb %s : %w", dcId, nlbID, err)
+		}
+	} else {
+		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPatch(ctx, dcId, nlbID, ID).NetworkLoadBalancerFlowLogProperties(*flowLog.Properties).Execute()
+		if err != nil {
+			return fmt.Errorf("error occured while updating flowlog %s datacenter %s, server %s : %w", ID, dcId, nlbID, err)
 		}
 	}
 	return nil

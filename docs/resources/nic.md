@@ -131,6 +131,35 @@ resource "random_password" "server_image_password" {
   special          = false
 }
 ```
+## Example configuring Flowlog
+
+```hcl
+resource "ionoscloud_nic" "example" {
+  datacenter_id         = ionoscloud_datacenter.example.id
+  server_id             = ionoscloud_server.example.id
+  lan                   = ionoscloud_lan.example.id
+  name                  = "IPV6 and Flowlog Enabled NIC"
+  dhcp                  = true
+  firewall_active       = true
+  firewall_type         = "INGRESS"
+  dhcpv6                = false
+  ipv6_cidr_block       = cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14)
+  ipv6_ips              = [
+    cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),10),
+    cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),20),
+    cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),30)
+  ]
+  flowlog {
+    action    = "ACCEPTED"
+    bucket    = "flowlog-bucket"
+    direction = "INGRESS"
+    name      = "flowlog"
+  }  
+}
+```
+
+This will configure flowlog for accepted ingress traffic and will log it into an existing ionos s3 bucket named `flowlog-bucket`. Any s3 compatible client can be used to create it. Adding a flowlog does not force re-creation or the nic, but changing any other field than 
+`name` will. Deleting a flowlog will also force nic re-creation.
 
 ## Argument reference
 

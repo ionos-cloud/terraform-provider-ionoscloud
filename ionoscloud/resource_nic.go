@@ -263,7 +263,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 						D:      d,
 						Client: client,
 					}
-					err = fw.CreateOrPatch(ctx, dcId, srvId, nicId, firstFlowLogId, flowLog)
+					err = fw.CreateOrPatchForServer(ctx, dcId, srvId, nicId, firstFlowLogId, flowLog)
 					if err != nil {
 						//if we have a create that failed, we do not want to save in state
 						// saving in state would mean a diff that would force a re-create
