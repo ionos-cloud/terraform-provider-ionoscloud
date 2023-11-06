@@ -95,7 +95,7 @@ resource "ionoscloud_dataplatform_cluster" "example" {
     day_of_the_week  	= "Sunday"
     time				= "09:00:00"
   }
-  version	= "23.4"
+  version	= "23.7"
 }
 
 data "ionoscloud_dataplatform_cluster" "example" {
@@ -118,7 +118,7 @@ resource "ionoscloud_dataplatform_cluster" "example" {
     day_of_the_week  	= "Sunday"
     time				= "09:00:00"
   }
-  version	= "23.4"
+  version	= "23.7"
 }
 
 data "ionoscloud_dataplatform_cluster" "example" {
