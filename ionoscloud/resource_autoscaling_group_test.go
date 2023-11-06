@@ -53,16 +53,17 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cores", "2"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cpu_family", "INTEL_SKYLAKE"),
 					resource.TestCheckResourceAttrPair(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.lan", constant.LanResource+".autoscaling_lan_1", "id"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.name", "LAN NIC 1"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.name", "nic_1"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.ram", "2048"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image", "065ba739-e30a-11eb-a927-824af8c35c96"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.name", "Volume 1"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_alias", "ubuntu:latest"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.name", "volume_1"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.size", "30"),
 					utils.TestNotEmptySlice(constant.AutoscalingGroupResource, "replica_configuration.0.volumes.0.ssh_keys"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.type", "HDD"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.user_data", "ZWNobyAiSGVsbG8sIFdvcmxkIgo="),
+					//resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.user_data", ""),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_password", "passw0rd"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.boot_order", "AUTO"),
 				),
 			},
 			{
@@ -93,15 +94,15 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.dhcp", "false"),
 					resource.TestCheckResourceAttrPair(resourceAutoscalingGroupName, "replica_configuration.0.nics.1.lan", constant.LanResource+".autoscaling_lan_2", "id"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.1.name", "LAN NIC 2"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.1.name", "nic_2"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.1.dhcp", "true"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.ram", "1024"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image", "065ba739-e30a-11eb-a927-824af8c35c96"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_alias", "ubuntu:latest"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.name", "Volume 2"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.size", "40"),
 					utils.TestNotEmptySlice(constant.AutoscalingGroupResource, "replica_configuration.0.volumes.0.ssh_keys"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.type", "HDD"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.user_data", ""),
+					//resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.user_data", ""),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_password", "passw0rdupdated")),
 			},
 			{
@@ -220,10 +221,11 @@ resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGrou
     metric             = "INSTANCE_CPU_UTILIZATION_AVERAGE"
     range              = "PT24H"
     scale_in_action {
-    amount                =  1
-    amount_type          = "ABSOLUTE"
-    termination_policy_type = "OLDEST_SERVER_FIRST"
-    cooldown_period      = "PT5M"
+      amount                  =  1
+      amount_type             = "ABSOLUTE"
+      termination_policy_type = "OLDEST_SERVER_FIRST"
+      cooldown_period         = "PT5M"
+      delete_volumes = true
     }
     scale_in_threshold = 33
     scale_out_action  {
@@ -240,18 +242,19 @@ resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGrou
   cpu_family        = "INTEL_SKYLAKE"
   nics {
     lan       = ` + constant.LanResource + `.autoscaling_lan_1.id
-    name      = "LAN NIC 1"
+    name      = "nic_1"
     dhcp      = true
   }
     ram          = 2048
     volumes {
-      image     = "065ba739-e30a-11eb-a927-824af8c35c96"
-      name      = "Volume 1"
+      image_alias     = "ubuntu:latest"
+      name      = "volume_1"
       size      = 30
       ssh_keys  = ["` + sshKey + `"]
       type      = "HDD"
       user_data    = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
       image_password= "passw0rd"
+      boot_order = "AUTO"
     }
   }
 }
@@ -276,50 +279,51 @@ resource ` + constant.LanResource + ` "autoscaling_lan_2" {
 
 resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGroupTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.autoscaling_datacenter.id
-  max_replica_count      = 6
   min_replica_count      = 2
-  //target_replica_count   = 4
-  name           = "%s"
+  max_replica_count      = 6
+  name                   = "%s"
   policy  {
-      metric             = "INSTANCE_NETWORK_IN_BYTES"
-    range              = "PT12H"
-        scale_in_action {
-      amount                =  2
-      amount_type          = "PERCENTAGE"
+    metric = "INSTANCE_NETWORK_IN_BYTES"
+    range  = "PT12H"
+    scale_in_action {
+      amount                  =  2
+      amount_type             = "PERCENTAGE"
       termination_policy_type = "NEWEST_SERVER_FIRST"
-      cooldown_period      = "PT10M"
-        }
+      cooldown_period         = "PT10M"
+      delete_volumes          = true
+    }
     scale_in_threshold = 35
-      scale_out_action {
-      amount         =  2
-      amount_type    = "PERCENTAGE"
-      cooldown_period= "PT10M"
-        }
+    scale_out_action {
+      amount          =  2
+      amount_type     = "PERCENTAGE"
+      cooldown_period = "PT10M"
+    }
     scale_out_threshold = 80
-        unit                = "PER_MINUTE"
+    unit                = "PER_MINUTE"
   }
     replica_configuration {
-    availability_zone = "ZONE_1"
-    cores         = "3"
-    cpu_family       = "INTEL_SKYLAKE"
-    nics {
-      lan        = ` + constant.LanResource + `.autoscaling_lan_1.id
-      name      = "` + constant.UpdatedResources + `"
-      dhcp       = false
-    }
-    nics {
-      lan        = ` + constant.LanResource + `.autoscaling_lan_2.id
-      name      = "LAN NIC 2"
-      dhcp       = true
-    }
-    ram          = 1024
+      availability_zone = "ZONE_1"
+      cores         = "3"
+      cpu_family    = "INTEL_SKYLAKE"
+      ram          = 1024
+      nics {
+        lan  = ` + constant.LanResource + `.autoscaling_lan_1.id
+        name = "` + constant.UpdatedResources + `"
+        dhcp = false
+      }
+      nics {
+        lan        = ` + constant.LanResource + `.autoscaling_lan_2.id
+        name       = "nic_2"
+        dhcp       = true
+      }
     volumes  {
-      image     = "065ba739-e30a-11eb-a927-824af8c35c96"
-      name      = "Volume 2"
-      size      = 40
-      ssh_keys  = ["` + sshKey + `"]
-      type      = "HDD"
-      image_password= "passw0rdupdated"
+      image_alias    = "ubuntu:latest"
+      name           = "Volume 2"
+      size           = 40
+      ssh_keys       = ["` + sshKey + `"]
+      type           = "HDD"
+      image_password = "passw0rdupdated"
+      boot_order     = "AUTO"
     }
   }
 }
@@ -331,40 +335,39 @@ resource ` + constant.DatacenterResource + ` "autoscaling_datacenter" {
    location = "de/fra"
 }
 resource ` + constant.LanResource + ` "autoscaling_lan_1" {
-  datacenter_id    = ` + constant.DatacenterResource + `.autoscaling_datacenter.id
-    public           = false
-    name             = "test_autoscaling_group_1"
+  datacenter_id = ` + constant.DatacenterResource + `.autoscaling_datacenter.id
+  public        = false
+  name          = "test_autoscaling_group_1"
 }
 
 resource ` + constant.LanResource + ` "autoscaling_lan_2" {
-  datacenter_id    = ` + constant.DatacenterResource + `.autoscaling_datacenter.id
-    public           = false
-    name             = "test_autoscaling_group_2"
-}
-
-resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGroupTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.autoscaling_datacenter.id
-  max_replica_count      = 6
-  min_replica_count      = 2
-  name           = "%s"
-  policy  {
-      metric             = "INSTANCE_NETWORK_IN_BYTES"
-      scale_in_action {
-      amount                =  2
-      amount_type          = "PERCENTAGE"
-  }
-  scale_in_threshold = 35
-  scale_out_action {
-  amount         =  2
-  amount_type    = "PERCENTAGE"
-  }
-  scale_out_threshold = 80
-  unit                = "PER_MINUTE"
+    public      = false
+    name        = "test_autoscaling_group_2"
+}
+  datacenter_id     = ` + constant.DatacenterResource + `.autoscaling_datacenter.id
+  min_replica_count = 2
+  max_replica_count = 6
+  name              = "%s"
+  policy {
+    metric = "INSTANCE_NETWORK_IN_BYTES"
+    scale_in_action {
+      amount      =  2
+      amount_type = "PERCENTAGE"
+      delete_volumes = true
+    }
+    scale_in_threshold = 35
+    scale_out_action {
+      amount      =  2
+      amount_type = "PERCENTAGE"
+    }
+    scale_out_threshold = 80
+    unit                = "PER_MINUTE"
   }
   replica_configuration {
     availability_zone = "ZONE_1"
-    cores         = "3"
-    ram          = 1024
+    cores             = "3"
+    ram               = 1024
   }
 }
 `

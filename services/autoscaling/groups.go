@@ -217,6 +217,13 @@ func GetScaleInActionData(d *schema.ResourceData) *autoscaling.GroupPolicyScaleI
 		scaleInAction.CooldownPeriod = nil
 	}
 
+	if value, ok := d.GetOk("policy.0.scale_in_action.0.delete_volumes"); ok {
+		value := value.(bool)
+		scaleInAction.DeleteVolumes = &value
+	} else {
+		scaleInAction.DeleteVolumes = nil
+	}
+
 	return &scaleInAction
 }
 
@@ -325,6 +332,11 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 					volumeEntry.Image = &value
 				}
 
+				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.image_alias", index)); ok {
+					value := value.(string)
+					volumeEntry.ImageAlias = &value
+				}
+
 				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.name", index)); ok {
 					value := value.(string)
 					volumeEntry.Name = &value
@@ -358,18 +370,32 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 					volumeEntry.Type = &value
 				}
 
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.user_data", index)); ok {
-					value := value.(string)
-					volumeEntry.UserData = &value
-				} else {
-					volumeEntry.UserData = nil
+				//if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.user_data", index)); ok {
+				//	value := value.(string)
+				//	volumeEntry.UserData = &value
+				//} else {
+				//	volumeEntry.UserData = nil
+				//}
+				if userData, ok := d.GetOk("replica_configuration.0.volumes.%d.user_data"); ok {
+					if *volumeEntry.Image == "" && *volumeEntry.ImageAlias == "" {
+						return nil, fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property ")
+					} else {
+						userData := userData.(string)
+						volumeEntry.UserData = &userData
+					}
 				}
-
 				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.image_password", index)); ok {
 					value := value.(string)
 					volumeEntry.ImagePassword = &value
 				} else {
 					volumeEntry.ImagePassword = nil
+				}
+
+				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.boot_order", index)); ok {
+					value := value.(string)
+					volumeEntry.BootOrder = &value
+				} else {
+					volumeEntry.BootOrder = nil
 				}
 
 				volumes = append(volumes, volumeEntry)
@@ -382,71 +408,67 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 	return &volumes, nil
 }
 
-func SetAutoscalingGroupData(d *schema.ResourceData, group autoscaling.Group) error {
+func SetAutoscalingGroupData(d *schema.ResourceData, groupProperties *autoscaling.GroupProperties) error {
 
-	resourceName := "autoscaling group"
+	resourceName := "autoscaling groupProperties"
 
-	if group.Id != nil {
-		d.SetId(*group.Id)
-	}
-
-	if group.Properties != nil {
-		if group.Properties.MaxReplicaCount != nil {
-			if err := d.Set("max_replica_count", *group.Properties.MaxReplicaCount); err != nil {
+	if groupProperties != nil {
+		if groupProperties.MaxReplicaCount != nil {
+			if err := d.Set("max_replica_count", *groupProperties.MaxReplicaCount); err != nil {
 				return generateSetError(resourceName, "max_replica_count", err)
 			}
 		}
 
-		if group.Properties.MinReplicaCount != nil {
-			if err := d.Set("min_replica_count", *group.Properties.MinReplicaCount); err != nil {
+		if groupProperties.MinReplicaCount != nil {
+			if err := d.Set("min_replica_count", *groupProperties.MinReplicaCount); err != nil {
 				return generateSetError(resourceName, "min_replica_count", err)
 			}
 		}
 
-		//if group.Properties.TargetReplicaCount != nil {
-		//	if err := d.Set("target_replica_count", *group.Properties.TargetReplicaCount); err != nil {
+		//if groupProperties.TargetReplicaCount != nil {
+		//	if err := d.Set("target_replica_count", *groupProperties.TargetReplicaCount); err != nil {
 		//		return generateSetError(resourceName, "target_replica_count", err)
 		//	}
 		//}
 
-		if group.Properties.Name != nil {
-			if err := d.Set("name", *group.Properties.Name); err != nil {
+		if groupProperties.Name != nil {
+			if err := d.Set("name", *groupProperties.Name); err != nil {
 				return generateSetError(resourceName, "name", err)
 			}
 		}
 
-		if group.Properties.MinReplicaCount != nil {
-			if err := d.Set("min_replica_count", *group.Properties.MinReplicaCount); err != nil {
+		if groupProperties.MinReplicaCount != nil {
+			if err := d.Set("min_replica_count", *groupProperties.MinReplicaCount); err != nil {
 				return generateSetError(resourceName, "min_replica_count", err)
 			}
 		}
 
-		if group.Properties.Policy != nil {
+		if groupProperties.Policy != nil {
 			var policies []any
-			policy := setPolicyProperties(*group.Properties.Policy)
+			policy := setPolicyProperties(*groupProperties.Policy)
 			policies = append(policies, policy)
 			if err := d.Set("policy", policies); err != nil {
 				return generateSetError(resourceName, "policy", err)
 			}
 		}
 
-		if group.Properties.ReplicaConfiguration != nil {
+		if groupProperties.ReplicaConfiguration != nil {
 			var replicaConfigurations []any
-			replicaConfiguration := setReplicaConfiguration(d, *group.Properties.ReplicaConfiguration)
+			replicaConfiguration := setReplicaConfiguration(d, *groupProperties.ReplicaConfiguration)
 			replicaConfigurations = append(replicaConfigurations, replicaConfiguration)
 			if err := d.Set("replica_configuration", replicaConfigurations); err != nil {
 				return generateSetError(resourceName, "replica_configuration", err)
 			}
 		}
 
-		if group.Properties.Datacenter != nil {
-			if err := d.Set("datacenter_id", *group.Properties.Datacenter.Id); err != nil {
+		if groupProperties.Datacenter != nil {
+			if err := d.Set("datacenter_id", *groupProperties.Datacenter.Id); err != nil {
 				return generateSetError(resourceName, "datacenter_id", err)
 			}
 		}
 
-		if group.Properties.Location != nil {
-			if err := d.Set("location", *group.Properties.Location); err != nil {
+		if groupProperties.Location != nil {
+			if err := d.Set("location", *groupProperties.Location); err != nil {
 				return generateSetError(resourceName, "location", err)
 			}
 		}
@@ -489,6 +511,7 @@ func setScaleInActionProperties(scaleInAction autoscaling.GroupPolicyScaleInActi
 	setPropWithNilCheck(scaleIn, "amount_type", scaleInAction.AmountType)
 	setPropWithNilCheck(scaleIn, "termination_policy_type", scaleInAction.TerminationPolicy)
 	setPropWithNilCheck(scaleIn, "cooldown_period", scaleInAction.CooldownPeriod)
+	setPropWithNilCheck(scaleIn, "delete_volumes", scaleInAction.DeleteVolumes)
 
 	return scaleIn
 }
@@ -524,8 +547,8 @@ func setReplicaConfiguration(d *schema.ResourceData, replicaConfiguration autosc
 
 	if replicaConfiguration.Volumes != nil {
 		var volumes []any
-		for _, volume := range *replicaConfiguration.Volumes {
-			volumeEntry := setVolumeProperties(d, volume)
+		for idx, volume := range *replicaConfiguration.Volumes {
+			volumeEntry := setVolumeProperties(d, idx, volume)
 			volumes = append(volumes, volumeEntry)
 		}
 		replica["volumes"] = volumes
@@ -544,10 +567,11 @@ func setNicProperties(replicaNic autoscaling.ReplicaNic) map[string]any {
 	return nic
 }
 
-func setVolumeProperties(d *schema.ResourceData, replicaVolume autoscaling.ReplicaVolumePost) map[string]any {
+func setVolumeProperties(d *schema.ResourceData, index int, replicaVolume autoscaling.ReplicaVolumePost) map[string]any {
 	volume := map[string]any{}
 
 	setPropWithNilCheck(volume, "image", replicaVolume.Image)
+	setPropWithNilCheck(volume, "image_alias", replicaVolume.ImageAlias)
 	setPropWithNilCheck(volume, "name", replicaVolume.Name)
 	setPropWithNilCheck(volume, "size", replicaVolume.Size)
 	//setPropWithNilCheck(volume, "ssh_keys", replicaVolume.SshKeys)
@@ -562,9 +586,12 @@ func setVolumeProperties(d *schema.ResourceData, replicaVolume autoscaling.Repli
 	//	volume["ssh_key_values"] = paths
 	//}
 
-	if password, ok := d.GetOk("replica_configuration.0.volumes.0.image_password"); ok {
+	if password, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.image_password", index)); ok {
 		volume["image_password"] = password
 	}
 
+	if bootOrder, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.boot_order", index)); ok {
+		volume["boot_order"] = bootOrder
+	}
 	return volume
 }

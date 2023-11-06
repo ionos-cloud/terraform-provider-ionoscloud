@@ -100,6 +100,11 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Type:        schema.TypeString,
 										Description: "Minimum time to pass after this Scaling action has started, until the next Scaling action will be started. Additionally, if a Scaling action is currently in progress, no second Scaling action will be started for the same autoscaling group. Instead, the Metric will be re-evaluated after the current Scaling action is completed (either successfully or with failures). This is validated with a minimum value of 2 minutes and a maximum of 24 hours currently. Default value is 5 minutes if not given.",
 									},
+									"delete_volumes": {
+										Optional:    true,
+										Type:        schema.TypeBool,
+										Description: "If set to `true`, when deleting an replica during scale in, any attached volume will also be deleted. When set to `false`, all volumes remain in the datacenter and must be deleted manually.  **Note**, that every scale-out creates new volumes. When they are not deleted, they will eventually use all of your contracts resource limits. At this point, scaling out would not be possible anymore.",
+									},
 								},
 							},
 						},
@@ -220,10 +225,15 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Computed: true,
 									},
 									"image": {
-										Required:         true,
+										Optional:         true,
 										Type:             schema.TypeString,
 										Description:      "The image installed on the disk. Currently, only the UUID of the image is supported.  >Note that either 'image' or 'imageAlias' must be specified, but not both.",
 										ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+									},
+									"image_alias": {
+										Optional:    true,
+										Type:        schema.TypeString,
+										Description: "The image installed on the volume. Must be an 'imageAlias' as specified via the images API. Note that one of 'image' or 'imageAlias' must be set, but not both.",
 									},
 									"name": {
 										Required:         true,
@@ -249,14 +259,30 @@ func resourceAutoscalingGroup() *schema.Resource {
 										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD", "SSD_PREMIUM", "SSD_STANDARD"}, true)),
 									},
 									"user_data": {
-										Optional:    true,
-										Type:        schema.TypeString,
-										Description: "User-data (Cloud Init) for this replica volume.",
+										Optional: true,
+										Computed: true,
+										Type:     schema.TypeString,
+										// backend does not return a value for user_data after it is set
+										DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+											if old == "" && new != "" {
+												return true
+											}
+											return false
+										},
+										DiffSuppressOnRefresh: true,
+										Description:           "User-data (Cloud Init) for this replica volume.",
 									},
 									"image_password": {
 										Optional:    true,
 										Type:        schema.TypeString,
 										Description: "Image password for this replica volume.",
+									},
+									"boot_order": {
+										Optional: true,
+										Type:     schema.TypeString,
+										Description: `Determines whether the volume will be used as a boot volume. Set to NONE, the volume will not be used as boot volume. 
+Set to PRIMARY, the volume will be used as boot volume and set to AUTO will delegate the decision to the provisioning engine to decide whether to use the volume as boot volume.
+Notice that exactly one volume can be set to PRIMARY or all of them set to AUTO.`,
 									},
 									//	TODO - add BUS, BackupunitId, BootOrder
 									//	Bus      *BusType `json:"bus,omitempty"`
@@ -313,7 +339,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	return resourceAutoscalingGroupRead(ctx, d, meta)
+	return diag.FromErr(autoscalingService.SetAutoscalingGroupData(d, autoscalingGroup.Properties))
 }
 
 func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -323,7 +349,7 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 	group, apiResponse, err := client.GetGroup(ctx, d.Id())
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] resource %s not found: %+v", d.Id(), err)
 			d.SetId("")
 			return nil
@@ -335,7 +361,7 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[INFO] successfully retrieved autoscaling group %s: %+v", d.Id(), group)
 
-	if err := autoscalingService.SetAutoscalingGroupData(d, group); err != nil {
+	if err := autoscalingService.SetAutoscalingGroupData(d, group.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -356,7 +382,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 
 	log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties)
 
-	_, _, err = client.UpdateGroup(ctx, d.Id(), *group)
+	updatedGroup, _, err := client.UpdateGroup(ctx, d.Id(), *group)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating autoscaling group %s: %w", d.Id(), err))
@@ -370,7 +396,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	return resourceAutoscalingGroupRead(ctx, d, meta)
+	return diag.FromErr(autoscalingService.SetAutoscalingGroupData(d, updatedGroup.Properties))
 }
 
 func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -407,7 +433,7 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 
 	log.Printf("[INFO] autoscaling group found: %+v", group)
 
-	if err := autoscalingService.SetAutoscalingGroupData(d, group); err != nil {
+	if err := autoscalingService.SetAutoscalingGroupData(d, group.Properties); err != nil {
 		return nil, err
 	}
 

@@ -293,7 +293,7 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 		}
 	}
 
-	if err := autoscalingService.SetAutoscalingGroupData(d, group); err != nil {
+	if err := autoscalingService.SetAutoscalingGroupData(d, group.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 
