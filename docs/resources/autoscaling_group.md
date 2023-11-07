@@ -3,7 +3,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud: autoscaling_group"
 sidebar_current: "docs-resource-autoscaling_group"
 description: |-
-Creates and manages IonosCloud Autoscaling Group.
+  Creates and manages IonosCloud Autoscaling Group.
 ---
 
 # ionoscloud_autoscaling_group
@@ -13,10 +13,9 @@ Manages an Autoscaling Group on IonosCloud.
 ## Example Usage
 
 ```hcl
-
 resource "ionoscloud_datacenter" "datacenter_example" {
     name     = "datacenter_example"
-    location = "de/fkb"
+    location = "de/fra"
 }
 
 resource "ionoscloud_lan" "lan_example_1" {
@@ -32,55 +31,55 @@ resource "ionoscloud_lan" "lan_example_2" {
 }
 
 resource "ionoscloud_autoscaling_group" "autoscaling_group_example" {
-    datacenter_id = ionoscloud_datacenter.datacenter_example.id
-    max_replica_count      = 5
-    min_replica_count      = 1
-    target_replica_count   = 2
-    name				   = "autoscaling_group_example"
-    policy {
-        metric             = "INSTANCE_CPU_UTILIZATION_AVERAGE"
-        range              = "PT24H"
-        scale_in_action {
-            amount        		    =  1
-            amount_type    			= "ABSOLUTE"
-            termination_policy_type = "OLDEST_SERVER_FIRST"
-            cooldown_period			= "PT5M"
-        }
-        scale_in_threshold = 33
-        scale_out_action  {
-            amount          =  1
-            amount_type     = "ABSOLUTE"
-            cooldown_period = "PT5M"
-        }
-        scale_out_threshold = 77
-        unit                = "PER_HOUR"
-	}
-    replica_configuration {
-        availability_zone = "AUTO"
-        cores 			  = "2"
-        cpu_family 		  = "INTEL_XEON"
-        ram				  = 2048
-        nics {
-            lan  		  = ionoscloud_lan.lan_example_1.id
-            name		  = "nic_example_1"
-            dhcp 		  = true
-        }
-        nics {
-            lan  		  = ionoscloud_lan.lan_example_2.id
-            name		  = "nic_example_2"
-            dhcp 		  = true
-        }
-        volumes	{
-            image  		  = "ee89912b-2290-11eb-af9f-1ee452559185"
-            name		  = "volume_example"
-            size 		  = 30
-            ssh_key_paths = [ "PATH_TO/.ssh/id_rsa.pub"]
-            ssh_key_values= [ "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSU\nGPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3\nPbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XA\nt3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/En\nmZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbx\nNrRFi9wrf+M7Q== user@domain.local"]
-            type		  = "HDD"
-            user_data	  = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
-            image_password= "passw0rd"
-		}
-	}
+  datacenter_id = ionoscloud_datacenter.datacenter_example.id
+  max_replica_count      = 2
+  min_replica_count      = 1
+  name				   = "autoscaling_group_example"
+  policy {
+    metric             = "INSTANCE_CPU_UTILIZATION_AVERAGE"
+    range              = "PT24H"
+    scale_in_action {
+      amount        		    =  1
+      amount_type    			= "ABSOLUTE"
+      termination_policy_type = "OLDEST_SERVER_FIRST"
+      cooldown_period			= "PT5M"
+      delete_volumes = true
+    }
+    scale_in_threshold = 33
+    scale_out_action  {
+      amount          =  1
+      amount_type     = "ABSOLUTE"
+      cooldown_period = "PT5M"
+    }
+    scale_out_threshold = 77
+    unit                = "PER_HOUR"
+  }
+  replica_configuration {
+    availability_zone = "AUTO"
+    cores 			  = "2"
+    cpu_family 		  = "INTEL_SKYLAKE"
+    ram				  = 2048
+    nics {
+      lan  		  = ionoscloud_lan.lan_example_1.id
+      name		  = "nic_example_1"
+      dhcp 		  = true
+    }
+    nics {
+      lan  		  = ionoscloud_lan.lan_example_2.id
+      name		  = "nic_example_2"
+      dhcp 		  = true
+    }
+    volumes	{
+      image_alias  		  = "ubuntu:latest"
+      name		  = "volume_example"
+      size 		  = 10
+      ssh_keys =    [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC6J7UMVHrx2EztvbnH+xCVOo8i4sg40H4U5NNySxF5ZwmHXHDlOw8BCJCwFAjknDxJPZQgZMPUAvAYZh0gBWcZhqOXTNcDyPCusMBQvEbngiXyAfTJKdSe+lPkpOnoq7RGjdIbrnLzmxtnPNL6pk1Ys+eVBxoOt+FGkfbIhXwEv5zy82Kk2j96fKD6OrfJna7O7xQWDkhIa6GHa9S0LaU6NwWZmaZidbEAbf4/ntjKLtrIJLcc8C5ExquBVg36jdTjsnoW85tY95SScVH5qlk7zEpn9nFLbb3TKNItwewK0pf5jsjbAOXpRWQk+sn2IgayEZ8fOfmQe88mH3ZHrWqAMSvyBl/CXY3wBjHsUiUNy+Z4i3Rx3Gqa+vcUpx8r0ZaryfbrTWkA4WYEsX5Brg6JsgcA/oJ8HNcUY8dexSZMXPV1Ofl+AxkwLMjUjxSKHgfX1EkjdhzVgQraHihSgCbKZCjkEhAzASI/TOQjSPk0/6itX+359fbBE5mahfYzrDFTwDqbgJI295cZxrMH5JU/RHMMq3xzUHO20L02kQgz3By5lDhlLq65qqxbSHncqbWPlbfzqqNaJEfK0tCwuTfMEmKv8PcrF6KrLyaYJTAjYPvOiZUVOp1OlUoArGrsHG2smjgn+juOHPBOWVFSukRTIn869uKWkCWfA1hIjFEhjQ== My nginx key"]
+      type		  = "HDD"
+      user_data	  = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
+      image_password= "passw0rd"
+      boot_order = "AUTO"
+    }
+  }
 }
 ```
 
