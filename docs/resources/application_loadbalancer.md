@@ -38,7 +38,8 @@ resource "ionoscloud_application_loadbalancer" "example" {
   datacenter_id         = ionoscloud_datacenter.example.id
   name                  = "ALB Example"
   listener_lan          = ionoscloud_lan.example_1.id
-  ips                   = [ "10.12.118.224"]target_lan            = ionoscloud_lan.example_2.id
+  ips                   = [ "10.12.118.224"]
+  target_lan            = ionoscloud_lan.example_2.id
   lb_private_ips        = [ "10.13.72.225/24"]
 }
 

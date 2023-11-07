@@ -170,7 +170,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 					flowLog := cloudapiflowlog.GetFlowlogFromMap(flowLogMap)
 					err := fw.CreateOrPatchForALB(ctx, dcId, d.Id(), "", flowLog)
 					if err != nil {
-						d.SetId("")
+						_ = d.Set("flowlog", nil)
 						diags := diag.FromErr(fmt.Errorf("error creating flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)))
 						return diags
 					}
