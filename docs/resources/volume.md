@@ -13,7 +13,7 @@ Manages a **Volume** on IonosCloud.
 
 ## Example Usage
 
-A primary volume will be created with the server. If there is a need for additional volumes, this resource handles it.
+A primary volume will be created with the server. If there is a need for additional volumes, this resource handles it. Any of the additional volumes can be used as a boot volume.
 
 ```hcl
 data "ionoscloud_image" "example" {
@@ -58,6 +58,7 @@ resource "ionoscloud_server" "example" {
         user_data         = "foo"
         bus               = "VIRTIO"
         availability_zone = "ZONE_1"
+        boot_order        = "NONE"
     }
     nic {
         lan               = ionoscloud_lan.example.id
@@ -90,6 +91,7 @@ resource "ionoscloud_volume" "example" {
   image_name              = data.ionoscloud_image.example.id
   image_password          = random_password.volume_image_password.result
   user_data               = "foo"
+  boot_order              = "PRIMARY"
 }
 
 resource "ionoscloud_volume" "example" {
@@ -142,6 +144,7 @@ resource "random_password" "volume_image_password" {
 * `disc_virtio_hot_plug` - (Computed)[string] Is capable of Virt-IO drive hot plug (no reboot required)
 * `disc_virtio_hot_unplug` - (Computed)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 * `boot_server` - (Computed)[string] The UUID of the attached server.
+* `boot_order` - (Optional)[string] The volume can be used as a primary boot device: AUTO, PRIMARY, NONE. By default, the inline volume of the server will always be the primary boot volume unless a different external volume is set as PRIMARY or the inline volume is explicitly set to NONE.
 > **⚠ WARNING**
 >
 > ssh_key_path and ssh_keys fields are immutable.

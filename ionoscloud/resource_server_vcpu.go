@@ -202,6 +202,13 @@ func resourceVCPUServer() *schema.Resource {
 							Description: "The UUID of the attached server.",
 							Computed:    true,
 						},
+						"boot_order": {
+							Type:             schema.TypeString,
+							Default:          constant.BootOrderAuto,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.BootOrderAuto, constant.BootOrderNone, constant.BootOrderPrimary}, true)),
+							Description:      "Determines if the volume will be used as the boot device. Possible values: 'AUTO' (default), 'NONE', 'PRIMARY'. The default behavior set by 'AUTO' means that the volume will be set as the boot device if there are no other volumes or cdrom devices. 'PRIMARY' will set this volume as the boot device and unset other devices, if they exist.",
+						},
 					},
 				},
 			},

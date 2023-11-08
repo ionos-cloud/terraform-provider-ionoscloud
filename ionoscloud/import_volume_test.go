@@ -29,7 +29,7 @@ func TestAccVolumeImportBasic(t *testing.T) {
 				ImportStateIdFunc:       testAccVolumeImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "user_data", "backup_unit_id"},
+				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "user_data", "backup_unit_id", "boot_order"},
 			},
 		},
 	})

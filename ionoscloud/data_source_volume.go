@@ -104,6 +104,10 @@ func dataSourceVolume() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"boot_order": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}

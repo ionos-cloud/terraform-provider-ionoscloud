@@ -310,6 +310,13 @@ func resourceServer() *schema.Resource {
 							Description: "The UUID of the attached server.",
 							Computed:    true,
 						},
+						"boot_order": {
+							Type:             schema.TypeString,
+							Default:          constant.BootOrderAuto,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.BootOrderAuto, constant.BootOrderNone, constant.BootOrderPrimary}, true)),
+							Description:      "Determines if the volume will be used as the boot device. Possible values: 'AUTO' (default), 'NONE', 'PRIMARY'. The default behavior set by 'AUTO' means that the volume will be set as the boot device if there are no other volumes or cdrom devices. 'PRIMARY' will set this volume as the boot device and unset other devices, if they exist.",
+						},
 					},
 				},
 			},
@@ -898,7 +905,15 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			diags := diag.FromErr(fmt.Errorf("boot_cdrom has to be a valid UUID, got: %s", bootCdrom))
 			return diags
 		}
-		/* todo: figure out a way of sending a nil bootCdrom to the API (the sdk's omitempty doesn't let us) */
+
+		// Don't override an inline volume explicitly set as PRIMARY boot device
+		if v, ok := d.GetOk("volume.0.boot_order"); ok {
+			bootOrder := v.(string)
+			if strings.EqualFold(bootOrder, constant.BootOrderPrimary) {
+				diags := diag.FromErr(fmt.Errorf("cannot set boot_cdrom while an inline volume has boot_order set to 'PRIMARY', set it to 'AUTO' or 'NONE' first"))
+				return diags
+			}
+		}
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Depth(3).Execute()
@@ -917,60 +932,57 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Volume stuff
 	if d.HasChange("volume") {
-		bootVolume := d.Get("boot_volume").(string)
-		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			volume := ionoscloud.Volume{
-				Id: &bootVolume,
-			}
-			_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, d.Id()).Volume(volume).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), bootVolume, err))
-				return diags
-			}
-
-			// Wait, catching any errors
-			_, errState = cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-			if errState != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occured while waiting for a state change for dcId: %s server_id: %s ID: %s %w", dcId, d.Id(), bootVolume, err))
-				return diags
-			}
-		}
 
 		properties := ionoscloud.VolumeProperties{}
+		inlineVolumeIds := d.Get("inline_volume_ids")
 
-		if v, ok := d.GetOk("volume.0.name"); ok {
-			vStr := v.(string)
-			properties.Name = &vStr
+		if inlineVolumeIds != nil {
+			inlineVolumeIds := inlineVolumeIds.([]interface{})
+			for i, volumeId := range inlineVolumeIds {
+				volumeIdStr := volumeId.(string)
+				volumePath := fmt.Sprintf("volume.%d.", i)
+				_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), volumeIdStr).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("an error occured while getting a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), volumeId, err))
+					return diags
+				}
+				if v, ok := d.GetOk(volumePath + "name"); ok {
+					vStr := v.(string)
+					properties.Name = &vStr
+				}
+
+				if v, ok := d.GetOk(volumePath + "size"); ok {
+					vInt := float32(v.(int))
+					properties.Size = &vInt
+				}
+
+				if v, ok := d.GetOk(volumePath + "bus"); ok {
+					vStr := v.(string)
+					properties.Bus = &vStr
+				}
+
+				if v, ok := d.GetOk(volumePath + "boot_order"); ok {
+					vStr := v.(string)
+					properties.BootOrder = &vStr
+				}
+
+				_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), volumeIdStr).Volume(properties).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("error patching volume (%s) (%w)", d.Id(), err))
+					return diags
+				}
+
+				_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+				if errState != nil {
+					diags := diag.FromErr(errState)
+					return diags
+				}
+
+			}
 		}
 
-		if v, ok := d.GetOk("volume.0.size"); ok {
-			vInt := float32(v.(int))
-			properties.Size = &vInt
-		}
-
-		if v, ok := d.GetOk("volume.0.bus"); ok {
-			vStr := v.(string)
-			properties.Bus = &vStr
-		}
-
-		_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error patching volume (%s) (%w)", d.Id(), err))
-			return diags
-		}
-
-		// Wait, catching any errors
-		_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(errState)
-			return diags
-		}
 	}
 
 	// Nic stuff
@@ -1158,7 +1170,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				return diag.FromErr(err)
 			}
 		}
-
 	}
 	return resourceServerRead(ctx, d, meta)
 }
@@ -1509,6 +1520,8 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
 				return fmt.Errorf("error setting boot_cdrom %w", err)
 			}
+		} else {
+			d.Set("boot_cdrom", nil)
 		}
 
 		if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
@@ -1529,23 +1542,43 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		return fmt.Errorf("server entities cannot be empty for %s", d.Id())
 	}
 
-	if server.Properties != nil && server.Properties.BootVolume != nil {
-		volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), *server.Properties.BootVolume.Id).Execute()
-		logApiRequestTime(apiResponse)
-		if err == nil {
-			var volumes []interface{}
+	inlineVolumeIds := d.Get("inline_volume_ids")
+
+	if inlineVolumeIds != nil {
+		inlineVolumeIds := inlineVolumeIds.([]interface{})
+
+		var volumes []interface{}
+		for i, volumeId := range inlineVolumeIds {
+			volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), volumeId.(string)).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return fmt.Errorf("error retrieving inline volume %w", err)
+			}
+			volumePath := fmt.Sprintf("volume.%d.", i)
 			entry := SetVolumeProperties(volume)
-			userData := d.Get("volume.0.user_data")
+			userData := d.Get(volumePath + "user_data")
 			entry["user_data"] = userData
 			if *server.Properties.Type != constant.VCPUType {
-				entry["ssh_key_path"] = d.Get("volume.0.ssh_key_path")
+				entry["ssh_key_path"] = d.Get(volumePath + "ssh_key_path")
 			}
-			backupUnit := d.Get("volume.0.backup_unit_id")
+			backupUnit := d.Get(volumePath + "backup_unit_id")
 			entry["backup_unit_id"] = backupUnit
-			volumes = append(volumes, entry)
-			if err := d.Set("volume", volumes); err != nil {
-				return fmt.Errorf("error setting volume %w", err)
+			bootOrder := ""
+			if val, ok := d.GetOk("boot_order"); ok {
+				bootOrder = val.(string)
 			}
+			if bootOrder == "" {
+				bootOrder = constant.BootOrderAuto
+			}
+			if !strings.EqualFold(bootOrder, constant.BootOrderAuto) {
+				entry["boot_order"] = *volume.Properties.BootOrder
+			} else {
+				entry["boot_order"] = bootOrder
+			}
+			volumes = append(volumes, entry)
+		}
+		if err := d.Set("volume", volumes); err != nil {
+			return fmt.Errorf("error setting inline volumes %w", err)
 		}
 	}
 

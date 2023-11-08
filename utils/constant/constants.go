@@ -324,3 +324,10 @@ const (
 
 const VCPUType = "VCPU"
 const RepoURL = "https://github.com/ionos-cloud/terraform-provider-ionoscloud"
+
+const (
+	// Volume Boot Order values
+	BootOrderPrimary = "PRIMARY"
+	BootOrderNone    = "NONE"
+	BootOrderAuto    = "AUTO"
+)
