@@ -26,6 +26,7 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		ExternalProviders: randomProviderVersion343(),
 		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -51,17 +52,17 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cores", "2"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cpu_family", "INTEL_SKYLAKE"),
-					resource.TestCheckResourceAttrPair(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.lan", constant.LanResource+".autoscaling_lan_1", "id"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.name", "nic_1"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.dhcp", "true"),
+					resource.TestCheckResourceAttrPair(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.lan", constant.LanResource+".autoscaling_lan_1", "id"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.name", "nic_1"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.ram", "2048"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_alias", "ubuntu:latest"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.name", "volume_1"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.size", "30"),
 					utils.TestNotEmptySlice(constant.AutoscalingGroupResource, "replica_configuration.0.volumes.0.ssh_keys"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.type", "HDD"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_password", "passw0rd"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.boot_order", "AUTO"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.bus", "IDE"),
 				),
 			},
 			{
@@ -87,18 +88,17 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cores", "3"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cpu_family", "INTEL_SKYLAKE"),
-					resource.TestCheckResourceAttrPair(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.lan", constant.LanResource+".autoscaling_lan_1", "id"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.name", "nic_1_updated"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.dhcp", "true"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.1.name", "nic_2_updated"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.1.dhcp", "true"),
+					resource.TestCheckResourceAttrPair(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.lan", constant.LanResource+".autoscaling_lan_1", "id"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.name", "nic_1_updated"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.1.name", "nic_2_updated"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.1.dhcp", "true"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.ram", "2048"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_alias", "ubuntu:latest"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.name", "volume_1"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.size", "30"),
 					utils.TestNotEmptySlice(constant.AutoscalingGroupResource, "replica_configuration.0.volumes.0.ssh_keys"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.type", "HDD"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_password", "passw0rd"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.boot_order", "AUTO")),
 			},
 			{
@@ -122,16 +122,15 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cores", "3"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cpu_family", "INTEL_SKYLAKE"),
-					resource.TestCheckResourceAttrPair(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.lan", constant.LanResource+".autoscaling_lan_1", "id"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.name", "nic_1_updated"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.dhcp", "false"),
+					resource.TestCheckResourceAttrPair(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.lan", constant.LanResource+".autoscaling_lan_1", "id"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.name", "nic_1_updated"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.dhcp", "false"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.ram", "2048"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_alias", "ubuntu:latest"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.name", "volume_1"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.size", "10"),
 					utils.TestNotEmptySlice(constant.AutoscalingGroupResource, "replica_configuration.0.volumes.0.ssh_keys"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.type", "HDD"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_password", "passw0rd"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.boot_order", "AUTO")),
 			},
 		},
@@ -241,23 +240,29 @@ resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGrou
     availability_zone = "AUTO"
     cores             = "2"
     cpu_family        = "INTEL_SKYLAKE"
-    nics {
+    nic {
       lan       = ` + constant.LanResource + `.autoscaling_lan_1.id
       name      = "nic_1"
       dhcp      = true
     }
     ram          = 2048
-    volumes {
+    volume {
       image_alias     = "ubuntu:latest"
       name      = "volume_1"
       size      = 30
       ssh_keys  = ["` + sshKey + `"]
       type      = "HDD"
       user_data    = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
-      image_password= "passw0rd"
+      image_password= random_password.image_password.result
       boot_order = "AUTO"
+      bus = "IDE"
     }
   }
+}
+
+resource "random_password" "image_password" {
+  length = 16
+  special = false
 }
 `
 
@@ -307,27 +312,32 @@ resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGrou
     availability_zone = "AUTO"
     cores             = "3"
     cpu_family        = "INTEL_SKYLAKE"
-    nics {
+    nic {
       lan       = ` + constant.LanResource + `.autoscaling_lan_1.id
       name      = "nic_1_updated"
       dhcp      = true
     }
-    nics {
+    nic {
       lan       = ` + constant.LanResource + `.autoscaling_lan_2.id
       name      = "nic_2_updated"
       dhcp      = true
     }
     ram          = 2048
-    volumes {
+    volume {
       image_alias     = "ubuntu:latest"
       name      = "volume_1"
       size      = 30
       ssh_keys  = ["` + sshKey + `"]
       type      = "HDD"
-      image_password= "passw0rd"
+      image_password= random_password.image_password.result
       boot_order = "AUTO"
     }
   }
+}
+
+resource "random_password" "image_password" {
+  length = 16
+  special = false
 }
 `
 
@@ -373,19 +383,18 @@ resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGrou
     availability_zone = "AUTO"
     cores             = "3"
     cpu_family        = "INTEL_SKYLAKE"
-    nics {
+    nic {
       lan       = ` + constant.LanResource + `.autoscaling_lan_1.id
       name      = "nic_1_updated"
       dhcp      = false
     }
     ram          = 2048
-    volumes {
+    volume {
       image_alias     = "ubuntu:latest"
       name      = "volume_1"
       size      = 10
       ssh_keys  = ["` + sshKey + `"]
       type      = "HDD"
-      image_password= "passw0rd"
       boot_order = "AUTO"
     }
   }

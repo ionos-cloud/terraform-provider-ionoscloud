@@ -18,7 +18,7 @@ type GroupService interface {
 }
 
 func (c *Client) GetGroup(ctx context.Context, groupId string) (autoscaling.Group, *autoscaling.APIResponse, error) {
-	group, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsFindById(ctx, groupId).Execute()
+	group, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsFindById(ctx, groupId).Depth(2).Execute()
 	if apiResponse != nil {
 		return group, apiResponse, err
 
@@ -271,7 +271,9 @@ func GetReplicaConfigurationPostData(d *schema.ResourceData) (*autoscaling.Repli
 	}
 
 	replica.Nics = GetNicsData(d)
-
+	if replica.Nics != nil && *replica.Nics == nil {
+		*replica.Nics = make([]autoscaling.ReplicaNic, 0)
+	}
 	if value, ok := d.GetOk("replica_configuration.0.ram"); ok {
 		value := int32(value.(int))
 		replica.Ram = &value
@@ -290,26 +292,15 @@ func GetReplicaConfigurationPostData(d *schema.ResourceData) (*autoscaling.Repli
 func GetNicsData(d *schema.ResourceData) *[]autoscaling.ReplicaNic {
 	var nics []autoscaling.ReplicaNic
 
-	if nicsValue, ok := d.GetOk("replica_configuration.0.nics"); ok {
-		nicsValue := nicsValue.([]any)
+	if nicsValue, ok := d.GetOk("replica_configuration.0.nic"); ok {
+		nicsValue := nicsValue.(*schema.Set)
 		if nicsValue != nil {
-			for index := range nicsValue {
-				var nicEntry autoscaling.ReplicaNic
-
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.nics.%d.lan", index)); ok {
-					value := int32(value.(int))
-					nicEntry.Lan = &value
-				}
-
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.nics.%d.name", index)); ok {
-					value := value.(string)
-					nicEntry.Name = &value
-				}
-
-				value := d.Get(fmt.Sprintf("replica_configuration.0.nics.%d.dhcp", index)).(bool)
-				nicEntry.Dhcp = &value
-
-				nics = append(nics, nicEntry)
+			for _, val := range nicsValue.List() {
+				mmap := val.(map[string]any)
+				var nicEntry = autoscaling.NewReplicaNic(int32(mmap["lan"].(int)), mmap["name"].(string))
+				nicEntry.Dhcp = new(bool)
+				*nicEntry.Dhcp = mmap["dhcp"].(bool)
+				nics = append(nics, *nicEntry)
 			}
 		}
 
@@ -398,6 +389,20 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 					volumeEntry.BootOrder = nil
 				}
 
+				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.bus", index)); ok {
+					value := autoscaling.BusType(value.(string))
+					volumeEntry.Bus = &value
+				} else {
+					volumeEntry.Bus = nil
+				}
+
+				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.backup_unit_id", index)); ok {
+					value := value.(string)
+					volumeEntry.BackupunitId = &value
+				} else {
+					volumeEntry.BackupunitId = nil
+				}
+
 				volumes = append(volumes, volumeEntry)
 			}
 
@@ -411,7 +416,6 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 func SetAutoscalingGroupData(d *schema.ResourceData, groupProperties *autoscaling.GroupProperties) error {
 
 	resourceName := "autoscaling groupProperties"
-
 	if groupProperties != nil {
 		if groupProperties.MaxReplicaCount != nil {
 			if err := d.Set("max_replica_count", *groupProperties.MaxReplicaCount); err != nil {
@@ -542,7 +546,7 @@ func setReplicaConfiguration(d *schema.ResourceData, replicaConfiguration autosc
 			nicEntry := setNicProperties(nic)
 			nics = append(nics, nicEntry)
 		}
-		replica["nics"] = nics
+		replica["nic"] = nics
 	}
 
 	if replicaConfiguration.Volumes != nil {
@@ -551,7 +555,7 @@ func setReplicaConfiguration(d *schema.ResourceData, replicaConfiguration autosc
 			volumeEntry := setVolumeProperties(d, idx, volume)
 			volumes = append(volumes, volumeEntry)
 		}
-		replica["volumes"] = volumes
+		replica["volume"] = volumes
 	}
 
 	return replica
@@ -577,21 +581,15 @@ func setVolumeProperties(d *schema.ResourceData, index int, replicaVolume autosc
 	//setPropWithNilCheck(volume, "ssh_keys", replicaVolume.SshKeys)
 	setPropWithNilCheck(volume, "type", replicaVolume.Type)
 	setPropWithNilCheck(volume, "user_data", replicaVolume.UserData)
-
-	if keys, ok := d.GetOk("replica_configuration.0.volumes.0.ssh_keys"); ok {
-		volume["ssh_keys"] = keys
-	}
-
-	//if paths, ok := d.GetOk("replica_configuration.0.volumes.0.ssh_key_values"); ok {
-	//	volume["ssh_key_values"] = paths
-	//}
-
+	//setPropWithNilCheck(volume, "image_password", replicaVolume.ImagePassword)
+	setPropWithNilCheck(volume, "boot_order", replicaVolume.BootOrder)
+	setPropWithNilCheck(volume, "bus", replicaVolume.Bus)
+	//we need to take these from schema as they are not returned by API
 	if password, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.image_password", index)); ok {
 		volume["image_password"] = password
 	}
-
-	if bootOrder, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.boot_order", index)); ok {
-		volume["boot_order"] = bootOrder
+	if keys, ok := d.GetOk("replica_configuration.0.volumes.0.ssh_keys"); ok {
+		volume["ssh_keys"] = keys
 	}
 	return volume
 }

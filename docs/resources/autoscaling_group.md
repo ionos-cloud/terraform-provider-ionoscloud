@@ -34,16 +34,16 @@ resource "ionoscloud_autoscaling_group" "autoscaling_group_example" {
   datacenter_id = ionoscloud_datacenter.datacenter_example.id
   max_replica_count      = 2
   min_replica_count      = 1
-  name				   = "autoscaling_group_example"
+  name                   = "autoscaling_group_example"
   policy {
     metric             = "INSTANCE_CPU_UTILIZATION_AVERAGE"
     range              = "PT24H"
     scale_in_action {
-      amount        		    =  1
-      amount_type    			= "ABSOLUTE"
+      amount                  =  1
+      amount_type             = "ABSOLUTE"
       termination_policy_type = "OLDEST_SERVER_FIRST"
-      cooldown_period			= "PT5M"
-      delete_volumes = true
+      cooldown_period         = "PT5M"
+      delete_volumes          = true
     }
     scale_in_threshold = 33
     scale_out_action  {
@@ -56,30 +56,35 @@ resource "ionoscloud_autoscaling_group" "autoscaling_group_example" {
   }
   replica_configuration {
     availability_zone = "AUTO"
-    cores 			  = "2"
-    cpu_family 		  = "INTEL_SKYLAKE"
-    ram				  = 2048
-    nics {
-      lan  		  = ionoscloud_lan.lan_example_1.id
-      name		  = "nic_example_1"
-      dhcp 		  = true
+    cores               = "2"
+    cpu_family           = "INTEL_SKYLAKE"
+    ram                  = 2048
+    nic {
+      lan   = ionoscloud_lan.lan_example_1.id
+      name  = "nic_example_1"
+      dhcp  = true
     }
-    nics {
-      lan  		  = ionoscloud_lan.lan_example_2.id
-      name		  = "nic_example_2"
-      dhcp 		  = true
+    nic {
+      lan   = ionoscloud_lan.lan_example_2.id
+      name  = "nic_example_2"
+      dhcp  = true
     }
-    volumes	{
-      image_alias  		  = "ubuntu:latest"
-      name		  = "volume_example"
-      size 		  = 10
-      ssh_keys =    [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC6J7UMVHrx2EztvbnH+xCVOo8i4sg40H4U5NNySxF5ZwmHXHDlOw8BCJCwFAjknDxJPZQgZMPUAvAYZh0gBWcZhqOXTNcDyPCusMBQvEbngiXyAfTJKdSe+lPkpOnoq7RGjdIbrnLzmxtnPNL6pk1Ys+eVBxoOt+FGkfbIhXwEv5zy82Kk2j96fKD6OrfJna7O7xQWDkhIa6GHa9S0LaU6NwWZmaZidbEAbf4/ntjKLtrIJLcc8C5ExquBVg36jdTjsnoW85tY95SScVH5qlk7zEpn9nFLbb3TKNItwewK0pf5jsjbAOXpRWQk+sn2IgayEZ8fOfmQe88mH3ZHrWqAMSvyBl/CXY3wBjHsUiUNy+Z4i3Rx3Gqa+vcUpx8r0ZaryfbrTWkA4WYEsX5Brg6JsgcA/oJ8HNcUY8dexSZMXPV1Ofl+AxkwLMjUjxSKHgfX1EkjdhzVgQraHihSgCbKZCjkEhAzASI/TOQjSPk0/6itX+359fbBE5mahfYzrDFTwDqbgJI295cZxrMH5JU/RHMMq3xzUHO20L02kQgz3By5lDhlLq65qqxbSHncqbWPlbfzqqNaJEfK0tCwuTfMEmKv8PcrF6KrLyaYJTAjYPvOiZUVOp1OlUoArGrsHG2smjgn+juOHPBOWVFSukRTIn869uKWkCWfA1hIjFEhjQ== My nginx key"]
-      type		  = "HDD"
-      user_data	  = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
-      image_password= "passw0rd"
-      boot_order = "AUTO"
+    volume    {
+      image_alias    = "ubuntu:latest"
+      name           = "volume_example"
+      size           = 10
+      ssh_keys       =    [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC6J7UMVHrx2EztvbnH+xCVOo8i4sg40H4U5NNySxF5ZwmHXHDlOw8BCJCwFAjknDxJPZQgZMPUAvAYZh0gBWcZhqOXTNcDyPCusMBQvEbngiXyAfTJKdSe+lPkpOnoq7RGjdIbrnLzmxtnPNL6pk1Ys+eVBxoOt+FGkfbIhXwEv5zy82Kk2j96fKD6OrfJna7O7xQWDkhIa6GHa9S0LaU6NwWZmaZidbEAbf4/ntjKLtrIJLcc8C5ExquBVg36jdTjsnoW85tY95SScVH5qlk7zEpn9nFLbb3TKNItwewK0pf5jsjbAOXpRWQk+sn2IgayEZ8fOfmQe88mH3ZHrWqAMSvyBl/CXY3wBjHsUiUNy+Z4i3Rx3Gqa+vcUpx8r0ZaryfbrTWkA4WYEsX5Brg6JsgcA/oJ8HNcUY8dexSZMXPV1Ofl+AxkwLMjUjxSKHgfX1EkjdhzVgQraHihSgCbKZCjkEhAzASI/TOQjSPk0/6itX+359fbBE5mahfYzrDFTwDqbgJI295cZxrMH5JU/RHMMq3xzUHO20L02kQgz3By5lDhlLq65qqxbSHncqbWPlbfzqqNaJEfK0tCwuTfMEmKv8PcrF6KrLyaYJTAjYPvOiZUVOp1OlUoArGrsHG2smjgn+juOHPBOWVFSukRTIn869uKWkCWfA1hIjFEhjQ== My nginx key"]
+      type           = "HDD"
+      user_data      = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
+      image_password = random_password.server_image_password.result
+      boot_order     = "AUTO"
     }
   }
+}
+
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = false
 }
 ```
 
@@ -110,13 +115,14 @@ The following arguments are supported:
     - `availability_zone` - (Required)[string] The zone where the VMs are created using this configuration. Possible values are: `AUTO`, `ZONE_1`, `ZONE_2`.
     - `cores` - (Required)[string] The total number of cores for the VMs.
     - `cpu_family` - (Optional)[string] PU family for the VMs created using this configuration. If null, the VM will be created with the default CPU family for the assigned location. Possible values are: `AMD_OPTERON`, `INTEL_SKYLAKE`, `INTEL_XEON`.
-    - `nics` - (Optional)[list] List of NICs associated with this Replica.
+    - `nics` - (Optional)[set] List of NICs associated with this Replica.
         - `lan` - (Required)[int] Lan ID for this replica Nic.
         - `name` - (Required)[string] Name for this replica NIC.
         - `dhcp` - (Optional)[bool] Dhcp flag for this replica Nic. This is an optional attribute with default value of 'true' if not given in the request payload or given as null.
     - `ram` - (Required)[int] The amount of memory for the VMs in MB, e.g. 2048. Size must be specified in multiples of 256 MB with a minimum of 256 MB; however, if you set ramHotPlug to TRUE then you must use a minimum of 1024 MB. If you set the RAM size more than 240GB, then ramHotPlug will be set to FALSE and can not be set to TRUE unless RAM size not set to less than 240GB.
-    - `volumes` - (Optional)[list] List of volumes associated with this Replica. Only a single volume is currently supported.
-        `image` - (Required)[string] The image installed on the volume. Only the UUID of the image is presently supported.
+    - `volume` - (Optional)[list] List of volumes associated with this Replica.
+        `image` - (Optional)[string] The image installed on the volume. Only the UUID of the image is presently supported.
+        `image_alias` - (Optional)[string] The image installed on the volume. Must be an 'imageAlias' as specified via the images API. Note that one of 'image' or 'imageAlias' must be set, but not both.
         `name` - (Required)[string] Name for this replica volume.
         `size` - (Required)[int] Name for this replica volume.
         `ssh_key_paths` - (Optional)[list] List of ssh key paths.
@@ -125,5 +131,9 @@ The following arguments are supported:
         `type` - (Required)[string] Storage Type for this replica volume. Possible values: `SSD`, `HDD`, `SSD_STANDARD` or `SSD_PREMIUM`.
         `user_data` - (Optional)[string] User-data (Cloud Init) for this replica volume. Make sure you provide a Cloud Init compatible image in conjunction with this parameter.
         `image_password` - (Optional)[string] Image password for this replica volume.
+        `bus` - (Optional)[string] The bus type of the volume. Default setting is 'VIRTIO'. The bus type 'IDE' is also supported.
+        `backup_unit_id` - (Optional)[string] The uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.
+        `boot_order` - (Optional)[string] Determines whether the volume will be used as a boot volume. Set to NONE, the volume will not be used as boot volume. Set to PRIMARY, the volume will be used as boot volume and set to AUTO will delegate the decision to the provisioning engine to decide whether to use the volume as boot volume.
+      Notice that exactly one volume can be set to PRIMARY or all of them set to AUTO.
 - `datacenter_id` - (Required)[string] Unique identifier for the resource
 - `location` - (Computed) Location of the data center.

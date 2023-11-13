@@ -179,16 +179,13 @@ func resourceAutoscalingGroup() *schema.Resource {
 							Description:      "The zone where the VMs are created using this configuration.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AMD_OPTERON", "INTEL_SKYLAKE", "INTEL_XEON"}, true)),
 						},
-						"nics": {
-							Type:        schema.TypeList,
-							Description: "List of NICs associated with this Replica.",
+						"nic": {
+							Type:        schema.TypeSet,
+							Description: "Set of NICs associated with this Replica.",
 							Optional:    true,
+							//ForceNew:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
 									"lan": {
 										Required:         true,
 										Type:             schema.TypeInt,
@@ -213,17 +210,12 @@ func resourceAutoscalingGroup() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "The amount of memory for the VMs in MB, e.g. 2048. Size must be specified in multiples of 256 MB with a minimum of 256 MB; however, if you set ramHotPlug to TRUE then you must use a minimum of 1024 MB. If you set the RAM size more than 240GB, then ramHotPlug will be set to FALSE and can not be set to TRUE unless RAM size not set to less than 240GB.",
 						},
-						"volumes": {
+						"volume": {
 							Type:        schema.TypeList,
-							Description: "List of volumes associated with this Replica. Only a single volume is currently supported.",
+							Description: "List of volumes associated with this Replica.",
 							Optional:    true,
-							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
 									"image": {
 										Optional:         true,
 										Type:             schema.TypeString,
@@ -284,12 +276,18 @@ func resourceAutoscalingGroup() *schema.Resource {
 Set to PRIMARY, the volume will be used as boot volume and set to AUTO will delegate the decision to the provisioning engine to decide whether to use the volume as boot volume.
 Notice that exactly one volume can be set to PRIMARY or all of them set to AUTO.`,
 									},
-									//	TODO - add BUS, BackupunitId, BootOrder
-									//	Bus      *BusType `json:"bus,omitempty"`
-									//	// The ID of the backup unit that the user has access to. The property is immutable and is only allowed to be set on creation of a new a volume. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.
-									//	BackupunitId *string `json:"backupunitId,omitempty"`
-									//	// Determines whether the volume will be used as a boot volume. Set to NONE, the volume will not be used as boot volume. Set to PRIMARY, the volume will be used as boot volume and set to AUTO will delegate the decision to the provisioning engine to decide whether to use the voluem as boot volume. Notice that exactly one volume can be set to PRIMARY or all of them set to AUTO.
-									//	BootOrder *string `json:"bootOrder"`
+									"bus": {
+										Optional:    true,
+										Type:        schema.TypeString,
+										Default:     autoscaling.BUSTYPE_VIRTIO,
+										Description: `The bus type of the volume. Default setting is 'VIRTIO'. The bus type 'IDE' is also supported.`,
+									},
+									"backup_unit_id": {
+										Type:        schema.TypeString,
+										Description: "The uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.",
+										Optional:    true,
+										Computed:    true,
+									},
 								}},
 						},
 					},
