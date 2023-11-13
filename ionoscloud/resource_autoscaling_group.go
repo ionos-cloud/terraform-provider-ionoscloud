@@ -27,15 +27,15 @@ func resourceAutoscalingGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"max_replica_count": {
 				Type:             schema.TypeInt,
-				Description:      "The maximum value for the number of replicas. Must be >= 0 and <= 100.",
+				Description:      "The maximum value for the number of replicas on a VM Auto Scaling Group. Must be >= 0 and <= 200. Will be enforced for both automatic and manual changes.",
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
 			},
 			"min_replica_count": {
 				Type:             schema.TypeInt,
-				Description:      "The minimum value for the number of replicas. Must be >= 0 and <= 100.",
+				Description:      "The minimum value for the number of replicas on a VM Auto Scaling Group. Must be >= 0 and <= 200. Will be enforced for both automatic and manual changes",
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
 			},
 			//"target_replica_count": {
 			//	Type:             schema.TypeInt,
@@ -85,7 +85,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Required:         true,
 										Type:             schema.TypeString,
 										Description:      "The type for the given amount. Possible values are: [ABSOLUTE, PERCENTAGE].",
-										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ABSOLUTE", "PERCENTAGE"}, true)),
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(autoscaling.ACTIONAMOUNT_ABSOLUTE), string(autoscaling.ACTIONAMOUNT_PERCENTAGE)}, true)),
 									},
 									"termination_policy_type": {
 										Optional:         true,
@@ -201,6 +201,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 									"dhcp": {
 										Optional:    true,
 										Type:        schema.TypeBool,
+										Default:     true,
 										Description: "Dhcp flag for this replica Nic. This is an optional attribute with default value of 'true' if not given in the request payload or given as null.",
 									},
 								}},
@@ -219,7 +220,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 									"image": {
 										Optional:         true,
 										Type:             schema.TypeString,
-										Description:      "The image installed on the disk. Currently, only the UUID of the image is supported.  >Note that either 'image' or 'imageAlias' must be specified, but not both.",
+										Description:      "The image installed on the disk. Currently, only the UUID of the image is supported. Note that either 'image' or 'imageAlias' must be specified, but not both.",
 										ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 									},
 									"image_alias": {
@@ -315,15 +316,13 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	group, err := autoscalingService.GetAutoscalingGroupDataCreate(d)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured at getting data from the provided schema: %q", err))
-		return diags
+		return diag.FromErr(fmt.Errorf("an error occured at getting data from the provided schema: %w", err))
 	}
-	if group.Properties != nil {
-		log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties)
+	if group.Properties != nil && group.Properties.Name != nil {
+		log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties.Name)
 	}
 
 	autoscalingGroup, _, err := client.CreateGroup(ctx, *group)
-
 	if err != nil {
 		d.SetId("")
 		diags := diag.FromErr(fmt.Errorf("error creating autoscaling group: %w", err))

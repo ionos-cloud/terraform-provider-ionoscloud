@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -254,8 +255,6 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	var err error
 
 	if idOk {
-		/* search by ID */
-
 		group, _, err = client.GetGroup(ctx, id.(string))
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
@@ -264,7 +263,7 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	} else {
 		groups, _, err := client.ListGroups(ctx)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group: %w", err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while getting groups: %w", err))
 			return diags
 		}
 
@@ -274,11 +273,10 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 			for _, g := range *groups.Items {
 				tmpGroup, _, err := client.GetGroup(ctx, id.(string))
 				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %s", *g.Id, err))
-					return diags
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err))
 				}
 
-				if tmpGroup.Properties.Name != nil && *tmpGroup.Properties.Name == name.(string) {
+				if tmpGroup.Properties != nil && tmpGroup.Properties.Name != nil && strings.EqualFold(*tmpGroup.Properties.Name, name.(string)) {
 					results = append(results, tmpGroup)
 					break
 				}

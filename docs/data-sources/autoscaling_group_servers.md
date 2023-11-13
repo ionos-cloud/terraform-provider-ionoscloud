@@ -3,10 +3,10 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_autoscaling_group_servers"
 sidebar_current: "docs-ionoscloud_autoscaling_group_servers"
 description: |-
-Get information on servers generated as part of the autoscaling group.
+  Get information on servers generated as part of the autoscaling group.
 ---
 
-# ionoscloud\_pg_backups
+# ionoscloud\_autoscaling_group_servers
 
 The autoscaling group servers data source can be used to search for and return existing servers that are part of a specific autoscaling group.
 

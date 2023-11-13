@@ -16,10 +16,10 @@ func dataSourceAutoscalingGroupServers() *schema.Resource {
 		ReadContext: dataSourceAutoscalingServersRead,
 		Schema: map[string]*schema.Schema{
 			"group_id": {
-				Type:         schema.TypeString,
-				Description:  "Unique identifier for the group",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "Unique identifier for the group",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"servers": {
 				Type:     schema.TypeList,
@@ -45,17 +45,10 @@ func dataSourceAutoscalingServersRead(ctx context.Context, d *schema.ResourceDat
 		return diags
 	}
 
-	/* search by ID */
 	groupServers, _, err := client.GetAllGroupServers(ctx, id.(string))
-
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching backup for cluster with ID %s: %s", id.(string), err))
-		return diags
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
 	}
 
-	if diags := autoscalingService.SetAutoscalingServersData(d, groupServers); diags != nil {
-		return diags
-	}
-
-	return nil
+	return autoscalingService.SetAutoscalingServersData(d, groupServers)
 }
