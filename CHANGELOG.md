@@ -7,6 +7,9 @@
 - Add `flowlog` to `ionoscloud_nic` resource
 - Add `flowlog` to `ionoscloud_networkloadbalancer` resource
 
+### Fixes
+- #487. Crash on server import without inline `nic`. 
+
 ## 6.4.10
 ### Refactor
 - Add `nic` service
