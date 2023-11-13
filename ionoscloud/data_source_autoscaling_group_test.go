@@ -4,7 +4,6 @@
 package ionoscloud
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -22,10 +21,10 @@ func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckAutoscalingGroupConfigBasic, constant.AutoscalingGroupTestResource),
+				Config: testAccCheckAutoscalingGroupConfigBasic,
 			},
 			{
-				Config: fmt.Sprintf(testAccDataSourceAutoscalingGroupMatchId, constant.AutoscalingGroupTestResource),
+				Config: testAccDataSourceAutoscalingGroupMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "name", resourceAutoscalingGroupName, "name"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "datacenter_id", resourceAutoscalingGroupName, "datacenter_id"),
@@ -60,7 +59,7 @@ func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccDataSourceAutoscalingGroupMatchName, constant.AutoscalingGroupTestResource),
+				Config: testAccDataSourceAutoscalingGroupMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "name", resourceAutoscalingGroupName, "name"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "datacenter_id", resourceAutoscalingGroupName, "datacenter_id"),

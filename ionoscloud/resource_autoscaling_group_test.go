@@ -30,7 +30,7 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckAutoscalingGroupConfigBasic, constant.AutoscalingGroupTestResource),
+				Config: testAccCheckAutoscalingGroupConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAutoscalingGroupExists(resourceAutoscalingGroupName, &autoscalingGroup),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "name", constant.AutoscalingGroupTestResource),
@@ -56,13 +56,13 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.name", "nic_1"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.ram", "2048"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_alias", "ubuntu:latest"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.name", "volume_1"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.size", "30"),
-					utils.TestNotEmptySlice(constant.AutoscalingGroupResource, "replica_configuration.0.volumes.0.ssh_keys"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.type", "HDD"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.boot_order", "AUTO"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.bus", "IDE"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.image_alias", "ubuntu:latest"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.name", "volume_1"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.size", "30"),
+					utils.TestNotEmptySlice(constant.AutoscalingGroupResource, "replica_configuration.0.volume.0.ssh_keys"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.type", "HDD"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.boot_order", "AUTO"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.bus", "IDE"),
 				),
 			},
 			{
@@ -94,12 +94,12 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.1.name", "nic_2_updated"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.1.dhcp", "true"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.ram", "2048"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_alias", "ubuntu:latest"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.name", "volume_1"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.size", "30"),
-					utils.TestNotEmptySlice(constant.AutoscalingGroupResource, "replica_configuration.0.volumes.0.ssh_keys"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.type", "HDD"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.boot_order", "AUTO")),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.image_alias", "ubuntu:latest"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.name", "volume_1"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.size", "30"),
+					utils.TestNotEmptySlice(constant.AutoscalingGroupResource, "replica_configuration.0.volume.0.ssh_keys"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.type", "HDD"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.boot_order", "AUTO")),
 			},
 			{
 				Config: fmt.Sprintf(testAccCheckAutoscalingGroupConfigUpdateRemoveOptionalFields, constant.UpdatedResources),
@@ -126,12 +126,12 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.name", "nic_1_updated"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nic.0.dhcp", "false"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.ram", "2048"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_alias", "ubuntu:latest"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.name", "volume_1"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.size", "10"),
-					utils.TestNotEmptySlice(constant.AutoscalingGroupResource, "replica_configuration.0.volumes.0.ssh_keys"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.type", "HDD"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.boot_order", "AUTO")),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.image_alias", "ubuntu:latest"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.name", "volume_1"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.size", "10"),
+					utils.TestNotEmptySlice(constant.AutoscalingGroupResource, "replica_configuration.0.volume.0.ssh_keys"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.type", "HDD"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volume.0.boot_order", "AUTO")),
 			},
 		},
 	})
@@ -216,7 +216,7 @@ resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGrou
   max_replica_count      = 5
   min_replica_count      = 1
   //target_replica_count   = 2
-  name           = "%s"
+  name           = "` + constant.AutoscalingGroupTestResource + `"
   policy {
     metric             = "INSTANCE_CPU_UTILIZATION_AVERAGE"
     range              = "PT24H"
@@ -247,13 +247,13 @@ resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGrou
     }
     ram          = 2048
     volume {
-      image_alias     = "ubuntu:latest"
-      name      = "volume_1"
-      size      = 30
-      ssh_keys  = ["` + sshKey + `"]
-      type      = "HDD"
+      image_alias = "ubuntu:latest"
+      name        = "volume_1"
+      size        = 30
+      ssh_keys    = ["` + sshKey + `"]
+      type        = "HDD"
       user_data    = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
-      image_password= random_password.image_password.result
+      image_password = random_password.image_password.result
       boot_order = "AUTO"
       bus = "IDE"
     }

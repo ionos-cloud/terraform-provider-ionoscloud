@@ -17,6 +17,7 @@ func TestAccDataSourceAutoscalingGroupServers(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		ExternalProviders: randomProviderVersion343(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckAutoscalingGroupConfigBasic,
@@ -34,6 +35,6 @@ func TestAccDataSourceAutoscalingGroupServers(t *testing.T) {
 
 const testAccDataSourceAutoscalingGroupServers = testAccCheckAutoscalingGroupConfigBasic + `
 data ` + constant.AutoscalingGroupServersResource + ` ` + constant.AutoscalingGroupServersTestDataSource + ` {
-	group_id = ` + constant.AutoscalingGroupResource + `.` + constant.AutoscalingGroupTestResource + `.id
+  group_id = ` + constant.AutoscalingGroupResource + `.` + constant.AutoscalingGroupTestResource + `.id
 }
 `
