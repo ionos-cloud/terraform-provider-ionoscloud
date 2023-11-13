@@ -170,8 +170,13 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 					flowLog := cloudapiflowlog.GetFlowlogFromMap(flowLogMap)
 					err := fw.CreateOrPatchForALB(ctx, dcId, d.Id(), "", flowLog)
 					if err != nil {
-						_ = d.Set("flowlog", nil)
-						diags := diag.FromErr(fmt.Errorf("error creating flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)))
+						_ = d.Set("", nil)
+						// flowlog creation failed, delete the alb
+						diags := resourceApplicationLoadBalancerDelete(ctx, d, meta)
+						if diags != nil {
+							log.Printf("[ERROR] could not delete alb %v", diags)
+						}
+						diags = diag.FromErr(fmt.Errorf("error creating flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)))
 						return diags
 					}
 				}
