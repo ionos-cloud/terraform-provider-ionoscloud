@@ -249,13 +249,13 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	nicId := d.Id()
 	var err error
 	if d.HasChange("flowlog") {
-		old, newV := d.GetChange("flowlog")
+		oldV, newV := d.GetChange("flowlog")
 		var firstFlowLogId = ""
-		if old != nil && len(old.([]any)) > 0 {
-			firstFlowLogId = old.([]any)[0].(map[string]any)["id"].(string)
+		if oldV != nil && len(oldV.([]any)) > 0 {
+			firstFlowLogId = oldV.([]any)[0].(map[string]any)["id"].(string)
 		}
 
-		if newV.([]any) != nil && len(newV.([]any)) > 0 {
+		if newV != nil && newV.([]any) != nil && len(newV.([]any)) > 0 {
 			for _, val := range newV.([]any) {
 				if flowLogMap, ok := val.(map[string]any); ok {
 					flowLog := cloudapiflowlog.GetFlowlogFromMap(flowLogMap)

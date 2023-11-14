@@ -105,10 +105,37 @@ func (fw *Service) CreateOrPatchForNLB(ctx context.Context, dcId, nlbID, ID stri
 	} else {
 		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPatch(ctx, dcId, nlbID, ID).NetworkLoadBalancerFlowLogProperties(*flowLog.Properties).Execute()
 		if err != nil {
-			return fmt.Errorf("error occured while updating flowlog %s datacenter %s, server %s : %w", ID, dcId, nlbID, err)
+			return fmt.Errorf("error occured while updating flowlog %s datacenter %s, nlb %s : %w", ID, dcId, nlbID, err)
 		}
 	}
 	return nil
+}
+
+func (fw *Service) CreateOrPatchForALB(ctx context.Context, dcId, albID, ID string, flowLog ionoscloud.FlowLog) error {
+	if ID == "" {
+		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPost(ctx, dcId, albID).ApplicationLoadBalancerFlowLog(flowLog).Execute()
+		if err != nil {
+			return fmt.Errorf("error occured while creating flowlog in datacenter %s, alb %s : %w", dcId, albID, err)
+		}
+	} else {
+		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPatch(ctx, dcId, albID, ID).ApplicationLoadBalancerFlowLogProperties(*flowLog.Properties).Execute()
+		if err != nil {
+			return fmt.Errorf("error occured while updating flowlog %s, datacenter %s, alb %s : %w", ID, dcId, albID, err)
+		}
+	}
+	return nil
+}
+
+// GetFlowLogForALB - there can be only one flowlog per alb
+func (fw *Service) GetFlowLogForALB(ctx context.Context, dcId, albID string, depth int32) (*ionoscloud.FlowLog, *ionoscloud.APIResponse, error) {
+	flowLogs, apiResponse, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsGet(ctx, dcId, albID).Depth(depth).Execute()
+	if err != nil {
+		return nil, apiResponse, fmt.Errorf("error occurred while finding datacenter %s, alb %s : %w", dcId, albID, err)
+	}
+	if flowLogs.Items != nil && len(*flowLogs.Items) > 0 {
+		return &(*flowLogs.Items)[0], apiResponse, nil
+	}
+	return nil, apiResponse, nil
 }
 
 // Delete - this method actually does not work for now
