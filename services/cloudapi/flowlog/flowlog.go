@@ -81,7 +81,7 @@ type Service struct {
 	D      *schema.ResourceData
 }
 
-func (fw *Service) CreateOrPatch(ctx context.Context, dcId, srvID, nicID, ID string, flowLog ionoscloud.FlowLog) error {
+func (fw *Service) CreateOrPatchForServer(ctx context.Context, dcId, srvID, nicID, ID string, flowLog ionoscloud.FlowLog) error {
 	if ID == "" {
 		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPost(ctx, dcId, srvID, nicID).Flowlog(flowLog).Execute()
 		if err != nil {

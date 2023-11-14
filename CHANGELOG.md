@@ -1,10 +1,14 @@
 ## 6.4.11 (upcoming release)
 ### Documentation
 - Refactor readme files to better explain the usage of the provider
+
 ### Features
 - Add `flowlog` to `ionoscloud_nic` resource
 - Add `flowlog` to `ionoscloud_networkloadbalancer` resource
 - Add `flowlog` to `ionoscloud_application_loadbalancer` resource
+- 
+### Fixes
+- #487. Crash on server import without inline `nic`
 
 ## 6.4.10
 ### Refactor
@@ -15,14 +19,12 @@
 ### Features
 - #460 add `contract_number` to provider configuration
 - #412 add support to set power state of Enterprise and Cube servers, by adding the new field `vm_state` in `ionoscloud_server`, `ionoscloud_cube_server` and `ionoscloud_vcpu_server `resources
-- add `flowlog` field to `ionoscloud_nic` resource
 ### Fixes
 - #467 removing an inline `nic` of the `server` resource from dcd should not throw 404 when running plan or apply after
-- Fix `ionoscloud_ipfailover` resource and solve the problems presented at #432. Now
-it is possible to create and delete multiple `ionoscloud_ipfailover` resources at the same time. The UUID is generated based on the IP of the 
+- #432 Now it is possible to create and delete multiple `ionoscloud_ipfailover` resources at the same time. The UUID is generated based on the IP of the 
 failover group. The resources that are created using Terraform cannot be modified/deleted outside Terraform.
 - Fix `nil` deref error on list for nic datasource
-- Fix image name searching in `ionoscloud_image` and `ionoscloud_volume` as presented at #470. Exact matches are returned correctly now if they exist.
+- #470 fix image name searching in `ionoscloud_image` and `ionoscloud_volume`. Exact matches are returned correctly now if they exist.
 
 ## 6.4.9
 
