@@ -6,6 +6,12 @@
 ### Features
 - Add `flowlog` to `ionoscloud_nic` resource
 - Add `flowlog` to `ionoscloud_networkloadbalancer` resource
+- New Product: **Autoscaling**:
+  - `Resources`:
+    - [ionoscloud_autoscaling_group](docs/resources/autoscaling_group.md)
+  - `Data Sources`:
+    - [ionoscloud_autoscaling_group](docs/data-sources/autoscaling_group.md)
+    - [ionoscloud_autoscaling_group_servers](docs/data-sources/autoscaling_group_servers.md)
 
 ### Fixes
 - #487. Crash on server import without inline `nic`. 
