@@ -578,10 +578,7 @@ func setVolumeProperties(d *schema.ResourceData, index int, replicaVolume autosc
 	setPropWithNilCheck(volume, "image_alias", replicaVolume.ImageAlias)
 	setPropWithNilCheck(volume, "name", replicaVolume.Name)
 	setPropWithNilCheck(volume, "size", replicaVolume.Size)
-	//setPropWithNilCheck(volume, "ssh_keys", replicaVolume.SshKeys)
 	setPropWithNilCheck(volume, "type", replicaVolume.Type)
-	setPropWithNilCheck(volume, "user_data", replicaVolume.UserData)
-	//setPropWithNilCheck(volume, "image_password", replicaVolume.ImagePassword)
 	setPropWithNilCheck(volume, "boot_order", replicaVolume.BootOrder)
 	setPropWithNilCheck(volume, "bus", replicaVolume.Bus)
 	//we need to take these from schema as they are not returned by API
@@ -590,6 +587,9 @@ func setVolumeProperties(d *schema.ResourceData, index int, replicaVolume autosc
 	}
 	if keys, ok := d.GetOk("replica_configuration.0.volume.0.ssh_keys"); ok {
 		volume["ssh_keys"] = keys
+	}
+	if password, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.user_data", index)); ok {
+		volume["user_data"] = password
 	}
 	return volume
 }

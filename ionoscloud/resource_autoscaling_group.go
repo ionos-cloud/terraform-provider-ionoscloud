@@ -256,14 +256,14 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Computed: true,
 										Type:     schema.TypeString,
 										// backend does not return a value for user_data after it is set
-										DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
-											if old == "" && new != "" {
-												return true
-											}
-											return false
-										},
-										DiffSuppressOnRefresh: true,
-										Description:           "User-data (Cloud Init) for this replica volume.",
+										//DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+										//	if old == "" && new != "" {
+										//		return true
+										//	}
+										//	return false
+										//},
+										//DiffSuppressOnRefresh: true,
+										Description: "User-data (Cloud Init) for this replica volume.",
 									},
 									"image_password": {
 										Optional:    true,

@@ -124,9 +124,7 @@ The following arguments are supported:
         `image_alias` - (Optional)[string] The image installed on the volume. Must be an 'imageAlias' as specified via the images API. Note that one of 'image' or 'imageAlias' must be set, but not both.
         `name` - (Required)[string] Name for this replica volume.
         `size` - (Required)[int] Name for this replica volume.
-        `ssh_key_paths` - (Optional)[list] List of ssh key paths.
-        `ssh_key_values` - (Optional)[list] List of ssh key values.
-        `ssh_keys` - (Computed) List of ssh key computed from what it was provided in `ssk_key_paths` and `ssh_key_values` fields.
+        `ssh_keys` - (Optional) List of ssh keys, supports values or paths to files. Cannot be changed at update.
         `type` - (Required)[string] Storage Type for this replica volume. Possible values: `SSD`, `HDD`, `SSD_STANDARD` or `SSD_PREMIUM`.
         `user_data` - (Optional)[string] User-data (Cloud Init) for this replica volume. Make sure you provide a Cloud Init compatible image in conjunction with this parameter.
         `image_password` - (Optional)[string] Image password for this replica volume.
