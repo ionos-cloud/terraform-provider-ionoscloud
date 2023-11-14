@@ -6,7 +6,8 @@
 - Add `flowlog` to `ionoscloud_nic` resource
 - Add `flowlog` to `ionoscloud_networkloadbalancer` resource
 - Add `flowlog` to `ionoscloud_application_loadbalancer` resource
-- New Product: **Autoscaling**:
+
+### New Product - **Autoscaling**:
   - `Resources`:
     - [ionoscloud_autoscaling_group](docs/resources/autoscaling_group.md)
   - `Data Sources`:
