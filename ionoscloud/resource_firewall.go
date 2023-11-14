@@ -133,7 +133,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 		}
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule dcId: %s server_id: %s  "+
-			"nic_id: %s %w", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), err))
+			"nic_id: %s %w", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), errState))
 		return diags
 	}
 
