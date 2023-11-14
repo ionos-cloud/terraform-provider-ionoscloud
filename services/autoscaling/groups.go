@@ -36,6 +36,7 @@ func (c *Client) ListGroups(ctx context.Context) (autoscaling.GroupCollection, *
 
 func (c *Client) CreateGroup(ctx context.Context, group autoscaling.GroupPost) (autoscaling.GroupPostResponse, *autoscaling.APIResponse, error) {
 	groupResponse, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsPost(ctx).GroupPost(group).Execute()
+	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return groupResponse, apiResponse, err
 	}
@@ -44,6 +45,7 @@ func (c *Client) CreateGroup(ctx context.Context, group autoscaling.GroupPost) (
 
 func (c *Client) UpdateGroup(ctx context.Context, groupId string, group autoscaling.GroupPut) (autoscaling.Group, *autoscaling.APIResponse, error) {
 	groupResponse, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsPut(ctx, groupId).GroupPut(group).Execute()
+	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return groupResponse, apiResponse, err
 	}
@@ -52,6 +54,7 @@ func (c *Client) UpdateGroup(ctx context.Context, groupId string, group autoscal
 
 func (c *Client) DeleteGroup(ctx context.Context, groupId string) (*autoscaling.APIResponse, error) {
 	apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsDelete(ctx, groupId).Execute()
+	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return apiResponse, err
 	}

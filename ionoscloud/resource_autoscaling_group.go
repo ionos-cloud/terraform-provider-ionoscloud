@@ -314,9 +314,8 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	client := meta.(services.SdkBundle).AutoscalingClient
 
 	group, err := autoscalingService.GetAutoscalingGroupDataCreate(d)
-
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured at getting data from the provided schema: %w", err))
+		return diag.FromErr(fmt.Errorf("an error occured getting data from the provided schema: %w", err))
 	}
 	if group.Properties != nil && group.Properties.Name != nil {
 		log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties.Name)
@@ -324,7 +323,6 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 
 	autoscalingGroup, _, err := client.CreateGroup(ctx, *group)
 	if err != nil {
-		d.SetId("")
 		diags := diag.FromErr(fmt.Errorf("error creating autoscaling group: %w", err))
 		return diags
 	}
@@ -333,10 +331,14 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	log.Printf("[INFO] autoscaling Group created. Id set to %s", *autoscalingGroup.Id)
 
 	if err := checkAction(ctx, client, d); err != nil {
+		d.SetId("")
 		return diag.FromErr(err)
 	}
-
-	return diag.FromErr(autoscalingService.SetAutoscalingGroupData(d, autoscalingGroup.Properties))
+	if err := autoscalingService.SetAutoscalingGroupData(d, autoscalingGroup.Properties); err != nil {
+		d.SetId("")
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -377,17 +379,17 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties)
-
+	if group.Properties != nil && group.Properties.Name != nil {
+		log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties.Name)
+	}
 	updatedGroup, _, err := client.UpdateGroup(ctx, d.Id(), *group)
-
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating autoscaling group %s: %w", d.Id(), err))
 		return diags
 	}
 	log.Printf("[INFO] autoscaling Group updated.")
 
-	time.Sleep(constant.SleepInterval * 20)
+	//time.Sleep(constant.SleepInterval * 20)
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diag.FromErr(err)
