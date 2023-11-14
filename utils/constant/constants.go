@@ -264,8 +264,8 @@ const (
 	DataplatformVersionsDataSource           = "ionoscloud_dataplatform_versions"
 	DataplatformNodePoolsTestDataSource      = "test_dataplatform_node_pools"
 	DataplatformVersionsTestDataSource       = "test_dataplatform_versions"
-	// DataPlatformVersion lowest 'available' version is now 23.4
-	DataPlatformVersion = "23.4"
+	// DataPlatformVersion lowest 'available' version is now 23.7
+	DataPlatformVersion = "23.7"
 )
 
 // DNS Constants

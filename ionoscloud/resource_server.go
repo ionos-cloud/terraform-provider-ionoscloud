@@ -1264,16 +1264,18 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			for _, nic := range *server.Entities.Nics.Items {
 				if *nic.Id == primaryNicId {
 					primaryNic = nic
+					if primaryNic.Properties != nil && *nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+						log.Printf("[DEBUG] set primary_ip to %s", (*primaryNic.Properties.Ips)[0])
+						if err := d.Set("primary_ip", (*primaryNic.Properties.Ips)[0]); err != nil {
+							return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
+						}
+					}
 					break
 				}
 			}
 		}
 	}
 
-	log.Printf("[DEBUG] set primary_ip to %s", (*primaryNic.Properties.Ips)[0])
-	if err := d.Set("primary_ip", (*primaryNic.Properties.Ips)[0]); err != nil {
-		return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
-	}
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, err
 	}
