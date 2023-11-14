@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -71,12 +72,39 @@ func resourcek8sCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			//"public": {
-			//	Type:        schema.TypeBool,
-			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
-			//	Optional:    true,
-			//	Default:     true,
-			//},
+			"public": {
+				Type:        schema.TypeBool,
+				Description: "The indicator if the cluster is public or private. Note that the status FALSE is still in the beta phase.",
+				Optional:    true,
+				Default:     true,
+				ForceNew:    true,
+			},
+			"nat_gateway_ip": {
+				Type:         schema.TypeString,
+				Description:  "The NAT gateway IP of the cluster if the cluster is private. This attribute is immutable. Must be a reserved IP in the same location as the cluster's location. This attribute is mandatory if the cluster is private.",
+				ValidateFunc: validation.All(validation.IsIPv4Address, validation.IsIPv6Address),
+				Optional:     true,
+				ForceNew:     true,
+			},
+			"node_subnet": {
+				Type:         schema.TypeString,
+				Description:  "The node subnet of the cluster, if the cluster is private. This attribute is optional and immutable. Must be a valid CIDR notation for an IPv4 network prefix of 16 bits length.",
+				ValidateFunc: validation.IsCIDR,
+				Optional:     true,
+				ForceNew:     true,
+			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "This attribute is mandatory if the cluster is private. The location must be enabled for your contract, or you must have a data center at that location. This property is not adjustable.",
+				Optional:    true,
+				ForceNew:    true,
+			},
+			"allow_replace": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When set to true, allows the update of immutable fields by destroying and re-creating the cluster.",
+			},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
 				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
@@ -107,12 +135,25 @@ func resourcek8sCluster() *schema.Resource {
 }
 func checkClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 
-	//we do not want to check in case of resource creation
+	allowReplace := diff.Get("allow_replace").(bool)
+	if allowReplace {
+		return nil
+	}
+	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
 	}
 	if diff.HasChange("public") {
 		return fmt.Errorf("public %s", ImmutableError)
+	}
+	if diff.HasChange("location") {
+		return fmt.Errorf("location %s", ImmutableError)
+	}
+	if diff.HasChange("nat_gateway_ip") {
+		return fmt.Errorf("nat_gateway_ip %s", ImmutableError)
+	}
+	if diff.HasChange("node_subnet") {
+		return fmt.Errorf("node_subnet %s", ImmutableError)
 	}
 	return nil
 
@@ -148,8 +189,25 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
-	//public := d.Get("public").(bool)
-	//cluster.Properties.Public = &public
+	if publicVal, publicOk := d.GetOkExists("public"); publicOk {
+		publicVal := publicVal.(bool)
+		cluster.Properties.Public = &publicVal
+	}
+
+	if locationVal, locationOk := d.GetOk("location"); locationOk {
+		locationVal := locationVal.(string)
+		cluster.Properties.Location = &locationVal
+	}
+
+	if natGatewayIpVal, natGatewayIpOk := d.GetOk("nat_gateway_ip"); natGatewayIpOk {
+		natGatewayIpVal := natGatewayIpVal.(string)
+		cluster.Properties.NatGatewayIp = &natGatewayIpVal
+	}
+
+	if nodeSubnetVal, nodeSubnetOk := d.GetOk("node_subnet"); nodeSubnetOk {
+		nodeSubnetVal := nodeSubnetVal.(string)
+		cluster.Properties.NodeSubnet = &nodeSubnetVal
+	}
 
 	if apiSubnet, apiSubnetOk := d.GetOk("api_subnet_allow_list"); apiSubnetOk {
 		apiSubnet := apiSubnet.([]interface{})
@@ -510,12 +568,29 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			}
 		}
 
-		//if cluster.Properties.Public != nil {
-		//	err := d.Set("public", *cluster.Properties.Public)
-		//	if err != nil {
-		//		return fmt.Errorf("error while setting public property for cluser %s: %w", d.Id(), err)
-		//	}
-		//}
+		if cluster.Properties.Public != nil {
+			if err := d.Set("public", *cluster.Properties.Public); err != nil {
+				return utils.GenerateSetError(constant.K8sClusterResource, "public", err)
+			}
+		}
+
+		if cluster.Properties.Location != nil {
+			if err := d.Set("location", *cluster.Properties.Location); err != nil {
+				return utils.GenerateSetError(constant.K8sClusterResource, "location", err)
+			}
+		}
+
+		if cluster.Properties.NatGatewayIp != nil {
+			if err := d.Set("nat_gateway_ip", *cluster.Properties.NatGatewayIp); err != nil {
+				return utils.GenerateSetError(constant.K8sClusterResource, "nat_gateway_ip", err)
+			}
+		}
+
+		if cluster.Properties.NodeSubnet != nil {
+			if err := d.Set("node_subnet", *cluster.Properties.NodeSubnet); err != nil {
+				return utils.GenerateSetError(constant.K8sClusterResource, "node_subnet", err)
+			}
+		}
 
 		if cluster.Properties.ApiSubnetAllowList != nil {
 			apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))
