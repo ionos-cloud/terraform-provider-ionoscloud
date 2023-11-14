@@ -166,14 +166,14 @@ func testAccCheckAutoscalingGroupDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckAutoscalingGroupExists(n string, autoscalingGroup *autoscaling.Group) resource.TestCheckFunc {
+func testAccCheckAutoscalingGroupExists(name string, autoscalingGroup *autoscaling.Group) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(services.SdkBundle).AutoscalingClient
 
-		rs, ok := s.RootModule().Resources[n]
+		rs, ok := s.RootModule().Resources[name]
 
 		if !ok {
-			return fmt.Errorf("not found: %s", n)
+			return fmt.Errorf("not found: %s", name)
 		}
 
 		if rs.Primary.ID == "" {
@@ -187,10 +187,10 @@ func testAccCheckAutoscalingGroupExists(n string, autoscalingGroup *autoscaling.
 		}
 
 		foundGroup, _, err := client.GetGroup(ctx, rs.Primary.ID)
-
 		if err != nil {
-			return fmt.Errorf("error occured while fetching backup unit: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching autoscaling group: %s, %w", rs.Primary.ID, err)
 		}
+
 		if *foundGroup.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
 		}

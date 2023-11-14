@@ -302,7 +302,7 @@ Notice that exactly one volume can be set to PRIMARY or all of them set to AUTO.
 	}
 }
 
-func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(services.SdkBundle).AutoscalingClient
 
 	group, err := autoscalingService.GetAutoscalingGroupDataCreate(d)
@@ -333,7 +333,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	client := meta.(services.SdkBundle).AutoscalingClient
 
@@ -360,7 +360,7 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	client := meta.(services.SdkBundle).AutoscalingClient
 
@@ -387,7 +387,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 	return diag.FromErr(autoscalingService.SetAutoscalingGroupData(d, updatedGroup.Properties))
 }
 
-func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(services.SdkBundle).AutoscalingClient
 
 	_, err := client.DeleteGroup(ctx, d.Id())
@@ -403,7 +403,7 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(services.SdkBundle).AutoscalingClient
 
 	groupId := d.Id()

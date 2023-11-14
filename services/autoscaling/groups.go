@@ -289,24 +289,22 @@ func GetReplicaConfigurationPostData(d *schema.ResourceData) (*autoscaling.Repli
 	}
 
 	return &replica, nil
-
 }
 
 func GetNicsData(d *schema.ResourceData) *[]autoscaling.ReplicaNic {
 	var nics []autoscaling.ReplicaNic
 
-	if nicsValue, ok := d.GetOk("replica_configuration.0.nic"); ok {
-		nicsValue := nicsValue.(*schema.Set)
-		if nicsValue != nil {
-			for _, val := range nicsValue.List() {
-				mmap := val.(map[string]any)
-				var nicEntry = autoscaling.NewReplicaNic(int32(mmap["lan"].(int)), mmap["name"].(string))
+	if value, ok := d.GetOk("replica_configuration.0.nic"); ok {
+		nicsSet := value.(*schema.Set)
+		if nicsSet != nil {
+			for _, val := range nicsSet.List() {
+				nicsMap := val.(map[string]any)
+				var nicEntry = autoscaling.NewReplicaNic(int32(nicsMap["lan"].(int)), nicsMap["name"].(string))
 				nicEntry.Dhcp = new(bool)
-				*nicEntry.Dhcp = mmap["dhcp"].(bool)
+				*nicEntry.Dhcp = nicsMap["dhcp"].(bool)
 				nics = append(nics, *nicEntry)
 			}
 		}
-
 	}
 
 	return &nics
@@ -315,8 +313,8 @@ func GetNicsData(d *schema.ResourceData) *[]autoscaling.ReplicaNic {
 func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, error) {
 	var volumes []autoscaling.ReplicaVolumePost
 
-	if volumesValue, ok := d.GetOk("replica_configuration.0.volume"); ok {
-		volumesValue := volumesValue.([]any)
+	if value, ok := d.GetOk("replica_configuration.0.volume"); ok {
+		volumesValue := value.([]any)
 		if volumesValue != nil {
 			for index := range volumesValue {
 				var volumeEntry autoscaling.ReplicaVolumePost
@@ -347,7 +345,6 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 					sshKeys := value.([]any)
 					if len(sshKeys) != 0 {
 						for _, keyOrPath := range sshKeys {
-							//log.Printf("[DEBUG] Reading file %s", keyOrPath)
 							publicKey, err := utils.ReadPublicKey(keyOrPath.(string))
 							if err != nil {
 								return nil, fmt.Errorf("error reading sshkey (%s) (%w)", keyOrPath, err)
@@ -364,12 +361,6 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 					volumeEntry.Type = &value
 				}
 
-				//if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.user_data", index)); ok {
-				//	value := value.(string)
-				//	volumeEntry.UserData = &value
-				//} else {
-				//	volumeEntry.UserData = nil
-				//}
 				if userData, ok := d.GetOk("replica_configuration.0.volume.%d.user_data"); ok {
 					if *volumeEntry.Image == "" && *volumeEntry.ImageAlias == "" {
 						return nil, fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property ")
@@ -405,14 +396,10 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 				} else {
 					volumeEntry.BackupunitId = nil
 				}
-
 				volumes = append(volumes, volumeEntry)
 			}
-
 		}
-
 	}
-
 	return &volumes, nil
 }
 
