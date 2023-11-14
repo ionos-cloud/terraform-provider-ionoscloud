@@ -252,17 +252,9 @@ func resourceAutoscalingGroup() *schema.Resource {
 										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD", "SSD_PREMIUM", "SSD_STANDARD"}, true)),
 									},
 									"user_data": {
-										Optional: true,
-										Computed: true,
-										Type:     schema.TypeString,
-										// backend does not return a value for user_data after it is set
-										//DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
-										//	if old == "" && new != "" {
-										//		return true
-										//	}
-										//	return false
-										//},
-										//DiffSuppressOnRefresh: true,
+										Optional:    true,
+										Computed:    true,
+										Type:        schema.TypeString,
 										Description: "User-data (Cloud Init) for this replica volume.",
 									},
 									"image_password": {
@@ -346,7 +338,6 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 	client := meta.(services.SdkBundle).AutoscalingClient
 
 	group, apiResponse, err := client.GetGroup(ctx, d.Id())
-
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] resource %s not found: %+v", d.Id(), err)
@@ -380,7 +371,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if group.Properties != nil && group.Properties.Name != nil {
-		log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties.Name)
+		log.Printf("[DEBUG] autoscaling group data extracted: %s", *group.Properties.Name)
 	}
 	updatedGroup, _, err := client.UpdateGroup(ctx, d.Id(), *group)
 	if err != nil {
@@ -388,8 +379,6 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diags
 	}
 	log.Printf("[INFO] autoscaling Group updated.")
-
-	//time.Sleep(constant.SleepInterval * 20)
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diag.FromErr(err)
@@ -402,7 +391,6 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 	client := meta.(services.SdkBundle).AutoscalingClient
 
 	_, err := client.DeleteGroup(ctx, d.Id())
-
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting an autoscaling group %s %w", d.Id(), err))
 		return diags
@@ -421,7 +409,6 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 	groupId := d.Id()
 
 	group, apiResponse, err := client.GetGroup(ctx, d.Id())
-
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -473,7 +460,6 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 		log.Printf("[INFO] waiting for action %s to be ready...", actionId)
 
 		actionSuccessful, rsErr := actionReady(ctx, client, d, actionId)
-
 		if rsErr != nil {
 			return fmt.Errorf("error while checking status of action %s: %w", actionId, rsErr)
 		}
