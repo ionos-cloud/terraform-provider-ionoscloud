@@ -6,11 +6,6 @@ import (
 	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
 )
 
-type ActionsService interface {
-	GetAction(ctx context.Context, groupId string, actionId string) (autoscaling.Action, *autoscaling.APIResponse, error)
-	GetAllActions(ctx context.Context, groupId string) (autoscaling.ActionCollection, *autoscaling.APIResponse, error)
-}
-
 func (c *Client) GetAction(ctx context.Context, groupId string, actionId string) (autoscaling.Action, *autoscaling.APIResponse, error) {
 	action, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsActionsFindById(ctx, actionId, groupId).Execute()
 	apiResponse.LogInfo()

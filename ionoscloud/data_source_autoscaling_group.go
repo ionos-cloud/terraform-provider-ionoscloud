@@ -69,7 +69,7 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 									"amount": {
 										Computed:    true,
 										Type:        schema.TypeInt,
-										Description: "When `amountType == ABSOLUTE`, this is the number of VMs added or removed in one step. When `amountType == PERCENTAGE`, this is a percentage value, which will be applied to the autoscaling group's current `targetReplicaCount` in order to derive the number of VMs that will be added or removed in one step. There will always be at least one VM added or removed. For SCALE_IN operation now volumes are NOT deleted after the server deletion.",
+										Description: "When 'amountType=ABSOLUTE' specifies the absolute number of VMs that are removed. The value must be between 1 to 10. 'amountType=PERCENTAGE' specifies the percentage value that is applied to the current number of replicas of the VM Auto Scaling Group. The value must be between 1 to 200. At least one VM is always removed. Note that for 'SCALE_IN' operations, volumes are not deleted after the server is deleted.",
 									},
 									"amount_type": {
 										Computed:    true,
@@ -103,7 +103,7 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 									"amount": {
 										Computed:    true,
 										Type:        schema.TypeInt,
-										Description: "When `amountType == ABSOLUTE`, this is the number of VMs added or removed in one step. When `amountType == PERCENTAGE`, this is a percentage value, which will be applied to the autoscaling group's current `targetReplicaCount` in order to derive the number of VMs that will be added or removed in one step. There will always be at least one VM added or removed. For SCALE_IN operation now volumes are NOT deleted after the server deletion.",
+										Description: "When 'amountType=ABSOLUTE' specifies the absolute number of VMs that are added. The value must be between 1 to 10. 'amountType=PERCENTAGE' specifies the percentage value that is applied to the current number of replicas of the VM Auto Scaling Group. The value must be between 1 to 200. At least one VM is always added. Note that for 'SCALE_IN' operations, volumes are not deleted after the server is deleted.",
 									},
 									"amount_type": {
 										Computed:    true,
@@ -243,7 +243,7 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		diags := diag.FromErr(fmt.Errorf("id and name cannot be both specified in the same time"))
+		diags := diag.FromErr(fmt.Errorf("id and name cannot be both specified at the same time"))
 		return diags
 	}
 	if !idOk && !nameOk {
@@ -283,12 +283,12 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 				}
 			}
 		}
-
-		if results != nil && len(results) > 0 {
-			group = results[0]
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no group found with the specified criteria: name = %s", name.(string)))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one server found with the specified criteria: name = %s", name.(string)))
 		} else {
-			diags := diag.FromErr(fmt.Errorf("group not found"))
-			return diags
+			group = results[0]
 		}
 	}
 

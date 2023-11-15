@@ -19,7 +19,7 @@ func dataSourceAutoscalingGroupServers() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "Unique identifier for the group",
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"servers": {
 				Type:     schema.TypeList,

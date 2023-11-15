@@ -19,7 +19,7 @@ func TestAccAutoscalingGroupImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAutoscalingGroupConfigBasic,
+				Config: testAG_ConfigBasic,
 			},
 			{
 				ResourceName:            constant.AutoscalingGroupResource + "." + constant.AutoscalingGroupTestResource,

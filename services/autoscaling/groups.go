@@ -9,56 +9,34 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-type GroupService interface {
-	GetGroup(ctx context.Context, groupId string) (autoscaling.Group, *autoscaling.APIResponse, error)
-	ListGroups(ctx context.Context) (autoscaling.GroupCollection, *autoscaling.APIResponse, error)
-	CreateGroup(ctx context.Context, group autoscaling.Group) (autoscaling.GroupPostResponse, *autoscaling.APIResponse, error)
-	UpdateGroup(ctx context.Context, groupId string, group autoscaling.GroupPut) (autoscaling.Group, *autoscaling.APIResponse, error)
-	DeleteGroup(ctx context.Context, groupId string) (*autoscaling.APIResponse, error)
-}
-
 func (c *Client) GetGroup(ctx context.Context, groupId string) (autoscaling.Group, *autoscaling.APIResponse, error) {
 	group, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsFindById(ctx, groupId).Depth(2).Execute()
-	if apiResponse != nil {
-		return group, apiResponse, err
-
-	}
-	return group, nil, err
+	apiResponse.LogInfo()
+	return group, apiResponse, err
 }
 
 func (c *Client) ListGroups(ctx context.Context) (autoscaling.GroupCollection, *autoscaling.APIResponse, error) {
 	groups, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsGet(ctx).Execute()
-	if apiResponse != nil {
-		return groups, apiResponse, err
-	}
-	return groups, nil, err
+	apiResponse.LogInfo()
+	return groups, apiResponse, err
 }
 
 func (c *Client) CreateGroup(ctx context.Context, group autoscaling.GroupPost) (autoscaling.GroupPostResponse, *autoscaling.APIResponse, error) {
 	groupResponse, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsPost(ctx).GroupPost(group).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return groupResponse, apiResponse, err
-	}
-	return groupResponse, nil, err
+	return groupResponse, apiResponse, err
 }
 
 func (c *Client) UpdateGroup(ctx context.Context, groupId string, group autoscaling.GroupPut) (autoscaling.Group, *autoscaling.APIResponse, error) {
 	groupResponse, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsPut(ctx, groupId).GroupPut(group).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return groupResponse, apiResponse, err
-	}
-	return groupResponse, nil, err
+	return groupResponse, apiResponse, err
 }
 
 func (c *Client) DeleteGroup(ctx context.Context, groupId string) (*autoscaling.APIResponse, error) {
 	apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsDelete(ctx, groupId).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return apiResponse, err
-	}
-	return nil, err
+	return apiResponse, err
 }
 
 func GetAutoscalingGroupDataCreate(d *schema.ResourceData) (*autoscaling.GroupPost, error) {
@@ -209,8 +187,6 @@ func GetScaleInActionData(d *schema.ResourceData) *autoscaling.GroupPolicyScaleI
 	if value, ok := d.GetOk("policy.0.scale_in_action.0.termination_policy_type"); ok {
 		value := autoscaling.TerminationPolicyType(value.(string))
 		scaleInAction.TerminationPolicy = &value
-	} else {
-		scaleInAction.TerminationPolicy = nil
 	}
 
 	if value, ok := d.GetOk("policy.0.scale_in_action.0.cooldown_period"); ok {
@@ -274,9 +250,10 @@ func GetReplicaConfigurationPostData(d *schema.ResourceData) (*autoscaling.Repli
 	}
 
 	replica.Nics = GetNicsData(d)
-	if replica.Nics != nil && *replica.Nics == nil {
+	if *replica.Nics == nil {
 		*replica.Nics = make([]autoscaling.ReplicaNic, 0)
 	}
+
 	if value, ok := d.GetOk("replica_configuration.0.ram"); ok {
 		value := int32(value.(int))
 		replica.Ram = &value
@@ -409,31 +386,31 @@ func SetAutoscalingGroupData(d *schema.ResourceData, groupProperties *autoscalin
 	if groupProperties != nil {
 		if groupProperties.MaxReplicaCount != nil {
 			if err := d.Set("max_replica_count", *groupProperties.MaxReplicaCount); err != nil {
-				return generateSetError(resourceName, "max_replica_count", err)
+				return utils.GenerateSetError(resourceName, "max_replica_count", err)
 			}
 		}
 
 		if groupProperties.MinReplicaCount != nil {
 			if err := d.Set("min_replica_count", *groupProperties.MinReplicaCount); err != nil {
-				return generateSetError(resourceName, "min_replica_count", err)
+				return utils.GenerateSetError(resourceName, "min_replica_count", err)
 			}
 		}
 
 		//if groupProperties.TargetReplicaCount != nil {
 		//	if err := d.Set("target_replica_count", *groupProperties.TargetReplicaCount); err != nil {
-		//		return generateSetError(resourceName, "target_replica_count", err)
+		//		return utils.GenerateSetError(resourceName, "target_replica_count", err)
 		//	}
 		//}
 
 		if groupProperties.Name != nil {
 			if err := d.Set("name", *groupProperties.Name); err != nil {
-				return generateSetError(resourceName, "name", err)
+				return utils.GenerateSetError(resourceName, "name", err)
 			}
 		}
 
 		if groupProperties.MinReplicaCount != nil {
 			if err := d.Set("min_replica_count", *groupProperties.MinReplicaCount); err != nil {
-				return generateSetError(resourceName, "min_replica_count", err)
+				return utils.GenerateSetError(resourceName, "min_replica_count", err)
 			}
 		}
 
@@ -442,7 +419,7 @@ func SetAutoscalingGroupData(d *schema.ResourceData, groupProperties *autoscalin
 			policy := setPolicyProperties(*groupProperties.Policy)
 			policies = append(policies, policy)
 			if err := d.Set("policy", policies); err != nil {
-				return generateSetError(resourceName, "policy", err)
+				return utils.GenerateSetError(resourceName, "policy", err)
 			}
 		}
 
@@ -451,19 +428,19 @@ func SetAutoscalingGroupData(d *schema.ResourceData, groupProperties *autoscalin
 			replicaConfiguration := setReplicaConfiguration(d, *groupProperties.ReplicaConfiguration)
 			replicaConfigurations = append(replicaConfigurations, replicaConfiguration)
 			if err := d.Set("replica_configuration", replicaConfigurations); err != nil {
-				return generateSetError(resourceName, "replica_configuration", err)
+				return utils.GenerateSetError(resourceName, "replica_configuration", err)
 			}
 		}
 
 		if groupProperties.Datacenter != nil {
 			if err := d.Set("datacenter_id", *groupProperties.Datacenter.Id); err != nil {
-				return generateSetError(resourceName, "datacenter_id", err)
+				return utils.GenerateSetError(resourceName, "datacenter_id", err)
 			}
 		}
 
 		if groupProperties.Location != nil {
 			if err := d.Set("location", *groupProperties.Location); err != nil {
-				return generateSetError(resourceName, "location", err)
+				return utils.GenerateSetError(resourceName, "location", err)
 			}
 		}
 
@@ -475,11 +452,11 @@ func setPolicyProperties(groupPolicy autoscaling.GroupPolicy) map[string]any {
 
 	policy := map[string]any{}
 
-	setPropWithNilCheck(policy, "metric", groupPolicy.Metric)
-	setPropWithNilCheck(policy, "range", groupPolicy.Range)
-	setPropWithNilCheck(policy, "scale_in_threshold", groupPolicy.ScaleInThreshold)
-	setPropWithNilCheck(policy, "scale_out_threshold", groupPolicy.ScaleOutThreshold)
-	setPropWithNilCheck(policy, "unit", groupPolicy.Unit)
+	utils.SetPropWithNilCheck(policy, "metric", groupPolicy.Metric)
+	utils.SetPropWithNilCheck(policy, "range", groupPolicy.Range)
+	utils.SetPropWithNilCheck(policy, "scale_in_threshold", groupPolicy.ScaleInThreshold)
+	utils.SetPropWithNilCheck(policy, "scale_out_threshold", groupPolicy.ScaleOutThreshold)
+	utils.SetPropWithNilCheck(policy, "unit", groupPolicy.Unit)
 
 	if groupPolicy.ScaleInAction != nil {
 		var scaleInActions []any
@@ -501,11 +478,11 @@ func setScaleInActionProperties(scaleInAction autoscaling.GroupPolicyScaleInActi
 
 	scaleIn := map[string]any{}
 
-	setPropWithNilCheck(scaleIn, "amount", scaleInAction.Amount)
-	setPropWithNilCheck(scaleIn, "amount_type", scaleInAction.AmountType)
-	setPropWithNilCheck(scaleIn, "termination_policy_type", scaleInAction.TerminationPolicy)
-	setPropWithNilCheck(scaleIn, "cooldown_period", scaleInAction.CooldownPeriod)
-	setPropWithNilCheck(scaleIn, "delete_volumes", scaleInAction.DeleteVolumes)
+	utils.SetPropWithNilCheck(scaleIn, "amount", scaleInAction.Amount)
+	utils.SetPropWithNilCheck(scaleIn, "amount_type", scaleInAction.AmountType)
+	utils.SetPropWithNilCheck(scaleIn, "termination_policy_type", scaleInAction.TerminationPolicy)
+	utils.SetPropWithNilCheck(scaleIn, "cooldown_period", scaleInAction.CooldownPeriod)
+	utils.SetPropWithNilCheck(scaleIn, "delete_volumes", scaleInAction.DeleteVolumes)
 
 	return scaleIn
 }
@@ -514,9 +491,9 @@ func setScaleOutActionProperties(scaleOutAction autoscaling.GroupPolicyScaleOutA
 
 	scaleOut := map[string]any{}
 
-	setPropWithNilCheck(scaleOut, "amount", scaleOutAction.Amount)
-	setPropWithNilCheck(scaleOut, "amount_type", scaleOutAction.AmountType)
-	setPropWithNilCheck(scaleOut, "cooldown_period", scaleOutAction.CooldownPeriod)
+	utils.SetPropWithNilCheck(scaleOut, "amount", scaleOutAction.Amount)
+	utils.SetPropWithNilCheck(scaleOut, "amount_type", scaleOutAction.AmountType)
+	utils.SetPropWithNilCheck(scaleOut, "cooldown_period", scaleOutAction.CooldownPeriod)
 
 	return scaleOut
 }
@@ -525,10 +502,10 @@ func setReplicaConfiguration(d *schema.ResourceData, replicaConfiguration autosc
 
 	replica := map[string]any{}
 
-	setPropWithNilCheck(replica, "availability_zone", replicaConfiguration.AvailabilityZone)
-	setPropWithNilCheck(replica, "cores", replicaConfiguration.Cores)
-	setPropWithNilCheck(replica, "cpu_family", replicaConfiguration.CpuFamily)
-	setPropWithNilCheck(replica, "ram", replicaConfiguration.Ram)
+	utils.SetPropWithNilCheck(replica, "availability_zone", replicaConfiguration.AvailabilityZone)
+	utils.SetPropWithNilCheck(replica, "cores", replicaConfiguration.Cores)
+	utils.SetPropWithNilCheck(replica, "cpu_family", replicaConfiguration.CpuFamily)
+	utils.SetPropWithNilCheck(replica, "ram", replicaConfiguration.Ram)
 
 	if replicaConfiguration.Nics != nil {
 		var nics []any
@@ -554,9 +531,9 @@ func setReplicaConfiguration(d *schema.ResourceData, replicaConfiguration autosc
 func setNicProperties(replicaNic autoscaling.ReplicaNic) map[string]any {
 	nic := map[string]any{}
 
-	setPropWithNilCheck(nic, "lan", replicaNic.Lan)
-	setPropWithNilCheck(nic, "name", replicaNic.Name)
-	setPropWithNilCheck(nic, "dhcp", replicaNic.Dhcp)
+	utils.SetPropWithNilCheck(nic, "lan", replicaNic.Lan)
+	utils.SetPropWithNilCheck(nic, "name", replicaNic.Name)
+	utils.SetPropWithNilCheck(nic, "dhcp", replicaNic.Dhcp)
 
 	return nic
 }
@@ -564,13 +541,13 @@ func setNicProperties(replicaNic autoscaling.ReplicaNic) map[string]any {
 func setVolumeProperties(d *schema.ResourceData, index int, replicaVolume autoscaling.ReplicaVolumePost) map[string]any {
 	volume := map[string]any{}
 
-	setPropWithNilCheck(volume, "image", replicaVolume.Image)
-	setPropWithNilCheck(volume, "image_alias", replicaVolume.ImageAlias)
-	setPropWithNilCheck(volume, "name", replicaVolume.Name)
-	setPropWithNilCheck(volume, "size", replicaVolume.Size)
-	setPropWithNilCheck(volume, "type", replicaVolume.Type)
-	setPropWithNilCheck(volume, "boot_order", replicaVolume.BootOrder)
-	setPropWithNilCheck(volume, "bus", replicaVolume.Bus)
+	utils.SetPropWithNilCheck(volume, "image", replicaVolume.Image)
+	utils.SetPropWithNilCheck(volume, "image_alias", replicaVolume.ImageAlias)
+	utils.SetPropWithNilCheck(volume, "name", replicaVolume.Name)
+	utils.SetPropWithNilCheck(volume, "size", replicaVolume.Size)
+	utils.SetPropWithNilCheck(volume, "type", replicaVolume.Type)
+	utils.SetPropWithNilCheck(volume, "boot_order", replicaVolume.BootOrder)
+	utils.SetPropWithNilCheck(volume, "bus", replicaVolume.Bus)
 	//we need to take these from schema as they are not returned by API
 	if password, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.image_password", index)); ok {
 		volume["image_password"] = password

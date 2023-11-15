@@ -10,11 +10,6 @@ import (
 	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
 )
 
-type ServersService interface {
-	GetGroupServer(ctx context.Context, groupId string, serverId string) (autoscaling.Server, *autoscaling.APIResponse, error)
-	GetAllGroupServers(ctx context.Context, groupId string) (autoscaling.ServerCollection, *autoscaling.APIResponse, error)
-}
-
 func (c *Client) GetGroupServer(ctx context.Context, groupId string, serverId string) (autoscaling.Server, *autoscaling.APIResponse, error) {
 	server, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsServersFindById(ctx, serverId, groupId).Execute()
 	if apiResponse != nil {

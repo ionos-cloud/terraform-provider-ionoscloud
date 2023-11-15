@@ -37,6 +37,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
 			},
+			//will be left until GA in case it is added again in swagger
 			//"target_replica_count": {
 			//	Type:             schema.TypeInt,
 			//	Description:      "The target number of VMs in this Group. Depending on the scaling policy, this number will be adjusted automatically. VMs will be created or destroyed automatically in order to adjust the actual number of VMs to this number. If targetReplicaCount is given in the request body then it must be >= minReplicaCount and <= maxReplicaCount.",
@@ -61,11 +62,11 @@ func resourceAutoscalingGroup() *schema.Resource {
 							Required:         true,
 							Type:             schema.TypeString,
 							Description:      "The Metric that should trigger the scaling actions. Metric values are checked at fixed intervals.",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"INSTANCE_CPU_UTILIZATION_AVERAGE", "INSTANCE_NETWORK_IN_BYTES", "INSTANCE_NETWORK_IN_PACKETS", "INSTANCE_NETWORK_OUT_BYTES", "INSTANCE_NETWORK_OUT_PACKETS"}, true)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(autoscaling.METRIC_CPU_UTILIZATION_AVERAGE), string(autoscaling.METRIC_NETWORK_IN_BYTES), string(autoscaling.METRIC_NETWORK_IN_PACKETS), string(autoscaling.METRIC_NETWORK_OUT_PACKETS), string(autoscaling.METRIC_NETWORK_OUT_BYTES)}, true)),
 						},
 						"range": {
 							Optional:    true,
-							Computed:    true,
+							Default:     "PT2M",
 							Type:        schema.TypeString,
 							Description: "Specifies the time range for which the samples are to be aggregated. Must be >= 2 minutes.",
 						},
@@ -73,13 +74,13 @@ func resourceAutoscalingGroup() *schema.Resource {
 							Required:    true,
 							Type:        schema.TypeList,
 							MaxItems:    1,
-							Description: "Specifies the action to take when the `scaleInThreshold` is exceeded. Hereby, scaling in is always about removing VMs that are currently associated with this autoscaling group. Default termination policy is OLDEST_SERVER_FIRST.",
+							Description: "Defines the action to be taken when the 'scaleInThreshold' is exceeded. Here, scaling is always about removing VMs associated with this VM Auto Scaling Group. By default, the termination policy is 'OLDEST_SERVER_FIRST' is effective.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"amount": {
 										Required:    true,
 										Type:        schema.TypeInt,
-										Description: "When `amountType == ABSOLUTE`, this is the number of VMs added or removed in one step. When `amountType == PERCENTAGE`, this is a percentage value, which will be applied to the autoscaling group's current `targetReplicaCount` in order to derive the number of VMs that will be added or removed in one step. There will always be at least one VM added or removed. For SCALE_IN operation now volumes are NOT deleted after the server deletion.",
+										Description: "When 'amountType=ABSOLUTE' specifies the absolute number of VMs that are removed. The value must be between 1 to 10. 'amountType=PERCENTAGE' specifies the percentage value that is applied to the current number of replicas of the VM Auto Scaling Group. The value must be between 1 to 200. At least one VM is always removed. Note that for 'SCALE_IN' operations, volumes are not deleted after the server is deleted.",
 									},
 									"amount_type": {
 										Required:         true,
@@ -91,14 +92,14 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Optional:         true,
 										Computed:         true,
 										Type:             schema.TypeString,
-										Description:      "The type of the termination policy for the autoscaling group so that a specific pattern is followed for Scaling-In instances. Default termination policy is OLDEST_SERVER_FIRST.",
+										Description:      "The type of termination policy for the VM Auto Scaling Group to follow a specific pattern for scaling-in replicas. The default termination policy is 'OLDEST_SERVER_FIRST'.",
 										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"OLDEST_SERVER_FIRST", "NEWEST_SERVER_FIRST", "RANDOM"}, true)),
 									},
 									"cooldown_period": {
 										Optional:    true,
-										Computed:    true,
+										Default:     "PT5M",
 										Type:        schema.TypeString,
-										Description: "Minimum time to pass after this Scaling action has started, until the next Scaling action will be started. Additionally, if a Scaling action is currently in progress, no second Scaling action will be started for the same autoscaling group. Instead, the Metric will be re-evaluated after the current Scaling action is completed (either successfully or with failures). This is validated with a minimum value of 2 minutes and a maximum of 24 hours currently. Default value is 5 minutes if not given.",
+										Description: "The minimum time that elapses after the start of this scaling action until the following scaling action is started. While a scaling action is in progress, no second action is initiated for the same VM Auto Scaling Group. Instead, the metric is re-evaluated after the current scaling action completes (either successfully or with errors). This is currently validated with a minimum value of 2 minutes and a maximum of 24 hours. The default value is 5 minutes if not specified.",
 									},
 									"delete_volumes": {
 										Optional:    true,
@@ -111,7 +112,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 						"scale_in_threshold": {
 							Required:    true,
 							Type:        schema.TypeInt,
-							Description: "The lower threshold for the value of the 'metric'. Used with the `less than` (<) operator. When this value is exceeded, a scale-in action is triggered, specified by the 'scaleInAction' property. The value must have a higher minimum delta to the 'scaleOutThreshold', depending on the 'metric', to avoid competing for actions at the same time.",
+							Description: "The upper threshold for the value of the 'metric'. Used with the 'greater than' (>) operator. A scale-out action is triggered when this value is exceeded, specified by the 'scale_out_action' property. The value must have a lower minimum delta to the 'scale_in_threshold', depending on the metric, to avoid competing for actions simultaneously. If 'properties.policy.unit=TOTAL', a value >= 40 must be chosen.",
 						},
 						"scale_out_action": {
 							Required:    true,
@@ -123,7 +124,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 									"amount": {
 										Required:    true,
 										Type:        schema.TypeInt,
-										Description: "When 'amountType=ABSOLUTE' specifies the absolute number of VMs that are added or removed. The value must be between 1 to 10.   'amountType=PERCENTAGE' specifies the percentage value that is applied to the current number of replicas of the VM Auto Scaling Group. The value must be between 1 to 200.   At least one VM is always added or removed.   Note that for 'SCALE_IN' operations, volumes are not deleted after the server is deleted.",
+										Description: "When 'amountType=ABSOLUTE' specifies the absolute number of VMs that are added. The value must be between 1 to 10. 'amountType=PERCENTAGE' specifies the percentage value that is applied to the current number of replicas of the VM Auto Scaling Group. The value must be between 1 to 200. At least one VM is always added or removed.",
 									},
 									"amount_type": {
 										Required:         true,
@@ -132,8 +133,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(autoscaling.ACTIONAMOUNT_ABSOLUTE), string(autoscaling.ACTIONAMOUNT_PERCENTAGE)}, true)),
 									},
 									"cooldown_period": {
-										Optional: true,
-										//Computed:    true,
+										Optional:    true,
 										Default:     "PT5M",
 										Type:        schema.TypeString,
 										Description: "The minimum time that elapses after the start of this scaling action until the following scaling action is started. While a scaling action is in progress, no second action is initiated for the same VM Auto Scaling Group. Instead, the metric is re-evaluated after the current scaling action completes (either successfully or with errors). This is currently validated with a minimum value of 2 minutes and a maximum of 24 hours. The default value is 5 minutes if not specified.",
@@ -144,7 +144,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 						"scale_out_threshold": {
 							Required:    true,
 							Type:        schema.TypeInt,
-							Description: "The upper threshold for the value of the `metric`. Will be used with `greater than` (>) operator. Exceeding this will start a Scale-Out action as specified by the `scaleOutAction` property. The value must have a lower minimum delta to the `scaleInThreshold` depending on the `metric` to avoid competitive actions at the same time.",
+							Description: "The upper threshold for the value of the 'metric'. Used with the 'greater than' (>) operator. A scale-out action is triggered when this value is exceeded, specified by the 'scaleOutAction' property. The value must have a lower minimum delta to the 'scaleInThreshold', depending on the metric, to avoid competing for actions simultaneously. If 'properties.policy.unit=TOTAL', a value >= 40 must be chosen.",
 						},
 						"unit": {
 							Required:         true,
@@ -211,6 +211,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "The amount of memory for the VMs in MB, e.g. 2048. Size must be specified in multiples of 256 MB with a minimum of 256 MB; however, if you set ramHotPlug to TRUE then you must use a minimum of 1024 MB. If you set the RAM size more than 240GB, then ramHotPlug will be set to FALSE and can not be set to TRUE unless RAM size not set to less than 240GB.",
 						},
+						//TODO: there might be a problem un update of multiple volumes because the order isn't guaranteed when we get the response from the API. We might have to move from TypeList to TypeSet, like for nics.
 						"volume": {
 							Type:        schema.TypeList,
 							Description: "List of volumes associated with this Replica.",
