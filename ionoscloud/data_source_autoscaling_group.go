@@ -133,7 +133,7 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 			},
 			"replica_configuration": {
 				Type:        schema.TypeList,
-				Description: "VMs for this Autoscaling Group will be created in this Virtual Datacenter. Please note, that it have the same `location` as the `template`.",
+				Description: "VMs for this Autoscaling Group will be created in this Virtual Datacenter. Please note, that it has to have the same `location` as the `template`.",
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
