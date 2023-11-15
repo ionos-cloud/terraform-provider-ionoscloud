@@ -740,7 +740,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			var inlineVolumeIds []string
 			inlineVolumeIds = append(inlineVolumeIds, bootVolume)
 			if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
-				return diag.FromErr(utils.GenerateSetError("server", "inline_volume_ids", err))
+				return diag.FromErr(utils.GenerateSetError("cube_server", "inline_volume_ids", err))
 			}
 		}
 	}

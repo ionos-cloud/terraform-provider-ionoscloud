@@ -1545,9 +1545,9 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	inlineVolumeIds := d.Get("inline_volume_ids")
 
 	if inlineVolumeIds != nil {
-		inlineVolumeIds := inlineVolumeIds.([]interface{})
+		inlineVolumeIds := inlineVolumeIds.([]any)
 
-		var volumes []interface{}
+		var volumes []any
 		for i, volumeId := range inlineVolumeIds {
 			volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), volumeId.(string)).Execute()
 			logApiRequestTime(apiResponse)
@@ -1563,18 +1563,11 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			}
 			backupUnit := d.Get(volumePath + "backup_unit_id")
 			entry["backup_unit_id"] = backupUnit
-			bootOrder := ""
-			if val, ok := d.GetOk("boot_order"); ok {
-				bootOrder = val.(string)
+			bootOrder := constant.BootOrderAuto
+			if val, ok := d.GetOk("boot_order"); ok && !strings.EqualFold(val.(string), constant.BootOrderAuto) {
+				bootOrder = *volume.Properties.BootOrder
 			}
-			if bootOrder == "" {
-				bootOrder = constant.BootOrderAuto
-			}
-			if !strings.EqualFold(bootOrder, constant.BootOrderAuto) {
-				entry["boot_order"] = *volume.Properties.BootOrder
-			} else {
-				entry["boot_order"] = bootOrder
-			}
+			entry["boot_order"] = bootOrder
 			volumes = append(volumes, entry)
 		}
 		if err := d.Set("volume", volumes); err != nil {

@@ -323,6 +323,49 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 	})
 }
 
+func TestAccServerPrimaryBootVolume(t *testing.T) {
+	var server ionoscloud.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ExternalProviders: randomProviderVersion343(),
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckServerConfigPrimaryBootVolume,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(constant.ServerResource+"."+constant.ServerTestResource, &server),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", "Inline Volume"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "10"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.boot_order", "AUTO"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_order", "PRIMARY"),
+				),
+			},
+			{
+				Config: testAccCheckServerConfigPrimaryBootVolumeUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(constant.ServerResource+"."+constant.ServerTestResource, &server),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", "Inline Volume"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "10"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.boot_order", "AUTO"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_order", "NONE"),
+				),
+			},
+		},
+	})
+}
+
 // tests server with no cdromimage and with multiple firewall rules inline
 func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 	var server ionoscloud.Server
@@ -1864,5 +1907,123 @@ const testAccCheckServerConfigNoBootVolumeRemoveServer = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
+}
+`
+
+const testAccCheckServerConfigPrimaryBootVolume = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+  name     = "server-test"
+  location = "us/las"
+}
+
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  type = "ENTERPRISE"
+  image_name = "ubuntu:latest"
+  ssh_key_path = ["` + sshKey + `"]
+  volume {
+    name = "Inline Volume"
+    size = 10
+    disk_type = "SSD Standard"
+    bus = "VIRTIO"
+    availability_zone = "AUTO"
+    boot_order = "AUTO"
+  }
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+	firewall_type = "INGRESS"
+  }
+}
+
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
+  datacenter_id           = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id               = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  name                    = "External Volume"
+  availability_zone       = "ZONE_1"
+  size                    = 10
+  disk_type               = "SSD Standard"
+  bus                     = "VIRTIO"
+  licence_type            = "OTHER"
+  image_password          = ` + constant.RandomPassword + `.server_image_password.result
+  image_name              = "debian:latest"
+  boot_order              = "PRIMARY"
+}
+
+resource ` + constant.RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+  }
+`
+
+const testAccCheckServerConfigPrimaryBootVolumeUpdate = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+  name     = "server-test"
+  location = "us/las"
+}
+
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  type = "ENTERPRISE"
+  image_name = "ubuntu:latest"
+  ssh_key_path = ["` + sshKey + `"]
+  volume {
+    name = "Inline Volume"
+    size = 10
+    disk_type = "SSD Standard"
+    bus = "VIRTIO"
+    availability_zone = "AUTO"
+    boot_order = "PRIMARY"
+  }
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+    firewall_type = "INGRESS"
+  }
+}
+
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
+  datacenter_id           = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id               = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  name                    = "External Volume"
+  availability_zone       = "ZONE_1"
+  size                    = 10
+  disk_type               = "SSD Standard"
+  bus                     = "VIRTIO"
+  licence_type            = "OTHER"
+  image_name              = "debian:latest"
+  image_password          = ` + constant.RandomPassword + `.server_image_password.result
+  boot_order              = "NONE"
+}
+
+resource ` + constant.RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
 }
 `
