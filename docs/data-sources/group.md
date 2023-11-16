@@ -40,7 +40,7 @@ Either `name` or `id` must be provided. If none, or both are provided, the datas
 
 The following attributes are returned by the datasource:
 
-* `id` - The id of the LAN.
+* `id` - The id of the group.
 * `name` - A name for the group.
 * `create_datacenter` - The group will be allowed to create virtual data centers.
 * `create_snapshot` - The group will be allowed to create snapshots.
