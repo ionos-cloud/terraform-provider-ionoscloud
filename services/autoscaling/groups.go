@@ -9,8 +9,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-func (c *Client) GetGroup(ctx context.Context, groupId string) (autoscaling.Group, *autoscaling.APIResponse, error) {
-	group, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsFindById(ctx, groupId).Depth(2).Execute()
+func (c *Client) GetGroup(ctx context.Context, groupId string, depth float32) (autoscaling.Group, *autoscaling.APIResponse, error) {
+	group, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsFindById(ctx, groupId).Depth(depth).Execute()
 	apiResponse.LogInfo()
 	return group, apiResponse, err
 }
@@ -291,35 +291,43 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 	var volumes []autoscaling.ReplicaVolumePost
 
 	if value, ok := d.GetOk("replica_configuration.0.volume"); ok {
-		volumesValue := value.([]any)
-		if volumesValue != nil {
-			for index := range volumesValue {
-				var volumeEntry autoscaling.ReplicaVolumePost
-
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.image", index)); ok {
-					value := value.(string)
-					volumeEntry.Image = &value
-				}
-
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.image_alias", index)); ok {
-					value := value.(string)
-					volumeEntry.ImageAlias = &value
-				}
-
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.name", index)); ok {
-					value := value.(string)
-					volumeEntry.Name = &value
-				}
-
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.size", index)); ok {
-					value := int32(value.(int))
-					volumeEntry.Size = &value
-				}
-
-				var publicKeys []string
-
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.ssh_keys", index)); ok {
-					sshKeys := value.([]any)
+		volumesSet := value.(*schema.Set)
+		if volumesSet != nil {
+			volumesValue := volumesSet.List()
+			if volumesValue != nil {
+				for index := range volumesValue {
+					volumeMap := volumesValue[index].(map[string]any)
+					var volumeEntry = *autoscaling.NewReplicaVolumePostWithDefaults()
+					if val, ok := volumeMap["name"]; ok {
+						volumeEntry.Name = new(string)
+						*volumeEntry.Name = val.(string)
+					}
+					if val, ok := volumeMap["image_alias"]; ok {
+						volumeEntry.ImageAlias = new(string)
+						*volumeEntry.ImageAlias = val.(string)
+					}
+					if val, ok := volumeMap["image"]; ok {
+						volumeEntry.Image = new(string)
+						*volumeEntry.Image = val.(string)
+					}
+					if val, ok := volumeMap["size"]; ok {
+						volumeEntry.Size = new(int32)
+						*volumeEntry.Size = int32(val.(int))
+					}
+					if val, ok := volumeMap["type"]; ok {
+						volumeEntry.Type = new(autoscaling.VolumeHwType)
+						*volumeEntry.Type = autoscaling.VolumeHwType(val.(string))
+					}
+					if *volumeEntry.Image == "" && *volumeEntry.ImageAlias == "" {
+						return nil, fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property")
+					} else {
+						if val, ok := volumeMap["user_data"]; ok {
+							volumeEntry.UserData = new(string)
+							*volumeEntry.UserData = val.(string)
+						}
+					}
+					var publicKeys []string
+					sshKeys := volumeMap["ssh_keys"].([]any)
 					if len(sshKeys) != 0 {
 						for _, keyOrPath := range sshKeys {
 							publicKey, err := utils.ReadPublicKey(keyOrPath.(string))
@@ -329,51 +337,28 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 							publicKeys = append(publicKeys, publicKey)
 						}
 					}
-				}
 
-				volumeEntry.SshKeys = &publicKeys
-
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.type", index)); ok {
-					value := autoscaling.VolumeHwType(value.(string))
-					volumeEntry.Type = &value
-				}
-
-				if userData, ok := d.GetOk("replica_configuration.0.volume.%d.user_data"); ok {
-					if *volumeEntry.Image == "" && *volumeEntry.ImageAlias == "" {
-						return nil, fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property ")
-					} else {
-						userData := userData.(string)
-						volumeEntry.UserData = &userData
+					volumeEntry.SshKeys = &publicKeys
+					if val, ok := volumeMap["image_password"]; ok {
+						volumeEntry.ImagePassword = new(string)
+						*volumeEntry.ImagePassword = val.(string)
 					}
-				}
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.image_password", index)); ok {
-					value := value.(string)
-					volumeEntry.ImagePassword = &value
-				} else {
-					volumeEntry.ImagePassword = nil
-				}
 
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.boot_order", index)); ok {
-					value := value.(string)
-					volumeEntry.BootOrder = &value
-				} else {
-					volumeEntry.BootOrder = nil
-				}
+					if val, ok := volumeMap["bus"]; ok {
+						volumeEntry.Bus = new(autoscaling.BusType)
+						*volumeEntry.Bus = autoscaling.BusType(val.(string))
+					}
+					if val, ok := volumeMap["backup_unit_id"]; ok {
+						volumeEntry.BackupunitId = new(string)
+						*volumeEntry.BackupunitId = val.(string)
+					}
+					if val, ok := volumeMap["boot_order"]; ok {
+						volumeEntry.BootOrder = new(string)
+						*volumeEntry.BootOrder = val.(string)
+					}
 
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.bus", index)); ok {
-					value := autoscaling.BusType(value.(string))
-					volumeEntry.Bus = &value
-				} else {
-					volumeEntry.Bus = nil
+					volumes = append(volumes, volumeEntry)
 				}
-
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.backup_unit_id", index)); ok {
-					value := value.(string)
-					volumeEntry.BackupunitId = &value
-				} else {
-					volumeEntry.BackupunitId = nil
-				}
-				volumes = append(volumes, volumeEntry)
 			}
 		}
 	}
@@ -549,14 +534,11 @@ func setVolumeProperties(d *schema.ResourceData, index int, replicaVolume autosc
 	utils.SetPropWithNilCheck(volume, "boot_order", replicaVolume.BootOrder)
 	utils.SetPropWithNilCheck(volume, "bus", replicaVolume.Bus)
 	//we need to take these from schema as they are not returned by API
-	if password, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.image_password", index)); ok {
-		volume["image_password"] = password
-	}
-	if keys, ok := d.GetOk("replica_configuration.0.volume.0.ssh_keys"); ok {
-		volume["ssh_keys"] = keys
-	}
-	if password, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volume.%d.user_data", index)); ok {
-		volume["user_data"] = password
-	}
+	volumeMap := d.Get("replica_configuration.0.volume").(*schema.Set).List()[index].(map[string]any)
+
+	volume["image_password"] = volumeMap["image_password"]
+	volume["ssh_keys"] = volumeMap["ssh_keys"]
+	volume["user_data"] = volumeMap["user_data"]
+
 	return volume
 }

@@ -183,7 +183,6 @@ func resourceAutoscalingGroup() *schema.Resource {
 							Type:        schema.TypeSet,
 							Description: "Set of NICs associated with this Replica.",
 							Optional:    true,
-							//ForceNew:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"lan": {
@@ -213,7 +212,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 						},
 						//TODO: there might be a problem un update of multiple volumes because the order isn't guaranteed when we get the response from the API. We might have to move from TypeList to TypeSet, like for nics.
 						"volume": {
-							Type:        schema.TypeList,
+							Type:        schema.TypeSet,
 							Description: "List of volumes associated with this Replica.",
 							Optional:    true,
 							Elem: &schema.Resource{
@@ -260,6 +259,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 									},
 									"image_password": {
 										Optional:    true,
+										Sensitive:   true,
 										Type:        schema.TypeString,
 										Description: "Image password for this replica volume.",
 									},
@@ -338,7 +338,7 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 
 	client := meta.(services.SdkBundle).AutoscalingClient
 
-	group, apiResponse, err := client.GetGroup(ctx, d.Id())
+	group, apiResponse, err := client.GetGroup(ctx, d.Id(), 2)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] resource %s not found: %+v", d.Id(), err)
@@ -409,7 +409,7 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 
 	groupId := d.Id()
 
-	group, apiResponse, err := client.GetGroup(ctx, d.Id())
+	group, apiResponse, err := client.GetGroup(ctx, d.Id(), 0)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")

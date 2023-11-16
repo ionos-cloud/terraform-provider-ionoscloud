@@ -202,7 +202,7 @@ func testAccCheckAutoscalingGroupDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.AutoscalingGroupResource {
 			continue
 		}
-		_, apiResponse, err := client.GetGroup(ctx, rs.Primary.ID)
+		_, apiResponse, err := client.GetGroup(ctx, rs.Primary.ID, 0)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
 				return fmt.Errorf("an error occurred while checking for the destruction of autoscaling group %s: %w",
@@ -237,7 +237,7 @@ func testAccCheckAutoscalingGroupExists(name string, autoscalingGroup *autoscali
 			defer cancel()
 		}
 
-		foundGroup, _, err := client.GetGroup(ctx, rs.Primary.ID)
+		foundGroup, _, err := client.GetGroup(ctx, rs.Primary.ID, 0)
 		if err != nil {
 			return fmt.Errorf("error occured while fetching autoscaling group: %s, %w", rs.Primary.ID, err)
 		}
@@ -304,17 +304,13 @@ resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGrou
       ssh_keys    = ["` + sshKey + `"]
       type        = "HDD"
       user_data    = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
-      image_password = random_password.image_password.result
       boot_order = "AUTO"
       bus = "IDE"
     }
   }
 }
 
-resource "random_password" "image_password" {
-  length = 16
-  special = false
-}
+
 `
 
 const testAGGroup_ConfigUpdate = `

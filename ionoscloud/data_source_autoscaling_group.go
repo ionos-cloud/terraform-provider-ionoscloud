@@ -255,7 +255,7 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	var err error
 
 	if idOk {
-		group, _, err = client.GetGroup(ctx, id.(string))
+		group, _, err = client.GetGroup(ctx, id.(string), 2)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
 			return diags
@@ -272,7 +272,7 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 		if groups.Items != nil {
 			for _, g := range *groups.Items {
 				// TODO: this will not be necessary once the swagger is fixed and list returns the full properties
-				tmpGroup, _, err := client.GetGroup(ctx, id.(string))
+				tmpGroup, _, err := client.GetGroup(ctx, id.(string), 2)
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err))
 				}
