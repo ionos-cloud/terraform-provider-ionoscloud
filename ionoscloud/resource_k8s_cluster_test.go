@@ -33,7 +33,6 @@ func TestAccK8sClusterBasic(t *testing.T) {
 					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, &k8sCluster),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "name", constant.K8sClusterTestResource),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "k8s_version", K8sVersion),
-					//resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "true"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
@@ -99,32 +98,51 @@ func TestAccK8sClusterBasic(t *testing.T) {
 	})
 }
 
-//func TestAccK8sClusterPrivate(t *testing.T) {
-//	var k8sCluster ionoscloud.KubernetesCluster
-//
-//	resource.Test(t, resource.TestCase{
-//		PreCheck: func() {
-//			testAccPreCheck(t)
-//		},
-//		ProviderFactories: testAccProviderFactories,
-//		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
-//		Steps: []resource.TestStep{
-//			{
-//				Config: testAccCheckK8sClusterConfigPrivateCluster,
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
-//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", K8sClusterTestResource),
-//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", K8sVersion),
-//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
-//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
-//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", K8sBucket),
-//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "false"),
-//				),
-//			},
-//		},
-//	})
-//}
+func TestAccK8sClusterPrivate(t *testing.T) {
+	var k8sCluster ionoscloud.KubernetesCluster
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckK8sClusterConfigPrivateCluster,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.K8sClusterResource, &k8sCluster),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "name", constant.K8sClusterTestResource),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "k8s_version", K8sVersion),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "maintenance_window.0.day_of_the_week", "Sunday"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "maintenance_window.0.time", "09:00:00Z"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "s3_buckets.0.name", K8sBucket),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "public", "false"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "location", "de/fra"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "nat_gateway_ip", "85.215.52.107"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "node_subnet", "192.168.0.0/16"),
+				),
+			},
+			{
+				Config: testAccDataSourcePrivateK8sClusterMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.K8sClusterResource, &k8sCluster),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "name", constant.K8sClusterTestResource),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "k8s_version", K8sVersion),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "maintenance_window.0.day_of_the_week", "Sunday"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "maintenance_window.0.time", "09:00:00Z"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "s3_buckets.0.name", K8sBucket),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "public", "false"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "location", "de/fra"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "nat_gateway_ip", "85.215.52.107"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "node_subnet", "192.168.0.0/16"),
+				),
+			},
+		},
+	})
+}
 
 func testAccCheckK8sClusterDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
@@ -203,6 +221,10 @@ resource ` + constant.K8sClusterResource + ` ` + constant.K8sClusterTestResource
   s3_buckets { 
      name = "` + K8sBucket + `"
   }
+  public = false
+  location = "de/fra"
+  nat_gateway_ip = "85.215.52.107"
+  node_subnet = "192.168.0.0/16"
 }`
 
 const testAccCheckK8sClusterConfigUpdate = `
@@ -235,8 +257,8 @@ resource ` + constant.K8sClusterResource + ` ` + constant.K8sClusterTestResource
 }`
 
 const testAccCheckK8sClusterConfigPrivateCluster = `
-resource ` + constant.K8sClusterResource + ` ` + constant.K8sClusterTestResource + ` {
-  name        = "` + constant.K8sClusterTestResource + `"
+resource ` + constant.K8sClusterResource + ` ` + constant.PrivateK8sClusterTestResource + ` {
+  name        = "` + constant.PrivateK8sClusterTestResource + `"
   k8s_version = "` + K8sVersion + `"
   maintenance_window {
     day_of_the_week = "Sunday"
@@ -252,6 +274,12 @@ resource ` + constant.K8sClusterResource + ` ` + constant.K8sClusterTestResource
 const testAccDataSourceK8sClusterMatchId = testAccCheckK8sClusterConfigBasic + `
 data ` + constant.K8sClusterResource + ` ` + constant.K8sClusterDataSourceById + `{
   id	= ` + constant.K8sClusterResource + `.` + constant.K8sClusterTestResource + `.id
+}
+`
+
+const testAccDataSourcePrivateK8sClusterMatchId = testAccCheckK8sClusterConfigPrivateCluster + `
+data ` + constant.K8sClusterResource + ` ` + constant.PrivateK8sClusterTestResource + `{
+  id	= ` + constant.K8sClusterResource + `.` + constant.PrivateK8sClusterTestResource + `.id
 }
 `
 
