@@ -23,7 +23,8 @@ func dataSourceAutoscalingGroupServers() *schema.Resource {
 			},
 			"servers": {
 				Type:     schema.TypeList,
-				Computed: true, Elem: &schema.Resource{
+				Computed: true,
+				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:        schema.TypeString,
@@ -47,7 +48,7 @@ func dataSourceAutoscalingServersRead(ctx context.Context, d *schema.ResourceDat
 
 	groupServers, _, err := client.GetAllGroupServers(ctx, id.(string))
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching server for group with ID %s: %w", id.(string), err))
 	}
 
 	return autoscalingService.SetAutoscalingServersData(d, groupServers)
