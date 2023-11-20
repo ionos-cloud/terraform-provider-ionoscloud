@@ -158,6 +158,10 @@ func dataSourceCubeServer() *schema.Resource {
 							Description: "The UUID of the attached server.",
 							Computed:    true,
 						},
+						"is_boot_volume": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
 					},
 				},
 			},

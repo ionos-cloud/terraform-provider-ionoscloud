@@ -64,4 +64,4 @@ The following attributes are returned by the datasource:
 * `disc_virtio_hot_plug` - Is capable of Virt-IO drive hot plug (no reboot required)
 * `disc_virtio_hot_unplug` - Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 * `boot_server` - The UUID of the attached server.
-* `boot_order` - The volume can be set as a primary boot device.
+* `is_boot_volume` - The volume can be set as a primary boot device.

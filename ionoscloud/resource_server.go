@@ -310,12 +310,11 @@ func resourceServer() *schema.Resource {
 							Description: "The UUID of the attached server.",
 							Computed:    true,
 						},
-						"boot_order": {
-							Type:             schema.TypeString,
-							Default:          constant.BootOrderAuto,
-							Optional:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.BootOrderAuto, constant.BootOrderNone, constant.BootOrderPrimary}, true)),
-							Description:      "Determines if the volume will be used as the boot device. Possible values: 'AUTO' (default), 'NONE', 'PRIMARY'. The default behavior set by 'AUTO' means that the volume will be set as the boot device if there are no other volumes or cdrom devices. 'PRIMARY' will set this volume as the boot device and unset other devices, if they exist.",
+						"is_boot_volume": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Sets this volume as the primary boot volume of the server. If there is another volume is already set as the primary boot volume, it will be unset.",
 						},
 					},
 				},
@@ -907,10 +906,9 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		// Don't override an inline volume explicitly set as PRIMARY boot device
-		if v, ok := d.GetOk("volume.0.boot_order"); ok {
-			bootOrder := v.(string)
-			if strings.EqualFold(bootOrder, constant.BootOrderPrimary) {
-				diags := diag.FromErr(fmt.Errorf("cannot set boot_cdrom while an inline volume has boot_order set to 'PRIMARY', set it to 'AUTO' or 'NONE' first"))
+		if v, ok := d.GetOk("volume.0.is_boot_volume"); ok {
+			if v.(bool) {
+				diags := diag.FromErr(fmt.Errorf("cannot set boot_cdrom while an inline volume has the is_boot_volume flag set to 'true', remove the flag or set to 'false'"))
 				return diags
 			}
 		}
@@ -962,9 +960,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 					properties.Bus = &vStr
 				}
 
-				if v, ok := d.GetOk(volumePath + "boot_order"); ok {
-					vStr := v.(string)
-					properties.BootOrder = &vStr
+				if v, ok := d.GetOk(volumePath + "is_boot_volume"); ok {
+					vBool := v.(bool)
+					if vBool {
+						properties.SetBootOrder(constant.BootOrderPrimary)
+					}
 				}
 
 				_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), volumeIdStr).Volume(properties).Execute()
@@ -1563,11 +1563,14 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			}
 			backupUnit := d.Get(volumePath + "backup_unit_id")
 			entry["backup_unit_id"] = backupUnit
-			bootOrder := constant.BootOrderAuto
-			if val, ok := d.GetOk("boot_order"); ok && !strings.EqualFold(val.(string), constant.BootOrderAuto) {
-				bootOrder = *volume.Properties.BootOrder
+			entry["is_boot_volume"] = false
+			if strings.EqualFold(*volume.Properties.BootOrder, constant.BootOrderPrimary) {
+				v, ok := d.GetOkExists(volumePath + "is_boot_volume")
+				vBool := v.(bool)
+				if !ok || vBool {
+					entry["is_boot_volume"] = true
+				}
 			}
-			entry["boot_order"] = bootOrder
 			volumes = append(volumes, entry)
 		}
 		if err := d.Set("volume", volumes); err != nil {

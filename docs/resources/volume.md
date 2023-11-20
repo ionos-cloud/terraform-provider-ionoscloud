@@ -58,7 +58,7 @@ resource "ionoscloud_server" "example" {
         user_data         = "foo"
         bus               = "VIRTIO"
         availability_zone = "ZONE_1"
-        boot_order        = "NONE"
+        is_boot_volume    = false
     }
     nic {
         lan               = ionoscloud_lan.example.id
@@ -91,7 +91,7 @@ resource "ionoscloud_volume" "example" {
   image_name              = data.ionoscloud_image.example.id
   image_password          = random_password.volume_image_password.result
   user_data               = "foo"
-  boot_order              = "PRIMARY"
+  is_boot_volume          = true
 }
 
 resource "ionoscloud_volume" "example" {
@@ -144,7 +144,7 @@ resource "random_password" "volume_image_password" {
 * `disc_virtio_hot_plug` - (Computed)[string] Is capable of Virt-IO drive hot plug (no reboot required)
 * `disc_virtio_hot_unplug` - (Computed)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 * `boot_server` - (Computed)[string] The UUID of the attached server.
-* `boot_order` - (Optional)[string] The volume can be used as a primary boot device: AUTO, PRIMARY, NONE. By default, the inline volume of the server will always be the primary boot volume unless a different external volume is set as PRIMARY or the inline volume is explicitly set to NONE.
+* `is_boot_volume` - (Computed)(Optional)[boolean] The volume can be set as the primary boot device of the server to which it is attached. If the property is omited, the inline volume will be set as primary boot device, by default. Setting this property while a different volume is already the primary boot device will result in the other volume being unset, and the current volume becoming the primary boot device. There will always be one boot volume for the server.
 > **⚠ WARNING**
 >
 > ssh_key_path and ssh_keys fields are immutable.

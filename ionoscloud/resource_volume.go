@@ -154,12 +154,11 @@ func resourceVolume() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			"boot_order": {
-				Type:             schema.TypeString,
-				Default:          constant.BootOrderAuto,
-				Optional:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.BootOrderAuto, constant.BootOrderNone, constant.BootOrderPrimary}, true)),
-				Description:      "Determines if the volume will be used as the boot device. Possible values: 'AUTO' (default), 'NONE', 'PRIMARY'. The default behavior set by 'AUTO' means that the volume will be set as the boot device if there are no other volumes or cdrom devices. 'PRIMARY' will set this volume as the boot device and unset other devices, if they exist.",
+			"is_boot_volume": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Sets this volume as the primary boot volume of the server. If there is another volume is already set as the primary boot volume, it will be unset.",
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -315,9 +314,9 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// For an external volume that we want to set as PRIMARY boot device at creation.
 	// The server will already have an inline volume set as PRIMARY, and attaching the external volume will not override this
-	// Updating the boot_order for the newly attached volume must be done separately
+	// Updating the bootOrder for the newly attached volume must be done separately
 
-	if strings.EqualFold(*volumeBootOrder, constant.BootOrderPrimary) {
+	if volumeBootOrder != nil && strings.EqualFold(*volumeBootOrder, constant.BootOrderPrimary) {
 		bootOrderProperties := ionoscloud.VolumeProperties{}
 		bootOrderProperties.BootOrder = volumeBootOrder
 		volume, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, dcId, *volume.Id).Volume(bootOrderProperties).Execute()
@@ -396,10 +395,12 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		newValueStr := newValue.(string)
 		properties.Bus = &newValueStr
 	}
-	if d.HasChange("boot_order") {
-		_, newValue := d.GetChange("boot_order")
-		newValueStr := newValue.(string)
-		properties.BootOrder = &newValueStr
+	if d.HasChange("is_boot_volume") {
+		_, newValue := d.GetChange("is_boot_volume")
+		newValueBool := newValue.(bool)
+		if newValueBool {
+			properties.SetBootOrder(constant.BootOrderPrimary)
+		}
 	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
@@ -637,17 +638,17 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 	}
 
 	if volume.Properties.BootOrder != nil {
-		bootOrder := ""
-		if val, ok := d.GetOk("boot_order"); ok {
-			bootOrder = val.(string)
+		isBootVolume := false
+		if strings.EqualFold(*volume.Properties.BootOrder, constant.BootOrderPrimary) {
+			v, ok := d.GetOkExists("is_boot_volume")
+			vBool := v.(bool)
+			if !ok || vBool {
+				isBootVolume = true
+			}
 		}
-		// "AUTO" values are changed by the backend to either "NONE" or "PRIMARY"
-		if !strings.EqualFold(bootOrder, constant.BootOrderAuto) {
-			bootOrder = *volume.Properties.BootOrder
-		}
-		err := d.Set("boot_order", bootOrder)
+		err := d.Set("is_boot_volume", isBootVolume)
 		if err != nil {
-			return fmt.Errorf("error while setting boot_order property for volume %s: %w", d.Id(), err)
+			return fmt.Errorf("error while setting is_boot_volume property for volume %s: %w", d.Id(), err)
 		}
 	}
 	return nil
@@ -696,9 +697,12 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 		volume.Name = &vStr
 	}
 
-	if v, ok := d.GetOk(path + "boot_order"); ok {
-		vStr := v.(string)
-		volume.BootOrder = &vStr
+	if v, ok := d.GetOk(path + "is_boot_volume"); ok {
+		vBool := v.(bool)
+		volume.SetBootOrder(constant.BootOrderAuto)
+		if vBool {
+			volume.SetBootOrder(constant.BootOrderPrimary)
+		}
 	}
 
 	var sshKeys []interface{}

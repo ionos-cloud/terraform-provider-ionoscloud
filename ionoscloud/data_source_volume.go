@@ -104,9 +104,10 @@ func dataSourceVolume() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"boot_order": {
-				Type:     schema.TypeString,
-				Computed: true,
+			"is_boot_volume": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "The volume is set as the primary boot device.",
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

@@ -172,8 +172,8 @@ func dataSourceServer() *schema.Resource {
 							Description: "The UUID of the attached server.",
 							Computed:    true,
 						},
-						"boot_order": {
-							Type:     schema.TypeString,
+						"is_boot_volume": {
+							Type:     schema.TypeBool,
 							Computed: true,
 						},
 					},

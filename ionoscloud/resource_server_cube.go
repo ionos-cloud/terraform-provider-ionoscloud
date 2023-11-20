@@ -213,12 +213,11 @@ func resourceCubeServer() *schema.Resource {
 							Description: "The UUID of the attached server.",
 							Computed:    true,
 						},
-						"boot_order": {
-							Type:             schema.TypeString,
-							Default:          constant.BootOrderAuto,
-							Optional:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.BootOrderAuto, constant.BootOrderNone, constant.BootOrderPrimary}, true)),
-							Description:      "Determines if the volume will be used as the boot device. Possible values: 'AUTO' (default), 'NONE', 'PRIMARY'. The default behavior set by 'AUTO' means that the volume will be set as the boot device if there are no other volumes or cdrom devices. 'PRIMARY' will set this volume as the boot device and unset other devices, if they exist.",
+						"is_boot_volume": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Sets this volume as the primary boot volume of the server. If there is another volume is already set as the primary boot volume, it will be unset.",
 						},
 					},
 				},
@@ -452,9 +451,10 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		volume.UserData = &vStr
 	}
 
-	if v, ok := d.GetOk("volume.0.boot_order"); ok {
-		vStr := v.(string)
-		volume.BootOrder = &vStr
+	if v, ok := d.GetOk("volume.0.is_boot_volume"); ok {
+		if v.(bool) {
+			volume.SetBootOrder(constant.BootOrderPrimary)
+		}
 	}
 
 	if v, ok := d.GetOk("volume.0.ssh_key_path"); ok {
@@ -817,14 +817,13 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			entry["user_data"] = userData
 			backupUnit := d.Get(volumePath + "backup_unit_id")
 			entry["backup_unit_id"] = backupUnit
-			bootOrder := d.Get(volumePath + "boot_order").(string)
-			if bootOrder == "" {
-				bootOrder = constant.BootOrderAuto
-			}
-			if !strings.EqualFold(bootOrder, constant.BootOrderAuto) {
-				entry["boot_order"] = *volume.Properties.BootOrder
-			} else {
-				entry["boot_order"] = bootOrder
+			entry["is_boot_volume"] = false
+			if strings.EqualFold(*volume.Properties.BootOrder, constant.BootOrderPrimary) {
+				v, ok := d.GetOkExists(volumePath + "is_boot_volume")
+				vBool := v.(bool)
+				if !ok || vBool {
+					entry["is_boot_volume"] = true
+				}
 			}
 			volumes = append(volumes, entry)
 		}
@@ -910,10 +909,9 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			return diags
 		}
 		// Don't override an inline volume explicitly set as PRIMARY boot device
-		if v, ok := d.GetOk("volume.0.boot_order"); ok {
-			bootOrder := v.(string)
-			if strings.EqualFold(bootOrder, constant.BootOrderPrimary) {
-				diags := diag.FromErr(fmt.Errorf("cannot set boot_cdrom while an inline volume has boot_order set to 'PRIMARY', set it to 'AUTO' or 'NONE' first"))
+		if v, ok := d.GetOk("volume.0.is_boot_volume"); ok {
+			if v.(bool) {
+				diags := diag.FromErr(fmt.Errorf("cannot set boot_cdrom while an inline volume has the is_boot_volume flag set to 'true', remove the flag or set to 'false'"))
 				return diags
 			}
 		}
@@ -959,9 +957,11 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 					properties.Bus = &vStr
 				}
 
-				if v, ok := d.GetOk(volumePath + "boot_order"); ok {
-					vStr := v.(string)
-					properties.BootOrder = &vStr
+				if v, ok := d.GetOk(volumePath + "is_boot_volume"); ok {
+					vBool := v.(bool)
+					if vBool {
+						properties.SetBootOrder(constant.BootOrderPrimary)
+					}
 				}
 
 				_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), volumeIdStr).Volume(properties).Execute()

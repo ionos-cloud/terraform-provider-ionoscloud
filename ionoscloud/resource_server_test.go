@@ -344,8 +344,8 @@ func TestAccServerPrimaryBootVolume(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.availability_zone", "AUTO"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.boot_order", "AUTO"),
-					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_order", "PRIMARY"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.is_boot_volume", "false"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "is_boot_volume", "true"),
 				),
 			},
 			{
@@ -358,8 +358,8 @@ func TestAccServerPrimaryBootVolume(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.availability_zone", "AUTO"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.boot_order", "AUTO"),
-					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_order", "NONE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.is_boot_volume", "true"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "is_boot_volume", "false"),
 				),
 			},
 		},
@@ -1938,7 +1938,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     bus = "VIRTIO"
     availability_zone = "AUTO"
-    boot_order = "AUTO"
+    is_boot_volume = "false"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -1960,7 +1960,7 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
   licence_type            = "OTHER"
   image_password          = ` + constant.RandomPassword + `.server_image_password.result
   image_name              = "debian:latest"
-  boot_order              = "PRIMARY"
+  is_boot_volume              = "true"
 }
 
 resource ` + constant.RandomPassword + ` "server_image_password" {
@@ -1997,7 +1997,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     bus = "VIRTIO"
     availability_zone = "AUTO"
-    boot_order = "PRIMARY"
+    is_boot_volume = "true"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -2019,7 +2019,7 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
   licence_type            = "OTHER"
   image_name              = "debian:latest"
   image_password          = ` + constant.RandomPassword + `.server_image_password.result
-  boot_order              = "NONE"
+  is_boot_volume              = "false"
 }
 
 resource ` + constant.RandomPassword + ` "server_image_password" {

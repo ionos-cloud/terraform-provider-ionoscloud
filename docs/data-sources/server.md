@@ -101,7 +101,7 @@ The following attributes are returned by the datasource:
   * `pci_slot` - The PCI slot number of the storage volume
   * `backup_unit_id` - The uuid of the Backup Unit that user has access to
   * `user_data` - The cloud-init configuration for the volume as base64 encoded string
-  * `boot_order` - The volume can be set as a primary boot device.
+  * `is_boot_volume` - The volume is set as primary boot device
 * `nics` - list of
   * `id` - Id of the attached nic
   * `name` - Name of the attached nid

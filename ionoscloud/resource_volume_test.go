@@ -1,4 +1,4 @@
-//go:build compute || all || volumes
+//go:build compute || all || volume
 
 package ionoscloud
 
@@ -42,8 +42,8 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_order", constant.BootOrderPrimary),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.boot_order", constant.BootOrderAuto),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "is_boot_volume", "true"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.is_boot_volume", "false"),
 					resource.TestCheckResourceAttrSet(constant.VolumeResource+"."+constant.VolumeTestResource, "image_name"),
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_server", constant.ServerResource+"."+constant.ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
@@ -66,7 +66,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "disc_virtio_hot_plug", constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_plug"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "disc_virtio_hot_unplug", constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_unplug"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "device_number", constant.VolumeResource+"."+constant.VolumeTestResource, "device_number"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "boot_order", constant.VolumeResource+"."+constant.VolumeTestResource, "boot_order"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "is_boot_volume", constant.VolumeResource+"."+constant.VolumeTestResource, "is_boot_volume"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "boot_server", constant.ServerResource+"."+constant.ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "id", constant.ServerResource+"."+constant.ServerTestResource, "boot_volume"),
 				),
@@ -88,7 +88,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "disc_virtio_hot_plug", constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_plug"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "disc_virtio_hot_unplug", constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_unplug"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "device_number", constant.VolumeResource+"."+constant.VolumeTestResource, "device_number"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "boot_order", constant.VolumeResource+"."+constant.VolumeTestResource, "boot_order"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "is_boot_volume", constant.VolumeResource+"."+constant.VolumeTestResource, "is_boot_volume"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "boot_server", constant.ServerResource+"."+constant.ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "id", constant.ServerResource+"."+constant.ServerTestResource, "boot_volume"),
 				),
@@ -105,8 +105,8 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_order", constant.BootOrderNone),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource+"updated", "volume.0.boot_order", constant.BootOrderAuto),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "is_boot_volume", "false"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource+"updated", "volume.0.is_boot_volume", "true"),
 					resource.TestCheckResourceAttrSet(constant.VolumeResource+"."+constant.VolumeTestResource, "image_name"),
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_server", constant.ServerResource+"."+constant.ServerTestResource+"updated", "id"),
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "image_password", constant.RandomPassword+".server_image_password_updated", "result"),
@@ -252,6 +252,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + `{
     name = "system"
     size = 5
     disk_type = "HDD"
+    is_boot_volume = false
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -270,7 +271,8 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
 	image_name ="ubuntu:latest"
 	image_password = ` + constant.RandomPassword + `.server_image_password.result
 	user_data = "foo"
-	boot_order = "` + constant.BootOrderPrimary + `"
+	is_boot_volume = true
+
 }
 ` + ServerImagePassword
 
@@ -322,6 +324,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + `upda
     name = "system"
     size = 5
     disk_type = "HDD"
+    is_boot_volume = true
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -340,7 +343,7 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
 	image_name ="ubuntu:latest"
 	image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
 	user_data = "foo"
-	boot_order = "` + constant.BootOrderNone + `"
+	is_boot_volume = false
 }
 ` + ServerImagePassword + ServerImagePasswordUpdated
 

@@ -334,6 +334,34 @@ func TestAccCubeServerWithICMP(t *testing.T) {
 	})
 }
 
+func TestAccCubeServerPrimaryBootVolume(t *testing.T) {
+	var server ionoscloud.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ExternalProviders: randomProviderVersion343(),
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckCubeServerNoFirewall,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCubeServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.name", "system"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.disk_type", "DAS"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.availability_zone", "AUTO"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckCubeServerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
@@ -706,3 +734,64 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
     }
 }
 ` + ServerImagePassword
+
+const testAccCheckCubeServerConfigPrimaryBootVolume = `
+data "ionoscloud_template" ` + constant.ServerTestResource + ` {
+    name  = "CUBES XS"
+    cores = 1
+    ram   = 1024
+    storage_size = 30
+}
+
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+	name = "server-test"
+	location = "de/fra"
+}
+
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.UpdatedResources + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  availability_zone = "AUTO"
+  image_name ="ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
+  template_uuid = data.ionoscloud_template.` + constant.ServerTestResource + `.id
+
+  volume {
+    name = "` + constant.ServerTestResource + `"
+    licence_type = "LINUX"
+    disk_type = "DAS"
+    is_boot_volume = true
+  }
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "` + constant.UpdatedResources + `"
+    dhcp = true
+    firewall_active = true
+    firewall_type = "BIDIRECTIONAL"
+    ips = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
+  }
+}
+
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
+    datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+    server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+    name = "External Volume"
+    availability_zone = "ZONE_1"
+    size = 10
+    disk_type = "SSD Standard"
+    bus = "VIRTIO"
+    licence_type = "OTHER"
+    image_name = "debian:latest"
+    image_password = ` + constant.RandomPassword + `.server_image_password.result
+  }
+` + ServerImagePasswordUpdated
