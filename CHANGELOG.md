@@ -2,7 +2,8 @@
 
 ### Fixes
 - `is_system_user` is actually only read-only. You cannot actually set it.
-- 
+### Features
+- Add parameters for private k8s cluster: `public`, `location`, `nat_gateway_ip`, `node_subnet`
 ## 6.4.11
 ### Documentation
 - Refactor readme files to better explain the usage of the provider

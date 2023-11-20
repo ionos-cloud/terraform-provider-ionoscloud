@@ -62,6 +62,10 @@ The following attributes are returned by the datasource:
   "TERMINATED"
 * `node_pools` - list of the IDs of the node pools in this cluster
 * `api_subnet_allow_list` - access to the K8s API server is restricted to these CIDRs
+* `public` - indicates if the cluster is public or private.
+* `nat_gateway_ip` - the NAT gateway IP of the cluster if the cluster is private.
+* `node_subnet` - the node subnet of the cluster, if the cluster is private.
+* `location` - this attribute is mandatory if the cluster is private.
 * `s3_buckets` - list of S3 bucket configured for K8s usage
 * `kube_config` - Kubernetes configuration
 * `config` - structured kubernetes config consisting of a list with 1 item with the following fields:

@@ -40,6 +40,11 @@ The following arguments are supported:
 - `viable_node_pool_versions` - (Computed)[list] List of versions that may be used for node pools under this cluster
 - `api_subnet_allow_list` - (Optional)[list] Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not affected by this restriction. If no allowlist is specified, access is not restricted. If an IP without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.
 - `s3_buckets` - (Optional)[list] List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.
+- `public` - (Optional)[boolean] Indicates if the cluster is public or private.
+- `nat_gateway_ip` - (Optional)[string] The NAT gateway IP of the cluster if the cluster is private. This attribute is immutable. Must be a reserved IP in the same location as the cluster's location. This attribute is mandatory if the cluster is private.
+- `node_subnet` - (Optional)[string] The node subnet of the cluster, if the cluster is private. This attribute is optional and immutable. Must be a valid CIDR notation for an IPv4 network prefix of 16 bits length.
+- `location` - (Optional)[string] This attribute is mandatory if the cluster is private. The location must be enabled for your contract, or you must have a data center at that location. This property is not adjustable.
+- `allow_replace` - (Optional)[bool] When set to true, allows the update of immutable fields by first destroying and then re-creating the cluster.
 
 ## Import
 

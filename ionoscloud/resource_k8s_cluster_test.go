@@ -73,7 +73,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, &k8sCluster),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "k8s_version", K8sVersion),
-					//resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "true"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "public", "true"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.time", "10:30:00Z"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
@@ -87,7 +87,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, &k8sCluster),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "k8s_version", K8sVersion),
-					//resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "true"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "public", "true"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.time", "10:30:00Z"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
@@ -111,33 +111,33 @@ func TestAccK8sClusterPrivate(t *testing.T) {
 			{
 				Config: testAccCheckK8sClusterConfigPrivateCluster,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.K8sClusterResource, &k8sCluster),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "name", constant.K8sClusterTestResource),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "k8s_version", K8sVersion),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "maintenance_window.0.time", "09:00:00Z"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "s3_buckets.0.name", K8sBucket),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "public", "false"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "location", "de/fra"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "nat_gateway_ip", "85.215.52.107"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "node_subnet", "192.168.0.0/16"),
+					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, &k8sCluster),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "name", constant.PrivateK8sClusterTestResource),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "k8s_version", K8sVersion),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "s3_buckets.0.name", K8sBucket),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "public", "false"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "location", "de/fra"),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "nat_gateway_ip", K8sPrivateClusterNATGatewayIP),
+					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "node_subnet", K8sPrivateClusterNodeSubnet),
 				),
 			},
 			{
 				Config: testAccDataSourcePrivateK8sClusterMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.K8sClusterResource, &k8sCluster),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "name", constant.K8sClusterTestResource),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "k8s_version", K8sVersion),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "maintenance_window.0.time", "09:00:00Z"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterResource, "s3_buckets.0.name", K8sBucket),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "public", "false"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "location", "de/fra"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "nat_gateway_ip", "85.215.52.107"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "node_subnet", "192.168.0.0/16"),
+					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, &k8sCluster),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "name", constant.PrivateK8sClusterTestResource),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "k8s_version", K8sVersion),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "s3_buckets.0.name", K8sBucket),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "public", "false"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "location", "de/fra"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "nat_gateway_ip", K8sPrivateClusterNATGatewayIP),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "node_subnet", K8sPrivateClusterNodeSubnet),
 				),
 			},
 		},
@@ -221,10 +221,6 @@ resource ` + constant.K8sClusterResource + ` ` + constant.K8sClusterTestResource
   s3_buckets { 
      name = "` + K8sBucket + `"
   }
-  public = false
-  location = "de/fra"
-  nat_gateway_ip = "85.215.52.107"
-  node_subnet = "192.168.0.0/16"
 }`
 
 const testAccCheckK8sClusterConfigUpdate = `
@@ -268,7 +264,10 @@ resource ` + constant.K8sClusterResource + ` ` + constant.PrivateK8sClusterTestR
   s3_buckets { 
      name = "` + K8sBucket + `"
   }
-  //public = "false"
+  public = false
+  location = "de/fra"
+  nat_gateway_ip = "` + K8sPrivateClusterNATGatewayIP + `"
+  node_subnet = "` + K8sPrivateClusterNodeSubnet + `"
 }`
 
 const testAccDataSourceK8sClusterMatchId = testAccCheckK8sClusterConfigBasic + `
