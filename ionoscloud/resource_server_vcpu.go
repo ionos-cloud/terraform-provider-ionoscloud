@@ -206,7 +206,7 @@ func resourceVCPUServer() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Computed:    true,
-							Description: "The volume is set as primary boot device.",
+							Description: "Sets this volume as the primary boot volume of the server. If a different volume is already set as the primary boot device, it will be overriden by this volume.",
 						},
 					},
 				},

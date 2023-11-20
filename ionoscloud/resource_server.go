@@ -314,7 +314,7 @@ func resourceServer() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Computed:    true,
-							Description: "Sets this volume as the primary boot volume of the server. If there is another volume is already set as the primary boot volume, it will be unset.",
+							Description: "Sets this volume as the primary boot volume of the server. If a different volume is already set as the primary boot device, it will be overriden.",
 						},
 					},
 				},
@@ -942,8 +942,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), volumeIdStr).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("an error occured while getting a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), volumeId, err))
-					return diags
+					return diag.FromErr(fmt.Errorf("an error occured while getting a volume dcId: %s, server_id: %s, ID: %s, Response: %s", dcId, d.Id(), volumeId, err))
 				}
 				if v, ok := d.GetOk(volumePath + "name"); ok {
 					vStr := v.(string)
@@ -970,8 +969,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), volumeIdStr).Volume(properties).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("error patching volume (%s) (%w)", d.Id(), err))
-					return diags
+					return diag.FromErr(fmt.Errorf("error patching volume (%s) (%w)", d.Id(), err))
 				}
 
 				_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
@@ -1547,13 +1545,17 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	if inlineVolumeIds != nil {
 		inlineVolumeIds := inlineVolumeIds.([]any)
 
+		// In the future, multiple inline volumes may be supported, so we are using inlineVolumeIds to iterate through each of them and perform updates and refreshes
 		var volumes []any
+		// Currently there is only 1 inline volume allowed, so using the for-loop index will have the correct behavior
+		// But this may require closer attention when multiple volumes are involved, as they may change ordering as some are added/removed
 		for i, volumeId := range inlineVolumeIds {
 			volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), volumeId.(string)).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				return fmt.Errorf("error retrieving inline volume %w", err)
+				return fmt.Errorf("error retrieving inline volume ID: %s, %w", volumeId, err)
 			}
+			// We may have to use a mapping between the index of the volume at creation time and the volume itself to ensure state is managed correctly.
 			volumePath := fmt.Sprintf("volume.%d.", i)
 			entry := SetVolumeProperties(volume)
 			userData := d.Get(volumePath + "user_data")

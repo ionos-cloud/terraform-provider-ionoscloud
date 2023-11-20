@@ -144,7 +144,7 @@ resource "random_password" "volume_image_password" {
 * `disc_virtio_hot_plug` - (Computed)[string] Is capable of Virt-IO drive hot plug (no reboot required)
 * `disc_virtio_hot_unplug` - (Computed)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 * `boot_server` - (Computed)[string] The UUID of the attached server.
-* `is_boot_volume` - (Computed)(Optional)[boolean] The volume can be set as the primary boot device of the server to which it is attached. If the property is omited, the inline volume will be set as primary boot device, by default. Setting this property while a different volume is already the primary boot device will result in the other volume being unset, and the current volume becoming the primary boot device. There will always be one boot volume for the server.
+* `is_boot_volume` - (Computed)(Optional)[boolean] The volume can be set as the primary boot device of the server to which it is attached. If the property is omitted, the inline volume will be set as primary boot device, by default. Setting this property while a different volume is already the primary boot device will result in the other volume being unset, and the current volume becoming the primary boot device. There will always be one boot volume for the server.
 > **⚠ WARNING**
 >
 > ssh_key_path and ssh_keys fields are immutable.

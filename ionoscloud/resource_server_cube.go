@@ -217,7 +217,7 @@ func resourceCubeServer() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Computed:    true,
-							Description: "Sets this volume as the primary boot volume of the server. If there is another volume is already set as the primary boot volume, it will be unset.",
+							Description: "Sets this volume as the primary boot volume of the server. If a different volume is already set as the primary boot device, it will be overriden by this volume.",
 						},
 					},
 				},
