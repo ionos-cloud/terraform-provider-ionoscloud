@@ -346,16 +346,35 @@ func TestAccCubeServerPrimaryBootVolume(t *testing.T) {
 		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCubeServerNoFirewall,
+				Config: testAccCheckCubeServerConfigPrimaryBootVolume,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCubeServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
-					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.name", "system"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.name", "Inline"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.disk_type", "DAS"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.is_boot_volume", "true"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "name", "External"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "is_boot_volume", "false"),
+				),
+			},
+			{
+				Config: testAccCheckCubeServerConfigPrimaryBootVolumeUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCubeServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.name", "Inline Updated"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.disk_type", "DAS"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.is_boot_volume", "false"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "name", "External Updated"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "is_boot_volume", "true"),
 				),
 			},
 		},
@@ -759,15 +778,15 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   name = "public"
 }
 resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
-  name = "` + constant.UpdatedResources + `"
+  name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
   image_name ="ubuntu:latest"
-  image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   template_uuid = data.ionoscloud_template.` + constant.ServerTestResource + `.id
 
   volume {
-    name = "` + constant.ServerTestResource + `"
+    name = "Inline"
     licence_type = "LINUX"
     disk_type = "DAS"
     is_boot_volume = true
@@ -784,8 +803,8 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
 
 resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
     datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-    server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
-    name = "External Volume"
+    server_id = ` + constant.ServerCubeResource + `.` + constant.ServerTestResource + `.id
+    name = "External"
     availability_zone = "ZONE_1"
     size = 10
     disk_type = "SSD Standard"
@@ -794,4 +813,66 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
     image_name = "debian:latest"
     image_password = ` + constant.RandomPassword + `.server_image_password.result
   }
-` + ServerImagePasswordUpdated
+` + ServerImagePassword
+
+const testAccCheckCubeServerConfigPrimaryBootVolumeUpdate = `
+data "ionoscloud_template" ` + constant.ServerTestResource + ` {
+    name  = "CUBES XS"
+    cores = 1
+    ram   = 1024
+    storage_size = 30
+}
+
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+	name = "server-test"
+	location = "de/fra"
+}
+
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  availability_zone = "AUTO"
+  image_name ="ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  template_uuid = data.ionoscloud_template.` + constant.ServerTestResource + `.id
+
+  volume {
+    name = "Inline Updated"
+    licence_type = "LINUX"
+    disk_type = "DAS"
+    is_boot_volume = false
+  }
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "` + constant.UpdatedResources + `"
+    dhcp = true
+    firewall_active = true
+    firewall_type = "BIDIRECTIONAL"
+    ips = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
+  }
+}
+
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
+    datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+    server_id = ` + constant.ServerCubeResource + `.` + constant.ServerTestResource + `.id
+    name = "External Updated"
+    availability_zone = "ZONE_1"
+    size = 10
+    disk_type = "SSD Standard"
+    bus = "VIRTIO"
+    licence_type = "OTHER"
+    image_name = "debian:latest"
+    is_boot_volume = true
+    image_password = ` + constant.RandomPassword + `.server_image_password.result
+  }
+` + ServerImagePassword
