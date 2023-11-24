@@ -19,6 +19,7 @@ func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
+		ExternalProviders: randomProviderVersion343(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAG_ConfigBasic,

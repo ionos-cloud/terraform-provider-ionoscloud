@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -102,9 +103,9 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Description: "The minimum time that elapses after the start of this scaling action until the following scaling action is started. While a scaling action is in progress, no second action is initiated for the same VM Auto Scaling Group. Instead, the metric is re-evaluated after the current scaling action completes (either successfully or with errors). This is currently validated with a minimum value of 2 minutes and a maximum of 24 hours. The default value is 5 minutes if not specified.",
 									},
 									"delete_volumes": {
-										Optional:    true,
+										Required:    true,
 										Type:        schema.TypeBool,
-										Description: "If set to `true`, when deleting an replica during scale in, any attached volume will also be deleted. When set to `false`, all volumes remain in the datacenter and must be deleted manually.  **Note**, that every scale-out creates new volumes. When they are not deleted, they will eventually use all of your contracts resource limits. At this point, scaling out would not be possible anymore.",
+										Description: "If set to 'true', when deleting an replica during scale in, any attached volume will also be deleted. When set to 'false', all volumes remain in the datacenter and must be deleted manually. Note that every scale-out creates new volumes. When they are not deleted, they will eventually use all of your contracts resource limits. At this point, scaling out would not be possible anymore.",
 									},
 								},
 							},
@@ -264,7 +265,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Description: "Image password for this replica volume.",
 									},
 									"boot_order": {
-										Optional: true,
+										Required: true,
 										Type:     schema.TypeString,
 										Description: `Determines whether the volume will be used as a boot volume. Set to NONE, the volume will not be used as boot volume. 
 Set to PRIMARY, the volume will be used as boot volume and set to AUTO will delegate the decision to the provisioning engine to decide whether to use the volume as boot volume.
@@ -296,7 +297,7 @@ Notice that exactly one volume can be set to PRIMARY or all of them set to AUTO.
 			"location": {
 				Type:        schema.TypeString,
 				Description: "Location of the data center.",
-				Computed:    true,
+				Required:    true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -311,17 +312,16 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(fmt.Errorf("an error occured getting data from the provided schema: %w", err))
 	}
 	if group.Properties != nil && group.Properties.Name != nil {
-		log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties.Name)
+		log.Printf("[DEBUG] Autoscaling Group data extracted: %+v", *group.Properties.Name)
 	}
 
 	autoscalingGroup, _, err := client.CreateGroup(ctx, *group)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating autoscaling group: %w", err))
-		return diags
+		return diag.FromErr(fmt.Errorf("error creating Autoscaling Group: %w", err))
 	}
 
 	d.SetId(*autoscalingGroup.Id)
-	log.Printf("[INFO] autoscaling Group created. Id set to %s", *autoscalingGroup.Id)
+	log.Printf("[INFO] Autoscaling Group created. Id set to %s", *autoscalingGroup.Id)
 
 	if err := checkAction(ctx, client, d); err != nil {
 		d.SetId("")
@@ -341,22 +341,20 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 	group, apiResponse, err := client.GetGroup(ctx, d.Id(), 2)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] resource %s not found: %+v", d.Id(), err)
+			log.Printf("[INFO] Autoscaling Group with ID: %s not found, err: %+v", d.Id(), err)
 			d.SetId("")
 			return nil
-		} else {
-			diags := diag.FromErr(fmt.Errorf("error while retrieving autoscaling group with id %v, %w", d.Id(), err))
-			return diags
 		}
+		return diag.FromErr(fmt.Errorf("error while retrieving Autoscaling Group with id %v, %w", d.Id(), err))
 	}
 
-	log.Printf("[INFO] successfully retrieved autoscaling group %s: %+v", d.Id(), group)
+	log.Printf("[INFO] successfully retrieved Autoscaling Group %s: %+v", d.Id(), group)
 
 	if err := autoscalingService.SetAutoscalingGroupData(d, group.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] successfully set autoscaling group data %s", d.Id())
+	log.Printf("[INFO] successfully set Autoscaling Group data %s", d.Id())
 
 	return nil
 }
@@ -372,14 +370,13 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if group.Properties != nil && group.Properties.Name != nil {
-		log.Printf("[DEBUG] autoscaling group data extracted: %s", *group.Properties.Name)
+		log.Printf("[DEBUG] Autoscaling Group data extracted: %s", *group.Properties.Name)
 	}
 	updatedGroup, _, err := client.UpdateGroup(ctx, d.Id(), *group)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating autoscaling group %s: %w", d.Id(), err))
-		return diags
+		return diag.FromErr(fmt.Errorf("an error occured while updating Autoscaling Group %s: %w", d.Id(), err))
 	}
-	log.Printf("[INFO] autoscaling Group updated.")
+	log.Printf("[INFO] Autoscaling Group updated.")
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diag.FromErr(err)
@@ -393,11 +390,10 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 
 	_, err := client.DeleteGroup(ctx, d.Id())
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting an autoscaling group %s %w", d.Id(), err))
-		return diags
+		return diag.FromErr(fmt.Errorf("an error occured while deleting an Autoscaling Group %s %w", d.Id(), err))
 	}
 
-	log.Printf("[INFO] autoscaling Group deleted: %s.", d.Id())
+	log.Printf("[INFO] Autoscaling Group deleted: %s.", d.Id())
 
 	d.SetId("")
 
@@ -413,12 +409,12 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find autoscaling group %q", groupId)
+			return nil, fmt.Errorf("unable to find Autoscaling Group %q", groupId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieveing autoscaling grouo %q, %w", groupId, err)
+		return nil, fmt.Errorf("an error occured while retrieving Autoscaling Group %q, %w", groupId, err)
 	}
 
-	log.Printf("[INFO] autoscaling group found: %+v", group)
+	log.Printf("[INFO] Autoscaling Group found: %+v", group)
 
 	if err := autoscalingService.SetAutoscalingGroupData(d, group.Properties); err != nil {
 		return nil, err
@@ -437,7 +433,11 @@ func actionReady(ctx context.Context, client *autoscalingService.Client, d *sche
 	if *action.Properties.ActionStatus == autoscaling.ACTIONSTATUS_FAILED {
 		return false, fmt.Errorf("action failed")
 	}
-	return *action.Properties.ActionStatus == autoscaling.ACTIONSTATUS_SUCCESSFUL, nil
+
+	if action.Properties.ActionStatus == nil {
+		return false, fmt.Errorf("expected a value for the action status but received 'nil' instead")
+	}
+	return strings.EqualFold(string(*action.Properties.ActionStatus), string(autoscaling.ACTIONSTATUS_SUCCESSFUL)), nil
 }
 
 // checkAction gets the triggered action and waits for it to be ready

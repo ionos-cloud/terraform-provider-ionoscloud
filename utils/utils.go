@@ -369,6 +369,9 @@ func ReadPublicKey(pathOrKey string) (string, error) {
 
 			return "", err
 		}
+		if bytes, err = os.ReadFile(pathOrKey); err != nil {
+			return "", err
+		}
 	} else {
 		log.Printf("[DEBUG] error opening file, key must have been provided directly %s ", pathOrKey)
 		bytes = []byte(pathOrKey)

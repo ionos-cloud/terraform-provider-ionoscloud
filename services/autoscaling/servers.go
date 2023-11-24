@@ -12,19 +12,12 @@ import (
 
 func (c *Client) GetGroupServer(ctx context.Context, groupId string, serverId string) (autoscaling.Server, *autoscaling.APIResponse, error) {
 	server, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsServersFindById(ctx, serverId, groupId).Execute()
-	if apiResponse != nil {
-		return server, apiResponse, err
-
-	}
-	return server, nil, err
+	return server, apiResponse, err
 }
 
 func (c *Client) GetAllGroupServers(ctx context.Context, groupId string) (autoscaling.ServerCollection, *autoscaling.APIResponse, error) {
 	servers, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsServersGet(ctx, groupId).Execute()
-	if apiResponse != nil {
-		return servers, apiResponse, err
-	}
-	return servers, nil, err
+	return servers, apiResponse, err
 }
 
 func SetAutoscalingServersData(d *schema.ResourceData, groupServers autoscaling.ServerCollection) diag.Diagnostics {
@@ -35,13 +28,14 @@ func SetAutoscalingServersData(d *schema.ResourceData, groupServers autoscaling.
 			serverEntry := make(map[string]interface{})
 			if groupServer.Id != nil {
 				serverEntry["id"] = *groupServer.Id
+			} else {
+				return diag.FromErr(fmt.Errorf("expected an UUID for server entry but received 'nil'"))
 			}
 			servers = append(servers, serverEntry)
 		}
 		err := d.Set("servers", servers)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting group servers data: %w", err))
-			return diags
+			return diag.FromErr(fmt.Errorf("error while setting group servers data: %w", err))
 		}
 	}
 

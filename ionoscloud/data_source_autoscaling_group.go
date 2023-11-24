@@ -86,6 +86,11 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 										Type:        schema.TypeString,
 										Description: "Minimum time to pass after this Scaling action has started, until the next Scaling action will be started. Additionally, if a Scaling action is currently in progress, no second Scaling action will be started for the same autoscaling group. Instead, the Metric will be re-evaluated after the current Scaling action is completed (either successfully or with failures). This is validated with a minimum value of 2 minutes and a maximum of 24 hours currently. Default value is 5 minutes if not given.",
 									},
+									"delete_volumes": {
+										Computed:    true,
+										Type:        schema.TypeBool,
+										Description: "If set to 'true', when deleting an replica during scale in, any attached volume will also be deleted. When set to 'false', all volumes remain in the datacenter and must be deleted manually. Note that every scale-out creates new volumes. When they are not deleted, they will eventually use all of your contracts resource limits. At this point, scaling out would not be possible anymore.",
+									},
 								},
 							},
 						},
@@ -181,7 +186,7 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 							Description: "The amount of memory for the VMs in MB, e.g. 2048. Size must be specified in multiples of 256 MB with a minimum of 256 MB; however, if you set ramHotPlug to TRUE then you must use a minimum of 1024 MB. If you set the RAM size more than 240GB, then ramHotPlug will be set to FALSE and can not be set to TRUE unless RAM size not set to less than 240GB.",
 						},
 						"volume": {
-							Type:        schema.TypeList,
+							Type:        schema.TypeSet,
 							Description: "List of volumes associated with this Replica. Only a single volume is currently supported.",
 							Computed:    true,
 							Elem: &schema.Resource{
@@ -190,6 +195,11 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 										Computed:    true,
 										Type:        schema.TypeString,
 										Description: "The image installed on the volume. Only the UUID of the image is presently supported.",
+									},
+									"image_alias": {
+										Computed:    true,
+										Type:        schema.TypeString,
+										Description: "The image installed on the volume. Must be an 'imageAlias' as specified via the images API.",
 									},
 									"name": {
 										Computed:    true,
@@ -211,10 +221,20 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 										Type:        schema.TypeString,
 										Description: "Storage Type for this replica volume. Possible values: SSD, HDD, SSD_STANDARD or SSD_PREMIUM",
 									},
-									"user_data": {
+									"boot_order": {
 										Computed:    true,
 										Type:        schema.TypeString,
-										Description: "user-data (Cloud Init) for this replica volume.",
+										Description: `Determines whether the volume will be used as a boot volume: NONE - the volume will not be used as boot volume, PRIMARY - the volume will be used as boot volume, AUTO - will delegate the decision to the provisioning engine to decide whether to use the volume as boot volume.`,
+									},
+									"bus": {
+										Computed:    true,
+										Type:        schema.TypeString,
+										Description: `The bus type of the volume. Default setting is 'VIRTIO'. The bus type 'IDE' is also supported.`,
+									},
+									"backup_unit_id": {
+										Computed:    true,
+										Type:        schema.TypeString,
+										Description: "The uuid of the Backup Unit that user has access to.",
 									},
 								}},
 						},
@@ -243,12 +263,10 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		diags := diag.FromErr(fmt.Errorf("id and name cannot be both specified at the same time"))
-		return diags
+		return diag.FromErr(fmt.Errorf("id and name cannot be both specified at the same time"))
 	}
 	if !idOk && !nameOk {
-		diags := diag.FromErr(fmt.Errorf("please provide either the group id or name"))
-		return diags
+		return diag.FromErr(fmt.Errorf("please provide either the group id or name"))
 	}
 
 	var group autoscaling.Group
@@ -257,14 +275,12 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	if idOk {
 		group, _, err = client.GetGroup(ctx, id.(string), 2)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
-			return diags
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
 		}
 	} else {
 		groups, _, err := client.ListGroups(ctx)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while getting groups: %w", err))
-			return diags
+			return diag.FromErr(fmt.Errorf("an error occurred while getting groups: %w", err))
 		}
 
 		var results []autoscaling.Group
@@ -285,8 +301,6 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 		}
 		if results == nil || len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no group found with the specified criteria: name = %s", name.(string)))
-		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one server found with the specified criteria: name = %s", name.(string)))
 		} else {
 			group = results[0]
 		}

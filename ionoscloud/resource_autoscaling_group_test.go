@@ -35,6 +35,7 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					testAccCheckAutoscalingGroupExists(resourceAGName, &autoscalingGroup),
 					resource.TestCheckResourceAttr(resourceAGName, "name", constant.AutoscalingGroupTestResource),
 					resource.TestCheckResourceAttrPair(resourceAGName, "datacenter_id", constant.DatacenterResource+".autoscaling_datacenter", "id"),
+					resource.TestCheckResourceAttrPair(resourceAGName, "replica_configuration.0.volume.0.image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(resourceAGName, "max_replica_count", "5"),
 					resource.TestCheckResourceAttr(resourceAGName, "min_replica_count", "1"),
 					resource.TestCheckResourceAttr(resourceAGName, "policy.0.metric", "INSTANCE_CPU_UTILIZATION_AVERAGE"),
@@ -264,6 +265,7 @@ name             = "test_autoscaling_group_1"
 
 resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGroupTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.autoscaling_datacenter.id
+  location = "de/fra"
   max_replica_count      = 5
   min_replica_count      = 1
   //target_replica_count   = 2
@@ -280,9 +282,9 @@ resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGrou
     }
     scale_in_threshold = 33
     scale_out_action  {
-    amount          =  1
-    amount_type     = "ABSOLUTE"
-    cooldown_period = "PT5M"
+      amount          =  1
+      amount_type     = "ABSOLUTE"
+      cooldown_period = "PT5M"
     }
     scale_out_threshold = 77
     unit                = "PER_HOUR"
@@ -300,6 +302,7 @@ resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGrou
     volume {
       image_alias = "ubuntu:latest"
       name        = "volume_1"
+      image_password = ` + constant.RandomPassword + `.server_image_password.result
       size        = 30
       ssh_keys    = ["` + sshKey + `"]
       type        = "HDD"
@@ -311,7 +314,7 @@ resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGrou
 }
 
 
-`
+` + ServerImagePassword
 
 const testAGGroup_ConfigUpdate = `
 resource ` + constant.DatacenterResource + ` "autoscaling_datacenter" {
@@ -332,6 +335,7 @@ resource ` + constant.LanResource + ` "autoscaling_lan_2" {
 
 resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGroupTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.autoscaling_datacenter.id
+  location = "de/fra"
   max_replica_count      = 2
   min_replica_count      = 1
   //target_replica_count   = 2
@@ -407,6 +411,7 @@ resource ` + constant.LanResource + ` "autoscaling_lan_2" {
 
 resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGroupTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.autoscaling_datacenter.id
+  location = "de/fra"
   max_replica_count      = 2
   min_replica_count      = 1
   //target_replica_count   = 2
@@ -495,6 +500,7 @@ resource ` + constant.LanResource + ` "autoscaling_lan_2" {
 
 resource ` + constant.AutoscalingGroupResource + `  ` + constant.AutoscalingGroupTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.autoscaling_datacenter.id
+  location = "de/fra"
   max_replica_count      = 2
   min_replica_count      = 1
   //target_replica_count   = 2

@@ -145,8 +145,6 @@ func GetAutoscalingGroupPolicyData(d *schema.ResourceData) *autoscaling.GroupPol
 	if value, ok := d.GetOk("policy.0.range"); ok {
 		value := value.(string)
 		groupPolicy.Range = &value
-	} else {
-		groupPolicy.Range = nil
 	}
 
 	groupPolicy.ScaleInAction = GetScaleInActionData(d)
@@ -192,15 +190,11 @@ func GetScaleInActionData(d *schema.ResourceData) *autoscaling.GroupPolicyScaleI
 	if value, ok := d.GetOk("policy.0.scale_in_action.0.cooldown_period"); ok {
 		value := value.(string)
 		scaleInAction.CooldownPeriod = &value
-	} else {
-		scaleInAction.CooldownPeriod = nil
 	}
 
 	if value, ok := d.GetOk("policy.0.scale_in_action.0.delete_volumes"); ok {
 		value := value.(bool)
 		scaleInAction.DeleteVolumes = &value
-	} else {
-		scaleInAction.DeleteVolumes = nil
 	}
 
 	return &scaleInAction
@@ -222,8 +216,6 @@ func GetScaleOutActionData(d *schema.ResourceData) *autoscaling.GroupPolicyScale
 	if value, ok := d.GetOk("policy.0.scale_out_action.0.cooldown_period"); ok {
 		value := value.(string)
 		scaleOutAction.CooldownPeriod = &value
-	} else {
-		scaleOutAction.CooldownPeriod = nil
 	}
 
 	return &scaleOutAction
@@ -245,14 +237,9 @@ func GetReplicaConfigurationPostData(d *schema.ResourceData) (*autoscaling.Repli
 	if value, ok := d.GetOk("replica_configuration.0.cpu_family"); ok {
 		value := autoscaling.CpuFamily(value.(string))
 		replica.CpuFamily = &value
-	} else {
-		replica.CpuFamily = nil
 	}
 
 	replica.Nics = GetNicsData(d)
-	if *replica.Nics == nil {
-		*replica.Nics = make([]autoscaling.ReplicaNic, 0)
-	}
 
 	if value, ok := d.GetOk("replica_configuration.0.ram"); ok {
 		value := int32(value.(int))
@@ -269,7 +256,7 @@ func GetReplicaConfigurationPostData(d *schema.ResourceData) (*autoscaling.Repli
 }
 
 func GetNicsData(d *schema.ResourceData) *[]autoscaling.ReplicaNic {
-	var nics []autoscaling.ReplicaNic
+	nics := make([]autoscaling.ReplicaNic, 0)
 
 	if value, ok := d.GetOk("replica_configuration.0.nic"); ok {
 		nicsSet := value.(*schema.Set)
@@ -320,22 +307,19 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 					}
 					if *volumeEntry.Image == "" && *volumeEntry.ImageAlias == "" {
 						return nil, fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property")
-					} else {
-						if val, ok := volumeMap["user_data"]; ok {
-							volumeEntry.UserData = new(string)
-							*volumeEntry.UserData = val.(string)
-						}
+					}
+					if val, ok := volumeMap["user_data"]; ok {
+						volumeEntry.UserData = new(string)
+						*volumeEntry.UserData = val.(string)
 					}
 					var publicKeys []string
 					sshKeys := volumeMap["ssh_keys"].([]any)
-					if len(sshKeys) != 0 {
-						for _, keyOrPath := range sshKeys {
-							publicKey, err := utils.ReadPublicKey(keyOrPath.(string))
-							if err != nil {
-								return nil, fmt.Errorf("error reading sshkey (%s) (%w)", keyOrPath, err)
-							}
-							publicKeys = append(publicKeys, publicKey)
+					for _, keyOrPath := range sshKeys {
+						publicKey, err := utils.ReadPublicKey(keyOrPath.(string))
+						if err != nil {
+							return nil, fmt.Errorf("error reading sshkey (%s) (%w)", keyOrPath, err)
 						}
+						publicKeys = append(publicKeys, publicKey)
 					}
 
 					volumeEntry.SshKeys = &publicKeys
@@ -356,7 +340,6 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 						volumeEntry.BootOrder = new(string)
 						*volumeEntry.BootOrder = val.(string)
 					}
-
 					volumes = append(volumes, volumeEntry)
 				}
 			}
@@ -534,11 +517,13 @@ func setVolumeProperties(d *schema.ResourceData, index int, replicaVolume autosc
 	utils.SetPropWithNilCheck(volume, "boot_order", replicaVolume.BootOrder)
 	utils.SetPropWithNilCheck(volume, "bus", replicaVolume.Bus)
 	//we need to take these from schema as they are not returned by API
-	volumeMap := d.Get("replica_configuration.0.volume").(*schema.Set).List()[index].(map[string]any)
-
-	volume["image_password"] = volumeMap["image_password"]
-	volume["ssh_keys"] = volumeMap["ssh_keys"]
-	volume["user_data"] = volumeMap["user_data"]
+	volumeMap, ok := d.GetOk("replica_configuration.0.volume")
+	if ok {
+		volumeMap := (volumeMap).(*schema.Set).List()[index].(map[string]any)
+		volume["image_password"] = volumeMap["image_password"]
+		volume["ssh_keys"] = volumeMap["ssh_keys"]
+		volume["user_data"] = volumeMap["user_data"]
+	}
 
 	return volume
 }
