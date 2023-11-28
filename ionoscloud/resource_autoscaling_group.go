@@ -259,8 +259,9 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Description: "User-data (Cloud Init) for this replica volume.",
 									},
 									"image_password": {
-										Optional:    true,
-										Sensitive:   true,
+										Optional: true,
+										// TODO -- check out if this should be sensitive or not.
+										//Sensitive:   true,
 										Type:        schema.TypeString,
 										Description: "Image password for this replica volume.",
 									},

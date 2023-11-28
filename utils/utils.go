@@ -364,11 +364,6 @@ func ReadPublicKey(pathOrKey string) (string, error) {
 	var bytes []byte
 	var err error
 	if CheckFileExists(pathOrKey) {
-		bytes, err = os.ReadFile(pathOrKey)
-		if err != nil {
-
-			return "", err
-		}
 		if bytes, err = os.ReadFile(pathOrKey); err != nil {
 			return "", err
 		}

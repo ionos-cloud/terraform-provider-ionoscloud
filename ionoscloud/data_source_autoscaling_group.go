@@ -288,7 +288,10 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 		if groups.Items != nil {
 			for _, g := range *groups.Items {
 				// TODO: this will not be necessary once the swagger is fixed and list returns the full properties
-				tmpGroup, _, err := client.GetGroup(ctx, id.(string), 2)
+				if g.Id == nil {
+					return diag.FromErr(fmt.Errorf("expected a valid ID for the Autoscaling Group, but received 'nil' instead"))
+				}
+				tmpGroup, _, err := client.GetGroup(ctx, *g.Id, 2)
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err))
 				}
@@ -305,6 +308,12 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 			group = results[0]
 		}
 	}
+
+	if group.Id == nil {
+		return diag.FromErr(fmt.Errorf("expected a valid ID for the Autoscaling Group, but received 'nil' instead"))
+	}
+
+	d.SetId(*group.Id)
 
 	if err := autoscalingService.SetAutoscalingGroupData(d, group.Properties); err != nil {
 		return diag.FromErr(err)
