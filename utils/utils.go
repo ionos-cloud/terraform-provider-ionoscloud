@@ -361,15 +361,14 @@ func IsCamelCaseEqualToSnakeCase(a, b string) bool {
 
 // ReadPublicKey Reads public key from file or directly provided and returns key string if valid
 func ReadPublicKey(pathOrKey string) (string, error) {
-	var bytes []byte
 	var err error
+	bytes := []byte(pathOrKey)
+
 	if CheckFileExists(pathOrKey) {
+		log.Printf("[DEBUG] ssh key has been provided in the following file: %s", pathOrKey)
 		if bytes, err = os.ReadFile(pathOrKey); err != nil {
 			return "", err
 		}
-	} else {
-		log.Printf("[DEBUG] error opening file, key must have been provided directly %s ", pathOrKey)
-		bytes = []byte(pathOrKey)
 	}
 	pubKey, _, _, _, err := ssh.ParseAuthorizedKey(bytes)
 	if err != nil {

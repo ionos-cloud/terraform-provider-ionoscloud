@@ -211,7 +211,6 @@ func resourceAutoscalingGroup() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "The amount of memory for the VMs in MB, e.g. 2048. Size must be specified in multiples of 256 MB with a minimum of 256 MB; however, if you set ramHotPlug to TRUE then you must use a minimum of 1024 MB. If you set the RAM size more than 240GB, then ramHotPlug will be set to FALSE and can not be set to TRUE unless RAM size not set to less than 240GB.",
 						},
-						//TODO: there might be a problem un update of multiple volumes because the order isn't guaranteed when we get the response from the API. We might have to move from TypeList to TypeSet, like for nics.
 						"volume": {
 							Type:        schema.TypeSet,
 							Description: "List of volumes associated with this Replica.",
@@ -259,9 +258,8 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Description: "User-data (Cloud Init) for this replica volume.",
 									},
 									"image_password": {
-										Optional: true,
-										// TODO -- check out if this should be sensitive or not.
-										//Sensitive:   true,
+										Optional:    true,
+										Sensitive:   true,
 										Type:        schema.TypeString,
 										Description: "Image password for this replica volume.",
 									},
@@ -435,7 +433,7 @@ func actionReady(ctx context.Context, client *autoscalingService.Client, d *sche
 		return false, fmt.Errorf("action failed")
 	}
 
-	if action.Properties.ActionStatus == nil {
+	if action.Properties == nil || action.Properties.ActionStatus == nil {
 		return false, fmt.Errorf("expected a value for the action status but received 'nil' instead")
 	}
 	return strings.EqualFold(string(*action.Properties.ActionStatus), string(autoscaling.ACTIONSTATUS_SUCCESSFUL)), nil

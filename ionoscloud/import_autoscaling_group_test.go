@@ -25,7 +25,7 @@ func TestAccAutoscalingGroupImportBasic(t *testing.T) {
 				ResourceName:            constant.AutoscalingGroupResource + "." + constant.AutoscalingGroupTestResource,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"replica_configuration.0.volume.0.ssh_keys", "replica_configuration.0.volume.0.password", "replica_configuration.0.volume.0.image_password"},
+				ImportStateVerifyIgnore: []string{"replica_configuration.0.volume.0.ssh_keys", "replica_configuration.0.volume.0.password", "replica_configuration.0.volume.0.image_password", "replica_configuration.0.volume.0.user_data"},
 			},
 		},
 	})
