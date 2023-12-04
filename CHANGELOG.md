@@ -16,6 +16,7 @@
 
 ### Fixes
 - #487. Crash on server import without inline `nic`
+- #497. allow to set empty `name` for `ionoscloud_dns_record`
 
 ## 6.4.10
 ### Refactor
