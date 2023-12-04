@@ -100,7 +100,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 		if partialMatch {
 			// By default, when providing the name as a filter, for the GET requests, partial match
 			// is true.
-			records, _, err := client.ListRecords(ctx, zoneId, recordName)
+			records, _, err := client.ListRecords(ctx, recordName)
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occured while fetching DNS Records: %w", err))
 			}
@@ -109,7 +109,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 			// In order to have an exact name match, we must retrieve all the DNS Records and then
 			// build a list of exact matches based on the response, there is no other way since using
 			// filter.name only does a partial match.
-			records, _, err := client.ListRecords(ctx, zoneId, "")
+			records, _, err := client.ListRecords(ctx, "")
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occured while fetching DNS Records: %w", err))
 			}
