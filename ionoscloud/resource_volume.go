@@ -665,7 +665,7 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 		var publicKeys []string
 		for _, path := range sshKeys {
 			log.Printf("[DEBUG] Reading file %s", path)
-			publicKey, err := readPublicKey(path.(string))
+			publicKey, err := utils.ReadPublicKey(path.(string))
 			if err != nil {
 				return nil, err
 			}

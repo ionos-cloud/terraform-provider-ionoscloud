@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/iancoleman/strcase"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/crypto/ssh"
 )
 
 const DefaultTimeout = 60 * time.Minute
@@ -356,4 +357,22 @@ func DecodeStructToMap(input interface{}) (map[string]interface{}, error) {
 
 func IsCamelCaseEqualToSnakeCase(a, b string) bool {
 	return strings.EqualFold(strcase.ToSnake(a), b)
+}
+
+// ReadPublicKey Reads public key from file or directly provided and returns key string if valid
+func ReadPublicKey(pathOrKey string) (string, error) {
+	var err error
+	bytes := []byte(pathOrKey)
+
+	if CheckFileExists(pathOrKey) {
+		log.Printf("[DEBUG] ssh key has been provided in the following file: %s", pathOrKey)
+		if bytes, err = os.ReadFile(pathOrKey); err != nil {
+			return "", err
+		}
+	}
+	pubKey, _, _, _, err := ssh.ParseAuthorizedKey(bytes)
+	if err != nil {
+		return "", fmt.Errorf("error for public key %s, check if path is correct or key is in correct format", pathOrKey)
+	}
+	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
 }
