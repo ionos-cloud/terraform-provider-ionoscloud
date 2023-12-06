@@ -28,11 +28,11 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return false, err
 	}
-	if pipeline.Metadata == nil || pipeline.Metadata.Status == nil {
+	if pipeline.Metadata == nil || pipeline.Metadata.State == nil {
 		return false, fmt.Errorf("expected metadata, got empty for pipeline with ID: %s", pipelineId)
 	}
-	log.Printf("[DEBUG] pipeline status: %s", *pipeline.Metadata.Status)
-	return strings.EqualFold(*pipeline.Metadata.Status, constant.Available), nil
+	log.Printf("[DEBUG] pipeline status: %s", *pipeline.Metadata.State)
+	return strings.EqualFold(*pipeline.Metadata.State, constant.Available), nil
 }
 
 func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (logging.Pipeline, utils.ApiResponseInfo, error) {
@@ -66,30 +66,30 @@ func (c *Client) ListPipelines(ctx context.Context) (logging.PipelineListRespons
 	return pipelines, apiResponse, err
 }
 
-func setPipelinePostRequest(d *schema.ResourceData) *logging.CreateRequest {
-	request := logging.CreateRequest{Properties: &logging.CreateRequestProperties{}}
+func setPipelinePostRequest(d *schema.ResourceData) *logging.PipelineCreate {
+	request := logging.PipelineCreate{Properties: &logging.PipelineCreateProperties{}}
 
 	if nameValue, ok := d.GetOk("name"); ok {
 		name := nameValue.(string)
 		request.Properties.Name = &name
 	}
 
-	var logs []logging.CreateRequestPipeline
+	var logs []logging.PipelineCreatePropertiesLogs
 	if logsValue, ok := d.GetOk("log"); ok {
 		for _, logData := range logsValue.([]interface{}) {
-			if log, ok := logData.(map[string]interface{}); ok {
-				// Populate the log entry.
-				logSource := log["source"].(string)
-				logTag := log["tag"].(string)
-				logProtocol := log["protocol"].(string)
-				newLog := *logging.NewCreateRequestPipeline()
+			if logElem, ok := logData.(map[string]interface{}); ok {
+				// Populate the logElem entry.
+				logSource := logElem["source"].(string)
+				logTag := logElem["tag"].(string)
+				logProtocol := logElem["protocol"].(string)
+				newLog := *logging.NewPipelineCreatePropertiesLogs()
 				newLog.Source = &logSource
 				newLog.Tag = &logTag
 				newLog.Protocol = &logProtocol
 
 				// Logic for destinations.
 				var destinations []logging.Destination
-				for _, destinationData := range log["destinations"].([]interface{}) {
+				for _, destinationData := range logElem["destinations"].([]interface{}) {
 					if destination, ok := destinationData.(map[string]interface{}); ok {
 						destinationType := destination["type"].(string)
 						retentionInDays := int32(destination["retention_in_days"].(int))
@@ -110,30 +110,30 @@ func setPipelinePostRequest(d *schema.ResourceData) *logging.CreateRequest {
 	return &request
 }
 
-func setPipelinePatchRequest(d *schema.ResourceData) *logging.PatchRequest {
-	request := logging.PatchRequest{Properties: &logging.PatchRequestProperties{}}
+func setPipelinePatchRequest(d *schema.ResourceData) *logging.PipelinePatch {
+	request := logging.PipelinePatch{Properties: &logging.PipelinePatchProperties{}}
 
 	if nameValue, ok := d.GetOk("name"); ok {
 		name := nameValue.(string)
 		request.Properties.Name = &name
 	}
 
-	var logs []logging.PatchRequestPipeline
+	var logs []logging.PipelineCreatePropertiesLogs
 	if logsValue, ok := d.GetOk("log"); ok {
 		for _, logData := range logsValue.([]interface{}) {
-			if log, ok := logData.(map[string]interface{}); ok {
-				// Populate the log entry.
-				logSource := log["source"].(string)
-				logTag := log["tag"].(string)
-				logProtocol := log["protocol"].(string)
-				newLog := *logging.NewPatchRequestPipeline()
+			if logElem, ok := logData.(map[string]interface{}); ok {
+				// Populate the logElem entry.
+				logSource := logElem["source"].(string)
+				logTag := logElem["tag"].(string)
+				logProtocol := logElem["protocol"].(string)
+				newLog := *logging.NewPipelineCreatePropertiesLogs()
 				newLog.Source = &logSource
 				newLog.Tag = &logTag
 				newLog.Protocol = &logProtocol
 
 				// Logic for destinations.
 				var destinations []logging.Destination
-				for _, destinationData := range log["destinations"].([]interface{}) {
+				for _, destinationData := range logElem["destinations"].([]interface{}) {
 					if destination, ok := destinationData.(map[string]interface{}); ok {
 						destinationType := destination["type"].(string)
 						retentionInDays := int32(destination["retention_in_days"].(int))
@@ -173,17 +173,17 @@ func (c *Client) SetPipelineData(d *schema.ResourceData, pipeline logging.Pipeli
 
 	if pipeline.Properties.Logs != nil {
 		logs := make([]interface{}, len(*pipeline.Properties.Logs))
-		for i, log := range *pipeline.Properties.Logs {
-			// Populate the log entry.
+		for i, logElem := range *pipeline.Properties.Logs {
+			// Populate the logElem entry.
 			logEntry := make(map[string]interface{})
-			logEntry["source"] = *log.Source
-			logEntry["tag"] = *log.Tag
-			logEntry["protocol"] = *log.Protocol
-			logEntry["public"] = *log.Public
+			logEntry["source"] = *logElem.Source
+			logEntry["tag"] = *logElem.Tag
+			logEntry["protocol"] = *logElem.Protocol
+			logEntry["public"] = *logElem.Public
 
 			// Logic for destinations
-			destinations := make([]interface{}, len(*log.Destinations))
-			for i, destination := range *log.Destinations {
+			destinations := make([]interface{}, len(*logElem.Destinations))
+			for i, destination := range *logElem.Destinations {
 				destinationEntry := make(map[string]interface{})
 				destinationEntry["type"] = *destination.Type
 				destinationEntry["retention_in_days"] = *destination.RetentionInDays
