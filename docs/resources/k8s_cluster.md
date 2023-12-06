@@ -13,10 +13,12 @@ Manages a **Managed Kubernetes Cluster** on IonosCloud.
 
 ## Example Usage
 
+### Public cluster
+
 ```hcl
 resource "ionoscloud_k8s_cluster" "example" {
   name                  = "k8sClusterExample"
-  k8s_version           = "1.20.10"
+  k8s_version           = "1.25.5"
   maintenance_window {
     day_of_the_week     = "Sunday"
     time                = "09:00:00Z"
@@ -25,6 +27,39 @@ resource "ionoscloud_k8s_cluster" "example" {
   s3_buckets { 
      name               = <your_s3_bucket>
   }
+}
+```
+
+### Private Cluster
+
+```hcl
+resource "ionoscloud_datacenter" "testdatacenter" {
+  name                    = "example"
+  location                = "de/fra"
+  description             = "Test datacenter"
+}
+
+resource "ionoscloud_ipblock" "k8sip" {
+  location = "de/fra"
+  size = 1
+  name = "IP Block Private K8s"
+}
+
+resource "ionoscloud_k8s_cluster" "example" {
+  name                  = "k8sClusterExample"
+  k8s_version           = "1.25.5"
+  maintenance_window {
+    day_of_the_week     = "Sunday"
+    time                = "09:00:00Z"
+  }
+  api_subnet_allow_list = ["1.2.3.4/32"]
+  s3_buckets {
+     name               = <your_s3_bucket>
+  }
+  location = "de/fra"
+  nat_gateway_ip = ionoscloud_ipblock.k8sip.ips[0]
+  node_subnet = "192.168.0.0/16"
+  public = false
 }
 ```
 
@@ -40,11 +75,13 @@ The following arguments are supported:
 - `viable_node_pool_versions` - (Computed)[list] List of versions that may be used for node pools under this cluster
 - `api_subnet_allow_list` - (Optional)[list] Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not affected by this restriction. If no allowlist is specified, access is not restricted. If an IP without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.
 - `s3_buckets` - (Optional)[list] List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.
-- `public` - (Optional)[boolean] Indicates if the cluster is public or private.
+- `public` - (Optional)[boolean] Indicates if the cluster is public or private. This attribute is immutable.
 - `nat_gateway_ip` - (Optional)[string] The NAT gateway IP of the cluster if the cluster is private. This attribute is immutable. Must be a reserved IP in the same location as the cluster's location. This attribute is mandatory if the cluster is private.
 - `node_subnet` - (Optional)[string] The node subnet of the cluster, if the cluster is private. This attribute is optional and immutable. Must be a valid CIDR notation for an IPv4 network prefix of 16 bits length.
 - `location` - (Optional)[string] This attribute is mandatory if the cluster is private. The location must be enabled for your contract, or you must have a data center at that location. This property is not adjustable.
 - `allow_replace` - (Optional)[bool] When set to true, allows the update of immutable fields by first destroying and then re-creating the cluster.
+
+⚠️ **_Warning: `allow_replace` - lets you update immutable fields, but it first destroys and then re-creates the cluster in order to do it. Set the field to true only if you know what you are doing._**
 
 ## Import
 

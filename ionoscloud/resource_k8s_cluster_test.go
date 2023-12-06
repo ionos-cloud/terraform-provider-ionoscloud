@@ -120,7 +120,7 @@ func TestAccK8sClusterPrivate(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "s3_buckets.0.name", K8sBucket),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "public", "false"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "location", "de/fra"),
-					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "nat_gateway_ip", K8sPrivateClusterNATGatewayIP),
+					resource.TestCheckResourceAttrSet(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "nat_gateway_ip"),
 					resource.TestCheckResourceAttr(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "node_subnet", K8sPrivateClusterNodeSubnet),
 				),
 			},
@@ -136,7 +136,7 @@ func TestAccK8sClusterPrivate(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "s3_buckets.0.name", K8sBucket),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "public", "false"),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "location", "de/fra"),
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "nat_gateway_ip", K8sPrivateClusterNATGatewayIP),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "nat_gateway_ip"),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "node_subnet", K8sPrivateClusterNodeSubnet),
 				),
 			},
@@ -253,6 +253,12 @@ resource ` + constant.K8sClusterResource + ` ` + constant.K8sClusterTestResource
 }`
 
 const testAccCheckK8sClusterConfigPrivateCluster = `
+resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
+  location = "de/fra"
+  size = 1
+  name = "` + constant.IpBlockTestResource + `"
+}
+
 resource ` + constant.K8sClusterResource + ` ` + constant.PrivateK8sClusterTestResource + ` {
   name        = "` + constant.PrivateK8sClusterTestResource + `"
   k8s_version = "` + K8sVersion + `"
@@ -266,7 +272,7 @@ resource ` + constant.K8sClusterResource + ` ` + constant.PrivateK8sClusterTestR
   }
   public = false
   location = "de/fra"
-  nat_gateway_ip = "` + K8sPrivateClusterNATGatewayIP + `"
+  nat_gateway_ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
   node_subnet = "` + K8sPrivateClusterNodeSubnet + `"
 }`
 
