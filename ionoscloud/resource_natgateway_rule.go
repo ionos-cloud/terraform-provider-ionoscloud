@@ -199,7 +199,11 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 	d.SetId(*natGatewayRuleResp.Id)
 
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	loc, err := apiResponse.Location()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -327,7 +331,11 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 		return diags
 	}
 
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	loc, err := apiResponse.Location()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -351,7 +359,11 @@ func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	loc, err := apiResponse.Location()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags

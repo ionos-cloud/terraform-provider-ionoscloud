@@ -72,7 +72,11 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	d.SetId(*rsp.Id)
 
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	loc, err := apiResponse.Location()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -132,7 +136,11 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	loc, err := apiResponse.Location()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -169,7 +177,11 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 	// Wait, catching any errors
 	if apiResponse != nil && apiResponse.Header.Get("Location") != "" {
-		_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+		loc, err := apiResponse.Location()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutDelete).WaitForStateContext(ctx)
 		if errState != nil {
 			diags := diag.FromErr(errState)
 			return diags

@@ -648,7 +648,11 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	loc, err := apiResponse.Location()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if cloudapi.IsRequestFailed(err) {
 			log.Printf("[DEBUG] failed to create server resource")
@@ -907,7 +911,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	loc, err := apiResponse.Location()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -964,7 +972,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		// Wait, catching any errors
-		_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+		loc, err := apiResponse.Location()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
 		if errState != nil {
 			diags := diag.FromErr(errState)
 			return diags
@@ -1174,7 +1186,11 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 
 		// Wait, catching any errors
-		_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+		loc, err := apiResponse.Location()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutDelete).WaitForStateContext(ctx)
 		if errState != nil {
 			diags := diag.FromErr(fmt.Errorf("error getting state change for volumes delete %w", errState))
 			return diags
@@ -1212,7 +1228,11 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	loc, err := apiResponse.Location()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(fmt.Errorf("error getting state change for datacenter delete %w", errState))
 		return diags
