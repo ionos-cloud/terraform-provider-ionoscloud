@@ -10,6 +10,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceTargetGroup() *schema.Resource {
@@ -32,7 +33,7 @@ func resourceTargetGroup() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "Balancing algorithm.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}, true)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.ForwardingRuleAlgorithms, true)),
 			},
 			"protocol": {
 				Type:             schema.TypeString,
@@ -61,6 +62,13 @@ func resourceTargetGroup() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1; targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best use values in the middle of the range to leave room for later adjustments.",
 							Required:    true,
+						},
+						"proxy_protocol": {
+							Type:             schema.TypeString,
+							Description:      "Proxy protocol version",
+							Optional:         true,
+							Default:          "none",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.LBTargetProxyProtocolVersions, true)),
 						},
 						"health_check_enabled": {
 							Type:        schema.TypeBool,
@@ -375,6 +383,10 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 					targetEntry["weight"] = *target.Weight
 				}
 
+				if target.ProxyProtocol != nil {
+					targetEntry["proxy_protocol"] = *target.ProxyProtocol
+				}
+
 				if target.HealthCheckEnabled != nil {
 					targetEntry["health_check_enabled"] = *target.HealthCheckEnabled
 				}
@@ -479,6 +491,11 @@ func getTargetGroupTargetData(d *schema.ResourceData) *[]ionoscloud.TargetGroupT
 				if weight, weightOk := d.GetOk(fmt.Sprintf("targets.%d.weight", targetIndex)); weightOk {
 					weight := int32(weight.(int))
 					target.Weight = &weight
+				}
+
+				if proxy, proxyOk := d.GetOk(fmt.Sprintf("targets.%d.proxy_protocol", targetIndex)); proxyOk {
+					proxy := proxy.(string)
+					target.ProxyProtocol = &proxy
 				}
 
 				healthCheck := d.Get(fmt.Sprintf("targets.%d.health_check_enabled", targetIndex)).(bool)

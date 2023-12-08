@@ -64,6 +64,11 @@ func dataSourceTargetGroup() *schema.Resource {
 							Description: "Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1; targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best use values in the middle of the range to leave room for later adjustments.",
 							Computed:    true,
 						},
+						"proxy_protocol": {
+							Type:        schema.TypeString,
+							Description: "Proxy protocol version",
+							Computed:    true,
+						},
 						"health_check_enabled": {
 							Type:        schema.TypeBool,
 							Description: "Makes the target available only if it accepts periodic health check TCP connection attempts; when turned off, the target is considered always available. The health check only consists of a connection attempt to the address and port of the target. Default is True.",

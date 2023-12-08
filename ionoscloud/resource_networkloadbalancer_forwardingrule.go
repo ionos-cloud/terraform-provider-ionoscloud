@@ -8,9 +8,11 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -31,14 +33,16 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 				Required:    true,
 			},
 			"algorithm": {
-				Type:        schema.TypeString,
-				Description: "Algorithm for the balancing.",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "Algorithm for the balancing.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.ForwardingRuleAlgorithms, true)),
 			},
 			"protocol": {
-				Type:        schema.TypeString,
-				Description: "Protocol of the balancing.",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "Protocol of the balancing.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HTTP", "TCP"}, true)),
 			},
 			"listener_ip": {
 				Type:        schema.TypeString,
@@ -110,6 +114,13 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "Weight parameter is used to adjust the target VM's weight relative to other target VMs",
 							Required:    true,
+						},
+						"proxy_protocol": {
+							Type:             schema.TypeString,
+							Description:      "Proxy protocol version",
+							Optional:         true,
+							Default:          "none",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.LBTargetProxyProtocolVersions, true)),
 						},
 						"health_check": {
 							Type:        schema.TypeList,
@@ -301,8 +312,12 @@ func getTargetsData(targets interface{}) ([]ionoscloud.NetworkLoadBalancerForwar
 			} else {
 				diags := diag.FromErr(fmt.Errorf("weight must be provided for network loadbalancer forwarding rule target"))
 				return nil, diags
-
 			}
+
+			if proxy, proxyOk := targetMap["proxy_protocol"].(string); proxyOk {
+				target.ProxyProtocol = &proxy
+			}
+
 			if healthCheck, healthCheckOk := targetMap["health_check"].([]interface{}); healthCheckOk {
 				if len(healthCheck) > 0 {
 					healthCheckMap := healthCheck[0].(map[string]interface{})
@@ -622,6 +637,10 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 
 				if target.Weight != nil {
 					targetEntry["weight"] = *target.Weight
+				}
+
+				if target.ProxyProtocol != nil {
+					targetEntry["proxy_protocol"] = *target.ProxyProtocol
 				}
 
 				if target.HealthCheck != nil {
