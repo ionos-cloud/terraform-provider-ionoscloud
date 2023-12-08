@@ -54,6 +54,12 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.proxy_protocol", "v2"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.health_check_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.maintenance_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.1.ip", "22.232.2.3"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.1.port", "8081"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.1.weight", "124"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.1.proxy_protocol", "v1"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.1.health_check_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.1.maintenance_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "health_check.0.check_timeout", "5000"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "health_check.0.check_interval", "50000"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "health_check.0.retries", "2"),
@@ -76,6 +82,12 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.proxy_protocol", resourceNameTargetGroup, "targets.0.proxy_protocol"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.health_check_enabled", resourceNameTargetGroup, "targets.0.health_check_enabled"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.maintenance_enabled", resourceNameTargetGroup, "targets.0.maintenance_enabled"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.ip", resourceNameTargetGroup, "targets.1.ip"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.port", resourceNameTargetGroup, "targets.1.port"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.weight", resourceNameTargetGroup, "targets.1.weight"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.proxy_protocol", resourceNameTargetGroup, "targets.1.proxy_protocol"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.health_check_enabled", resourceNameTargetGroup, "targets.1.health_check_enabled"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.maintenance_enabled", resourceNameTargetGroup, "targets.1.maintenance_enabled"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "health_check.0.check_timeout", resourceNameTargetGroup, "health_check.0.check_timeout"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "health_check.0.check_interval", resourceNameTargetGroup, "health_check.0.check_interval"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "health_check.0.retries", resourceNameTargetGroup, "health_check.0.retries"),
@@ -98,6 +110,12 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.0.proxy_protocol", resourceNameTargetGroup, "targets.0.proxy_protocol"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.0.health_check_enabled", resourceNameTargetGroup, "targets.0.health_check_enabled"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.0.maintenance_enabled", resourceNameTargetGroup, "targets.0.maintenance_enabled"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.1.ip", resourceNameTargetGroup, "targets.1.ip"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.1.port", resourceNameTargetGroup, "targets.1.port"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.1.weight", resourceNameTargetGroup, "targets.1.weight"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.1.proxy_protocol", resourceNameTargetGroup, "targets.1.proxy_protocol"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.1.health_check_enabled", resourceNameTargetGroup, "targets.1.health_check_enabled"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.1.maintenance_enabled", resourceNameTargetGroup, "targets.1.maintenance_enabled"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "health_check.0.check_timeout", resourceNameTargetGroup, "health_check.0.check_timeout"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "health_check.0.check_interval", resourceNameTargetGroup, "health_check.0.check_interval"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "health_check.0.retries", resourceNameTargetGroup, "health_check.0.retries"),
@@ -120,6 +138,11 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.0.proxy_protocol", resourceNameTargetGroup, "targets.0.proxy_protocol"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.0.health_check_enabled", resourceNameTargetGroup, "targets.0.health_check_enabled"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.0.maintenance_enabled", resourceNameTargetGroup, "targets.0.maintenance_enabled"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.1.ip", resourceNameTargetGroup, "targets.1.ip"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.1.port", resourceNameTargetGroup, "targets.1.port"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.1.weight", resourceNameTargetGroup, "targets.1.weight"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.1.proxy_protocol", resourceNameTargetGroup, "targets.1.proxy_protocol"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.1.health_check_enabled", resourceNameTargetGroup, "targets.1.health_check_enabled"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "health_check.0.check_timeout", resourceNameTargetGroup, "health_check.0.check_timeout"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "health_check.0.check_interval", resourceNameTargetGroup, "health_check.0.check_interval"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "health_check.0.retries", resourceNameTargetGroup, "health_check.0.retries"),
@@ -151,6 +174,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.proxy_protocol", "v1"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.health_check_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.maintenance_enabled", "false"),
+					resource.TestCheckNoResourceAttr(resourceNameTargetGroup, "targets.1"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "health_check.0.check_timeout", "5500"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "health_check.0.check_interval", "55000"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "health_check.0.retries", "3"),
@@ -256,6 +280,14 @@ resource ` + constant.TargetGroupResource + ` ` + constant.TargetGroupTestResour
    health_check_enabled = true
    maintenance_enabled = true
  }
+ targets {
+	ip = "22.232.2.3"
+	port = "8081"
+	weight = "124"
+	proxy_protocol = "v1"
+	health_check_enabled = false
+	maintenance_enabled = false
+  }
  health_check {
      check_timeout = 5000
      check_interval = 50000

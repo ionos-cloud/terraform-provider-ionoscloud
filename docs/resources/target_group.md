@@ -22,6 +22,7 @@ resource "ionoscloud_target_group" "example" {
         ip                    = "22.231.2.2"
         port                  = "8080"
         weight                = "1"
+        proxy_protocol        = "v2ssl"
         health_check_enabled  = true
         maintenance_enabled   = false
     }    
@@ -29,6 +30,7 @@ resource "ionoscloud_target_group" "example" {
         ip                    = "22.231.2.3"
         port                  = "8081"
         weight                = "124"
+        proxy_protocol        = "v2"
         health_check_enabled  = false
         maintenance_enabled   = false
     }
