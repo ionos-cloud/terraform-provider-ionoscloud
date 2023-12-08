@@ -10,6 +10,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceTargetGroup() *schema.Resource {
@@ -32,7 +33,7 @@ func resourceTargetGroup() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "Balancing algorithm.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}, true)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.ForwardingRuleAlgorithms, true)),
 			},
 			"protocol": {
 				Type:             schema.TypeString,
@@ -67,7 +68,7 @@ func resourceTargetGroup() *schema.Resource {
 							Description:      "Proxy protocol version",
 							Optional:         true,
 							Default:          "none",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"none", "v1", "v2", "v2ssl"}, true)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.LBTargetProxyProtocolVersions, true)),
 						},
 						"health_check_enabled": {
 							Type:        schema.TypeBool,

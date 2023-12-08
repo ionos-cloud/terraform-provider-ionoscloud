@@ -8,6 +8,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -32,14 +33,16 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 				Required:    true,
 			},
 			"algorithm": {
-				Type:        schema.TypeString,
-				Description: "Algorithm for the balancing.",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "Algorithm for the balancing.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.ForwardingRuleAlgorithms, true)),
 			},
 			"protocol": {
-				Type:        schema.TypeString,
-				Description: "Protocol of the balancing.",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "Protocol of the balancing.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HTTP", "TCP"}, true)),
 			},
 			"listener_ip": {
 				Type:        schema.TypeString,
@@ -117,7 +120,7 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 							Description:      "Proxy protocol version",
 							Optional:         true,
 							Default:          "none",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"none", "v1", "v2", "v2ssl"}, true)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.LBTargetProxyProtocolVersions, true)),
 						},
 						"health_check": {
 							Type:        schema.TypeList,
