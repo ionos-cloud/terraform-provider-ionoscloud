@@ -16,6 +16,7 @@
 
 ### Fixes
 - #487. Crash on server import without inline `nic`
+- #503. Use `Location`` func for state tracking request instead of getting Location header directly and minor refactor.
 
 ## 6.4.10
 ### Refactor
