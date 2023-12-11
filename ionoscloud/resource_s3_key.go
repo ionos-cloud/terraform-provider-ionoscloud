@@ -67,11 +67,8 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 	keyId := *rsp.Id
 	d.SetId(keyId)
-
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	log.Printf("[INFO] Created S3 key: %s", d.Id())
@@ -89,10 +86,8 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(fmt.Errorf("error saving key data %s: %w", keyId, err))
 	}
 
-	_, errState = cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	return resourceS3KeyRead(ctx, d, meta)
@@ -154,10 +149,8 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diags
 	}
 
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	return resourceS3KeyRead(ctx, d, meta)

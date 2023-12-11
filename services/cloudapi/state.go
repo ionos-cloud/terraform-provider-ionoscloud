@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
@@ -73,6 +75,22 @@ func resourceStateRefreshFunc(meta interface{}, path string) retry.StateRefreshF
 
 		return nil, *request.Metadata.Status, nil
 	}
+}
+
+// WaitForStateChange tracks state change progress of a resource
+func WaitForStateChange(ctx context.Context, meta interface{}, d *schema.ResourceData, apiResponse *ionoscloud.APIResponse, opTimeout string) error {
+	var err error
+	var loc *url.URL
+
+	if apiResponse == nil {
+		return fmt.Errorf("cannot track resource state change, apiResponse was nil")
+	}
+
+	if loc, err = apiResponse.Location(); err != nil {
+		return fmt.Errorf("error retrieving 'Location' header: %w", err)
+	}
+	_, errState := GetStateChangeConf(meta, d, loc.String(), opTimeout).WaitForStateContext(ctx)
+	return errState
 }
 
 // resourcePendingStates defines states of working in progress
