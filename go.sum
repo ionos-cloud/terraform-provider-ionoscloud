@@ -98,8 +98,8 @@ github.com/ionos-cloud/sdk-go-logging v1.0.0 h1:zLQnKOcimfsJ55clUjApH/2Vv87pwvCd
 github.com/ionos-cloud/sdk-go-logging v1.0.0/go.mod h1:P2JQJpUgH3ZyfyJmv6jMwcB1NJIVVZSL+/bllhWpwc8=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0 h1:G9E6DeQe/Wu3rvGVgidLE52qwTpTqXaZ3hyinVX4mXA=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0/go.mod h1:Q5d1R6silarsX5jWLPBHd/1PSC5zZNf2ONvXB+fygC0=
-github.com/ionos-cloud/sdk-go/v6 v6.1.9 h1:Iq3VIXzeEbc8EbButuACgfLMiY5TPVWUPNrF+Vsddo4=
-github.com/ionos-cloud/sdk-go/v6 v6.1.9/go.mod h1:EzEgRIDxBELvfoa/uBN0kOQaqovLjUWEB7iW4/Q+t4k=
+github.com/ionos-cloud/sdk-go/v6 v6.1.10 h1:3815Q2Hw/wc4cJ8wD7bwfsmDsdfIEp80B7BQMj0YP2w=
+github.com/ionos-cloud/sdk-go/v6 v6.1.10/go.mod h1:EzEgRIDxBELvfoa/uBN0kOQaqovLjUWEB7iW4/Q+t4k=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jhump/protoreflect v1.6.1 h1:4/2yi5LyDPP7nN+Hiird1SAJ6YoxUm13/oxHGRnbPd8=
 github.com/jhump/protoreflect v1.6.1/go.mod h1:RZQ/lnuN+zqeRVpQigTwO6o0AJUkxbnSnpuG7toUTG4=

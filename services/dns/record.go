@@ -43,7 +43,7 @@ func (c *Client) GetRecordById(ctx context.Context, zoneId, recordId string) (dn
 	return record, apiResponse, err
 }
 
-func (c *Client) ListRecords(ctx context.Context, zoneId, recordName string) (dns.RecordReadList, *dns.APIResponse, error) {
+func (c *Client) ListRecords(ctx context.Context, recordName string) (dns.RecordReadList, *dns.APIResponse, error) {
 	request := c.sdkClient.RecordsApi.RecordsGet(ctx)
 	if recordName != "" {
 		request = request.FilterName(recordName)
@@ -131,7 +131,9 @@ func setRecordPutRequest(d *schema.ResourceData) *dns.RecordEnsure {
 		Properties: &dns.Record{},
 	}
 
-	if nameValue, ok := d.GetOk("name"); ok {
+	// tread carefully, workaround for setting empty name
+	isNull := d.GetRawConfig().AsValueMap()["name"].IsNull()
+	if nameValue, _ := d.GetOk("name"); !isNull {
 		name := nameValue.(string)
 		request.Properties.Name = &name
 	}

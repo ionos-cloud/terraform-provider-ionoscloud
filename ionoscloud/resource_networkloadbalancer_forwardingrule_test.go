@@ -47,6 +47,7 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.ip", "22.231.2.2"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.port", "8081"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.weight", "123"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.proxy_protocol", "none"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check", "true"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval", "1000"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance", "false"),
@@ -74,6 +75,7 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleId, "targets.0.ip", networkLoadBalancerForwardingRuleResource, "targets.0.ip"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleId, "targets.0.port", networkLoadBalancerForwardingRuleResource, "targets.0.port"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleId, "targets.0.weight", networkLoadBalancerForwardingRuleResource, "targets.0.weight"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleId, "targets.0.proxy_protocol", networkLoadBalancerForwardingRuleResource, "targets.0.proxy_protocol"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleId, "targets.0.health_check.0.check", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleId, "targets.0.health_check.0.check_interval", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleId, "targets.0.health_check.0.maintenance", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance"),
@@ -94,6 +96,7 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.ip", networkLoadBalancerForwardingRuleResource, "targets.0.ip"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.port", networkLoadBalancerForwardingRuleResource, "targets.0.port"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.weight", networkLoadBalancerForwardingRuleResource, "targets.0.weight"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.proxy_protocol", networkLoadBalancerForwardingRuleResource, "targets.0.proxy_protocol"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.health_check.0.check", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.health_check.0.check_interval", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.health_check.0.maintenance", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance"),
@@ -118,14 +121,18 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.ip", "22.231.2.2"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.port", "8081"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.weight", "123"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.proxy_protocol", "v2ssl"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check", "true"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval", "1000"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance", "false"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.1.ip", "22.231.2.3"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.1.proxy_protocol", "none"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.2.ip", "22.231.2.4"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.2.proxy_protocol", "none"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.ip", "22.231.2.5"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.port", "8081"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.weight", "123"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.proxy_protocol", "v1"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.health_check.0.check", "true"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.health_check.0.check_interval", "1010"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.health_check.0.maintenance", "true"),
@@ -253,6 +260,7 @@ resource ` + constant.NetworkLoadBalancerForwardingRuleResource + ` ` + constant
    		ip = "22.231.2.2"
    		port = "8081"
    		weight = "123"
+		proxy_protocol = "v2ssl"
    		health_check {
      		check = true
      		check_interval = 1000
@@ -283,6 +291,7 @@ resource ` + constant.NetworkLoadBalancerForwardingRuleResource + ` ` + constant
    		ip = "22.231.2.5"
    		port = "8081"
    		weight = "123"
+		proxy_protocol = "v1"
    		health_check {
      		check = true
      		check_interval = 1010

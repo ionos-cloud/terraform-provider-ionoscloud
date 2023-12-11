@@ -176,7 +176,7 @@ func testAccCheckNetworkLoadBalancerExists(n string, networkLoadBalancer *ionosc
 
 const testAccCheckNetworkLoadBalancerConfigBasicWithoutPrivateIp = `
 resource ` + constant.DatacenterResource + ` "datacenter" {
-  name              = "test_nbl"
+  name              = "test_nlb"
   location          = "gb/lhr"
   description       = "datacenter for hosting "
 }
@@ -211,7 +211,7 @@ resource ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBa
 
 const testAccCheckNetworkLoadBalancerConfigBasic = `
 resource ` + constant.DatacenterResource + ` "datacenter" {
-  name              = "test_nbl"
+  name              = "test_nlb"
   location          = "gb/lhr"
   description       = "datacenter for hosting "
 }
@@ -247,7 +247,7 @@ resource ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBa
 
 const testAccCheckNetworkLoadBalancerConfigUpdate = `
 resource ` + constant.DatacenterResource + ` "datacenter" {
-  name              = "test_nbl"
+  name              = "test_nlb"
   location          = "gb/lhr"
   description       = "datacenter for hosting "
 }

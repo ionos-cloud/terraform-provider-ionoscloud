@@ -101,6 +101,11 @@ func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 							Description: "Weight parameter is used to adjust the target VM's weight relative to other target VMs",
 							Computed:    true,
 						},
+						"proxy_protocol": {
+							Type:        schema.TypeString,
+							Description: "Proxy protocol version",
+							Computed:    true,
+						},
 						"health_check": {
 							Type:        schema.TypeList,
 							Description: "Health check attributes for Network Load Balancer forwarding rule target",
