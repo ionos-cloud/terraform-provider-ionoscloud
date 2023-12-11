@@ -295,7 +295,11 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Wait, catching any errors
-	_, errState = cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	loc, err = apiResponse.Location()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_, errState = cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if cloudapi.IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -407,8 +411,13 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			return diags
 		}
 
+		loc, err = apiResponse.Location()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
 		// Wait, catching any errors
-		_, errState = cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+		_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
 		if errState != nil {
 			diags := diag.FromErr(errState)
 			return diags

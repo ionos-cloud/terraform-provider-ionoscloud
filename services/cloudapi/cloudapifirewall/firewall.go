@@ -55,7 +55,11 @@ func (fs *Service) Delete(ctx context.Context, datacenterId, serverId, nicId, fi
 		return apiResponse, err
 	}
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(fs.Meta, fs.D, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	loc, err := apiResponse.Location()
+	if err != nil {
+		return apiResponse, err
+	}
+	_, errState := cloudapi.GetStateChangeConf(fs.Meta, fs.D, loc.String(), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		return apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterId, serverId, nicId, firewallId, errState)
 	}
@@ -69,7 +73,11 @@ func (fs *Service) Create(ctx context.Context, datacenterId, serverId, nicId str
 		return nil, apiResponse, fmt.Errorf("an error occured while creating firewall rule for dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, err)
 	}
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(fs.Meta, fs.D, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	loc, err := apiResponse.Location()
+	if err != nil {
+		return nil, apiResponse, err
+	}
+	_, errState := cloudapi.GetStateChangeConf(fs.Meta, fs.D, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
@@ -83,7 +91,11 @@ func (fs *Service) Update(ctx context.Context, datacenterId, serverId, nicId, id
 		return nil, apiResponse, fmt.Errorf("an error occured while updating firewall rule for dcId: %s, server_id: %s, nic_id: %s, id %s, Response: (%w)", datacenterId, serverId, nicId, id, err)
 	}
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(fs.Meta, fs.D, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	loc, err := apiResponse.Location()
+	if err != nil {
+		return nil, apiResponse, err
+	}
+	_, errState := cloudapi.GetStateChangeConf(fs.Meta, fs.D, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}

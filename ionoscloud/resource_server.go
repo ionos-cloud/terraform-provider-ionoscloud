@@ -939,7 +939,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 
 			// Wait, catching any errors
-			_, errState = cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+			loc, err := apiResponse.Location()
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
 			if errState != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occured while waiting for a state change for dcId: %s server_id: %s ID: %s %w", dcId, d.Id(), bootVolume, err))
 				return diags
