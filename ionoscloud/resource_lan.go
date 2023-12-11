@@ -125,19 +125,13 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	log.Printf("[INFO] LAN ID: %s", d.Id())
 
-	// Wait, catching any errors
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
-			d.SetId("")
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if errState != nil {
+			if cloudapi.IsRequestFailed(errState) {
+				d.SetId("")
+			}
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return diag.FromErr(errState)
 	}
 
 	for {
@@ -240,14 +234,8 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	return resourceLanRead(ctx, d, meta)

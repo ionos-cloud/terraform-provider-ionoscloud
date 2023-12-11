@@ -577,20 +577,12 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	d.SetId(*createdServer.Id)
 
-	// Wait, catching any errors
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			log.Printf("[DEBUG] failed to create createdServer resource")
-			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		diags := diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
-		return diags
+		return diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
 	}
 
 	// get additional data for schema
@@ -869,15 +861,10 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
-	}
+
 	// Volume stuff
 	if d.HasChange("volume") {
 		bootVolume := d.Get("boot_volume").(string)
@@ -895,15 +882,8 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				return diags
 			}
 
-			// Wait, catching any errors
-			loc, err := apiResponse.Location()
-			if err != nil {
-				return diag.FromErr(err)
-			}
-			_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
-			if errState != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occured while waiting for a state change for dcId: %s server_id: %s ID: %s %w", dcId, d.Id(), bootVolume, err))
-				return diags
+			if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+				return diag.FromErr(fmt.Errorf("an error occured while waiting for a state change for dcId: %s server_id: %s ID: %s %w", dcId, d.Id(), bootVolume, err))
 			}
 		}
 
@@ -927,15 +907,8 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			return diags
 		}
 
-		// Wait, catching any errors
-		loc, err := apiResponse.Location()
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(errState)
-			return diags
+		if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+			return diag.FromErr(errState)
 		}
 	}
 
@@ -1048,16 +1021,8 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				return diags
 			}
 
-			loc, err := apiResponse.Location()
-			if err != nil {
-				return diag.FromErr(err)
-			}
-
-			// Wait, catching any errors
-			_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
-			if errState != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occured while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, errState))
-				return diags
+			if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+				return diag.FromErr(fmt.Errorf("an error occured while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, errState))
 			}
 
 			if firewallId == "" && firewall.Id != nil {
@@ -1137,15 +1102,8 @@ func resourceCubeServerDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 	}
 
-	// Wait, catching any errors
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(fmt.Errorf("error getting state change for cube server delete %w", errState))
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(fmt.Errorf("error getting state change for cube server delete %w", errState))
 	}
 
 	d.SetId("")

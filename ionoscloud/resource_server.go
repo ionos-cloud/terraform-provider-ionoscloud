@@ -647,21 +647,12 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		d.SetId(*postServer.Id)
 	}
 
-	// Wait, catching any errors
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); err != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			log.Printf("[DEBUG] failed to create server resource")
-			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-
-		diags := diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
-		return diags
+		return diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
 	}
 
 	// Logic for labels creation
@@ -911,14 +902,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); err != nil {
+		return diag.FromErr(errState)
 	}
 
 	// Volume stuff
@@ -938,15 +923,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				return diags
 			}
 
-			// Wait, catching any errors
-			loc, err := apiResponse.Location()
-			if err != nil {
-				return diag.FromErr(err)
-			}
-			_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
-			if errState != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occured while waiting for a state change for dcId: %s server_id: %s ID: %s %w", dcId, d.Id(), bootVolume, err))
-				return diags
+			if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+				return diag.FromErr(fmt.Errorf("an error occured while waiting for a state change for dcId: %s server_id: %s ID: %s %w", dcId, d.Id(), bootVolume, errState))
 			}
 		}
 
@@ -975,15 +953,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			return diags
 		}
 
-		// Wait, catching any errors
-		loc, err := apiResponse.Location()
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(errState)
-			return diags
+		if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+			return diag.FromErr(errState)
 		}
 	}
 
@@ -1189,15 +1160,8 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 			return diags
 		}
 
-		// Wait, catching any errors
-		loc, err := apiResponse.Location()
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutDelete).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(fmt.Errorf("error getting state change for volumes delete %w", errState))
-			return diags
+		if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+			return diag.FromErr(errState)
 		}
 
 	}
@@ -1231,15 +1195,8 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	}
 
-	// Wait, catching any errors
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(fmt.Errorf("error getting state change for datacenter delete %w", errState))
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(fmt.Errorf("error getting state change for datacenter delete %w", errState))
 	}
 
 	d.SetId("")

@@ -195,19 +195,11 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	d.SetId(*rsp.Id)
-	// Wait, catching any errors
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return diag.FromErr(errState)
 	}
 
 	return resourceTargetGroupRead(ctx, d, meta)
@@ -277,15 +269,8 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	d.SetId(*response.Id)
 
-	// Wait, catching any errors
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	return resourceTargetGroupRead(ctx, d, meta)
@@ -302,15 +287,8 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 		return diags
 	}
 
-	// Wait, catching any errors
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	d.SetId("")

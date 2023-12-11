@@ -71,19 +71,11 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 	d.SetId(*rsp.Id)
 
-	// Wait, catching any errors
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return diag.FromErr(errState)
 	}
 
 	return resourceShareRead(ctx, d, meta)
@@ -135,15 +127,8 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diags
 	}
 
-	// Wait, catching any errors
-	loc, err := apiResponse.Location()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	return resourceShareRead(ctx, d, meta)
@@ -175,17 +160,8 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 	}
 
-	// Wait, catching any errors
-	if apiResponse != nil && apiResponse.Header.Get("Location") != "" {
-		loc, err := apiResponse.Location()
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		_, errState := cloudapi.GetStateChangeConf(meta, d, loc.String(), schema.TimeoutDelete).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(errState)
-			return diags
-		}
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	d.SetId("")
