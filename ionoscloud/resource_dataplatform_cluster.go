@@ -25,12 +25,11 @@ func resourceDataplatformCluster() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"datacenter_id": {
-				Type:        schema.TypeString,
-				Description: "The UUID of the virtual data center (VDC) in which the cluster is provisioned",
-				ValidateDiagFunc: validation.AllDiag(validation.ToDiagFunc(validation.StringLenBetween(32, 63)),
-					validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$"), ""))),
-				Required: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Description:      "The UUID of the virtual data center (VDC) in which the cluster is provisioned",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Required:         true,
+				ForceNew:         true,
 			},
 			"name": {
 				Type:        schema.TypeString,
