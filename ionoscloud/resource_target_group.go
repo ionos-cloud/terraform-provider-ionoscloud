@@ -10,6 +10,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceTargetGroup() *schema.Resource {
@@ -32,7 +33,7 @@ func resourceTargetGroup() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "Balancing algorithm.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}, true)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.ForwardingRuleAlgorithms, true)),
 			},
 			"protocol": {
 				Type:             schema.TypeString,
@@ -61,6 +62,13 @@ func resourceTargetGroup() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1; targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best use values in the middle of the range to leave room for later adjustments.",
 							Required:    true,
+						},
+						"proxy_protocol": {
+							Type:             schema.TypeString,
+							Description:      "Proxy protocol version",
+							Optional:         true,
+							Default:          "none",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.LBTargetProxyProtocolVersions, true)),
 						},
 						"health_check_enabled": {
 							Type:        schema.TypeBool,
@@ -195,15 +203,11 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	d.SetId(*rsp.Id)
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return diag.FromErr(errState)
 	}
 
 	return resourceTargetGroupRead(ctx, d, meta)
@@ -273,11 +277,8 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	d.SetId(*response.Id)
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	return resourceTargetGroupRead(ctx, d, meta)
@@ -294,11 +295,8 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 		return diags
 	}
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	d.SetId("")
@@ -373,6 +371,10 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 
 				if target.Weight != nil {
 					targetEntry["weight"] = *target.Weight
+				}
+
+				if target.ProxyProtocol != nil {
+					targetEntry["proxy_protocol"] = *target.ProxyProtocol
 				}
 
 				if target.HealthCheckEnabled != nil {
@@ -479,6 +481,11 @@ func getTargetGroupTargetData(d *schema.ResourceData) *[]ionoscloud.TargetGroupT
 				if weight, weightOk := d.GetOk(fmt.Sprintf("targets.%d.weight", targetIndex)); weightOk {
 					weight := int32(weight.(int))
 					target.Weight = &weight
+				}
+
+				if proxy, proxyOk := d.GetOk(fmt.Sprintf("targets.%d.proxy_protocol", targetIndex)); proxyOk {
+					proxy := proxy.(string)
+					target.ProxyProtocol = &proxy
 				}
 
 				healthCheck := d.Get(fmt.Sprintf("targets.%d.health_check_enabled", targetIndex)).(bool)

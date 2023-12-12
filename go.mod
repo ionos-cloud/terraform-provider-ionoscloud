@@ -14,7 +14,7 @@ require (
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
 	github.com/ionos-cloud/sdk-go-logging v1.0.1
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
-	github.com/ionos-cloud/sdk-go/v6 v6.1.9
+	github.com/ionos-cloud/sdk-go/v6 v6.1.10
 	golang.org/x/crypto v0.15.0
 	gopkg.in/yaml.v3 v3.0.1
 )

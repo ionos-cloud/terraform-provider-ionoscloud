@@ -22,6 +22,7 @@ resource "ionoscloud_target_group" "example" {
         ip                    = "22.231.2.2"
         port                  = "8080"
         weight                = "1"
+        proxy_protocol        = "v2ssl"
         health_check_enabled  = true
         maintenance_enabled   = false
     }    
@@ -29,6 +30,7 @@ resource "ionoscloud_target_group" "example" {
         ip                    = "22.231.2.3"
         port                  = "8081"
         weight                = "124"
+        proxy_protocol        = "v2"
         health_check_enabled  = false
         maintenance_enabled   = false
     }
@@ -59,6 +61,7 @@ The following arguments are supported:
     - `ip` - (Required)[string] The IP of the balanced target VM.
     - `port` - (Required)[int] The port of the balanced target service; valid range is 1 to 65535.
     - `weight` - (Required)[int] Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1; targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best use values in the middle of the range to leave room for later adjustments.
+    - `proxy_protocol` - (Optional)[string] The proxy protocol version. Accepted values are `none`, `v1`, `v2`, `v2ssl`. If unspecified, the default value of `none` is used.
     - `health_check_enabled` - (Optional)[bool] Makes the target available only if it accepts periodic health check TCP connection attempts; when turned off, the target is considered always available. The health check only consists of a connection attempt to the address and port of the target. Default is True.
     - `maintenance_enabled` - (Optional)[bool] Maintenance mode prevents the target from receiving balanced traffic.
 - `health_check` - (Optional) Health check attributes for Target Group.

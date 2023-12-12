@@ -55,6 +55,7 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
         ip                      = "22.231.2.2"
         port                    = "8080"
         weight                  = "123"
+        proxy_protocol          = "v1"
         health_check {
              check              = true
              check_interval     = 1000
@@ -138,6 +139,7 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
     - `ip` - (Required)[string] IP of a balanced target VM.
     - `port` - (Required)[int] Port of the balanced target service. (range: 1 to 65535).
     - `weight` - (Required)[int] Weight parameter is used to adjust the target VM's weight relative to other target VMs.
+    - `proxy_protocol` - (Optional)[string] The proxy protocol version. Accepted values are `none`, `v1`, `v2`, `v2ssl`. If unspecified, the default value of `none` is used.
     - `health_check` - (Optional) Health check attributes for Network Load Balancer forwarding rule target.
          - `check` - (Optional)[boolean] Check specifies whether the target VM's health is checked.
          - `check_interval` - (Optional)[int] CheckInterval determines the duration (in milliseconds) between consecutive health checks. If unspecified a default of 2000 ms is used.
