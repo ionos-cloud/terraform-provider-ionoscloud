@@ -10,9 +10,9 @@ func dataSourceVCPUServer() *schema.Resource {
 		ReadContext: dataSourceServerRead,
 		Schema: map[string]*schema.Schema{
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"id": {
 				Type:     schema.TypeString,

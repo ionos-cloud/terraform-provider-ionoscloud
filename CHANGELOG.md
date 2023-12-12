@@ -6,6 +6,9 @@
 - Add `flowlog` to `ionoscloud_nic` resource
 - Add `flowlog` to `ionoscloud_networkloadbalancer` resource
 - Add `flowlog` to `ionoscloud_application_loadbalancer` resource
+- Update dependency for terraform-plugin-sdk v2.30.0
+- Use v6.4.10 of cloudapiv6 sdk
+- #494 add `proxy-protocol` to `ionoscloud_networkloadbalancer_forwarding_rule` resource
 
 ### New Product - **Autoscaling**:
   - `Resources`:
@@ -18,6 +21,7 @@
 - #487. Crash on server import without inline `nic`
 - #503. Use `Location` func for state tracking request instead of getting Location header directly and minor refactor.
 - #497. allow to set empty `name` for `ionoscloud_dns_record`
+- Refactor validation to use `ValidateAllDiag` instead of `ValidateAll`, remove unnecessary usage of `validation.All()`
 
 ## 6.4.10
 ### Refactor

@@ -25,11 +25,12 @@ func resourceDataplatformNodePool() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:             schema.TypeString,
-				Description:      "The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]). It can contain dashes (-), underscores (_), dots (.), and alphanumerics in-between.",
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), ""))),
-				ForceNew:         true,
+				Type:        schema.TypeString,
+				Description: "The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]). It can contain dashes (-), underscores (_), dots (.), and alphanumerics in-between.",
+				Required:    true,
+				ValidateDiagFunc: validation.AllDiag(validation.ToDiagFunc(validation.StringLenBetween(0, 63)),
+					validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), ""))),
+				ForceNew: true,
 			},
 			"node_count": {
 				Type:        schema.TypeInt,
@@ -52,12 +53,13 @@ func resourceDataplatformNodePool() *schema.Resource {
 				ForceNew:         true,
 			},
 			"ram_size": {
-				Type:             schema.TypeInt,
-				Description:      "The RAM size for one node in MB. Must be set in multiples of 1024 MB, with a minimum size is of 2048 MB.",
-				Optional:         true,
-				Computed:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(1024))),
-				ForceNew:         true,
+				Type:        schema.TypeInt,
+				Description: "The RAM size for one node in MB. Must be set in multiples of 1024 MB, with a minimum size is of 2048 MB.",
+				Optional:    true,
+				Computed:    true,
+				ValidateDiagFunc: validation.AllDiag(validation.ToDiagFunc(validation.IntAtLeast(2048)),
+					validation.ToDiagFunc(validation.IntDivisibleBy(1024))),
+				ForceNew: true,
 			},
 			"availability_zone": {
 				Type:             schema.TypeString,

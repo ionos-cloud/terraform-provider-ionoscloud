@@ -18,10 +18,10 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 		ReadContext: dataSourceAutoscalingGroupRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:         schema.TypeString,
-				Description:  "UUID of the Autoscaling Group.",
-				Optional:     true,
-				ValidateFunc: validation.All(validation.IsUUID),
+				Type:             schema.TypeString,
+				Description:      "UUID of the Autoscaling Group.",
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"name": {
 				Type:        schema.TypeString,
