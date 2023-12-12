@@ -12,7 +12,7 @@ func dataSourceVCPUServer() *schema.Resource {
 			"datacenter_id": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"id": {
 				Type:     schema.TypeString,
