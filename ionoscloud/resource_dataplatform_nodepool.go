@@ -12,6 +12,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceDataplatformNodePool() *schema.Resource {
@@ -28,8 +29,9 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]). It can contain dashes (-), underscores (_), dots (.), and alphanumerics in-between.",
 				Required:    true,
+
 				ValidateDiagFunc: validation.AllDiag(validation.ToDiagFunc(validation.StringLenBetween(0, 63)),
-					validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), ""))),
+					validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(constant.DataPlatformNameRegexConstraint), constant.DataPlatformRegexNameError))),
 				ForceNew: true,
 			},
 			"node_count": {
@@ -132,7 +134,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "The UUID of an existing Dataplatform cluster.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(constant.DataPlatformNameRegexConstraint), constant.DataPlatformRegexNameError)),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
