@@ -21,7 +21,7 @@
 - #487. Crash on server import without inline `nic`
 - #503. Use `Location` func for state tracking request instead of getting Location header directly and minor refactor.
 - #497. allow to set empty `name` for `ionoscloud_dns_record`
-- Refactor validation to use `ValidateAllDiag` instead of `ValidateAll`, remove unnecessary usage of `validation.All()`
+- Refactor validation to use `validation.AllDiag` instead of `validation.All`, remove unnecessary usage of `validation.All`
 
 ## 6.4.10
 ### Refactor
