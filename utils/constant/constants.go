@@ -265,7 +265,9 @@ const (
 	DataplatformNodePoolsTestDataSource      = "test_dataplatform_node_pools"
 	DataplatformVersionsTestDataSource       = "test_dataplatform_versions"
 	// DataPlatformVersion lowest 'available' version is now 23.7
-	DataPlatformVersion = "23.7"
+	DataPlatformVersion             = "23.7"
+	DataPlatformNameRegexConstraint = "^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$\""
+	DataPlatformRegexNameError      = "name should match " + DataPlatformNameRegexConstraint
 )
 
 // DNS Constants

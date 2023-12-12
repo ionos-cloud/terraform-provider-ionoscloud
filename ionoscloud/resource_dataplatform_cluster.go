@@ -12,6 +12,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceDataplatformCluster() *schema.Resource {
@@ -25,18 +26,18 @@ func resourceDataplatformCluster() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"datacenter_id": {
-				Type:        schema.TypeString,
-				Description: "The UUID of the virtual data center (VDC) in which the cluster is provisioned",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(32, 63),
-					validation.StringMatch(regexp.MustCompile("^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$"), ""))),
-				Required: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Description:      "The UUID of the virtual data center (VDC) in which the cluster is provisioned",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Required:         true,
+				ForceNew:         true,
 			},
 			"name": {
-				Type:             schema.TypeString,
-				Description:      "The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]). It can contain dashes (-), underscores (_), dots (.), and alphanumerics in-between.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), ""))),
-				Required:         true,
+				Type:        schema.TypeString,
+				Description: "The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]). It can contain dashes (-), underscores (_), dots (.), and alphanumerics in-between.",
+				ValidateDiagFunc: validation.AllDiag(validation.ToDiagFunc(validation.StringLenBetween(0, 63)),
+					validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(constant.DataPlatformNameRegexConstraint), constant.DataPlatformRegexNameError))),
+				Required: true,
 			},
 			"version": {
 				Type:             schema.TypeString,

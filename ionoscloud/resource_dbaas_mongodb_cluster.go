@@ -191,12 +191,13 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				},
 			},
 			"ram": {
-				Type:             schema.TypeInt,
-				Optional:         true,
-				Computed:         true,
-				ConflictsWith:    []string{"template_id"},
-				Description:      "The amount of memory per instance in megabytes. Multiple of 1024",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(1024))),
+				Type:          schema.TypeInt,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"template_id"},
+				Description:   "The amount of memory per instance in megabytes. Multiple of 1024",
+				ValidateDiagFunc: validation.AllDiag(validation.ToDiagFunc(validation.IntAtLeast(2048)),
+					validation.ToDiagFunc(validation.IntDivisibleBy(1024))),
 			},
 			"storage_size": {
 				Type:          schema.TypeInt,
@@ -204,9 +205,10 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				Computed:      true,
 				ConflictsWith: []string{"template_id"},
 
-				Description:      "The amount of storage per instance in megabytes. At least 5120, at most 2097152",
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.IntBetween(5120, 2097152), validation.IntDivisibleBy(1024))),
+				Description: "The amount of storage per instance in megabytes. At least 5120, at most 2097152",
+				ForceNew:    true,
+				ValidateDiagFunc: validation.AllDiag(validation.ToDiagFunc(validation.IntBetween(5120, 2097152)),
+					validation.ToDiagFunc(validation.IntDivisibleBy(1024))),
 			},
 			"storage_type": {
 				Type:          schema.TypeString,

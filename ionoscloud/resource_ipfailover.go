@@ -37,7 +37,7 @@ func resourceLanIPFailover() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				Description:      "Failover IP",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.IsIPAddress)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPAddress),
 			},
 			"nicuuid": {
 				Type:             schema.TypeString,
