@@ -21,7 +21,6 @@ resource "ionoscloud_pg_user" "example_pg_user" {
   cluster_id = ionoscloud_pg_cluster.example.id
   username = "exampleuser"
   password = random_password.user_password.result
-  is_system_user = false
 }
 
 resource "random_password" "user_password" {
@@ -36,7 +35,7 @@ resource "random_password" "user_password" {
 * `cluster_id` - (Required)[string] The unique ID of the cluster. Updates to the value of the field force the cluster to be re-created.
 * `username` - (Required)[string] Used for authentication. Updates to the value of the field force the cluster to be re-created.
 * `password` - (Required)[string] User password.
-* `is_system_user` - (Optional)[bool] Describes whether this user is a system user or not. A system user cannot be updated or deleted.
+* `is_system_user` - (Computed)[bool] Describes whether this user is a system user or not. A system user cannot be updated or deleted.
 
 ## Import
 
