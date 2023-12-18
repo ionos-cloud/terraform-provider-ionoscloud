@@ -336,5 +336,7 @@ const (
 	AutoscalingGroupServersTestDataSource = "test_autoscaling_servers"
 )
 
+const ServerBootDeviceSelectionResource = "ionoscloud_server_boot_device_selection"
+
 var ForwardingRuleAlgorithms = []string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}
 var LBTargetProxyProtocolVersions = []string{"none", "v1", "v2", "v2ssl"}

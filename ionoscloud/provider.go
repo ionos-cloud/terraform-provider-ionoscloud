@@ -118,6 +118,7 @@ func Provider() *schema.Provider {
 			constant.DNSRecordResource:                         resourceDNSRecord(),
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  resourceAutoscalingGroup(),
+			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),

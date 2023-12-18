@@ -67,6 +67,8 @@ func resourceServer() *schema.Resource {
 			"boot_cdrom": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
+				Deprecated:       "Please use the 'ionoscloud_server_boot_device_selection' resource for managing the boot device of the server.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				Description:      "The associated boot drive, if any. Must be the UUID of a bootable CDROM image that you can retrieve using the image data source",
 			},
@@ -647,7 +649,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		d.SetId(*postServer.Id)
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); err != nil {
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if cloudapi.IsRequestFailed(errState) {
 			log.Printf("[DEBUG] failed to create server resource")
 			d.SetId("")
@@ -884,14 +886,9 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		bootCdrom := n.(string)
 
 		if utils.IsValidUUID(bootCdrom) {
-			request.BootCdrom = &ionoscloud.ResourceReference{
-				Id: &bootCdrom,
-			}
-		} else {
-			diags := diag.FromErr(fmt.Errorf("boot_cdrom has to be a valid UUID, got: %s", bootCdrom))
-			return diags
+			ss := cloudapiserver.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
+			ss.UpdateBootDevice(ctx, dcId, d.Id(), bootCdrom)
 		}
-		/* todo: figure out a way of sending a nil bootCdrom to the API (the sdk's omitempty doesn't let us) */
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Depth(3).Execute()
@@ -902,59 +899,51 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); err != nil {
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
 	}
 
 	// Volume stuff
 	if d.HasChange("volume") {
-		bootVolume := d.Get("boot_volume").(string)
-		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			volume := ionoscloud.Volume{
-				Id: &bootVolume,
-			}
-			_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, d.Id()).Volume(volume).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), bootVolume, err))
-				return diags
-			}
-
-			if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-				return diag.FromErr(fmt.Errorf("an error occured while waiting for a state change for dcId: %s server_id: %s ID: %s %w", dcId, d.Id(), bootVolume, errState))
-			}
-		}
-
 		properties := ionoscloud.VolumeProperties{}
+		inlineVolumeIds := d.Get("inline_volume_ids")
 
-		if v, ok := d.GetOk("volume.0.name"); ok {
-			vStr := v.(string)
-			properties.Name = &vStr
-		}
+		if inlineVolumeIds != nil {
+			inlineVolumeIds := inlineVolumeIds.([]interface{})
+			for i, volumeId := range inlineVolumeIds {
+				volumeIdStr := volumeId.(string)
+				volumePath := fmt.Sprintf("volume.%d.", i)
+				_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), volumeIdStr).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("an error occured while getting a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), volumeId, err))
+					return diags
+				}
+				if v, ok := d.GetOk(volumePath + "name"); ok {
+					vStr := v.(string)
+					properties.Name = &vStr
+				}
+				if v, ok := d.GetOk(volumePath + "size"); ok {
+					vInt := float32(v.(int))
+					properties.Size = &vInt
+				}
+				if v, ok := d.GetOk(volumePath + "bus"); ok {
+					vStr := v.(string)
+					properties.Bus = &vStr
+				}
 
-		if v, ok := d.GetOk("volume.0.size"); ok {
-			vInt := float32(v.(int))
-			properties.Size = &vInt
-		}
+				_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), volumeIdStr).Volume(properties).Execute()
+				logApiRequestTime(apiResponse)
 
-		if v, ok := d.GetOk("volume.0.bus"); ok {
-			vStr := v.(string)
-			properties.Bus = &vStr
-		}
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("error patching volume (%s) (%w)", d.Id(), err))
+					return diags
+				}
 
-		_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error patching volume (%s) (%w)", d.Id(), err))
-			return diags
-		}
-
-		if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-			return diag.FromErr(errState)
+				if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+					return diag.FromErr(errState)
+				}
+			}
 		}
 	}
 
@@ -1465,13 +1454,13 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			}
 		}
 
-		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
+		if server.Properties.BootCdrom != nil {
 			if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
 				return fmt.Errorf("error setting boot_cdrom %w", err)
 			}
 		}
 
-		if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
+		if server.Properties.BootVolume != nil {
 			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
 				return fmt.Errorf("error setting bootVolume %w", err)
 			}
@@ -1489,23 +1478,29 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		return fmt.Errorf("server entities cannot be empty for %s", d.Id())
 	}
 
-	if server.Properties != nil && server.Properties.BootVolume != nil {
-		volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), *server.Properties.BootVolume.Id).Execute()
-		logApiRequestTime(apiResponse)
-		if err == nil {
-			var volumes []interface{}
+	inlineVolumeIds := d.Get("inline_volume_ids")
+	if inlineVolumeIds != nil {
+		inlineVolumeIds := inlineVolumeIds.([]any)
+		var volumes []any
+		for i, volumeId := range inlineVolumeIds {
+			volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), volumeId.(string)).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return fmt.Errorf("error retrieving inline volume %w", err)
+			}
+			volumePath := fmt.Sprintf("volume.%d.", i)
 			entry := SetVolumeProperties(volume)
-			userData := d.Get("volume.0.user_data")
+			userData := d.Get(volumePath + "user_data")
 			entry["user_data"] = userData
 			if *server.Properties.Type != constant.VCPUType {
-				entry["ssh_key_path"] = d.Get("volume.0.ssh_key_path")
+				entry["ssh_key_path"] = d.Get(volumePath + "ssh_key_path")
 			}
-			backupUnit := d.Get("volume.0.backup_unit_id")
+			backupUnit := d.Get(volumePath + "backup_unit_id")
 			entry["backup_unit_id"] = backupUnit
 			volumes = append(volumes, entry)
-			if err := d.Set("volume", volumes); err != nil {
-				return fmt.Errorf("error setting volume %w", err)
-			}
+		}
+		if err := d.Set("volume", volumes); err != nil {
+			return fmt.Errorf("error setting inline volumes %w", err)
 		}
 	}
 
