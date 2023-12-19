@@ -96,6 +96,12 @@ func (c *Client) SetRecordData(d *schema.ResourceData, record dns.RecordRead) er
 		}
 	}
 
+	if record.Properties.Priority != nil {
+		if err := d.Set("priority", *record.Properties.Priority); err != nil {
+			return utils.GenerateSetError(recordResourceName, "priority", err)
+		}
+	}
+
 	if record.Metadata.Fqdn != nil {
 		if err := d.Set("fqdn", *record.Metadata.Fqdn); err != nil {
 			return utils.GenerateSetError(recordResourceName, "fqdn", err)

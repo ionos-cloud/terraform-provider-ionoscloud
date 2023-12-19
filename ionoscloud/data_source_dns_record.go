@@ -53,6 +53,10 @@ func dataSourceDNSRecord() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"priority": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
