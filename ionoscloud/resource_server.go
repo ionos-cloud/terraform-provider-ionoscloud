@@ -1458,12 +1458,16 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
 				return fmt.Errorf("error setting boot_cdrom %w", err)
 			}
+		} else {
+			d.Set("boot_cdrom", nil)
 		}
 
 		if server.Properties.BootVolume != nil {
 			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
 				return fmt.Errorf("error setting bootVolume %w", err)
 			}
+		} else {
+			d.Set("boot_volume", nil)
 		}
 
 		if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
