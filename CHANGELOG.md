@@ -1,6 +1,13 @@
-## 6.4.12
+## 6.4.12 (upcoming release)
 ### Features
 - Add `ionoscloud_server_boot_device_selection` resource for selecting the boot device of `ionoscloud_server`, `ionoscloud_vcpu_server` and `ionoscloud_cube_server` resources
+
+### Fixes
+- `is_system_user` is actually only read-only. You cannot actually set it.
+- Add `priority` in state for DNS Records
+
+### Features
+- Add parameters for private k8s cluster: `public`, `location`, `nat_gateway_ip`, `node_subnet`
 
 ## 6.4.11
 ### Documentation

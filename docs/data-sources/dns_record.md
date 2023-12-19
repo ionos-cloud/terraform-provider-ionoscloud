@@ -59,4 +59,5 @@ The following attributes are returned by the datasource:
 * `type` - The type of the DNS Record.
 * `content` - The content of the DNS Record.
 * `ttl` - The time to live of the DNS Record.
+* `priority` - The priority for the DNS Record.
 * `enabled` - Indicates if the DNS Record is active or not.

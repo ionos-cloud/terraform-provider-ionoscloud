@@ -14,7 +14,7 @@ require (
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
 	github.com/ionos-cloud/sdk-go-logging v1.0.1
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
-	github.com/ionos-cloud/sdk-go/v6 v6.1.10
+	github.com/ionos-cloud/sdk-go/v6 v6.1.11
 	golang.org/x/crypto v0.15.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -24,7 +24,6 @@ require github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/go-test/deep v1.0.6 // indirect
@@ -50,7 +49,6 @@ require (
 	github.com/hashicorp/terraform-registry-address v0.2.2 // indirect
 	github.com/hashicorp/terraform-svchost v0.1.1 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
-	github.com/jhump/protoreflect v1.15.1 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
