@@ -179,6 +179,10 @@ func (ss *Service) UpdateVmState(ctx context.Context, datacenterID, serverID, ne
 	return nil
 }
 
+// UpdateBootDevice will set a new boot device for the server, which can be a volume or bootable image CDROM.
+// When the new boot device is a volume, it must be already attached to the server.
+// When the new boot device is a CDROM image, it will be attached by default.
+// If the current boot device is a CDROM image, it will be detached after it is changed by this operation.
 func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID, newBootDeviceID string) error {
 	oldBootDeviceID, oldBdType, err := ss.GetCurrentBootDeviceID(ctx, datacenterID, serverID)
 	if err != nil {
@@ -191,7 +195,7 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 	newBdType := BootDeviceTypeCDROM
 	_, apiResponse, err := ss.Client.ImagesApi.ImagesFindById(ctx, newBootDeviceID).Execute()
 	if err != nil {
-		if !(apiResponse != nil && apiResponse.StatusCode == 404) {
+		if !apiResponse.HttpNotFound() {
 			return err
 		}
 		log.Printf("[DEBUG] no bootable image found with id : %s\n", newBootDeviceID)
@@ -201,36 +205,29 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 	switch oldBdType {
 	case BootDeviceTypeCDROM:
 		if strings.EqualFold(newBdType, BootDeviceTypeVolume) {
+			// update to new boot volume
 			sp := ionoscloud.ServerProperties{BootVolume: ionoscloud.NewResourceReference(newBootDeviceID)}
 			if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
 				return err
 			}
-			// detach the cdrom
-			apiResponse, err = ss.Client.ServersApi.DatacentersServersCdromsDelete(ctx, datacenterID, serverID, oldBootDeviceID).Execute()
+		} else {
+			// attach new cdrom
+			img := ionoscloud.Image{Id: &newBootDeviceID}
+			_, apiResponse, err := ss.Client.ServersApi.DatacentersServersCdromsPost(ctx, datacenterID, serverID).Cdrom(img).Execute()
 			if err != nil {
 				return err
 			}
 			if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 				return errState
 			}
-			return nil
+			log.Printf("[DEBUG] attached CDROM image to server: serverId: %s, imageId: %s\n", serverID, newBootDeviceID)
+			// update to new boot cdrom
+			sp := ionoscloud.ServerProperties{BootCdrom: ionoscloud.NewResourceReference(newBootDeviceID)}
+			if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
+				return err
+			}
 		}
-
-		// attach new
-		img := ionoscloud.Image{Id: &newBootDeviceID}
-		_, apiResponse, err := ss.Client.ServersApi.DatacentersServersCdromsPost(ctx, datacenterID, serverID).Cdrom(img).Execute()
-		if err != nil {
-			return err
-		}
-		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-			return errState
-		}
-		// update boot device
-		sp := ionoscloud.ServerProperties{BootCdrom: ionoscloud.NewResourceReference(newBootDeviceID)}
-		if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
-			return err
-		}
-		// detach old
+		// detach old cdrom
 		apiResponse, err = ss.Client.ServersApi.DatacentersServersCdromsDelete(ctx, datacenterID, serverID, oldBootDeviceID).Execute()
 		if err != nil {
 			return err
@@ -238,9 +235,10 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return errState
 		}
+		log.Printf("[DEBUG] detached CDROM image from server: serverId: %s, imageId: %s\n", serverID, oldBootDeviceID)
 
 	case BootDeviceTypeVolume:
-		// just update with the new one, whatever it might be
+		// no cdrom is detached, only update to the new boot device, regardless of type
 		sp := ionoscloud.ServerProperties{BootVolume: ionoscloud.NewResourceReference(newBootDeviceID)}
 		if strings.EqualFold(newBdType, BootDeviceTypeCDROM) {
 			sp = ionoscloud.ServerProperties{BootCdrom: ionoscloud.NewResourceReference(newBootDeviceID)}
