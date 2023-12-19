@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -200,6 +199,25 @@ func dataSourceK8sCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"public": {
+				Type:        schema.TypeBool,
+				Description: "The indicator if the cluster is public or private.",
+				Computed:    true,
+			},
+			"nat_gateway_ip": {
+				Type:        schema.TypeString,
+				Description: "The NAT gateway IP of the cluster if the cluster is private.",
+				Computed:    true,
+			},
+			"node_subnet": {
+				Type:        schema.TypeString,
+				Description: "The node subnet of the cluster, if the cluster is private.",
+				Computed:    true,
+			},
+			"location": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"node_pools": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -211,11 +229,6 @@ func dataSourceK8sCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			//"public": {
-			//	Type:        schema.TypeBool,
-			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
-			//	Computed:    true,
-			//},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
 				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +

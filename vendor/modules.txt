@@ -21,8 +21,6 @@ github.com/ProtonMail/go-crypto/openpgp/s2k
 # github.com/agext/levenshtein v1.2.3
 ## explicit
 github.com/agext/levenshtein
-# github.com/apparentlymart/go-textseg/v13 v13.0.0
-## explicit; go 1.16
 # github.com/apparentlymart/go-textseg/v15 v15.0.0
 ## explicit; go 1.16
 github.com/apparentlymart/go-textseg/v15/textseg
@@ -216,11 +214,9 @@ github.com/ionos-cloud/sdk-go-logging
 # github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-vm-autoscaling
-# github.com/ionos-cloud/sdk-go/v6 v6.1.10
+# github.com/ionos-cloud/sdk-go/v6 v6.1.11
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go/v6
-# github.com/jhump/protoreflect v1.15.1
-## explicit; go 1.18
 # github.com/kr/pretty v0.3.0
 ## explicit; go 1.12
 # github.com/mattn/go-colorable v0.1.13
