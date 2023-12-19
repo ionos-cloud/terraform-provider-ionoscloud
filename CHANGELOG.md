@@ -1,4 +1,8 @@
-## 6.4.11 (upcoming release)
+## 6.4.12
+### Features
+- Add `ionoscloud_server_boot_device_selection` resource for selecting the boot device of `ionoscloud_server`, `ionoscloud_vcpu_server` and `ionoscloud_cube_server` resources
+
+## 6.4.11
 ### Documentation
 - Refactor readme files to better explain the usage of the provider
 
