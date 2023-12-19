@@ -1,4 +1,9 @@
-## 6.4.11 (upcoming release)
+## 6.4.12 (upcoming release)
+
+### Fixes
+- `is_system_user` is actually only read-only. You cannot actually set it.
+- 
+## 6.4.11
 ### Documentation
 - Refactor readme files to better explain the usage of the provider
 
