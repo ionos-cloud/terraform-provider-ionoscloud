@@ -21,19 +21,20 @@ func resourceServerBootDeviceSelection() *schema.Resource {
 		ReadContext:   resourceServerBootDeviceSelectionRead,
 		UpdateContext: resourceServerBootDeviceSelectionUpdate,
 		DeleteContext: resourceServerBootDeviceSelectionDelete,
-		CustomizeDiff: checkBootDeviceSelectorImmutableFields,
 		Schema: map[string]*schema.Schema{
 
 			"datacenter_id": {
 				Type:             schema.TypeString,
 				Description:      "ID of the Datacenter that holds the server for which the boot volume is selected",
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"server_id": {
 				Type:             schema.TypeString,
 				Description:      "ID of the Server for which the boot device will be selected.",
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"boot_device_id": {
@@ -51,19 +52,6 @@ func resourceServerBootDeviceSelection() *schema.Resource {
 
 		Timeouts: &resourceDefaultTimeouts,
 	}
-}
-
-func checkBootDeviceSelectorImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-
-	if diff.Id() == "" {
-		return nil
-	}
-
-	if diff.HasChange("server_id") {
-		return fmt.Errorf("server_id %s", ImmutableError)
-	}
-
-	return nil
 }
 
 func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

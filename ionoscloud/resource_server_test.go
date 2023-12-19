@@ -820,7 +820,7 @@ func TestAccServerBootDeviceSelection(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "boot_volume", constant.ServerResource+"."+constant.ServerTestResource, "inline_volume_ids.0"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", ""),
 				)},
-			// The server object is updated 'outside' of the resource, so the state of the server resource won't be won't be refreshed in the same step
+			// The server object is updated 'outside' of the resource, so the state of the server resource won't be refreshed in the same step
 			{
 				Config: testExternalVolumeSelection,
 				Check: resource.ComposeTestCheckFunc(
