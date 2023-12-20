@@ -152,7 +152,6 @@ resource ` + constant.PsqlUserResource + ` ` + constant.UserTestResource + ` {
   ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id 
   ` + usernameAttribute + ` = "` + usernameValue + `"
   ` + passwordAttribute + ` = ` + constant.RandomPassword + `.user_password.result
-  ` + isSystemUserAttribute + ` = ` + isSystemUserValue + `
 }
 
 resource ` + constant.RandomPassword + ` "cluster_password" {

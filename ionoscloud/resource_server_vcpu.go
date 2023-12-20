@@ -48,6 +48,8 @@ func resourceVCPUServer() *schema.Resource {
 			"boot_cdrom": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
+				Deprecated:       "Please use the 'ionoscloud_server_boot_device_selection' resource for managing the boot device of the server.",
 				Description:      "The associated boot drive, if any. Must be the UUID of a bootable CDROM image that can be retrieved using the ionoscloud_image data source.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},

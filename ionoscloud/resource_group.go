@@ -229,15 +229,11 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	d.SetId(*group.Id)
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return diag.FromErr(errState)
 	}
 
 	//add users to group if any is provided
@@ -331,11 +327,9 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a group ID %s %w", d.Id(), err))
 		return diags
 	}
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	if d.HasChange("user_id") {
@@ -400,11 +394,8 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		return diags
 	}
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	d.SetId("")
@@ -607,9 +598,7 @@ func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.Resou
 
 	log.Printf("[INFO] Added user %s to group %s", userId, groupId)
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		return errState
 	}
 
@@ -628,9 +617,7 @@ func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.
 
 	log.Printf("[INFO] Deleted user %s from group %s", userId, groupId)
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return errState
 	}
 

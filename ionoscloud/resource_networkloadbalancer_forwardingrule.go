@@ -8,9 +8,11 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -31,14 +33,16 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 				Required:    true,
 			},
 			"algorithm": {
-				Type:        schema.TypeString,
-				Description: "Algorithm for the balancing.",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "Algorithm for the balancing.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.ForwardingRuleAlgorithms, true)),
 			},
 			"protocol": {
-				Type:        schema.TypeString,
-				Description: "Protocol of the balancing.",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "Protocol of the balancing.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HTTP", "TCP"}, true)),
 			},
 			"listener_ip": {
 				Type:        schema.TypeString,
@@ -110,6 +114,13 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "Weight parameter is used to adjust the target VM's weight relative to other target VMs",
 							Required:    true,
+						},
+						"proxy_protocol": {
+							Type:             schema.TypeString,
+							Description:      "Proxy protocol version",
+							Optional:         true,
+							Default:          "none",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.LBTargetProxyProtocolVersions, true)),
 						},
 						"health_check": {
 							Type:        schema.TypeList,
@@ -256,15 +267,11 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 
 	d.SetId(*networkLoadBalancerForwardingRuleResp.Id)
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return diag.FromErr(errState)
 	}
 
 	return resourceNetworkLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -301,8 +308,12 @@ func getTargetsData(targets interface{}) ([]ionoscloud.NetworkLoadBalancerForwar
 			} else {
 				diags := diag.FromErr(fmt.Errorf("weight must be provided for network loadbalancer forwarding rule target"))
 				return nil, diags
-
 			}
+
+			if proxy, proxyOk := targetMap["proxy_protocol"].(string); proxyOk {
+				target.ProxyProtocol = &proxy
+			}
+
 			if healthCheck, healthCheckOk := targetMap["health_check"].([]interface{}); healthCheckOk {
 				if len(healthCheck) > 0 {
 					healthCheckMap := healthCheck[0].(map[string]interface{})
@@ -462,10 +473,8 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 		return diags
 	}
 
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	return resourceNetworkLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -485,11 +494,8 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *sch
 		return diags
 	}
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	d.SetId("")
@@ -622,6 +628,10 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 
 				if target.Weight != nil {
 					targetEntry["weight"] = *target.Weight
+				}
+
+				if target.ProxyProtocol != nil {
+					targetEntry["proxy_protocol"] = *target.ProxyProtocol
 				}
 
 				if target.HealthCheck != nil {

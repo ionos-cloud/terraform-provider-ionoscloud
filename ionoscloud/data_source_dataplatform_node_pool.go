@@ -14,6 +14,7 @@ import (
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func dataSourceDataplatformNodePool() *schema.Resource {
@@ -23,7 +24,7 @@ func dataSourceDataplatformNodePool() *schema.Resource {
 			"id": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(constant.DataPlatformNameRegexConstraint), "")),
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -115,7 +116,7 @@ func dataSourceDataplatformNodePool() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "The UUID of an existing Dataplatform cluster",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(constant.DataPlatformNameRegexConstraint), "")),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

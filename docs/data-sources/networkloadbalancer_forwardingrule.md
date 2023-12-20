@@ -62,6 +62,7 @@ The following attributes are returned by the datasource:
     * `ip` -  IP of a balanced target VM.
     * `port` - Port of the balanced target service. (range: 1 to 65535).
     * `weight` - Weight parameter is used to adjust the target VM's weight relative to other target VMs.
+    * `proxy_protocol` - The proxy protocol version.
     * `health_check` -  Health check attributes for Network Load Balancer forwarding rule target.
         * `check` - Check specifies whether the target VM's health is checked.
         * `check_interval` - CheckInterval determines the duration (in milliseconds) between consecutive health checks. If unspecified a default of 2000 ms is used.

@@ -1663,9 +1663,12 @@ resource "random_string" "simple_string" {
 }
 `
 
+// K8s values
+
 const K8sVersion = "1.26.4"
 const UpgradedK8sVersion = "1.26.6"
 const K8sBucket = "test_k8s_terraform_v7"
+const K8sPrivateClusterNodeSubnet = "192.168.0.0/16"
 
 // DNS test constants: configs, attributes and values.
 
@@ -1689,17 +1692,18 @@ resource ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestResourceName +
 
 // DNS Records constants
 const recordNameAttribute = "name"
-const recordNameValue = "testrecord"
+const recordNameValue = "example.com"
 const recordTypeAttribute = "type"
-const recordTypeValue = "CNAME"
+const recordTypeValue = "MX"
 const recordContentAttribute = "content"
-const recordContentValue = "1.2.3.4"
-const recordUpdatedContentValue = "4.3.2.1"
+const recordContentValue = "mail.example.com"
+const recordUpdatedContentValue = "updated.example.com"
 const recordTtlAttribute = "ttl"
 const recordTtlValue = "2000"
 const recordUpdatedTtlValue = "3600"
 const recordPriorityAttribute = "priority"
 const recordPriorityValue = "1024"
+const recordUpdatedPriorityValue = "2048"
 const recordEnabledAttribute = "enabled"
 const recordEnabledValue = "true"
 const recordUpdatedEnabledValue = "false"

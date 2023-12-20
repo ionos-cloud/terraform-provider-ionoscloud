@@ -804,6 +804,49 @@ func TestAccServerWithLabels(t *testing.T) {
 	})
 }
 
+func TestAccServerBootDeviceSelection(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ExternalProviders: randomProviderVersion343(),
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMultipleBootDevices,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "boot_volume", constant.ServerResource+"."+constant.ServerTestResource, "inline_volume_ids.0"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", ""),
+				)},
+			// The server object is updated 'outside' of the resource, so the state of the server resource won't be refreshed in the same step
+			{
+				Config: testExternalVolumeSelection,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", ""),
+				)},
+			{
+				Config: testImageCdromSelection,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "boot_volume", constant.VolumeResource+"."+constant.VolumeTestResource, "id"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", ""),
+				)},
+			{
+				Config: testAccMultipleBootDevices,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", `data.`+constant.ImageResource+"."+constant.ImageTestResource, "id"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_volume", ""),
+				)},
+			{
+				Config: testAccMultipleBootDevices,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "boot_volume", constant.ServerResource+"."+constant.ServerTestResource, "inline_volume_ids.0"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", ""),
+				)},
+		},
+	})
+}
+
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
@@ -1863,5 +1906,39 @@ const testAccCheckServerConfigNoBootVolumeRemoveServer = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
+}
+`
+
+const testAccMultipleBootDevices = testAccCheckServerConfigBasic + `
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
+  server_id         = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  datacenter_id     = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name              = "External Volume 1"
+  size              = 10
+  disk_type         = "SSD"
+  availability_zone = "AUTO"
+  image_name        = "debian:latest"
+  image_password    = ` + constant.RandomPassword + `.server_image_password.result
+}
+data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
+  name     = "ubuntu-22.04"
+  location = "us/las"
+  type     = "CDROM"
+}
+`
+
+const testExternalVolumeSelection = testAccMultipleBootDevices + `
+resource ` + constant.ServerBootDeviceSelectionResource + ` ` + constant.TestServerBootDeviceSelectionResource + ` {
+  datacenter_id  = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id      = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  boot_device_id = ` + constant.VolumeResource + `.` + constant.VolumeTestResource + `.id
+}
+`
+
+const testImageCdromSelection = testAccMultipleBootDevices + `
+resource ` + constant.ServerBootDeviceSelectionResource + ` ` + constant.TestServerBootDeviceSelectionResource + ` {
+  datacenter_id  = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id      = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  boot_device_id = data.` + constant.ImageResource + `.` + constant.ImageTestResource + `.id
 }
 `

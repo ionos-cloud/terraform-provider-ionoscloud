@@ -44,7 +44,7 @@ Either `email` or `id` can be provided. If no argument is set, the provider will
 
 The following attributes are returned by the datasource:
 
-* `id` - The id of the LAN.
+* `id` - The id of the user.
 * `administrator` - The group has permission to edit privileges on this resource.
 * `email` - The e-mail address for the user.
 * `first_name` - The first name for the user.

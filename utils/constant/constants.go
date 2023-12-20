@@ -100,10 +100,11 @@ const (
 
 // K8s Constants
 const (
-	K8sClusterResource         = "ionoscloud_k8s_cluster"
-	K8sClusterTestResource     = "test_k8s_cluster"
-	K8sClusterDataSourceById   = "test_k8s_cluster_id"
-	K8sClusterDataSourceByName = "test_k8s_cluster_name"
+	K8sClusterResource            = "ionoscloud_k8s_cluster"
+	K8sClusterTestResource        = "test_k8s_cluster"
+	PrivateK8sClusterTestResource = "test_private_k8s_cluster"
+	K8sClusterDataSourceById      = "test_k8s_cluster_id"
+	K8sClusterDataSourceByName    = "test_k8s_cluster_name"
 
 	K8sNodePoolResource         = "ionoscloud_k8s_node_pool"
 	K8sNodePoolNodesResource    = "ionoscloud_k8s_node_pool_nodes"
@@ -264,8 +265,10 @@ const (
 	DataplatformVersionsDataSource           = "ionoscloud_dataplatform_versions"
 	DataplatformNodePoolsTestDataSource      = "test_dataplatform_node_pools"
 	DataplatformVersionsTestDataSource       = "test_dataplatform_versions"
-	// DataPlatformVersion lowest 'available' version is now 23.4
-	DataPlatformVersion = "23.4"
+	// DataPlatformVersion lowest 'available' version is now 23.7
+	DataPlatformVersion             = "23.7"
+	DataPlatformNameRegexConstraint = "^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$\""
+	DataPlatformRegexNameError      = "name should match " + DataPlatformNameRegexConstraint
 )
 
 // DNS Constants
@@ -329,4 +332,33 @@ const (
 	VMStateStart    = "RUNNING"
 	VMStateStop     = "SHUTOFF"
 )
+
+const (
+	BootDeviceTypeCDROM  = "cdrom"
+	BootDeviceTypeVolume = "volume"
+)
+
+const (
+	// FlowlogBucket created on account that runs CI
+	FlowlogBucket        = "flowlog-acceptance-test"
+	FlowlogBucketUpdated = "flowlog-acceptance-test-updated"
+)
+
 const RepoURL = "https://github.com/ionos-cloud/terraform-provider-ionoscloud"
+
+const (
+	AutoscalingGroupResource              = "ionoscloud_autoscaling_group"
+	AutoscalingGroupTestResource          = "test_autoscaling_group"
+	AutoscalingGroupDataSourceById        = "test_autoscaling_group_id"
+	AutoscalingGroupDataSourceByName      = "test_autoscaling_group_name"
+	AutoscalingGroupServersResource       = "ionoscloud_autoscaling_group_servers"
+	AutoscalingGroupServersTestDataSource = "test_autoscaling_servers"
+)
+
+const (
+	ServerBootDeviceSelectionResource     = "ionoscloud_server_boot_device_selection"
+	TestServerBootDeviceSelectionResource = "boot_device_selection_example"
+)
+
+var ForwardingRuleAlgorithms = []string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}
+var LBTargetProxyProtocolVersions = []string{"none", "v1", "v2", "v2ssl"}

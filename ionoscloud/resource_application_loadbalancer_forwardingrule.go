@@ -242,15 +242,11 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 
 	d.SetId(*albForwardingRuleResp.Id)
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return diag.FromErr(errState)
 	}
 
 	return resourceApplicationLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -351,10 +347,8 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 		return diags
 	}
 
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	return resourceApplicationLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -374,11 +368,8 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 		return diags
 	}
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	d.SetId("")

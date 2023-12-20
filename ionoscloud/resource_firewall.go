@@ -125,16 +125,13 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 	d.SetId(*fw.Id)
 
 	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			log.Printf("[DEBUG] firewall resource failed to be created")
-			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule dcId: %s server_id: %s  "+
-			"nic_id: %s %w", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), err))
-		return diags
+		return diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule dcId: %s server_id: %s  "+
+			"nic_id: %s %w", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), errState))
 	}
 
 	return resourceFirewallRead(ctx, d, meta)
@@ -180,11 +177,8 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(fmt.Errorf("error getting state change for firewall patch %w", errState))
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(fmt.Errorf("error getting state change for firewall patch %w", errState))
 	}
 
 	return resourceFirewallRead(ctx, d, meta)
@@ -204,11 +198,8 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(fmt.Errorf("error getting state change for firewall delete %w", errState))
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(fmt.Errorf("error getting state change for firewall delete %w", errState))
 	}
 
 	d.SetId("")

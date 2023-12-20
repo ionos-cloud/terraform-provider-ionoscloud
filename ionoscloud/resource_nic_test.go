@@ -18,7 +18,7 @@ import (
 
 func TestAccNicBasic(t *testing.T) {
 	var nic ionoscloud.Nic
-	volumeName := "volume"
+	name := "testNic"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -29,11 +29,11 @@ func TestAccNicBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckNicDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNicConfigBasic, volumeName),
+				Config: fmt.Sprintf(testAccCheckNicConfigBasic, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNICExists(constant.FullNicResourceName, &nic),
 					resource.TestCheckResourceAttrSet(constant.FullNicResourceName, "pci_slot"),
-					resource.TestCheckResourceAttr(constant.FullNicResourceName, "name", volumeName),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "name", name),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcp", "true"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcpv6", "true"),
 					resource.TestCheckResourceAttrSet(constant.FullNicResourceName, "ipv6_cidr_block"),
@@ -42,6 +42,10 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_type", "INGRESS"),
 					resource.TestCheckResourceAttrPair(constant.FullNicResourceName, "ips.0", "ionoscloud_ipblock.test_server", "ips.0"),
 					resource.TestCheckResourceAttrPair(constant.FullNicResourceName, "ips.1", "ionoscloud_ipblock.test_server", "ips.1"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "flowlog.0.name", "test_flowlog"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "flowlog.0.action", "ALL"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "flowlog.0.direction", "INGRESS"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "flowlog.0.bucket", constant.FlowlogBucket),
 				),
 			},
 			{
@@ -58,6 +62,10 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "lan", constant.FullNicResourceName, "lan"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ips", constant.FullNicResourceName, "ips"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.name", constant.FullNicResourceName, "flowlog.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.action", constant.FullNicResourceName, "flowlog.0.action"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.direction", constant.FullNicResourceName, "flowlog.0.direction"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.bucket", constant.FullNicResourceName, "flowlog.0.bucket"),
 				),
 			},
 			{
@@ -74,6 +82,10 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "lan", constant.FullNicResourceName, "lan"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ips", constant.FullNicResourceName, "ips"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.name", constant.FullNicResourceName, "flowlog.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.action", constant.FullNicResourceName, "flowlog.0.action"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.direction", constant.FullNicResourceName, "flowlog.0.direction"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.bucket", constant.FullNicResourceName, "flowlog.0.bucket"),
 				),
 			},
 			{
@@ -98,6 +110,10 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_type", "BIDIRECTIONAL"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "flowlog.0.name", "test_flowlog_updated"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "flowlog.0.action", "REJECTED"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "flowlog.0.direction", "EGRESS"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "flowlog.0.bucket", constant.FlowlogBucketUpdated),
 				),
 			},
 			{
@@ -105,6 +121,7 @@ func TestAccNicBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
+					resource.TestCheckNoResourceAttr(constant.FullNicResourceName, "flowlog.%"),
 				),
 			},
 		},
@@ -231,6 +248,12 @@ resource ` + constant.NicResource + ` "database_nic" {
   firewall_type = "INGRESS"
   ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
   name = "%s"
+  flowlog {
+    name = "test_flowlog"
+    action = "ALL"
+    direction = "INGRESS"
+    bucket = "` + constant.FlowlogBucket + `"
+  }
 }
 `
 
@@ -251,6 +274,12 @@ resource ` + constant.NicResource + ` "database_nic" {
                 cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12),2),
                 cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12),3)
              ]
+  flowlog {
+    name = "test_flowlog_updated"
+    action = "REJECTED"
+    direction = "EGRESS"
+    bucket = "` + constant.FlowlogBucketUpdated + `"
+  }
 }
 
 data ` + constant.NicResource + ` test_nic_data {

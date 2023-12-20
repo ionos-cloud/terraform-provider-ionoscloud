@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/iancoleman/strcase"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/crypto/ssh"
 )
 
 const DefaultTimeout = 60 * time.Minute
@@ -321,4 +322,57 @@ func IsValueInSliceOfMap[T comparable](sliceOfMaps []interface{}, key string, va
 		}
 	}
 	return false
+}
+
+// DecodeStructToMap SDK struct to map[string]interface{}
+func DecodeStructToMap(input interface{}) (map[string]interface{}, error) {
+	var result map[string]interface{}
+	config := &mapstructure.DecoderConfig{
+		Metadata:         nil,
+		TagName:          "json",
+		MatchName:        IsCamelCaseEqualToSnakeCase,
+		WeaklyTypedInput: true,
+		ErrorUnused:      false,
+		DecodeHook:       PointerEmptyToNil(),
+		ErrorUnset:       false,
+		ZeroFields:       false,
+		Result:           &result,
+	}
+	decoder, err := mapstructure.NewDecoder(config)
+	if err != nil {
+		return result, err
+	}
+	err = decoder.Decode(input)
+	if err != nil {
+		return nil, err
+	}
+
+	newResult := make(map[string]interface{})
+	for k, v := range result {
+		newResult[strcase.ToSnake(k)] = v
+	}
+
+	return newResult, nil
+}
+
+func IsCamelCaseEqualToSnakeCase(a, b string) bool {
+	return strings.EqualFold(strcase.ToSnake(a), b)
+}
+
+// ReadPublicKey Reads public key from file or directly provided and returns key string if valid
+func ReadPublicKey(pathOrKey string) (string, error) {
+	var err error
+	bytes := []byte(pathOrKey)
+
+	if CheckFileExists(pathOrKey) {
+		log.Printf("[DEBUG] ssh key has been provided in the following file: %s", pathOrKey)
+		if bytes, err = os.ReadFile(pathOrKey); err != nil {
+			return "", err
+		}
+	}
+	pubKey, _, _, _, err := ssh.ParseAuthorizedKey(bytes)
+	if err != nil {
+		return "", fmt.Errorf("error for public key %s, check if path is correct or key is in correct format", pathOrKey)
+	}
+	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
 }

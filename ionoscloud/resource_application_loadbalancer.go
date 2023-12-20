@@ -12,6 +12,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func resourceApplicationLoadBalancer() *schema.Resource {
@@ -61,6 +63,16 @@ func resourceApplicationLoadBalancer() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+			},
+			"flowlog": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     cloudapiflowlog.FlowlogSchemaResource,
+				MaxItems: 1,
+				Description: `Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination 
+IP addresses, source and destination ports, number of packets, amount of bytes, 
+the start and end time of the recording, and the type of protocol – 
+and log the extent to which your instances are being accessed.`,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -137,15 +149,36 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 
 	d.SetId(*applicationLoadbalancer.Id)
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return diag.FromErr(errState)
+	}
+
+	if flowLogs, ok := d.GetOk("flowlog"); ok {
+		fw := cloudapiflowlog.Service{
+			D:      d,
+			Client: client,
+		}
+		if flowLogList, ok := flowLogs.([]any); ok {
+			for _, flowLogData := range flowLogList {
+				if flowLogMap, ok := flowLogData.(map[string]interface{}); ok {
+					flowLog := cloudapiflowlog.GetFlowlogFromMap(flowLogMap)
+					err := fw.CreateOrPatchForALB(ctx, dcId, d.Id(), "", flowLog)
+					if err != nil {
+						_ = d.Set("", nil)
+						// flowlog creation failed, delete the alb
+						diags := resourceApplicationLoadBalancerDelete(ctx, d, meta)
+						if diags != nil {
+							log.Printf("[ERROR] could not delete alb %v", diags)
+						}
+						diags = diag.FromErr(fmt.Errorf("error creating flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)))
+						return diags
+					}
+				}
+			}
+		}
 	}
 
 	return resourceApplicationLoadBalancerRead(ctx, d, meta)
@@ -168,11 +201,20 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 	}
 
 	log.Printf("[INFO] Successfully retreived application loadbalancer %s: %+v", d.Id(), applicationLoadBalancer)
-
-	if err := setApplicationLoadBalancerData(d, &applicationLoadBalancer); err != nil {
-		return diag.FromErr(err)
+	fw := cloudapiflowlog.Service{
+		Client: client,
+		Meta:   meta,
+		D:      d,
 	}
-	return nil
+	flowLog, apiResponse, err := fw.GetFlowLogForALB(ctx, dcId, *applicationLoadBalancer.Id, 1)
+	if err != nil {
+		if !apiResponse.HttpNotFound() {
+			diags := diag.FromErr(fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)))
+			return diags
+		}
+	}
+
+	return diag.FromErr(setApplicationLoadBalancerData(d, &applicationLoadBalancer, flowLog))
 }
 
 func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -227,6 +269,34 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 		request.Properties.LbPrivateIps = &privateIps
 	}
 
+	if d.HasChange("flowlog") {
+		old, newV := d.GetChange("flowlog")
+		var firstFlowLogId = ""
+		if old != nil && len(old.([]any)) > 0 {
+			firstFlowLogId = old.([]any)[0].(map[string]any)["id"].(string)
+		}
+
+		if newV.([]any) != nil && len(newV.([]any)) > 0 {
+			for _, val := range newV.([]any) {
+				if flowLogMap, ok := val.(map[string]any); ok {
+					flowLog := cloudapiflowlog.GetFlowlogFromMap(flowLogMap)
+					fw := cloudapiflowlog.Service{
+						D:      d,
+						Client: client,
+					}
+					err := fw.CreateOrPatchForALB(ctx, dcId, d.Id(), firstFlowLogId, flowLog)
+					if err != nil {
+						//if we have a create that failed, we do not want to save in state
+						// saving in state would mean a diff that would force a re-create
+						if firstFlowLogId == "" {
+							_ = d.Set("flowlog", nil)
+						}
+						return diag.FromErr(err)
+					}
+				}
+			}
+		}
+	}
 	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersPatch(ctx, dcId, d.Id()).ApplicationLoadBalancerProperties(*request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -235,10 +305,8 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 		return diags
 	}
 
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	return resourceApplicationLoadBalancerRead(ctx, d, meta)
@@ -257,11 +325,8 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 		return diags
 	}
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	d.SetId("")
@@ -295,13 +360,23 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, fmt.Errorf("error while setting datacenter_id property for alb %q: %w", albId, err)
 	}
-
-	if err := setApplicationLoadBalancerData(d, &alb); err != nil {
+	fw := cloudapiflowlog.Service{
+		Client: client,
+		Meta:   meta,
+		D:      d,
+	}
+	flowLog, apiResponse, err := fw.GetFlowLogForALB(ctx, datacenterId, d.Id(), 0)
+	if err != nil {
+		if !apiResponse.HttpNotFound() {
+			return nil, fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse))
+		}
+	}
+	if err := setApplicationLoadBalancerData(d, &alb, flowLog); err != nil {
 		return nil, err
 	}
 	return []*schema.ResourceData{d}, nil
 }
-func setApplicationLoadBalancerData(d *schema.ResourceData, applicationLoadBalancer *ionoscloud.ApplicationLoadBalancer) error {
+func setApplicationLoadBalancerData(d *schema.ResourceData, applicationLoadBalancer *ionoscloud.ApplicationLoadBalancer, flowLog *ionoscloud.FlowLog) error {
 
 	if applicationLoadBalancer.Id != nil {
 		d.SetId(*applicationLoadBalancer.Id)
@@ -341,6 +416,19 @@ func setApplicationLoadBalancerData(d *schema.ResourceData, applicationLoadBalan
 			if err != nil {
 				return fmt.Errorf("error while setting lb_private_ips property for application loadbalancer %s: %w", d.Id(), err)
 			}
+		}
+	}
+
+	if flowLog != nil {
+		var flowlogs []map[string]any
+		result, err := utils.DecodeStructToMap(flowLog.Properties)
+		if err != nil {
+			return err
+		}
+		result["id"] = *flowLog.Id
+		flowlogs = append(flowlogs, result)
+		if err := d.Set("flowlog", flowlogs); err != nil {
+			return fmt.Errorf("error setting flowlog %w", err)
 		}
 	}
 	return nil

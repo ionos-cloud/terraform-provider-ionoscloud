@@ -1,7 +1,7 @@
 /*
  * IONOS Logging REST API
  *
- * Logging Service is a service that provides a centralized logging system where users are able to push and aggregate their system or application logs. This service also provides a visualization platform where users are able to observe, search and filter the logs and also create dashboards and alerts for their data points. This service can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an API. The API allows you to create logging pipelines or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * Logging as a Service (LaaS) is a service that provides a centralized logging system where users are able to push and aggregate their system or application logs. This service also provides a visualization platform where users are able to observe, search and filter the logs and also create dashboards and alerts for their data points. This service can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an API. The API allows you to create logging pipelines or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
  *
  * API version: 0.0.1
  */
@@ -27,8 +27,8 @@ type Metadata struct {
 	LastModifiedBy         *string    `json:"lastModifiedBy,omitempty"`
 	LastModifiedByUserId   *string    `json:"lastModifiedByUserId,omitempty"`
 	LastModifiedByUserUuid *string    `json:"lastModifiedByUserUuid,omitempty"`
-	// The current status reported back by the pipeline.
-	Status *string `json:"status,omitempty"`
+	// The current state reported back by the pipeline.
+	State *string `json:"state,omitempty"`
 }
 
 // NewMetadata instantiates a new Metadata object
@@ -367,38 +367,38 @@ func (o *Metadata) HasLastModifiedByUserUuid() bool {
 	return false
 }
 
-// GetStatus returns the Status field value
+// GetState returns the State field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Metadata) GetStatus() *string {
+func (o *Metadata) GetState() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Status
+	return o.State
 
 }
 
-// GetStatusOk returns a tuple with the Status field value
+// GetStateOk returns a tuple with the State field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetStatusOk() (*string, bool) {
+func (o *Metadata) GetStateOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Status, true
+	return o.State, true
 }
 
-// SetStatus sets field value
-func (o *Metadata) SetStatus(v string) {
+// SetState sets field value
+func (o *Metadata) SetState(v string) {
 
-	o.Status = &v
+	o.State = &v
 
 }
 
-// HasStatus returns a boolean if a field has been set.
-func (o *Metadata) HasStatus() bool {
-	if o != nil && o.Status != nil {
+// HasState returns a boolean if a field has been set.
+func (o *Metadata) HasState() bool {
+	if o != nil && o.State != nil {
 		return true
 	}
 
@@ -439,8 +439,8 @@ func (o Metadata) MarshalJSON() ([]byte, error) {
 		toSerialize["lastModifiedByUserUuid"] = o.LastModifiedByUserUuid
 	}
 
-	if o.Status != nil {
-		toSerialize["status"] = o.Status
+	if o.State != nil {
+		toSerialize["state"] = o.State
 	}
 
 	return json.Marshal(toSerialize)

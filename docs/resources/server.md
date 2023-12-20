@@ -246,7 +246,6 @@ resource "ionoscloud_server" "test" {
     size         = 50
     licence_type = "OTHER"
   }
-  boot_cdrom = data.ionoscloud_image.cdrom.id
   nic {
     lan    = 1
     dhcp   = true
@@ -272,7 +271,7 @@ resource "ionoscloud_server" "test" {
 - `nic` - (Optional) See the [Nic](nic.md) section.
 - `firewall` - (Optional) Allows to define firewall rules inline in the server. See the [Firewall](firewall.md) section.
 - `boot_volume` - (Computed) The associated boot volume.
-- `boot_cdrom` - (Optional)[string] The associated boot drive, if any. Must be the UUID of a bootable CDROM image that can be retrieved using the [ionoscloud_image](../data-sources/image.md) data source.
+- `boot_cdrom` - ***DEPRECATED*** Please refer to [ionoscloud_server_boot_device_selection](server_boot_device_selection.md) (Optional)[string] The associated boot drive, if any. Must be the UUID of a bootable CDROM image that can be retrieved using the [ionoscloud_image](../data-sources/image.md) data source.
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.

@@ -44,7 +44,6 @@ func resourceDbaasPgSqlUser() *schema.Resource {
 				Type:        schema.TypeBool,
 				Description: "Describes whether this user is a system user or not. A system user cannot be updated or deleted.",
 				Computed:    true,
-				Optional:    true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -64,14 +63,9 @@ func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, m
 	request.Properties.Username = &username
 	request.Properties.Password = &password
 
-	if isSystemUser, ok := d.GetOk("is_system_user"); ok {
-		isSystemUserValue := isSystemUser.(bool)
-		request.Properties.System = &isSystemUserValue
-	}
-
 	user, _, err := client.CreateUser(ctx, clusterId, request)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while adding the user: %s to the PgSql cluster with ID: %s, error: %w", username, clusterId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while adding the user: %s to the PgSql cluster with ID: %s, error: %w", username, clusterId, err))
 	}
 	d.SetId(*user.Id)
 	// Wait for the cluster to be ready again (when creating/updating the user, the cluster enters

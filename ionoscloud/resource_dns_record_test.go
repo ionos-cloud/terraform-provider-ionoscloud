@@ -34,6 +34,7 @@ func TestAccDNSRecord(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordPriorityAttribute, recordPriorityValue),
 				),
 			},
 			{
@@ -45,6 +46,7 @@ func TestAccDNSRecord(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordPriorityAttribute, recordPriorityValue),
 				),
 			},
 			{
@@ -56,6 +58,7 @@ func TestAccDNSRecord(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordPriorityAttribute, recordPriorityValue),
 				),
 			},
 			{
@@ -67,6 +70,7 @@ func TestAccDNSRecord(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordPriorityAttribute, recordPriorityValue),
 				),
 			},
 			{
@@ -98,6 +102,7 @@ func TestAccDNSRecord(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordContentAttribute, recordUpdatedContentValue),
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTtlAttribute, recordUpdatedTtlValue),
 					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordEnabledAttribute, recordUpdatedEnabledValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordPriorityAttribute, recordUpdatedPriorityValue),
 				),
 			},
 		},
@@ -217,7 +222,7 @@ resource ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestResourceNa
 	` + recordTypeAttribute + ` = "` + recordTypeValue + `"
 	` + recordContentAttribute + ` = "` + recordUpdatedContentValue + `"
 	` + recordTtlAttribute + ` = ` + recordUpdatedTtlValue + `
-	` + recordPriorityAttribute + ` = ` + recordPriorityValue + `
+	` + recordPriorityAttribute + ` = ` + recordUpdatedPriorityValue + `
 	` + recordEnabledAttribute + ` = ` + recordUpdatedEnabledValue + `
 }
 `

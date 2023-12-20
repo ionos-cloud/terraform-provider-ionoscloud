@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -62,6 +63,15 @@ func dataSourceApplicationLoadBalancer() *schema.Resource {
 			"datacenter_id": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"flowlog": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     cloudapiflowlog.FlowlogSchemaDatasource,
+				Description: `Flow logs holistically capture network information such as source and destination 
+IP addresses, source and destination ports, number of packets, amount of bytes, 
+the start and end time of the recording, and the type of protocol – 
+and log the extent to which your instances are being accessed.`,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -147,8 +157,19 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 		applicationLoadBalancer = results[0]
 
 	}
-
-	if err = setApplicationLoadBalancerData(d, &applicationLoadBalancer); err != nil {
+	fw := cloudapiflowlog.Service{
+		Client: client,
+		Meta:   meta,
+		D:      d,
+	}
+	flowLog, apiResponse, err := fw.GetFlowLogForALB(ctx, datacenterId, *applicationLoadBalancer.Id, 2)
+	if err != nil {
+		if !apiResponse.HttpNotFound() {
+			diags := diag.FromErr(fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)))
+			return diags
+		}
+	}
+	if err = setApplicationLoadBalancerData(d, &applicationLoadBalancer, flowLog); err != nil {
 		return diag.FromErr(err)
 	}
 

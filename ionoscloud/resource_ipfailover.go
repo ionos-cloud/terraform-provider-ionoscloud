@@ -3,9 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilan"
 	"log"
 	"strings"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilan"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
@@ -36,7 +37,7 @@ func resourceLanIPFailover() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				Description:      "Failover IP",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.IsIPAddress)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPAddress),
 			},
 			"nicuuid": {
 				Type:             schema.TypeString,
@@ -93,11 +94,8 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(fmt.Errorf("an error occured while patching a lans IP failover group, LAN ID: %s, error: %w", lanId, err))
 	}
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	// Use the IP in order to generate the resource ID
@@ -192,11 +190,8 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 			return diags
 		}
 
-		// Wait, catching any errors
-		_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(errState)
-			return diags
+		if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+			return diag.FromErr(errState)
 		}
 	}
 	return nil
@@ -234,11 +229,8 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 		return diags
 	}
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	d.SetId("")

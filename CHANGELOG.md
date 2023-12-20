@@ -1,4 +1,40 @@
-## 6.4.10 (upcoming release)
+## 6.4.12 (upcoming release)
+### Features
+- Add `ionoscloud_server_boot_device_selection` resource for selecting the boot device of `ionoscloud_server`, `ionoscloud_vcpu_server` and `ionoscloud_cube_server` resources
+
+### Fixes
+- `is_system_user` is actually only read-only. You cannot actually set it.
+- Add `priority` in state for DNS Records
+
+### Features
+- Add parameters for private k8s cluster: `public`, `location`, `nat_gateway_ip`, `node_subnet`
+
+## 6.4.11
+### Documentation
+- Refactor readme files to better explain the usage of the provider
+
+### Features
+- Add `flowlog` to `ionoscloud_nic` resource
+- Add `flowlog` to `ionoscloud_networkloadbalancer` resource
+- Add `flowlog` to `ionoscloud_application_loadbalancer` resource
+- Update dependency for terraform-plugin-sdk v2.30.0
+- Use v6.4.10 of cloudapiv6 sdk
+- #494 add `proxy-protocol` to `ionoscloud_networkloadbalancer_forwarding_rule` resource
+
+### New Product - **Autoscaling**:
+  - `Resources`:
+    - [ionoscloud_autoscaling_group](docs/resources/autoscaling_group.md)
+  - `Data Sources`:
+    - [ionoscloud_autoscaling_group](docs/data-sources/autoscaling_group.md)
+    - [ionoscloud_autoscaling_group_servers](docs/data-sources/autoscaling_group_servers.md)
+
+### Fixes
+- #487. Crash on server import without inline `nic`
+- #503. Use `Location` func for state tracking request instead of getting Location header directly and minor refactor.
+- #497. allow to set empty `name` for `ionoscloud_dns_record`
+- Refactor validation to use `validation.AllDiag` instead of `validation.All`, remove unnecessary usage of `validation.All`
+
+## 6.4.10
 ### Refactor
 - Add `nic` service
 - Use `error.As` for `requestFailed` err
@@ -9,11 +45,10 @@
 - #412 add support to set power state of Enterprise and Cube servers, by adding the new field `vm_state` in `ionoscloud_server`, `ionoscloud_cube_server` and `ionoscloud_vcpu_server `resources
 ### Fixes
 - #467 removing an inline `nic` of the `server` resource from dcd should not throw 404 when running plan or apply after
-- Fix `ionoscloud_ipfailover` resource and solve the problems presented at #432. Now
-it is possible to create and delete multiple `ionoscloud_ipfailover` resources at the same time. The UUID is generated based on the IP of the 
+- #432 Now it is possible to create and delete multiple `ionoscloud_ipfailover` resources at the same time. The UUID is generated based on the IP of the 
 failover group. The resources that are created using Terraform cannot be modified/deleted outside Terraform.
 - Fix `nil` deref error on list for nic datasource
-- Fix image name searching in `ionoscloud_image` and `ionoscloud_volume` as presented at #470. Exact matches are returned correctly now if they exist.
+- #470 fix image name searching in `ionoscloud_image` and `ionoscloud_volume`. Exact matches are returned correctly now if they exist.
 
 ## 6.4.9
 

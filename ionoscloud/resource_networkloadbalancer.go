@@ -8,6 +8,8 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -69,8 +71,19 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"flowlog": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     cloudapiflowlog.FlowlogSchemaResource,
+				MaxItems: 1,
+				Description: `Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination 
+IP addresses, source and destination ports, number of packets, amount of bytes, 
+the start and end time of the recording, and the type of protocol – 
+and log the extent to which your instances are being accessed.`,
+			},
 		},
-		Timeouts: &resourceDefaultTimeouts,
+		Timeouts:      &resourceDefaultTimeouts,
+		CustomizeDiff: ForceNewForFlowlogChanges,
 	}
 }
 
@@ -127,6 +140,20 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
+	if flowLogs, ok := d.GetOk("flowlog"); ok {
+		networkLoadBalancer.Entities = &ionoscloud.NetworkLoadBalancerEntities{
+			Flowlogs: &ionoscloud.FlowLogs{
+				Items: &[]ionoscloud.FlowLog{},
+			},
+		}
+		if flowLogList, ok := flowLogs.([]any); ok {
+			for _, flowLogData := range flowLogList {
+				if flowLog, ok := flowLogData.(map[string]interface{}); ok {
+					*networkLoadBalancer.Entities.Flowlogs.Items = append(*networkLoadBalancer.Entities.Flowlogs.Items, cloudapiflowlog.GetFlowlogFromMap(flowLog))
+				}
+			}
+		}
+	}
 	dcId := d.Get("datacenter_id").(string)
 
 	networkLoadBalancerResp, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPost(ctx, dcId).NetworkLoadBalancer(networkLoadBalancer).Execute()
@@ -140,15 +167,11 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 
 	d.SetId(*networkLoadBalancerResp.Id)
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return diag.FromErr(errState)
 	}
 
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
@@ -159,7 +182,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 
 	dcId := d.Get("datacenter_id").(string)
 
-	networkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcId, d.Id()).Execute()
+	networkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcId, d.Id()).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -239,6 +262,36 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		}
 		request.Properties.LbPrivateIps = &lbPrivateIps
 	}
+
+	if d.HasChange("flowlog") {
+		old, newV := d.GetChange("flowlog")
+		var firstFlowLogId = ""
+		if old != nil && len(old.([]any)) > 0 {
+			firstFlowLogId = old.([]any)[0].(map[string]any)["id"].(string)
+		}
+
+		if newV.([]any) != nil && len(newV.([]any)) > 0 {
+			for _, val := range newV.([]any) {
+				if flowLogMap, ok := val.(map[string]any); ok {
+					flowLog := cloudapiflowlog.GetFlowlogFromMap(flowLogMap)
+					fw := cloudapiflowlog.Service{
+						D:      d,
+						Client: client,
+					}
+					err := fw.CreateOrPatchForNLB(ctx, dcId, d.Id(), firstFlowLogId, flowLog)
+					if err != nil {
+						//if we have a create that failed, we do not want to save in state
+						// saving in state would mean a diff that would force a re-create
+						if firstFlowLogId == "" {
+							_ = d.Set("flowlog", nil)
+						}
+						return diag.FromErr(err)
+					}
+				}
+			}
+		}
+	}
+
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPatch(ctx, dcId, d.Id()).NetworkLoadBalancerProperties(*request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -247,10 +300,8 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		return diags
 	}
 
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
@@ -269,11 +320,8 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 		return diags
 	}
 
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(errState)
 	}
 
 	d.SetId("")
@@ -356,7 +404,22 @@ func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ion
 				return fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %w", d.Id(), err)
 			}
 		}
-
+		if networkLoadBalancer.Entities != nil && networkLoadBalancer.Entities.Flowlogs != nil &&
+			networkLoadBalancer.Entities.Flowlogs.Items != nil && len(*networkLoadBalancer.Entities.Flowlogs.Items) > 0 {
+			var flowlogs []map[string]any
+			for _, flowLog := range *networkLoadBalancer.Entities.Flowlogs.Items {
+				result := map[string]any{}
+				result, err := utils.DecodeStructToMap(flowLog.Properties)
+				if err != nil {
+					return err
+				}
+				result["id"] = *flowLog.Id
+				flowlogs = append(flowlogs, result)
+			}
+			if err := d.Set("flowlog", flowlogs); err != nil {
+				return fmt.Errorf("error setting flowlog %w", err)
+			}
+		}
 	}
 	return nil
 }

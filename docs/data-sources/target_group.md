@@ -59,6 +59,7 @@ The following attributes are returned by the datasource:
   - `ip` - The IP of the balanced target VM.
   - `port` - The port of the balanced target service; valid range is 1 to 65535.
   - `weight` - Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1; targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best use values in the middle of the range to leave room for later adjustments.
+  - `proxy_protocol` - The proxy protocol version.
   - `health_check_enabled` - Makes the target available only if it accepts periodic health check TCP connection attempts; when turned off, the target is considered always available. The health check only consists of a connection attempt to the address and port of the target. Default is True.
   - `maintenance_enabled` - Maintenance mode prevents the target from receiving balanced traffic.
 - `health_check` - Health check attributes for Target Group.

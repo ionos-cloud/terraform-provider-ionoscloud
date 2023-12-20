@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -21,11 +22,16 @@ type Service struct {
 
 // The caller should ignore this error, it only informs that the CUBE server should be suspended after all other updates have been applied.
 var ErrSuspendCubeLast error
+var ServerNotFound error
 
 func (ss *Service) FindById(ctx context.Context, datacenterID, serverID string, depth int32) (*ionoscloud.Server, error) {
 	server, apiResponse, err := ss.Client.ServersApi.DatacentersServersFindById(ctx, datacenterID, serverID).Depth(depth).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
+		if apiResponse.HttpNotFound() {
+			log.Printf("[DEBUG] cannot find server by id in datacenter dcId: %s, serverId: %s\n", datacenterID, serverID)
+			return nil, ServerNotFound
+		}
 		return nil, err
 	}
 	return &server, nil
@@ -37,9 +43,7 @@ func (ss *Service) Delete(ctx context.Context, datacenterID, serverID, ID string
 	if err != nil {
 		return apiResponse, err
 	}
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(ss.Meta, ss.D, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
+	if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutDelete); errState != nil {
 		return apiResponse, fmt.Errorf("an error occured while waiting for server state change on delete dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
 	}
 	return apiResponse, nil
@@ -51,11 +55,8 @@ func (ss *Service) Create(ctx context.Context, datacenterID string) (*ionoscloud
 	if err != nil {
 		return nil, apiResponse, fmt.Errorf("an error occured while creating server for dcId: %s, Response: (%w)", datacenterID, err)
 	}
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(ss.Meta, ss.D, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-	if errState != nil {
-		if cloudapi.IsRequestFailed(err) {
-			// Request failed, so resource was not created, delete resource from state file
+	if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutCreate); errState != nil {
+		if cloudapi.IsRequestFailed(errState) {
 			ss.D.SetId("")
 		}
 		return nil, apiResponse, fmt.Errorf("an error occured while waiting for server state change on create dcId: %s, Response: (%w)", datacenterID, errState)
@@ -64,17 +65,68 @@ func (ss *Service) Create(ctx context.Context, datacenterID string) (*ionoscloud
 }
 
 func (ss *Service) Update(ctx context.Context, datacenterID, serverID string, serverProperties ionoscloud.ServerProperties) (*ionoscloud.Server, *ionoscloud.APIResponse, error) {
-	updatedServer, apiResponse, err := ss.Client.ServersApi.DatacentersServersPatch(ctx, datacenterID, serverID).Execute()
+	updatedServer, apiResponse, err := ss.Client.ServersApi.DatacentersServersPatch(ctx, datacenterID, serverID).Server(serverProperties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		return nil, apiResponse, fmt.Errorf("an error occured while updating server for dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, err)
 	}
-	// Wait, catching any errors
-	_, errState := cloudapi.GetStateChangeConf(ss.Meta, ss.D, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-	if errState != nil {
+	if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return nil, apiResponse, fmt.Errorf("an error occured while waiting for server state change on update dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 	}
 	return &updatedServer, apiResponse, nil
+}
+
+func (ss *Service) GetAttachedVolumes(ctx context.Context, datacenterID, serverID string) ([]*ionoscloud.Volume, *ionoscloud.APIResponse, error) {
+
+	attachedVolumeIds, apiResponse, err := ss.Client.ServersApi.DatacentersServersVolumesGet(ctx, datacenterID, serverID).Execute()
+	apiResponse.LogInfo()
+	if err != nil {
+		return nil, apiResponse, fmt.Errorf("an error occured while fetching attached volumes for server, dcId: %s, serverId: %s, Response: (%w)", datacenterID, serverID, err)
+	}
+	attachedVolumes := []*ionoscloud.Volume{}
+	for _, v := range *attachedVolumeIds.Items {
+		volume, apiResponse, err := ss.Client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterID, serverID, *v.Id).Execute()
+		if err != nil {
+			return nil, apiResponse, err
+		}
+		attachedVolumes = append(attachedVolumes, &volume)
+	}
+
+	return attachedVolumes, apiResponse, nil
+}
+
+func (ss *Service) GetDefaultBootVolume(ctx context.Context, datacenterId, serverId string) (*ionoscloud.Volume, error) {
+	attachedVolumes, _, err := ss.GetAttachedVolumes(ctx, datacenterId, serverId)
+	if err != nil {
+		return nil, err
+	}
+
+	var defaultBootVolume ionoscloud.Volume
+	firstCreatedTime := time.Now()
+	for _, v := range attachedVolumes {
+		if v.Metadata.CreatedDate.Before(firstCreatedTime) {
+			defaultBootVolume = *v
+			firstCreatedTime = v.Metadata.CreatedDate.Time
+		}
+	}
+	return &defaultBootVolume, nil
+}
+
+func (ss *Service) GetCurrentBootDeviceID(ctx context.Context, datacenterId, serverId string) (string, string, error) {
+	server, err := ss.FindById(ctx, datacenterId, serverId, 3)
+	if err != nil {
+		return "", "", err
+	}
+	if server.Properties == nil {
+		return "", "", fmt.Errorf("server has no boot device because properties object was nil")
+	}
+	if server.Properties.BootCdrom != nil {
+		return *server.Properties.BootCdrom.Id, constant.BootDeviceTypeCDROM, nil
+	}
+	if server.Properties.BootVolume != nil {
+		return *server.Properties.BootVolume.Id, constant.BootDeviceTypeVolume, nil
+	}
+	return "", "", fmt.Errorf("server has no boot device")
 }
 
 func (ss *Service) UpdateVmState(ctx context.Context, datacenterID, serverID, newVmState string) error {
@@ -112,6 +164,78 @@ func (ss *Service) UpdateVmState(ctx context.Context, datacenterID, serverID, ne
 			return ErrSuspendCubeLast
 		}
 
+	}
+
+	return nil
+}
+
+// UpdateBootDevice will set a new boot device for the server, which can be a volume or bootable image CDROM.
+// When the new boot device is a volume, it must be already attached to the server.
+// When the new boot device is a CDROM image, it will be attached by default.
+// If the current boot device is a CDROM image, it will be detached after it is changed by this operation.
+func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID, newBootDeviceID string) error {
+	oldBootDeviceID, oldBdType, err := ss.GetCurrentBootDeviceID(ctx, datacenterID, serverID)
+	if err != nil {
+		return err
+	}
+	if strings.EqualFold(oldBootDeviceID, newBootDeviceID) {
+		return nil
+	}
+
+	newBdType := constant.BootDeviceTypeCDROM
+	_, apiResponse, err := ss.Client.ImagesApi.ImagesFindById(ctx, newBootDeviceID).Execute()
+	if err != nil {
+		if !apiResponse.HttpNotFound() {
+			return err
+		}
+		log.Printf("[DEBUG] no bootable image found with id : %s\n", newBootDeviceID)
+		newBdType = constant.BootDeviceTypeVolume
+	}
+
+	switch oldBdType {
+	case constant.BootDeviceTypeCDROM:
+		if strings.EqualFold(newBdType, constant.BootDeviceTypeVolume) {
+			// update to new boot volume
+			sp := ionoscloud.ServerProperties{BootVolume: ionoscloud.NewResourceReference(newBootDeviceID)}
+			if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
+				return err
+			}
+		} else {
+			// attach new cdrom
+			img := ionoscloud.Image{Id: &newBootDeviceID}
+			_, apiResponse, err := ss.Client.ServersApi.DatacentersServersCdromsPost(ctx, datacenterID, serverID).Cdrom(img).Execute()
+			if err != nil {
+				return err
+			}
+			if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
+				return errState
+			}
+			log.Printf("[DEBUG] attached CDROM image to server: serverId: %s, imageId: %s\n", serverID, newBootDeviceID)
+			// update to new boot cdrom
+			sp := ionoscloud.ServerProperties{BootCdrom: ionoscloud.NewResourceReference(newBootDeviceID)}
+			if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
+				return err
+			}
+		}
+		// detach old cdrom
+		apiResponse, err = ss.Client.ServersApi.DatacentersServersCdromsDelete(ctx, datacenterID, serverID, oldBootDeviceID).Execute()
+		if err != nil {
+			return err
+		}
+		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
+			return errState
+		}
+		log.Printf("[DEBUG] detached CDROM image from server: serverId: %s, imageId: %s\n", serverID, oldBootDeviceID)
+
+	case constant.BootDeviceTypeVolume:
+		// no cdrom is detached, only update to the new boot device, regardless of type
+		sp := ionoscloud.ServerProperties{BootVolume: ionoscloud.NewResourceReference(newBootDeviceID)}
+		if strings.EqualFold(newBdType, constant.BootDeviceTypeCDROM) {
+			sp = ionoscloud.ServerProperties{BootCdrom: ionoscloud.NewResourceReference(newBootDeviceID)}
+		}
+		if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
+			return err
+		}
 	}
 
 	return nil
