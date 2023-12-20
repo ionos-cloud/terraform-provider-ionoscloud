@@ -26,7 +26,7 @@ resource "ionoscloud_lan"  "lan_example" {
   name                    = "example"
 }
 
-resource ionoscloud_mongo_cluster "example_mongo_cluster" {
+resource "ionoscloud_mongo_cluster" "example_mongo_cluster" {
   maintenance_window {
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
@@ -59,7 +59,7 @@ resource "random_password" "user_password" {
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ionoscloud_mongo_user example_mongo_user {
+resource "ionoscloud_mongo_user" "example_mongo_user" {
   cluster_id = ionoscloud_mongo_cluster.example_mongo_cluster.id
   username = "myUser"
   password = random_password.user_password.result
