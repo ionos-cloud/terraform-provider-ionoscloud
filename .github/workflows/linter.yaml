@@ -59,5 +59,6 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v3
         with:
+          only-new-issues: true
           version: ${{ env.GOLANGCI_VERSION }}
           args: --timeout 10m0s --verbose
