@@ -19,9 +19,9 @@ This resource also allows switching between a `volume` and a `ionoscloud_image` 
 ### Select an external volume
 ```hcl
 resource "ionoscloud_server_boot_device_selection" "example"{
-    datacenter_id  = ionoscloud_datacenter.example.id
-    server_id      = ionoscloud_server.example.id
-    boot_device_id = ionoscloud_volume.example.id
+  datacenter_id  = ionoscloud_datacenter.example.id
+  server_id      = ionoscloud_server.example.id
+  boot_device_id = ionoscloud_volume.example.id
 }
 
 resource "ionoscloud_server" "example" {
@@ -48,23 +48,23 @@ resource "ionoscloud_server" "example" {
 }
 
 resource "ionoscloud_volume" "example" {
-    server_id = ionoscloud_server.example.id
-    datacenter_id     = ionoscloud_datacenter.example.id
-    name = "External 1"
-    size = 10
-    disk_type = "HDD"
-    availability_zone = "AUTO"
-    image_name = "debian:latest"
-    image_password = random_password.server_image_password.result
+  server_id = ionoscloud_server.example.id
+  datacenter_id     = ionoscloud_datacenter.example.id
+  name = "External 1"
+  size = 10
+  disk_type = "HDD"
+  availability_zone = "AUTO"
+  image_name = "debian:latest"
+  image_password = random_password.server_image_password.result
 }
 ```
 
 ### Select an inline volume again
 ```hcl
 resource "ionoscloud_server_boot_device_selection" "example"{
-    datacenter_id  = ionoscloud_datacenter.example.id
-    server_id      = ionoscloud_server.example.id
-    boot_device_id = ionoscloud_server.example.inline_volume_ids[0]
+  datacenter_id  = ionoscloud_datacenter.example.id
+  server_id      = ionoscloud_server.example.id
+  boot_device_id = ionoscloud_server.example.inline_volume_ids[0]
 }
 
 resource "ionoscloud_server" "example" {
@@ -91,23 +91,23 @@ resource "ionoscloud_server" "example" {
 }
 
 resource "ionoscloud_volume" "example" {
-    server_id = ionoscloud_server.example.id
-    datacenter_id     = ionoscloud_datacenter.example.id
-    name = "External 1"
-    size = 10
-    disk_type = "HDD"
-    availability_zone = "AUTO"
-    image_name = "debian:latest"
-    image_password = random_password.server_image_password.result
+  server_id = ionoscloud_server.example.id
+  datacenter_id     = ionoscloud_datacenter.example.id
+  name = "External 1"
+  size = 10
+  disk_type = "HDD"
+  availability_zone = "AUTO"
+  image_name = "debian:latest"
+  image_password = random_password.server_image_password.result
 }
 ```
 
 ### Select a CDROM image
 ```hcl
 resource "ionoscloud_server_boot_device_selection" "example"{
-    datacenter_id  = ionoscloud_datacenter.example.id
-    server_id      = ionoscloud_server.example.inline_volume_ids[0]
-    boot_device_id = data.ionoscloud_image.example.id
+  datacenter_id  = ionoscloud_datacenter.example.id
+  server_id      = ionoscloud_server.example.inline_volume_ids[0]
+  boot_device_id = data.ionoscloud_image.example.id
 }
 
 resource "ionoscloud_server" "example" {
@@ -134,19 +134,19 @@ resource "ionoscloud_server" "example" {
 }
 
 resource "ionoscloud_volume" "example" {
-    server_id = ionoscloud_server.example.id
-    datacenter_id     = ionoscloud_datacenter.example.id
-    name = "External 1"
-    size = 10
-    disk_type = "HDD"
-    availability_zone = "AUTO"
-    image_name = "debian:latest"
-    image_password = random_password.server_image_password.result
+  server_id = ionoscloud_server.example.id
+  datacenter_id     = ionoscloud_datacenter.example.id
+  name = "External 1"
+  size = 10
+  disk_type = "HDD"
+  availability_zone = "AUTO"
+  image_name = "debian:latest"
+  image_password = random_password.server_image_password.result
 }
 
 data "ionoscloud_image" "example" {
-    name = "ubuntu-20.04"
-    location = "de/txl"
-    type = "CDROM"
+  name = "ubuntu-20.04"
+  location = "de/txl"
+  type = "CDROM"
 }
 ```
