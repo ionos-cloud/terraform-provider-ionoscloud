@@ -1,6 +1,7 @@
 ## 6.4.12 (upcoming release)
 ### Features
 - Add `ionoscloud_server_boot_device_selection` resource for selecting the boot device of `ionoscloud_server`, `ionoscloud_vcpu_server` and `ionoscloud_cube_server` resources
+- Increase the timeout period for k8s node pools
 
 ### Fixes
 - `is_system_user` is actually only read-only. You cannot actually set it.
