@@ -414,6 +414,9 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 	image, imageAlias, err = getImage(ctx, client, d, *volume)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if image != "" {
 		volume.Image = &image
