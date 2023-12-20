@@ -1,11 +1,8 @@
 name: CI golangci-lint
 
 on:
-  push:
-    branches:
-      - feat/add_linter
-  pull_request: { }
-  workflow_dispatch: { }
+  pull_request:
+    types: [ assigned, opened, synchronize, reopened ]
 
 env:
   GOLANGCI_VERSION: 'v1.54.0'
