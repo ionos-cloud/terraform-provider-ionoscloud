@@ -21,6 +21,7 @@ type Service struct {
 
 // The caller should ignore this error, it only informs that the CUBE server should be suspended after all other updates have been applied.
 var ErrSuspendCubeLast error
+var ServerNotFound error
 
 const (
 	CubeServerType       = "CUBE"
@@ -42,6 +43,10 @@ func (ss *Service) FindById(ctx context.Context, datacenterID, serverID string, 
 	server, apiResponse, err := ss.Client.ServersApi.DatacentersServersFindById(ctx, datacenterID, serverID).Depth(depth).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
+		if apiResponse.HttpNotFound() {
+			log.Printf("[DEBUG] cannot find server by id in datacenter dcId: %s, serverId: %s\n", datacenterID, serverID)
+			return nil, ServerNotFound
+		}
 		return nil, err
 	}
 	return &server, nil

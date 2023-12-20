@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
@@ -65,13 +66,13 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("default_boot_volume_id", defaultBootVolume.Id)
 
 	if err := ss.UpdateBootDevice(ctx, dcId, serverId, bootDeviceId); err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(uuidgen.ResourceUuid().String())
+	d.Set("default_boot_volume_id", defaultBootVolume.Id)
 	return resourceServerBootDeviceSelectionRead(ctx, d, meta)
 }
 
@@ -83,10 +84,14 @@ func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.Resour
 
 	server, err := ss.FindById(ctx, dcId, serverId, 3)
 	if err != nil {
+		if errors.Is(err, cloudapiserver.ServerNotFound) {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
-	if err = setBootDeviceSelectorData(d, server); err != nil {
+	if err = setServerBootDeviceSelectionData(d, server); err != nil {
 		return diag.FromErr(fmt.Errorf("error reading boot devices for server, dcId: %s, sId: %s, (%w)", dcId, serverId, err))
 	}
 
@@ -122,7 +127,7 @@ func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func setBootDeviceSelectorData(d *schema.ResourceData, server *ionoscloud.Server) error {
+func setServerBootDeviceSelectionData(d *schema.ResourceData, server *ionoscloud.Server) error {
 	if server.Properties.BootCdrom != nil {
 		if err := d.Set("boot_device_id", *server.Properties.BootCdrom.Id); err != nil {
 			return err
