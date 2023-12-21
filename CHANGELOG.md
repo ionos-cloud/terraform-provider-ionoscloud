@@ -1,3 +1,7 @@
+## 6.4.13
+### Refactor
+- Remove duplicate functions for image retrieval (`checkImage`, `resolveImageName`) in `resource_volume.go`
+
 ## 6.4.12
 ### Features
 - Add `ionoscloud_server_boot_device_selection` resource for selecting the boot device of `ionoscloud_server`, `ionoscloud_vcpu_server` and `ionoscloud_cube_server` resources
