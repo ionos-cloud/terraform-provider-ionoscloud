@@ -215,7 +215,7 @@ func resourceK8sNodePool() *schema.Resource {
 				Description: "When set to true, allows the update of immutable fields by destroying and re-creating the node pool",
 			},
 		},
-		Timeouts:      &resourceDefaultTimeouts,
+		Timeouts:      &constant.ResourceK8sNodePoolTimeout,
 		SchemaVersion: 1,
 		StateUpgraders: []schema.StateUpgrader{
 			{
