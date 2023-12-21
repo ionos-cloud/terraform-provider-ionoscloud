@@ -22,10 +22,11 @@ func TestAcck8sClusterImportBasic(t *testing.T) {
 				Config: testAccCheckK8sClusterConfigBasic,
 			},
 			{
-				ResourceName:      constant.K8sClusterResource + "." + constant.K8sClusterTestResource,
-				ImportStateIdFunc: testAccK8sClusterImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            constant.K8sClusterResource + "." + constant.K8sClusterTestResource,
+				ImportStateIdFunc:       testAccK8sClusterImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"allow_replace"},
 			},
 		},
 	})
