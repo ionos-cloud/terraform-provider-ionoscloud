@@ -345,6 +345,7 @@ const (
 	VMStateStop     = "SHUTOFF"
 )
 
+// Server boot devices constants
 const (
 	BootDeviceTypeCDROM  = "cdrom"
 	BootDeviceTypeVolume = "volume"
