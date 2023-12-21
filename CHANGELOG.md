@@ -1,14 +1,14 @@
-## 6.4.12 (upcoming release)
+## 6.4.12
 ### Features
 - Add `ionoscloud_server_boot_device_selection` resource for selecting the boot device of `ionoscloud_server`, `ionoscloud_vcpu_server` and `ionoscloud_cube_server` resources
-- Increase the timeout period for k8s node pools
+- Increase the timeout period for `ionoscloud_node_pool` resource to 3 hours
 
 ### Fixes
-- `is_system_user` is actually only read-only. You cannot actually set it.
+- `is_system_user` is actually read-only. You cannot set it.
 - Add `priority` in state for DNS Records
 
 ### Features
-- Add parameters for private k8s cluster: `public`, `location`, `nat_gateway_ip`, `node_subnet`
+- Add support for creating private k8s clusters to `ionoscloud_k8s_cluster` : `public`, `location`, `nat_gateway_ip`, `node_subnet`
 
 ## 6.4.11
 ### Documentation
