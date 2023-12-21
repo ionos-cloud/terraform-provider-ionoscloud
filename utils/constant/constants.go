@@ -1,6 +1,10 @@
 package constant
 
-import "time"
+import (
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
 
 // IonosDebug - env variable, set to true to enable debug
 const IonosDebug = "IONOS_DEBUG"
@@ -115,7 +119,15 @@ const (
 	ResourceNameK8sNodePool   = K8sNodePoolResource + "." + K8sNodePoolTestResource
 	DataSourceK8sNodePoolId   = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceById
 	DataSourceK8sNodePoolName = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceByName
+	K8sNodePoolTimeout        = 3 * time.Hour
 )
+
+var ResourceK8sNodePoolTimeout = schema.ResourceTimeout{
+	Create:  schema.DefaultTimeout(K8sNodePoolTimeout),
+	Update:  schema.DefaultTimeout(K8sNodePoolTimeout),
+	Delete:  schema.DefaultTimeout(K8sNodePoolTimeout),
+	Default: schema.DefaultTimeout(K8sNodePoolTimeout),
+}
 
 // NatGateway Constants
 const (

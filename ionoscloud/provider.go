@@ -314,12 +314,3 @@ var resourceDefaultTimeouts = schema.ResourceTimeout{
 	Delete:  schema.DefaultTimeout(utils.DefaultTimeout),
 	Default: schema.DefaultTimeout(utils.DefaultTimeout),
 }
-
-const K8sNodePoolTimeout = 3 * utils.DefaultTimeout
-
-var resourceK8sNodePoolTimeout = schema.ResourceTimeout{
-	Create:  schema.DefaultTimeout(K8sNodePoolTimeout),
-	Update:  schema.DefaultTimeout(K8sNodePoolTimeout),
-	Delete:  schema.DefaultTimeout(K8sNodePoolTimeout),
-	Default: schema.DefaultTimeout(K8sNodePoolTimeout),
-}
