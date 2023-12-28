@@ -1,3 +1,7 @@
+## 6.4.13(upcoming)
+
+### Fixes
+- Remove `credentials` field from `ionoscloud_mongo_cluster` resource
 ## 6.4.12
 ### Features
 - Add `ionoscloud_server_boot_device_selection` resource for selecting the boot device of `ionoscloud_server`, `ionoscloud_vcpu_server` and `ionoscloud_cube_server` resources
