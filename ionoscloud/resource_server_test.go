@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -229,14 +228,14 @@ func TestAccServerBasic(t *testing.T) {
 			{
 				Config: testAccCheckServerConfigShutdown,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.VMStateStop),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "vm_state", constant.VMStateStop),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerResource+"."+constant.ServerTestResource, "vm_state"),
 				),
 			},
 			{
 				Config: testAccCheckServerConfigPowerOn,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "vm_state", cloudapiserver.VMStateStart),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "vm_state", constant.VMStateStart),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerResource+"."+constant.ServerTestResource, "vm_state"),
 				),
 			},

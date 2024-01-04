@@ -331,13 +331,32 @@ const (
 	TestCertName        = "certTest"
 )
 
+// Server type constants
+const (
+	VCPUType       = "VCPU"
+	CubeType       = "CUBE"
+	EnterpriseType = "ENTERPRISE"
+)
+
+// Server power state constants
+const (
+	CubeVMStateStop = "SUSPENDED"
+	VMStateStart    = "RUNNING"
+	VMStateStop     = "SHUTOFF"
+)
+
+// Server boot devices constants
+const (
+	BootDeviceTypeCDROM  = "cdrom"
+	BootDeviceTypeVolume = "volume"
+)
+
 const (
 	// FlowlogBucket created on account that runs CI
 	FlowlogBucket        = "flowlog-acceptance-test"
 	FlowlogBucketUpdated = "flowlog-acceptance-test-updated"
 )
 
-const VCPUType = "VCPU"
 const RepoURL = "https://github.com/ionos-cloud/terraform-provider-ionoscloud"
 
 const (

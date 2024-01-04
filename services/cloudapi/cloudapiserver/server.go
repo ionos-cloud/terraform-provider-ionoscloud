@@ -11,6 +11,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 type Service struct {
@@ -22,22 +23,6 @@ type Service struct {
 // The caller should ignore this error, it only informs that the CUBE server should be suspended after all other updates have been applied.
 var ErrSuspendCubeLast error
 var ServerNotFound error
-
-const (
-	CubeServerType       = "CUBE"
-	EnterpriseServerType = "ENTERPRISE"
-	VCPUServerType       = "VCPU"
-
-	CubeVMStateStop = "SUSPENDED"
-
-	// These are the vm_state values that are available for VCPU and ENTERPRISE servers
-	VMStateStart = "RUNNING"
-	VMStateStop  = "SHUTOFF"
-
-	// Types of bootable devices which servers use
-	BootDeviceTypeVolume = "volume"
-	BootDeviceTypeCDROM  = "cdrom"
-)
 
 func (ss *Service) FindById(ctx context.Context, datacenterID, serverID string, depth int32) (*ionoscloud.Server, error) {
 	server, apiResponse, err := ss.Client.ServersApi.DatacentersServersFindById(ctx, datacenterID, serverID).Depth(depth).Execute()
@@ -136,10 +121,10 @@ func (ss *Service) GetCurrentBootDeviceID(ctx context.Context, datacenterId, ser
 		return "", "", fmt.Errorf("server has no boot device because properties object was nil")
 	}
 	if server.Properties.BootCdrom != nil {
-		return *server.Properties.BootCdrom.Id, BootDeviceTypeCDROM, nil
+		return *server.Properties.BootCdrom.Id, constant.BootDeviceTypeCDROM, nil
 	}
 	if server.Properties.BootVolume != nil {
-		return *server.Properties.BootVolume.Id, BootDeviceTypeVolume, nil
+		return *server.Properties.BootVolume.Id, constant.BootDeviceTypeVolume, nil
 	}
 	return "", "", fmt.Errorf("server has no boot device")
 }
@@ -157,25 +142,25 @@ func (ss *Service) UpdateVmState(ctx context.Context, datacenterID, serverID, ne
 	}
 
 	switch serverType {
-	case EnterpriseServerType, VCPUServerType:
-		if strings.EqualFold(newVmState, CubeVMStateStop) {
-			return fmt.Errorf("cannot suspend a %s server, set to %s instead", serverType, VMStateStop)
+	case constant.EnterpriseType, constant.VCPUType:
+		if strings.EqualFold(newVmState, constant.CubeVMStateStop) {
+			return fmt.Errorf("cannot suspend a %s server, set to %s instead", serverType, constant.VMStateStop)
 		}
-		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, VMStateStop) {
+		if strings.EqualFold(newVmState, constant.VMStateStart) && strings.EqualFold(currentVmState, constant.VMStateStop) {
 			return ss.Start(ctx, datacenterID, serverID, serverType)
 		}
-		if strings.EqualFold(newVmState, VMStateStop) && strings.EqualFold(currentVmState, VMStateStart) {
+		if strings.EqualFold(newVmState, constant.VMStateStop) && strings.EqualFold(currentVmState, constant.VMStateStart) {
 			return ss.Stop(ctx, datacenterID, serverID, serverType)
 		}
 
-	case CubeServerType:
-		if strings.EqualFold(newVmState, VMStateStop) {
-			return fmt.Errorf("cannot shut down a %s server, set to %s instead", serverType, CubeVMStateStop)
+	case constant.CubeType:
+		if strings.EqualFold(newVmState, constant.VMStateStop) {
+			return fmt.Errorf("cannot shut down a %s server, set to %s instead", serverType, constant.CubeVMStateStop)
 		}
-		if strings.EqualFold(newVmState, VMStateStart) && strings.EqualFold(currentVmState, CubeVMStateStop) {
+		if strings.EqualFold(newVmState, constant.VMStateStart) && strings.EqualFold(currentVmState, constant.CubeVMStateStop) {
 			return ss.Start(ctx, datacenterID, serverID, serverType)
 		}
-		if strings.EqualFold(newVmState, CubeVMStateStop) && strings.EqualFold(currentVmState, VMStateStart) {
+		if strings.EqualFold(newVmState, constant.CubeVMStateStop) && strings.EqualFold(currentVmState, constant.VMStateStart) {
 			return ErrSuspendCubeLast
 		}
 
@@ -197,19 +182,19 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 		return nil
 	}
 
-	newBdType := BootDeviceTypeCDROM
+	newBdType := constant.BootDeviceTypeCDROM
 	_, apiResponse, err := ss.Client.ImagesApi.ImagesFindById(ctx, newBootDeviceID).Execute()
 	if err != nil {
 		if !apiResponse.HttpNotFound() {
 			return err
 		}
 		log.Printf("[DEBUG] no bootable image found with id : %s\n", newBootDeviceID)
-		newBdType = BootDeviceTypeVolume
+		newBdType = constant.BootDeviceTypeVolume
 	}
 
 	switch oldBdType {
-	case BootDeviceTypeCDROM:
-		if strings.EqualFold(newBdType, BootDeviceTypeVolume) {
+	case constant.BootDeviceTypeCDROM:
+		if strings.EqualFold(newBdType, constant.BootDeviceTypeVolume) {
 			// update to new boot volume
 			sp := ionoscloud.ServerProperties{BootVolume: ionoscloud.NewResourceReference(newBootDeviceID)}
 			if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
@@ -242,10 +227,10 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 		}
 		log.Printf("[DEBUG] detached CDROM image from server: serverId: %s, imageId: %s\n", serverID, oldBootDeviceID)
 
-	case BootDeviceTypeVolume:
+	case constant.BootDeviceTypeVolume:
 		// no cdrom is detached, only update to the new boot device, regardless of type
 		sp := ionoscloud.ServerProperties{BootVolume: ionoscloud.NewResourceReference(newBootDeviceID)}
-		if strings.EqualFold(newBdType, BootDeviceTypeCDROM) {
+		if strings.EqualFold(newBdType, constant.BootDeviceTypeCDROM) {
 			sp = ionoscloud.ServerProperties{BootCdrom: ionoscloud.NewResourceReference(newBootDeviceID)}
 		}
 		if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
@@ -282,21 +267,21 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 
 	switch serverType {
 
-	case EnterpriseServerType, VCPUServerType:
+	case constant.EnterpriseType, constant.VCPUType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersStartPost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
 			return err
 		}
-		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, VMStateStart))
+		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, constant.VMStateStart))
 
-	case CubeServerType:
+	case constant.CubeType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersResumePost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
 			return err
 		}
-		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, VMStateStart))
+		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, constant.VMStateStart))
 	}
 
 	return fmt.Errorf("cannot start unknown server type: %s", serverType)
@@ -307,21 +292,21 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 
 	switch serverType {
 
-	case EnterpriseServerType, VCPUServerType:
+	case constant.EnterpriseType, constant.VCPUType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersStopPost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
 			return err
 		}
-		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, VMStateStop))
+		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, constant.VMStateStop))
 
-	case CubeServerType:
+	case constant.CubeType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersSuspendPost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
 			return err
 		}
-		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, CubeVMStateStop))
+		return utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(ctx, datacenterID, constant.CubeVMStateStop))
 	}
 
 	return fmt.Errorf("cannot stop unknown server type: %s", serverType)
