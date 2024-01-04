@@ -1,5 +1,5 @@
-//go:build compute || all || server || enterprise || cube
-// +build compute all server enterprise cube
+//go:build compute || all || server || enterprise
+// +build compute all server enterprise
 
 package ionoscloud
 
