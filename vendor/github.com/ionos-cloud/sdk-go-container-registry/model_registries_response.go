@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls.
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
  *
- * API version: 1.0
+ * API version: 1.1.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -21,7 +21,7 @@ type RegistriesResponse struct {
 	Href       *string             `json:"href,omitempty"`
 	Id         *string             `json:"id,omitempty"`
 	Items      *[]RegistryResponse `json:"items,omitempty"`
-	Pagination *Pagination         `json:"pagination"`
+	Pagination *RegistryPagination `json:"pagination"`
 	Type       *string             `json:"type,omitempty"`
 }
 
@@ -29,7 +29,7 @@ type RegistriesResponse struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegistriesResponse(links PaginationLinks, pagination Pagination) *RegistriesResponse {
+func NewRegistriesResponse(links PaginationLinks, pagination RegistryPagination) *RegistriesResponse {
 	this := RegistriesResponse{}
 
 	this.Links = &links
@@ -199,8 +199,8 @@ func (o *RegistriesResponse) HasItems() bool {
 }
 
 // GetPagination returns the Pagination field value
-// If the value is explicit nil, the zero value for Pagination will be returned
-func (o *RegistriesResponse) GetPagination() *Pagination {
+// If the value is explicit nil, the zero value for RegistryPagination will be returned
+func (o *RegistriesResponse) GetPagination() *RegistryPagination {
 	if o == nil {
 		return nil
 	}
@@ -212,7 +212,7 @@ func (o *RegistriesResponse) GetPagination() *Pagination {
 // GetPaginationOk returns a tuple with the Pagination field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegistriesResponse) GetPaginationOk() (*Pagination, bool) {
+func (o *RegistriesResponse) GetPaginationOk() (*RegistryPagination, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -221,7 +221,7 @@ func (o *RegistriesResponse) GetPaginationOk() (*Pagination, bool) {
 }
 
 // SetPagination sets field value
-func (o *RegistriesResponse) SetPagination(v Pagination) {
+func (o *RegistriesResponse) SetPagination(v RegistryPagination) {
 
 	o.Pagination = &v
 

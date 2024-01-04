@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls.
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
  *
- * API version: 1.0
+ * API version: 1.1.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -17,21 +17,19 @@ import (
 
 // Pagination struct for Pagination
 type Pagination struct {
-	// The maximum number of elements to return (used together with pagination.token for pagination)
-	Limit *int32 `json:"limit"`
-	// An opaque token used to iterate the set of results (used together with limit for pagination)
-	Token *string `json:"token"`
+	// The offset specified in the request (if none was specified, the default offset is 0) (not implemented yet).
+	Offset *int32 `json:"offset,omitempty"`
+	// The limit specified in the request (if none was specified, use the endpoint's default pagination limit) (not implemented yet, always return number of items).
+	Limit *int32 `json:"limit,omitempty"`
+	Links *Links `json:"_links,omitempty"`
 }
 
 // NewPagination instantiates a new Pagination object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPagination(limit int32, token string) *Pagination {
+func NewPagination() *Pagination {
 	this := Pagination{}
-
-	this.Limit = &limit
-	this.Token = &token
 
 	return &this
 }
@@ -42,6 +40,44 @@ func NewPagination(limit int32, token string) *Pagination {
 func NewPaginationWithDefaults() *Pagination {
 	this := Pagination{}
 	return &this
+}
+
+// GetOffset returns the Offset field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *Pagination) GetOffset() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.Offset
+
+}
+
+// GetOffsetOk returns a tuple with the Offset field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Pagination) GetOffsetOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Offset, true
+}
+
+// SetOffset sets field value
+func (o *Pagination) SetOffset(v int32) {
+
+	o.Offset = &v
+
+}
+
+// HasOffset returns a boolean if a field has been set.
+func (o *Pagination) HasOffset() bool {
+	if o != nil && o.Offset != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetLimit returns the Limit field value
@@ -82,38 +118,38 @@ func (o *Pagination) HasLimit() bool {
 	return false
 }
 
-// GetToken returns the Token field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *Pagination) GetToken() *string {
+// GetLinks returns the Links field value
+// If the value is explicit nil, the zero value for Links will be returned
+func (o *Pagination) GetLinks() *Links {
 	if o == nil {
 		return nil
 	}
 
-	return o.Token
+	return o.Links
 
 }
 
-// GetTokenOk returns a tuple with the Token field value
+// GetLinksOk returns a tuple with the Links field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Pagination) GetTokenOk() (*string, bool) {
+func (o *Pagination) GetLinksOk() (*Links, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Token, true
+	return o.Links, true
 }
 
-// SetToken sets field value
-func (o *Pagination) SetToken(v string) {
+// SetLinks sets field value
+func (o *Pagination) SetLinks(v Links) {
 
-	o.Token = &v
+	o.Links = &v
 
 }
 
-// HasToken returns a boolean if a field has been set.
-func (o *Pagination) HasToken() bool {
-	if o != nil && o.Token != nil {
+// HasLinks returns a boolean if a field has been set.
+func (o *Pagination) HasLinks() bool {
+	if o != nil && o.Links != nil {
 		return true
 	}
 
@@ -122,12 +158,16 @@ func (o *Pagination) HasToken() bool {
 
 func (o Pagination) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Offset != nil {
+		toSerialize["offset"] = o.Offset
+	}
+
 	if o.Limit != nil {
 		toSerialize["limit"] = o.Limit
 	}
 
-	if o.Token != nil {
-		toSerialize["token"] = o.Token
+	if o.Links != nil {
+		toSerialize["_links"] = o.Links
 	}
 
 	return json.Marshal(toSerialize)

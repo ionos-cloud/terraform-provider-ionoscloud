@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls.
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
  *
- * API version: 1.0
+ * API version: 1.1.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -21,13 +21,13 @@ type Day string
 
 // List of Day
 const (
-	MONDAY    Day = "Monday"
-	TUESDAY   Day = "Tuesday"
-	WEDNESDAY Day = "Wednesday"
-	THURSDAY  Day = "Thursday"
-	FRIDAY    Day = "Friday"
-	SATURDAY  Day = "Saturday"
-	SUNDAY    Day = "Sunday"
+	DAY_MONDAY    Day = "Monday"
+	DAY_TUESDAY   Day = "Tuesday"
+	DAY_WEDNESDAY Day = "Wednesday"
+	DAY_THURSDAY  Day = "Thursday"
+	DAY_FRIDAY    Day = "Friday"
+	DAY_SATURDAY  Day = "Saturday"
+	DAY_SUNDAY    Day = "Sunday"
 )
 
 func (v *Day) UnmarshalJSON(src []byte) error {

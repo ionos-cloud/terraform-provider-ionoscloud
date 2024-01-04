@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
-	github.com/ionos-cloud/sdk-go-container-registry v1.0.1
+	github.com/ionos-cloud/sdk-go-container-registry v1.1.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.0.0
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2

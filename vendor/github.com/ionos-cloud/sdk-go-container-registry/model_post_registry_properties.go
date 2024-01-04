@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls.
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
  *
- * API version: 1.0
+ * API version: 1.1.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -17,9 +17,10 @@ import (
 
 // PostRegistryProperties struct for PostRegistryProperties
 type PostRegistryProperties struct {
-	GarbageCollectionSchedule *WeeklySchedule `json:"garbageCollectionSchedule,omitempty"`
-	Location                  *string         `json:"location"`
-	Name                      *string         `json:"name"`
+	GarbageCollectionSchedule *WeeklySchedule   `json:"garbageCollectionSchedule,omitempty"`
+	Location                  *string           `json:"location"`
+	Name                      *string           `json:"name"`
+	Features                  *RegistryFeatures `json:"features,omitempty"`
 }
 
 // NewPostRegistryProperties instantiates a new PostRegistryProperties object
@@ -157,6 +158,44 @@ func (o *PostRegistryProperties) HasName() bool {
 	return false
 }
 
+// GetFeatures returns the Features field value
+// If the value is explicit nil, the zero value for RegistryFeatures will be returned
+func (o *PostRegistryProperties) GetFeatures() *RegistryFeatures {
+	if o == nil {
+		return nil
+	}
+
+	return o.Features
+
+}
+
+// GetFeaturesOk returns a tuple with the Features field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *PostRegistryProperties) GetFeaturesOk() (*RegistryFeatures, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Features, true
+}
+
+// SetFeatures sets field value
+func (o *PostRegistryProperties) SetFeatures(v RegistryFeatures) {
+
+	o.Features = &v
+
+}
+
+// HasFeatures returns a boolean if a field has been set.
+func (o *PostRegistryProperties) HasFeatures() bool {
+	if o != nil && o.Features != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o PostRegistryProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["garbageCollectionSchedule"] = o.GarbageCollectionSchedule
@@ -167,6 +206,10 @@ func (o PostRegistryProperties) MarshalJSON() ([]byte, error) {
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
+	}
+
+	if o.Features != nil {
+		toSerialize["features"] = o.Features
 	}
 
 	return json.Marshal(toSerialize)
