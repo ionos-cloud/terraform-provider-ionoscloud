@@ -81,6 +81,22 @@ func resourceContainerRegistry() *schema.Resource {
 					},
 				},
 			},
+			"features": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"vulnerability_scanning": {
+							Type:        schema.TypeBool,
+							Description: "Enables vulnerability scanning for images in the container registry. Note: this feature can incur additional charges",
+							Optional:    true,
+							Computed:    true,
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -91,6 +107,9 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 	containerRegistry := crService.GetRegistryDataCreate(d)
 
+	containerRegistryFeatures, warnings := crService.GetRegistryFeatures(d)
+	containerRegistry.Properties.Features = containerRegistryFeatures
+
 	containerRegistryResponse, _, err := client.CreateRegistry(ctx, *containerRegistry)
 
 	if err != nil {
@@ -100,7 +119,7 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 	d.SetId(*containerRegistryResponse.Id)
 
-	return resourceContainerRegistryRead(ctx, d, meta)
+	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
 
 func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -131,6 +150,8 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 	client := meta.(services.SdkBundle).ContainerClient
 
 	containerRegistry := crService.GetRegistryDataUpdate(d)
+	containerRegistryFeatures, _ := crService.GetRegistryFeatures(d)
+	containerRegistry.Features = containerRegistryFeatures
 
 	registryId := d.Id()
 

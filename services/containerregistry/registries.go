@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -190,6 +191,16 @@ func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error
 		}
 	}
 
+	if registry.Properties.Features != nil {
+
+		registryFeatures := map[string]any{}
+		utils.SetPropWithNilCheck(registryFeatures, "vulnerability_scanning", registry.Properties.Features.VulnerabilityScanning.Enabled)
+
+		if err := d.Set("features", []map[string]any{registryFeatures}); err != nil {
+			return utils.GenerateSetError(resourceName, "features", err)
+		}
+	}
+
 	return nil
 }
 
@@ -256,6 +267,8 @@ func GetTokenDataUpdate(d *schema.ResourceData) (*cr.PatchTokenInput, error) {
 			return nil, err
 		}
 		token.ExpiryDate = expiryDate
+	} else {
+		token.ExpiryDate = nil
 	}
 
 	if _, ok := d.GetOk("scopes"); ok {
@@ -388,12 +401,41 @@ func SetScopes(scopes []cr.Scope) []interface{} {
 
 }
 
+func GetRegistryFeatures(d *schema.ResourceData) (*cr.RegistryFeatures, diag.Diagnostics) {
+
+	registryFeatures := cr.NewRegistryFeatures()
+	var warnings diag.Diagnostics
+
+	registryFeatures.VulnerabilityScanning = cr.NewFeatureVulnerabilityScanning(true)
+	if vulnerabilityScanning, ok := d.GetOkExists("features.0.vulnerability_scanning"); ok {
+		vulnerabilityScanning := vulnerabilityScanning.(bool)
+		registryFeatures.VulnerabilityScanning.Enabled = &vulnerabilityScanning
+	} else {
+		warnings = append(warnings, diag.Diagnostic{Severity: diag.Warning,
+			Summary: "'vulnerability_scanning' is omitted from the config. CR Vulnerability Scanning will be activated by default.",
+			Detail: "Container Registry Vulnerability Scanning is a paid feature which is enabled by default.\n" +
+				"If you do not wish to enable it, ensure 'vulnerability_scanning' is set to false when creating the resource.\n" +
+				"Once activated, it cannot be deactivated afterwards.",
+		})
+	}
+
+	return registryFeatures, warnings
+
+}
+
 func convertToIonosTime(targetTime string) (*cr.IonosTime, error) {
 	var ionosTime cr.IonosTime
-	layout := "2006-01-02 15:04:05Z"
-	convertedTime, err := time.Parse(layout, targetTime)
-	if err != nil {
-		return nil, fmt.Errorf("an error occured while converting from IonosTime to time.Time: %w", err)
+	var convertedTime time.Time
+	var err error
+
+	zLayout := "2006-01-02 15:04:05Z"
+	tzOffsetLayout := "2006-01-02 15:04:05 -0700 MST"
+
+	// targetTime might have tzOffset layout (+0000 UTC)
+	if convertedTime, err = time.Parse(tzOffsetLayout, targetTime); err != nil {
+		if convertedTime, err = time.Parse(zLayout, targetTime); err != nil {
+			return nil, fmt.Errorf("an error occured while converting from IonosTime string to time.Time: %w", err)
+		}
 	}
 	ionosTime.Time = convertedTime
 	return &ionosTime, nil
