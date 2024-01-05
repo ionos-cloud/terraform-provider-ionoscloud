@@ -18,6 +18,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceCubeServer() *schema.Resource {
@@ -223,7 +224,7 @@ func resourceCubeServer() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Description:      "Sets the power state of the cube server. Possible values: `RUNNING` or `SUSPENDED`.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{cloudapiserver.VMStateStart, cloudapiserver.CubeVMStateStop}, true)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.VMStateStart, constant.CubeVMStateStop}, true)),
 			},
 			"nic": {
 				Type:     schema.TypeList,
@@ -374,14 +375,8 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	server := ionoscloud.Server{
 		Properties: &ionoscloud.ServerProperties{},
 	}
-	volume := ionoscloud.VolumeProperties{}
 
-	var sshKeyPath []interface{}
-	var publicKeys []string
-	var image, imageAlias, imageInput string
-	var isSnapshot bool
-	var diags diag.Diagnostics
-	var password, licenceType string
+	var image, imageAlias string
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -396,74 +391,8 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		server.Properties.AvailabilityZone = &vStr
 	}
 
-	serverType := cloudapiserver.CubeServerType
+	serverType := constant.CubeType
 	server.Properties.Type = &serverType
-
-	volumeType := d.Get("volume.0.disk_type").(string)
-	volume.Type = &volumeType
-
-	if v, ok := d.GetOk("volume.0.image_password"); ok {
-		vStr := v.(string)
-		volume.ImagePassword = &vStr
-		if err := d.Set("image_password", password); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if v, ok := d.GetOk("image_password"); ok {
-		password = v.(string)
-		volume.ImagePassword = &password
-	}
-
-	if v, ok := d.GetOk("volume.0.licence_type"); ok {
-		licenceType = v.(string)
-		volume.LicenceType = &licenceType
-	}
-
-	if v, ok := d.GetOk("volume.0.availability_zone"); ok {
-		vStr := v.(string)
-		volume.AvailabilityZone = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.name"); ok {
-		vStr := v.(string)
-		volume.Name = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.bus"); ok {
-		vStr := v.(string)
-		volume.Bus = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.backup_unit_id"); ok {
-		vStr := v.(string)
-		volume.BackupunitId = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.user_data"); ok {
-		vStr := v.(string)
-		volume.UserData = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.ssh_key_path"); ok {
-		sshKeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	} else if v, ok := d.GetOk("ssh_key_path"); ok {
-		sshKeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	} else {
-		if err := d.Set("ssh_key_path", [][]string{}); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
 
 	if _, ok := d.GetOk("boot_cdrom"); ok {
 		resId := d.Get("boot_cdrom").(string)
@@ -477,35 +406,16 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
-	if len(sshKeyPath) != 0 {
-		for _, path := range sshKeyPath {
-			log.Printf("[DEBUG] Reading file %s", path)
-			publicKey, err := utils.ReadPublicKey(path.(string))
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) %w", path, err))
-				return diags
-			}
-			publicKeys = append(publicKeys, publicKey)
-		}
-		if len(publicKeys) > 0 {
-			volume.SshKeys = &publicKeys
-		}
-	}
-
-	if v, ok := d.GetOk("image_name"); ok {
-		imageInput = v.(string)
-	}
-
-	if imageInput != "" {
-		image, imageAlias, isSnapshot, diags = checkImage(ctx, client, imageInput, password, licenceType, dcId, sshKeyPath)
-		if diags != nil {
-			return diags
-		}
-	}
-
-	if isSnapshot == true && (volume.ImagePassword != nil && *volume.ImagePassword != "" || len(publicKeys) > 0) {
-		diags := diag.FromErr(fmt.Errorf("you can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot"))
+	var err error
+	var volume *ionoscloud.VolumeProperties
+	volume, err = getVolumeData(d, "volume.0.", constant.CubeType)
+	if err != nil {
+		diags := diag.FromErr(err)
 		return diags
+	}
+	image, imageAlias, err = getImage(ctx, client, d, *volume)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	if image != "" {
@@ -524,7 +434,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		Volumes: &ionoscloud.AttachedVolumes{
 			Items: &[]ionoscloud.Volume{
 				{
-					Properties: &volume,
+					Properties: volume,
 				},
 			},
 		},
@@ -537,7 +447,6 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	nic := ionoscloud.Nic{
 		Properties: &ionoscloud.NicProperties{},
 	}
-	var err error
 	if _, ok := d.GetOk("nic"); ok {
 		nic, err = cloudapinic.GetNicFromSchema(d, "nic.0.")
 		if err != nil {
@@ -660,7 +569,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 		initialState := initialState.(string)
 
-		if strings.EqualFold(initialState, cloudapiserver.CubeVMStateStop) {
+		if strings.EqualFold(initialState, constant.CubeVMStateStop) {
 			err := ss.Stop(ctx, dcId, d.Id(), serverType)
 			if err != nil {
 				return diag.FromErr(err)
@@ -830,14 +739,14 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		diags := diag.FromErr(fmt.Errorf("could not retrieve server vmState: %w", err))
 		return diags
 	}
-	if strings.EqualFold(currentVmState, cloudapiserver.CubeVMStateStop) && !d.HasChange("vm_state") {
+	if strings.EqualFold(currentVmState, constant.CubeVMStateStop) && !d.HasChange("vm_state") {
 		diags := diag.FromErr(fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"))
 		return diags
 	}
 
 	// Unsuspend a Cube server first, before applying other changes
-	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, cloudapiserver.CubeVMStateStop) {
-		err := ss.Start(ctx, dcId, d.Id(), cloudapiserver.CubeServerType)
+	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, constant.CubeVMStateStop) {
+		err := ss.Start(ctx, dcId, d.Id(), constant.CubeType)
 		if err != nil {
 			diags := diag.FromErr(err)
 			return diags
@@ -1058,10 +967,10 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Suspend a Cube server last, after applying other changes
-	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, cloudapiserver.VMStateStart) {
+	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, constant.VMStateStart) {
 		_, newVmState := d.GetChange("vm_state")
-		if strings.EqualFold(newVmState.(string), cloudapiserver.CubeVMStateStop) {
-			err := ss.Stop(ctx, dcId, d.Id(), cloudapiserver.CubeServerType)
+		if strings.EqualFold(newVmState.(string), constant.CubeVMStateStop) {
+			err := ss.Stop(ctx, dcId, d.Id(), constant.CubeType)
 			if err != nil {
 				diags := diag.FromErr(err)
 				return diags
