@@ -1,6 +1,8 @@
-## 6.4.13
+## 6.4.13(upcoming)
 ### Refactor
 - Remove duplicate functions for image retrieval (`checkImage`, `resolveImageName`) in `resource_volume.go`
+### Fixes
+- Remove `credentials` field from `ionoscloud_mongo_cluster` resource
 
 ## 6.4.12
 ### Features

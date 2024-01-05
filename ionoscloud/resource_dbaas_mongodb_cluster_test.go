@@ -23,7 +23,6 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckDbaasMongoClusterDestroyCheck,
 		Steps: []resource.TestStep{
@@ -41,8 +40,6 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example", "id"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list.0", "192.168.1.108/24"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "template_id", "33457e53-1f8b-4ed2-8a12-2d42355aa759"),
-					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", constant.RandomPassword+".dbaas_mongo_cluster_password", "result"),
 				),
 			},
 			{
@@ -59,8 +56,6 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connections.0.cidr_list.0", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list.0"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "template_id", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "template_id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connection_string", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connection_string"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "credentials.username", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.username"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "credentials.password", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.password"),
 				),
 			},
 			{
@@ -77,8 +72,6 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connections.0.cidr_list", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "template_id", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "template_id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connection_string", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connection_string"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "credentials.username", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.username"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "credentials.password", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.password"),
 				),
 			},
 			{
@@ -95,8 +88,6 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example", "id"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list.0", "192.168.1.108/24"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "template_id", "6b78ea06-ee0e-4689-998c-fc9c46e781f6"),
-					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", constant.RandomPassword+".dbaas_mongo_cluster_password", "result"),
 				),
 			},
 			{
@@ -110,8 +101,6 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "display_name", constant.DBaaSClusterTestResource+"update"),
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example", "location"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "template_id", "6b78ea06-ee0e-4689-998c-fc9c46e781f6"),
-					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", constant.RandomPassword+".dbaas_mongo_cluster_password", "result"),
 				),
 			},
 			{
@@ -129,7 +118,6 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckDbaasMongoClusterDestroyCheck,
 		Steps: []resource.TestStep{
@@ -146,8 +134,6 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example", "id"),
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example", "id"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list.0", "192.168.1.108/24"),
-					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", constant.RandomPassword+".dbaas_mongo_cluster_password", "result"),
 					//enterprise edition
 					//add after api adds support
 					//resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.whitelist.0", "192.168.1.108/24"),
@@ -171,8 +157,6 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example", "id"),
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example", "id"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list.0", "192.168.1.108/24"),
-					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", constant.RandomPassword+".dbaas_mongo_cluster_password", "result"),
 					//enterprise edition
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "edition", "enterprise"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "type", "sharded-cluster"),
@@ -210,10 +194,6 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 						constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "template_id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connection_string",
 						constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connection_string"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "credentials.username",
-						constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.username"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "credentials.password",
-						constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.password"),
 					//enterprise here
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "edition",
 						constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "edition"),
@@ -249,8 +229,6 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connections.0.cidr_list", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "template_id", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "template_id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connection_string", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connection_string"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "credentials.username", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.username"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "credentials.password", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.password"),
 					//enterprise here
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "edition",
 						constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "edition"),
@@ -359,33 +337,23 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
   display_name = "` + constant.DBaaSClusterTestResource + `"
   location = ` + constant.DatacenterResource + `.datacenter_example.location
   connections   {
-	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
+    datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
     lan_id          =  ` + constant.LanResource + `.lan_example.id 
     cidr_list            =  ["192.168.1.108/24"]
   }
   template_id = "33457e53-1f8b-4ed2-8a12-2d42355aa759"
-  credentials {
-  	username = "username"
-	password = ` + constant.RandomPassword + `.dbaas_mongo_cluster_password.result
-  }
-}
-
-resource ` + constant.RandomPassword + ` "dbaas_mongo_cluster_password" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 
 const testAccDataSourceDBaaSMongoClusterMatchId = testAccCheckDbaasMongoClusterConfigBasic + `
 data ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
-  id	= ` + constant.DBaasMongoClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
+  id = ` + constant.DBaasMongoClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 }
 `
 
 const testAccDataSourceDBaaSMongoClusterMatchName = testAccCheckDbaasMongoClusterConfigBasic + `
 data ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTestDataSourceByName + ` {
-  display_name	= "` + constant.DBaaSClusterTestResource + `"
+  display_name = "` + constant.DBaaSClusterTestResource + `"
 }
 `
 
@@ -412,21 +380,11 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
   display_name    = "` + constant.DBaaSClusterTestResource + `update"
   location        = ` + constant.DatacenterResource + `.datacenter_example.location
   connections   {
-	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
+    datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
     lan_id          =  ` + constant.LanResource + `.lan_example.id 
     cidr_list       =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
   }
-  template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
-  
-  credentials {
-  	username = "username"
-	password = ` + constant.RandomPassword + `.dbaas_mongo_cluster_password.result
-  }
-}
-resource ` + constant.RandomPassword + ` "dbaas_mongo_cluster_password" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6" 
 }
 `
 
@@ -453,27 +411,17 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
   display_name = "` + constant.DBaaSClusterTestResource + `update"
   location = ` + constant.DatacenterResource + `.datacenter_example.location
   connections   {
-	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
+    datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
     lan_id          =  ` + constant.LanResource + `.lan_example.id 
     cidr_list       =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
   }
   template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
-  
-  credentials {
-  	username = "username"
-	password = ` + constant.RandomPassword + `.dbaas_mongo_cluster_password.result
-  }
-}
-resource ` + constant.RandomPassword + ` "dbaas_mongo_cluster_password" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 
 const testAccDataSourceDBaaSMongoClusterWrongNameError = testAccCheckDbaasMongoClusterConfigBasic + `
 data ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTestDataSourceByName + ` {
-  display_name	= "wrong_name"
+  display_name = "wrong_name"
 }
 `
 
@@ -504,10 +452,6 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     lan_id          =  ` + constant.LanResource + `.lan_example.id 
     cidr_list       =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
   }
-  credentials {
-  	username = "username"
-	password = ` + constant.RandomPassword + `.dbaas_mongo_cluster_password.result
-  }
   type         = "sharded-cluster"
   shards       = 2
   edition      = "enterprise"
@@ -516,14 +460,8 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
   storage_size = 5120
   storage_type = "HDD"
   backup {
-	location = "de"
+    location = "de"
   }
-}
-
-resource ` + constant.RandomPassword + ` "dbaas_mongo_cluster_password" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 const testAccCheckDbaasMongoClusterEnterpriseUpdated = `
@@ -549,16 +487,12 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
   display_name       = "` + constant.DBaaSClusterTestResource + `update"
   location           = ` + constant.DatacenterResource + `.datacenter_example.location
   connections   {
-	datacenter_id =  ` + constant.DatacenterResource + `.datacenter_example.id 
+    datacenter_id =  ` + constant.DatacenterResource + `.datacenter_example.id 
     lan_id        =  ` + constant.LanResource + `.lan_example.id 
     cidr_list     =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
   }
-  credentials {
-  	username = "username"
-	password = ` + constant.RandomPassword + `.dbaas_mongo_cluster_password.result
-  }
   bi_connector {
-	enabled = true
+    enabled = true
   }
   type         = "sharded-cluster"
   shards       = 3
@@ -568,15 +502,10 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
   storage_size = 5120
   storage_type = "HDD"
   backup {
-	location = "de"
+    location = "de"
   }
 }
 
-resource ` + constant.RandomPassword + ` "dbaas_mongo_cluster_password" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
-}
 `
 
 const testAccDataSourceDBaaSMongoClusterEnterpriseMatchId = testAccCheckDbaasMongoClusterEnterpriseUpdated + `
