@@ -126,29 +126,6 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				Description: "The connection string for your cluster.",
 				Computed:    true,
 			},
-			"credentials": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Description: "Credentials for the database user to be created. Update forces cluster re-creation.",
-				Required:    true,
-				ForceNew:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"username": {
-							Type:             schema.TypeString,
-							Description:      "the username for the initial mongoDB user.",
-							Required:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-						},
-						"password": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Sensitive:        true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-						},
-					},
-				},
-			},
 			//enterprise edition below
 			"type": {
 				Type:        schema.TypeString,
