@@ -35,6 +35,7 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "garbage_collection_schedule.0.days.1", "Tuesday"),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "location", "de/fra"),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "name", constant.ContainerRegistryTestResource),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "features.0.vulnerability_scanning", "false"),
 				),
 			},
 			{
@@ -45,6 +46,7 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceById, "garbage_collection_schedule.0.days.1", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "garbage_collection_schedule.0.days.1"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceById, "location", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "location"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceById, "name", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceById, "features.0.vulnerability_scanning", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "features.0.vulnerability_scanning"),
 				),
 			},
 			{
@@ -55,6 +57,7 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.1", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "garbage_collection_schedule.0.days.1"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "location", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "location"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "name", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "features.0.vulnerability_scanning", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "features.0.vulnerability_scanning"),
 				),
 			},
 			{
@@ -65,6 +68,7 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.1", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "garbage_collection_schedule.0.days.1"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "location", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "location"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "name", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "features.0.vulnerability_scanning", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "features.0.vulnerability_scanning"),
 				),
 			},
 			{
@@ -83,6 +87,7 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.1", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "garbage_collection_schedule.0.days.1"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "location", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "location"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "name", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceByName, "features.0.vulnerability_scanning", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "features.0.vulnerability_scanning"),
 				),
 			},
 			{
@@ -97,6 +102,7 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "garbage_collection_schedule.0.days.0", "Monday"),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "location", "de/fra"),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "name", constant.ContainerRegistryTestResource),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "features.0.vulnerability_scanning", "true"),
 				),
 			},
 			{
@@ -180,6 +186,9 @@ resource ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegist
     days			 = ["Monday", "Tuesday"]
     time             = "05:19:00+00:00"
   }
+  features {
+    vulnerability_scanning = false
+  }
   location           = "de/fra"
   name		         = "` + constant.ContainerRegistryTestResource + `"
 }
@@ -190,6 +199,9 @@ resource ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegist
    garbage_collection_schedule {
     days			 = ["Monday"]
     time             = "01:23:00+00:00"
+  }
+  features {
+    vulnerability_scanning = true
   }
   location           = "de/fra"
   name		         = "` + constant.ContainerRegistryTestResource + `"
@@ -242,7 +254,7 @@ data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTe
   partial_match = true
 }
 `
-const testAccDataSourceCRTokenNameMultipleRegsFound = testAccCheckContainerRegistryConfigBasic + `
+const testAccDataSourceCRTokenNameMultipleRegsFound = testAccCheckContainerRegistryConfigUpdate + `
 resource ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestResource + `1 {
    garbage_collection_schedule {
     days			 = ["Monday", "Tuesday"]
@@ -258,7 +270,7 @@ depends_on = [ ` + constant.ContainerRegistryResource + `.` + constant.Container
 }
 `
 
-const testAccDataSourceCRTokenLocationMultipleRegsFound = testAccCheckContainerRegistryConfigBasic + `
+const testAccDataSourceCRTokenLocationMultipleRegsFound = testAccCheckContainerRegistryConfigUpdate + `
 resource ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestResource + `1 {
    garbage_collection_schedule {
     days			 = ["Monday", "Tuesday"]
