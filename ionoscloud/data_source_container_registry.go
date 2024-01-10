@@ -94,6 +94,18 @@ func dataSourceContainerRegistry() *schema.Resource {
 					},
 				},
 			},
+			"features": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"vulnerability_scanning": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
