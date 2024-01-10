@@ -182,105 +182,105 @@ func testAccCheckContainerRegistryExists(n string, registry *cr.RegistryResponse
 
 const testAccCheckContainerRegistryConfigBasic = `
 resource ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestResource + ` {
-   garbage_collection_schedule {
-    days			 = ["Monday", "Tuesday"]
-    time             = "05:19:00+00:00"
+  garbage_collection_schedule {
+    days    = ["Monday", "Tuesday"]
+    time    = "05:19:00+00:00"
   }
   features {
     vulnerability_scanning = false
   }
-  location           = "de/fra"
-  name		         = "` + constant.ContainerRegistryTestResource + `"
+  location  = "de/fra"
+  name      = "` + constant.ContainerRegistryTestResource + `"
 }
 `
 
 const testAccCheckContainerRegistryConfigUpdate = `
 resource ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestResource + ` {
-   garbage_collection_schedule {
-    days			 = ["Monday"]
-    time             = "01:23:00+00:00"
+  garbage_collection_schedule {
+    days    = ["Monday"]
+    time    = "01:23:00+00:00"
   }
   features {
     vulnerability_scanning = true
   }
-  location           = "de/fra"
-  name		         = "` + constant.ContainerRegistryTestResource + `"
+  location    = "de/fra"
+  name        = "` + constant.ContainerRegistryTestResource + `"
 }
 `
 
 const testAccDataSourceContainerRegistryMatchId = testAccCheckContainerRegistryConfigBasic + `
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceById + ` {
-  id	= ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
+  id = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
 }
 `
 
 const testAccDataSourceContainerRegistryMatchName = testAccCheckContainerRegistryConfigBasic + `
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceByName + ` {
-  name	= "` + constant.ContainerRegistryTestResource + `"
+  name = "` + constant.ContainerRegistryTestResource + `"
 }
 `
 
 const testAccDataSourceContainerRegistryMatchNameAndLocation = testAccCheckContainerRegistryConfigBasic + `
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceByName + ` {
-  name	   = "` + constant.ContainerRegistryTestResource + `"
+  name = "` + constant.ContainerRegistryTestResource + `"
   location = "de/fra" 
 }
 `
 const testAccDataSourceContainerRegistryWrongIdError = testAccCheckContainerRegistryConfigBasic + `
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceByName + ` {
-  id	= "wrong_id"
+  id = "wrong_id"
 }
 `
 const testAccDataSourceContainerRegistryWrongNameError = testAccCheckContainerRegistryConfigBasic + `
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceByName + ` {
-  name	= "wrong_name"
+  name = "wrong_name"
 }
 `
 const testAccDataSourceContainerRegistryWrongLocationErr = testAccCheckContainerRegistryConfigBasic + `
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceByName + ` {
-  location	= "de/txl"
+  location = "de/txl"
 }
 `
 const testAccDataSourceContainerRegistryPartialMatchName = testAccCheckContainerRegistryConfigBasic + `
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceByName + ` {
-  name	= "test"
+  name = "test"
   partial_match = true
 }
 `
 
 const testAccDataSourceContainerRegistryWrongPartialNameError = testAccCheckContainerRegistryConfigBasic + `
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceByName + ` {
-  name	= "wrong_name"
+  name = "wrong_name"
   partial_match = true
 }
 `
 const testAccDataSourceCRTokenNameMultipleRegsFound = testAccCheckContainerRegistryConfigUpdate + `
 resource ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestResource + `1 {
-   garbage_collection_schedule {
-    days			 = ["Monday", "Tuesday"]
-    time             = "05:19:00+00:00"
+  garbage_collection_schedule {
+    days    = ["Monday", "Tuesday"]
+    time    = "05:19:00+00:00"
   }
-  location           = "de/fra"
-  name		         = "` + constant.ContainerRegistryTestResource + `1"
+  location  = "de/fra"
+  name      = "` + constant.ContainerRegistryTestResource + `1"
 }
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceByName + ` {
-depends_on = [ ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `]
+  depends_on = [ ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `]
   partial_match = true
-  name	= "` + constant.ContainerRegistryTestResource + `"
+  name = "` + constant.ContainerRegistryTestResource + `"
 }
 `
 
 const testAccDataSourceCRTokenLocationMultipleRegsFound = testAccCheckContainerRegistryConfigUpdate + `
 resource ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestResource + `1 {
-   garbage_collection_schedule {
-    days			 = ["Monday", "Tuesday"]
-    time             = "05:19:00+00:00"
+  garbage_collection_schedule {
+    days    = ["Monday", "Tuesday"]
+    time    = "05:19:00+00:00"
   }
-  location           = "de/fra"
-  name		         = "` + constant.ContainerRegistryTestResource + `1"
+  location  = "de/fra"
+  name      = "` + constant.ContainerRegistryTestResource + `1"
 }
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceByName + ` {
-depends_on = [ ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `]
-  location	= "de/fra"
+  depends_on = [ ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `]
+  location = "de/fra"
 }
 `
