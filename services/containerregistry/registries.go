@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func (c *Client) ListRegistries(ctx context.Context) (cr.RegistriesResponse, *cr.APIResponse, error) {
@@ -428,12 +429,9 @@ func convertToIonosTime(targetTime string) (*cr.IonosTime, error) {
 	var convertedTime time.Time
 	var err error
 
-	zLayout := "2006-01-02 15:04:05Z"
-	tzOffsetLayout := "2006-01-02 15:04:05 -0700 MST"
-
-	// targetTime might have tzOffset layout (+0000 UTC)
-	if convertedTime, err = time.Parse(tzOffsetLayout, targetTime); err != nil {
-		if convertedTime, err = time.Parse(zLayout, targetTime); err != nil {
+	// targetTime might have time zone offset layout (+0000 UTC)
+	if convertedTime, err = time.Parse(constant.DatetimeTZOffsetLayout, targetTime); err != nil {
+		if convertedTime, err = time.Parse(constant.DatetimeZLayout, targetTime); err != nil {
 			return nil, fmt.Errorf("an error occured while converting from IonosTime string to time.Time: %w", err)
 		}
 	}
