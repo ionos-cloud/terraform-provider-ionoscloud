@@ -434,7 +434,7 @@ func convertToIonosTime(targetTime string) (*cr.IonosTime, error) {
 	// targetTime might have time zone offset layout (+0000 UTC)
 	if convertedTime, err = time.Parse(constant.DatetimeTZOffsetLayout, targetTime); err != nil {
 		if convertedTime, err = time.Parse(constant.DatetimeZLayout, targetTime); err != nil {
-			return nil, fmt.Errorf("an error occured while converting from IonosTime string to time.Time: %w", err)
+			return nil, fmt.Errorf("an error occurred while converting from IonosTime string to time.Time: %w", err)
 		}
 	}
 	ionosTime.Time = convertedTime
