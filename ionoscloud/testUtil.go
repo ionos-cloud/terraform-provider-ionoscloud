@@ -45,8 +45,9 @@ func getEmptyTestResourceData(t *testing.T, resourceSchema map[string]*schema.Sc
 	return schema.TestResourceDataRaw(t, testSchema, testMap)
 }
 
+// use text templates to insert values that need to be generated at test runtime (such as expiry dates).
 func getConfigurationFromTemplate(templateConfig string, data interface{}) string {
-	T, _ := template.New("cfg-template").Parse(templateConfig)
+	T, _ := template.New("").Parse(templateConfig)
 	b := &bytes.Buffer{}
 	if err := T.Execute(b, data); err != nil {
 		panic(err)
