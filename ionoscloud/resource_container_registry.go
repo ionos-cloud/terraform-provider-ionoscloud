@@ -113,7 +113,7 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 	containerRegistryResponse, _, err := client.CreateRegistry(ctx, *containerRegistry)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating the registry: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating the registry: %w", err))
 		return diags
 	}
 
@@ -157,7 +157,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	_, _, err := client.PatchRegistry(ctx, registryId, *containerRegistry)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a registry: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a registry: %w", err))
 		return diags
 	}
 
@@ -219,7 +219,7 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil, fmt.Errorf("registry does not exist %q", registryId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of registry %q", registryId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of registry %q", registryId)
 	}
 
 	log.Printf("[INFO] registry found: %+v", containerRegistry)

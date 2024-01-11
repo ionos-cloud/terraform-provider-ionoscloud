@@ -386,5 +386,5 @@ func GetConfigurationFromTemplate(templateConfig string, data interface{}) strin
 	if err := T.Execute(b, data); err != nil {
 		panic(err)
 	}
-	return string(b.Bytes())
+	return b.String()
 }

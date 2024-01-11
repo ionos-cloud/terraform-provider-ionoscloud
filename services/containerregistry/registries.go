@@ -402,6 +402,8 @@ func SetScopes(scopes []cr.Scope) []interface{} {
 
 }
 
+// GetRegistryFeatures returns the container registry features retrieved from the configuration
+// It will also return a list of warnings related to attributes which should be set explicitly
 func GetRegistryFeatures(d *schema.ResourceData) (*cr.RegistryFeatures, diag.Diagnostics) {
 
 	registryFeatures := cr.NewRegistryFeatures()
