@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -37,7 +36,7 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckContainerRegistryTokenDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: utils.GetConfigurationFromTemplate(testAccCheckContainerRegistryTokenConfigBasic, templateData),
+				Config: getConfigurationFromTemplate(testAccCheckContainerRegistryTokenConfigBasic, templateData),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerRegistryTokenExists(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, &containerRegistryToken),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "expiry_date", expiryDateTZOffsetLayout),
@@ -49,7 +48,7 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: utils.GetConfigurationFromTemplate(testAccDataSourceContainerRegistryTokenMatchId, templateData),
+				Config: getConfigurationFromTemplate(testAccDataSourceContainerRegistryTokenMatchId, templateData),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceById, "expiry_date", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "expiry_date"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceById, "scopes.0.actions.0", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
@@ -60,7 +59,7 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: utils.GetConfigurationFromTemplate(testAccDataSourceContainerRegistryTokenMatchName, templateData),
+				Config: getConfigurationFromTemplate(testAccDataSourceContainerRegistryTokenMatchName, templateData),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "expiry_date", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "expiry_date"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "scopes.0.actions.0", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
@@ -74,7 +73,7 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile("no token found with the specified name"),
 			},
 			{
-				Config: utils.GetConfigurationFromTemplate(testAccDataSourceContainerRegistryTokenPartialMatchName, templateData),
+				Config: getConfigurationFromTemplate(testAccDataSourceContainerRegistryTokenPartialMatchName, templateData),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "expiry_date", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "expiry_date"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceByName, "scopes.0.actions.0", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
@@ -88,7 +87,7 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile("no token found with the specified name"),
 			},
 			{
-				Config: utils.GetConfigurationFromTemplate(testAccCheckContainerRegistryTokenConfigUpdate, templateData),
+				Config: getConfigurationFromTemplate(testAccCheckContainerRegistryTokenConfigUpdate, templateData),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerRegistryTokenExists(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, &containerRegistryToken),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "expiry_date", expiryDateTZOffsetLayout),
@@ -104,7 +103,7 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "name", constant.ContainerRegistryTokenTestResource)),
 			},
 			{
-				Config:      utils.GetConfigurationFromTemplate(testAccDataSourceContainerRegistryTokenMultipleTokensFound, templateData),
+				Config:      getConfigurationFromTemplate(testAccDataSourceContainerRegistryTokenMultipleTokensFound, templateData),
 				ExpectError: regexp.MustCompile("more than one token found with the specified criteria: name = test-container-registry-token"),
 			},
 		},

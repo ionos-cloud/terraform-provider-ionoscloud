@@ -1,10 +1,8 @@
 package utils
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"html/template"
 	"log"
 	"net"
 	"net/http"
@@ -377,14 +375,4 @@ func ReadPublicKey(pathOrKey string) (string, error) {
 		return "", fmt.Errorf("error for public key %s, check if path is correct or key is in correct format", pathOrKey)
 	}
 	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
-}
-
-// GetConfigurationFromTemplate returns the complete TF configuration from a configuration template used in test cases
-func GetConfigurationFromTemplate(templateConfig string, data interface{}) string {
-	T, _ := template.New("cfg-template").Parse(templateConfig)
-	b := &bytes.Buffer{}
-	if err := T.Execute(b, data); err != nil {
-		panic(err)
-	}
-	return b.String()
 }
