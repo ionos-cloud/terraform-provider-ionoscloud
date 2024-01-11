@@ -139,6 +139,11 @@ issues:
         - scopelint
         - unparam
     
+    # Disable 'unused' warning in test utilities file
+    - path: testUtil.go
+      linters:
+        - unused
+    
     # Ease some gocritic warnings on test files.
     - path: _test\.go
       text: "(unnamedResult|exitAfterDefer)"
