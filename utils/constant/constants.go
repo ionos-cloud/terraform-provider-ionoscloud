@@ -233,8 +233,8 @@ const (
 
 // DBaaS Constants
 const (
-	DBaaSClusterTestResource         = "test_dbaas_cluster"
 	DBaaSClusterTestDataSourceById   = "test_dbaas_cluster_id"
+	DBaaSClusterTestResource         = "test_dbaas_cluster"
 	DBaaSClusterTestDataSourceByName = "test_dbaas_cluster_name"
 
 	// PgSql constants
@@ -249,6 +249,8 @@ const (
 	PsqlBackupsTest              = "test_dbaas_backups"
 	PsqlVersionsResource         = "ionoscloud_pg_versions"
 	PsqlVersionsTest             = "test_dbaas_versions"
+
+	DBaaSMariaDBClusterResource = "ionoscloud_mariadb_cluster"
 
 	DBaasMongoClusterResource        = "ionoscloud_mongo_cluster"
 	DBaasMongoUserResource           = "ionoscloud_mongo_user"

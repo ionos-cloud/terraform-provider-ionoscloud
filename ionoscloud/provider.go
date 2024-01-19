@@ -104,6 +104,7 @@ func Provider() *schema.Provider {
 			constant.PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
 			constant.PsqlUserResource:                          resourceDbaasPgSqlUser(),
 			constant.PsqlDatabaseResource:                      resourceDbaasPgSqlDatabase(),
+			constant.DBaaSMariaDBClusterResource:               resourceDBaaSMariaDBCluster(),
 			constant.DBaasMongoClusterResource:                 resourceDbaasMongoDBCluster(),
 			constant.DBaasMongoUserResource:                    resourceDbaasMongoUser(),
 			constant.ALBResource:                               resourceApplicationLoadBalancer(),
@@ -241,6 +242,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		DataplatformClient: NewClientByType(clientOpts, dataplatformClient).(*dataplatformService.Client),
 		DNSClient:          NewClientByType(clientOpts, dnsClient).(*dnsService.Client),
 		LoggingClient:      NewClientByType(clientOpts, loggingClient).(*loggingService.Client),
+		MariaDBClient:      NewClientByType(clientOpts, mariaDBClient).(*dbaasService.MariaDBClient),
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
 	}, nil
@@ -256,6 +258,7 @@ const (
 	dataplatformClient
 	dnsClient
 	loggingClient
+	mariaDBClient
 	mongoClient
 	psqlClient
 )
@@ -288,6 +291,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case loggingClient:
 		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case mariaDBClient:
+		return dbaasService.NewMariaDBClient(clientOpts.Username, clientOpts.Password, "", "", clientOpts.Version, clientOpts.TerraformVersion)
 	case mongoClient:
 		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case psqlClient:

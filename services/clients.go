@@ -15,6 +15,7 @@ type SdkBundle struct {
 	CloudApiClient     *ionoscloud.APIClient
 	PsqlClient         *dbaas.PsqlClient
 	MongoClient        *dbaas.MongoClient
+	MariaDBClient      *dbaas.MariaDBClient
 	CertManagerClient  *cert.Client
 	ContainerClient    *containerregistry.Client
 	DataplatformClient *dataplatform.Client

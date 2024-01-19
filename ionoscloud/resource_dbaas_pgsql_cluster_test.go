@@ -226,9 +226,7 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
-	if cancel != nil {
-		defer cancel()
-	}
+	defer cancel()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != constant.PsqlBackupsResource {
@@ -241,7 +239,7 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 				return fmt.Errorf("an error occurred while checking the destruction of psql cluster %s: %w", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("k8s cluster %s still exists", rs.Primary.ID)
+			return fmt.Errorf("PgSQL cluster with ID: %v still exists", rs.Primary.ID)
 		}
 
 	}
@@ -265,17 +263,15 @@ func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
-		if cancel != nil {
-			defer cancel()
-		}
+		defer cancel()
 
 		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching k8s Cluster %s: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occured while fetching PgSQL cluster with ID: %v, error: %w", rs.Primary.ID, err)
 		}
 		if *foundCluster.Id != rs.Primary.ID {
-			return fmt.Errorf("record not found")
+			return fmt.Errorf("resource not found")
 		}
 		cluster = &foundCluster
 
