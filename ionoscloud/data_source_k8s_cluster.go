@@ -40,223 +40,225 @@ type KubeConfig struct {
 	// preferences - add it when its structure is clear
 }
 
-var dataSourceK8sClusterSchema map[string]*schema.Schema = map[string]*schema.Schema{
-	"id": {
-		Type:     schema.TypeString,
-		Optional: true,
-	},
-	"name": {
-		Type:     schema.TypeString,
-		Optional: true,
-	},
-	"state": {
-		Type:     schema.TypeString,
-		Computed: true,
-	},
-	"k8s_version": {
-		Type:     schema.TypeString,
-		Computed: true,
-	},
-	"maintenance_window": {
-		Type:        schema.TypeList,
-		Description: "A maintenance window comprise of a day of the week and a time for maintenance to be allowed",
-		Computed:    true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"time": {
-					Type:        schema.TypeString,
-					Description: "A clock time in the day when maintenance is allowed",
-					Computed:    true,
-				},
-				"day_of_the_week": {
-					Type:        schema.TypeString,
-					Description: "Day of the week when maintenance is allowed",
-					Computed:    true,
-				},
-			},
+func dataSourceK8sClusterSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"id": {
+			Type:     schema.TypeString,
+			Optional: true,
 		},
-	},
-	"config": {
-		Type:      schema.TypeList,
-		Computed:  true,
-		Sensitive: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"api_version": {
-					Type:      schema.TypeString,
-					Computed:  true,
-					Sensitive: true,
-				},
-				"current_context": {
-					Type:      schema.TypeString,
-					Computed:  true,
-					Sensitive: true,
-				},
-				"kind": {
-					Type:     schema.TypeString,
-					Computed: true,
-				},
-				"users": {
-					Type:     schema.TypeList,
-					Computed: true,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"name": {
-								Type:      schema.TypeString,
-								Computed:  true,
-								Sensitive: true,
-							},
-							"user": {
-								Type:      schema.TypeMap,
-								Computed:  true,
-								Sensitive: true,
-								Elem: &schema.Schema{
-									Type: schema.TypeString,
-								},
-							},
-						},
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"state": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"k8s_version": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"maintenance_window": {
+			Type:        schema.TypeList,
+			Description: "A maintenance window comprise of a day of the week and a time for maintenance to be allowed",
+			Computed:    true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"time": {
+						Type:        schema.TypeString,
+						Description: "A clock time in the day when maintenance is allowed",
+						Computed:    true,
 					},
-				},
-				"clusters": {
-					Type:     schema.TypeList,
-					Computed: true,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"name": {
-								Type:      schema.TypeString,
-								Computed:  true,
-								Sensitive: true,
-							},
-							"cluster": {
-								Type:      schema.TypeMap,
-								Computed:  true,
-								Sensitive: true,
-								Elem: &schema.Schema{
-									Type: schema.TypeString,
-								},
-							},
-						},
-					},
-				},
-				"contexts": {
-					Type:     schema.TypeList,
-					Computed: true,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"name": {
-								Type:      schema.TypeString,
-								Computed:  true,
-								Sensitive: true,
-							},
-							"context": {
-								Type:      schema.TypeMap,
-								Computed:  true,
-								Sensitive: true,
-								Elem: &schema.Schema{
-									Type: schema.TypeString,
-								},
-							},
-						},
+					"day_of_the_week": {
+						Type:        schema.TypeString,
+						Description: "Day of the week when maintenance is allowed",
+						Computed:    true,
 					},
 				},
 			},
 		},
-	},
-	"user_tokens": {
-		Type:      schema.TypeMap,
-		Sensitive: true,
-		Computed:  true,
-		Elem: &schema.Schema{
+		"config": {
+			Type:      schema.TypeList,
+			Computed:  true,
+			Sensitive: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"api_version": {
+						Type:      schema.TypeString,
+						Computed:  true,
+						Sensitive: true,
+					},
+					"current_context": {
+						Type:      schema.TypeString,
+						Computed:  true,
+						Sensitive: true,
+					},
+					"kind": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"users": {
+						Type:     schema.TypeList,
+						Computed: true,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"name": {
+									Type:      schema.TypeString,
+									Computed:  true,
+									Sensitive: true,
+								},
+								"user": {
+									Type:      schema.TypeMap,
+									Computed:  true,
+									Sensitive: true,
+									Elem: &schema.Schema{
+										Type: schema.TypeString,
+									},
+								},
+							},
+						},
+					},
+					"clusters": {
+						Type:     schema.TypeList,
+						Computed: true,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"name": {
+									Type:      schema.TypeString,
+									Computed:  true,
+									Sensitive: true,
+								},
+								"cluster": {
+									Type:      schema.TypeMap,
+									Computed:  true,
+									Sensitive: true,
+									Elem: &schema.Schema{
+										Type: schema.TypeString,
+									},
+								},
+							},
+						},
+					},
+					"contexts": {
+						Type:     schema.TypeList,
+						Computed: true,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"name": {
+									Type:      schema.TypeString,
+									Computed:  true,
+									Sensitive: true,
+								},
+								"context": {
+									Type:      schema.TypeMap,
+									Computed:  true,
+									Sensitive: true,
+									Elem: &schema.Schema{
+										Type: schema.TypeString,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"user_tokens": {
+			Type:      schema.TypeMap,
+			Sensitive: true,
+			Computed:  true,
+			Elem: &schema.Schema{
+				Type:      schema.TypeString,
+				Sensitive: true,
+			},
+		},
+		"ca_crt": {
+			Type:      schema.TypeString,
+			Sensitive: true, // is this necessary? cert is already displayed in clear in another field
+			Computed:  true,
+		},
+		"server": {
 			Type:      schema.TypeString,
 			Sensitive: true,
+			Computed:  true,
 		},
-	},
-	"ca_crt": {
-		Type:      schema.TypeString,
-		Sensitive: true, // is this necessary? cert is already displayed in clear in another field
-		Computed:  true,
-	},
-	"server": {
-		Type:      schema.TypeString,
-		Sensitive: true,
-		Computed:  true,
-	},
-	"available_upgrade_versions": {
-		Type:        schema.TypeList,
-		Description: "A list of available versions for upgrading the cluster",
-		Computed:    true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
+		"available_upgrade_versions": {
+			Type:        schema.TypeList,
+			Description: "A list of available versions for upgrading the cluster",
+			Computed:    true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
 		},
-	},
-	"viable_node_pool_versions": {
-		Type:        schema.TypeList,
-		Description: "A list of versions that may be used for node pools under this cluster",
-		Computed:    true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
+		"viable_node_pool_versions": {
+			Type:        schema.TypeList,
+			Description: "A list of versions that may be used for node pools under this cluster",
+			Computed:    true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
 		},
-	},
-	"public": {
-		Type:        schema.TypeBool,
-		Description: "The indicator if the cluster is public or private.",
-		Computed:    true,
-	},
-	"nat_gateway_ip": {
-		Type:        schema.TypeString,
-		Description: "The NAT gateway IP of the cluster if the cluster is private.",
-		Computed:    true,
-	},
-	"node_subnet": {
-		Type:        schema.TypeString,
-		Description: "The node subnet of the cluster, if the cluster is private.",
-		Computed:    true,
-	},
-	"location": {
-		Type:     schema.TypeString,
-		Computed: true,
-	},
-	"node_pools": {
-		Type:     schema.TypeList,
-		Computed: true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
+		"public": {
+			Type:        schema.TypeBool,
+			Description: "The indicator if the cluster is public or private.",
+			Computed:    true,
 		},
-	},
-	"kube_config": {
-		Type:     schema.TypeString,
-		Computed: true,
-	},
-	"api_subnet_allow_list": {
-		Type: schema.TypeList,
-		Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
-			"affected by this restriction. If no allowlist is specified, access is not restricted. If an IP " +
-			"without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.",
-		Computed: true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
+		"nat_gateway_ip": {
+			Type:        schema.TypeString,
+			Description: "The NAT gateway IP of the cluster if the cluster is private.",
+			Computed:    true,
 		},
-	},
-	"s3_buckets": {
-		Type:        schema.TypeList,
-		Description: "List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.",
-		Computed:    true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"name": {
-					Type:        schema.TypeString,
-					Description: "Name of the S3 bucket",
-					Required:    true,
+		"node_subnet": {
+			Type:        schema.TypeString,
+			Description: "The node subnet of the cluster, if the cluster is private.",
+			Computed:    true,
+		},
+		"location": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"node_pools": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+		"kube_config": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"api_subnet_allow_list": {
+			Type: schema.TypeList,
+			Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
+				"affected by this restriction. If no allowlist is specified, access is not restricted. If an IP " +
+				"without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.",
+			Computed: true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+		"s3_buckets": {
+			Type:        schema.TypeList,
+			Description: "List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.",
+			Computed:    true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"name": {
+						Type:        schema.TypeString,
+						Description: "Name of the S3 bucket",
+						Required:    true,
+					},
 				},
 			},
 		},
-	},
+	}
 }
 
 func dataSourceK8sCluster() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceK8sReadCluster,
-		Schema:      dataSourceK8sClusterSchema,
+		Schema:      dataSourceK8sClusterSchema(),
 		Timeouts:    &resourceDefaultTimeouts,
 	}
 }
