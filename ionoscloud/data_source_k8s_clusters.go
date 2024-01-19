@@ -3,11 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/iancoleman/strcase"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
@@ -17,119 +18,94 @@ import (
 
 func dataSourceK8sClusters() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceK8sReadClusterList,
+		ReadContext: dataSourceK8sReadClusters,
 		Schema: map[string]*schema.Schema{
 			"clusters": {
 				Type:        schema.TypeList,
 				Description: "List of clusters which match the filtering criteria.",
 				Computed:    true,
-				Elem:        &schema.Resource{Schema: dataSourceK8sClusterSchema},
+				Elem:        &schema.Resource{Schema: dataSourceK8sClusterSchema()},
 			},
 			"entries": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"location": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"k8s_version": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"public": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"states": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
+			"filter": dataSourceFiltersSchema(),
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
-func dataSourceK8sReadClusterList(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+
+	// strcase.ToLowerCamel doesn't produce the correct format for these keys, provide them directly
+	filterKeys := map[string]string{
+		"k8s_version": "k8sVersion",
+	}
+
 	client := meta.(services.SdkBundle).CloudApiClient
-	filters := clusterListFilter{states: map[string]struct{}{}}
+	req := client.KubernetesApi.K8sGet(ctx).Depth(1)
 
-	if name, nameOk := d.GetOk("name"); nameOk {
-		filters.name = name.(string)
+	filters, filtersOk := d.GetOk("filter")
+	if !filtersOk {
+		return diag.FromErr(errors.New("please provide filters for data source lookup"))
 	}
-	if location, locationOk := d.GetOk("location"); locationOk {
-		filters.location = location.(string)
-	}
-	if public, publicOk := d.GetOkExists("public"); publicOk {
-		filters.public.set = true
-		filters.public.value = public.(bool)
-	}
-	if states, statesOk := d.GetOkExists("states"); statesOk {
-		statesVal := states.([]interface{})
-		for _, state := range statesVal {
-			filters.states[state.(string)] = struct{}{}
+
+	for _, v := range filters.(*schema.Set).List() {
+		filter := v.(map[string]any)
+		key := filter["name"].(string)
+		value := filter["value"].(string)
+		if v, ok := filterKeys[key]; ok {
+			key = v
+		} else {
+			key = strcase.ToLowerCamel(key)
 		}
+		req.Filter(key, value)
 	}
 
-	clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Depth(1).Execute()
+	clusters, apiResponse, err := req.Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %w", err))
 	}
-
-	if clusters.Items != nil {
-
-		var results []*ionoscloud.KubernetesCluster
-		for _, c := range *clusters.Items {
-			if filters.filter(c) && true {
-				c := c
-				results = append(results, &c)
-			}
-		}
-		if len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no clusters match the specified filtering criteria"))
-		}
-		if err := setDataSourceK8sSetClusterList(d, results, client); err != nil {
-			return diag.FromErr(err)
-		}
+	if clusters.Items != nil && len(*clusters.Items) == 0 {
+		return diag.FromErr(fmt.Errorf("no clusters match the specified filtering criteria"))
+	}
+	if err := setDataSourceK8sSetClusters(ctx, d, *clusters.Items, client); err != nil {
+		return diag.FromErr(err)
 	}
 	return nil
 }
 
-func setDataSourceK8sSetClusterList(d *schema.ResourceData, clusters []*ionoscloud.KubernetesCluster, client *ionoscloud.APIClient) error {
+func setDataSourceK8sSetClusters(ctx context.Context, d *schema.ResourceData, clusters []ionoscloud.KubernetesCluster, client *ionoscloud.APIClient) error {
 
 	if d.Id() == "" {
 		d.SetId(uuidgen.ResourceUuid().String())
 	}
 	clusterList := make([]map[string]any, 0)
 	for _, c := range clusters {
-
-		clusterProperties, err := K8sClusterProperties(c, client)
+		clusterProperties, err := K8sClusterProperties(ctx, c, client)
 		if err != nil {
 			return err
 		}
-
 		clusterList = append(clusterList, clusterProperties)
 	}
 
 	if err := d.Set("clusters", clusterList); err != nil {
 		return err
 	}
-
 	if err := d.Set("entries", len(clusterList)); err != nil {
 		return err
 	}
 
 	return nil
-
 }
 
-func K8sClusterProperties(cluster *ionoscloud.KubernetesCluster, client *ionoscloud.APIClient) (map[string]any, error) {
+// K8sClusterProperties returns a map equivalent of dataSourceK8sClusterSchema
+func K8sClusterProperties(ctx context.Context, cluster ionoscloud.KubernetesCluster, client *ionoscloud.APIClient) (map[string]any, error) {
+	if cluster.Properties == nil {
+		return nil, fmt.Errorf("cannot set data, Properties was nil for cluster: %s", *cluster.Id)
+	}
 	clusterProperties := make(map[string]any)
 
 	utils.SetPropWithNilCheck(clusterProperties, "name", cluster.Properties.Name)
@@ -150,12 +126,17 @@ func K8sClusterProperties(cluster *ionoscloud.KubernetesCluster, client *ionoscl
 		}
 		clusterProperties["s3_buckets"] = s3Buckets
 	}
+	if cluster.Properties.AvailableUpgradeVersions != nil {
+		availableUpgradeVersions := make([]any, len(*cluster.Properties.AvailableUpgradeVersions))
+		for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
+			availableUpgradeVersions[i] = availableUpgradeVersion
+		}
+		clusterProperties["available_upgrade_versions"] = availableUpgradeVersions
+	}
 	if cluster.Metadata != nil {
 		utils.SetPropWithNilCheck(clusterProperties, "state", cluster.Metadata.State)
 	}
 	if cluster.Id != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-		defer cancel()
 
 		// kubeconfig
 		clusterConfig, apiResponse, err := client.KubernetesApi.K8sKubeconfigGet(ctx, *cluster.Id).Execute()
@@ -170,6 +151,18 @@ func K8sClusterProperties(cluster *ionoscloud.KubernetesCluster, client *ionoscl
 		}
 
 		// node pools
+		clusterNodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return nil, fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %w", *cluster.Id, err)
+		}
+		if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {
+			var nodePools []any
+			for _, nodePool := range *clusterNodePools.Items {
+				nodePools = append(nodePools, *nodePool.Id)
+			}
+			clusterProperties["node_pools"] = nodePools
+		}
 
 		clusterProperties = mergeMaps(clusterProperties, clusterConfigProperties)
 	}
@@ -177,6 +170,7 @@ func K8sClusterProperties(cluster *ionoscloud.KubernetesCluster, client *ionoscl
 	return clusterProperties, nil
 }
 
+// K8sClusterConfigProperties returns a map with additional properties parsed from the kubeconfig of a KubernetesCluster
 func K8sClusterConfigProperties(clusterConfig string) (map[string]any, error) {
 	kubeConfig := KubeConfig{}
 	if err := yaml.Unmarshal([]byte(clusterConfig), &kubeConfig); err != nil {
@@ -243,74 +237,4 @@ func mergeMaps(maps ...map[string]any) map[string]any {
 		}
 	}
 	return merged
-}
-
-type clusterListFilter struct {
-	name       string
-	location   string
-	k8sVersion string
-	states     map[string]struct{}
-	public     struct {
-		set   bool
-		value bool
-	}
-}
-
-func (clf clusterListFilter) filter(cluster ionoscloud.KubernetesCluster) bool {
-
-	type filterFn func(ionoscloud.KubernetesCluster) bool
-	filterFns := []filterFn{
-		clf.nameFieldFilter,
-		clf.locationFieldFilter,
-		clf.publicFieldFilter,
-		clf.statesFieldFilter,
-		clf.k8sVersionFieldFilter,
-	}
-
-	if cluster.Properties == nil {
-		return false
-	}
-
-	for _, f := range filterFns {
-		if !f(cluster) {
-			return false
-		}
-	}
-
-	return true
-}
-func (clf clusterListFilter) nameFieldFilter(cluster ionoscloud.KubernetesCluster) bool {
-	if clf.name == "" || (cluster.Properties.Name != nil && strings.Contains(*cluster.Properties.Name, clf.name)) {
-		return true
-	}
-	return false
-}
-func (clf clusterListFilter) locationFieldFilter(cluster ionoscloud.KubernetesCluster) bool {
-	if clf.location == "" || (cluster.Properties.Location != nil && strings.EqualFold(*cluster.Properties.Location, clf.location)) {
-		return true
-	}
-	return false
-}
-func (clf clusterListFilter) publicFieldFilter(cluster ionoscloud.KubernetesCluster) bool {
-	if !clf.public.set || (cluster.Properties.Public != nil && *cluster.Properties.Public == clf.public.value) {
-		return true
-	}
-	return false
-}
-func (clf clusterListFilter) statesFieldFilter(cluster ionoscloud.KubernetesCluster) bool {
-	if len(clf.states) == 0 {
-		return true
-	}
-	if cluster.Metadata != nil && cluster.Metadata.State != nil {
-		if _, ok := clf.states[*cluster.Metadata.State]; ok {
-			return true
-		}
-	}
-	return false
-}
-func (clf clusterListFilter) k8sVersionFieldFilter(cluster ionoscloud.KubernetesCluster) bool {
-	if clf.k8sVersion == "" || (cluster.Properties.K8sVersion != nil && strings.EqualFold(*cluster.Properties.K8sVersion, clf.k8sVersion)) {
-		return true
-	}
-	return false
 }
