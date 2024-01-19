@@ -105,6 +105,7 @@ const (
 // K8s Constants
 const (
 	K8sClusterResource            = "ionoscloud_k8s_cluster"
+	K8sClustersDataSource         = "ionoscloud_k8s_clusters"
 	K8sClusterTestResource        = "test_k8s_cluster"
 	PrivateK8sClusterTestResource = "test_private_k8s_cluster"
 	K8sClusterDataSourceById      = "test_k8s_cluster_id"
