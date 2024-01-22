@@ -150,8 +150,12 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 	client := meta.(services.SdkBundle).ContainerClient
 
 	containerRegistry := crService.GetRegistryDataUpdate(d)
-	containerRegistryFeatures, _ := crService.GetRegistryFeatures(d)
+	containerRegistryFeatures, warnings := crService.GetRegistryFeatures(d)
 	containerRegistry.Features = containerRegistryFeatures
+	// suppress warnings if there are no changes to the features set
+	if !d.HasChange("features") {
+		warnings = diag.Diagnostics{}
+	}
 
 	registryId := d.Id()
 
@@ -161,7 +165,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	return resourceContainerRegistryRead(ctx, d, meta)
+	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
 
 func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

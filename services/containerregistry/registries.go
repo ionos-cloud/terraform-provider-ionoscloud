@@ -406,6 +406,33 @@ func SetScopes(scopes []cr.Scope) []interface{} {
 // It will also return a list of warnings related to attributes which should be set explicitly
 func GetRegistryFeatures(d *schema.ResourceData) (*cr.RegistryFeatures, diag.Diagnostics) {
 
+	crfWarnings := struct {
+		warnCRVScanningOmitted diag.Diagnostic
+		warnCRVScanningOff     diag.Diagnostic
+		warnCRVScanningOn      diag.Diagnostic
+	}{
+		warnCRVScanningOmitted: diag.Diagnostic{Severity: diag.Warning,
+			Summary: "'vulnerability_scanning' is omitted from the config. CR Vulnerability Scanning has been enabled by default.",
+			Detail: "Container Registry Vulnerability Scanning is a paid security feature which is enabled by default.\n" +
+				"If you do not wish to enable it, ensure 'vulnerability_scanning' is set to false when creating the resource.\n" +
+				"Once activated, it cannot be deactivated afterwards for this CR instance.\n" +
+				"More details about CR Vulnerability Scanning: https://docs.ionos.com/cloud/managed-services/container-registry/dcd-how-tos/enable-vulnerability-scanning\n" +
+				"Price list is available under the 'Data Platform' section for your selected region at: https://docs.ionos.com/support/general-information/price-list",
+		},
+		warnCRVScanningOff: diag.Diagnostic{Severity: diag.Warning,
+			Summary: "'vulnerability_scanning' is disabled for this Container Registry.",
+			Detail: "Container Registry Vulnerability Scanning is a paid security feature which we recommend enabling.\n" +
+				"More details about CR Vulnerability Scanning: https://docs.ionos.com/cloud/managed-services/container-registry/dcd-how-tos/enable-vulnerability-scanning\n" +
+				"Price list is available under the 'Data Platform' section for your selected region at: https://docs.ionos.com/support/general-information/price-list",
+		},
+		warnCRVScanningOn: diag.Diagnostic{Severity: diag.Warning,
+			Summary: "'vulnerability_scanning' has been enabled for this Container Registry.",
+			Detail: "Container Registry Vulnerability Scanning is a paid security feature.\n" +
+				"More details about CR Vulnerability Scanning: https://docs.ionos.com/cloud/managed-services/container-registry/dcd-how-tos/enable-vulnerability-scanning\n" +
+				"Price list is available under the 'Data Platform' section for your selected region at: https://docs.ionos.com/support/general-information/price-list",
+		},
+	}
+
 	registryFeatures := cr.NewRegistryFeatures()
 	var warnings diag.Diagnostics
 
@@ -413,13 +440,15 @@ func GetRegistryFeatures(d *schema.ResourceData) (*cr.RegistryFeatures, diag.Dia
 	if vulnerabilityScanning, ok := d.GetOkExists("features.0.vulnerability_scanning"); ok { //nolint:staticcheck
 		vulnerabilityScanning := vulnerabilityScanning.(bool)
 		registryFeatures.VulnerabilityScanning.Enabled = &vulnerabilityScanning
+
+		if vulnerabilityScanning {
+			warnings = append(warnings, crfWarnings.warnCRVScanningOn)
+		} else {
+			warnings = append(warnings, crfWarnings.warnCRVScanningOff)
+		}
+
 	} else {
-		warnings = append(warnings, diag.Diagnostic{Severity: diag.Warning,
-			Summary: "'vulnerability_scanning' is omitted from the config. CR Vulnerability Scanning will be activated by default.",
-			Detail: "Container Registry Vulnerability Scanning is a paid feature which is enabled by default.\n" +
-				"If you do not wish to enable it, ensure 'vulnerability_scanning' is set to false when creating the resource.\n" +
-				"Once activated, it cannot be deactivated afterwards.",
-		})
+		warnings = append(warnings, crfWarnings.warnCRVScanningOmitted)
 	}
 
 	return registryFeatures, warnings
