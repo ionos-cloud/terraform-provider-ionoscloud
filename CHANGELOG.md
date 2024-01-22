@@ -1,4 +1,7 @@
 ## 6.4.13(upcoming)
+### Features
+- Add `ionoscloud_k8s_clusters` data source
+
 ### Refactor
 - Remove duplicate functions for image retrieval (`checkImage`, `resolveImageName`) in `resource_volume.go`
 ### Fixes
