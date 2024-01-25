@@ -38,7 +38,7 @@ func dataSourceK8sClusters() *schema.Resource {
 
 func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
-	// strcase.ToLowerCamel doesn't produce the correct format for these keys, provide them directly
+	// strcase.ToLowerCamel doesn't produce the correct format for these keys, provide them directly (https://github.com/iancoleman/strcase/issues/51)
 	filterKeys := map[string]string{
 		"k8s_version": "k8sVersion",
 	}
@@ -170,8 +170,7 @@ func K8sClusterProperties(ctx context.Context, cluster ionoscloud.KubernetesClus
 			}
 			clusterProperties["node_pools"] = nodePools
 		}
-
-		clusterProperties = mergeMaps(clusterProperties, clusterConfigProperties)
+		clusterProperties = utils.MergeMaps(clusterProperties, clusterConfigProperties)
 	}
 
 	return clusterProperties, nil
@@ -233,15 +232,4 @@ func K8sClusterConfigProperties(clusterConfig string) (map[string]any, error) {
 	clusterProperties["user_tokens"] = userTokens
 
 	return clusterProperties, nil
-}
-
-func mergeMaps(maps ...map[string]any) map[string]any {
-	merged := map[string]any{}
-	for _, m := range maps {
-
-		for k := range m {
-			merged[k] = m[k]
-		}
-	}
-	return merged
 }

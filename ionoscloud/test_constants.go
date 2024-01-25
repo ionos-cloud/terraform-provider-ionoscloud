@@ -1664,11 +1664,12 @@ resource "random_string" "simple_string" {
 `
 
 // K8s values
-
-const K8sVersion = "1.26.4"
-const UpgradedK8sVersion = "1.26.6"
-const K8sBucket = "test-k8s-terraform-v6"
-const K8sPrivateClusterNodeSubnet = "192.168.0.0/16"
+const (
+	K8sVersion                  = "1.26.4"
+	UpgradedK8sVersion          = "1.26.6"
+	K8sBucket                   = "test-k8s-terraform-v6"
+	K8sPrivateClusterNodeSubnet = "192.168.0.0/16"
+)
 
 // DNS test constants: configs, attributes and values.
 

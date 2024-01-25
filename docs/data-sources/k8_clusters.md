@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : k8s_clusters"
+page_title: "IonosCloud : ionoscloud_k8s_clusters"
 sidebar_current: "docs-ionoscloud-datasource-clusters"
 description: |-
   Retrieves a list of Ionos Cloud Kubernetes Clusters

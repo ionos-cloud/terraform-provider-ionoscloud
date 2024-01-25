@@ -108,7 +108,7 @@ const (
 	K8sClustersDataSource             = "ionoscloud_k8s_clusters"
 	K8sClusterTestResource            = "test_k8s_cluster"
 	PrivateK8sClusterTestResource     = "test_private_k8s_cluster"
-	K8sClusterDataSourceById          = "test_k8s_cluster_id"
+	K8sClusterDataSourceByID          = "test_k8s_cluster_id"
 	K8sClusterDataSourceByName        = "test_k8s_cluster_name"
 	K8sClustersDataSourceFilterName   = "test_k8s_clusters_filter_name"
 	K8sClustersDataSourceFilterPublic = "test_k8s_clusters_filter_public"
