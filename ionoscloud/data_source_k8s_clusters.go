@@ -36,7 +36,7 @@ func dataSourceK8sClusters() *schema.Resource {
 	}
 }
 
-func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	// strcase.ToLowerCamel doesn't produce the correct format for these keys, provide them directly
 	filterKeys := map[string]string{
@@ -133,6 +133,13 @@ func K8sClusterProperties(ctx context.Context, cluster ionoscloud.KubernetesClus
 		}
 		clusterProperties["available_upgrade_versions"] = availableUpgradeVersions
 	}
+	if cluster.Properties.ApiSubnetAllowList != nil {
+		apiSubnetAllowList := make([]any, len(*cluster.Properties.ApiSubnetAllowList))
+		for i, subnet := range *cluster.Properties.ApiSubnetAllowList {
+			apiSubnetAllowList[i] = subnet
+		}
+		clusterProperties["api_subnet_allow_list"] = apiSubnetAllowList
+	}
 	if cluster.Metadata != nil {
 		utils.SetPropWithNilCheck(clusterProperties, "state", cluster.Metadata.State)
 	}
@@ -198,7 +205,7 @@ func K8sClusterConfigProperties(clusterConfig string) (map[string]any, error) {
 
 	contexts := make([]map[string]any, len(kubeConfig.Contexts))
 	for i, contextVal := range kubeConfig.Contexts {
-		contexts[i] = map[string]interface{}{
+		contexts[i] = map[string]any{
 			"name": contextVal.Name,
 			"context": map[string]string{
 				"cluster": contextVal.Context.Cluster,

@@ -153,33 +153,38 @@ func TestAccK8sClusters(t *testing.T) {
 		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckK8sClusters,
+				Config: testAccDataSourceK8sClusters,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckK8sClusterExists(constant.K8sClustersDataSource+"."+constant.PrivateK8sClusterTestResource, &k8sCluster),
-					testAccCheckK8sClusterExists(constant.K8sClustersDataSource+"."+constant.K8sClusterTestResource, &k8sCluster),
-					// Filter by 'name'
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "entries", "2"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.name", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.name", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.k8s_version", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "k8s_version"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.k8s_version", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "k8s_version"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.public", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "public"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.public", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "public"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.maintenance_window.0.day_of_the_week", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.day_of_the_week"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.maintenance_window.0.day_of_the_week", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "maintenance_window.0.day_of_the_week"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.maintenance_window.0.time", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.maintenance_window.0.time", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.api_subnet_allow_list.0", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "api_subnet_allow_list.0"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.api_subnet_allow_list.0", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "api_subnet_allow_list.0"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.s3_buckets.0.name", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "s3_buckets.0.name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.s3_buckets.0.name", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "s3_buckets.0.name"),
-					// Filter By 'private'
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "entries", "1"),
+					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.K8sClusterTestResource, &k8sCluster),
+					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, &k8sCluster),
+					// filter by 'name'
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "entries", constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.#"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.name", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.k8s_version", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "k8s_version"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.public", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "public"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.maintenance_window.0.day_of_the_week", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.maintenance_window.0.time", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.api_subnet_allow_list.0", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "api_subnet_allow_list.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.s3_buckets.0.name", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "s3_buckets.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.0.location", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "location"),
+
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.name", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.k8s_version", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "k8s_version"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.public", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "public"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.maintenance_window.0.day_of_the_week", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.maintenance_window.0.time", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.api_subnet_allow_list.0", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "api_subnet_allow_list.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.1.s3_buckets.0.name", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "s3_buckets.0.name"),
+					// filter by 'public'
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "entries", constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.#"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.0.k8s_version", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "k8s_version"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.0.public", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "public"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.0.maintenance_window.0.day_of_the_week", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "maintenance_window.0.day_of_the_week"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.0.maintenance_window.0.time", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "maintenance_window.0.time"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.0.api_subnet_allow_list.0", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "api_subnet_allow_list.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.0.location", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.0.nat_gateway_ip", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "nat_gateway_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.0.node_subnet", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "node_subnet"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.0.s3_buckets.0.name", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "s3_buckets.0.name"),
 				),
 			},
@@ -343,15 +348,16 @@ data ` + constant.K8sClusterResource + ` ` + constant.K8sClusterDataSourceByName
 }
 `
 
-const testAccCheckK8sClusters = testAccCheckK8sClusterConfigBasic + `
-` + testAccCheckK8sClusterConfigPrivateCluster + `
+const testAccDataSourceK8sClusters = testAccCheckK8sClusterConfigBasic + "\n" + testAccCheckK8sClusterConfigPrivateCluster + `
 data ` + constant.K8sClustersDataSource + ` ` + constant.K8sClustersDataSourceFilterName + `{
+  depends_on = [` + constant.K8sClusterResource + `.` + constant.PrivateK8sClusterTestResource + `,` + constant.K8sClusterResource + `.` + constant.K8sClusterTestResource + `]
   filter{
     name = "name"
     value = "test_"
   }
 }
 data ` + constant.K8sClustersDataSource + ` ` + constant.K8sClustersDataSourceFilterPublic + `{
+  depends_on = [` + constant.K8sClusterResource + `.` + constant.PrivateK8sClusterTestResource + `,` + constant.K8sClusterResource + `.` + constant.K8sClusterTestResource + `]
   filter{
     name = "public"
     value = "false"
