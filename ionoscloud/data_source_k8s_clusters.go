@@ -152,7 +152,7 @@ func K8sClusterProperties(ctx context.Context, cluster ionoscloud.KubernetesClus
 			return nil, fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %w", *cluster.Id, err)
 		}
 		clusterProperties["kube_config"] = clusterConfig
-		clusterConfigProperties, err := K8sClusterConfigProperties(clusterConfig)
+		clusterConfigProperties, err := setKubeConfigData(clusterConfig)
 		if err != nil {
 			return nil, err
 		}
@@ -176,8 +176,7 @@ func K8sClusterProperties(ctx context.Context, cluster ionoscloud.KubernetesClus
 	return clusterProperties, nil
 }
 
-// K8sClusterConfigProperties returns a map with additional properties parsed from the kubeconfig of a KubernetesCluster
-func K8sClusterConfigProperties(clusterConfig string) (map[string]any, error) {
+func setKubeConfigData(clusterConfig string) (map[string]any, error) {
 	kubeConfig := KubeConfig{}
 	if err := yaml.Unmarshal([]byte(clusterConfig), &kubeConfig); err != nil {
 		return nil, err
