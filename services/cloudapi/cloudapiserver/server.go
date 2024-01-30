@@ -17,10 +17,12 @@ import (
 )
 
 var (
-	//ErrSuspendCubeLast signals to the Server Resource UpdateContext that the cube server will be suspended so that the operation is deferred
+	// ErrSuspendCubeLast signals to the Server Resource UpdateContext that the cube server will be suspended so that the operation is deferred
 	ErrSuspendCubeLast error
-	ErrServerNotFound  error
-	ErrNoBootDevice    = errors.New("server has no boot device")
+	// ErrServerNotFound returned when the server with the requested ID does not exist
+	ErrServerNotFound error
+	// ErrNoBootDevice is returned if the Server does not have a boot cdrom or boot volume set
+	ErrNoBootDevice = errors.New("server has no boot device")
 )
 
 // UnboundService allows usage of a subset of the method set of the Service
@@ -430,10 +432,10 @@ func (ss *Service) PxeBoot(ctx context.Context, datacenterID, serverID string) e
 }
 
 // checkExpectedVMStateFn wraps over the ResourceReadyFunc to allow passing expectedState
-func (ss *Service) checkExpectedVMStateFn(dcId, expectedState string) utils.ResourceReadyFunc {
+func (ss *Service) checkExpectedVMStateFn(dcID, expectedState string) utils.ResourceReadyFunc {
 
 	return func(ctx context.Context, d *schema.ResourceData) (bool, error) {
-		server, _, err := ss.Client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
+		server, _, err := ss.Client.ServersApi.DatacentersServersFindById(ctx, dcID, d.Id()).Execute()
 		if err != nil {
 			return false, err
 		}
