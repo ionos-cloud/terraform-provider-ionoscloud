@@ -1,4 +1,6 @@
 ## 6.4.13(upcoming)
+### Features
+- Added ability to boot from network for `ionoscloud_server`, `ionoscloud_vcpu_server`, `ionoscloud_cube_server`
 ### Refactor
 - Remove duplicate functions for image retrieval (`checkImage`, `resolveImageName`) in `resource_volume.go`
 ### Fixes

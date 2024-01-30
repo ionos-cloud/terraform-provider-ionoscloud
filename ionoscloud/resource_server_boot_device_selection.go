@@ -46,7 +46,7 @@ func resourceServerBootDeviceSelection() *schema.Resource {
 			},
 			"default_boot_volume_id": {
 				Type:        schema.TypeString,
-				Description: "ID of the first attached volume of the Server, which will be the default boot volume unless another is explicitly specified.",
+				Description: "ID of the first attached volume of the Server, which will be the default boot volume.",
 				Computed:    true,
 			},
 		},

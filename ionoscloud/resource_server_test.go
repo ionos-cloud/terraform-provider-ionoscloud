@@ -819,26 +819,39 @@ func TestAccServerBootDeviceSelection(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "boot_volume", constant.ServerResource+"."+constant.ServerTestResource, "inline_volume_ids.0"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", ""),
 				)},
-			// The server object is updated 'outside' of the resource, so the state of the server resource won't be refreshed in the same step
 			{
 				Config: testExternalVolumeSelection,
 				Check: resource.ComposeTestCheckFunc(
+					// The Server resource state is not updated after the Apply because the changes are triggered through the boot selection resource, so a second refresh is not performed for the Server state
+					// The new boot_volume value will be available in the next Update.
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", ""),
 				)},
 			{
 				Config: testImageCdromSelection,
 				Check: resource.ComposeTestCheckFunc(
+					// The Server resource state is not updated after the Apply because the changes are triggered through the selection resource, so a second refresh is not performed for the Server state
+					// The new boot_cdrom value will be available in the next Update
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "boot_volume", constant.VolumeResource+"."+constant.VolumeTestResource, "id"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", ""),
 				)},
 			{
-				Config: testAccMultipleBootDevices,
+				Config: testAccPxeShellBoot,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", `data.`+constant.ImageResource+"."+constant.ImageTestResource, "id"),
+					// The Server resource state is not updated after the Apply because the changes are triggered through the selection resource, so a second refresh is not performed for the Server state
+					// The null value for boot_cdrom will be available in the next Update
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_volume", ""),
+					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", `data.`+constant.ImageResource+"."+constant.ImageTestResource, "id"),
 				)},
 			{
-				Config: testAccMultipleBootDevices,
+				Config: testAccCheckServerConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					// The Server resource state is not updated after the Apply because the changes are triggered through the selection resource, so a second refresh is not performed for the Server state
+					// The new boot_volume value will be available in the next Update.
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_volume", ""),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", ""),
+				)},
+			{
+				Config: testAccCheckServerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "boot_volume", constant.ServerResource+"."+constant.ServerTestResource, "inline_volume_ids.0"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "boot_cdrom", ""),
@@ -1940,5 +1953,11 @@ resource ` + constant.ServerBootDeviceSelectionResource + ` ` + constant.TestSer
   datacenter_id  = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   server_id      = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   boot_device_id = data.` + constant.ImageResource + `.` + constant.ImageTestResource + `.id
+}
+`
+const testAccPxeShellBoot = testAccMultipleBootDevices + `
+resource ` + constant.ServerBootDeviceSelectionResource + ` ` + constant.TestServerBootDeviceSelectionResource + ` {
+  datacenter_id  = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id      = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
 }
 `
