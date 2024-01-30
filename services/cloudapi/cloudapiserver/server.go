@@ -17,6 +17,7 @@ import (
 )
 
 var (
+	//ErrSuspendCubeLast signals to the Server Resource UpdateContext that the cube server will be suspended so that the operation is deferred
 	ErrSuspendCubeLast error
 	ErrServerNotFound  error
 	ErrNoBootDevice    = errors.New("server has no boot device")
@@ -28,7 +29,7 @@ var (
 // The methods of this interface must not write to the state, since the Service will use a placeholder ResourceData reference
 type UnboundService interface {
 	Update(context.Context, string, string, ionoscloud.ServerProperties) (*ionoscloud.Server, *ionoscloud.APIResponse, error)
-	GetDefaultBootVolume(ctx context.Context, datacenterId, serverId string) (*ionoscloud.Volume, error)
+	GetDefaultBootVolume(ctx context.Context, datacenterID, serverID string) (*ionoscloud.Volume, error)
 	UpdateBootDevice(ctx context.Context, datacenterID, serverID, newBootDeviceID string) error
 	PxeBoot(ctx context.Context, datacenterID, serverID string) error
 	Reboot(ctx context.Context, datacenterID, serverID string) error
@@ -43,10 +44,10 @@ type Service struct {
 // NewUnboundService creates an UnboundService with a subset of the underlying Service methods
 // The concrete Service is created with a dummy ResourceData reference which has the ID of the Server this service will interact with
 // This ensure state tracking functions such as WaitForResourceToBeReady use the correct ID
-func NewUnboundService(serverId string, meta any) UnboundService {
+func NewUnboundService(serverID string, meta any) UnboundService {
 	client := meta.(services.SdkBundle).CloudApiClient
 	d := &schema.ResourceData{}
-	d.SetId(serverId)
+	d.SetId(serverID)
 	return &Service{client, meta, d}
 }
 
@@ -70,7 +71,7 @@ func (ss *Service) Delete(ctx context.Context, datacenterID, serverID, ID string
 		return apiResponse, err
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutDelete); errState != nil {
-		return apiResponse, fmt.Errorf("an error occured while waiting for server state change on delete dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
+		return apiResponse, fmt.Errorf("an error occurred while waiting for server state change on delete dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
 	}
 	return apiResponse, nil
 }
@@ -79,13 +80,13 @@ func (ss *Service) Create(ctx context.Context, datacenterID string) (*ionoscloud
 	server, apiResponse, err := ss.Client.ServersApi.DatacentersServersPost(ctx, datacenterID).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while creating server for dcId: %s, Response: (%w)", datacenterID, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while creating server for dcId: %s, Response: (%w)", datacenterID, err)
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutCreate); errState != nil {
 		if cloudapi.IsRequestFailed(errState) {
 			ss.D.SetId("")
 		}
-		return nil, apiResponse, fmt.Errorf("an error occured while waiting for server state change on create dcId: %s, Response: (%w)", datacenterID, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for server state change on create dcId: %s, Response: (%w)", datacenterID, errState)
 	}
 	return &server, apiResponse, nil
 }
@@ -94,10 +95,10 @@ func (ss *Service) Update(ctx context.Context, datacenterID, serverID string, se
 	updatedServer, apiResponse, err := ss.Client.ServersApi.DatacentersServersPatch(ctx, datacenterID, serverID).Server(serverProperties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while updating server for dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while updating server for dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, err)
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while waiting for server state change on update dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for server state change on update dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 	}
 	return &updatedServer, apiResponse, nil
 }
@@ -107,7 +108,7 @@ func (ss *Service) GetAttachedVolumes(ctx context.Context, datacenterID, serverI
 	attachedVolumeIds, apiResponse, err := ss.Client.ServersApi.DatacentersServersVolumesGet(ctx, datacenterID, serverID).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while fetching attached volumes for server, dcId: %s, serverId: %s, Response: (%w)", datacenterID, serverID, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while fetching attached volumes for server, dcId: %s, serverId: %s, Response: (%w)", datacenterID, serverID, err)
 	}
 	attachedVolumes := []*ionoscloud.Volume{}
 	for _, v := range *attachedVolumeIds.Items {
@@ -303,11 +304,11 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 		if err != nil {
 			return err
 		}
-		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, constant.VMStateStart)); err != nil {
+		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVMStateFn(datacenterID, constant.VMStateStart)); err != nil {
 			return err
 		}
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-			return fmt.Errorf("an error occured while waiting for server state change on VM POWER ON dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+			return fmt.Errorf("an error occurred while waiting for server state change on VM POWER ON dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
 		log.Printf("[DEBUG] %s server powered on: serverId: %s \n", serverType, serverID)
 		return nil
@@ -318,11 +319,11 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 		if err != nil {
 			return err
 		}
-		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, constant.VMStateStart)); err != nil {
+		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVMStateFn(datacenterID, constant.VMStateStart)); err != nil {
 			return err
 		}
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-			return fmt.Errorf("an error occured while waiting for server state change on VM RESUME dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+			return fmt.Errorf("an error occurred while waiting for server state change on VM RESUME dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
 		log.Printf("[DEBUG] %s server unsuspended: serverId: %s \n", serverType, serverID)
 		return nil
@@ -343,11 +344,11 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 		if err != nil {
 			return err
 		}
-		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, constant.VMStateStop)); err != nil {
+		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVMStateFn(datacenterID, constant.VMStateStop)); err != nil {
 			return err
 		}
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-			return fmt.Errorf("an error occured while waiting for server state change on VM SHUTOFF dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+			return fmt.Errorf("an error occurred while waiting for server state change on VM SHUTOFF dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
 		log.Printf("[DEBUG] %s server powered off: serverId: %s \n", serverType, serverID)
 		return nil
@@ -358,11 +359,11 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 		if err != nil {
 			return err
 		}
-		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, constant.CubeVMStateStop)); err != nil {
+		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVMStateFn(datacenterID, constant.CubeVMStateStop)); err != nil {
 			return err
 		}
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-			return fmt.Errorf("an error occured while waiting for server state change on VM SUSPEND dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+			return fmt.Errorf("an error occurred while waiting for server state change on VM SUSPEND dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
 		log.Printf("[DEBUG] %s server suspended: serverId: %s \n", serverType, serverID)
 		return nil
@@ -372,6 +373,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 
 }
 
+// Reboot resets the VM,
 func (ss *Service) Reboot(ctx context.Context, datacenterID, serverID string) error {
 
 	apiResponse, err := ss.Client.ServersApi.DatacentersServersRebootPost(ctx, datacenterID, serverID).Execute()
@@ -379,16 +381,17 @@ func (ss *Service) Reboot(ctx context.Context, datacenterID, serverID string) er
 	if err != nil {
 		return err
 	}
-	if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, constant.VMStateStart)); err != nil {
+	if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVMStateFn(datacenterID, constant.VMStateStart)); err != nil {
 		return err
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return fmt.Errorf("an error occured while waiting for server state change on reboot dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+		return fmt.Errorf("an error occurred while waiting for server state change on reboot dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 	}
 	log.Printf("[DEBUG] server reboot finished: serverId: %s \n", serverID)
 	return nil
 }
 
+// PxeBoot restarts the Server into the PXE shell by unsetting the primary boot device of the VM and performing a reset
 func (ss *Service) PxeBoot(ctx context.Context, datacenterID, serverID string) error {
 
 	deviceID, deviceType, err := ss.GetCurrentBootDeviceID(ctx, datacenterID, serverID)
@@ -426,8 +429,8 @@ func (ss *Service) PxeBoot(ctx context.Context, datacenterID, serverID string) e
 	return ss.Reboot(ctx, datacenterID, serverID)
 }
 
-// checkExpectedVmStateFn wraps over the ResourceReadyFunc to allow passing expectedState
-func (ss *Service) checkExpectedVmStateFn(dcId, expectedState string) utils.ResourceReadyFunc {
+// checkExpectedVMStateFn wraps over the ResourceReadyFunc to allow passing expectedState
+func (ss *Service) checkExpectedVMStateFn(dcId, expectedState string) utils.ResourceReadyFunc {
 
 	return func(ctx context.Context, d *schema.ResourceData) (bool, error) {
 		server, _, err := ss.Client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
