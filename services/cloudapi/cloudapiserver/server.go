@@ -41,8 +41,8 @@ type Service struct {
 }
 
 // NewUnboundService creates an UnboundService with a subset of the underlying Service methods
-// The concrete Service is created with a dummy ResourceData reference for which has the ID set to the Server this service will interact with
-// This ensure state tracking functions such as WaitForStateChange use the correct ID when performing resource state lookup
+// The concrete Service is created with a dummy ResourceData reference which has the ID of the Server this service will interact with
+// This ensure state tracking functions such as WaitForResourceToBeReady use the correct ID
 func NewUnboundService(serverId string, meta any) UnboundService {
 	client := meta.(services.SdkBundle).CloudApiClient
 	d := &schema.ResourceData{}
@@ -303,7 +303,7 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 		if err != nil {
 			return err
 		}
-		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, serverID, constant.VMStateStart)); err != nil {
+		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, constant.VMStateStart)); err != nil {
 			return err
 		}
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -318,7 +318,7 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 		if err != nil {
 			return err
 		}
-		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, serverID, constant.VMStateStart)); err != nil {
+		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, constant.VMStateStart)); err != nil {
 			return err
 		}
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -343,7 +343,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 		if err != nil {
 			return err
 		}
-		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, serverID, constant.VMStateStop)); err != nil {
+		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, constant.VMStateStop)); err != nil {
 			return err
 		}
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -358,7 +358,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 		if err != nil {
 			return err
 		}
-		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, serverID, constant.CubeVMStateStop)); err != nil {
+		if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, constant.CubeVMStateStop)); err != nil {
 			return err
 		}
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -379,7 +379,7 @@ func (ss *Service) Reboot(ctx context.Context, datacenterID, serverID string) er
 	if err != nil {
 		return err
 	}
-	if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, serverID, constant.VMStateStart)); err != nil {
+	if err = utils.WaitForResourceToBeReady(ctx, ss.D, ss.checkExpectedVmStateFn(datacenterID, constant.VMStateStart)); err != nil {
 		return err
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -427,18 +427,17 @@ func (ss *Service) PxeBoot(ctx context.Context, datacenterID, serverID string) e
 }
 
 // checkExpectedVmStateFn wraps over the ResourceReadyFunc to allow passing expectedState
-// TODO: change ResourceReadyFunc sig to support passing an expectedState param
-func (ss *Service) checkExpectedVmStateFn(dcId, serverId, expectedState string) utils.ResourceReadyFunc {
+func (ss *Service) checkExpectedVmStateFn(dcId, expectedState string) utils.ResourceReadyFunc {
 
 	return func(ctx context.Context, d *schema.ResourceData) (bool, error) {
-		server, _, err := ss.Client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
+		server, _, err := ss.Client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
 		if err != nil {
 			return false, err
 		}
 
 		serverType := *server.Properties.Type
 		if !strings.EqualFold(*server.Properties.VmState, expectedState) {
-			log.Printf("[INFO] Server (type: %s) vmState not yet changed to %s: %s", serverType, expectedState, serverId)
+			log.Printf("[INFO] Server (type: %s) vmState not yet changed to %s: %s", serverType, expectedState, d.Id())
 			return false, nil
 		}
 		return true, nil
