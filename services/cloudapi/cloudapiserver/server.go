@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -22,7 +23,7 @@ var (
 	// ErrServerNotFound returned when the server with the requested ID does not exist
 	ErrServerNotFound error
 	// ErrNoBootDevice is returned if the Server does not have a boot cdrom or boot volume set
-	ErrNoBootDevice = errors.New("server has no boot device")
+	ErrNoBootDevice = errors.New("server h as no boot device")
 )
 
 // UnboundService allows usage of a subset of the method set of the Service

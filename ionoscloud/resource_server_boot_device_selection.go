@@ -71,8 +71,8 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(fmt.Errorf("error setting a default boot volume for boot selection resource"))
 	}
 
-	bootDeviceIDValue, bootDeviceIdOk := d.GetOk("boot_device_id")
-	if !bootDeviceIdOk {
+	bootDeviceIDValue, bootDeviceIDOk := d.GetOk("boot_device_id")
+	if !bootDeviceIDOk {
 		if err := ss.PxeBoot(ctx, dcId, serverId); err != nil {
 			return diag.FromErr(fmt.Errorf("error while performing pxe boot: %s, serverId: %s, dcId: %s", err.Error(), serverId, dcId))
 		}
@@ -116,8 +116,8 @@ func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.Reso
 	ss := cloudapiserver.NewUnboundService(serverId, meta)
 
 	if d.HasChange("boot_device_id") {
-		bootDeviceIDValue, bootDeviceIdOk := d.GetOk("boot_device_id")
-		if !bootDeviceIdOk {
+		bootDeviceIDValue, bootDeviceIDOk := d.GetOk("boot_device_id")
+		if !bootDeviceIDOk {
 			if err := ss.PxeBoot(ctx, dcId, serverId); err != nil {
 				return diag.FromErr(fmt.Errorf("error while performing pxe boot: %s, serverId: %s, dcId: %s", err.Error(), serverId, dcId))
 			}
