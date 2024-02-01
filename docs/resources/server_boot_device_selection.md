@@ -204,7 +204,6 @@ data "ionoscloud_image" "example" {
 
 - `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
 - `server_id` - (Required)[string] The ID of a server.
-- `boot_device_id` - (Optional)[string] The ID of a bootable device such as a volume or an image data source. I
-f this field is omitted from the configuration, the VM will be restarted with no primary boot device, and it will enter the PXE shell for network booting. 
-***Note***: If the network booting process started by the PXE shell fails, the VM will still boot into the image of the attached storage as a fallback. This behavior imitates the "Boot from Network" option from DCC.
+- `boot_device_id` - (Optional)[string] The ID of a bootable device such as a volume or an image data source. If this field is omitted from the configuration, the VM will be restarted with no primary boot device, and it will enter the PXE shell for network booting. 
+***Note***: If the network booting process started by the PXE shell fails, the VM will still boot into the image of the attached storage as a fallback. This behavior imitates the "Boot from Network" option from [DCD](https://dcd.ionos.com/).
 
