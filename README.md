@@ -17,6 +17,14 @@
 
 The IonosCloud provider gives the ability to deploy and configure resources using the IonosCloud APIs.
 
+---
+### Warning: API Basic Authentication Deprecation Notice
+Effective March 15, 2024, IONOS account holders using 2-Factor Authentication will no longer be able to utilize Basic Authentication for accessing our APIs, SDKs, and all related tools. Token creation and deletion via APIs and ionosCTL will also be restricted.
+
+Affected users are required to switch to token-based authorization. These tokens will be accessible through our new Token Manager in the Data Center Designer, launching at the beginning of February 2024. More information can be found [here](https://docs.ionos.com/cloud/getting-started/basic-tutorials/deprecation-basic-authentication/basic-authentication-deprecation-faqs).
+
+---
+
 ## Requirements
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.12.x+
