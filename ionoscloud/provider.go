@@ -234,15 +234,15 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.TerraformVersion = terraformVersion
 
 	return services.SdkBundle{
-		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
-		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
-		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
+		AutoscalingClient:  NewClientByType(clientOpts, autoscalingClient).(*autoscalingService.Client),
 		CertManagerClient:  NewClientByType(clientOpts, certManagerClient).(*cert.Client),
+		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
 		ContainerClient:    NewClientByType(clientOpts, containerRegistryClient).(*crService.Client),
 		DataplatformClient: NewClientByType(clientOpts, dataplatformClient).(*dataplatformService.Client),
 		DNSClient:          NewClientByType(clientOpts, dnsClient).(*dnsService.Client),
 		LoggingClient:      NewClientByType(clientOpts, loggingClient).(*loggingService.Client),
-		AutoscalingClient:  NewClientByType(clientOpts, autoscalingClient).(*autoscalingService.Client),
+		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
+		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
 	}, nil
 }
 
@@ -250,14 +250,14 @@ type clientType int
 
 const (
 	ionosClient clientType = iota
-	psqlClient
+	autoscalingClient
 	certManagerClient
-	mongoClient
 	containerRegistryClient
 	dataplatformClient
 	dnsClient
 	loggingClient
-	autoscalingClient
+	mongoClient
+	psqlClient
 )
 
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
@@ -276,10 +276,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 			return ionoscloud.NewAPIClient(newConfig)
 		}
-	case psqlClient:
-		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
-	case mongoClient:
-		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case autoscalingClient:
+		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case certManagerClient:
 		return cert.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case containerRegistryClient:
@@ -290,8 +288,10 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case loggingClient:
 		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
-	case autoscalingClient:
-		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case mongoClient:
+		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case psqlClient:
+		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}

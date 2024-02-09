@@ -158,8 +158,8 @@ resource "ionoscloud_nic" "example" {
 }
 ```
 
-This will configure flowlog for accepted ingress traffic and will log it into an existing ionos s3 bucket named `flowlog-bucket`. Any s3 compatible client can be used to create it. Adding a flowlog does not force re-creation or the nic, but changing any other field than 
-`name` will. Deleting a flowlog will also force nic re-creation.
+This will configure flowlog for accepted ingress traffic and will log it into an existing ionos s3 bucket named `flowlog-bucket`. Any s3 compatible client can be used to create it. Adding a flowlog does not force re-creation of the NIC, but changing any other field than 
+`name` will. Deleting a flowlog will also force NIC re-creation.
 
 ## Argument reference
 
@@ -170,8 +170,8 @@ This will configure flowlog for accepted ingress traffic and will log it into an
 - `dhcp` - (Optional)[Boolean] Indicates if the NIC should get an IP address using DHCP (true) or not (false).
 - `dhcpv6` - (Optional)[Boolean] Indicates if the NIC should get an IPv6 address using DHCP (true) or not (false).
 - `ipv6_cidr_block` - (Computed, Optional) Automatically assigned /80 IPv6 CIDR block if the NIC is connected to an IPv6 enabled LAN. You can also specify an /80 IPv6 CIDR block for the NIC on your own, which must be inside the /64 IPv6 CIDR block of the LAN and unique.
-- `ips` - (Optional)[list] Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.
-- `ipv6_ips` - (Optional)[list] Collection of IPv6 addresses assigned to a nic. Explicitly assigned public IPs need to come from the NIC's Ipv6 CIDR block, Passing value null or empty array will assign an IPv6 address automatically from the NIC's CIDR block.
+- `ips` - (Optional)[list] Collection of IP addresses assigned to a NIC. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.
+- `ipv6_ips` - (Optional)[list] Collection of IPv6 addresses assigned to a NIC. Explicitly assigned public IPs need to come from the NIC's Ipv6 CIDR block, Passing value null or empty array will assign an IPv6 address automatically from the NIC's CIDR block.
 - `firewall_active` - (Optional)[Boolean] If this resource is set to true and is nested under a server resource firewall, with open SSH port, resource must be nested under the NIC.
 - `firewall_type` - (Optional) [String] The type of firewall rules that will be allowed on the NIC. If it is not specified it will take the default value INGRESS
 - `id` - (Computed) The ID of the NIC.
@@ -184,7 +184,7 @@ This will configure flowlog for accepted ingress traffic and will log it into an
   - `direction` - (Required) Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL. Immutable, update forces re-creation.
   - `name` - (Required) Specifies the name of the flow log.
     
-⚠️ **Note:**: Removing the `flowlog` forces re-creation of the nic resource.  
+⚠️ **Note:**: Removing the `flowlog` forces re-creation of the NIC resource.  
 
 ## Import
 
@@ -194,10 +194,10 @@ Resource **Nic** can be imported using the `resource id`, e.g.
 terraform import ionoscloud_nic.mynic {datacenter uuid}/{server uuid}/{nic uuid}
 ```
 ## Working with load balancers
-Please be aware that when using a nic in a load balancer, the load balancer will
-change the nic's ID behind the scenes, therefore the plan will always report this change
+Please be aware that when using a NIC in a load balancer, the load balancer will
+change the NIC's ID behind the scenes, therefore the plan will always report this change
 trying to revert the state to the one specified by your terraform file.
-In order to prevent this, use the "lifecycle meta-argument" when declaring your nic,
+In order to prevent this, use the "lifecycle meta-argument" when declaring your NIC,
 in order to ignore changes to the `lan` attribute:
 
 Here's an example:

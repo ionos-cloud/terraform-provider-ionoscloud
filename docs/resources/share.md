@@ -49,6 +49,11 @@ resource "ionoscloud_share" "example" {
 * `resource_id` - (Required)[string] The ID of the specific resource to update.
 * `share_privilege` - (Optional)[Boolean] The group has permission to share this resource.
 
+⚠️ **Note:** There is a limitation due to which the creation of several shares at the same time leads
+to an error. To avoid this, `parallelism=1` can be used when running `terraform apply` command in order
+to create the resources in a sequential manner. Another solution involves the usage of `depends_on`
+attributes inside the `ionoscloud_share` resource to enforce the sequential creation of the shares.
+
 ## Import
 
 Resource Share can be imported using the `resource id`, e.g.
