@@ -168,7 +168,7 @@ resource "ionoscloud_server" "example" {
   image_password    = random_password.server_image_password.result
   datacenter_id     = ionoscloud_datacenter.example.id
   volume {
-    name = "Inline Updated"
+    name = "Inline volume"
     size = 20
     disk_type = "SSD Standard"
     bus = "VIRTIO"
