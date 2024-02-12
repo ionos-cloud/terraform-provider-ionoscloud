@@ -10,6 +10,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,13 +41,13 @@ func resourceServerBootDeviceSelection() *schema.Resource {
 			},
 			"boot_device_id": {
 				Type:             schema.TypeString,
-				Description:      "ID of the entity to set as primary boot device. Possible boot devices are CDROM Images and Volumes",
-				Required:         true,
+				Description:      "ID of the entity to set as primary boot device. Possible boot devices are CDROM Images and Volumes. If omitted, server will boot from PXE",
+				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"default_boot_volume_id": {
 				Type:        schema.TypeString,
-				Description: "ID of the first attached volume of the Server, which will be the default boot volume unless another is explicitly specified.",
+				Description: "ID of the first attached volume of the Server, which will be the default boot volume.",
 				Computed:    true,
 			},
 		},
@@ -56,10 +57,10 @@ func resourceServerBootDeviceSelection() *schema.Resource {
 }
 
 func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ss := cloudapiserver.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
-	bootDeviceId := d.Get("boot_device_id").(string)
+
+	ss := cloudapiserver.NewUnboundService(serverId, meta)
 
 	// The bootable device to which the server will revert if this resource is destroyed.
 	defaultBootVolume, err := ss.GetDefaultBootVolume(ctx, dcId, serverId)
@@ -67,12 +68,23 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	if err := ss.UpdateBootDevice(ctx, dcId, serverId, bootDeviceId); err != nil {
-		return diag.FromErr(err)
+	if err = d.Set("default_boot_volume_id", defaultBootVolume.Id); err != nil {
+		return diag.FromErr(fmt.Errorf("error setting a default boot volume for boot selection resource"))
+	}
+
+	bootDeviceIDValue, bootDeviceIDOk := d.GetOk("boot_device_id")
+	if !bootDeviceIDOk {
+		if err = ss.PxeBoot(ctx, dcId, serverId); err != nil {
+			return diag.FromErr(fmt.Errorf("error while performing pxe boot for server, serverId: %s, dcId: %s (%w)", serverId, dcId, err))
+		}
+	} else {
+		bootDeviceID := bootDeviceIDValue.(string)
+		if err = ss.UpdateBootDevice(ctx, dcId, serverId, bootDeviceID); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	d.SetId(uuidgen.ResourceUuid().String())
-	d.Set("default_boot_volume_id", defaultBootVolume.Id)
 	return resourceServerBootDeviceSelectionRead(ctx, d, meta)
 }
 
@@ -84,7 +96,7 @@ func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.Resour
 
 	server, err := ss.FindById(ctx, dcId, serverId, 3)
 	if err != nil {
-		if errors.Is(err, cloudapiserver.ServerNotFound) {
+		if errors.Is(err, cloudapiserver.ErrServerNotFound) {
 			d.SetId("")
 			return nil
 		}
@@ -99,23 +111,30 @@ func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.Resour
 }
 
 func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ss := cloudapiserver.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
 
+	ss := cloudapiserver.NewUnboundService(serverId, meta)
+
 	if d.HasChange("boot_device_id") {
-		_, n := d.GetChange("boot_device_id")
-		bootDeviceId := n.(string)
-		if err := ss.UpdateBootDevice(ctx, dcId, serverId, bootDeviceId); err != nil {
-			return diag.FromErr(err)
+		bootDeviceIDValue, bootDeviceIDOk := d.GetOk("boot_device_id")
+		if !bootDeviceIDOk {
+			if err := ss.PxeBoot(ctx, dcId, serverId); err != nil {
+				return diag.FromErr(fmt.Errorf("error while performing pxe boot: %s, serverId: %s, dcId: %s", err.Error(), serverId, dcId))
+			}
+		} else {
+			bootDeviceID := bootDeviceIDValue.(string)
+			if err := ss.UpdateBootDevice(ctx, dcId, serverId, bootDeviceID); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
-
 	return resourceServerBootDeviceSelectionRead(ctx, d, meta)
 }
 
 func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	ss := cloudapiserver.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
+
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
 	defaultBootVolumeId := d.Get("default_boot_volume_id").(string)
@@ -128,6 +147,7 @@ func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.Reso
 }
 
 func setServerBootDeviceSelectionData(d *schema.ResourceData, server *ionoscloud.Server) error {
+
 	if server.Properties.BootCdrom != nil {
 		if err := d.Set("boot_device_id", *server.Properties.BootCdrom.Id); err != nil {
 			return err
@@ -135,12 +155,11 @@ func setServerBootDeviceSelectionData(d *schema.ResourceData, server *ionoscloud
 		return nil
 	}
 
-	if server.Properties.BootVolume == nil {
-		return fmt.Errorf("server has no bootable entity attached")
+	if server.Properties.BootVolume != nil {
+		if err := d.Set("boot_device_id", *server.Properties.BootVolume.Id); err != nil {
+			return err
+		}
 	}
 
-	if err := d.Set("boot_device_id", *server.Properties.BootVolume.Id); err != nil {
-		return err
-	}
 	return nil
 }

@@ -354,6 +354,9 @@ const (
 	BootDeviceTypeVolume = "volume"
 )
 
+// VolumeBootOrderNone unsets the volume as boot device for the VM it is attached to
+const VolumeBootOrderNone = "NONE"
+
 const (
 	// FlowlogBucket created on account that runs CI
 	FlowlogBucket        = "flowlog-acceptance-test"
