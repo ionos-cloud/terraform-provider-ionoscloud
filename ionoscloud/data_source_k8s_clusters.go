@@ -52,7 +52,7 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(errors.New("please provide filters for data source lookup"))
 	}
 
-	var _filters []string
+	_filters := make([]string, 0, 2)
 	for _, v := range filters.(*schema.Set).List() {
 		filter := v.(map[string]any)
 		key := filter["name"].(string)
@@ -86,7 +86,7 @@ func setDataSourceK8sSetClusters(ctx context.Context, d *schema.ResourceData, cl
 	if d.Id() == "" {
 		d.SetId(uuidgen.ResourceUuid().String())
 	}
-	clusterList := make([]map[string]any, 0)
+	clusterList := make([]map[string]any, 0, len(clusters))
 	for _, c := range clusters {
 		clusterProperties, err := K8sClusterProperties(ctx, c, client)
 		if err != nil {
