@@ -23,7 +23,7 @@ var (
 	// ErrServerNotFound returned when the server with the requested ID does not exist
 	ErrServerNotFound error
 	// ErrNoBootDevice is returned if the Server does not have a boot cdrom or boot volume set
-	ErrNoBootDevice = errors.New("server h as no boot device")
+	ErrNoBootDevice = errors.New("server has no boot device")
 )
 
 // UnboundService allows usage of a subset of the method set of the Service
