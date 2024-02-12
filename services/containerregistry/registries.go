@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -434,21 +435,16 @@ func GetRegistryFeatures(d *schema.ResourceData) (*cr.RegistryFeatures, diag.Dia
 	}
 
 	registryFeatures := cr.NewRegistryFeatures()
-	var warnings diag.Diagnostics
-
+	var warnings = diag.Diagnostics{crfWarnings.warnCRVScanningOmitted}
 	registryFeatures.VulnerabilityScanning = cr.NewFeatureVulnerabilityScanning(true)
 	if vulnerabilityScanning, ok := d.GetOkExists("features.0.vulnerability_scanning"); ok { //nolint:staticcheck
 		vulnerabilityScanning := vulnerabilityScanning.(bool)
 		registryFeatures.VulnerabilityScanning.Enabled = &vulnerabilityScanning
+		warnings = diag.Diagnostics{crfWarnings.warnCRVScanningOff}
 
 		if vulnerabilityScanning {
-			warnings = append(warnings, crfWarnings.warnCRVScanningOn)
-		} else {
-			warnings = append(warnings, crfWarnings.warnCRVScanningOff)
+			warnings = diag.Diagnostics{crfWarnings.warnCRVScanningOn}
 		}
-
-	} else {
-		warnings = append(warnings, crfWarnings.warnCRVScanningOmitted)
 	}
 
 	return registryFeatures, warnings
