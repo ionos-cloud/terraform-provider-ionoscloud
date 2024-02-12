@@ -11,6 +11,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -416,7 +417,7 @@ func (ss *Service) PxeBoot(ctx context.Context, datacenterID, serverID string) e
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return errState
 		}
-		log.Printf("[DEBUG] enabled PXE boot for server: serverId: %s \n", serverID)
+		log.Printf("[DEBUG] unset primary boot volume and performed reboot into PXE shell for server: serverId: %s, volumeId: %s \n", serverID, deviceID)
 
 	case constant.BootDeviceTypeCDROM:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersCdromsDelete(ctx, datacenterID, serverID, deviceID).Execute()

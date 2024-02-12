@@ -10,6 +10,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -73,8 +74,8 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 
 	bootDeviceIDValue, bootDeviceIDOk := d.GetOk("boot_device_id")
 	if !bootDeviceIDOk {
-		if err := ss.PxeBoot(ctx, dcId, serverId); err != nil {
-			return diag.FromErr(fmt.Errorf("error while performing pxe boot: %s, serverId: %s, dcId: %s", err.Error(), serverId, dcId))
+		if err = ss.PxeBoot(ctx, dcId, serverId); err != nil {
+			return diag.FromErr(fmt.Errorf("error while performing pxe boot for server, serverId: %s, dcId: %s (%w)", serverId, dcId, err))
 		}
 	} else {
 		bootDeviceID := bootDeviceIDValue.(string)
@@ -121,10 +122,11 @@ func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.Reso
 			if err := ss.PxeBoot(ctx, dcId, serverId); err != nil {
 				return diag.FromErr(fmt.Errorf("error while performing pxe boot: %s, serverId: %s, dcId: %s", err.Error(), serverId, dcId))
 			}
-		}
-		bootDeviceID := bootDeviceIDValue.(string)
-		if err := ss.UpdateBootDevice(ctx, dcId, serverId, bootDeviceID); err != nil {
-			return diag.FromErr(err)
+		} else {
+			bootDeviceID := bootDeviceIDValue.(string)
+			if err := ss.UpdateBootDevice(ctx, dcId, serverId, bootDeviceID); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 	return resourceServerBootDeviceSelectionRead(ctx, d, meta)
