@@ -60,7 +60,7 @@ func (ss *Service) FindById(ctx context.Context, datacenterID, serverID string, 
 	apiResponse.LogInfo()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[DEBUG] cannot find server by id in datacenter dcId: %s, serverId: %s\n", datacenterID, serverID)
+			log.Printf("[DEBUG] cannot find server by id in datacenter dcId: %s, serverId: %s", datacenterID, serverID)
 			return nil, ErrServerNotFound
 		}
 		return nil, err
@@ -223,7 +223,7 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 		if !apiResponse.HttpNotFound() {
 			return err
 		}
-		log.Printf("[DEBUG] no bootable image found with id : %s\n", newBootDeviceID)
+		log.Printf("[DEBUG] no bootable image found with id : %s", newBootDeviceID)
 		newBdType = constant.BootDeviceTypeVolume
 	}
 
@@ -245,7 +245,7 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 			if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 				return errState
 			}
-			log.Printf("[DEBUG] attached CDROM image to server: serverId: %s, imageId: %s\n", serverID, newBootDeviceID)
+			log.Printf("[DEBUG] attached CDROM image to server: serverId: %s, imageId: %s", serverID, newBootDeviceID)
 			// update to new boot cdrom
 			sp := ionoscloud.ServerProperties{BootCdrom: ionoscloud.NewResourceReference(newBootDeviceID)}
 			if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
@@ -260,7 +260,7 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return errState
 		}
-		log.Printf("[DEBUG] detached CDROM image from server: serverId: %s, imageId: %s\n", serverID, oldBootDeviceID)
+		log.Printf("[DEBUG] detached CDROM image from server: serverId: %s, imageId: %s", serverID, oldBootDeviceID)
 
 	case constant.BootDeviceTypeVolume:
 		// no cdrom is detached, only update to the new boot device, regardless of type
@@ -314,7 +314,7 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return fmt.Errorf("an error occurred while waiting for server state change on VM POWER ON dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
-		log.Printf("[DEBUG] %s server powered on: serverId: %s \n", serverType, serverID)
+		log.Printf("[DEBUG] %s server powered on: serverId: %s", serverType, serverID)
 		return nil
 
 	case constant.CubeType:
@@ -329,7 +329,7 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return fmt.Errorf("an error occurred while waiting for server state change on VM RESUME dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
-		log.Printf("[DEBUG] %s server unsuspended: serverId: %s \n", serverType, serverID)
+		log.Printf("[DEBUG] %s server unsuspended: serverId: %s", serverType, serverID)
 		return nil
 
 	}
@@ -354,7 +354,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return fmt.Errorf("an error occurred while waiting for server state change on VM SHUTOFF dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
-		log.Printf("[DEBUG] %s server powered off: serverId: %s \n", serverType, serverID)
+		log.Printf("[DEBUG] %s server powered off: serverId: %s", serverType, serverID)
 		return nil
 
 	case constant.CubeType:
@@ -369,7 +369,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return fmt.Errorf("an error occurred while waiting for server state change on VM SUSPEND dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
-		log.Printf("[DEBUG] %s server suspended: serverId: %s \n", serverType, serverID)
+		log.Printf("[DEBUG] %s server suspended: serverId: %s", serverType, serverID)
 		return nil
 	}
 
@@ -391,7 +391,7 @@ func (ss *Service) Reboot(ctx context.Context, datacenterID, serverID string) er
 	if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return fmt.Errorf("an error occurred while waiting for server state change on reboot dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 	}
-	log.Printf("[DEBUG] server reboot finished: serverId: %s \n", serverID)
+	log.Printf("[DEBUG] server reboot finished: serverId: %s", serverID)
 	return nil
 }
 
@@ -417,7 +417,7 @@ func (ss *Service) PxeBoot(ctx context.Context, datacenterID, serverID string) e
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return errState
 		}
-		log.Printf("[DEBUG] unset primary boot volume and performed reboot into PXE shell for server: serverId: %s, volumeId: %s \n", serverID, deviceID)
+		log.Printf("[DEBUG] unset primary boot volume and performed reboot into PXE shell for server: serverId: %s, volumeId: %s", serverID, deviceID)
 
 	case constant.BootDeviceTypeCDROM:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersCdromsDelete(ctx, datacenterID, serverID, deviceID).Execute()
@@ -427,7 +427,7 @@ func (ss *Service) PxeBoot(ctx context.Context, datacenterID, serverID string) e
 		if errState := cloudapi.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return errState
 		}
-		log.Printf("[DEBUG] detached CDROM image from server: serverId: %s, imageId: %s\n", serverID, deviceID)
+		log.Printf("[DEBUG] detached CDROM image from server: serverId: %s, imageId: %s", serverID, deviceID)
 	}
 
 	return ss.Reboot(ctx, datacenterID, serverID)
