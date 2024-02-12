@@ -40,7 +40,7 @@ func resourceServerBootDeviceSelection() *schema.Resource {
 			},
 			"boot_device_id": {
 				Type:             schema.TypeString,
-				Description:      "ID of the entity to set as primary boot device. Possible boot devices are CDROM Images and Volumes",
+				Description:      "ID of the entity to set as primary boot device. Possible boot devices are CDROM Images and Volumes. If omitted, server will boot from PXE",
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
