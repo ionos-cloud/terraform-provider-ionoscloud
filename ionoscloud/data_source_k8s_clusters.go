@@ -9,11 +9,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/iancoleman/strcase"
+	"gopkg.in/yaml.v3"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"gopkg.in/yaml.v3"
 )
 
 func dataSourceK8sClusters() *schema.Resource {
@@ -51,10 +52,13 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(errors.New("please provide filters for data source lookup"))
 	}
 
+	var _filters []string
 	for _, v := range filters.(*schema.Set).List() {
 		filter := v.(map[string]any)
 		key := filter["name"].(string)
 		value := filter["value"].(string)
+		_filters = append(_filters, fmt.Sprintf("%s:%s", key, value))
+
 		if v, ok := filterKeys[key]; ok {
 			key = v
 		} else {
@@ -69,7 +73,7 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %w", err))
 	}
 	if clusters.Items != nil && len(*clusters.Items) == 0 {
-		return diag.FromErr(fmt.Errorf("no clusters match the specified filtering criteria"))
+		return diag.FromErr(fmt.Errorf("no clusters match the specified filtering criteria: %v", _filters))
 	}
 	if err := setDataSourceK8sSetClusters(ctx, d, *clusters.Items, client); err != nil {
 		return diag.FromErr(err)
@@ -104,7 +108,11 @@ func setDataSourceK8sSetClusters(ctx context.Context, d *schema.ResourceData, cl
 // K8sClusterProperties returns a map equivalent of dataSourceK8sClusterSchema
 func K8sClusterProperties(ctx context.Context, cluster ionoscloud.KubernetesCluster, client *ionoscloud.APIClient) (map[string]any, error) {
 	if cluster.Properties == nil {
-		return nil, fmt.Errorf("cannot set data, Properties was nil for cluster: %s", *cluster.Id)
+		clusterID := "nil"
+		if cluster.Id != nil {
+			clusterID = *cluster.Id
+		}
+		return nil, fmt.Errorf("cannot set data, Properties was nil for cluster: %s", clusterID)
 	}
 	clusterProperties := make(map[string]any)
 

@@ -42,12 +42,12 @@ func TestAccK8sClusterBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceK8sClusterMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceById, "name", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceById, "k8s_version", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "k8s_version"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceById, "maintenance_window.0.day_of_the_week", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.day_of_the_week"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceById, "maintenance_window.0.time", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceById, "api_subnet_allow_list.0", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "api_subnet_allow_list.0"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceById, "s3_buckets.0.name", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "s3_buckets.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceByID, "name", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceByID, "k8s_version", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "k8s_version"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceByID, "maintenance_window.0.day_of_the_week", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceByID, "maintenance_window.0.time", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceByID, "api_subnet_allow_list.0", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "api_subnet_allow_list.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceByID, "s3_buckets.0.name", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "s3_buckets.0.name"),
 				),
 			},
 			{
@@ -145,6 +145,7 @@ func TestAccK8sClusterPrivate(t *testing.T) {
 func TestAccK8sClusters(t *testing.T) {
 	var k8sCluster ionoscloud.KubernetesCluster
 
+	filtersErrRegex := fmt.Sprintf("no clusters match the specified filtering criteria: \\[%s:%s %s:%s\\]", filterName, noMatchName, filterVersion, noMatchVersion)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -187,6 +188,10 @@ func TestAccK8sClusters(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.0.node_subnet", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "node_subnet"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterPublic, "clusters.0.s3_buckets.0.name", constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "s3_buckets.0.name"),
 				),
+			},
+			{
+				Config:      testAccDataSourceK8sClustersNoMatchError,
+				ExpectError: regexp.MustCompile(filtersErrRegex),
 			},
 		},
 	})
@@ -325,7 +330,7 @@ resource ` + constant.K8sClusterResource + ` ` + constant.PrivateK8sClusterTestR
 }`
 
 const testAccDataSourceK8sClusterMatchId = testAccCheckK8sClusterConfigBasic + `
-data ` + constant.K8sClusterResource + ` ` + constant.K8sClusterDataSourceById + `{
+data ` + constant.K8sClusterResource + ` ` + constant.K8sClusterDataSourceByID + `{
   id	= ` + constant.K8sClusterResource + `.` + constant.K8sClusterTestResource + `.id
 }
 `
@@ -364,3 +369,24 @@ data ` + constant.K8sClustersDataSource + ` ` + constant.K8sClustersDataSourceFi
   }
 }
 `
+
+const testAccDataSourceK8sClustersNoMatchError = testAccCheckK8sClusterConfigBasic + "\n" + testAccCheckK8sClusterConfigPrivateCluster + `
+data ` + constant.K8sClustersDataSource + ` ` + constant.K8sClustersDataSourceFilterName + `{
+  depends_on = [` + constant.K8sClusterResource + `.` + constant.PrivateK8sClusterTestResource + `,` + constant.K8sClusterResource + `.` + constant.K8sClusterTestResource + `]
+  filter{
+    name = "` + filterName + `"
+    value = "` + noMatchName + `"
+  }
+  filter{
+	name = "` + filterVersion + `"
+    value = "` + noMatchVersion + `"
+  }
+}
+`
+
+const (
+	filterName     = "name"
+	filterVersion  = "k8s_version"
+	noMatchName    = "nomatch"
+	noMatchVersion = "8.8"
+)
