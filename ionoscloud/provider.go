@@ -133,6 +133,7 @@ func Provider() *schema.Provider {
 			constant.ServerVCPUResource:                        dataSourceVCPUServer(),
 			constant.ServersDataSource:                         dataSourceServers(),
 			constant.K8sClusterResource:                        dataSourceK8sCluster(),
+			constant.K8sClustersDataSource:                     dataSourceK8sClusters(),
 			constant.K8sNodePoolResource:                       dataSourceK8sNodePool(),
 			constant.K8sNodePoolNodesResource:                  dataSourceK8sNodePoolNodes(),
 			constant.NatGatewayResource:                        dataSourceNatGateway(),

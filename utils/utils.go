@@ -376,3 +376,15 @@ func ReadPublicKey(pathOrKey string) (string, error) {
 	}
 	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
 }
+
+// MergeMaps merges a slice of map[string]any entries into one map.
+// Note: Maps should be disjoint, otherwise overlapping keys will be overwritten.
+func MergeMaps(maps ...map[string]any) map[string]any {
+	merged := map[string]any{}
+	for _, m := range maps {
+		for k := range m {
+			merged[k] = m[k]
+		}
+	}
+	return merged
+}
