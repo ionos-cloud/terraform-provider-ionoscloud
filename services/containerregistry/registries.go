@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func (c *Client) ListRegistries(ctx context.Context) (cr.RegistriesResponse, *cr.APIResponse, error) {
@@ -190,6 +193,16 @@ func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error
 		}
 	}
 
+	if registry.Properties.Features != nil {
+
+		registryFeatures := map[string]any{}
+		utils.SetPropWithNilCheck(registryFeatures, "vulnerability_scanning", registry.Properties.Features.VulnerabilityScanning.Enabled)
+
+		if err := d.Set("features", []map[string]any{registryFeatures}); err != nil {
+			return utils.GenerateSetError(resourceName, "features", err)
+		}
+	}
+
 	return nil
 }
 
@@ -256,6 +269,8 @@ func GetTokenDataUpdate(d *schema.ResourceData) (*cr.PatchTokenInput, error) {
 			return nil, err
 		}
 		token.ExpiryDate = expiryDate
+	} else {
+		token.ExpiryDate = nil
 	}
 
 	if _, ok := d.GetOk("scopes"); ok {
@@ -388,12 +403,64 @@ func SetScopes(scopes []cr.Scope) []interface{} {
 
 }
 
+// GetRegistryFeatures returns the container registry features retrieved from the configuration
+// It will also return a list of warnings related to attributes which should be set explicitly
+func GetRegistryFeatures(d *schema.ResourceData) (*cr.RegistryFeatures, diag.Diagnostics) {
+
+	crfWarnings := struct {
+		warnCRVScanningOmitted diag.Diagnostic
+		warnCRVScanningOff     diag.Diagnostic
+		warnCRVScanningOn      diag.Diagnostic
+	}{
+		warnCRVScanningOmitted: diag.Diagnostic{Severity: diag.Warning,
+			Summary: "'vulnerability_scanning' is omitted from the config. CR Vulnerability Scanning has been enabled by default.",
+			Detail: "Container Registry Vulnerability Scanning is a paid security feature which is enabled by default.\n" +
+				"If you do not wish to enable it, ensure 'vulnerability_scanning' is set to false when creating the resource.\n" +
+				"Once activated, it cannot be deactivated afterwards for this CR instance.\n" +
+				"More details about CR Vulnerability Scanning: https://docs.ionos.com/cloud/managed-services/container-registry/dcd-how-tos/enable-vulnerability-scanning\n" +
+				"Price list is available under the 'Data Platform' section for your selected region at: https://docs.ionos.com/support/general-information/price-list",
+		},
+		warnCRVScanningOff: diag.Diagnostic{Severity: diag.Warning,
+			Summary: "'vulnerability_scanning' is disabled for this Container Registry.",
+			Detail: "Container Registry Vulnerability Scanning is a paid security feature which we recommend enabling.\n" +
+				"More details about CR Vulnerability Scanning: https://docs.ionos.com/cloud/managed-services/container-registry/dcd-how-tos/enable-vulnerability-scanning\n" +
+				"Price list is available under the 'Data Platform' section for your selected region at: https://docs.ionos.com/support/general-information/price-list",
+		},
+		warnCRVScanningOn: diag.Diagnostic{Severity: diag.Warning,
+			Summary: "'vulnerability_scanning' has been enabled for this Container Registry.",
+			Detail: "Container Registry Vulnerability Scanning is a paid security feature.\n" +
+				"More details about CR Vulnerability Scanning: https://docs.ionos.com/cloud/managed-services/container-registry/dcd-how-tos/enable-vulnerability-scanning\n" +
+				"Price list is available under the 'Data Platform' section for your selected region at: https://docs.ionos.com/support/general-information/price-list",
+		},
+	}
+
+	registryFeatures := cr.NewRegistryFeatures()
+	var warnings = diag.Diagnostics{crfWarnings.warnCRVScanningOmitted}
+	registryFeatures.VulnerabilityScanning = cr.NewFeatureVulnerabilityScanning(true)
+	if vulnerabilityScanning, ok := d.GetOkExists("features.0.vulnerability_scanning"); ok { //nolint:staticcheck
+		vulnerabilityScanning := vulnerabilityScanning.(bool)
+		registryFeatures.VulnerabilityScanning.Enabled = &vulnerabilityScanning
+		warnings = diag.Diagnostics{crfWarnings.warnCRVScanningOff}
+
+		if vulnerabilityScanning {
+			warnings = diag.Diagnostics{crfWarnings.warnCRVScanningOn}
+		}
+	}
+
+	return registryFeatures, warnings
+
+}
+
 func convertToIonosTime(targetTime string) (*cr.IonosTime, error) {
 	var ionosTime cr.IonosTime
-	layout := "2006-01-02 15:04:05Z"
-	convertedTime, err := time.Parse(layout, targetTime)
-	if err != nil {
-		return nil, fmt.Errorf("an error occured while converting from IonosTime to time.Time: %w", err)
+	var convertedTime time.Time
+	var err error
+
+	// targetTime might have time zone offset layout (+0000 UTC)
+	if convertedTime, err = time.Parse(constant.DatetimeTZOffsetLayout, targetTime); err != nil {
+		if convertedTime, err = time.Parse(constant.DatetimeZLayout, targetTime); err != nil {
+			return nil, fmt.Errorf("an error occurred while converting from IonosTime string to time.Time: %w", err)
+		}
 	}
 	ionosTime.Time = convertedTime
 	return &ionosTime, nil

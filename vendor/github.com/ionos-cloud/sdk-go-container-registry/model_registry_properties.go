@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls.
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
  *
- * API version: 1.0
+ * API version: 1.1.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -17,11 +17,12 @@ import (
 
 // RegistryProperties struct for RegistryProperties
 type RegistryProperties struct {
-	GarbageCollectionSchedule *WeeklySchedule `json:"garbageCollectionSchedule,omitempty"`
-	Hostname                  *string         `json:"hostname,omitempty"`
-	Location                  *string         `json:"location"`
-	Name                      *string         `json:"name"`
-	StorageUsage              *StorageUsage   `json:"storageUsage,omitempty"`
+	GarbageCollectionSchedule *WeeklySchedule   `json:"garbageCollectionSchedule,omitempty"`
+	Hostname                  *string           `json:"hostname,omitempty"`
+	Location                  *string           `json:"location"`
+	Name                      *string           `json:"name"`
+	StorageUsage              *StorageUsage     `json:"storageUsage,omitempty"`
+	Features                  *RegistryFeatures `json:"features,omitempty"`
 }
 
 // NewRegistryProperties instantiates a new RegistryProperties object
@@ -235,6 +236,44 @@ func (o *RegistryProperties) HasStorageUsage() bool {
 	return false
 }
 
+// GetFeatures returns the Features field value
+// If the value is explicit nil, the zero value for RegistryFeatures will be returned
+func (o *RegistryProperties) GetFeatures() *RegistryFeatures {
+	if o == nil {
+		return nil
+	}
+
+	return o.Features
+
+}
+
+// GetFeaturesOk returns a tuple with the Features field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *RegistryProperties) GetFeaturesOk() (*RegistryFeatures, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Features, true
+}
+
+// SetFeatures sets field value
+func (o *RegistryProperties) SetFeatures(v RegistryFeatures) {
+
+	o.Features = &v
+
+}
+
+// HasFeatures returns a boolean if a field has been set.
+func (o *RegistryProperties) HasFeatures() bool {
+	if o != nil && o.Features != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o RegistryProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["garbageCollectionSchedule"] = o.GarbageCollectionSchedule
@@ -252,6 +291,10 @@ func (o RegistryProperties) MarshalJSON() ([]byte, error) {
 	}
 
 	toSerialize["storageUsage"] = o.StorageUsage
+
+	if o.Features != nil {
+		toSerialize["features"] = o.Features
+	}
 
 	return json.Marshal(toSerialize)
 }

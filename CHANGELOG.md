@@ -4,11 +4,15 @@
 - Add `ionoscloud_k8s_clusters` data source
 ### Refactor
 - Remove duplicate functions for image retrieval (`checkImage`, `resolveImageName`) in `resource_volume.go`
+
 ### Fixes
 - Remove `credentials` field from `ionoscloud_mongo_cluster` resource
 - Remove `credentials` field from `ionoscloud_pg_cluster` data source
 ### Documentation
 - Update documentation for K8s cluster, nodepools and shares
+
+### Features
+- Add `vulnerability_scanning` parameter to `ionoscloud_container_registry` resource.
 
 ## 6.4.12
 ### Features

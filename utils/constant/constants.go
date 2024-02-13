@@ -19,6 +19,12 @@ const SleepInterval = 5 * time.Second
 
 const Available = "AVAILABLE"
 
+// Datetime formats
+const (
+	DatetimeZLayout        = "2006-01-02 15:04:05Z"
+	DatetimeTZOffsetLayout = "2006-01-02 15:04:05 -0700 MST"
+)
+
 // ApplicationLoadBalancer Constants
 const (
 	ALBResource         = "ionoscloud_application_loadbalancer"

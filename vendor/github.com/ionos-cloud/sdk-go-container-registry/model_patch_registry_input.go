@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls.
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
  *
- * API version: 1.0
+ * API version: 1.1.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -17,7 +17,8 @@ import (
 
 // PatchRegistryInput struct for PatchRegistryInput
 type PatchRegistryInput struct {
-	GarbageCollectionSchedule *WeeklySchedule `json:"garbageCollectionSchedule,omitempty"`
+	GarbageCollectionSchedule *WeeklySchedule   `json:"garbageCollectionSchedule,omitempty"`
+	Features                  *RegistryFeatures `json:"features,omitempty"`
 }
 
 // NewPatchRegistryInput instantiates a new PatchRegistryInput object
@@ -76,9 +77,51 @@ func (o *PatchRegistryInput) HasGarbageCollectionSchedule() bool {
 	return false
 }
 
+// GetFeatures returns the Features field value
+// If the value is explicit nil, the zero value for RegistryFeatures will be returned
+func (o *PatchRegistryInput) GetFeatures() *RegistryFeatures {
+	if o == nil {
+		return nil
+	}
+
+	return o.Features
+
+}
+
+// GetFeaturesOk returns a tuple with the Features field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *PatchRegistryInput) GetFeaturesOk() (*RegistryFeatures, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Features, true
+}
+
+// SetFeatures sets field value
+func (o *PatchRegistryInput) SetFeatures(v RegistryFeatures) {
+
+	o.Features = &v
+
+}
+
+// HasFeatures returns a boolean if a field has been set.
+func (o *PatchRegistryInput) HasFeatures() bool {
+	if o != nil && o.Features != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o PatchRegistryInput) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["garbageCollectionSchedule"] = o.GarbageCollectionSchedule
+
+	if o.Features != nil {
+		toSerialize["features"] = o.Features
+	}
 
 	return json.Marshal(toSerialize)
 }

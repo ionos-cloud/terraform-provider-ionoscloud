@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls.
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
  *
- * API version: 1.0
+ * API version: 1.1.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -14,7 +14,7 @@ package ionoscloud
 import (
 	_context "context"
 	"fmt"
-	_ioutil "io/ioutil"
+	"io"
 	_nethttp "net/http"
 	_neturl "net/url"
 	"strings"
@@ -40,6 +40,7 @@ func (r ApiRegistriesDeleteRequest) Execute() (*APIResponse, error) {
 
 /*
  * RegistriesDelete Delete registry
+ *
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param registryId The unique ID of the registry
  * @return ApiRegistriesDeleteRequest
@@ -126,7 +127,7 @@ func (a *RegistriesApiService) RegistriesDeleteExecute(r ApiRegistriesDeleteRequ
 		return localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -255,7 +256,7 @@ func (a *RegistriesApiService) RegistriesFindByIdExecute(r ApiRegistriesFindById
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -424,7 +425,7 @@ func (a *RegistriesApiService) RegistriesGetExecute(r ApiRegistriesGetRequest) (
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -576,7 +577,7 @@ func (a *RegistriesApiService) RegistriesPatchExecute(r ApiRegistriesPatchReques
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -636,6 +637,7 @@ func (r ApiRegistriesPostRequest) Execute() (PostRegistryOutput, *APIResponse, e
 - "name" must have passed validation
 - "location" must be one of the available location IDs
 - "garbageCollectionSchedule" time and days of the week for runs
+- "features": "vulnerabilityScanning" default is enabled
   - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
   - @return ApiRegistriesPostRequest
 */
@@ -726,7 +728,7 @@ func (a *RegistriesApiService) RegistriesPostExecute(r ApiRegistriesPostRequest)
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -785,15 +787,12 @@ func (r ApiRegistriesPutRequest) Execute() (PutRegistryOutput, *APIResponse, err
   - Create/replace a registry to hold container images or OCI compliant
 
 artifacts
-
 **On create**
 - "name" must have passed validation
 - "location" must be one of the available location IDs
-
 **On update**
 - "name" cannot be changed
 - "location" cannot be changed
-
 **On create or update**
 - "garbageCollectionSchedule": time and days of the week for runs
 
@@ -890,7 +889,7 @@ func (a *RegistriesApiService) RegistriesPutExecute(r ApiRegistriesPutRequest) (
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {

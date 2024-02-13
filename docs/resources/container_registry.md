@@ -33,7 +33,10 @@ The following arguments are supported:
     * `time` - (Required)[string]
     * `days` - (Required)[list] Elements of list must have one of the values: `Saturday`, `Sunday`, `Monday`, `Tuesday`,  `Wednesday`,  `Thursday`,  `Friday` 
 * `location` - (Required)[string] Immutable, update forces re-creation of the resource.
-
+* `features` - (Optional)[Map]
+    * `vulnerability_scanning` - (Optional)[bool] Enables or disables the Vulnerability Scanning feature for the Container Registry. To disable this feature, set the attribute to false when creating the CR resource.
+  
+> **⚠ WARNING** `Container Registry Vulnerability Scanning` is a paid feature which is enabled by default, and cannot be turned off after activation. To disable this feature for a Container Registry, ensure `vulnerability_scanning` is set to false on resource creation.
 
 ## Import
 

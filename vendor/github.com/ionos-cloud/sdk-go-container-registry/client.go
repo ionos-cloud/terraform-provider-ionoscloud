@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls.
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
  *
- * API version: 1.0
+ * API version: 1.1.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -51,16 +51,18 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.0.1"
+	Version = "1.1.0"
 )
 
-// APIClient manages communication with the Container Registry service API v1.0
+// APIClient manages communication with the Container Registry service API v1.1.0
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration
 	common service // Reuse a single struct instead of allocating one for each service on the heap.
 
 	// API Services
+
+	ArtifactsApi *ArtifactsApiService
 
 	LocationsApi *LocationsApiService
 
@@ -71,6 +73,8 @@ type APIClient struct {
 	RepositoriesApi *RepositoriesApiService
 
 	TokensApi *TokensApiService
+
+	VulnerabilitiesApi *VulnerabilitiesApiService
 }
 
 type service struct {
@@ -96,11 +100,13 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.common.client = c
 
 	// API Services
+	c.ArtifactsApi = (*ArtifactsApiService)(&c.common)
 	c.LocationsApi = (*LocationsApiService)(&c.common)
 	c.NamesApi = (*NamesApiService)(&c.common)
 	c.RegistriesApi = (*RegistriesApiService)(&c.common)
 	c.RepositoriesApi = (*RepositoriesApiService)(&c.common)
 	c.TokensApi = (*TokensApiService)(&c.common)
+	c.VulnerabilitiesApi = (*VulnerabilitiesApiService)(&c.common)
 
 	return c
 }
@@ -301,6 +307,9 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		case http.StatusServiceUnavailable,
 			http.StatusGatewayTimeout,
 			http.StatusBadGateway:
+			if request.Method == http.MethodPost {
+				return resp, httpRequestTime, err
+			}
 			backoffTime = c.GetConfig().WaitTime
 
 		case http.StatusTooManyRequests:
@@ -324,21 +333,31 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 			}
 			break
 		} else {
-			c.backOff(backoffTime)
+			c.backOff(request.Context(), backoffTime)
 		}
 	}
 
 	return resp, httpRequestTime, err
 }
 
-func (c *APIClient) backOff(t time.Duration) {
+func (c *APIClient) backOff(ctx context.Context, t time.Duration) {
 	if t > c.GetConfig().MaxWaitTime {
 		t = c.GetConfig().MaxWaitTime
 	}
 	if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
 		c.cfg.Logger.Printf(" Sleeping %s before retrying request\n", t.String())
 	}
-	time.Sleep(t)
+	if t <= 0 {
+		return
+	}
+
+	timer := time.NewTimer(t)
+	defer timer.Stop()
+
+	select {
+	case <-ctx.Done():
+	case <-timer.C:
+	}
 }
 
 // Allow modification of underlying config for alternate implementations and testing

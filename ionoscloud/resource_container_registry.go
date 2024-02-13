@@ -81,6 +81,22 @@ func resourceContainerRegistry() *schema.Resource {
 					},
 				},
 			},
+			"features": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"vulnerability_scanning": {
+							Type:        schema.TypeBool,
+							Description: "Enables vulnerability scanning for images in the container registry. Note: this feature can incur additional charges",
+							Optional:    true,
+							Computed:    true,
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -91,16 +107,19 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 	containerRegistry := crService.GetRegistryDataCreate(d)
 
+	containerRegistryFeatures, warnings := crService.GetRegistryFeatures(d)
+	containerRegistry.Properties.Features = containerRegistryFeatures
+
 	containerRegistryResponse, _, err := client.CreateRegistry(ctx, *containerRegistry)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating the registry: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating the registry: %w", err))
 		return diags
 	}
 
 	d.SetId(*containerRegistryResponse.Id)
 
-	return resourceContainerRegistryRead(ctx, d, meta)
+	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
 
 func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -131,16 +150,22 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 	client := meta.(services.SdkBundle).ContainerClient
 
 	containerRegistry := crService.GetRegistryDataUpdate(d)
+	containerRegistryFeatures, warnings := crService.GetRegistryFeatures(d)
+	containerRegistry.Features = containerRegistryFeatures
+	// suppress warnings if there are no changes to the features set
+	if !d.HasChange("features") {
+		warnings = diag.Diagnostics{}
+	}
 
 	registryId := d.Id()
 
 	_, _, err := client.PatchRegistry(ctx, registryId, *containerRegistry)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a registry: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a registry: %w", err))
 		return diags
 	}
 
-	return resourceContainerRegistryRead(ctx, d, meta)
+	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
 
 func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -198,7 +223,7 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil, fmt.Errorf("registry does not exist %q", registryId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of registry %q", registryId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of registry %q", registryId)
 	}
 
 	log.Printf("[INFO] registry found: %+v", containerRegistry)

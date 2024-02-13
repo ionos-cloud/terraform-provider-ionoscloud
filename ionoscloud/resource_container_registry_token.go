@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -43,7 +44,6 @@ func resourceContainerRegistryToken() *schema.Resource {
 			"expiry_date": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Computed:         true,
 				DiffSuppressFunc: DiffExpiryDate,
 			},
 			"name": {
@@ -112,7 +112,7 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 	}
 	registryTokenResponse, _, err := client.CreateTokens(ctx, registryId, *registryToken)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while creating the registry token: %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while creating the registry token: %w", err))
 	}
 
 	d.SetId(*registryTokenResponse.Id)
@@ -175,7 +175,7 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 
 	_, _, err = client.PatchToken(ctx, registryId, registryTokenId, *registryToken)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a registry token: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a registry token: %w", err))
 		return diags
 	}
 
@@ -215,7 +215,7 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 			d.SetId("")
 			return nil, fmt.Errorf("registry does not exist %q", registryTokenId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of registry token %q", registryTokenId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q", registryTokenId)
 	}
 
 	log.Printf("[INFO] registry token found: %+v", registryToken)

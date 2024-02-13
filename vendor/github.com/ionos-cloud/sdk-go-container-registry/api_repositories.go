@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls.
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
  *
- * API version: 1.0
+ * API version: 1.1.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -14,7 +14,7 @@ package ionoscloud
 import (
 	_context "context"
 	"fmt"
-	_ioutil "io/ioutil"
+	"io"
 	_nethttp "net/http"
 	_neturl "net/url"
 	"strings"
@@ -29,10 +29,10 @@ var (
 type RepositoriesApiService service
 
 type ApiRegistriesRepositoriesDeleteRequest struct {
-	ctx        _context.Context
-	ApiService *RepositoriesApiService
-	registryId string
-	name       string
+	ctx            _context.Context
+	ApiService     *RepositoriesApiService
+	registryId     string
+	repositoryName string
 }
 
 func (r ApiRegistriesRepositoriesDeleteRequest) Execute() (*APIResponse, error) {
@@ -51,16 +51,16 @@ func (r ApiRegistriesRepositoriesDeleteRequest) Execute() (*APIResponse, error) 
 
   - @param registryId The unique ID of the registry
 
-  - @param name The name of the repository
+  - @param repositoryName The name of the repository
 
   - @return ApiRegistriesRepositoriesDeleteRequest
 */
-func (a *RepositoriesApiService) RegistriesRepositoriesDelete(ctx _context.Context, registryId string, name string) ApiRegistriesRepositoriesDeleteRequest {
+func (a *RepositoriesApiService) RegistriesRepositoriesDelete(ctx _context.Context, registryId string, repositoryName string) ApiRegistriesRepositoriesDeleteRequest {
 	return ApiRegistriesRepositoriesDeleteRequest{
-		ApiService: a,
-		ctx:        ctx,
-		registryId: registryId,
-		name:       name,
+		ApiService:     a,
+		ctx:            ctx,
+		registryId:     registryId,
+		repositoryName: repositoryName,
 	}
 }
 
@@ -81,9 +81,9 @@ func (a *RepositoriesApiService) RegistriesRepositoriesDeleteExecute(r ApiRegist
 		return nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/registries/{registryId}/repositories/{name}"
+	localVarPath := localBasePath + "/registries/{registryId}/repositories/{repositoryName}"
 	localVarPath = strings.Replace(localVarPath, "{"+"registryId"+"}", _neturl.PathEscape(parameterToString(r.registryId, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", _neturl.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"repositoryName"+"}", _neturl.PathEscape(parameterToString(r.repositoryName, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -139,7 +139,7 @@ func (a *RepositoriesApiService) RegistriesRepositoriesDeleteExecute(r ApiRegist
 		return localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -156,4 +156,378 @@ func (a *RepositoriesApiService) RegistriesRepositoriesDeleteExecute(r ApiRegist
 	}
 
 	return localVarAPIResponse, nil
+}
+
+type ApiRegistriesRepositoriesFindByNameRequest struct {
+	ctx            _context.Context
+	ApiService     *RepositoriesApiService
+	registryId     string
+	repositoryName string
+}
+
+func (r ApiRegistriesRepositoriesFindByNameRequest) Execute() (RepositoryRead, *APIResponse, error) {
+	return r.ApiService.RegistriesRepositoriesFindByNameExecute(r)
+}
+
+/*
+ * RegistriesRepositoriesFindByName Retrieve Repository
+ * Returns the Repository by Name.
+ * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param registryId The ID (UUID) of the Registry.
+ * @param repositoryName The Name of the Repository that should be retrieved.
+ * @return ApiRegistriesRepositoriesFindByNameRequest
+ */
+func (a *RepositoriesApiService) RegistriesRepositoriesFindByName(ctx _context.Context, registryId string, repositoryName string) ApiRegistriesRepositoriesFindByNameRequest {
+	return ApiRegistriesRepositoriesFindByNameRequest{
+		ApiService:     a,
+		ctx:            ctx,
+		registryId:     registryId,
+		repositoryName: repositoryName,
+	}
+}
+
+/*
+ * Execute executes the request
+ * @return RepositoryRead
+ */
+func (a *RepositoriesApiService) RegistriesRepositoriesFindByNameExecute(r ApiRegistriesRepositoriesFindByNameRequest) (RepositoryRead, *APIResponse, error) {
+	var (
+		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarPostBody     interface{}
+		localVarFormFileName string
+		localVarFileName     string
+		localVarFileBytes    []byte
+		localVarReturnValue  RepositoryRead
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RepositoriesApiService.RegistriesRepositoriesFindByName")
+	if err != nil {
+		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/registries/{registryId}/repositories/{repositoryName}"
+	localVarPath = strings.Replace(localVarPath, "{"+"registryId"+"}", _neturl.PathEscape(parameterToString(r.registryId, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"repositoryName"+"}", _neturl.PathEscape(parameterToString(r.repositoryName, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := _neturl.Values{}
+	localVarFormParams := _neturl.Values{}
+	if strlen(r.repositoryName) > 256 {
+		return localVarReturnValue, nil, reportError("repositoryName must have less than 256 elements")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["tokenAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
+
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestTime: httpRequestTime,
+		RequestURL:  localVarPath,
+		Operation:   "RegistriesRepositoriesFindByName",
+	}
+
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarAPIResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarAPIResponse.Payload = localVarBody
+	if err != nil {
+		return localVarReturnValue, localVarAPIResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := GenericOpenAPIError{
+			statusCode: localVarHTTPResponse.StatusCode,
+			body:       localVarBody,
+			error:      fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarAPIResponse, newErr
+			}
+			newErr.model = v
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarAPIResponse, newErr
+			}
+			newErr.model = v
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarAPIResponse, newErr
+			}
+			newErr.model = v
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarAPIResponse, newErr
+			}
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarAPIResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := GenericOpenAPIError{
+			statusCode: localVarHTTPResponse.StatusCode,
+			body:       localVarBody,
+			error:      err.Error(),
+		}
+		return localVarReturnValue, localVarAPIResponse, newErr
+	}
+
+	return localVarReturnValue, localVarAPIResponse, nil
+}
+
+type ApiRegistriesRepositoriesGetRequest struct {
+	ctx                         _context.Context
+	ApiService                  *RepositoriesApiService
+	registryId                  string
+	offset                      *int32
+	limit                       *int32
+	filterName                  *string
+	filterVulnerabilitySeverity *string
+	orderBy                     *string
+}
+
+func (r ApiRegistriesRepositoriesGetRequest) Offset(offset int32) ApiRegistriesRepositoriesGetRequest {
+	r.offset = &offset
+	return r
+}
+func (r ApiRegistriesRepositoriesGetRequest) Limit(limit int32) ApiRegistriesRepositoriesGetRequest {
+	r.limit = &limit
+	return r
+}
+func (r ApiRegistriesRepositoriesGetRequest) FilterName(filterName string) ApiRegistriesRepositoriesGetRequest {
+	r.filterName = &filterName
+	return r
+}
+func (r ApiRegistriesRepositoriesGetRequest) FilterVulnerabilitySeverity(filterVulnerabilitySeverity string) ApiRegistriesRepositoriesGetRequest {
+	r.filterVulnerabilitySeverity = &filterVulnerabilitySeverity
+	return r
+}
+func (r ApiRegistriesRepositoriesGetRequest) OrderBy(orderBy string) ApiRegistriesRepositoriesGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
+func (r ApiRegistriesRepositoriesGetRequest) Execute() (RepositoryReadList, *APIResponse, error) {
+	return r.ApiService.RegistriesRepositoriesGetExecute(r)
+}
+
+/*
+  - RegistriesRepositoriesGet Retrieve all Repositories
+  - This endpoint enables retrieving all Repositories using
+
+pagination and optional filters.
+
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param registryId The ID (UUID) of the Registry.
+  - @return ApiRegistriesRepositoriesGetRequest
+*/
+func (a *RepositoriesApiService) RegistriesRepositoriesGet(ctx _context.Context, registryId string) ApiRegistriesRepositoriesGetRequest {
+	return ApiRegistriesRepositoriesGetRequest{
+		ApiService: a,
+		ctx:        ctx,
+		registryId: registryId,
+	}
+}
+
+/*
+ * Execute executes the request
+ * @return RepositoryReadList
+ */
+func (a *RepositoriesApiService) RegistriesRepositoriesGetExecute(r ApiRegistriesRepositoriesGetRequest) (RepositoryReadList, *APIResponse, error) {
+	var (
+		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarPostBody     interface{}
+		localVarFormFileName string
+		localVarFileName     string
+		localVarFileBytes    []byte
+		localVarReturnValue  RepositoryReadList
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RepositoriesApiService.RegistriesRepositoriesGet")
+	if err != nil {
+		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/registries/{registryId}/repositories"
+	localVarPath = strings.Replace(localVarPath, "{"+"registryId"+"}", _neturl.PathEscape(parameterToString(r.registryId, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := _neturl.Values{}
+	localVarFormParams := _neturl.Values{}
+
+	if r.offset != nil {
+		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.filterName != nil {
+		localVarQueryParams.Add("filter.name", parameterToString(*r.filterName, ""))
+	}
+	if r.filterVulnerabilitySeverity != nil {
+		localVarQueryParams.Add("filter.vulnerabilitySeverity", parameterToString(*r.filterVulnerabilitySeverity, ""))
+	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["tokenAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
+
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestTime: httpRequestTime,
+		RequestURL:  localVarPath,
+		Operation:   "RegistriesRepositoriesGet",
+	}
+
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarAPIResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarAPIResponse.Payload = localVarBody
+	if err != nil {
+		return localVarReturnValue, localVarAPIResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := GenericOpenAPIError{
+			statusCode: localVarHTTPResponse.StatusCode,
+			body:       localVarBody,
+			error:      fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarAPIResponse, newErr
+			}
+			newErr.model = v
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarAPIResponse, newErr
+			}
+			newErr.model = v
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarAPIResponse, newErr
+			}
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarAPIResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := GenericOpenAPIError{
+			statusCode: localVarHTTPResponse.StatusCode,
+			body:       localVarBody,
+			error:      err.Error(),
+		}
+		return localVarReturnValue, localVarAPIResponse, newErr
+	}
+
+	return localVarReturnValue, localVarAPIResponse, nil
 }
