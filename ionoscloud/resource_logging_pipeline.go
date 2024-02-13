@@ -104,7 +104,6 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 	pipeline, apiResponse, err := client.GetPipelineById(ctx, pipelineId)
 
 	if err != nil {
-		// TODO -- leave it as it is for now but check if this can be done in a better way
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] Could not find Logging pipeline with ID: %s", pipelineId)
 			d.SetId("")

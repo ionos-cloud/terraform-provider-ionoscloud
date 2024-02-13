@@ -38,7 +38,7 @@ resource "ionoscloud_ipblock" "example" {
 
 resource "ionoscloud_k8s_cluster" "example" {
   name                  = "k8sClusterExample"
-  k8s_version           = "1.25.5"
+  k8s_version           = "1.28.6"
   maintenance_window {
     day_of_the_week     = "Sunday"
     time                = "09:00:00Z"
@@ -60,7 +60,7 @@ resource "ionoscloud_k8s_node_pool" "example" {
   } 
   auto_scaling {
     min_node_count      = 1
-    max_node_count      = 1
+    max_node_count      = 2
   }
   cpu_family            = "INTEL_XEON"
   availability_zone     = "AUTO"
@@ -69,7 +69,7 @@ resource "ionoscloud_k8s_node_pool" "example" {
   cores_count           = 2
   ram_size              = 2048
   storage_size          = 40
-  public_ips            = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
+  public_ips            = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1], ionoscloud_ipblock.example.ips[2] ]
   lans {
     id                  = ionoscloud_lan.example.id
     dhcp                = true

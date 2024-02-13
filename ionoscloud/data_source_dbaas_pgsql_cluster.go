@@ -110,25 +110,6 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 					},
 				},
 			},
-			"credentials": {
-				Type:        schema.TypeList,
-				Description: "Credentials for the database user to be created.",
-				Computed:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"username": {
-							Type:        schema.TypeString,
-							Description: "the username for the initial postgres user. some system usernames are restricted (e.g. \"postgres\", \"admin\", \"standby\")",
-							Computed:    true,
-						},
-						"password": {
-							Type:      schema.TypeString,
-							Computed:  true,
-							Sensitive: true,
-						},
-					},
-				},
-			},
 			"synchronization_mode": {
 				Type:        schema.TypeString,
 				Description: "Represents different modes of replication.",
