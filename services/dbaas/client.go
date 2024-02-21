@@ -30,7 +30,7 @@ type PsqlClient struct {
 func NewMariaDBClient(username, password, token, url, version, terraformVersion string) *MariaDBClient {
 	newConfigDbaas := mariadb.NewConfiguration(username, password, token, url)
 
-	if os.Getenv("IONOS_DEBUG") != "" {
+	if os.Getenv(constant.IonosDebug) != "" {
 		newConfigDbaas.Debug = true
 	}
 	newConfigDbaas.MaxRetries = constant.MaxRetries
@@ -49,7 +49,7 @@ func NewMariaDBClient(username, password, token, url, version, terraformVersion 
 func NewMongoClient(username, password, token, url, version, terraformVersion string) *MongoClient {
 	newConfigDbaas := mongo.NewConfiguration(username, password, token, url)
 
-	if os.Getenv("IONOS_DEBUG") != "" {
+	if os.Getenv(constant.IonosDebug) != "" {
 		newConfigDbaas.Debug = true
 	}
 	newConfigDbaas.MaxRetries = constant.MaxRetries

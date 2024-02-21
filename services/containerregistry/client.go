@@ -20,7 +20,7 @@ type Client struct {
 func NewClient(username, password, token, url, version, terraformVersion string) *Client {
 	newConfigRegistry := cr.NewConfiguration(username, password, token, url)
 
-	if os.Getenv("IONOS_DEBUG") != "" {
+	if os.Getenv(constant.IonosDebug) != "" {
 		newConfigRegistry.Debug = true
 	}
 	newConfigRegistry.MaxRetries = constant.MaxRetries

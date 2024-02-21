@@ -199,9 +199,9 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta inte
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("MariaDB cluster with ID: %v does not exist", clusterId)
+			return nil, fmt.Errorf("MariaDB cluster with ID: %v does not exist, error: %w", clusterId, err)
 		}
-		return nil, fmt.Errorf("an error occured while trying to import MariaDB cluster with ID: %v", clusterId)
+		return nil, fmt.Errorf("an error occured while trying to import MariaDB cluster with ID: %v, error: %w", clusterId, err)
 	}
 
 	log.Printf("[INFO] MariaDB cluster found: %+v", cluster)
