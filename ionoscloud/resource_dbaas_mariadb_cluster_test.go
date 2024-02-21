@@ -192,21 +192,6 @@ data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestD
 }
 `
 
-// Attributes
-const clusterVersionAttribute = "mariadb_version"
-
-// Values
-const clusterVersionValue = "10.6"
-const clusterInstancesValue = "1"
-const clusterCoresValue = "4"
-const clusterRamValue = "2"
-const clusterStorageSizeValue = "10"
-const clusterConnectionsCidrValue = "192.168.1.100/24"
-const clusterDisplayNameValue = constant.DBaaSClusterTestResource
-const clusterCredentialsUsernameValue = "username"
-const datacenterResourceName = "datacenter_example"
-const lanResourceName = "lan_example"
-
 // Internal resources
 const connections = clusterConnectionsAttribute + `{
 	` + clusterConnectionsDatacenterIDAttribute + ` = ` + constant.DatacenterResource + `.` + datacenterResourceName + `.id
@@ -223,3 +208,20 @@ const credentials = clusterCredentialsAttribute + `{
 	` + clusterCredentialsUsernameAttribute + ` = "` + clusterCredentialsUsernameValue + `"
 	` + clusterCredentialsPasswordAttribute + ` = ` + constant.RandomPassword + `.cluster_password.result
 }`
+
+// Attributes
+const clusterVersionAttribute = "mariadb_version"
+
+// Values
+const (
+	clusterVersionValue             = "10.6"
+	clusterInstancesValue           = "1"
+	clusterCoresValue               = "4"
+	clusterRamValue                 = "2"
+	clusterStorageSizeValue         = "10"
+	clusterConnectionsCidrValue     = "192.168.1.100/24"
+	clusterDisplayNameValue         = constant.DBaaSClusterTestResource
+	clusterCredentialsUsernameValue = "username"
+	datacenterResourceName          = "datacenter_example"
+	lanResourceName                 = "lan_example"
+)

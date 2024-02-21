@@ -33,7 +33,7 @@ resource "ionoscloud_server" "example" {
   ram                     = 2048
   availability_zone       = "ZONE_1"
   cpu_family              = "INTEL_SKYLAKE"
-  image_name              = "Debian-10-cloud-init.qcow2"
+  image_name              = "debian-10-genericcloud-amd64-20240114-1626"
   image_password          = "password"
   volume {
     name                  = "example"

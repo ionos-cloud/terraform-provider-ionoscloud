@@ -279,8 +279,17 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 			return ionoscloud.NewAPIClient(newConfig)
 		}
+<<<<<<< HEAD
 	case autoscalingClient:
 		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+=======
+	case psqlClient:
+		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case mongoClient:
+		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case mariaDBClient:
+		return dbaasService.NewMariaDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+>>>>>>> eabe0a8e (refactor: Fix small bug, modify documentation, refactor constants in tests)
 	case certManagerClient:
 		return cert.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case containerRegistryClient:

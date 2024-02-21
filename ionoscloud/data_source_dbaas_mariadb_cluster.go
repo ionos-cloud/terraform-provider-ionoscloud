@@ -133,7 +133,7 @@ func dataSourceMariaDBClusterRead(ctx context.Context, d *schema.ResourceData, m
 
 		var results []dbaas.ClusterResponse
 
-		if clusters.Items != nil && len(*clusters.Items) > 0 {
+		if clusters.Items != nil {
 			for _, clusterItem := range *clusters.Items {
 				if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, name.(string)) {
 					results = append(results, clusterItem)

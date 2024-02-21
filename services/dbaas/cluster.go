@@ -613,8 +613,8 @@ func GetMariaClusterConnectionsData(d *schema.ResourceData) *[]mariadb.Connectio
 	connections := make([]mariadb.Connection, 0)
 
 	if connectionsIntf, ok := d.GetOk("connections"); ok {
-		connections := connectionsIntf.([]interface{})
-		for connectionIdx := range connections {
+		connectionsValues := connectionsIntf.([]interface{})
+		for connectionIdx := range connectionsValues {
 			connection := mariadb.Connection{}
 
 			if datacenterID, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", connectionIdx)); ok {
