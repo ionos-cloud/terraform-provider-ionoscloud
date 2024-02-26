@@ -7,6 +7,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 )
@@ -15,7 +16,7 @@ type SdkBundle struct {
 	CloudApiClient     *ionoscloud.APIClient
 	PsqlClient         *dbaas.PsqlClient
 	MongoClient        *dbaas.MongoClient
-	MariaDBClient      *dbaas.MariaDBClient
+	MariaDBClient      *mariadb.MariaDBClient
 	CertManagerClient  *cert.Client
 	ContainerClient    *containerregistry.Client
 	DataplatformClient *dataplatform.Client

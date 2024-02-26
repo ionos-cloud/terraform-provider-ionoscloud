@@ -10,11 +10,6 @@ import (
 	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 )
 
-type BackupService interface {
-	GetClusterBackups(ctx context.Context, clusterId string) (dbaas.ClusterBackupList, *dbaas.APIResponse, error)
-	GetAllBackups(ctx context.Context) (dbaas.ClusterBackupList, *dbaas.APIResponse, error)
-}
-
 func (c *PsqlClient) GetClusterBackups(ctx context.Context, clusterId string) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
 	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterId).Execute()
 	apiResponse.LogInfo()

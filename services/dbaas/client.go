@@ -9,15 +9,10 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	mariadb "github.com/ionos-cloud/sdk-go-dbaas-maria"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
-
-type MariaDBClient struct {
-	sdkClient *mariadb.APIClient
-}
 
 type MongoClient struct {
 	sdkClient *mongo.APIClient
@@ -25,25 +20,6 @@ type MongoClient struct {
 
 type PsqlClient struct {
 	sdkClient *psql.APIClient
-}
-
-func NewMariaDBClient(username, password, token, url, version, terraformVersion string) *MariaDBClient {
-	newConfigDbaas := mariadb.NewConfiguration(username, password, token, url)
-
-	if os.Getenv(constant.IonosDebug) != "" {
-		newConfigDbaas.Debug = true
-	}
-	newConfigDbaas.MaxRetries = constant.MaxRetries
-	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
-
-	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
-	newConfigDbaas.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-maria/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, mariadb.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
-	return &MariaDBClient{
-		sdkClient: mariadb.NewAPIClient(newConfigDbaas),
-	}
 }
 
 func NewMongoClient(username, password, token, url, version, terraformVersion string) *MongoClient {

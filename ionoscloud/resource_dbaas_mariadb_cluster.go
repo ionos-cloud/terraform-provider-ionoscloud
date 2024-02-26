@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -147,7 +147,7 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).MariaDBClient
 
-	cluster, err := dbaasService.GetMariaDBClusterDataCreate(d)
+	cluster, err := mariadb.GetMariaDBClusterDataCreate(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}

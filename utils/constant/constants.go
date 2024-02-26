@@ -138,6 +138,9 @@ var ResourceK8sNodePoolTimeout = schema.ResourceTimeout{
 	Default: schema.DefaultTimeout(K8sNodePoolTimeout),
 }
 
+// LoadBalancer Constants
+const LoadBalancerResource = "ionoscloud_loadbalancer"
+
 // NatGateway Constants
 const (
 	NatGatewayResource             = "ionoscloud_natgateway"
@@ -250,7 +253,9 @@ const (
 	PsqlVersionsResource         = "ionoscloud_pg_versions"
 	PsqlVersionsTest             = "test_dbaas_versions"
 
-	DBaaSMariaDBClusterResource = "ionoscloud_mariadb_cluster"
+	// MariaDB constants
+	DBaaSMariaDBClusterResource   = "ionoscloud_mariadb_cluster"
+	DBaaSMariaDBBackupsDataSource = "ionoscloud_mariadb_backups"
 
 	DBaasMongoClusterResource        = "ionoscloud_mongo_cluster"
 	DBaasMongoUserResource           = "ionoscloud_mongo_user"

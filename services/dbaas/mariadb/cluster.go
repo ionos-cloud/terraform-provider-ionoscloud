@@ -1,0 +1,271 @@
+package mariadb
+
+import (
+	"context"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	mariadb "github.com/ionos-cloud/sdk-go-dbaas-maria"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"log"
+	"strings"
+)
+
+func (c *MariaDBClient) GetCluster(ctx context.Context, clusterId string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
+	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+	apiResponse.LogInfo()
+	return cluster, apiResponse, err
+}
+
+func (c *MariaDBClient) ListClusters(ctx context.Context, filterName string) (mariadb.ClusterList, *mariadb.APIResponse, error) {
+	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
+	if filterName != "" {
+		request = request.FilterName(filterName)
+	}
+	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGetExecute(request)
+	apiResponse.LogInfo()
+	return clusters, apiResponse, err
+}
+
+func (c *MariaDBClient) CreateCluster(ctx context.Context, cluster mariadb.CreateClusterRequest) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
+	apiResponse.LogInfo()
+	return clusterResponse, apiResponse, err
+}
+
+func (c *MariaDBClient) DeleteCluster(ctx context.Context, clusterId string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
+	apiResponse.LogInfo()
+	return clusterResponse, apiResponse, err
+}
+
+func (c *MariaDBClient) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	clusterID := d.Id()
+	cluster, _, err := c.GetCluster(ctx, clusterID)
+	if err != nil {
+		return true, fmt.Errorf("status check failed for MariaDB cluster with ID: %v, error: %w", clusterID, err)
+	}
+
+	if cluster.Metadata == nil || cluster.Metadata.State == nil {
+		return false, fmt.Errorf("cluster metadata or state is empty for MariaDB cluster with ID: %v", clusterID)
+	}
+
+	log.Printf("[INFO] state of the MariaDB cluster with ID: %v is: %s ", clusterID, string(*cluster.Metadata.State))
+	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
+}
+
+func (c *MariaDBClient) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	clusterID := d.Id()
+	_, apiResponse, err := c.GetCluster(ctx, clusterID)
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return true, nil
+		}
+		return false, fmt.Errorf("check failed for MariaDB cluster deletion status, cluster ID: %v, error: %w", clusterID, err)
+	}
+	return false, nil
+}
+
+func GetMariaDBClusterDataCreate(d *schema.ResourceData) (*mariadb.CreateClusterRequest, error) {
+	cluster := mariadb.CreateClusterRequest{
+		Properties: &mariadb.CreateClusterProperties{},
+	}
+
+	if mariaDBVersion, ok := d.GetOk("mariadb_version"); ok {
+		mariaDBVersion := mariaDBVersion.(string)
+		cluster.Properties.MariadbVersion = (*mariadb.MariadbVersion)(&mariaDBVersion)
+	}
+
+	if instances, ok := d.GetOk("instances"); ok {
+		instances := int32(instances.(int))
+		cluster.Properties.Instances = &instances
+	}
+
+	if cores, ok := d.GetOk("cores"); ok {
+		cores := int32(cores.(int))
+		cluster.Properties.Cores = &cores
+	}
+
+	if ram, ok := d.GetOk("ram"); ok {
+		ram := int32(ram.(int))
+		cluster.Properties.Ram = &ram
+	}
+
+	if storageSize, ok := d.GetOk("storage_size"); ok {
+		storageSize := int32(storageSize.(int))
+		cluster.Properties.StorageSize = &storageSize
+	}
+
+	if _, ok := d.GetOk("connections"); ok {
+		cluster.Properties.Connections = GetMariaClusterConnectionsData(d)
+	}
+
+	if displayName, ok := d.GetOk("display_name"); ok {
+		displayName := displayName.(string)
+		cluster.Properties.DisplayName = &displayName
+	}
+
+	cluster.Properties.Credentials = GetMariaClusterCredentialsData(d)
+
+	if _, ok := d.GetOk("maintenance_window"); ok {
+		cluster.Properties.MaintenanceWindow = GetMariaClusterMaintenanceWindowData(d)
+	}
+
+	return &cluster, nil
+}
+
+func GetMariaClusterConnectionsData(d *schema.ResourceData) *[]mariadb.Connection {
+	connections := make([]mariadb.Connection, 0)
+
+	if connectionsIntf, ok := d.GetOk("connections"); ok {
+		connectionsValues := connectionsIntf.([]interface{})
+		for connectionIdx := range connectionsValues {
+			connection := mariadb.Connection{}
+
+			if datacenterID, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", connectionIdx)); ok {
+				datacenterID := datacenterID.(string)
+				connection.DatacenterId = &datacenterID
+			}
+
+			if lanID, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", connectionIdx)); ok {
+				lanID := lanID.(string)
+				connection.LanId = &lanID
+			}
+
+			if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.cidr", connectionIdx)); ok {
+				cidr := cidr.(string)
+				connection.Cidr = &cidr
+			}
+			connections = append(connections, connection)
+		}
+	}
+	return &connections
+}
+
+func GetMariaClusterMaintenanceWindowData(d *schema.ResourceData) *mariadb.MaintenanceWindow {
+	var maintenanceWindow mariadb.MaintenanceWindow
+
+	if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
+		timeV := timeV.(string)
+		maintenanceWindow.Time = &timeV
+	}
+
+	if dayOfTheWeek, ok := d.GetOk("maintenance_window.0.day_of_the_week"); ok {
+		dayOfTheWeek := mariadb.DayOfTheWeek(dayOfTheWeek.(string))
+		maintenanceWindow.DayOfTheWeek = &dayOfTheWeek
+	}
+
+	return &maintenanceWindow
+}
+
+func GetMariaClusterCredentialsData(d *schema.ResourceData) *mariadb.DBUser {
+	var user mariadb.DBUser
+
+	if username, ok := d.GetOk("credentials.0.username"); ok {
+		username := username.(string)
+		user.Username = &username
+	}
+
+	if password, ok := d.GetOk("credentials.0.password"); ok {
+		password := password.(string)
+		user.Password = &password
+	}
+
+	return &user
+}
+
+func (c *MariaDBClient) SetMariaDBClusterData(d *schema.ResourceData, cluster mariadb.ClusterResponse) error {
+
+	resourceName := "MariaDB cluster"
+
+	if cluster.Id != nil {
+		d.SetId(*cluster.Id)
+	}
+
+	if cluster.Properties == nil {
+		return fmt.Errorf("response properties should not be empty for MariaDB cluster with ID %v", *cluster.Id)
+	}
+
+	if cluster.Properties.MariadbVersion != nil {
+		if err := d.Set("mariadb_version", *cluster.Properties.MariadbVersion); err != nil {
+			return utils.GenerateSetError(resourceName, "mariadb_version", err)
+		}
+	}
+
+	if cluster.Properties.Instances != nil {
+		if err := d.Set("instances", *cluster.Properties.Instances); err != nil {
+			return utils.GenerateSetError(resourceName, "instances", err)
+		}
+	}
+
+	if cluster.Properties.Cores != nil {
+		if err := d.Set("cores", *cluster.Properties.Cores); err != nil {
+			return utils.GenerateSetError(resourceName, "cores", err)
+		}
+	}
+
+	if cluster.Properties.Ram != nil {
+		if err := d.Set("ram", *cluster.Properties.Ram); err != nil {
+			return utils.GenerateSetError(resourceName, "ram", err)
+		}
+	}
+
+	if cluster.Properties.StorageSize != nil {
+		if err := d.Set("storage_size", *cluster.Properties.StorageSize); err != nil {
+			return utils.GenerateSetError(resourceName, "storage_size", err)
+		}
+	}
+
+	if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
+		var connections []interface{}
+		for _, connection := range *cluster.Properties.Connections {
+			connectionEntry := c.SetConnectionProperties(connection)
+			connections = append(connections, connectionEntry)
+		}
+		if err := d.Set("connections", connections); err != nil {
+			return utils.GenerateSetError(resourceName, "connections", err)
+		}
+	}
+
+	if cluster.Properties.DisplayName != nil {
+		if err := d.Set("display_name", *cluster.Properties.DisplayName); err != nil {
+			return utils.GenerateSetError(resourceName, "display_name", err)
+		}
+	}
+
+	if cluster.Properties.MaintenanceWindow != nil {
+		var maintenanceWindow []interface{}
+		maintenanceWindowEntry := c.SetMaintenanceWindowProperties(*cluster.Properties.MaintenanceWindow)
+		maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
+		if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
+			return utils.GenerateSetError(resourceName, "maintenance_window", err)
+		}
+	}
+
+	if cluster.Properties.DnsName != nil {
+		if err := d.Set("dns_name", *cluster.Properties.DnsName); err != nil {
+			return utils.GenerateSetError(resourceName, "dns_name", err)
+		}
+	}
+
+	return nil
+}
+
+func (c *MariaDBClient) SetConnectionProperties(connection mariadb.Connection) map[string]interface{} {
+	connectionMap := map[string]interface{}{}
+
+	utils.SetPropWithNilCheck(connectionMap, "datacenter_id", connection.DatacenterId)
+	utils.SetPropWithNilCheck(connectionMap, "lan_id", connection.LanId)
+	utils.SetPropWithNilCheck(connectionMap, "cidr", connection.Cidr)
+
+	return connectionMap
+}
+
+func (c *MariaDBClient) SetMaintenanceWindowProperties(maintenanceWindow mariadb.MaintenanceWindow) map[string]interface{} {
+	maintenance := map[string]interface{}{}
+
+	utils.SetPropWithNilCheck(maintenance, "time", maintenanceWindow.Time)
+	utils.SetPropWithNilCheck(maintenance, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
+
+	return maintenance
+}

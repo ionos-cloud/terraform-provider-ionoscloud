@@ -18,6 +18,7 @@ import (
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -81,7 +82,7 @@ func Provider() *schema.Provider {
 			constant.IpBlockResource:                           resourceIPBlock(),
 			constant.FirewallResource:                          resourceFirewall(),
 			constant.LanResource:                               resourceLan(),
-			"ionoscloud_loadbalancer":                          resourceLoadbalancer(),
+			constant.LoadBalancerResource:                      resourceLoadbalancer(),
 			constant.NicResource:                               resourceNic(),
 			constant.ServerResource:                            resourceServer(),
 			constant.ServerCubeResource:                        resourceCubeServer(),
@@ -137,6 +138,7 @@ func Provider() *schema.Provider {
 			constant.K8sClustersDataSource:                     dataSourceK8sClusters(),
 			constant.K8sNodePoolResource:                       dataSourceK8sNodePool(),
 			constant.K8sNodePoolNodesResource:                  dataSourceK8sNodePoolNodes(),
+			constant.DBaaSMariaDBBackupsDataSource:             dataSourceDBaaSMariaDBBackups(),
 			constant.NatGatewayResource:                        dataSourceNatGateway(),
 			constant.NatGatewayRuleResource:                    dataSourceNatGatewayRule(),
 			constant.NetworkLoadBalancerResource:               dataSourceNetworkLoadBalancer(),
@@ -242,7 +244,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		DataplatformClient: NewClientByType(clientOpts, dataplatformClient).(*dataplatformService.Client),
 		DNSClient:          NewClientByType(clientOpts, dnsClient).(*dnsService.Client),
 		LoggingClient:      NewClientByType(clientOpts, loggingClient).(*loggingService.Client),
-		MariaDBClient:      NewClientByType(clientOpts, mariaDBClient).(*dbaasService.MariaDBClient),
+		MariaDBClient:      NewClientByType(clientOpts, mariaDBClient).(*mariadb.MariaDBClient),
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
 	}, nil
@@ -279,17 +281,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 			return ionoscloud.NewAPIClient(newConfig)
 		}
-<<<<<<< HEAD
 	case autoscalingClient:
 		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
-=======
-	case psqlClient:
-		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
-	case mongoClient:
-		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
-	case mariaDBClient:
-		return dbaasService.NewMariaDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
->>>>>>> eabe0a8e (refactor: Fix small bug, modify documentation, refactor constants in tests)
 	case certManagerClient:
 		return cert.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case containerRegistryClient:
@@ -301,7 +294,7 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	case loggingClient:
 		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case mariaDBClient:
-		return dbaasService.NewMariaDBClient(clientOpts.Username, clientOpts.Password, "", "", clientOpts.Version, clientOpts.TerraformVersion)
+		return mariadb.NewMariaDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case mongoClient:
 		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case psqlClient:
