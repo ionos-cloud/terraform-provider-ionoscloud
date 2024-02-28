@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -48,23 +47,21 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 	req := client.KubernetesApi.K8sGet(ctx).Depth(1)
 
 	filters, filtersOk := d.GetOk("filter")
-	if !filtersOk {
-		return diag.FromErr(errors.New("please provide filters for data source lookup"))
-	}
+	if filtersOk {
+		_filters := make([]string, 0, 2)
+		for _, v := range filters.(*schema.Set).List() {
+			filter := v.(map[string]any)
+			key := filter["name"].(string)
+			value := filter["value"].(string)
+			_filters = append(_filters, fmt.Sprintf("%s:%s", key, value))
 
-	_filters := make([]string, 0, 2)
-	for _, v := range filters.(*schema.Set).List() {
-		filter := v.(map[string]any)
-		key := filter["name"].(string)
-		value := filter["value"].(string)
-		_filters = append(_filters, fmt.Sprintf("%s:%s", key, value))
-
-		if v, ok := filterKeys[key]; ok {
-			key = v
-		} else {
-			key = strcase.ToLowerCamel(key)
+			if v, ok := filterKeys[key]; ok {
+				key = v
+			} else {
+				key = strcase.ToLowerCamel(key)
+			}
+			req.Filter(key, value)
 		}
-		req.Filter(key, value)
 	}
 
 	clusters, apiResponse, err := req.Execute()
@@ -73,7 +70,7 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %w", err))
 	}
 	if clusters.Items != nil && len(*clusters.Items) == 0 {
-		return diag.FromErr(fmt.Errorf("no clusters match the specified filtering criteria: %v", _filters))
+		return diag.FromErr(fmt.Errorf("no clusters found"))
 	}
 	if err := setDataSourceK8sSetClusters(ctx, d, *clusters.Items, client); err != nil {
 		return diag.FromErr(err)

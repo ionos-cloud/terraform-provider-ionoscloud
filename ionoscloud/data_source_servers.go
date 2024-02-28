@@ -210,7 +210,7 @@ func dataSourceServers() *schema.Resource {
 func dataSourceFiltersSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeSet,
-		Required: true,
+		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"name": {
@@ -235,16 +235,15 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	}
 	req := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Depth(5)
 	filters, filtersOk := d.GetOk("filter")
-	if !filtersOk {
-		return diag.FromErr(errors.New("please provide filters for data source lookup"))
-	}
-	for _, v := range filters.(*schema.Set).List() {
-		filter := v.(map[string]interface{})
-		//we want to convert for example cpu_family to cpuFamily
-		name := strcase.ToLowerCamel(filter["name"].(string))
-		value := filter["value"].(string)
-		req = req.Filter(name, value)
-		log.Printf("[INFO] Adding filter with name %s and value %s \n", name, value)
+	if filtersOk {
+		for _, v := range filters.(*schema.Set).List() {
+			filter := v.(map[string]interface{})
+			// we want to convert for example cpu_family to cpuFamily
+			name := strcase.ToLowerCamel(filter["name"].(string))
+			value := filter["value"].(string)
+			req = req.Filter(name, value)
+			log.Printf("[INFO] Adding filter with name %s and value %s \n", name, value)
+		}
 	}
 	var err error
 	var apiResponse *ionoscloud.APIResponse
@@ -264,7 +263,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	for _, server := range *servers.Items {
 		serverEntry = SetServerProperties(server)
 		utils.SetPropWithNilCheck(serverEntry, "id", server.Id)
-		//todo: Add token?
+		// todo: Add token?
 		if server.Entities != nil {
 			if server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
 				nicItems := server.Entities.Nics.Items
