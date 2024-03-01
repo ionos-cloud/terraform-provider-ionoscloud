@@ -419,16 +419,16 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 
 	k8sNodepool := ionoscloud.KubernetesNodePoolForPost{
 		Properties: &ionoscloud.KubernetesNodePoolPropertiesForPost{
-			Name:             &name,
+			AvailabilityZone: &availabilityZone,
+			CoresCount:       &coresCount,
+			CpuFamily:        &cpuFamily,
 			DatacenterId:     &datacenterId,
 			K8sVersion:       &k8sVersion,
-			AvailabilityZone: &availabilityZone,
-			CpuFamily:        &cpuFamily,
-			StorageType:      &storageType,
+			Name:             &name,
 			NodeCount:        &nodeCount,
-			CoresCount:       &coresCount,
-			StorageSize:      &storageSize,
 			RamSize:          &ramSize,
+			StorageSize:      &storageSize,
+			StorageType:      &storageType,
 		},
 	}
 

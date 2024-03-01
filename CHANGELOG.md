@@ -1,18 +1,20 @@
-## 6.4.13(upcoming)
+## 6.4.14(upcoming)
+### Fixes
+- #524 `filters` is now optional for `ionoscloud_servers` data source. If not provided, all servers in the configured datacenter will be returned.
+- `filters` is now optional for `ionoscloud_clusters` data source. If not provided, all k8s clusters will be returned.
+
+## 6.4.13
 ### Features
 - Added ability to boot from network for `ionoscloud_server`, `ionoscloud_vcpu_server`, `ionoscloud_cube_server`
 - Add `ionoscloud_k8s_clusters` data source
+- Add `vulnerability_scanning` parameter to `ionoscloud_container_registry` resource.
 ### Refactor
 - Remove duplicate functions for image retrieval (`checkImage`, `resolveImageName`) in `resource_volume.go`
-
 ### Fixes
 - Remove `credentials` field from `ionoscloud_mongo_cluster` resource
 - Remove `credentials` field from `ionoscloud_pg_cluster` data source
 ### Documentation
 - Update documentation for K8s cluster, nodepools and shares
-
-### Features
-- Add `vulnerability_scanning` parameter to `ionoscloud_container_registry` resource.
 
 ## 6.4.12
 ### Features

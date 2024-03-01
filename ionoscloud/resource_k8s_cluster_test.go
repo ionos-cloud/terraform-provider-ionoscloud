@@ -145,7 +145,7 @@ func TestAccK8sClusterPrivate(t *testing.T) {
 func TestAccK8sClusters(t *testing.T) {
 	var k8sCluster ionoscloud.KubernetesCluster
 
-	filtersErrRegex := fmt.Sprintf("no clusters match the specified filtering criteria: \\[%s:%s %s:%s\\]", filterName, noMatchName, filterVersion, noMatchVersion)
+	filtersErrRegex := fmt.Sprintf("no clusters found")
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
