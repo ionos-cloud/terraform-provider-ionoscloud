@@ -48,17 +48,13 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 
 	filters, filtersOk := d.GetOk("filter")
 	if filtersOk {
-		_filters := make([]string, 0, 2)
 		for _, v := range filters.(*schema.Set).List() {
 			filter := v.(map[string]any)
 			key := filter["name"].(string)
 			value := filter["value"].(string)
-			_filters = append(_filters, fmt.Sprintf("%s:%s", key, value))
-
+			key = strcase.ToLowerCamel(key)
 			if v, ok := filterKeys[key]; ok {
 				key = v
-			} else {
-				key = strcase.ToLowerCamel(key)
 			}
 			req.Filter(key, value)
 		}

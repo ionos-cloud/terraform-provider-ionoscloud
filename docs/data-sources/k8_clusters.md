@@ -58,7 +58,7 @@ data ionoscloud_servers example {
 
 ## Argument Reference
 
-* `filter` -  (Required) One or more property name - value pairs to be used in filtering the cluster list by the specified attributes. You can use most of the top level fields from the  [k8s_cluster](../data-sources/k8s_cluster.md) resource **except** those containing other nested structures such as `maintenance_window` or `config`.
+* `filter` -  (Optional) One or more property name - value pairs to be used in filtering the cluster list by the specified attributes. You can use most of the top level fields from the  [k8s_cluster](../data-sources/k8s_cluster.md) resource **except** those containing other nested structures such as `maintenance_window` or `config`.
 
 **NOTE:** Filtering uses partial matching for all types of values. Searching for a cluster using `name:testCluster` will find all clusters who have the `testCluster` substring in their name. This also applies to values for properties that would normally be boolean or numerical.
 
