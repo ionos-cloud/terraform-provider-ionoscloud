@@ -101,15 +101,15 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 							},
 							Description: "The list of IPs and subnet for your cluster. Note the following unavailable IP ranges:10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24. example: [192.168.1.100/24, 192.168.1.101/24]",
 						},
-						//add after api adds support
-						//"whitelist": {
+						// add after api adds support
+						// "whitelist": {
 						//	Type:     schema.TypeList,
 						//	Optional: true,
 						//	Elem: &schema.Schema{
 						//		Type: schema.TypeString,
 						//	},
 						//	Description: "List of whitelisted CIDRs",
-						//},
+						// },
 					},
 				},
 			},
@@ -126,7 +126,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				Description: "The connection string for your cluster.",
 				Computed:    true,
 			},
-			//enterprise edition below
+			// enterprise edition below
 			"type": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -212,7 +212,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"enterprise", "playground", "business"}, false)),
 			},
 			// to be added when there is api support
-			//"from_backup": {
+			// "from_backup": {
 			//	Type:        schema.TypeList,
 			//	MaxItems:    1,
 			//	Description: "Creates the cluster based on the existing backup.",
@@ -231,7 +231,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 			//			},
 			//		},
 			//	},
-			//},
+			// },
 			"backup": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -252,8 +252,8 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 							Description:      "Number of hours in the past for which a point-in-time snapshot can be created.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 24)),
 						},
-						//will be added at a later date
-						//"backup_retention": {
+						// will be added at a later date
+						// "backup_retention": {
 						//	Type:        schema.TypeList,
 						//	MaxItems:    1,
 						//	Optional:    true,
@@ -290,7 +290,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 						//			},
 						//		},
 						//	},
-						//},
+						// },
 						"location": {
 							Type:     schema.TypeString,
 							Optional: true,

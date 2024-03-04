@@ -188,7 +188,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 	}
 }
 func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	//we do not want to check in case of resource creation
+	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
 	}
