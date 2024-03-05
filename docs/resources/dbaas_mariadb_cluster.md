@@ -57,7 +57,7 @@ resource "ionoscloud_mariadb_cluster" "example" {
   mariadb_version        = "10.6"
   instances               = 1
   cores                   = 4
-  ram                     = 2
+  ram                     = 4
   storage_size            = 10
   connections   {
     datacenter_id         =  ionoscloud_datacenter.example.id 

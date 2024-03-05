@@ -28,11 +28,13 @@ func SetMariaDBClusterBackupsData(d *schema.ResourceData, clusterBackups *mariad
 	var backups []interface{}
 	for _, backup := range *clusterBackups.Properties.Items {
 		backupEntry := make(map[string]interface{})
+		backupEntry["id"] = *clusterBackups.Id
+
 		if backup.Size != nil {
 			backupEntry["size"] = *backup.Size
 		}
 		if backup.Created != nil {
-			backupEntry["created"] = *backup.Created
+			backupEntry["created"] = (*backup.Created).Time.Format("2006-01-02T15:04:05Z")
 		}
 		backups = append(backups, backupEntry)
 	}

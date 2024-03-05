@@ -138,6 +138,7 @@ func Provider() *schema.Provider {
 			constant.K8sClustersDataSource:                     dataSourceK8sClusters(),
 			constant.K8sNodePoolResource:                       dataSourceK8sNodePool(),
 			constant.K8sNodePoolNodesResource:                  dataSourceK8sNodePoolNodes(),
+			constant.DBaaSMariaDBClusterResource:               dataSourceDBaaSMariaDBCluster(),
 			constant.DBaaSMariaDBBackupsDataSource:             dataSourceDBaaSMariaDBBackups(),
 			constant.NatGatewayResource:                        dataSourceNatGateway(),
 			constant.NatGatewayRuleResource:                    dataSourceNatGatewayRule(),

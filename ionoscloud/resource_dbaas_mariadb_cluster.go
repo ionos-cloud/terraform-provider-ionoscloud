@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -12,7 +11,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceDBaaSMariaDBCluster() *schema.Resource {
@@ -26,10 +24,9 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"mariadb_version": {
-				Type:             schema.TypeString,
-				Description:      "The MariaDB version of your cluster.",
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringInSlice([]string{"10.6"}, true), validation.StringIsNotWhiteSpace)),
+				Type:        schema.TypeString,
+				Description: "The MariaDB version of your cluster.",
+				Required:    true,
 			},
 			"instances": {
 				Type:             schema.TypeInt,
@@ -184,9 +181,6 @@ func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("deletion check failed for MariaDB cluster with ID: %v, error: %w", clusterID, err))
 	}
-
-	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
-	time.Sleep(constant.SleepInterval * 3)
 
 	return nil
 }
