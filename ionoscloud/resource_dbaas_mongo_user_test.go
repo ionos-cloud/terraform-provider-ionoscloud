@@ -158,11 +158,6 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     cidr_list            =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
   }
   template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
-  
-  credentials {
-  	username = "username"
-	password = ` + constant.RandomPassword + `.user_password.result
-  }
 }
 
 resource ` + constant.RandomPassword + ` "user_password" {
@@ -213,11 +208,6 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     cidr_list            =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
   }
   template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
-  
-  credentials {
-  	username = "username"
-	password = ` + constant.RandomPassword + `.user_password.result
-  }
 }
 
 resource ` + constant.DBaasMongoUserResource + ` ` + constant.UserTestResource + ` {
@@ -230,12 +220,6 @@ resource ` + constant.DBaasMongoUserResource + ` ` + constant.UserTestResource +
   }
 }
 resource ` + constant.RandomPassword + ` "user_password" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
-}
-
-resource ` + constant.RandomPassword + ` "user_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"

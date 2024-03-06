@@ -29,7 +29,7 @@ resource "ionoscloud_lan"  "lan_example" {
 resource ionoscloud_mongo_cluster "example_mongo_cluster" {
   maintenance_window {
     day_of_the_week  = "Sunday"
-    time             = "09:00:00"
+  time             = "09:00:00"
   }
   mongodb_version = "5.0"
   instances          = 1
@@ -41,10 +41,6 @@ resource ionoscloud_mongo_cluster "example_mongo_cluster" {
     cidr_list            =  ["192.168.1.108/24"]
   }
   template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
-  credentials {
-    username = "username"
-    password = random_password.cluster_password.result
-  }
 }
 
 resource "random_password" "cluster_password" {
@@ -84,10 +80,6 @@ resource ionoscloud_mongo_cluster "example_mongo_cluster" {
     lan_id          =  ionoscloud_lan.lan_example.id
     cidr_list       =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
   }
-  credentials {
-  	username = "username"
-    password = random_password.cluster_password.result
-  }
   type = "sharded-cluster"
   shards = 2
   edition = "enterprise"
@@ -119,9 +111,6 @@ resource "random_password" "cluster_password" {
 * `maintenance_window` - (Optional)(Computed)[string] A weekly 4 hour-long window, during which maintenance might occur.  Updates to the value of the field force the cluster to be re-created.
     * `time` - (Required)[string]
     * `day_of_the_week` - (Required)[string]
-* `credentials` - (Required)[string] Credentials for the database user to be created. This attribute is immutable(disallowed in update requests). Updates to the value of the field force the cluster to be re-created.
-    * `username` - (Required)[string] The username for the initial mongoDB user.
-    * `password` - (Required)[string] 
 * `connection_string` - (Computed)[string] The physical location where the cluster will be created. This will be where all of your instances live. Updates to the value of the field force the cluster to be re-created. Available locations: de/txl, gb/lhr, es/vit
 * `ram` - (Optional)(Computed)[int]The amount of memory per instance in megabytes. Required for enterprise edition.
 * `storage_size` - (Optional)(Computed)[int] The amount of storage per instance in MB. Required for enterprise edition.
