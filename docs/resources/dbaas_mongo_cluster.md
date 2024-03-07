@@ -122,7 +122,7 @@ resource "random_password" "cluster_password" {
 * `credentials` - (Required)[string] Credentials for the database user to be created. This attribute is immutable(disallowed in update requests). Updates to the value of the field force the cluster to be re-created.
     * `username` - (Required)[string] The username for the initial mongoDB user.
     * `password` - (Required)[string] 
-* `connection_string` - (Computed)[string] The physical location where the cluster will be created. This will be where all of your instances live. Updates to the value of the field force the cluster to be re-created. Available locations: de/txl, gb/lhr, es/vit"
+* `connection_string` - (Computed)[string] The physical location where the cluster will be created. This will be where all of your instances live. Updates to the value of the field force the cluster to be re-created. Available locations: de/txl, gb/lhr, es/vit
 * `ram` - (Optional)(Computed)[int]The amount of memory per instance in megabytes. Required for enterprise edition.
 * `storage_size` - (Optional)(Computed)[int] The amount of storage per instance in MB. Required for enterprise edition.
 * `storage_type` - (Optional)(Computed)[String] The storage type used in your cluster. Required for enterprise edition.
@@ -131,8 +131,8 @@ resource "random_password" "cluster_password" {
 * `type` - (Optional)(Computed)[string]The cluster type, either `replicaset` or `sharded-cluster`.
 * `bi_connector` - (Optional)(Computed)The MongoDB Connector for Business Intelligence allows you to query a MongoDB database using SQL commands to aid in data analysis.
   * `enabled`: (Optional)[bool] - The status of the BI Connector. If not set, the BI Connector is disabled. 
-  * `host`: (Computed) - The host where this new BI Connector is installed.
-  * `port`: (Computed) - Port number used when connecting to this new BI Connector.
+  * `host`: (Computed)[string] - The host where this new BI Connector is installed.
+  * `port`: (Computed)[string] - Port number used when connecting to this new BI Connector.
 * `backup` - (Optional)[list]
   * `location`: (Optional)[string] - The location where the cluster backups will be stored. If not set, the backup is stored in the nearest location of the cluster. Possible values are de, eu-south-2, or eu-central-2.
 
