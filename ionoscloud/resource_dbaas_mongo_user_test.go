@@ -219,7 +219,7 @@ resource ` + constant.DBaasMongoUserResource + ` ` + constant.UserTestResource +
     database = "db1"
   }
 }
-resource ` + constant.RandomPassword + ` "user_password" {
+resource ` + constant.RandomPassword + ` "user_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
