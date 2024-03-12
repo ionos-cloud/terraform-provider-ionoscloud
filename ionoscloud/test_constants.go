@@ -1667,7 +1667,7 @@ resource "random_string" "simple_string" {
 const (
 	K8sVersion                  = "1.26.4"
 	UpgradedK8sVersion          = "1.26.6"
-	K8sBucket                   = "test-k8s-terraform-v6"
+	K8sBucket                   = "test_k8s_terraform_v7"
 	K8sPrivateClusterNodeSubnet = "192.168.0.0/16"
 )
 
