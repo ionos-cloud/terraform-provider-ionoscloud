@@ -3,12 +3,6 @@ on:
   schedule:
     # At 09:00:00 - UTC, every week on Monday.
     - cron: '0 09 * * MON'
-  workflow_dispatch:
-      inputs:
-        branch:
-            description: 'Branch on which to run the tests'
-            required: true
-            default: 'master'
 
 jobs:
   test:
@@ -26,7 +20,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          ref: ${{ github.event.inputs.branch || 'master' }}
+          ref: master
       - name: Install Go
         uses: actions/setup-go@v3
         with:
