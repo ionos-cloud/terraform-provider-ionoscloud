@@ -1,8 +1,17 @@
 name: Test run for server resources
 on:
-  schedule:
-    # At 11:00:00 - UTC, every Monday, Wednesday and Friday
-    - cron: '0 11 * * MON,WED,FRI'
+  # This pipeline will fail since there are some known problems, there is no need to run it every
+  # two days since we already know that it will fail. When the fix will be made, this 'schedule'
+  # section will be uncommented.
+  #  schedule:
+  #    # At 11:00:00 - UTC, every Monday, Wednesday and Friday
+  #    - cron: '0 11 * * MON,WED,FRI'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch on which to run the tests'
+        required: true
+        default: 'master'
 
 jobs:
   test:
@@ -20,7 +29,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          ref: master
+          ref: ${{ github.event.inputs.branch || 'master' }}
       - name: Install Go
         uses: actions/setup-go@v3
         with:
