@@ -254,8 +254,9 @@ const (
 	PsqlVersionsTest             = "test_dbaas_versions"
 
 	// MariaDB constants
-	DBaaSMariaDBClusterResource   = "ionoscloud_mariadb_cluster"
-	DBaaSMariaDBBackupsDataSource = "ionoscloud_mariadb_backups"
+	DBaaSMariaDBClusterResource       = "ionoscloud_mariadb_cluster"
+	DBaaSMariaDBBackupsDataSource     = "ionoscloud_mariadb_backups"
+	DBaasMariaDBBackupsDataSourceName = "test_mariadb_backups"
 
 	DBaasMongoClusterResource        = "ionoscloud_mongo_cluster"
 	DBaasMongoUserResource           = "ionoscloud_mongo_user"

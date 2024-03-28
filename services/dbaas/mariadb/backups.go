@@ -9,7 +9,7 @@ import (
 	mariadb "github.com/ionos-cloud/sdk-go-dbaas-maria"
 )
 
-func (c *MariaDBClient) GetClusterBackups(ctx context.Context, clusterId string) (mariadb.BackupResponse, *mariadb.APIResponse, error) {
+func (c *MariaDBClient) GetClusterBackups(ctx context.Context, clusterId string) (mariadb.BackupList, *mariadb.APIResponse, error) {
 	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err
@@ -21,24 +21,40 @@ func (c *MariaDBClient) FindBackupById(ctx context.Context, backupId string) (ma
 	return backups, apiResponse, err
 }
 
-func SetMariaDBClusterBackupsData(d *schema.ResourceData, clusterBackups *mariadb.BackupResponse) diag.Diagnostics {
+func SetMariaDBClusterBackupsData(d *schema.ResourceData, retrievedBackups []mariadb.BackupResponse) diag.Diagnostics {
 	resourceId := uuid.New()
 	d.SetId(resourceId.String())
 
-	var backups []interface{}
-	for _, backup := range *clusterBackups.Properties.Items {
+	var backupsToBeSet []interface{}
+	for _, retrievedBackup := range retrievedBackups {
+		if retrievedBackup.Properties == nil {
+			return diag.FromErr(fmt.Errorf("expected valid properties in the API response for backup, but received 'nil' instead, backup ID: %s", *retrievedBackup.Id))
+		}
 		backupEntry := make(map[string]interface{})
-		backupEntry["id"] = *clusterBackups.Id
-
-		if backup.Size != nil {
-			backupEntry["size"] = *backup.Size
+		if retrievedBackup.Properties.ClusterId != nil {
+			backupEntry["cluster_id"] = *retrievedBackup.Properties.ClusterId
 		}
-		if backup.Created != nil {
-			backupEntry["created"] = (*backup.Created).Time.Format("2006-01-02T15:04:05Z")
+		if retrievedBackup.Properties.EarliestRecoveryTargetTime != nil {
+			backupEntry["earliest_recovery_target_time"] = (*retrievedBackup.Properties.EarliestRecoveryTargetTime).String()
 		}
-		backups = append(backups, backupEntry)
+		if retrievedBackup.Properties.Size != nil {
+			backupEntry["size"] = *retrievedBackup.Properties.Size
+		}
+		var baseBackupsToBeSet []interface{}
+		for _, baseBackup := range *retrievedBackup.Properties.BaseBackups {
+			baseBackupEntry := make(map[string]interface{})
+			if baseBackup.Size != nil {
+				baseBackupEntry["size"] = *baseBackup.Size
+			}
+			if baseBackup.Created != nil {
+				baseBackupEntry["created"] = (*baseBackup.Created).String()
+			}
+			baseBackupsToBeSet = append(baseBackupsToBeSet, baseBackupEntry)
+		}
+		backupEntry["base_backups"] = baseBackupsToBeSet
+		backupsToBeSet = append(backupsToBeSet, backupEntry)
 	}
-	err := d.Set("cluster_backups", backups)
+	err := d.Set("backups", backupsToBeSet)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error while setting 'cluster_backups': %w", err))
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mariadbSDK "github.com/ionos-cloud/sdk-go-dbaas-maria"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	mariaDBService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 )
 
 func dataSourceDBaaSMariaDBBackups() *schema.Resource {
@@ -24,26 +24,45 @@ func dataSourceDBaaSMariaDBBackups() *schema.Resource {
 				Description: "The unique ID of the backup",
 				Optional:    true,
 			},
-			"cluster_backups": {
+			"backups": {
 				Type:        schema.TypeList,
-				Description: "The list of backups for the specified cluster",
+				Description: "The list of backups",
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id": {
+						"cluster_id": {
 							Type:        schema.TypeString,
-							Description: "The unique ID of the backup",
+							Description: "The unique ID of the cluster that was backed up",
+							Computed:    true,
+						},
+						"earliest_recovery_target_time": {
+							Type:        schema.TypeString,
+							Description: "The oldest available timestamp to which you can restore",
 							Computed:    true,
 						},
 						"size": {
 							Type:        schema.TypeInt,
-							Description: "The size of the backup in Mebibytes (MiB). This is the size of the binary backup file that was stored",
+							Description: "Size of all base backups in Mebibytes (MiB). This is at least the sum of all base backup sizes",
 							Computed:    true,
 						},
-						"created": {
-							Type:        schema.TypeString,
-							Description: "The ISO 8601 creation timestamp",
+						"base_backups": {
+							Type:        schema.TypeList,
+							Description: "The list of backups for the specified cluster",
 							Computed:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"size": {
+										Type:        schema.TypeInt,
+										Description: "The size of the backup in Mebibytes (MiB). This is the size of the binary backup file that was stored",
+										Computed:    true,
+									},
+									"created": {
+										Type:        schema.TypeString,
+										Description: "The ISO 8601 creation timestamp",
+										Computed:    true,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -68,27 +87,29 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("'cluster_id' and 'backup_id' cannot be specified at the same time"))
 	}
 
-	var backups mariadbSDK.BackupResponse
+	var backups []mariadbSDK.BackupResponse
 	var err error
 	if clusterIdOk {
-		backups, _, err = client.GetClusterBackups(ctx, clusterId)
+		var backupsResponse mariadbSDK.BackupList
+		backupsResponse, _, err = client.GetClusterBackups(ctx, clusterId)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backups for cluster with ID %s: %w", clusterId, err))
 		}
-	} else if backupIdOk {
-		backups, _, err = client.FindBackupById(ctx, backupId)
+		if backupsResponse.Items == nil {
+			return diag.FromErr(fmt.Errorf("expected valid properties in the API response for cluster backups, but received 'nil' instead, cluster ID: %s", clusterId))
+		}
+		backups = *backupsResponse.Items
+	} else {
+		var backup mariadbSDK.BackupResponse
+		backup, _, err = client.FindBackupById(ctx, backupId)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup with ID %s: %w", backupId, err))
 		}
+		if backup.Properties == nil {
+			return diag.FromErr(fmt.Errorf("expected valid properties in the API response for backup, but received 'nil' instead, backup ID: %s", backupId))
+		}
+		backups = append(backups, backup)
 	}
 
-	if backups.Properties == nil || backups.Properties.Items == nil {
-		return diag.FromErr(fmt.Errorf("expected valid properties in the API response for cluster backups, but received 'nil' instead"))
-	}
-
-	if diags := mariaDBService.SetMariaDBClusterBackupsData(d, &backups); diags != nil {
-		return diags
-	}
-
-	return nil
+	return mariadb.SetMariaDBClusterBackupsData(d, backups)
 }

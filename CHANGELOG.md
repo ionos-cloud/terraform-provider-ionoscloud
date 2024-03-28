@@ -1,4 +1,6 @@
-## 6.4.14(upcoming)
+## 6.4.14
+### Features
+- Add MariaDB cluster resource, data source and backups data source.
 ### Fixes
 - #524 `filters` is now optional for `ionoscloud_servers` data source. If not provided, all servers in the configured datacenter will be returned.
 - `filters` is now optional for `ionoscloud_clusters` data source. If not provided, all k8s clusters will be returned.

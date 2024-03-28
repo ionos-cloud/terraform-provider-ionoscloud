@@ -38,7 +38,10 @@ data "ionoscloud_mariadb_backups" "example" {
 
 The following attributes are returned by the datasource:
 
-* `cluster_backups` - List of backups.
-    * `id` - The unique ID of the backup.
-    * `size` - The size of the backup in Mebibytes (MiB). This is the size of the binary backup file that was stored.
-    * `created` - The ISO 8601 creation timestamp
+* `bakups` - List of backups.
+    * `cluster_id` - The unique ID of the cluster that was backed up.
+    * `earliest_recovery_target_time` - The oldest available timestamp to which you can restore.
+    * `size` - Size of all base backups in Mebibytes (MiB). This is at least the sum of all base backup sizes.
+    * `base_backups` - The list of backups for the specified cluster
+      * `size` - The size of the backup in Mebibytes (MiB). This is the size of the binary backup file that was stored
+      * `created` - The ISO 8601 creation timestamp

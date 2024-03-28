@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
@@ -35,7 +36,6 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterDisplayNameAttribute, clusterDisplayNameValue),
 					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
 					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
-					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsCidrAttribute, clusterConnectionsCidrValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameValue),
@@ -53,7 +53,6 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterDisplayNameAttribute, clusterDisplayNameValue),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterConnectionsAttribute+".0."+clusterConnectionsCidrAttribute, clusterConnectionsCidrValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
 				),
@@ -69,9 +68,20 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, clusterDisplayNameAttribute, clusterDisplayNameValue),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsCidrAttribute, clusterConnectionsCidrValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
+				),
+			},
+			{
+				Config: mariaDBBackupsDataSourceMatchClusterID,
+				Check: resource.ComposeTestCheckFunc(
+					utils.TestNotEmptySlice(constant.DBaaSMariaDBBackupsDataSource, "backups.#"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSMariaDBBackupsDataSource+"."+constant.DBaasMariaDBBackupsDataSourceName, "backups.0.cluster_id", constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, "id"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.DBaaSMariaDBBackupsDataSource+"."+constant.DBaasMariaDBBackupsDataSourceName, "backups.0.earliest_recovery_target_time"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.DBaaSMariaDBBackupsDataSource+"."+constant.DBaasMariaDBBackupsDataSourceName, "backups.0.size"),
+					utils.TestNotEmptySlice(constant.DBaaSMariaDBBackupsDataSource, "backups.0.base_backups.#"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.DBaaSMariaDBBackupsDataSource+"."+constant.DBaasMariaDBBackupsDataSourceName, "backups.0.base_backups.0.size"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.DBaaSMariaDBBackupsDataSource+"."+constant.DBaasMariaDBBackupsDataSourceName, "backups.0.base_backups.0.created"),
 				),
 			},
 			{
@@ -146,6 +156,33 @@ resource ` + constant.LanResource + ` ` + lanResourceName + ` {
   name          = "mariadb_lan_example"
 }
 
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name                    = "example"
+  datacenter_id           = ionoscloud_datacenter.datacenter_example.id
+  cores                   = 2
+  ram                     = 2048
+  availability_zone       = "ZONE_1"
+  cpu_family              = "INTEL_SKYLAKE"
+  image_name              = "debian-10-genericcloud-amd64-20240114-1626"
+  image_password          = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name                  = "example"
+    size                  = 20
+    disk_type             = "SSD Standard"
+  }
+  nic {
+    lan                   = ionoscloud_lan.lan_example.id
+    name                  = "example"
+    dhcp                  = true
+  }
+}
+
+locals {
+ prefix                   = format("%s/%s", ionoscloud_server.test_server.nic[0].ips[0], "24")
+ database_ip              = cidrhost(local.prefix, 1)
+ database_ip_cidr         = format("%s/%s", local.database_ip, "24")
+}
+
 resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   ` + clusterVersionAttribute + ` = "` + clusterVersionValue + `"
   ` + clusterInstancesAttribute + ` = "` + clusterInstancesValue + `"
@@ -163,7 +200,7 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
-`
+` + ServerImagePassword
 
 const mariaDBClusterDataSourceMatchId = mariaDBClusterConfigBasic + `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
@@ -177,6 +214,11 @@ data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestD
 }
 `
 
+const mariaDBBackupsDataSourceMatchClusterID = mariaDBClusterConfigBasic + `
+data ` + constant.DBaaSMariaDBBackupsDataSource + ` ` + constant.DBaasMariaDBBackupsDataSourceName + ` {
+	cluster_id = ` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
+}
+`
 const mariaDBClusterDataSourceWrongName = `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceByName + ` {
   display_name = "wrong_name"
@@ -194,7 +236,7 @@ data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestD
 const connections = clusterConnectionsAttribute + `{
 	` + clusterConnectionsDatacenterIDAttribute + ` = ` + constant.DatacenterResource + `.` + datacenterResourceName + `.id
     ` + clusterConnectionsLanIDAttribute + ` = ` + constant.LanResource + `.` + lanResourceName + `.id
-	` + clusterConnectionsCidrAttribute + ` = "` + clusterConnectionsCidrValue + `"
+	` + clusterConnectionsCidrAttribute + ` = ` + clusterConnectionsCidrValue + `
 }`
 
 const maintenanceWindow = clusterMaintenanceWindowAttribute + `{
@@ -217,7 +259,7 @@ const (
 	clusterCoresValue               = "4"
 	clusterRamValue                 = "4"
 	clusterStorageSizeValue         = "10"
-	clusterConnectionsCidrValue     = "192.168.1.100/24"
+	clusterConnectionsCidrValue     = "local.database_ip_cidr"
 	clusterDisplayNameValue         = constant.DBaaSClusterTestResource
 	clusterCredentialsUsernameValue = "username"
 	datacenterResourceName          = "datacenter_example"
