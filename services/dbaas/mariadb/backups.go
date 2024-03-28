@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	mariadb "github.com/ionos-cloud/sdk-go-dbaas-maria"
+	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 )
 
 func (c *MariaDBClient) GetClusterBackups(ctx context.Context, clusterId string) (mariadb.BackupList, *mariadb.APIResponse, error) {

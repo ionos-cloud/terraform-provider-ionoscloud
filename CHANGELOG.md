@@ -1,4 +1,4 @@
-## 6.4.14
+## 6.4.15
 ### Features
 - Add MariaDB cluster resource, data source and backups data source.
 ### Fixes
@@ -6,6 +6,9 @@
 - `filters` is now optional for `ionoscloud_clusters` data source. If not provided, all k8s clusters will be returned.
 ### Documentation
 - Update documentation for pgsql cluster and mongo cluster
+
+## 6.4.14
+> **⚠ IMPORTANT:** **Version v6.4.14 is compromised due to a critical compilation error.** We strongly recommend updating to the corrected version, v6.4.15, to ensure functionality and stability. Thank you for your understanding.
 
 ## 6.4.13
 ### Features

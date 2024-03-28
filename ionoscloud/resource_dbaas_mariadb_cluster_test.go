@@ -1,3 +1,5 @@
+//go:build all || dbaas || mariadb
+
 package ionoscloud
 
 import (
@@ -10,7 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	mariadb "github.com/ionos-cloud/sdk-go-dbaas-maria"
+	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
