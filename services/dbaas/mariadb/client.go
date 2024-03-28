@@ -3,7 +3,7 @@ package mariadb
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	mariadb "github.com/ionos-cloud/sdk-go-dbaas-maria"
+	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"net/http"
@@ -26,7 +26,7 @@ func NewMariaDBClient(username, password, token, url, version, terraformVersion 
 
 	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigDbaas.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-maria/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mariadb/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, mariadb.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	return &MariaDBClient{
