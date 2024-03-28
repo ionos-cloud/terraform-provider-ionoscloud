@@ -1775,7 +1775,26 @@ resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTe
 }
 `
 
-// DBaaS PgSQL constants
-
+// DBaaS constants
 // Attributes
+// These can be used for all clusters, no matter the type
 const clusterIdAttribute = "cluster_id"
+const clusterInstancesAttribute = "instances"
+const clusterCoresAttribute = "cores"
+const clusterRamAttribute = "ram"
+const clusterStorageSizeAttribute = "storage_size"
+const clusterConnectionsAttribute = "connections"
+const clusterConnectionsDatacenterIDAttribute = "datacenter_id"
+const clusterConnectionsLanIDAttribute = "lan_id"
+const clusterConnectionsCidrAttribute = "cidr"
+const clusterDisplayNameAttribute = "display_name"
+const clusterMaintenanceWindowAttribute = "maintenance_window"
+const clusterMaintenanceWindowDayOfTheWeekAttribute = "day_of_the_week"
+const clusterMaintenanceWindowTimeAttribute = "time"
+const clusterCredentialsAttribute = "credentials"
+const clusterCredentialsUsernameAttribute = "username"
+const clusterCredentialsPasswordAttribute = "password"
+
+// Values
+const clusterMaintenanceWindowDayOfTheWeekValue = "Sunday"
+const clusterMaintenanceWindowTimeValue = "09:00:00"

@@ -89,6 +89,7 @@ func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mong
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
+
 func (c *PsqlClient) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	var clusterId string
 	// This can be called from the users service, in which case the cluster_id is defined inside

@@ -109,6 +109,13 @@
     * [DBaaS MongoDB Template](../docs/data-sources/dbaas_mongo_template.md)
     * [DBaaS MongoDB User](../docs/data-sources/dbaas_mongo_user.md)
 
+* Database as a Service - MariaDB
+  * Resources
+    * [DBaaS MariaDB Cluster](../docs/resources/dbaas_mariadb_cluster.md)
+  * Data Sources
+    * [DBaaS MongoDB Cluster](../docs/data-sources/dbaas_mariadb_cluster.md)
+    * [DBaaS MongoDB Backups](../docs/data-sources/dbaas_mariadb_backups.md)
+
 * Application Load Balancer
   * Resources
     * [Application Load Balancer](../docs/resources/application_loadbalancer.md)

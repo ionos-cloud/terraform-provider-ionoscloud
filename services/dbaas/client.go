@@ -14,12 +14,31 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
+type MongoClient struct {
+	sdkClient *mongo.APIClient
+}
+
 type PsqlClient struct {
 	sdkClient *psql.APIClient
 }
 
-type MongoClient struct {
-	sdkClient *mongo.APIClient
+func NewMongoClient(username, password, token, url, version, terraformVersion string) *MongoClient {
+	newConfigDbaas := mongo.NewConfiguration(username, password, token, url)
+
+	if os.Getenv(constant.IonosDebug) != "" {
+		newConfigDbaas.Debug = true
+	}
+	newConfigDbaas.MaxRetries = constant.MaxRetries
+	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
+
+	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newConfigDbaas.UserAgent = fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		version, mongo.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+
+	return &MongoClient{
+		sdkClient: mongo.NewAPIClient(newConfigDbaas),
+	}
 }
 
 func NewPsqlClient(username, password, token, url, version, terraformVersion string) *PsqlClient {
@@ -38,24 +57,5 @@ func NewPsqlClient(username, password, token, url, version, terraformVersion str
 
 	return &PsqlClient{
 		sdkClient: psql.NewAPIClient(newConfigDbaas),
-	}
-}
-
-func NewMongoClient(username, password, token, url, version, terraformVersion string) *MongoClient {
-	newConfigDbaas := mongo.NewConfiguration(username, password, token, url)
-
-	if os.Getenv("IONOS_DEBUG") != "" {
-		newConfigDbaas.Debug = true
-	}
-	newConfigDbaas.MaxRetries = constant.MaxRetries
-	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
-
-	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
-	newConfigDbaas.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, mongo.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
-	return &MongoClient{
-		sdkClient: mongo.NewAPIClient(newConfigDbaas),
 	}
 }
