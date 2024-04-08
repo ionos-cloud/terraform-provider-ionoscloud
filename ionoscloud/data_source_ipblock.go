@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -135,7 +136,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
 	} else {
 
-		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Execute()
+		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Limit(constant.IPBlockLimit).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {

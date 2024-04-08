@@ -395,3 +395,10 @@ const (
 
 var ForwardingRuleAlgorithms = []string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}
 var LBTargetProxyProtocolVersions = []string{"none", "v1", "v2", "v2ssl"}
+
+// Maximum limit for various resources
+// The limit represents the maximum number of entities that can be fetched in a single 'GET' request
+const (
+	TargetGroupLimit = 200
+	IPBlockLimit     = 1000
+)
