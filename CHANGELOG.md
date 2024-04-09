@@ -4,6 +4,8 @@
 ### Fixes
 - #524 `filters` is now optional for `ionoscloud_servers` data source. If not provided, all servers in the configured datacenter will be returned.
 - `filters` is now optional for `ionoscloud_clusters` data source. If not provided, all k8s clusters will be returned.
+- populate `server` field for k8s cluster data sources
+
 ### Documentation
 - Update documentation for pgsql cluster and mongo cluster
 

@@ -8,9 +8,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"gopkg.in/yaml.v3"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 type KubeConfig struct {
@@ -174,7 +175,7 @@ func dataSourceK8sClusterSchema() map[string]*schema.Schema {
 		},
 		"ca_crt": {
 			Type:      schema.TypeString,
-			Sensitive: true, // is this necessary? cert is already displayed in clear in another field
+			Sensitive: true,
 			Computed:  true,
 		},
 		"server": {
@@ -335,46 +336,32 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 
 func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 
-	var kubeConfig KubeConfig
-	if err := yaml.Unmarshal([]byte(configStr), &kubeConfig); err != nil {
+	kubeConfig, err := parseClusterKubeconfig(configStr)
+	if err != nil {
 		return err
 	}
 
+	var server, caCrt string
 	userTokens := map[string]string{}
-
-	var server string
-	var caCrt []byte
-
 	configMap := make(map[string]interface{})
 
 	configMap["api_version"] = kubeConfig.ApiVersion
 	configMap["current_context"] = kubeConfig.CurrentContext
 	configMap["kind"] = kubeConfig.Kind
 
-	clustersList := make([]map[string]interface{}, len(kubeConfig.Clusters))
-	for i, cluster := range kubeConfig.Clusters {
-
-		/* decode ca */
-		decodedCrt := make([]byte, base64.StdEncoding.DecodedLen(len(cluster.Cluster.CaData)))
-		if _, err := base64.StdEncoding.Decode(decodedCrt, []byte(cluster.Cluster.CaData)); err != nil {
+	// Managed K8s clusters each have their own unique kubeconfig so there is only 1 Clusters entry
+	if len(kubeConfig.Clusters) != 0 {
+		caData := kubeConfig.Clusters[0].Cluster.CaData
+		decodedCrt := make([]byte, base64.StdEncoding.DecodedLen(len(caData)))
+		if _, err := base64.StdEncoding.Decode(decodedCrt, []byte(caData)); err != nil {
 			return err
 		}
-
-		// pointless if?
-		if len(caCrt) == 0 {
-			caCrt = decodedCrt
-		}
-
-		clustersList[i] = map[string]interface{}{
-			"name": cluster.Name,
-			"cluster": map[string]string{
-				"server":                     cluster.Cluster.Server,
-				"certificate_authority_data": string(decodedCrt),
-			},
+		caCrt = string(decodedCrt)
+		server = kubeConfig.Clusters[0].Cluster.Server
+		configMap["clusters"] = []map[string]interface{}{
+			{"name": kubeConfig.Clusters[0].Name, "cluster": map[string]string{"server": server, "certificate_authority_data": caCrt}},
 		}
 	}
-
-	configMap["clusters"] = clustersList
 
 	contextsList := make([]map[string]interface{}, len(kubeConfig.Contexts))
 	for i, contextVal := range kubeConfig.Contexts {
@@ -408,17 +395,13 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 	if err := d.Set("config", configList); err != nil {
 		return err
 	}
-
 	if err := d.Set("user_tokens", userTokens); err != nil {
 		return err
 	}
-
-	// this doesn't do anything, nothing is assigned to server variable
 	if err := d.Set("server", server); err != nil {
 		return err
 	}
-	// will hold same data as the nested 'certificate_authority_data', only this is marked as sensitive while other is not
-	if err := d.Set("ca_crt", string(caCrt)); err != nil {
+	if err := d.Set("ca_crt", caCrt); err != nil {
 		return err
 	}
 
@@ -487,4 +470,13 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 	}
 
 	return nil
+}
+
+func parseClusterKubeconfig(configStr string) (KubeConfig, error) {
+	var kubeConfig KubeConfig
+	err := yaml.Unmarshal([]byte(configStr), &kubeConfig)
+	if err != nil {
+		err = fmt.Errorf("error parsing cluster kubeconfig: %w", err)
+	}
+	return kubeConfig, err
 }
