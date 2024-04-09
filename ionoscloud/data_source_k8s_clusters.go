@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/iancoleman/strcase"
-	"gopkg.in/yaml.v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
@@ -179,8 +178,9 @@ func K8sClusterProperties(ctx context.Context, cluster ionoscloud.KubernetesClus
 }
 
 func setKubeConfigData(clusterConfig string) (map[string]any, error) {
-	kubeConfig := KubeConfig{}
-	if err := yaml.Unmarshal([]byte(clusterConfig), &kubeConfig); err != nil {
+
+	err, kubeConfig := parseClusterKubeconfig(clusterConfig)
+	if err != nil {
 		return nil, err
 	}
 
@@ -191,20 +191,19 @@ func setKubeConfigData(clusterConfig string) (map[string]any, error) {
 	clusterConfigProperties["current_context"] = kubeConfig.CurrentContext
 	clusterConfigProperties["kind"] = kubeConfig.Kind
 
-	var decodedCert string
-	clusters := make([]map[string]any, len(kubeConfig.Clusters))
-	for i, c := range kubeConfig.Clusters {
-		caCert := make([]byte, base64.StdEncoding.DecodedLen(len(c.Cluster.CaData)))
-		if _, err := base64.StdEncoding.Decode(caCert, []byte(c.Cluster.CaData)); err != nil {
+	// Managed K8s clusters each have their own unique kubeconfig so there is only 1 Clusters entry
+	if len(kubeConfig.Clusters) != 0 {
+		caData := kubeConfig.Clusters[0].Cluster.CaData
+		decodedCrt := make([]byte, base64.StdEncoding.DecodedLen(len(caData)))
+		if _, err := base64.StdEncoding.Decode(decodedCrt, []byte(caData)); err != nil {
 			return nil, err
 		}
-		decodedCert = string(caCert)
-		clusters[i] = map[string]any{"name": c.Name, "cluster": map[string]string{"server": c.Cluster.Server, "certificate_authority_data": decodedCert}}
-	}
-	if len(kubeConfig.Clusters) != 0 {
+		clusterProperties["ca_crt"] = string(decodedCrt)
 		clusterProperties["server"] = kubeConfig.Clusters[0].Cluster.Server
+		clusterConfigProperties["clusters"] = []map[string]any{
+			{"name": kubeConfig.Clusters[0].Name, "cluster": map[string]string{"server": kubeConfig.Clusters[0].Cluster.Server, "certificate_authority_data": string(decodedCrt)}},
+		}
 	}
-	clusterConfigProperties["clusters"] = clusters
 
 	contexts := make([]map[string]any, len(kubeConfig.Contexts))
 	for i, contextVal := range kubeConfig.Contexts {
@@ -232,7 +231,6 @@ func setKubeConfigData(clusterConfig string) (map[string]any, error) {
 	clusterConfigProperties["users"] = users
 
 	clusterProperties["config"] = []map[string]any{clusterConfigProperties}
-	clusterProperties["ca_crt"] = decodedCert
 	clusterProperties["user_tokens"] = userTokens
 
 	return clusterProperties, nil

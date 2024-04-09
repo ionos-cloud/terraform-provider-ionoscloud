@@ -336,8 +336,8 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 
 func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 
-	var kubeConfig KubeConfig
-	if err := yaml.Unmarshal([]byte(configStr), &kubeConfig); err != nil {
+	err, kubeConfig := parseClusterKubeconfig(configStr)
+	if err != nil {
 		return err
 	}
 
@@ -349,32 +349,19 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 	configMap["current_context"] = kubeConfig.CurrentContext
 	configMap["kind"] = kubeConfig.Kind
 
-	clustersList := make([]map[string]interface{}, len(kubeConfig.Clusters))
-	for i, cluster := range kubeConfig.Clusters {
-
-		/* decode ca */
-		decodedCrt := make([]byte, base64.StdEncoding.DecodedLen(len(cluster.Cluster.CaData)))
-		if _, err := base64.StdEncoding.Decode(decodedCrt, []byte(cluster.Cluster.CaData)); err != nil {
+	// Managed K8s clusters each have their own unique kubeconfig so there is only 1 Clusters entry
+	if len(kubeConfig.Clusters) != 0 {
+		caData := kubeConfig.Clusters[0].Cluster.CaData
+		decodedCrt := make([]byte, base64.StdEncoding.DecodedLen(len(caData)))
+		if _, err := base64.StdEncoding.Decode(decodedCrt, []byte(caData)); err != nil {
 			return err
 		}
-
-		if caCrt == "" {
-			caCrt = string(decodedCrt)
-		}
-
-		clustersList[i] = map[string]interface{}{
-			"name": cluster.Name,
-			"cluster": map[string]string{
-				"server":                     cluster.Cluster.Server,
-				"certificate_authority_data": string(decodedCrt),
-			},
-		}
-	}
-	if len(kubeConfig.Clusters) != 0 {
+		caCrt = string(decodedCrt)
 		server = kubeConfig.Clusters[0].Cluster.Server
+		configMap["clusters"] = []map[string]interface{}{
+			{"name": kubeConfig.Clusters[0].Name, "cluster": map[string]string{"server": server, "certificate_authority_data": caCrt}},
+		}
 	}
-
-	configMap["clusters"] = clustersList
 
 	contextsList := make([]map[string]interface{}, len(kubeConfig.Contexts))
 	for i, contextVal := range kubeConfig.Contexts {
@@ -483,4 +470,13 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 	}
 
 	return nil
+}
+
+func parseClusterKubeconfig(configStr string) (error, KubeConfig) {
+	var kubeConfig KubeConfig
+	err := yaml.Unmarshal([]byte(configStr), &kubeConfig)
+	if err != nil {
+		err = fmt.Errorf("error parsing cluster kubeconfig: %w", err)
+	}
+	return err, kubeConfig
 }
