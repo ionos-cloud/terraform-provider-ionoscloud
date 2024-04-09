@@ -179,7 +179,7 @@ func K8sClusterProperties(ctx context.Context, cluster ionoscloud.KubernetesClus
 
 func setKubeConfigData(clusterConfig string) (map[string]any, error) {
 
-	err, kubeConfig := parseClusterKubeconfig(clusterConfig)
+	kubeConfig, err := parseClusterKubeconfig(clusterConfig)
 	if err != nil {
 		return nil, err
 	}

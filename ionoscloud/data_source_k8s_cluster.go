@@ -336,7 +336,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 
 func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 
-	err, kubeConfig := parseClusterKubeconfig(configStr)
+	kubeConfig, err := parseClusterKubeconfig(configStr)
 	if err != nil {
 		return err
 	}
@@ -472,11 +472,11 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 	return nil
 }
 
-func parseClusterKubeconfig(configStr string) (error, KubeConfig) {
+func parseClusterKubeconfig(configStr string) (KubeConfig, error) {
 	var kubeConfig KubeConfig
 	err := yaml.Unmarshal([]byte(configStr), &kubeConfig)
 	if err != nil {
 		err = fmt.Errorf("error parsing cluster kubeconfig: %w", err)
 	}
-	return err, kubeConfig
+	return kubeConfig, err
 }
