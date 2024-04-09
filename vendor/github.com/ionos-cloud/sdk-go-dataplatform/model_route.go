@@ -14,153 +14,156 @@ import (
 	"encoding/json"
 )
 
-// ErrorMessage struct for ErrorMessage
-type ErrorMessage struct {
-	// Internal error code.
-	ErrorCode *string `json:"errorCode,omitempty"`
-	// A human readable explanation of the problem.
-	Message *string `json:"message,omitempty"`
+// Route A LAN route.
+type Route struct {
+	// IPv4 or IPv6 CIDR to be routed via the interface.
+	Network *string `json:"network"`
+	// IPv4 or IPv6 gateway IP for the route.
+	Gateway *string `json:"gateway"`
 }
 
-// NewErrorMessage instantiates a new ErrorMessage object
+// NewRoute instantiates a new Route object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewErrorMessage() *ErrorMessage {
-	this := ErrorMessage{}
+func NewRoute(network string, gateway string) *Route {
+	this := Route{}
+
+	this.Network = &network
+	this.Gateway = &gateway
 
 	return &this
 }
 
-// NewErrorMessageWithDefaults instantiates a new ErrorMessage object
+// NewRouteWithDefaults instantiates a new Route object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewErrorMessageWithDefaults() *ErrorMessage {
-	this := ErrorMessage{}
+func NewRouteWithDefaults() *Route {
+	this := Route{}
 	return &this
 }
 
-// GetErrorCode returns the ErrorCode field value
+// GetNetwork returns the Network field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *ErrorMessage) GetErrorCode() *string {
+func (o *Route) GetNetwork() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.ErrorCode
+	return o.Network
 
 }
 
-// GetErrorCodeOk returns a tuple with the ErrorCode field value
+// GetNetworkOk returns a tuple with the Network field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ErrorMessage) GetErrorCodeOk() (*string, bool) {
+func (o *Route) GetNetworkOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.ErrorCode, true
+	return o.Network, true
 }
 
-// SetErrorCode sets field value
-func (o *ErrorMessage) SetErrorCode(v string) {
+// SetNetwork sets field value
+func (o *Route) SetNetwork(v string) {
 
-	o.ErrorCode = &v
+	o.Network = &v
 
 }
 
-// HasErrorCode returns a boolean if a field has been set.
-func (o *ErrorMessage) HasErrorCode() bool {
-	if o != nil && o.ErrorCode != nil {
+// HasNetwork returns a boolean if a field has been set.
+func (o *Route) HasNetwork() bool {
+	if o != nil && o.Network != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetMessage returns the Message field value
+// GetGateway returns the Gateway field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *ErrorMessage) GetMessage() *string {
+func (o *Route) GetGateway() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Message
+	return o.Gateway
 
 }
 
-// GetMessageOk returns a tuple with the Message field value
+// GetGatewayOk returns a tuple with the Gateway field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ErrorMessage) GetMessageOk() (*string, bool) {
+func (o *Route) GetGatewayOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Message, true
+	return o.Gateway, true
 }
 
-// SetMessage sets field value
-func (o *ErrorMessage) SetMessage(v string) {
+// SetGateway sets field value
+func (o *Route) SetGateway(v string) {
 
-	o.Message = &v
+	o.Gateway = &v
 
 }
 
-// HasMessage returns a boolean if a field has been set.
-func (o *ErrorMessage) HasMessage() bool {
-	if o != nil && o.Message != nil {
+// HasGateway returns a boolean if a field has been set.
+func (o *Route) HasGateway() bool {
+	if o != nil && o.Gateway != nil {
 		return true
 	}
 
 	return false
 }
 
-func (o ErrorMessage) MarshalJSON() ([]byte, error) {
+func (o Route) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.ErrorCode != nil {
-		toSerialize["errorCode"] = o.ErrorCode
+	if o.Network != nil {
+		toSerialize["network"] = o.Network
 	}
 
-	if o.Message != nil {
-		toSerialize["message"] = o.Message
+	if o.Gateway != nil {
+		toSerialize["gateway"] = o.Gateway
 	}
 
 	return json.Marshal(toSerialize)
 }
 
-type NullableErrorMessage struct {
-	value *ErrorMessage
+type NullableRoute struct {
+	value *Route
 	isSet bool
 }
 
-func (v NullableErrorMessage) Get() *ErrorMessage {
+func (v NullableRoute) Get() *Route {
 	return v.value
 }
 
-func (v *NullableErrorMessage) Set(val *ErrorMessage) {
+func (v *NullableRoute) Set(val *Route) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableErrorMessage) IsSet() bool {
+func (v NullableRoute) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableErrorMessage) Unset() {
+func (v *NullableRoute) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableErrorMessage(val *ErrorMessage) *NullableErrorMessage {
-	return &NullableErrorMessage{value: val, isSet: true}
+func NewNullableRoute(val *Route) *NullableRoute {
+	return &NullableRoute{value: val, isSet: true}
 }
 
-func (v NullableErrorMessage) MarshalJSON() ([]byte, error) {
+func (v NullableRoute) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableErrorMessage) UnmarshalJSON(src []byte) error {
+func (v *NullableRoute) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

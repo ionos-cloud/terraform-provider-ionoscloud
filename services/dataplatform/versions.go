@@ -13,7 +13,7 @@ import (
 func (c *Client) GetVersions(ctx context.Context) ([]string, *dataplatform.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.DataPlatformMetaDataApi.VersionsGet(ctx).Execute()
 	apiResponse.LogInfo()
-	return versions, apiResponse, err
+	return *versions.Items, apiResponse, err
 }
 
 func SetVersionsData(d *schema.ResourceData, versions []string) diag.Diagnostics {
