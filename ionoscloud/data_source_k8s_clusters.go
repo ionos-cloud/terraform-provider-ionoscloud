@@ -10,10 +10,11 @@ import (
 	"github.com/iancoleman/strcase"
 	"gopkg.in/yaml.v3"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceK8sClusters() *schema.Resource {
@@ -199,6 +200,9 @@ func setKubeConfigData(clusterConfig string) (map[string]any, error) {
 		}
 		decodedCert = string(caCert)
 		clusters[i] = map[string]any{"name": c.Name, "cluster": map[string]string{"server": c.Cluster.Server, "certificate_authority_data": decodedCert}}
+	}
+	if len(kubeConfig.Clusters) != 0 {
+		clusterProperties["server"] = kubeConfig.Clusters[0].Cluster.Server
 	}
 	clusterConfigProperties["clusters"] = clusters
 

@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -45,6 +46,7 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 					"listenerLan must be a customer reserved IP for the public load balancer and private IP " +
 					"for the private load balancer.",
 				Optional: true,
+				// Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -280,7 +282,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 					}
 					err := fw.CreateOrPatchForNLB(ctx, dcId, d.Id(), firstFlowLogId, flowLog)
 					if err != nil {
-						//if we have a create that failed, we do not want to save in state
+						// if we have a create that failed, we do not want to save in state
 						// saving in state would mean a diff that would force a re-create
 						if firstFlowLogId == "" {
 							_ = d.Set("flowlog", nil)

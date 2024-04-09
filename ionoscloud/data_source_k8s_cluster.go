@@ -8,9 +8,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"gopkg.in/yaml.v3"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 type KubeConfig struct {
@@ -174,7 +175,7 @@ func dataSourceK8sClusterSchema() map[string]*schema.Schema {
 		},
 		"ca_crt": {
 			Type:      schema.TypeString,
-			Sensitive: true, // is this necessary? cert is already displayed in clear in another field
+			Sensitive: true,
 			Computed:  true,
 		},
 		"server": {
@@ -340,11 +341,8 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 		return err
 	}
 
+	var server, caCrt string
 	userTokens := map[string]string{}
-
-	var server string
-	var caCrt []byte
-
 	configMap := make(map[string]interface{})
 
 	configMap["api_version"] = kubeConfig.ApiVersion
@@ -360,9 +358,8 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 			return err
 		}
 
-		// pointless if?
-		if len(caCrt) == 0 {
-			caCrt = decodedCrt
+		if caCrt == "" {
+			caCrt = string(decodedCrt)
 		}
 
 		clustersList[i] = map[string]interface{}{
@@ -372,6 +369,9 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 				"certificate_authority_data": string(decodedCrt),
 			},
 		}
+	}
+	if len(kubeConfig.Clusters) != 0 {
+		server = kubeConfig.Clusters[0].Cluster.Server
 	}
 
 	configMap["clusters"] = clustersList
@@ -408,17 +408,13 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 	if err := d.Set("config", configList); err != nil {
 		return err
 	}
-
 	if err := d.Set("user_tokens", userTokens); err != nil {
 		return err
 	}
-
-	// this doesn't do anything, nothing is assigned to server variable
 	if err := d.Set("server", server); err != nil {
 		return err
 	}
-	// will hold same data as the nested 'certificate_authority_data', only this is marked as sensitive while other is not
-	if err := d.Set("ca_crt", string(caCrt)); err != nil {
+	if err := d.Set("ca_crt", caCrt); err != nil {
 		return err
 	}
 
