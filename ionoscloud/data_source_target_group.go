@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -184,7 +185,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Using data source for target group by name with partial_match %t and name: %s", partialMatch, name)
 
 		if partialMatch {
-			targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(1).Filter("name", name).Execute()
+			targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(1).Filter("name", name).Limit(constant.TargetGroupLimit).Execute()
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
@@ -193,7 +194,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 
 			results = *targetGroups.Items
 		} else {
-			targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(1).Execute()
+			targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(1).Limit(constant.TargetGroupLimit).Execute()
 			logApiRequestTime(apiResponse)
 
 			if err != nil {

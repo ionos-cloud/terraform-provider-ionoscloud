@@ -112,37 +112,19 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 			return diags
 		}
 	} else {
-		/* search by name */
-		var users ionoscloud.Users
-
-		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Depth(1).Execute()
+		/* search by email */
+		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Depth(1).Filter("email", email).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching users: %w", err))
 			return diags
 		}
-
-		var results []ionoscloud.User
-		if users.Items != nil {
-			for _, u := range *users.Items {
-				if u.Properties != nil && u.Properties.Email != nil && *u.Properties.Email == email {
-					/* user found */
-					user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user %s: %w", *u.Id, err))
-						return diags
-					}
-					results = append(results, user)
-				}
-			}
-		}
-
-		if results == nil || len(results) == 0 {
+		if users.Items == nil || len(*users.Items) == 0 {
 			return diag.FromErr(fmt.Errorf("no user found with the specified criteria: email = %s", email))
-		} else {
-			user = results[0]
+		} else if len(*users.Items) > 1 {
+			return diag.FromErr(fmt.Errorf("multiple users found with the specified criteria: email = %s", email))
 		}
+		user = (*users.Items)[0]
 	}
 	if err = setUsersForGroup(ctx, d, &user, *client); err != nil {
 		return diag.FromErr(err)

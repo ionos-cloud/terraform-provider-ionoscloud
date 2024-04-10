@@ -1,3 +1,8 @@
+## 6.4.15
+### Fixes
+- Increase max result limit of data sources for target groups (200) and IP blocks (1000), as a workaround for pagination issues.
+- Add email filter for user data source, fixes pagination issues for users.
+
 ## 6.4.14
 ### Features
 - Add MariaDB cluster resource, data source and backups data source.
