@@ -27,9 +27,8 @@ func resourceDataplatformNodePool() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
-				Description: "The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]). It can contain dashes (-), underscores (_), dots (.), and alphanumerics in-between.",
+				Description: "The name of your node pool. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]). It can contain dashes (-), underscores (_), dots (.), and alphanumerics in-between.",
 				Required:    true,
-
 				ValidateDiagFunc: validation.AllDiag(validation.ToDiagFunc(validation.StringLenBetween(0, 63)),
 					validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(constant.DataPlatformNameRegexConstraint), constant.DataPlatformRegexNameError))),
 				ForceNew: true,
@@ -134,7 +133,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "The UUID of an existing Dataplatform cluster.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(constant.DataPlatformNameRegexConstraint), constant.DataPlatformRegexNameError)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
