@@ -1,8 +1,9 @@
 name: Test run for server resources
-on:
-  schedule:
-    # At 11:00:00 - UTC, every Monday, Wednesday and Friday
-    - cron: '0 11 * * MON,WED,FRI'
+# TODO -- After pipeline is fixed, uncomment this section and remove 'workflow_dispatch'
+on: workflow_dispatch
+#  schedule:
+#    # At 11:00:00 - UTC, every Monday, Wednesday and Friday
+#    - cron: '0 11 * * MON,WED,FRI'
 
 jobs:
   test:

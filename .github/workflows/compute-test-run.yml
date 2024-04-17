@@ -1,9 +1,10 @@
 #This workflow will trigger every week, running terraform compute-engine tests
 name: Weekly compute-engine test run
-on:
-  schedule:
-    # At 09:00:00 - UTC, every week on Wednesday.
-    - cron: '0 09 * * WED'
+# TODO -- After pipeline is fixed, uncomment this section and remove 'workflow_dispatch'
+on: workflow_dispatch
+#  schedule:
+#    # At 09:00:00 - UTC, every week on Wednesday.
+#    - cron: '0 09 * * WED'
 
 jobs:
   test:
