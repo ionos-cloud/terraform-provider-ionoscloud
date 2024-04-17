@@ -1,9 +1,10 @@
 #This workflow will trigger every week on Tuesday, running terraform dbaas tests
 name: Weekly DBaaS test run
-on:
-  schedule:
-    # At 09:00:00 - UTC, every week on Tuesday.
-    - cron: '0 09 * * TUE'
+# TODO -- After pipeline is fixed, uncomment this section and remove 'workflow_dispatch'
+on: workflow_dispatch
+#  schedule:
+#    # At 09:00:00 - UTC, every week on Tuesday.
+#    - cron: '0 09 * * TUE'
 
 jobs:
   test:
