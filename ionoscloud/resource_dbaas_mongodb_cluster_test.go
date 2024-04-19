@@ -317,7 +317,7 @@ func testAccCheckDbaasMongoClusterExists(n string, cluster *mongo.ClusterRespons
 const testAccCheckDbaasMongoClusterConfigBasic = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing dbaas cluster"
 }
 
@@ -360,7 +360,7 @@ data ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTestDat
 const testAccCheckDbaasMongoClusterUpdated = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing dbaas cluster"
 }
 
@@ -391,7 +391,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
 const testAccCheckDbaasMongoClusterUpdateTemplateAndInstances = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing dbaas cluster"
 }
 
@@ -428,7 +428,7 @@ data ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTestDat
 const testAccCheckMongoClusterEnterpriseBasic = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing dbaas cluster"
 }
 
@@ -467,12 +467,12 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
 const testAccCheckDbaasMongoClusterEnterpriseUpdated = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing dbaas cluster"
 }
 
 resource ` + constant.LanResource + ` "lan_example" {
-  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example.id 
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example.id
   public        = false
   name          = "lan_example"
 }
