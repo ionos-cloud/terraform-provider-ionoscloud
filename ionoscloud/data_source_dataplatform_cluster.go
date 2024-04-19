@@ -313,10 +313,10 @@ func setAdditionalDataplatformClusterData(ctx context.Context, d *schema.Resourc
 		}
 
 		kubeConfig, err := json.Marshal(kubeConfigMap)
-		kubeConfigString := string(kubeConfig)
 		if err != nil {
 			return err
 		}
+		kubeConfigString := string(kubeConfig)
 		if err := d.Set("kube_config", kubeConfigString); err != nil {
 			return err
 		}
