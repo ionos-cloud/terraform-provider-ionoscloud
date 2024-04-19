@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -14,7 +13,6 @@ import (
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func dataSourceDataplatformNodePool() *schema.Resource {
@@ -24,7 +22,7 @@ func dataSourceDataplatformNodePool() *schema.Resource {
 			"id": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(constant.DataPlatformNameRegexConstraint), "")),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -116,7 +114,7 @@ func dataSourceDataplatformNodePool() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "The UUID of an existing Dataplatform cluster",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(constant.DataPlatformNameRegexConstraint), "")),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
