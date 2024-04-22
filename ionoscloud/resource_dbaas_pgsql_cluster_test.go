@@ -282,7 +282,7 @@ func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse
 const testAccCheckDbaasPgSqlClusterConfigBasic = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -328,13 +328,13 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 const testAccCheckDbaasPgSqlClusterConfigUpdate = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing psql cluster"
 }
 
 resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -387,13 +387,13 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 const testAccCheckDbaasPgSqlClusterConfigUpdateRemoveConnections = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing psql cluster"
 }
 
 resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -440,13 +440,13 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 const testAccCheckDbaasPgSqlClusterConfigUpdateRemoveDBaaS = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing psql cluster"
 }
 
 resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -466,7 +466,7 @@ resource ` + constant.LanResource + ` "lan_example_update" {
 const testAccFromBackup = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing psql cluster"
 }
 

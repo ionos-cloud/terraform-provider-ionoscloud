@@ -112,7 +112,7 @@ const isSystemUserValue = "false"
 const PgSqlUserConfig = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing DBaaS PgSql user"
 }
 
