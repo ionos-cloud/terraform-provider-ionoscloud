@@ -22,7 +22,16 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {
+				VersionConstraint: "3.4.3",
+				Source:            "hashicorp/random",
+			},
+			"time": {
+				Source:            "hashicorp/time",
+				VersionConstraint: "0.11.1",
+			},
+		},
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckDBaaSMariaDBClusterDestroyCheck,
 		Steps: []resource.TestStep{
@@ -197,6 +206,12 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
   ` + credentials + `
 }
 
+# Wait few seconds after cluster creation so the backups can be properly retrieved
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `]
+  create_duration = "30s"
+}
+
 resource ` + constant.RandomPassword + ` "cluster_password" {
   length           = 16
   special          = true
@@ -219,6 +234,8 @@ data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestD
 const mariaDBBackupsDataSourceMatchClusterID = mariaDBClusterConfigBasic + `
 data ` + constant.DBaaSMariaDBBackupsDataSource + ` ` + constant.DBaasMariaDBBackupsDataSourceName + ` {
 	cluster_id = ` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
+    # Use the previously created 'time' resource to delay information retrieval for the data source
+	depends_on = [time_sleep.wait_30_seconds]
 }
 `
 const mariaDBClusterDataSourceWrongName = `
