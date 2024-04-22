@@ -3,10 +3,13 @@ package ionoscloud
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -14,7 +17,6 @@ import (
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
-	"gopkg.in/yaml.v3"
 )
 
 func dataSourceDataplatformCluster() *schema.Resource {
@@ -175,6 +177,44 @@ func dataSourceDataplatformCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"lans": {
+				Type:        schema.TypeSet,
+				Description: "A list of LANs you want this node pool to be part of",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"lan_id": {
+							Type:        schema.TypeString,
+							Description: "The LAN ID of an existing LAN at the related data center",
+							Computed:    true,
+						},
+						"dhcp": {
+							Type:        schema.TypeBool,
+							Description: "Indicates if the Kubernetes node pool LAN will reserve an IP using DHCP. The default value is 'true'",
+							Computed:    true,
+						},
+						"routes": {
+							Type:        schema.TypeSet,
+							Description: "An array of additional LANs attached to worker nodes",
+							Computed:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"network": {
+										Type:        schema.TypeString,
+										Description: "IPv4 or IPv6 CIDR to be routed via the interface",
+										Computed:    true,
+									},
+									"gateway": {
+										Type:        schema.TypeString,
+										Description: "IPv4 or IPv6 gateway IP for the route",
+										Computed:    true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -267,16 +307,21 @@ func setAdditionalDataplatformClusterData(ctx context.Context, d *schema.Resourc
 
 	/* get from api and set in schema the kubeconfig*/
 	if cluster.Id != nil {
-		kubeConfig, _, err := client.GetClusterKubeConfig(ctx, *cluster.Id)
+		kubeConfigMap, _, err := client.GetClusterKubeConfig(ctx, *cluster.Id)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %w", *cluster.Id, err)
 		}
 
-		if err := d.Set("kube_config", kubeConfig); err != nil {
+		kubeConfig, err := json.Marshal(kubeConfigMap)
+		if err != nil {
+			return err
+		}
+		kubeConfigString := string(kubeConfig)
+		if err := d.Set("kube_config", kubeConfigString); err != nil {
 			return err
 		}
 
-		if err := setDataplatformConfigData(d, kubeConfig); err != nil {
+		if err := setDataplatformConfigData(d, kubeConfigString); err != nil {
 			return err
 		}
 	}

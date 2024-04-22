@@ -14,153 +14,240 @@ import (
 	"encoding/json"
 )
 
-// ErrorMessage struct for ErrorMessage
-type ErrorMessage struct {
-	// Internal error code.
-	ErrorCode *string `json:"errorCode,omitempty"`
-	// A human readable explanation of the problem.
-	Message *string `json:"message,omitempty"`
+// VersionsGet200Response struct for VersionsGet200Response
+type VersionsGet200Response struct {
+	// The ID of a list of resources.
+	Id    *string   `json:"id,omitempty"`
+	Type  *string   `json:"type,omitempty"`
+	Href  *string   `json:"href,omitempty"`
+	Items *[]string `json:"items"`
 }
 
-// NewErrorMessage instantiates a new ErrorMessage object
+// NewVersionsGet200Response instantiates a new VersionsGet200Response object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewErrorMessage() *ErrorMessage {
-	this := ErrorMessage{}
+func NewVersionsGet200Response(items []string) *VersionsGet200Response {
+	this := VersionsGet200Response{}
+
+	this.Items = &items
 
 	return &this
 }
 
-// NewErrorMessageWithDefaults instantiates a new ErrorMessage object
+// NewVersionsGet200ResponseWithDefaults instantiates a new VersionsGet200Response object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewErrorMessageWithDefaults() *ErrorMessage {
-	this := ErrorMessage{}
+func NewVersionsGet200ResponseWithDefaults() *VersionsGet200Response {
+	this := VersionsGet200Response{}
 	return &this
 }
 
-// GetErrorCode returns the ErrorCode field value
+// GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *ErrorMessage) GetErrorCode() *string {
+func (o *VersionsGet200Response) GetId() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.ErrorCode
+	return o.Id
 
 }
 
-// GetErrorCodeOk returns a tuple with the ErrorCode field value
+// GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ErrorMessage) GetErrorCodeOk() (*string, bool) {
+func (o *VersionsGet200Response) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.ErrorCode, true
+	return o.Id, true
 }
 
-// SetErrorCode sets field value
-func (o *ErrorMessage) SetErrorCode(v string) {
+// SetId sets field value
+func (o *VersionsGet200Response) SetId(v string) {
 
-	o.ErrorCode = &v
+	o.Id = &v
 
 }
 
-// HasErrorCode returns a boolean if a field has been set.
-func (o *ErrorMessage) HasErrorCode() bool {
-	if o != nil && o.ErrorCode != nil {
+// HasId returns a boolean if a field has been set.
+func (o *VersionsGet200Response) HasId() bool {
+	if o != nil && o.Id != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetMessage returns the Message field value
+// GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *ErrorMessage) GetMessage() *string {
+func (o *VersionsGet200Response) GetType() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Message
+	return o.Type
 
 }
 
-// GetMessageOk returns a tuple with the Message field value
+// GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ErrorMessage) GetMessageOk() (*string, bool) {
+func (o *VersionsGet200Response) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Message, true
+	return o.Type, true
 }
 
-// SetMessage sets field value
-func (o *ErrorMessage) SetMessage(v string) {
+// SetType sets field value
+func (o *VersionsGet200Response) SetType(v string) {
 
-	o.Message = &v
+	o.Type = &v
 
 }
 
-// HasMessage returns a boolean if a field has been set.
-func (o *ErrorMessage) HasMessage() bool {
-	if o != nil && o.Message != nil {
+// HasType returns a boolean if a field has been set.
+func (o *VersionsGet200Response) HasType() bool {
+	if o != nil && o.Type != nil {
 		return true
 	}
 
 	return false
 }
 
-func (o ErrorMessage) MarshalJSON() ([]byte, error) {
+// GetHref returns the Href field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *VersionsGet200Response) GetHref() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Href
+
+}
+
+// GetHrefOk returns a tuple with the Href field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *VersionsGet200Response) GetHrefOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Href, true
+}
+
+// SetHref sets field value
+func (o *VersionsGet200Response) SetHref(v string) {
+
+	o.Href = &v
+
+}
+
+// HasHref returns a boolean if a field has been set.
+func (o *VersionsGet200Response) HasHref() bool {
+	if o != nil && o.Href != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetItems returns the Items field value
+// If the value is explicit nil, the zero value for []string will be returned
+func (o *VersionsGet200Response) GetItems() *[]string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Items
+
+}
+
+// GetItemsOk returns a tuple with the Items field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *VersionsGet200Response) GetItemsOk() (*[]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Items, true
+}
+
+// SetItems sets field value
+func (o *VersionsGet200Response) SetItems(v []string) {
+
+	o.Items = &v
+
+}
+
+// HasItems returns a boolean if a field has been set.
+func (o *VersionsGet200Response) HasItems() bool {
+	if o != nil && o.Items != nil {
+		return true
+	}
+
+	return false
+}
+
+func (o VersionsGet200Response) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.ErrorCode != nil {
-		toSerialize["errorCode"] = o.ErrorCode
+	if o.Id != nil {
+		toSerialize["id"] = o.Id
 	}
 
-	if o.Message != nil {
-		toSerialize["message"] = o.Message
+	if o.Type != nil {
+		toSerialize["type"] = o.Type
+	}
+
+	if o.Href != nil {
+		toSerialize["href"] = o.Href
+	}
+
+	if o.Items != nil {
+		toSerialize["items"] = o.Items
 	}
 
 	return json.Marshal(toSerialize)
 }
 
-type NullableErrorMessage struct {
-	value *ErrorMessage
+type NullableVersionsGet200Response struct {
+	value *VersionsGet200Response
 	isSet bool
 }
 
-func (v NullableErrorMessage) Get() *ErrorMessage {
+func (v NullableVersionsGet200Response) Get() *VersionsGet200Response {
 	return v.value
 }
 
-func (v *NullableErrorMessage) Set(val *ErrorMessage) {
+func (v *NullableVersionsGet200Response) Set(val *VersionsGet200Response) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableErrorMessage) IsSet() bool {
+func (v NullableVersionsGet200Response) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableErrorMessage) Unset() {
+func (v *NullableVersionsGet200Response) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableErrorMessage(val *ErrorMessage) *NullableErrorMessage {
-	return &NullableErrorMessage{value: val, isSet: true}
+func NewNullableVersionsGet200Response(val *VersionsGet200Response) *NullableVersionsGet200Response {
+	return &NullableVersionsGet200Response{value: val, isSet: true}
 }
 
-func (v NullableErrorMessage) MarshalJSON() ([]byte, error) {
+func (v NullableVersionsGet200Response) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableErrorMessage) UnmarshalJSON(src []byte) error {
+func (v *NullableVersionsGet200Response) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

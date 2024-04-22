@@ -5,6 +5,7 @@
 - Fix name validation for Dataplatform resources
 - Change location for MongoDB tests to improve running time
 - Change location for PgSQL tests to improve running time
+- Add new attribute for Dataplatform clusters: `lans`
 
 ## 6.4.14
 ### Features

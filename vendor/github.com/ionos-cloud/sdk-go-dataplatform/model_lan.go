@@ -14,153 +14,199 @@ import (
 	"encoding/json"
 )
 
-// ErrorMessage struct for ErrorMessage
-type ErrorMessage struct {
-	// Internal error code.
-	ErrorCode *string `json:"errorCode,omitempty"`
-	// A human readable explanation of the problem.
-	Message *string `json:"message,omitempty"`
+// Lan Local area network.
+type Lan struct {
+	// The LAN ID of an existing LAN at the related data center.
+	LanId *string `json:"lanId"`
+	// Indicates if the Kubernetes node pool LAN will reserve an IP using DHCP. The default value is `true`.
+	Dhcp *bool `json:"dhcp,omitempty"`
+	// An array of additional LANs attached to worker nodes.
+	Routes *[]Route `json:"routes,omitempty"`
 }
 
-// NewErrorMessage instantiates a new ErrorMessage object
+// NewLan instantiates a new Lan object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewErrorMessage() *ErrorMessage {
-	this := ErrorMessage{}
+func NewLan(lanId string) *Lan {
+	this := Lan{}
+
+	this.LanId = &lanId
 
 	return &this
 }
 
-// NewErrorMessageWithDefaults instantiates a new ErrorMessage object
+// NewLanWithDefaults instantiates a new Lan object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewErrorMessageWithDefaults() *ErrorMessage {
-	this := ErrorMessage{}
+func NewLanWithDefaults() *Lan {
+	this := Lan{}
 	return &this
 }
 
-// GetErrorCode returns the ErrorCode field value
+// GetLanId returns the LanId field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *ErrorMessage) GetErrorCode() *string {
+func (o *Lan) GetLanId() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.ErrorCode
+	return o.LanId
 
 }
 
-// GetErrorCodeOk returns a tuple with the ErrorCode field value
+// GetLanIdOk returns a tuple with the LanId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ErrorMessage) GetErrorCodeOk() (*string, bool) {
+func (o *Lan) GetLanIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.ErrorCode, true
+	return o.LanId, true
 }
 
-// SetErrorCode sets field value
-func (o *ErrorMessage) SetErrorCode(v string) {
+// SetLanId sets field value
+func (o *Lan) SetLanId(v string) {
 
-	o.ErrorCode = &v
+	o.LanId = &v
 
 }
 
-// HasErrorCode returns a boolean if a field has been set.
-func (o *ErrorMessage) HasErrorCode() bool {
-	if o != nil && o.ErrorCode != nil {
+// HasLanId returns a boolean if a field has been set.
+func (o *Lan) HasLanId() bool {
+	if o != nil && o.LanId != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetMessage returns the Message field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *ErrorMessage) GetMessage() *string {
+// GetDhcp returns the Dhcp field value
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *Lan) GetDhcp() *bool {
 	if o == nil {
 		return nil
 	}
 
-	return o.Message
+	return o.Dhcp
 
 }
 
-// GetMessageOk returns a tuple with the Message field value
+// GetDhcpOk returns a tuple with the Dhcp field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ErrorMessage) GetMessageOk() (*string, bool) {
+func (o *Lan) GetDhcpOk() (*bool, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Message, true
+	return o.Dhcp, true
 }
 
-// SetMessage sets field value
-func (o *ErrorMessage) SetMessage(v string) {
+// SetDhcp sets field value
+func (o *Lan) SetDhcp(v bool) {
 
-	o.Message = &v
+	o.Dhcp = &v
 
 }
 
-// HasMessage returns a boolean if a field has been set.
-func (o *ErrorMessage) HasMessage() bool {
-	if o != nil && o.Message != nil {
+// HasDhcp returns a boolean if a field has been set.
+func (o *Lan) HasDhcp() bool {
+	if o != nil && o.Dhcp != nil {
 		return true
 	}
 
 	return false
 }
 
-func (o ErrorMessage) MarshalJSON() ([]byte, error) {
+// GetRoutes returns the Routes field value
+// If the value is explicit nil, the zero value for []Route will be returned
+func (o *Lan) GetRoutes() *[]Route {
+	if o == nil {
+		return nil
+	}
+
+	return o.Routes
+
+}
+
+// GetRoutesOk returns a tuple with the Routes field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Lan) GetRoutesOk() (*[]Route, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Routes, true
+}
+
+// SetRoutes sets field value
+func (o *Lan) SetRoutes(v []Route) {
+
+	o.Routes = &v
+
+}
+
+// HasRoutes returns a boolean if a field has been set.
+func (o *Lan) HasRoutes() bool {
+	if o != nil && o.Routes != nil {
+		return true
+	}
+
+	return false
+}
+
+func (o Lan) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.ErrorCode != nil {
-		toSerialize["errorCode"] = o.ErrorCode
+	if o.LanId != nil {
+		toSerialize["lanId"] = o.LanId
 	}
 
-	if o.Message != nil {
-		toSerialize["message"] = o.Message
+	if o.Dhcp != nil {
+		toSerialize["dhcp"] = o.Dhcp
+	}
+
+	if o.Routes != nil {
+		toSerialize["routes"] = o.Routes
 	}
 
 	return json.Marshal(toSerialize)
 }
 
-type NullableErrorMessage struct {
-	value *ErrorMessage
+type NullableLan struct {
+	value *Lan
 	isSet bool
 }
 
-func (v NullableErrorMessage) Get() *ErrorMessage {
+func (v NullableLan) Get() *Lan {
 	return v.value
 }
 
-func (v *NullableErrorMessage) Set(val *ErrorMessage) {
+func (v *NullableLan) Set(val *Lan) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableErrorMessage) IsSet() bool {
+func (v NullableLan) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableErrorMessage) Unset() {
+func (v *NullableLan) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableErrorMessage(val *ErrorMessage) *NullableErrorMessage {
-	return &NullableErrorMessage{value: val, isSet: true}
+func NewNullableLan(val *Lan) *NullableLan {
+	return &NullableLan{value: val, isSet: true}
 }
 
-func (v NullableErrorMessage) MarshalJSON() ([]byte, error) {
+func (v NullableLan) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableErrorMessage) UnmarshalJSON(src []byte) error {
+func (v *NullableLan) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

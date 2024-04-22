@@ -6,13 +6,14 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceDataplatformCluster() *schema.Resource {
@@ -63,6 +64,47 @@ func resourceDataplatformCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IsDayOfTheWeek(true)),
 							Required:         true,
+						},
+					},
+				},
+			},
+			"lans": {
+				Type:        schema.TypeSet,
+				Description: "A list of LANs you want this node pool to be part of",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"lan_id": {
+							Type:        schema.TypeString,
+							Description: "The LAN ID of an existing LAN at the related data center",
+							Required:    true,
+						},
+						"dhcp": {
+							Type:        schema.TypeBool,
+							Description: "Indicates if the Kubernetes node pool LAN will reserve an IP using DHCP. The default value is 'true'",
+							Optional:    true,
+							Default:     true,
+						},
+						"routes": {
+							Type:        schema.TypeSet,
+							Description: "An array of additional LANs attached to worker nodes",
+							Optional:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"network": {
+										Type:             schema.TypeString,
+										Description:      "IPv4 or IPv6 CIDR to be routed via the interface",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IsCIDR),
+										Required:         true,
+									},
+									"gateway": {
+										Type:             schema.TypeString,
+										Description:      "IPv4 or IPv6 gateway IP for the route",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPAddress),
+										Required:         true,
+									},
+								},
+							},
 						},
 					},
 				},

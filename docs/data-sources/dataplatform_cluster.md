@@ -82,6 +82,12 @@ The following attributes are returned by the datasource:
   * value - is the token
 * `server` - cluster server (same as `config[0].clusters[0].cluster.server` but provided as an attribute for ease of use)
 * `ca_crt` - base64 decoded cluster certificate authority data (provided as an attribute for direct use)
+* `lans` - A list of LANs you want this node pool to be part of
+  * `lan_id` - The LAN ID of an existing LAN at the related data center
+  * `dhcp` - Indicates if the Kubernetes node pool LAN will reserve an IP using DHCP. The default value is 'true'.
+  * `routes` - An array of additional LANs attached to worker nodes
+    * `gateway` - IPv4 or IPv6 gateway IP for the route
+    * `network` - IPv4 or IPv6 CIDR to be routed via the interface
 
 **NOTE**: The whole `config` node is marked as **sensitive**.
 

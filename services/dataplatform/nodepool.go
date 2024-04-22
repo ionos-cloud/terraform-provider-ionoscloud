@@ -18,7 +18,7 @@ import (
 var nodePoolResourceName = "Dataplatform Node Pool"
 
 func (c *Client) GetNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
-	cluster, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.GetClusterNodepool(ctx, clusterId, nodePoolId).Execute()
+	cluster, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.ClustersNodepoolsFindById(ctx, clusterId, nodePoolId).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
@@ -30,33 +30,33 @@ func (c *Client) IsNodePoolDeleted(ctx context.Context, d *schema.ResourceData) 
 	}
 	clusterIdStr := clusterId.(string)
 	nodePoolId := d.Id()
-	_, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.GetClusterNodepool(ctx, clusterIdStr, nodePoolId).Execute()
+	_, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.ClustersNodepoolsFindById(ctx, clusterIdStr, nodePoolId).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
 }
 
 func (c *Client) ListNodePools(ctx context.Context, clusterId string) (dataplatform.NodePoolListResponseData, *dataplatform.APIResponse, error) {
-	nodePool, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.GetClusterNodepools(ctx, clusterId).Execute()
+	nodePool, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.ClustersNodepoolsGet(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return nodePool, apiResponse, err
 }
 
 func (c *Client) CreateNodePool(ctx context.Context, clusterId string, d *schema.ResourceData) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
 	dataplatformNodePool := GetDataplatformNodePoolDataCreate(d)
-	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.CreateClusterNodepool(ctx, clusterId).CreateNodePoolRequest(*dataplatformNodePool).Execute()
+	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.ClustersNodepoolsPost(ctx, clusterId).CreateNodePoolRequest(*dataplatformNodePool).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
 func (c *Client) UpdateNodePool(ctx context.Context, clusterId, nodePoolId string, d *schema.ResourceData) (dataplatform.NodePoolResponseData, utils.ApiResponseInfo, error) {
 	dataplatformNodePool := GetDataplatformNodePoolDataUpdate(d)
-	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.PatchClusterNodepool(ctx, clusterId, nodePoolId).PatchNodePoolRequest(*dataplatformNodePool).Execute()
+	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.ClustersNodepoolsPatch(ctx, clusterId, nodePoolId).PatchNodePoolRequest(*dataplatformNodePool).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
 func (c *Client) DeleteNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.DeleteClusterNodepool(ctx, clusterId, nodePoolId).Execute()
+	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.ClustersNodepoolsDelete(ctx, clusterId, nodePoolId).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
