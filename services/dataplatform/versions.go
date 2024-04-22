@@ -13,6 +13,9 @@ import (
 func (c *Client) GetVersions(ctx context.Context) ([]string, *dataplatform.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.DataPlatformMetaDataApi.VersionsGet(ctx).Execute()
 	apiResponse.LogInfo()
+	if err != nil {
+		return nil, apiResponse, err
+	}
 	if versions.Items == nil {
 		return nil, nil, fmt.Errorf("expected a list of Dataplatform versions but received 'nil' instead")
 	}
