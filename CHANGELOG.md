@@ -4,6 +4,7 @@
 - Add email filter for user data source, fixes pagination issues for users.
 - Fix name validation for Dataplatform resources
 - Change location for MongoDB tests to improve running time
+- Change location for PgSQL tests to improve running time
 
 ## 6.4.14
 ### Features
