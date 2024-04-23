@@ -1,15 +1,21 @@
 ## 6.4.16
 ### Enhancements
 - Modify DBaaS workflow to run tests in multiple stages for every service (Mongo, MariaDB, PgSQL) rather than running all tests in one stage
+### Fixes
+- Fix MongoDB user import
 
 ## 6.4.15
 ### Fixes
 - Increase max result limit of data sources for target groups (200) and IP blocks (1000), as a workaround for pagination issues.
 - Add email filter for user data source, fixes pagination issues for users.
-- Fix name validation for Dataplatform resources
-- Change location for MongoDB tests to improve running time
-- Change location for PgSQL tests to improve running time
-- Add new attribute for Dataplatform clusters: `lans`
+- Fix name validation for Dataplatform resources.
+
+### Enhancements
+- Change location for MongoDB tests to improve running time.
+- Change location for PgSQL tests to improve running time.
+
+### Features
+- Add new attribute for Dataplatform clusters: `lans`.
 
 ## 6.4.14
 ### Features

@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -157,7 +157,7 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	user, _, err := client.UpdateUser(ctx, clusterId, username, request)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a user to mongoDB cluster %s: %w", clusterId, err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a user to mongoDB cluster %s: %w", clusterId, err))
 		return diags
 	}
 
@@ -182,7 +182,7 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %w", d.Id(), err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching a User ID %s %w", d.Id(), err))
 	}
 
 	if err := dbaas.SetUserMongoData(d, &user); err != nil {
@@ -221,26 +221,26 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(services.SdkBundle).MongoClient
 
-	userId := d.Id()
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import format: %s, expecting the following format: {clusterID}/{username}", d.Id())
+	}
+	clusterID := parts[0]
+	username := parts[1]
 
-	clusterId := d.Get("cluster_id").(string)
-	username := d.Get("username").(string)
-
-	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
-
+	user, apiResponse, err := client.FindUserByUsername(ctx, clusterID, username)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the mongodb user %q", userId)
+			return nil, fmt.Errorf("unable to find MongoDB user: %s, cluster ID: %s", username, clusterID)
 		}
-		return nil, fmt.Errorf("mongodb user does not exist %q", userId)
+		return nil, fmt.Errorf("error occurred while fetching MongoDB user: %s, cluster ID: %s, error: %w", username, clusterID, err)
 	}
-
 	if err := dbaas.SetUserMongoData(d, &user); err != nil {
 		return nil, err
 	}
-
-	log.Printf("[INFO] user found: %+v", user)
-
+	if err := d.Set("cluster_id", clusterID); err != nil {
+		return nil, utils.GenerateSetError("MongoDB user", "cluster_id", err)
+	}
 	return []*schema.ResourceData{d}, nil
 }
