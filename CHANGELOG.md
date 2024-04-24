@@ -1,3 +1,7 @@
+## 6.4.16
+### Enhancements
+- Modify DBaaS workflow to run tests in multiple stages for every service (Mongo, MariaDB, PgSQL) rather than running all tests in one stage
+
 ## 6.4.15
 ### Fixes
 - Increase max result limit of data sources for target groups (200) and IP blocks (1000), as a workaround for pagination issues.
