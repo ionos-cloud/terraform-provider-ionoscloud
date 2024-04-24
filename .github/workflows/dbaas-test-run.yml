@@ -28,5 +28,9 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version-file: 'go.mod'
-      - name: Run tests with dbaas tag
-        run: go test ./ionoscloud -v -failfast -timeout 240m -tags dbaas
+      - name: Run tests with mariadb tag
+        run: go test ./ionoscloud -v -failfast -timeout 70m -tags mariadb
+      - name: Run tests with psql tag
+        run: go test ./ionoscloud -v -failfast -timeout 140m -tags psql
+      - name: Run tests with mongo tag
+        run: go test ./ionoscloud -v -failfast -timeout 140m -tags mongo
