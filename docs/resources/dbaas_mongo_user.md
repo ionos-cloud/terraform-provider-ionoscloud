@@ -41,10 +41,6 @@ resource "ionoscloud_mongo_cluster" "example_mongo_cluster" {
     cidr_list            =  ["192.168.1.108/24"]
   }
   template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
-  credentials {
-    username = "username"
-    password = random_password.cluster_password.result
-  }
 }
 
 resource "random_password" "cluster_password" {
@@ -88,8 +84,14 @@ resource "ionoscloud_mongo_user" "example_mongo_user" {
 
 ## Import
 
-Resource DbaaS MongoDb User can be imported using the `cluster_id`, the `database` and the `username` e.g.
-
+Resource DBaaS MongoDB User can be imported using the `clusterID` and the `username`.
+First, define an empty resource in the plan:
+```hcl
+resource "ionoscloud_mongo_user" "importeduser" {
+  
+}
+```
+Then you can import the user using the following command:
 ```shell
-terraform import ionoscloud_mongo_cluster.mycluser {cluster uuid} {database} {username}
+terraform import ionoscloud_mongo_user.mycluser {clusterId}/{username}
 ```
