@@ -3,6 +3,7 @@
 - Modify DBaaS workflow to run tests in multiple stages for every service (Mongo, MariaDB, PgSQL) rather than running all tests in one stage
 ### Fixes
 - Fix MongoDB user import
+- Fix k8s cluster tests
 
 ## 6.4.15
 ### Fixes
