@@ -138,7 +138,7 @@ func setPatchClusterRequestProperties(d *schema.ResourceData) *dataplatform.Patc
 }
 
 func setLansData(d *schema.ResourceData) *[]dataplatform.Lan {
-	var lansBody []dataplatform.Lan
+	lansBody := make([]dataplatform.Lan, 0)
 	if lansData, ok := d.GetOk("lans"); ok {
 		if lansData, ok := lansData.(*schema.Set); ok {
 			for _, lanData := range lansData.List() {
@@ -158,7 +158,7 @@ func setLansData(d *schema.ResourceData) *[]dataplatform.Lan {
 }
 
 func setRoutesData(lan map[string]interface{}) *[]dataplatform.Route {
-	var routesBody []dataplatform.Route
+	routesBody := make([]dataplatform.Route, 0)
 	if routesData, ok := lan["routes"].(*schema.Set); ok {
 		for _, routeData := range routesData.List() {
 			if route, ok := routeData.(map[string]interface{}); ok {
