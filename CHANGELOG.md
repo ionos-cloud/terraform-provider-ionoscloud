@@ -4,6 +4,7 @@
 ### Fixes
 - Fix MongoDB user import
 - Fix k8s cluster tests
+- Fix #552 in order to allow Dataplatform cluster creation without `lans` or `routes`
 
 ## 6.4.15
 ### Fixes
