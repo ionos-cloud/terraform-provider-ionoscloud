@@ -14,13 +14,14 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func resourceServer() *schema.Resource {
@@ -83,8 +84,8 @@ func resourceServer() *schema.Resource {
 				Computed:         true,
 				Description:      "server usages: ENTERPRISE or CUBE",
 				DiffSuppressFunc: utils.DiffToLower,
-				//to do: add in next release
-				//ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"CUBE", "ENTERPRISE"}, true)),
+				// to do: add in next release
+				// ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"CUBE", "ENTERPRISE"}, true)),
 			},
 			"boot_image": {
 				Type:     schema.TypeString,
@@ -145,8 +146,8 @@ func resourceServer() *schema.Resource {
 				ConflictsWith: []string{"volume.0.ssh_key_path", "volume.0.ssh_keys", "ssh_key_path"},
 				Optional:      true,
 				Description:   "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
-				//todo: remove as test servervassic fails
-				//DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				// todo: remove as test servervassic fails
+				// DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 				//	if k == "ssh_keys.#" {
 				//		if d.Get("volume.0.ssh_keys.#") == new {
 				//			return true
@@ -161,7 +162,7 @@ func resourceServer() *schema.Resource {
 				//	}
 				//
 				//	return false
-				//},
+				// },
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -490,14 +491,16 @@ func resourceServer() *schema.Resource {
 
 func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 
-	//we do not want to check in case of resource creation
+	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
 	}
 	if diff.HasChange("image_name") {
 		return fmt.Errorf("image_name %s", ImmutableError)
 	}
-
+	if diff.HasChange("template_uuid") {
+		return fmt.Errorf("template_uuid %s", ImmutableError)
+	}
 	if diff.HasChange("availability_zone") {
 		return fmt.Errorf("availability_zone %s", ImmutableError)
 	}
@@ -1218,7 +1221,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	var primaryNic ionoscloud.Nic
 	d.SetId(*server.Id)
 	primaryNicId := ""
-	//first we try to get primary nic from parts, then if that fails, we get it from entities.
+	// first we try to get primary nic from parts, then if that fails, we get it from entities.
 	if len(parts) > 2 {
 		primaryNicId = parts[2]
 		if err := d.Set("primary_nic", primaryNicId); err != nil {
@@ -1328,7 +1331,7 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 		if _, ok := d.GetOk("volume.0.size"); ok {
 			return *server, fmt.Errorf("volume.0.size argument can not be set for %s type of servers\n", serverType)
 		}
-	default: //enterprise
+	default: // enterprise
 		if _, ok := d.GetOk("template_uuid"); ok {
 			return *server, fmt.Errorf("template_uuid argument can not be set only for %s type of servers\n", serverType)
 		}
@@ -1517,7 +1520,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		ns := cloudapinic.Service{Client: client, Meta: nil, D: d}
 		nic, apiResponse, err := ns.Get(ctx, datacenterId, d.Id(), nicId, 2)
 		if err != nil {
-			//fixes #467
+			// fixes #467
 			if apiResponse.HttpNotFound() {
 				log.Printf("[DEBUG] Nic %s not found, might have been removed from dcd, setting primary_nic, primary_ip and nic to empty", nicId)
 				if err := d.Set("primary_nic", ""); err != nil {
@@ -1537,7 +1540,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		var fwRulesEntries []map[string]interface{}
 
 		if nic != nil && nic.Properties != nil {
-			//fixes #467
+			// fixes #467
 			if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 				if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
 					return err
@@ -1587,10 +1590,10 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		return err
 	}
 
-	//if token != nil {
+	// if token != nil {
 	//	if err := d.Set("token", *token.Token); err != nil {
 	//		return err
 	//	}
-	//}
+	// }
 	return nil
 }
