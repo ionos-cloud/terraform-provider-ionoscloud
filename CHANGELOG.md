@@ -1,3 +1,7 @@
+## 6.4.17
+### Fixes
+- correctly raise immutable error for changes to `template_uuid` when running `terraform plan` for Cube servers 
+
 ## 6.4.16
 ### Enhancements
 - Modify DBaaS workflow to run tests in multiple stages for every service (Mongo, MariaDB, PgSQL) rather than running all tests in one stage
