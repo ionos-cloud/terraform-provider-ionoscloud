@@ -9,13 +9,15 @@ import (
 	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 )
 
-func (c *MariaDBClient) GetClusterBackups(ctx context.Context, clusterId string) (mariadb.BackupList, *mariadb.APIResponse, error) {
+func (c *MariaDBClient) GetClusterBackups(ctx context.Context, clusterId, location string) (mariadb.BackupList, *mariadb.APIResponse, error) {
+	c.modifyConfigURL(location)
 	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err
 }
 
-func (c *MariaDBClient) FindBackupById(ctx context.Context, backupId string) (mariadb.BackupResponse, *mariadb.APIResponse, error) {
+func (c *MariaDBClient) FindBackupById(ctx context.Context, backupId, location string) (mariadb.BackupResponse, *mariadb.APIResponse, error) {
+	c.modifyConfigURL(location)
 	backups, apiResponse, err := c.sdkClient.BackupsApi.BackupsFindById(ctx, backupId).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err

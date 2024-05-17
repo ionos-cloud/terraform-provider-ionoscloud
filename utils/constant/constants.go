@@ -264,6 +264,8 @@ const (
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
 )
 
+var MariaDBClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
+
 // Container Registry Constants
 const (
 	//ContainerRegistryTestResource needs to be with -, do not change

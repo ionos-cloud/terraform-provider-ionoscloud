@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	mariadbSDK "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func dataSourceDBaaSMariaDBBackups() *schema.Resource {
@@ -23,6 +25,12 @@ func dataSourceDBaaSMariaDBBackups() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The unique ID of the backup",
 				Optional:    true,
+			},
+			"location": {
+				Type:             schema.TypeString,
+				Description:      "The cluster location",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
 			},
 			"backups": {
 				Type:        schema.TypeList,
@@ -87,11 +95,13 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("'cluster_id' and 'backup_id' cannot be specified at the same time"))
 	}
 
+	location := d.Get("location").(string)
+
 	var backups []mariadbSDK.BackupResponse
 	var err error
 	if clusterIdOk {
 		var backupsResponse mariadbSDK.BackupList
-		backupsResponse, _, err = client.GetClusterBackups(ctx, clusterId)
+		backupsResponse, _, err = client.GetClusterBackups(ctx, clusterId, location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backups for cluster with ID %s: %w", clusterId, err))
 		}
@@ -101,7 +111,7 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 		backups = *backupsResponse.Items
 	} else {
 		var backup mariadbSDK.BackupResponse
-		backup, _, err = client.FindBackupById(ctx, backupId)
+		backup, _, err = client.FindBackupById(ctx, backupId, location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup with ID %s: %w", backupId, err))
 		}

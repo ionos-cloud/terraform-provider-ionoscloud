@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"log"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -29,6 +31,12 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The MariaDB version of your cluster.",
 				Required:    true,
+			},
+			"location": {
+				Type:             schema.TypeString,
+				Description:      "The cluster location",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
 			},
 			"instances": {
 				Type:             schema.TypeInt,
@@ -151,7 +159,7 @@ func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(err)
 	}
 
-	response, _, err := client.CreateCluster(ctx, *cluster)
+	response, _, err := client.CreateCluster(ctx, *cluster, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while creating a DBaaS MariaDB cluster: %w", err))
 	}
@@ -171,7 +179,15 @@ func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta inte
 func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).MariaDBClient
 	clusterID := d.Id()
-	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
+	var location string
+	// This takes care of the old version of the provider where the location was not required and
+	// all the requests were done for "de/txl" location with the correspondent endpoint.
+	if locationValue, locationOk := d.GetOk("location"); locationOk {
+		location = locationValue.(string)
+	} else {
+		location = "de/txl"
+	}
+	_, apiResponse, err := client.DeleteCluster(ctx, d.Id(), location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -192,19 +208,30 @@ func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(services.SdkBundle).MariaDBClient
-	clusterId := d.Id()
-	cluster, apiResponse, err := client.GetCluster(ctx, clusterId)
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<cluster_id>'", d.Id())
+	}
+	location := parts[0]
+	if !slices.Contains(constant.MariaDBClusterLocations, location) {
+		return nil, fmt.Errorf("invalid import ID: %q, location must be one of %v", d.Id(), constant.MariaDBClusterLocations)
+	}
+	clusterID := parts[1]
 
+	cluster, apiResponse, err := client.GetCluster(ctx, clusterID, location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("MariaDB cluster with ID: %v does not exist, error: %w", clusterId, err)
+			return nil, fmt.Errorf("MariaDB cluster with ID: %v does not exist, error: %w", clusterID, err)
 		}
-		return nil, fmt.Errorf("an error occured while trying to import MariaDB cluster with ID: %v, error: %w", clusterId, err)
+		return nil, fmt.Errorf("an error occured while trying to import MariaDB cluster with ID: %v, error: %w", clusterID, err)
 	}
 
 	log.Printf("[INFO] MariaDB cluster found: %+v", cluster)
 
+	if err := d.Set("location", location); err != nil {
+		return nil, utils.GenerateSetError("MariaDB cluster", "location", err)
+	}
 	if err := client.SetMariaDBClusterData(d, cluster); err != nil {
 		return nil, err
 	}
@@ -215,7 +242,16 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta inte
 func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).MariaDBClient
 	clusterID := d.Id()
-	cluster, apiResponse, err := client.GetCluster(ctx, clusterID)
+	var location string
+	// This takes care of the old version of the provider where the location was not required and
+	// all the requests were done for "de/txl" location with the correspondent endpoint.
+	if locationValue, locationOk := d.GetOk("location"); locationOk {
+		location = locationValue.(string)
+	} else {
+		location = "de/txl"
+	}
+
+	cluster, apiResponse, err := client.GetCluster(ctx, clusterID, location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
