@@ -66,7 +66,7 @@ The following attributes are returned by the datasource:
 - `client_timeout` - The maximum time in milliseconds to wait for the client to acknowledge or send data; default is 50,000 (50 seconds).
 - `server certificates` - Array of items in that collection.
 - `http_rules` - Array of items in that collection
-  - `name` - The unique name of the Application Load Balancer HTTP rule.
+    - `name` - The unique name of the Application Load Balancer HTTP rule.
     - `type` - Type of the Http Rule.
     - `target_group` - The UUID of the target group; mandatory for FORWARD action.
     - `drop_query` - Default is false; valid only for REDIRECT actions.
