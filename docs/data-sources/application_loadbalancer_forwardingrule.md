@@ -66,7 +66,7 @@ The following attributes are returned by the datasource:
 - `client_timeout` - The maximum time in milliseconds to wait for the client to acknowledge or send data; default is 50,000 (50 seconds).
 - `server certificates` - Array of items in that collection.
 - `http_rules` - Array of items in that collection
-    - `name` - The unique name of the Application Load Balancer HTTP rule.
+  - `name` - The unique name of the Application Load Balancer HTTP rule.
     - `type` - Type of the Http Rule.
     - `target_group` - The UUID of the target group; mandatory for FORWARD action.
     - `drop_query` - Default is false; valid only for REDIRECT actions.
@@ -75,8 +75,8 @@ The following attributes are returned by the datasource:
     - `response_message` - The response message of the request; mandatory for STATIC action.
     - `content_type` - Valid only for STATIC actions.
     - `conditions` - An array of items in the collection.The action is only performed if each and every condition is met; if no conditions are set, the rule will always be performed.
-        - `type` - Type of the Http Rule condition.
-        - `condition` - Matching rule for the HTTP rule condition attribute; mandatory for HEADER, PATH, QUERY, METHOD, HOST, and COOKIE types; must be null when type is SOURCE_IP.
-        - `negate` - Specifies whether the condition is negated or not; the default is False.
-        - `key` - Must be null when type is PATH, METHOD, HOST, or SOURCE_IP. Key can only be set when type is COOKIES, HEADER, or QUERY.
-        - `value` - Mandatory for conditions CONTAINS, EQUALS, MATCHES, STARTS_WITH, ENDS_WITH; must be null when condition is EXISTS; should be a valid CIDR if provided and if type is SOURCE_IP.
+        * `type` - Type of the Http Rule condition.
+        * `condition` - Matching rule for the HTTP rule condition attribute; mandatory for HEADER, PATH, QUERY, METHOD, HOST, and COOKIE types; must be null when type is SOURCE_IP.
+        * `negate` - Specifies whether the condition is negated or not; the default is False.
+        *  `key` - Must be null when type is PATH, METHOD, HOST, or SOURCE_IP. Key can only be set when type is COOKIES, HEADER, or QUERY.
+        *  `value` - Mandatory for conditions CONTAINS, EQUALS, MATCHES, STARTS_WITH, ENDS_WITH; must be null when condition is EXISTS; should be a valid CIDR if provided and if type is SOURCE_IP.
