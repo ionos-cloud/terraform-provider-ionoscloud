@@ -34,8 +34,9 @@ data "ionoscloud_mariadb_cluster" "example" {
 
 * `display_name` - (Optional)[string] Display Name of an existing cluster that you want to search for.
 * `id` - (Optional)[string] ID of the cluster you want to search for.
-* `location` - (Required)[string] The location of the cluster. This is required because different service endpoints are used based on location, possible options are: "de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci".
+* `location`- (Optional)[string] The location of the cluster. Different service endpoints are used based on location, possible options are: "de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci". If not set, the endpoint will be the one corresponding to "de/txl".
 
+> **⚠ WARNING:** `Location` attribute will become required in the future.
 
 Either `display_name` or `id` must be provided. If none or both are provided, the datasource will return an error.
 

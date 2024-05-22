@@ -25,7 +25,7 @@ func dataSourceDBaaSMariaDBCluster() *schema.Resource {
 			"location": {
 				Type:             schema.TypeString,
 				Description:      "The cluster location",
-				Required:         true,
+				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
 			},
 			"display_name": {

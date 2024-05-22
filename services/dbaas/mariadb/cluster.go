@@ -12,6 +12,7 @@ import (
 )
 
 var locationToURL = map[string]string{
+	"":       "https://mariadb.de-txl.ionos.com",
 	"de/fra": "https://mariadb.de-fra.ionos.com",
 	"de/txl": "https://mariadb.de-txl.ionos.com",
 	"es/vit": "https://mariadb.es-vit.ionos.com",
@@ -83,15 +84,7 @@ func (c *MariaDBClient) IsClusterReady(ctx context.Context, d *schema.ResourceDa
 
 func (c *MariaDBClient) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	clusterID := d.Id()
-	var location string
-	// This takes care of the old version of the provider where the location was not required and
-	// all the requests were done for "de/txl" location with the correspondent endpoint.
-	if locationValue, locationOk := d.GetOk("location"); locationOk {
-		location = locationValue.(string)
-	} else {
-		location = "de/txl"
-	}
-	_, apiResponse, err := c.GetCluster(ctx, clusterID, location)
+	_, apiResponse, err := c.GetCluster(ctx, clusterID, d.Get("location").(string))
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return true, nil

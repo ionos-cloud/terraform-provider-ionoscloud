@@ -35,7 +35,8 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 			"location": {
 				Type:             schema.TypeString,
 				Description:      "The cluster location",
-				Required:         true,
+				Optional:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
 			},
 			"instances": {
@@ -179,15 +180,7 @@ func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta inte
 func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).MariaDBClient
 	clusterID := d.Id()
-	var location string
-	// This takes care of the old version of the provider where the location was not required and
-	// all the requests were done for "de/txl" location with the correspondent endpoint.
-	if locationValue, locationOk := d.GetOk("location"); locationOk {
-		location = locationValue.(string)
-	} else {
-		location = "de/txl"
-	}
-	_, apiResponse, err := client.DeleteCluster(ctx, d.Id(), location)
+	_, apiResponse, err := client.DeleteCluster(ctx, d.Id(), d.Get("location").(string))
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -242,16 +235,7 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta inte
 func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).MariaDBClient
 	clusterID := d.Id()
-	var location string
-	// This takes care of the old version of the provider where the location was not required and
-	// all the requests were done for "de/txl" location with the correspondent endpoint.
-	if locationValue, locationOk := d.GetOk("location"); locationOk {
-		location = locationValue.(string)
-	} else {
-		location = "de/txl"
-	}
-
-	cluster, apiResponse, err := client.GetCluster(ctx, clusterID, location)
+	cluster, apiResponse, err := client.GetCluster(ctx, clusterID, d.Get("location").(string))
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")

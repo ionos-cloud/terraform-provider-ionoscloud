@@ -86,7 +86,7 @@ resource "random_password" "cluster_password" {
 
 * `mariadb_version` - (Required)[string] The MariaDB version of your cluster.
 * `instances` - (Required)[int] The total number of instances in the cluster (one primary and n-1 secondary).
-* `location`- (Required)[string] The location in which the cluster will be created. This is required because different service endpoints are used based on location, possible options are: "de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci".
+* `location`- (Optional)[string] The location in which the cluster will be created. Different service endpoints are used based on location, possible options are: "de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci". If not set, the endpoint will be the one corresponding to "de/txl".
 * `cores` - (Required)[int] The number of CPU cores per instance.
 * `ram` - (Required)[int] The amount of memory per instance in gigabytes (GB).
 * `storage_size` - (Required)[int] The amount of storage per instance in gigabytes (GB).
@@ -102,6 +102,8 @@ resource "random_password" "cluster_password" {
     * `username` - (Required)[string] The username for the initial MariaDB user. Some system usernames are restricted (e.g 'mariadb', 'admin', 'standby').
     * `password` - (Required)[string] The password for a MariaDB user.
 * `dns_name` - (Computed)[string] The DNS name pointing to your cluster.
+
+> **⚠ WARNING:** `Location` attribute will become required in the future.
 
 ## Import
 

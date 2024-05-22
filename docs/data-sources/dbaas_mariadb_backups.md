@@ -15,8 +15,8 @@ The **DBaaS MariaDB Backups data source** can be used to search for and return e
 
 ### Get all backups for a specific cluster
 ```hcl
-data "ionoscloud_mariadb_backups" "example" {
-	cluster_id = <cluster_id>
+data "ionoscloud_mariadb_backups" "example" { 
+    cluster_id = <cluster_id>
     location   = "de/txl"
 }
 ```
@@ -24,7 +24,7 @@ data "ionoscloud_mariadb_backups" "example" {
 ### Get a specific backup
 ```hcl
 data "ionoscloud_mariadb_backups" "example" {
-	backup_id = <backup_id>
+    backup_id = <backup_id>
     location   = "de/txl"
 }
 ```
@@ -33,9 +33,12 @@ data "ionoscloud_mariadb_backups" "example" {
 
 * `cluster_id` - (Optional)[string] The unique ID of the cluster.
 * `backup_id` - (Optional)[string] The unique ID of the backup.
-* `location` - (Required)[string] The location of the cluster. This is required because different service endpoints are used based on location, possible options are: "de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci".
+* `location`- (Optional)[string] The location of the cluster. Different service endpoints are used based on location, possible options are: "de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci". If not set, the endpoint will be the one corresponding to "de/txl".
 
 ⚠️ **Note:** Either `cluster_id` or `backup_id` must be used, but not both at the same time.
+
+> **⚠ WARNING:** `Location` attribute will become required in the future.
+
 
 ## Attributes Reference
 
