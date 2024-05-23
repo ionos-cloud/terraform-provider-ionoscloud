@@ -69,17 +69,17 @@ The following attributes are returned by the datasource:
 * `storage_size` - The size of the volume in GB. The size should be greater than 10GB.
 * `k8s_version` - The kubernetes version
 * `maintenance_window` - A maintenance window comprise of a day of the week and a time for maintenance to be allowed
-  * `time` - A clock time in the day when maintenance is allowed
-  * `day_of_the_week` - Day of the week when maintenance is allowed
+    * `time` - A clock time in the day when maintenance is allowed
+    * `day_of_the_week` - Day of the week when maintenance is allowed
 * `auto_scaling` - The range defining the minimum and maximum number of worker nodes that the managed node group can scale in
-  * `min_node_count` - The minimum number of worker nodes the node pool can scale down to
-  * `max_node_count` - The maximum number of worker nodes that the node pool can scale to
+    * `min_node_count` - The minimum number of worker nodes the node pool can scale down to
+    * `max_node_count` - The maximum number of worker nodes that the node pool can scale to
 * `lans` - A list of Local Area Networks the node pool is a part of
-  * `id` - The LAN ID of an existing LAN at the related datacenter
-  * `dhcp` - Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP
-  * `routes` - An array of additional LANs attached to worker nodes
-    * `network` - IPv4 or IPv6 CIDR to be routed via the interface
-    * `gateway_ip` - IPv4 or IPv6 Gateway IP for the route
+    * `id` - The LAN ID of an existing LAN at the related datacenter
+    * `dhcp` - Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP
+    * `routes` - An array of additional LANs attached to worker nodes
+        - `network` - IPv4 or IPv6 CIDR to be routed via the interface
+        - `gateway_ip` - IPv4 or IPv6 Gateway IP for the route
 * `labels` - A map of labels in the form of key -> value
 * `annotations` - A map of annotations in the form of key -> value
 * `available_upgrade_versions` - A list of kubernetes versions available for upgrade

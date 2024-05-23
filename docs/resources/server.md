@@ -260,8 +260,8 @@ resource "ionoscloud_server" "test" {
 - `template_uuid` - (Optional)[string] The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
 - `name` - (Required)[string] The name of the server.
 - `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
-- `cores` - (Optional)[integer] Number of server CPU cores.
-- `ram` - (Optional)[integer] The amount of memory for the server in MB.
+- `cores` - (Optional)(Computed)[integer] Number of server CPU cores.
+- `ram` - (Optional)(Computed)[integer] The amount of memory for the server in MB.
 - `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist. E.g: `AUTO`, `ZONE_1`, `ZONE_2`. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
@@ -271,7 +271,7 @@ resource "ionoscloud_server" "test" {
 - `nic` - (Optional) See the [Nic](nic.md) section.
 - `firewall` - (Optional) Allows to define firewall rules inline in the server. See the [Firewall](firewall.md) section.
 - `boot_volume` - (Computed) The associated boot volume.
-- `boot_cdrom` - ***DEPRECATED*** Please refer to [ionoscloud_server_boot_device_selection](server_boot_device_selection.md) (Optional)[string] The associated boot drive, if any. Must be the UUID of a bootable CDROM image that can be retrieved using the [ionoscloud_image](../data-sources/image.md) data source.
+- `boot_cdrom` - ***DEPRECATED*** Please refer to [ionoscloud_server_boot_device_selection](server_boot_device_selection.md) (Optional)(Computed)[string] The associated boot drive, if any. Must be the UUID of a bootable CDROM image that can be retrieved using the [ionoscloud_image](../data-sources/image.md) data source.
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.
@@ -280,8 +280,10 @@ resource "ionoscloud_server" "test" {
 - `ssh_key_path` - (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided. Does not support `~` expansion to homedir in the given path. This property is immutable.
 - `ssh_keys` - (Optional)[list] Immutable List of absolute or relative paths to files containing public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation. Does not support `~` expansion to homedir in the given path.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
-- `type` - (Optional)[string] Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes). This property is immutable.
-- `label` - (Optional) A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.
+- `type` - (Optional)(Computed)[string] Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes). This property is immutable.
+- `label` - (Optional)[set] A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.
+    - `key` - (Required)[string] The key of the label.
+    - `value` - (Required)[string] The value of the label.
 - `inline_volume_ids` - (Computed) A list with the IDs for the volumes that are defined inside the server resource.
 
 > **⚠ WARNING** 

@@ -2,6 +2,10 @@
 ### Fixes
 - correctly raise immutable error for changes to `template_uuid` when running `terraform plan` for Cube servers 
 
+### Documentation
+- update `ionoscloud_user` documentation. Fix `administrator` and add other fields description
+- change to have nested lists show correctly in tf registry docs
+
 ## 6.4.16
 ### Enhancements
 - Modify DBaaS workflow to run tests in multiple stages for every service (Mongo, MariaDB, PgSQL) rather than running all tests in one stage

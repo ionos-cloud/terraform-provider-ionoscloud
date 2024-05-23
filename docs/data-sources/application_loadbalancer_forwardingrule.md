@@ -75,8 +75,8 @@ The following attributes are returned by the datasource:
     - `response_message` - The response message of the request; mandatory for STATIC action.
     - `content_type` - Valid only for STATIC actions.
     - `conditions` - An array of items in the collection.The action is only performed if each and every condition is met; if no conditions are set, the rule will always be performed.
-        - `type` - Type of the Http Rule condition.
-        - `condition` - Matching rule for the HTTP rule condition attribute; mandatory for HEADER, PATH, QUERY, METHOD, HOST, and COOKIE types; must be null when type is SOURCE_IP.
-        - `negate` - Specifies whether the condition is negated or not; the default is False.
-        - `key` - Must be null when type is PATH, METHOD, HOST, or SOURCE_IP. Key can only be set when type is COOKIES, HEADER, or QUERY.
-        - `value` - Mandatory for conditions CONTAINS, EQUALS, MATCHES, STARTS_WITH, ENDS_WITH; must be null when condition is EXISTS; should be a valid CIDR if provided and if type is SOURCE_IP.
+        * `type` - Type of the Http Rule condition.
+        * `condition` - Matching rule for the HTTP rule condition attribute; mandatory for HEADER, PATH, QUERY, METHOD, HOST, and COOKIE types; must be null when type is SOURCE_IP.
+        * `negate` - Specifies whether the condition is negated or not; the default is False.
+        *  `key` - Must be null when type is PATH, METHOD, HOST, or SOURCE_IP. Key can only be set when type is COOKIES, HEADER, or QUERY.
+        *  `value` - Mandatory for conditions CONTAINS, EQUALS, MATCHES, STARTS_WITH, ENDS_WITH; must be null when condition is EXISTS; should be a valid CIDR if provided and if type is SOURCE_IP.

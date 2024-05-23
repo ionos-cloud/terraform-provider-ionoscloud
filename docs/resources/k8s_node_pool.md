@@ -98,17 +98,17 @@ The following arguments are supported:
 - `name` - (Required)[string] The name of the Kubernetes Cluster. *This attribute is immutable*.
 - `k8s_version` - (Optional)[string] The desired Kubernetes Version. For supported values, please check the API documentation. Downgrades are not supported. The provider will ignore downgrades of patch level.
 - `auto_scaling` - (Optional)[string] Wether the Node Pool should autoscale. For more details, please check the API documentation
-  - `min_node_count` - (Optional)[int] The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count
-  - `max_node_count` - (Optional)[int] The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count
+    - `min_node_count` - (Optional)[int] The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count
+    - `max_node_count` - (Optional)[int] The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count
 - `lans` - (Optional)[list] A list of numeric LAN id's you want this node pool to be part of. For more details, please check the API documentation, as well as the example above
-  - `id` - (Required)[int] The LAN ID of an existing LAN at the related datacenter
-  - `dhcp` - (Optional)[boolean] Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP. Default value is `true`
-  - `routes` - (Optional) An array of additional LANs attached to worker nodes
-    - `network` - (Required)[string] IPv4 or IPv6 CIDR to be routed via the interface
-    - `gateway_ip` - (Required)[string] IPv4 or IPv6 Gateway IP for the route
+    - `id` - (Required)[int] The LAN ID of an existing LAN at the related datacenter
+    - `dhcp` - (Optional)[boolean] Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP. Default value is `true`
+    - `routes` - (Optional) An array of additional LANs attached to worker nodes
+        * `network` - (Required)[string] IPv4 or IPv6 CIDR to be routed via the interface
+        * `gateway_ip` - (Required)[string] IPv4 or IPv6 Gateway IP for the route
 - `maintenance_window` - (Optional) See the **maintenance_window** section in the example above
-  - `time` - (Required)[string] A clock time in the day when maintenance is allowed
-  - `day_of_the_week` - (Required)[string] Day of the week when maintenance is allowed
+    - `time` - (Required)[string] A clock time in the day when maintenance is allowed
+    - `day_of_the_week` - (Required)[string] Day of the week when maintenance is allowed
 - `datacenter_id` - (Required)[string] A Datacenter's UUID
 - `k8s_cluster_id`- (Required)[string] A k8s cluster's UUID
 - `cpu_family` - (Required)[string] The desired CPU Family - See the API documentation for more information. *This attribute is immutable*.

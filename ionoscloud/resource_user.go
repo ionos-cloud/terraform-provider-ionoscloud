@@ -38,6 +38,7 @@ func resourceUser() *schema.Resource {
 			"email": {
 				Type:             schema.TypeString,
 				Required:         true,
+				Description:      "Email address of the user",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				DiffSuppressFunc: utils.DiffToLower,
 			},
@@ -48,24 +49,28 @@ func resourceUser() *schema.Resource {
 				Sensitive:        true,
 			},
 			"administrator": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Indicates if the user has administrative rights. Administrators do not need to be managed in groups, as they automatically have access to all resources associated with the contract.",
+				Optional:    true,
 			},
 			"force_sec_auth": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Indicates if secure (two-factor) authentication is forced for the user",
+				Optional:    true,
 			},
 			"sec_auth_active": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Description: "Indicates if secure (two-factor) authentication is active for the user. It can not be used in create requests - can be used in update.",
+				Computed:    true,
 			},
 			"s3_canonical_user_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"active": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Indicates if the user is active",
+				Optional:    true,
 			},
 			"group_ids": {
 				Type:     schema.TypeSet,
@@ -189,7 +194,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	userReq := ionoscloud.UserPut{
 		Properties: &ionoscloud.UserPropertiesPut{},
 	}
-	//this is a PUT, so we first fill everything, then we change what has been modified
+	// this is a PUT, so we first fill everything, then we change what has been modified
 	if foundUser.Properties != nil {
 		userReq.Properties.Firstname = foundUser.Properties.Firstname
 		userReq.Properties.Lastname = foundUser.Properties.Lastname
