@@ -58,10 +58,10 @@ resource "random_password" "user_password" {
 
 ## Argument reference
 
-* `administrator` - (Required)[Boolean] The group has permission to edit privileges on this resource.
+* `administrator` - (Required)[Boolean] Indicates if the user has administrative rights. Administrators do not need to be managed in groups, as they automatically have access to all resources associated with the contract.
 * `email` - (Required)[string] An e-mail address for the user.
 * `first_name` - (Required)[string] A first name for the user.
-* `force_sec_auth` - (Required)[Boolean] Indicates if secure (two-factor) authentication should be enabled for the user (true) or not (false).
+* `force_sec_auth` - (Required)[Boolean] Indicates if secure (two-factor) authentication should be forced for the user (true) or not (false).
 * `last_name` - (Required)[string] A last name for the user.
 * `password` - (Required)[string] A password for the user.
 * `sec_auth_active` - (Optional)[Boolean] Indicates if secure authentication is active for the user or not. *it can not be used in create requests - can be used in update*

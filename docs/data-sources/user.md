@@ -45,10 +45,10 @@ Either `email` or `id` can be provided. If no argument is set, the provider will
 The following attributes are returned by the datasource:
 
 * `id` - The id of the user.
-* `administrator` - The group has permission to edit privileges on this resource.
+* `administrator` - Indicates if the user has administrative rights. Administrators do not need to be managed in groups, as they automatically have access to all resources associated with the contract.
 * `email` - The e-mail address for the user.
 * `first_name` - The first name for the user.
-* `force_sec_auth` - Indicates if secure (two-factor) authentication should be enabled for the user (true) or not (false).
+* `force_sec_auth` - Indicates if secure (two-factor) authentication should be forced for the user (true) or not (false).
 * `last_name` - The last name for the user.
 * `password` - The password for the user.
 * `sec_auth_active` - Indicates if secure authentication is active for the user or not
