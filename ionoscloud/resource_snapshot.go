@@ -214,7 +214,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(ctx, d.Id()).Snapshot(*input).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a snapshot ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while restoring a snapshot ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -231,7 +231,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	apiResponse, err := client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a snapshot ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a snapshot ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -255,7 +255,7 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find snapshot %q", snapshotId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the snapshot %q, %w", snapshotId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving the snapshot %q, %w", snapshotId, err)
 	}
 
 	log.Printf("[INFO] snapshot %s found: %+v", d.Id(), snapshot)
