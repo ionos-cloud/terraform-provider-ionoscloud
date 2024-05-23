@@ -140,7 +140,7 @@ issues:
         - unparam
     
     # Disable 'unused' warning in test utilities file
-    - path: testUtil.go
+    - path: testUtil.go, test_constants.go
       linters:
         - unused
     
