@@ -140,7 +140,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	rsp, apiResponse, err := request.Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a snapshot: %w ", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a snapshot: %w ", err))
 		return diags
 	}
 
@@ -166,7 +166,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a snapshot ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a snapshot ID %s %w", d.Id(), err))
 		return diags
 	}
 

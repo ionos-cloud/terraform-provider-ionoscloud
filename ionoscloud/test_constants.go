@@ -327,8 +327,8 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 
 const testSnapshotServer = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
-	name       = "server-test"
-	location = "us/las"
+  name     = "server-test"
+  location = "us/las"
 }
 
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
