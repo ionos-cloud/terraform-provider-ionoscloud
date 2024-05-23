@@ -138,6 +138,7 @@ issues:
         - gosec
         - scopelint
         - unparam
+        - unused
     
     # Disable 'unused' warning in test utilities file
     - path: test*.go
