@@ -4,17 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
-	"time"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 )
 
 func resourceSnapshot() *schema.Resource {
@@ -36,11 +32,13 @@ func resourceSnapshot() *schema.Resource {
 			"description": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Optional:    true,
 				Description: "Human readable description",
 			},
 			"licence_type": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Optional:    true,
 				Description: "OS type of this Snapshot",
 			},
 			"location": {
@@ -56,10 +54,12 @@ func resourceSnapshot() *schema.Resource {
 			"sec_auth_protection": {
 				Type:        schema.TypeBool,
 				Computed:    true,
+				Optional:    true,
 				Description: "Boolean value representing if the snapshot requires extra protection e.g. two factor protection",
 			},
 			"cpu_hot_plug": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 			},
 			"cpu_hot_unplug": {
@@ -68,6 +68,7 @@ func resourceSnapshot() *schema.Resource {
 			},
 			"ram_hot_plug": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 			},
 			"ram_hot_unplug": {
@@ -76,18 +77,22 @@ func resourceSnapshot() *schema.Resource {
 			},
 			"nic_hot_plug": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 			},
 			"nic_hot_unplug": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 			},
 			"disc_virtio_hot_plug": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 			},
 			"disc_virtio_hot_unplug": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 			},
 			"disc_scsi_hot_plug": {
@@ -122,7 +127,17 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	volumeId := d.Get("volume_id").(string)
 	name := d.Get("name").(string)
 
-	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Name(name).Execute()
+	request := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Name(name)
+	if v, ok := d.GetOk("description"); ok {
+		request = request.Description(v.(string))
+	}
+	if v, ok := d.GetOk("licence_type"); ok {
+		request = request.LicenceType(v.(string))
+	}
+	if v, ok := d.GetOk("sec_auth_protection"); ok {
+		request = request.SecAuthProtection(v.(bool))
+	}
+	rsp, apiResponse, err := request.Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a snapshot: %w ", err))
@@ -166,14 +181,40 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	name := d.Get("name").(string)
-	input := ionoscloud.SnapshotProperties{
-		Name: &name,
-	}
+	input := ionoscloud.NewSnapshotProperties()
+	input.Name = &name
 
-	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(context.TODO(), d.Id()).Snapshot(input).Execute()
+	if d.HasChange("description") {
+		input.Description = ionoscloud.ToPtr(d.Get("description").(string))
+	}
+	if d.HasChange("licence_type") {
+		input.LicenceType = ionoscloud.ToPtr(d.Get("licence_type").(string))
+	}
+	if d.HasChange("sec_auth_protection") {
+		input.SecAuthProtection = ionoscloud.ToPtr(d.Get("sec_auth_protection").(bool))
+	}
+	if d.HasChange("cpu_hot_plug") {
+		input.CpuHotPlug = ionoscloud.ToPtr(d.Get("cpu_hot_plug").(bool))
+	}
+	if d.HasChange("nic_hot_plug") {
+		input.NicHotPlug = ionoscloud.ToPtr(d.Get("nic_hot_plug").(bool))
+	}
+	if d.HasChange("nic_hot_unplug") {
+		input.NicHotUnplug = ionoscloud.ToPtr(d.Get("nic_hot_unplug").(bool))
+	}
+	if d.HasChange("ram_hot_plug") {
+		input.RamHotPlug = ionoscloud.ToPtr(d.Get("ram_hot_plug").(bool))
+	}
+	if d.HasChange("disc_virtio_hot_plug") {
+		input.DiscVirtioHotPlug = ionoscloud.ToPtr(d.Get("disc_virtio_hot_plug").(bool))
+	}
+	if d.HasChange("disc_virtio_hot_unplug") {
+		input.DiscVirtioHotUnplug = ionoscloud.ToPtr(d.Get("disc_virtio_hot_unplug").(bool))
+	}
+	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(ctx, d.Id()).Snapshot(*input).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a snapshot ID %s %d", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a snapshot ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -187,45 +228,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 
-	rsp, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
-	logApiRequestTime(apiResponse)
-	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %w", d.Id(), err))
-		return diags
-	}
-
-	for !strings.EqualFold(*rsp.Metadata.State, constant.Available) {
-		time.Sleep(30 * time.Second)
-		_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %w", d.Id(), err))
-			return diags
-		}
-	}
-
-	dcId := d.Get("datacenter_id").(string)
-	dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err))
-		return diags
-	}
-
-	for !strings.EqualFold(*dc.Metadata.State, constant.Available) {
-		time.Sleep(30 * time.Second)
-		_, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err))
-			return diags
-		}
-	}
-
-	apiResponse, err = client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
+	apiResponse, err := client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a snapshot ID %s %w", d.Id(), err))
@@ -252,7 +255,7 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find snapshot %q", snapshotId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the snapshot %q, %q", snapshotId, err)
+		return nil, fmt.Errorf("an error occured while retrieving the snapshot %q, %w", snapshotId, err)
 	}
 
 	log.Printf("[INFO] snapshot %s found: %+v", d.Id(), snapshot)

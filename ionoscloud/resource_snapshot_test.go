@@ -32,6 +32,8 @@ func TestAccSnapshotBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnapshotExists(constant.SnapshotResource+"."+constant.SnapshotTestResource, &snapshot),
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "name", constant.SnapshotTestResource),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "description", constant.SnapshotTestResource),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "sec_auth_protection", "true"),
 				),
 			},
 			{
@@ -113,6 +115,13 @@ func TestAccSnapshotBasic(t *testing.T) {
 				Config: testAccCheckSnapshotConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "description", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "sec_auth_protection", "false"),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "cpu_hot_plug", "false"),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "nic_hot_plug", "false"),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "ram_hot_plug", "false"),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_unplug", "false"),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_plug", "false"),
 				),
 			},
 		},
@@ -181,24 +190,33 @@ func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resourc
 	}
 }
 
-const testAccCheckSnapshotConfigBasic = testAccCheckServerConfigBasic + `
+const testAccCheckSnapshotConfigBasic = testSnapshotServer + `
 resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   volume_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.boot_volume
   name = "` + constant.SnapshotTestResource + `"
+  description = "` + constant.SnapshotTestResource + `"
+  sec_auth_protection = true
 }
 `
 
-const testAccCheckSnapshotConfigUpdate = testAccCheckServerConfigBasic + `
+const testAccCheckSnapshotConfigUpdate = testSnapshotServer + `
 resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   volume_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.boot_volume
   name = "` + constant.UpdatedResources + `"
+  description = "` + constant.UpdatedResources + `"
+  sec_auth_protection = false
+  cpu_hot_plug = false
+  nic_hot_plug = false
+  disc_virtio_hot_plug = true
+  disc_virtio_hot_unplug = false
+  ram_hot_plug = false
 }`
 
 const testAccDataSourceSnapshotMatchId = testAccCheckSnapshotConfigBasic + `
 data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceById + ` {
-  id			= ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.id
+  id = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.id
 }`
 
 const testAccDataSourceSnapshotMatching = testAccCheckSnapshotConfigBasic + `
