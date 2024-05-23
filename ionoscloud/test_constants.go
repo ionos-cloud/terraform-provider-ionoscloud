@@ -350,7 +350,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
 }
-` + ServerImagePassword
+` + ServerImagePassword // nolint:unused
 
 // Solves  #372 crash when ips field in nic resource is a list with an empty string
 const testAccCheckServerConfigEmptyNicIps = `
