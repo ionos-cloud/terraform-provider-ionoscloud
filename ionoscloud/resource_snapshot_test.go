@@ -34,6 +34,7 @@ func TestAccSnapshotBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "name", constant.SnapshotTestResource),
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "description", constant.SnapshotTestResource),
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "sec_auth_protection", "true"),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "licence_type", "LINUX"),
 				),
 			},
 			{
@@ -121,7 +122,8 @@ func TestAccSnapshotBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "nic_hot_plug", "false"),
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "ram_hot_plug", "false"),
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_unplug", "false"),
-					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_plug", "false"),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_plug", "true"),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "licence_type", "OTHER"),
 				),
 			},
 		},
@@ -197,6 +199,7 @@ resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + `
   name = "` + constant.SnapshotTestResource + `"
   description = "` + constant.SnapshotTestResource + `"
   sec_auth_protection = true
+  licence_type = "LINUX"
 }
 `
 
@@ -212,6 +215,7 @@ resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + `
   disc_virtio_hot_plug = true
   disc_virtio_hot_unplug = false
   ram_hot_plug = false
+  licence_type = "OTHER"
 }`
 
 const testAccDataSourceSnapshotMatchId = testAccCheckSnapshotConfigBasic + `

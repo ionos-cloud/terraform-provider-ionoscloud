@@ -1,13 +1,13 @@
 ## 6.4.17
 ### Fixes
-- correctly raise immutable error for changes to `template_uuid` when running `terraform plan` for Cube servers 
+- Correctly raise immutable error for changes to `template_uuid` when running `terraform plan` for Cube servers 
 
 ### Documentation
-- update `ionoscloud_user` documentation. Fix `administrator` and add other fields description
-- change to have nested lists show correctly in tf registry docs
+- Update `ionoscloud_user` documentation. Fix `administrator` and add other fields description
+- Change to have nested lists show correctly in tf registry docs
 
 ### Enhancements
-- add configurable fields to `ionoscloud_share` resource. Fields that can be set on creation: `description`, `sec_auth_protection`, `licence_type`. 
+- Add configurable fields to `ionoscloud_share` resource. Fields that can be set on creation: `description`, `sec_auth_protection`, `licence_type`. 
 Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug`, `disc_virtio_hot_unplug`, `ram_hot_plug`.
 
 ## 6.4.16
@@ -37,7 +37,7 @@ Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`,
 ### Fixes
 - #524 `filters` is now optional for `ionoscloud_servers` data source. If not provided, all servers in the configured datacenter will be returned.
 - `filters` is now optional for `ionoscloud_clusters` data source. If not provided, all k8s clusters will be returned.
-- populate `server` field for k8s cluster data sources
+- Populate `server` field for k8s cluster data sources
 
 ### Documentation
 - Update documentation for pgsql cluster and mongo cluster
@@ -114,7 +114,7 @@ failover group. The resources that are created using Terraform cannot be modifie
 - Cloud DNS is now Generally Available
 - Data Platform is now in Generally Available
 - #451 update go sdk, allow `IONOS_CONTRACT_NUMBER` to be used to run terraform on different contract numbers for reseller accounts
-- update dependency for terraform-plugin-sdk. Stop using deprecated functions from `resource` package
+- Update dependency for terraform-plugin-sdk. Stop using deprecated functions from `resource` package
 
 
 ## 6.4.8
@@ -123,9 +123,9 @@ failover group. The resources that are created using Terraform cannot be modifie
 - `ssh_keys` was no longer being set if server was not vcpu.
 - `ssh_keys` will no longer be computed on any type of server
 - `ssh_key_path` will now be set to schema on creation
-- setting explicit `ipv6_cidr_block` on `nic` resource.
-- ipv6 fields `dhcpv6`, `ipv6_cidr_block`, `ipv6_ips` not updating correctly on `ionoscloud_server` and `ionoscloud_cube_server`
-- issue caused by `dhcpv6` field for plans which do not enable the IPv6 feature
+- Setting explicit `ipv6_cidr_block` on `nic` resource.
+- Ipv6 fields `dhcpv6`, `ipv6_cidr_block`, `ipv6_ips` not updating correctly on `ionoscloud_server` and `ionoscloud_cube_server`
+- Issue caused by `dhcpv6` field for plans which do not enable the IPv6 feature
 - #449. Increase `NotFoundChecks` to 9999.
 ### Documentation
 - Example IPv6 usage for `ionoscloud_server` and `ionoscloud_cube_server`
@@ -328,7 +328,7 @@ is `not found`(404)
 - Crash on update of k8s version when we have a value without `.`
 
 ### Documentation
-- add links to documentation for `cube` and `enterprise` fields
+- Add links to documentation for `cube` and `enterprise` fields
 
 ## 6.3.1
 
@@ -358,83 +358,83 @@ is `not found`(404)
 
 ## 6.2.5
 ### Enhancement
-- update sdk-go dependency to v6.0.3. 
+- Update sdk-go dependency to v6.0.3. 
   * enable certificate pinning, by setting IONOS_PINNED_CERT env variable
-- temporarily removed `gateway_ip` and `public` fields for k8s
-- introduced error when trying to set `max_node_count` equal to `min_node_count` in `k8s_node_pool`
+- Temporarily removed `gateway_ip` and `public` fields for k8s
+- Introduced error when trying to set `max_node_count` equal to `min_node_count` in `k8s_node_pool`
 
 ### Fixes 
-- fixed crash when trying to disable `autoscaling` on `k8s_node_pool`
+- Crash when trying to disable `autoscaling` on `k8s_node_pool`
 
 ## 6.2.4
 ### Fixes
-- fixed bug when upgrading from a v6.0.0-beta.X version to a stable one (_number is required_ error)
-- reintroduced error for image data source when finding multiple results with data source
+- Bug when upgrading from a v6.0.0-beta.X version to a stable one (_number is required_ error)
+- Reintroduced error for image data source when finding multiple results with data source
 ### Enhancement
-- update sdk-go-dbaas-postgres dependency to v1.0.3
+- Update sdk-go-dbaas-postgres dependency to v1.0.3
 
 ### Documentation
-- updated multiple nics under the same IP Failover example, with a [one_step example](examples/ip_failover/README.md)
+- Updated multiple nics under the same IP Failover example, with a [one_step example](examples/ip_failover/README.md)
 
 ## 6.2.3
 
 ### Fixes
-- do not allow empty string AvailabilityZone. Only allow "AUTO", "ZONE_1", "ZONE_2", "ZONE_3"
-- type field in server resource should be case-insensitive
-- remove deprecated image_name field on volume level from server resource
-- solve #266 crash on resource_volume when using image_alias with no image_password, or ssh_key_path
+- Do not allow empty string AvailabilityZone. Only allow "AUTO", "ZONE_1", "ZONE_2", "ZONE_3"
+- Type field in server resource should be case-insensitive
+- Remove deprecated image_name field on volume level from server resource
+- Solve #266 crash on resource_volume when using image_alias with no image_password, or ssh_key_path
 
 ### Features
-- added `group_ids` property for `ionoscloud_user` resource. For more details refer to the [documentation](docs/resources/user.md)
-- added `groups` property for `ionoscloud_user` data source. For more details refer to the [documentation](docs/data-sources/user.md)
+- Added `group_ids` property for `ionoscloud_user` resource. For more details refer to the [documentation](docs/resources/user.md)
+- Added `groups` property for `ionoscloud_user` data source. For more details refer to the [documentation](docs/data-sources/user.md)
 
 ## 6.2.2
 
 ### Fix
-- fixed error from upgrading from 6.2.0 to 6.2.1 (version compatibility issue)
+- Fixed error from upgrading from 6.2.0 to 6.2.1 (version compatibility issue)
 
 ## 6.2.1
 
 ### Documentation
-- improved all the examples to be ready to use 
-- added units where missing
-- added example for adding a secondary NIC to an IP Failover
-- updated provider version to the latest release in main registry page
-- added details in [README.md](README.md) about testing locally
+- Improved all the examples to be ready to use 
+- Added units where missing
+- Added example for adding a secondary NIC to an IP Failover
+- Updated provider version to the latest release in main registry page
+- Added details in [README.md](README.md) about testing locally
 
 ### Enhancement
-- add `allow_replace` to node pool resource, which allows the update of immutable node_pool fields will first
+- Add `allow_replace` to node pool resource, which allows the update of immutable node_pool fields will first
   destroy and then re-create the resource. This field should be used with care, understanding the risks.
-- update sdk-go dependency to v6.0.2
-- update sdk-go-dbaas-postgres dependency to v1.0.2
-- update terraform-plugin-sdk to v2.12.0
-- token and username+password does not conflict anymore, all three can be set, the token having priority
+- Update sdk-go dependency to v6.0.2
+- Update sdk-go-dbaas-postgres dependency to v1.0.2
+- Update terraform-plugin-sdk to v2.12.0
+- Token and username+password does not conflict anymore, all three can be set, the token having priority
 
 ### Features 
-- added `backup_location` property for `ionoscloud_pg_cluster`. For more details refer to the [documentation](docs/resources/dbaas_pgsql_cluster.md)
+- Added `backup_location` property for `ionoscloud_pg_cluster`. For more details refer to the [documentation](docs/resources/dbaas_pgsql_cluster.md)
 
 ### Fixes
-- fixed image data-source bug when `name` not provided - data-source returned 0 results
-- when you try to change an immutable field, you get an error, but before that the tf state is changed. 
+- Fixed image data-source bug when `name` not provided - data-source returned 0 results
+- When you try to change an immutable field, you get an error, but before that the tf state is changed. 
 Before applying a real change you need to `apply` it back with an error again. 
 To fix, when you try to change immutable fields they will throw an error in the plan phase.
-- reintroduced in group resource the `user_id` argument, as deprecated, to provide a period of transition
-- check slice length to prevent crash
-- fixed k8s_cluster data_source bug when searching by name 
-- fix lan deletion error, when trying to delete it immediately after the deletion of the DBaaS cluster that contained it
+- Reintroduced in group resource the `user_id` argument, as deprecated, to provide a period of transition
+- Check slice length to prevent crash
+- Fixed k8s_cluster data_source bug when searching by name 
+- Fix lan deletion error, when trying to delete it immediately after the deletion of the DBaaS cluster that contained it
 
 ## 6.2.0
 
 ### Enhancement
-- modified group_resource to accept multiple users. **Note: Modify your plan according to the documentation**
+- Modified group_resource to accept multiple users. **Note: Modify your plan according to the documentation**
 
 ## 6.1.6
 
 ### Fixes
-- fixed data sources to provide an exact match (roll-back to 6.1.3 + errors in case of multiple results)
+- Fixed data sources to provide an exact match (roll-back to 6.1.3 + errors in case of multiple results)
 
 ### Documentation
-- updated k8s cluster and node pool version from examples
+- Updated k8s cluster and node pool version from examples
 
 ## 6.1.5
 
@@ -444,41 +444,41 @@ To fix, when you try to change immutable fields they will throw an error in the 
 - Set backoff time to 4s.
 
 ### Documentation:
-- updated gitbook documentation with `legal` subheading
+- Updated gitbook documentation with `legal` subheading
 
 ## 6.1.4
 
 ### Enhancements:
-- improved lookup in data_sources by using filters
-- improved tests duration by moving steps from data_source test files in the corresponding resource test files 
-- added workflow to run tests from GitHub actions 
-- split tests with build tags
-- improve http client performance and timeouts
+- Improved lookup in data_sources by using filters
+- Improved tests duration by moving steps from data_source test files in the corresponding resource test files 
+- Added workflow to run tests from GitHub actions 
+- Split tests with build tags
+- Improve http client performance and timeouts
 
 ### Documentations: 
-- a more accurate example on how can the cidr be set automatically on a DBaaS Cluster
-- update doc of how to dump kube_config into a file in yaml format.
+- A more accurate example on how can the cidr be set automatically on a DBaaS Cluster
+- Update doc of how to dump kube_config into a file in yaml format.
 
 ### Fixes: 
-- fix on creating a DBaaS Cluster without specifying the maintenance window
-- solve #204 - targets in nlb forwarding rule(switched to Set instead of List), lb_private_ips(set to computed), features in datacenter resources(switched to Set instead of List)
-- fix of plugin crash when updating k8s_node_pool node_count
-- fix of diff when creating a k8s_node_pool without maintenance_window
+- Fix on creating a DBaaS Cluster without specifying the maintenance window
+- Solve #204 - targets in nlb forwarding rule(switched to Set instead of List), lb_private_ips(set to computed), features in datacenter resources(switched to Set instead of List)
+- Fix of plugin crash when updating k8s_node_pool node_count
+- Fix of diff when creating a k8s_node_pool without maintenance_window
 
 ## 6.1.3
 
 ### Features:
-- added **public** parameter for k8s_cluster (creation of private clusters is possible now)
-- added **gateway_ip** parameter for k8s_nodepool
-- added **boot_server** read-only property for volume
+- Added **public** parameter for k8s_cluster (creation of private clusters is possible now)
+- Added **gateway_ip** parameter for k8s_nodepool
+- Added **boot_server** read-only property for volume
 
 ### Fixes:
-- do not diff on gateway ips set as normal ips instead of cidr
+- Do not diff on gateway ips set as normal ips instead of cidr
 
 ### Enhancements:
-- terraform plugin sdk upgrade to v2.10.1
-- use depth explicitly on api calls to improve performance
-- sdk-go updated to v6.0.1
+- Terraform plugin sdk upgrade to v2.10.1
+- Use depth explicitly on api calls to improve performance
+- Sdk-go updated to v6.0.1
 
 
 ## 6.1.2
@@ -506,20 +506,20 @@ To fix, when you try to change immutable fields they will throw an error in the 
 ## 6.0.3
 
 ### Enhancements:
-- improved tests for networkloadbalancer and networkloadbalancer_forwardingrule
+- Improved tests for networkloadbalancer and networkloadbalancer_forwardingrule
 
 ### Fixes:
-- fixed bug regarding updating listener_lan and target_lan on networkloadbalancer
-- fixed diff on availableUpgradeVersions for k8s cluster and nodepool
-- fixed lan deletion - wait for completion of nic deletion
+- Fixed bug regarding updating listener_lan and target_lan on networkloadbalancer
+- Fixed diff on availableUpgradeVersions for k8s cluster and nodepool
+- Fixed lan deletion - wait for completion of nic deletion
 
 ### Documentation:
-- restructured documentation by adding subcategories
+- Restructured documentation by adding subcategories
 
 ## 6.0.2
 
 ### Fixes:
-- fixes #168: Add versioning to allow module import.
+- Fixes #168: Add versioning to allow module import.
 - Modify UserAgent string
 
 ### Documentation:
@@ -538,53 +538,53 @@ To fix, when you try to change immutable fields they will throw an error in the 
 ## 6.0.0
 
 ### Enhancements:
-- added http request time log for api calls
-- updated to go version 1.17, updated to sdk version 6.0.0
-- for `k8s_node_pool`, `nic`, `ipfailover`, and `share`:
+- Added http request time log for api calls
+- Updated to go version 1.17, updated to sdk version 6.0.0
+- For `k8s_node_pool`, `nic`, `ipfailover`, and `share`:
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source, resource and tests files
-- improved tests on natgateway and natgateway_rule
+- Improved tests on natgateway and natgateway_rule
 
 ### Features:
-- import for `nic`, data_source for `nic`, `share`, `ipfailover`
+- Import for `nic`, data_source for `nic`, `share`, `ipfailover`
 
 ### Fixes:
-- k8s_node_pool update node_count and emptying lans and public_ips didn't work
-- fixed bug at creating natgateway_rule - target_subnet was not set properly
-- revert icmp_code and icmp_type to string to allow setting to 0
+- K8s_node_pool update node_count and emptying lans and public_ips didn't work
+- Fixed bug at creating natgateway_rule - target_subnet was not set properly
+- Revert icmp_code and icmp_type to string to allow setting to 0
 - Add additional fixes to improve code stability and prevent crashes. Revert icmp_type and icmp_code inside server resource and add tests.
 - Allow creation of an inner firewall rule for server when updating a terraform plan.
-- fixed issue #155: added stateUpgrader for handling change of lan field structure
-- fix sporadic EOF received when making a lot of https requests to server (fixed in sdk)
-- fixed #154: allow url to start with "http" (fixed in sdk)
-- fixed #92: fix user update, user password change and password field is now sensitive
-- fix crash when no metadata is received from server
+- Fixed issue #155: added stateUpgrader for handling change of lan field structure
+- Fix sporadic EOF received when making a lot of https requests to server (fixed in sdk)
+- Fixed #154: allow url to start with "http" (fixed in sdk)
+- Fixed #92: fix user update, user password change and password field is now sensitive
+- Fix crash when no metadata is received from server
 
 ## 6.0.0-beta.14
 
 ### Fixes:
-- fixed datacenter datasource
+- Fixed datacenter datasource
 
 ### Enhancements:
-- added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
-- for `pcc`, `group`, `user`, `snapshot`, and `volume` :
+- Added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
+- For `pcc`, `group`, `user`, `snapshot`, and `volume` :
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source, resource and tests files
 
 ### Features:
-- added import for `snapshot`, `ipblock`, data_source for `group`, `user`, `ipblock`, `volume`
+- Added import for `snapshot`, `ipblock`, data_source for `group`, `user`, `ipblock`, `volume`
 
 ## 6.0.0-beta.13
 
 ### Fixes:
-- fixed issue #112 can't attach existing volume to server after recreating server
+- Fixed issue #112 can't attach existing volume to server after recreating server
 - `cube server` could not be deleted
-- cannot empty `api_subnet_allow_list` and `s3_buckets`
+- Cannot empty `api_subnet_allow_list` and `s3_buckets`
 
 ### Enhancements:
-- improved data_source for template - now `template` can be searched by any of its arguments
+- Improved data_source for template - now `template` can be searched by any of its arguments
 - **code enhancements**: for `k8s_cluster`:
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
@@ -596,7 +596,7 @@ To fix, when you try to change immutable fields they will throw an error in the 
 - `firewall`: using type argument throws error
 
 ### Enhancements:
-- for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
+- For `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source and resource files (set parameters)
@@ -604,111 +604,111 @@ To fix, when you try to change immutable fields they will throw an error in the 
   - improved import functions
 
 ### Features:
-- data_source for `s3_key`
+- Data_source for `s3_key`
 
 ## 6.0.0-beta.11
 ### Fixes:
-- added `image_alias` to volume
-- removed `public` and `gateway_ip` properties from `k8s_cluster`
+- Added `image_alias` to volume
+- Removed `public` and `gateway_ip` properties from `k8s_cluster`
 
 ### Enhancements:
-- updated sdk-go to `v6.0.0-beta.7`
+- Updated sdk-go to `v6.0.0-beta.7`
 
 ### Features:
-- added `data_sources for `backup_unit` and `firewall_rule`
-- added import for `natgateway`, `natgateway_rule`, `networkloadbalancer` and `networkloadbalancer_forwardingrule`
+- Added `data_sources for `backup_unit` and `firewall_rule`
+- Added import for `natgateway`, `natgateway_rule`, `networkloadbalancer` and `networkloadbalancer_forwardingrule`
 
 ## 6.0.0-beta.10
 
-- issue #19 - fixed update `ssh_key_path` although not changed
-- issue #93 - updated `documentation` for image data source
-- made `backup_unit_id` configurable for volume
-- fixed `server import`
+- Issue #19 - fixed update `ssh_key_path` although not changed
+- Issue #93 - updated `documentation` for image data source
+- Made `backup_unit_id` configurable for volume
+- Fixed `server import`
 
 ## 6.0.0-beta.9
 
-- issue #31 - k8s node pool labels and annotations implemented
-- ipblock `k8s_nodepool_uuid` attribute fixed
-- correctly importing private lans from k8s node pools
+- Issue #31 - k8s node pool labels and annotations implemented
+- Ipblock `k8s_nodepool_uuid` attribute fixed
+- Correctly importing private lans from k8s node pools
 
 ## 6.0.0-beta.8
 
-- fixed set of empty array in terraform state instead of null
+- Fixed set of empty array in terraform state instead of null
 
 ## 6.0.0-beta.7
 
-- k8s security features implemented
+- K8s security features implemented
 
 ## 6.0.0-beta.6
 
-- updated arguments for datacenter, ipblock, location and user
-- issue #72 - fixed find volume image by name
-- error message for immutable node pool attributes
-- issue #84 - fixed build & updated README.md
+- Updated arguments for datacenter, ipblock, location and user
+- Issue #72 - fixed find volume image by name
+- Error message for immutable node pool attributes
+- Issue #84 - fixed build & updated README.md
 
 ## 6.0.0-beta.5
 
-- rollback to the node pool behaviour before the fix of issue #71
-- issue #77 - fix import for k8s nodepool
+- Rollback to the node pool behaviour before the fix of issue #71
+- Issue #77 - fix import for k8s nodepool
 
 ## 6.0.0-beta.4
 
-- fix: issue #71 - recreate nodepool on change of specifications
+- Fix: issue #71 - recreate nodepool on change of specifications
 
 ## 6.0.0-beta.3
 
-- issue #66 - detailed kube config attributes implemented
+- Issue #66 - detailed kube config attributes implemented
 
 ## 6.0.0-beta.2
 
-- updated dependencies 
-- updated server, nic and volume resources with the missing arguments
+- Updated dependencies 
+- Updated server, nic and volume resources with the missing arguments
 
 ## 6.0.0-beta.1
 
-- documentation updates
-- fix: fixes #13 ignore changes of patch level for k8s
+- Documentation updates
+- Fix: fixes #13 ignore changes of patch level for k8s
 
 ## 6.0.0-alpha.4
 
-- documentation updates
+- Documentation updates
 
 ## Enhancements:
-- terraform plugin sdk upgrade to v2.4.3
-- fix: create volume without password
-- fix: ability to create server without image
-- fix: fixes #25 correctly set of dhcp + nil check + added firewall_type field in server resource
-- fix: fixes #39 - new imports for volume, user, group, share, IPfailover and loadbalancer
-- fix: fixes #47 - corrected nic resource to accept a list of strings for ips parameter
-- fix: fixes #36 - correctly setting the active property of the s3 key upon creation
+- Terraform plugin sdk upgrade to v2.4.3
+- Fix: create volume without password
+- Fix: ability to create server without image
+- Fix: fixes #25 correctly set of dhcp + nil check + added firewall_type field in server resource
+- Fix: fixes #39 - new imports for volume, user, group, share, IPfailover and loadbalancer
+- Fix: fixes #47 - corrected nic resource to accept a list of strings for ips parameter
+- Fix: fixes #36 - correctly setting the active property of the s3 key upon creation
 
 ## 6.0.0-alpha.3
 
-- documentation updates
+- Documentation updates
 
 ## 6.0.0-alpha.2
 
 - IONOS_DEBUG env var support for debugging sdk/api request payloads
-- fix: contract number correctly computed when generating backup-unit names
-- fix: segfault avoided on missing volume image
-- test suite improvements
+- Fix: contract number correctly computed when generating backup-unit names
+- Fix: segfault avoided on missing volume image
+- Test suite improvements
 
 ## 6.0.0-alpha.1
 
-- initial v6 version supporting Ionos Cloud API v6
+- Initial v6 version supporting Ionos Cloud API v6
 
 ## 5.1.6
 
-- fixes #5 - correctly dereferencing possibly nil properties received from the api
+- Fixes #5 - correctly dereferencing possibly nil properties received from the api
 
 ## 5.1.5
 
-- fixes #12 - correctly setting up a custom Ionos Cloud API url
+- Fixes #12 - correctly setting up a custom Ionos Cloud API url
 
 ## 5.1.4
 
-- error handling improvements 
-- always displaying the full response body from the API in case of an error
+- Error handling improvements 
+- Always displaying the full response body from the API in case of an error
 
 ## 5.1.3
 
@@ -736,7 +736,7 @@ BUG FIXES:
 ## 5.0.3
 
 FEATURES:
-- new data sources added: k8s_cluster, k8s_node_pool
+- New data sources added: k8s_cluster, k8s_node_pool
 
 ## 5.0.2
 
@@ -747,10 +747,10 @@ BUG FIXES:
 ## 5.0.1
 
 FEATURES:
-- new datasources added: lan, server, private cross connect
+- New datasources added: lan, server, private cross connect
 
 ## 5.0.0
 
 FEATURES:
-- terraform-provider-profitbricks rebranding to terraform-provider-ionoscloud
+- Terraform-provider-profitbricks rebranding to terraform-provider-ionoscloud
 
