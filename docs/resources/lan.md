@@ -28,7 +28,7 @@ resource "ionoscloud_private_crossconnect" "example" {
 
 resource "ionoscloud_lan" "example" {
   datacenter_id         = ionoscloud_datacenter.example.id
-  public                = true
+  public                = false
   name                  = "Lan Example"
   pcc                   = ionoscloud_private_crossconnect.example.id
 }
