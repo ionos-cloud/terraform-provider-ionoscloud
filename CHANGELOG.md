@@ -8,7 +8,7 @@
 
 ### Enhancements
 - add configurable fields to `ionoscloud_share` resource. Fields that can be set on creation: `description`, `sec_auth_protection`, `licence_type`. 
-Updatable fields: `description`, `licence_type`, `nic_hotplub`, `cpu_hotplug`, `nic_hotunplug`, `disc_virtio_hot_plug`, `disc_virtio_hot_unplug`, `ram_hot_plug`.
+Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug`, `disc_virtio_hot_unplug`, `ram_hot_plug`.
 
 ## 6.4.16
 ### Enhancements
