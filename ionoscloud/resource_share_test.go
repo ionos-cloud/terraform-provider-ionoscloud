@@ -160,6 +160,7 @@ resource "ionoscloud_share" "share" {
   resource_id = "${ionoscloud_datacenter.foobar.id}"
   edit_privilege = false
   share_privilege = false
+  licence_type = LiNUX
 }
 `
 

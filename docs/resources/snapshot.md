@@ -33,12 +33,6 @@ resource "ionoscloud_lan" "example" {
     name                  = "Lan Example"
 }
 
-resource "ionoscloud_ipblock" "example" {
-    location              = ionoscloud_datacenter.example.location
-    size                  = 4
-    name                  = "IP Block Example"
-}
-
 resource "ionoscloud_server" "example" {
     name                  = "Server Example"
     datacenter_id         = ionoscloud_datacenter.example.id
@@ -57,24 +51,6 @@ resource "ionoscloud_server" "example" {
         bus               = "VIRTIO"
         availability_zone = "ZONE_1"
     }
-    nic {
-        lan               = ionoscloud_lan.example.id
-        name              = "system"
-        dhcp              = true
-        firewall_active   = true
-        firewall_type     = "BIDIRECTIONAL"
-        ips               = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
-    firewall {
-        protocol          = "TCP"
-        name              = "SSH"
-        port_range_start  = 22
-        port_range_end    = 22
-        source_mac        = "00:0a:95:9d:68:17"
-        source_ip         = ionoscloud_ipblock.example.ips[2]
-        target_ip         = ionoscloud_ipblock.example.ips[3]
-        type              = "EGRESS"
-    }
-  }
 }
 
 resource "ionoscloud_snapshot" "test_snapshot" {
@@ -94,24 +70,24 @@ resource "random_password" "server_image_password" {
 * `datacenter_id` - (Required)[string] The ID of the Virtual Data Center.
 * `name` - (Required)[string] The name of the snapshot.
 * `volume_id` - (Required)[string] The ID of the specific volume to take the snapshot from.
+* `description` - (Optional)(Computed)[string] Human readable description
+* `licence_type` - (Optional)(Computed)[string] OS type of this Snapshot
+* `cpu_hot_plug` - (Optional)(Computed)[string] Is capable of CPU hot plug (no reboot required). Can only be updated.
+* `ram_hot_plug` - (Optional)(Computed)[string] Is capable of memory hot plug (no reboot required). Can only be updated.
+* `disc_virtio_hot_plug` - (Optional)(Computed)[string] Is capable of Virt-IO drive hot plug (no reboot required). Can only be updated.
+* `disc_virtio_hot_unplug` - (Optional)(Computed)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines. Can only be updated.
+* `nic_hot_plug` - (Optional)(Computed)[string] Is capable of nic hot plug (no reboot required). Can only be updated.
+* `nic_hot_unplug` - (Optional)(Computed)[string] Is capable of nic hot unplug (no reboot required). Can only be updated.
 
 ## Attribute reference
 
 Beside the configurable arguments, the resource returns the following additional attributes:
 
-* `description` - Human readable description
-* `licence_type` - OS type of this Snapshot
 * `location` - Location of that image/snapshot
 * `size` - The size of the image in GB
 * `sec_auth_protection` - Boolean value representing if the snapshot requires extra protection e.g. two factor protection
-* `cpu_hot_plug` -  Is capable of CPU hot plug (no reboot required)
 * `cpu_hot_unplug` -  Is capable of CPU hot unplug (no reboot required)
-* `ram_hot_plug` -  Is capable of memory hot plug (no reboot required)
 * `ram_hot_unplug` -  Is capable of memory hot unplug (no reboot required)
-* `nic_hot_plug` -  Is capable of nic hot plug (no reboot required)
-* `nic_hot_unplug` -  Is capable of nic hot unplug (no reboot required)
-* `disc_virtio_hot_plug` -  Is capable of Virt-IO drive hot plug (no reboot required)
-* `disc_virtio_hot_unplug` -  Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 * `disc_scsi_hot_plug` -  Is capable of SCSI drive hot plug (no reboot required)
 * `disc_scsi_hot_unplug` -  Is capable of SCSI drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 

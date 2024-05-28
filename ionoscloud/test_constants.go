@@ -325,6 +325,33 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 }
 ` + ServerImagePassword
 
+const testSnapshotServer = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+  name     = "server-test"
+  location = "us/las"
+}
+
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name ="ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  type = "ENTERPRISE"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+}
+` + ServerImagePassword //nolint:unused
+
 // Solves  #372 crash when ips field in nic resource is a list with an empty string
 const testAccCheckServerConfigEmptyNicIps = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {

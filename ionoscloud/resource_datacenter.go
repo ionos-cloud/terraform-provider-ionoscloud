@@ -25,7 +25,7 @@ func resourceDatacenter() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 
-			//Datacenter parameters
+			// Datacenter parameters
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
@@ -117,7 +117,6 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	createdDatacenter, apiResponse, err := client.DataCentersApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error creating data center (%s) (%w)", d.Id(), err))
 		return diags
