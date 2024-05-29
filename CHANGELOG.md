@@ -5,6 +5,7 @@
 ### Documentation
 - Update `ionoscloud_user` documentation. Fix `administrator` and add other fields description
 - Change to have nested lists show correctly in tf registry docs
+- Fix documentation for `ionoscloud_server`, `ionoscloud_volume`, `ionoscloud_lan` resources and `ionoscloud_image` data sources
 
 ### Enhancements
 - Add configurable fields to `ionoscloud_share` resource. Fields that can be set on creation: `description`, `sec_auth_protection`, `licence_type`. 
