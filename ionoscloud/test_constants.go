@@ -1808,7 +1808,7 @@ resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTe
 const clusterIdAttribute = "cluster_id"
 const clusterInstancesAttribute = "instances"
 const clusterCoresAttribute = "cores"
-const clusterLocationAttribute = "location"
+const clusterLocationAttribute = "location" // nolint:unused
 const clusterRamAttribute = "ram"
 const clusterStorageSizeAttribute = "storage_size"
 const clusterConnectionsAttribute = "connections"

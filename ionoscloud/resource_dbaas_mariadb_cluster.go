@@ -162,14 +162,14 @@ func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	response, _, err := client.CreateCluster(ctx, *cluster, d.Get("location").(string))
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while creating a DBaaS MariaDB cluster: %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while creating a DBaaS MariaDB cluster: %w", err))
 	}
 	clusterID := *response.Id
 	d.SetId(clusterID)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error occured while checking the status for MariaDB cluster with ID: %v, error: %w", clusterID, err))
+		return diag.FromErr(fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v, error: %w", clusterID, err))
 	}
 	if err := client.SetMariaDBClusterData(d, response); err != nil {
 		return diag.FromErr(err)
@@ -217,7 +217,7 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil, fmt.Errorf("MariaDB cluster with ID: %v does not exist, error: %w", clusterID, err)
 		}
-		return nil, fmt.Errorf("an error occured while trying to import MariaDB cluster with ID: %v, error: %w", clusterID, err)
+		return nil, fmt.Errorf("an error occurred while trying to import MariaDB cluster with ID: %v, error: %w", clusterID, err)
 	}
 
 	log.Printf("[INFO] MariaDB cluster found: %+v", cluster)

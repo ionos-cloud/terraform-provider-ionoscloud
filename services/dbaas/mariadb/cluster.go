@@ -34,13 +34,15 @@ func (c *MariaDBClient) modifyConfigURL(location string) {
 	}
 }
 
-func (c *MariaDBClient) GetCluster(ctx context.Context, clusterId, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
+// GetCluster retrieves a cluster by its ID and the location in which the cluster is created.
+func (c *MariaDBClient) GetCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
 	c.modifyConfigURL(location)
-	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
 
+// ListClusters retrieves a list of clusters based on the location. Filters can be used.
 func (c *MariaDBClient) ListClusters(ctx context.Context, filterName, location string) (mariadb.ClusterList, *mariadb.APIResponse, error) {
 	c.modifyConfigURL(location)
 	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
@@ -52,6 +54,7 @@ func (c *MariaDBClient) ListClusters(ctx context.Context, filterName, location s
 	return clusters, apiResponse, err
 }
 
+// CreateCluster creates a new cluster using the provided data in the request and the location.
 func (c *MariaDBClient) CreateCluster(ctx context.Context, cluster mariadb.CreateClusterRequest, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
 	c.modifyConfigURL(location)
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
@@ -59,9 +62,10 @@ func (c *MariaDBClient) CreateCluster(ctx context.Context, cluster mariadb.Creat
 	return clusterResponse, apiResponse, err
 }
 
-func (c *MariaDBClient) DeleteCluster(ctx context.Context, clusterId, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
+// DeleteCluster deletes a cluster by its ID and the location in which the cluster is created.
+func (c *MariaDBClient) DeleteCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
 	c.modifyConfigURL(location)
-	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }

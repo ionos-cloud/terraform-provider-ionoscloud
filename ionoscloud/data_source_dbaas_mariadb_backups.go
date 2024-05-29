@@ -111,7 +111,7 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 		backups = *backupsResponse.Items
 	} else {
 		var backup mariadbSDK.BackupResponse
-		backup, _, err = client.FindBackupById(ctx, backupId, location)
+		backup, _, err = client.FindBackupByID(ctx, backupId, location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup with ID %s: %w", backupId, err))
 		}

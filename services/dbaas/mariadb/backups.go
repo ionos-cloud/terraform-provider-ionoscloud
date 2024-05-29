@@ -9,20 +9,23 @@ import (
 	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 )
 
-func (c *MariaDBClient) GetClusterBackups(ctx context.Context, clusterId, location string) (mariadb.BackupList, *mariadb.APIResponse, error) {
+// GetClusterBackups retrieves a list of backups for a given cluster ID and the location in which the cluster is created.
+func (c *MariaDBClient) GetClusterBackups(ctx context.Context, clusterID, location string) (mariadb.BackupList, *mariadb.APIResponse, error) {
 	c.modifyConfigURL(location)
-	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterId).Execute()
+	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err
 }
 
-func (c *MariaDBClient) FindBackupById(ctx context.Context, backupId, location string) (mariadb.BackupResponse, *mariadb.APIResponse, error) {
+// FindBackupByID retrieves a backup by its ID and the location in which the cluster is created.
+func (c *MariaDBClient) FindBackupByID(ctx context.Context, backupID, location string) (mariadb.BackupResponse, *mariadb.APIResponse, error) {
 	c.modifyConfigURL(location)
-	backups, apiResponse, err := c.sdkClient.BackupsApi.BackupsFindById(ctx, backupId).Execute()
+	backups, apiResponse, err := c.sdkClient.BackupsApi.BackupsFindById(ctx, backupID).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err
 }
 
+// SetMariaDBClusterBackupsData sets the data for the backups attribute in the MariaDB backup data source.
 func SetMariaDBClusterBackupsData(d *schema.ResourceData, retrievedBackups []mariadb.BackupResponse) diag.Diagnostics {
 	resourceId := uuid.New()
 	d.SetId(resourceId.String())
