@@ -308,6 +308,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		KafkaClient:        NewClientByType(clientOpts, kafkaClient).(*kafkaService.Client),
 		APIGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
 		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
+		RedisClient:        NewClientByType(clientOpts, redisClient).(*dbaasService.RedisClient),
 	}, nil
 }
 
@@ -325,6 +326,7 @@ const (
 	mariaDBClient
 	mongoClient
 	nfsClient
+	redisClient
 	psqlClient
 	s3Client
 	kafkaClient
@@ -381,6 +383,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		)
 	case vpnClient:
 		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username)
+	case redisClient:
+		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}

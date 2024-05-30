@@ -20,6 +20,7 @@ import (
 
 type SdkBundle struct {
 	CloudApiClient     *ionoscloud.APIClient
+	RedisClient        *dbaas.RedisClient
 	PsqlClient         *dbaas.PsqlClient
 	MongoClient        *dbaas.MongoClient
 	MariaDBClient      *mariadb.MariaDBClient
