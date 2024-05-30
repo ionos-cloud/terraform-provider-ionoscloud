@@ -248,6 +248,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		MariaDBClient:      NewClientByType(clientOpts, mariaDBClient).(*mariadb.MariaDBClient),
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
+		RedisClient:        NewClientByType(clientOpts, redisClient).(*dbaasService.RedisClient),
 	}, nil
 }
 
@@ -263,6 +264,7 @@ const (
 	loggingClient
 	mariaDBClient
 	mongoClient
+	redisClient
 	psqlClient
 )
 
@@ -299,6 +301,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	case mongoClient:
 		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case psqlClient:
+		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case redisClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)

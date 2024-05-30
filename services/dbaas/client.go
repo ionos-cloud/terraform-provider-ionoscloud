@@ -11,8 +11,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	redis "github.com/ionos-cloud/sdk-go-dbaas-redis"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
+
+type RedisClient struct {
+	sdkClient *redis.APIClient
+}
 
 type MongoClient struct {
 	sdkClient *mongo.APIClient
@@ -20,6 +25,25 @@ type MongoClient struct {
 
 type PsqlClient struct {
 	sdkClient *psql.APIClient
+}
+
+func NewRedisClient(username, password, token, url, version, terraformVersion string) *RedisClient {
+	newConfigDbaas := redis.NewConfiguration(username, password, token, url)
+
+	if os.Getenv(constant.IonosDebug) != "" {
+		newConfigDbaas.Debug = true
+	}
+	newConfigDbaas.MaxRetries = constant.MaxRetries
+	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
+
+	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newConfigDbaas.UserAgent = fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-redis/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		version, psql.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+
+	return &RedisClient{
+		sdkClient: redis.NewAPIClient(newConfigDbaas),
+	}
 }
 
 func NewMongoClient(username, password, token, url, version, terraformVersion string) *MongoClient {
