@@ -115,7 +115,7 @@ func testAccCheckDBaaSMariaDBClusterDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.DBaaSMariaDBClusterResource {
 			continue
 		}
-		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID)
+		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID, rs.Primary.Attributes[clusterLocationAttribute])
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occured while checking the destruction of MariaDB cluster with ID: %v, error: %w", rs.Primary.ID, err)
@@ -141,7 +141,7 @@ func testAccCheckDBaaSMariaDBClusterExists(n string, cluster *mariadb.ClusterRes
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
 
-		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID)
+		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID, rs.Primary.Attributes[clusterLocationAttribute])
 		if err != nil {
 			return fmt.Errorf("an error occured while fetching MariaDB cluster with ID: %v, error: %w", rs.Primary.ID, err)
 		}
@@ -157,7 +157,7 @@ func testAccCheckDBaaSMariaDBClusterExists(n string, cluster *mariadb.ClusterRes
 const mariaDBClusterConfigBasic = `
 resource ` + constant.DatacenterResource + ` ` + datacenterResourceName + ` {
   name        = "mariadb_datacenter_example"
-  location    = "de/txl"
+  location    = "es/vit"
   description = "Datacenter for testing MariaDB cluster"
 }
 
@@ -197,6 +197,7 @@ locals {
 resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   ` + clusterVersionAttribute + ` = "` + clusterVersionValue + `"
   ` + clusterInstancesAttribute + ` = "` + clusterInstancesValue + `"
+  ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
   ` + clusterCoresAttribute + ` = "` + clusterCoresValue + `"
   ` + clusterRamAttribute + ` = "` + clusterRamValue + `"
   ` + clusterStorageSizeAttribute + ` = "` + clusterStorageSizeValue + `"
@@ -222,18 +223,21 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 const mariaDBClusterDataSourceMatchId = mariaDBClusterConfigBasic + `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
 	id = ` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
+    ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
 }
 `
 
 const mariaDBClusterDataSourceMatchName = mariaDBClusterConfigBasic + `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceByName + ` {
 	display_name	= "` + clusterDisplayNameValue + `"
+    ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
 }
 `
 
 const mariaDBBackupsDataSourceMatchClusterID = mariaDBClusterConfigBasic + `
 data ` + constant.DBaaSMariaDBBackupsDataSource + ` ` + constant.DBaasMariaDBBackupsDataSourceName + ` {
 	cluster_id = ` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
+	` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
     # Use the previously created 'time' resource to delay information retrieval for the data source
 	depends_on = [time_sleep.wait_30_seconds]
 }
@@ -241,6 +245,7 @@ data ` + constant.DBaaSMariaDBBackupsDataSource + ` ` + constant.DBaasMariaDBBac
 const mariaDBClusterDataSourceWrongName = `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceByName + ` {
   display_name = "wrong_name"
+  ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
 }
 `
 
@@ -248,6 +253,7 @@ data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestD
 const mariaDBClusterDataSourceWrongId = `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
   id = "178d6a7d-5ed4-44de-88f0-27f1182d8ae8"
+  ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
 }
 `
 
@@ -275,6 +281,7 @@ const clusterVersionAttribute = "mariadb_version"
 const (
 	clusterVersionValue             = "10.6"
 	clusterInstancesValue           = "1"
+	clusterLocationValue            = "es/vit"
 	clusterCoresValue               = "4"
 	clusterRamValue                 = "4"
 	clusterStorageSizeValue         = "10"

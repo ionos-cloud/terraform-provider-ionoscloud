@@ -1,6 +1,6 @@
 ## 6.4.17
 ### Fixes
-- Correctly raise immutable error for changes to `template_uuid` when running `terraform plan` for Cube servers 
+- Correctly raise immutable error for changes to `template_uuid` when running `terraform plan` for Cube servers
 
 ### Documentation
 - Update `ionoscloud_user` documentation. Fix `administrator` and add other fields description
@@ -9,6 +9,8 @@
 ### Enhancements
 - Add configurable fields to `ionoscloud_share` resource. Fields that can be set on creation: `description`, `sec_auth_protection`, `licence_type`. 
 Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug`, `disc_virtio_hot_unplug`, `ram_hot_plug`.
+- Allow MariaDB cluster creation in other zones than `de/txl` by adding `location` parameter to resources and data sources
+
 
 ## 6.4.16
 ### Enhancements

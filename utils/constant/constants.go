@@ -264,6 +264,9 @@ const (
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
 )
 
+// MariaDBClusterLocations slice represents the locations in which MariaDB clusters can be created
+var MariaDBClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
+
 // Container Registry Constants
 const (
 	//ContainerRegistryTestResource needs to be with -, do not change
