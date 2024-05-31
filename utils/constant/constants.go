@@ -411,3 +411,7 @@ const (
 	TargetGroupLimit = 200
 	IPBlockLimit     = 1000
 )
+
+const (
+	KafkaClusterResource = "ionoscloud_kafka_cluster"
+)
