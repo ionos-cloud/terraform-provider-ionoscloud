@@ -269,7 +269,7 @@ var MariaDBClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "
 
 // Container Registry Constants
 const (
-	//ContainerRegistryTestResource needs to be with -, do not change
+	// ContainerRegistryTestResource needs to be with -, do not change
 	ContainerRegistryTestResource      = "test-container-registry"
 	ContainerRegistryTokenTestResource = "test-container-registry-token"
 
@@ -404,4 +404,8 @@ var LBTargetProxyProtocolVersions = []string{"none", "v1", "v2", "v2ssl"}
 const (
 	TargetGroupLimit = 200
 	IPBlockLimit     = 1000
+)
+
+const (
+	KafkaClusterResource = "ionoscloud_kafka_cluster"
 )

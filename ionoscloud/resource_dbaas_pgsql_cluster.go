@@ -307,7 +307,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("The check for cluster deletion failed with the following error: %w", err))
+		return diag.FromErr(fmt.Errorf("the check for cluster deletion failed with the following error: %w", err))
 	}
 
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed

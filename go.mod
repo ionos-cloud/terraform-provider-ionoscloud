@@ -13,6 +13,7 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
+	github.com/ionos-cloud/sdk-go-kafka v0.1.0
 	github.com/ionos-cloud/sdk-go-logging v1.0.1
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 	github.com/ionos-cloud/sdk-go/v6 v6.1.11
@@ -21,6 +22,8 @@ require (
 )
 
 require github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
+// TODO: replace before merge
+replace github.com/ionos-cloud/sdk-go-kafka => /tmp/sdk-go-kafka
 
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // indirect

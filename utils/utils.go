@@ -316,7 +316,7 @@ func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
 // checks if value['1'] of key[`id`] is present inside a slice of maps[string]interface{}
 func IsValueInSliceOfMap[T comparable](sliceOfMaps []interface{}, key string, value T) bool {
 	for _, mmap := range sliceOfMaps {
-		//do not delete if the id in the old rule is present in the new rules to be updated
+		// do not delete if the id in the old rule is present in the new rules to be updated
 		if value == mmap.(map[string]interface{})[key] {
 			return true
 		}
@@ -387,4 +387,12 @@ func MergeMaps(maps ...map[string]any) map[string]any {
 		}
 	}
 	return merged
+}
+
+// NameMatches checks if the name matches the value, with partialMatch set to true, it will check if the value is a substring of the name
+func NameMatches(name, value string, partialMatch bool) bool {
+	if partialMatch {
+		return strings.Contains(name, value)
+	}
+	return strings.EqualFold(name, value)
 }
