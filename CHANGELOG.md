@@ -1,3 +1,7 @@
+## 6.4.18
+### Enhancements
+- Add `grafana_address` attribute to `ionoscloud_logging_pipeline` resource and data source
+
 ## 6.4.17
 ### Fixes
 - Correctly raise immutable error for changes to `template_uuid` when running `terraform plan` for Cube servers

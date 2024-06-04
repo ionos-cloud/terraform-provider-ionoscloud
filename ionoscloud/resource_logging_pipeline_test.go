@@ -40,38 +40,41 @@ func TestAccLoggingPipeline(t *testing.T) {
 						pipelineLogDestinationTypeAttribute:      pipelineLogDestinationTypeValue,
 						pipelineLogDestinationRetentionAttribute: pipelineLogDestinationRetentionValue,
 					}),
+					resource.TestCheckResourceAttrSet(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineGrafanaAddressAttribute),
 				),
 			},
 			{
 				Config: LoggingPipelineDataSourceMatchById,
 				Check: resource.ComposeTestCheckFunc(
-					testAccLoggingPipelineExistenceCheck(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, &Pipeline),
-					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineNameAttribute, pipelineNameValue),
-					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".*", map[string]string{
+					testAccLoggingPipelineExistenceCheck(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, &Pipeline),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineNameAttribute, pipelineNameValue),
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineLogAttribute+".*", map[string]string{
 						pipelineLogSourceAttribute:   pipelineLogSourceValue,
 						pipelineLogTagAttribute:      pipelineLogTagValue,
 						pipelineLogProtocolAttribute: pipelineLogProtocolValue,
 					}),
-					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".0."+pipelineLogDestinationAttribute+".*", map[string]string{
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineLogAttribute+".0."+pipelineLogDestinationAttribute+".*", map[string]string{
 						pipelineLogDestinationTypeAttribute:      pipelineLogDestinationTypeValue,
 						pipelineLogDestinationRetentionAttribute: pipelineLogDestinationRetentionValue,
 					}),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineGrafanaAddressAttribute),
 				),
 			},
 			{
 				Config: LoggingPipelineDataSourceMatchByName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccLoggingPipelineExistenceCheck(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, &Pipeline),
-					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineNameAttribute, pipelineNameValue),
-					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".*", map[string]string{
+					testAccLoggingPipelineExistenceCheck(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, &Pipeline),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineNameAttribute, pipelineNameValue),
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineLogAttribute+".*", map[string]string{
 						pipelineLogSourceAttribute:   pipelineLogSourceValue,
 						pipelineLogTagAttribute:      pipelineLogTagValue,
 						pipelineLogProtocolAttribute: pipelineLogProtocolValue,
 					}),
-					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".0."+pipelineLogDestinationAttribute+".*", map[string]string{
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineLogAttribute+".0."+pipelineLogDestinationAttribute+".*", map[string]string{
 						pipelineLogDestinationTypeAttribute:      pipelineLogDestinationTypeValue,
 						pipelineLogDestinationRetentionAttribute: pipelineLogDestinationRetentionValue,
 					}),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineGrafanaAddressAttribute),
 				),
 			},
 			{

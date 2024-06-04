@@ -171,6 +171,12 @@ func (c *Client) SetPipelineData(d *schema.ResourceData, pipeline logging.Pipeli
 		}
 	}
 
+	if pipeline.Properties.GrafanaAddress != nil {
+		if err := d.Set("grafana_address", *pipeline.Properties.GrafanaAddress); err != nil {
+			return utils.GenerateSetError(pipelineResourceName, "grafana_address", err)
+		}
+	}
+
 	if pipeline.Properties.Logs != nil {
 		logs := make([]interface{}, len(*pipeline.Properties.Logs))
 		for i, logElem := range *pipeline.Properties.Logs {
