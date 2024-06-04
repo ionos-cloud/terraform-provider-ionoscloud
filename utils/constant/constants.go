@@ -92,6 +92,14 @@ const (
 	FirewallDataSourceByName = "test_firewall_name"
 )
 
+// NSG Constants
+const (
+	NetworkSecurityGroupResource         = "ionoscloud_networksecuritygroup"
+	NetworkSecurityGroupTestResource     = "test_nsg"
+	NetworkSecurityGroupDataSourceById   = "test_nsg_id"
+	NetworkSecurityGroupDataSourceByName = "test_nsg_name"
+)
+
 // Lan Constants
 const (
 	LanResource         = "ionoscloud_lan"
@@ -266,7 +274,7 @@ const (
 
 // Container Registry Constants
 const (
-	//ContainerRegistryTestResource needs to be with -, do not change
+	// ContainerRegistryTestResource needs to be with -, do not change
 	ContainerRegistryTestResource      = "test-container-registry"
 	ContainerRegistryTokenTestResource = "test-container-registry-token"
 
