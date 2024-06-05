@@ -27,6 +27,7 @@ import (
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/redisdb"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
@@ -308,7 +309,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		KafkaClient:        NewClientByType(clientOpts, kafkaClient).(*kafkaService.Client),
 		APIGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
 		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
-		RedisClient:        NewClientByType(clientOpts, redisClient).(*dbaasService.RedisClient),
+		RedisDBClient:      NewClientByType(clientOpts, redisDBClient).(*redisdb.RedisDBClient),
 	}, nil
 }
 
@@ -326,7 +327,7 @@ const (
 	mariaDBClient
 	mongoClient
 	nfsClient
-	redisClient
+	redisDBClient
 	psqlClient
 	s3Client
 	kafkaClient
@@ -383,8 +384,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		)
 	case vpnClient:
 		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username)
-	case redisClient:
-		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case redisDBClient:
+		return redisdb.NewRedisDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
