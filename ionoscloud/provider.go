@@ -22,6 +22,7 @@ import (
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/redisdb"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -251,7 +252,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		MariaDBClient:      NewClientByType(clientOpts, mariaDBClient).(*mariadb.MariaDBClient),
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
-		RedisClient:        NewClientByType(clientOpts, redisClient).(*dbaasService.RedisClient),
+		RedisDBClient:      NewClientByType(clientOpts, redisDBClient).(*redisdb.RedisDBClient),
 	}, nil
 }
 
@@ -267,8 +268,8 @@ const (
 	loggingClient
 	mariaDBClient
 	mongoClient
-	redisClient
 	psqlClient
+	redisDBClient
 )
 
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
@@ -305,8 +306,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case psqlClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
-	case redisClient:
-		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case redisDBClient:
+		return redisdb.NewRedisDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
