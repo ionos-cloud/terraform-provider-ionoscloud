@@ -37,9 +37,10 @@ Finds an image with alias `ubuntu:latest` in location `de/txl`. Uses exact match
 
 ```hcl
 data "ionoscloud_image" "example" {
-  name               = "ubuntu"
-  version            = "20.04.6
-  location           = "de/txl"
+    type                  = "HDD"
+    cloud_init            = "V1"
+    image_alias           = "ubuntu:latest"
+    location              = "us/ewr"
 }
 ```
 Finds an image named `ubuntu-20.04.6` in location `de/txl`. Uses exact matching.

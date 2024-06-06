@@ -19,6 +19,7 @@ A primary volume will be created with the server. If there is a need for additio
 data "ionoscloud_image" "example" {
     type                  = "HDD"
     cloud_init            = "V1"
+    image_alias           = "ubuntu:latest"
     location              = "us/las"
 }
 
@@ -48,7 +49,7 @@ resource "ionoscloud_server" "example" {
     ram                   = 1024
     availability_zone     = "ZONE_1"
     cpu_family            = "AMD_OPTERON"
-    image_name            = data.ionoscloud_image.example.id
+    image_name            = data.ionoscloud_image.example.name
     image_password        = random_password.server_image_password.result
     type                  = "ENTERPRISE"
     volume {
@@ -87,7 +88,7 @@ resource "ionoscloud_volume" "example" {
   size                    = 5
   disk_type               = "SSD Standard"
   bus                     = "VIRTIO"
-  image_name              = data.ionoscloud_image.example.id
+  image_name              = data.ionoscloud_image.example.name
   image_password          = random_password.volume_image_password.result
   user_data               = "foo"
 }
