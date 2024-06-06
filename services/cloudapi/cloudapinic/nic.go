@@ -116,6 +116,17 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 			network["ips"] = *nic.Properties.Ips
 		}
 	}
+
+	if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
+		ids := make([]string, 0)
+		for _, group := range *nic.Entities.Securitygroups.Items {
+			if group.Id != nil {
+				id := *group.Id
+				ids = append(ids, id)
+			}
+		}
+		utils.SetPropWithNilCheck(network, "security_groups_ids", ids)
+	}
 	return network
 }
 
@@ -270,6 +281,19 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 		if nic.Properties.PciSlot != nil {
 			if err := d.Set("pci_slot", *nic.Properties.PciSlot); err != nil {
 				return fmt.Errorf("error setting pci_slot %w", err)
+			}
+		}
+
+		if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
+			ids := make([]string, 0)
+			for _, group := range *nic.Entities.Securitygroups.Items {
+				if group.Id != nil {
+					id := *group.Id
+					ids = append(ids, id)
+				}
+			}
+			if err := d.Set("security_groups_ids", ids); err != nil {
+				return fmt.Errorf("error setting security_groups_ids %w", err)
 			}
 		}
 	}
