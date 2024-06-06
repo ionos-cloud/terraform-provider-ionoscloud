@@ -391,6 +391,12 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"security_groups_ids": {
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Description: "The list of Security Group IDs",
+						},
 						"firewall": {
 							Description: "Firewall rules created in the server resource. The rules can also be created as separate resources outside the server resource",
 							Type:        schema.TypeList,
@@ -706,6 +712,24 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
 					return diags
+				}
+
+				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
+					raw := v.([]interface{})
+					if len(raw) > 0 {
+						ids := make([]string, 0)
+						for _, rawId := range raw {
+							if rawId != nil {
+								id := rawId.(string)
+								ids = append(ids, id)
+							}
+						}
+						if len(ids) > 0 {
+							client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(
+								ctx, d.Get("datacenter_id").(string),
+								d.Id(), *foundFirstNic.Id).Securitygroups(ids)
+						}
+					}
 				}
 			}
 			foundNicProps := foundFirstNic.Properties
@@ -1077,6 +1101,31 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("error nic (%w)", err))
 				return diags
+			}
+
+			if d.HasChange("nic.0.security_groups_ids") {
+				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
+					raw := v.([]interface{})
+					if len(raw) > 0 {
+						ids := make([]string, 0)
+						for _, rawId := range raw {
+							if rawId != nil {
+								id := rawId.(string)
+								ids = append(ids, id)
+							}
+						}
+						if len(ids) > 0 {
+							nicId := ""
+							if createNic {
+								nicId = *createdNic.Id
+							} else {
+								nicId = *nic.Id
+							}
+
+							client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, nicId).Securitygroups(ids)
+						}
+					}
+				}
 			}
 
 			if createNic {

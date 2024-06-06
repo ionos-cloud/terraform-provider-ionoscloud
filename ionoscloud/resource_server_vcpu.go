@@ -281,6 +281,12 @@ func resourceVCPUServer() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"security_groups_ids": {
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Description: "The list of Security Group IDs",
+						},
 						"firewall": {
 							Description: "Firewall rules created in the server resource. The rules can also be created as separate resources outside the server resource",
 							Type:        schema.TypeList,
