@@ -102,6 +102,12 @@ func resourceCubeServer() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 			},
+			"security_groups_ids": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "The list of Security Group IDs for the server",
+			},
 			"volume": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -293,7 +299,7 @@ func resourceCubeServer() *schema.Resource {
 							Type:        schema.TypeList,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 							Optional:    true,
-							Description: "The list of Security Group IDs",
+							Description: "The list of Security Group IDs for the NIC",
 						},
 						"firewall": {
 							Type:     schema.TypeList,
@@ -519,6 +525,22 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		diags := diag.FromErr(fmt.Errorf("error fetching server: (%w)", err))
 		return diags
 	}
+	if v, ok := d.GetOk("security_groups_ids"); ok {
+		raw := v.([]interface{})
+		if len(raw) > 0 {
+			ids := make([]string, 0)
+			for _, rawId := range raw {
+				if rawId != nil {
+					id := rawId.(string)
+					ids = append(ids, id)
+				}
+			}
+			if len(ids) > 0 {
+				client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, d.Get("datacenter_id").(string),
+					*createdServer.Id).Securitygroups(ids)
+			}
+		}
+	}
 
 	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
 		*createdServer.Id, *(*createdServer.Entities.Nics.Items)[0].Id).Execute()
@@ -660,6 +682,19 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
 				return diag.FromErr(utils.GenerateSetError("cube_server", "inline_volume_ids", err))
 			}
+		}
+	}
+
+	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+		ids := make([]string, 0)
+		for _, group := range *server.Entities.Securitygroups.Items {
+			if group.Id != nil {
+				id := *group.Id
+				ids = append(ids, id)
+			}
+		}
+		if err := d.Set("security_groups_ids", ids); err != nil {
+			return diag.FromErr(fmt.Errorf("error setting security_groups_ids %w", err))
 		}
 	}
 
@@ -808,6 +843,24 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
+	}
+
+	if d.HasChange("security_groups_ids") {
+		if v, ok := d.GetOk("security_groups_ids"); ok {
+			raw := v.([]interface{})
+			if len(raw) > 0 {
+				ids := make([]string, 0)
+				for _, rawId := range raw {
+					if rawId != nil {
+						id := rawId.(string)
+						ids = append(ids, id)
+					}
+				}
+				if len(ids) > 0 {
+					client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(ids)
+				}
+			}
+		}
 	}
 
 	// Volume stuff
@@ -1098,6 +1151,19 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		log.Printf("[DEBUG] set primary_ip to %s", (*firstNicItem.Properties.Ips)[0])
 		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
 			return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
+		}
+	}
+
+	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+		ids := make([]string, 0)
+		for _, group := range *server.Entities.Securitygroups.Items {
+			if group.Id != nil {
+				id := *group.Id
+				ids = append(ids, id)
+			}
+		}
+		if err := d.Set("security_groups_ids", ids); err != nil {
+			return nil, fmt.Errorf("error setting security_groups_ids %w", err)
 		}
 	}
 

@@ -163,6 +163,12 @@ func resourceServer() *schema.Resource {
 				//	return false
 				// },
 			},
+			"security_groups_ids": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "The list of Security Group IDs for the server",
+			},
 			"volume": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -395,7 +401,7 @@ func resourceServer() *schema.Resource {
 							Type:        schema.TypeList,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 							Optional:    true,
-							Description: "The list of Security Group IDs",
+							Description: "The list of Security Group IDs for the NIC",
 						},
 						"firewall": {
 							Description: "Firewall rules created in the server resource. The rules can also be created as separate resources outside the server resource",
@@ -664,6 +670,21 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 		return diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
 	}
+	if v, ok := d.GetOk("security_groups_ids"); ok {
+		raw := v.([]interface{})
+		if len(raw) > 0 {
+			ids := make([]string, 0)
+			for _, rawId := range raw {
+				if rawId != nil {
+					id := rawId.(string)
+					ids = append(ids, id)
+				}
+			}
+			if len(ids) > 0 {
+				client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, datacenterId, *postServer.Id).Securitygroups(ids)
+			}
+		}
+	}
 
 	// Logic for labels creation
 	ls := LabelsService{ctx: ctx, client: client}
@@ -927,6 +948,24 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
+	}
+
+	if d.HasChange("security_groups_ids") {
+		if v, ok := d.GetOk("security_groups_ids"); ok {
+			raw := v.([]interface{})
+			if len(raw) > 0 {
+				ids := make([]string, 0)
+				for _, rawId := range raw {
+					if rawId != nil {
+						id := rawId.(string)
+						ids = append(ids, id)
+					}
+				}
+				if len(ids) > 0 {
+					client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(ids)
+				}
+			}
+		}
 	}
 
 	// Volume stuff
@@ -1525,6 +1564,19 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			(*server.Entities.Volumes.Items)[0].Properties != nil && (*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 			if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 				return fmt.Errorf("error setting boot_image %w", err)
+			}
+		}
+
+		if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+			ids := make([]string, 0)
+			for _, group := range *server.Entities.Securitygroups.Items {
+				if group.Id != nil {
+					id := *group.Id
+					ids = append(ids, id)
+				}
+			}
+			if err := d.Set("security_groups_ids", ids); err != nil {
+				return fmt.Errorf("error setting security_groups_ids %w", err)
 			}
 		}
 	}
