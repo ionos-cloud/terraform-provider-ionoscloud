@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -52,6 +53,11 @@ func resourceNetworkSecurityGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						// "ip_version": {
+						// 	Type:             schema.TypeString,
+						// 	Optional:         true,
+						// 	ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"IPv4", "IPv6"}, false)),
+						// },
 						"source_ip": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -128,7 +134,7 @@ func resourceNetworkSecurityGroupCreate(ctx context.Context, d *schema.ResourceD
 	// }
 	sg.Entities = ionoscloud.NewSecurityGroupRequestEntitiesWithDefaults()
 
-	rulesObjects := ionoscloud.NewFirewallRules()
+	var firewallRules []ionoscloud.FirewallRule
 	rules := d.Get("firewall_rules").([]any)
 	for i := range rules {
 		rule, diags := getFirewallData(d, fmt.Sprintf("firewall_rules.%d.", i), false)
@@ -136,10 +142,10 @@ func resourceNetworkSecurityGroupCreate(ctx context.Context, d *schema.ResourceD
 			return diags
 		}
 
-		*rulesObjects.Items = append(*rulesObjects.Items, rule)
+		firewallRules = append(firewallRules, rule)
 	}
 
-	sg.Entities.SetRules(*rulesObjects)
+	sg.Entities.SetRules(ionoscloud.FirewallRules{Items: &firewallRules})
 
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPost(ctx, datacenterID).SecurityGroup(sg).Execute()
 	apiResponse.LogInfo()
@@ -211,10 +217,10 @@ func resourceNetworkSecurityGroupRead(ctx context.Context, d *schema.ResourceDat
 						newRule["port_range_end"] = *ruleProperties.PortRangeEnd
 					}
 					if ruleProperties.IcmpType != nil {
-						newRule["icmp_type"] = *ruleProperties.IcmpType
+						newRule["icmp_type"] = strconv.Itoa(int(*ruleProperties.IcmpType))
 					}
 					if ruleProperties.IcmpCode != nil {
-						newRule["icmp_code"] = *ruleProperties.IcmpCode
+						newRule["icmp_code"] = strconv.Itoa(int(*ruleProperties.IcmpCode))
 					}
 					if ruleProperties.Type != nil {
 						newRule["type"] = *ruleProperties.Type
@@ -250,23 +256,22 @@ func resourceNetworkSecurityGroupUpdate(ctx context.Context, d *schema.ResourceD
 
 	sg.Entities = ionoscloud.NewSecurityGroupRequestEntitiesWithDefaults()
 
-	rulesObjects := ionoscloud.NewFirewallRules()
+	var firewallRules []ionoscloud.FirewallRule
 	rules := d.Get("firewall_rules").([]any)
 	for i := range rules {
 		rule, diags := getFirewallData(d, fmt.Sprintf("firewall_rules.%d.", i), false)
 		if diags != nil {
 			return diags
 		}
-
-		*rulesObjects.Items = append(*rulesObjects.Items, rule)
+		firewallRules = append(firewallRules, rule)
 	}
 
-	sg.Entities.SetRules(*rulesObjects)
+	sg.Entities.SetRules(ionoscloud.FirewallRules{Items: &firewallRules})
 
 	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPut(ctx, datacenterID, d.Id()).SecurityGroup(sg).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a security group: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a security group: %w", err))
 		return diags
 	}
 
