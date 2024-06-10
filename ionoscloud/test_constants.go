@@ -1751,6 +1751,7 @@ resource ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestResourceNa
 // Logging Pipeline constants
 // Attributes
 const pipelineNameAttribute = "name"
+const pipelineGrafanaAddressAttribute = "grafana_address" // nolint:unused
 const pipelineLogAttribute = "log"
 const pipelineLogSourceAttribute = "source"
 const pipelineLogTagAttribute = "tag"

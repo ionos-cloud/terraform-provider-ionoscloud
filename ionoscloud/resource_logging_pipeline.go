@@ -26,6 +26,11 @@ func resourceLoggingPipeline() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"grafana_address": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The address of the client's grafana instance",
+			},
 			"log": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -92,10 +97,8 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while waiting for the pipeline with ID: %s to become available: %w", *pipelineResponse.Id, err))
 	}
-	if err := client.SetPipelineData(d, pipelineResponse); err != nil {
-		return diag.FromErr(err)
-	}
-	return nil
+	// Make another read and set the data in the state because 'grafanaAdress` is not returned in the create response
+	return pipelineRead(ctx, d, meta)
 }
 
 func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

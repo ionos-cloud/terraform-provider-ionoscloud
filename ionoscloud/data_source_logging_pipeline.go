@@ -29,6 +29,11 @@ func dataSourceLoggingPipeline() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
+			"grafana_address": {
+				Type:        schema.TypeString,
+				Description: "The address of the client's grafana instance",
+				Computed:    true,
+			},
 			"log": {
 				Type:        schema.TypeSet,
 				Description: "The logs for the Logging pipeline",

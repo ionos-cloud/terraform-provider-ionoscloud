@@ -107,6 +107,7 @@ terraform apply -var-file="vars.tfvars"
 ## Argument reference
 
 * `name` - (Required)[string] The name of the Logging pipeline.
+* `grafana_address` - (Computed)[string] The address of the client's grafana instance.
 * `log` - (Required)[list] Pipeline logs, a list that contains elements with the following structure:
   * `source` - (Required)[string] The source parser to be used.
   * `tag` - (Required)[string] The tag is used to distinguish different pipelines. Must be unique amongst the pipeline's array items.
