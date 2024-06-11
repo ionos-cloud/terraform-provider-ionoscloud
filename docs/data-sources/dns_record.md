@@ -13,6 +13,8 @@ The **DNS Record** can be used to search for and return an existing DNS Record.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search and make sure that your resources have unique names.
 
+> ⚠️  Only tokens are accepted for authorization in the **ionoscloud_dns_record** data source. Please ensure you are using tokens as other methods will not be valid.
+
 ## Example Usage
 
 ### By ID
