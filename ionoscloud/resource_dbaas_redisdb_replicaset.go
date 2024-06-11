@@ -2,8 +2,14 @@ package ionoscloud
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/redisdb"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceDBaaSRedisDBReplicaSet() *schema.Resource {
@@ -20,6 +26,14 @@ func resourceDBaaSRedisDBReplicaSet() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The human readable name of your replica set.",
 				Required:    true,
+			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The replica set location",
+				Required:    true,
+				ForceNew:    true,
+				// TODO -- Change the name of this constant since the value can be used for both MariaDB and RedisDB
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
 			},
 			"redis_version": {
 				Type:        schema.TypeString,
@@ -111,13 +125,14 @@ func resourceDBaaSRedisDBReplicaSet() *schema.Resource {
 							Type:         schema.TypeString,
 							Description:  "The password for a RedisDB user.",
 							Optional:     true,
-							ExactlyOneOf: []string{"plain_text_password", "hashed_password"},
+							Sensitive:    true,
+							ExactlyOneOf: []string{"credentials.0.plain_text_password", "credentials.0.hashed_password"},
 						},
 						"hashed_password": {
 							Type:         schema.TypeList,
 							Description:  "The hashed password for a RedisDB user.",
 							Optional:     true,
-							ExactlyOneOf: []string{"hashed_password", "plain_text_password"},
+							ExactlyOneOf: []string{"credentials.0.hashed_password", "credentials.0.plain_text_password"},
 							MaxItems:     1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -168,6 +183,22 @@ func resourceDBaaSRedisDBReplicaSet() *schema.Resource {
 }
 
 func redisDBReplicaSetCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).RedisDBClient
+
+	replicaSet := redisdb.GetRedisDBReplicaSetDataCreate(d)
+	response, _, err := client.CreateRedisDPReplicaSet(ctx, replicaSet, d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("an error occurred while creating a DBaaS RedisDB replica set: %w", err))
+	}
+	replicaSetID := *response.Id
+	d.SetId(replicaSetID)
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsReplicaSetReady)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error occurred while checking the status for RedisDB replica set with ID: %v, error: %w", replicaSetID, err))
+	}
+	if err := client.SetRedisDBReplicaSetData(d, response); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
