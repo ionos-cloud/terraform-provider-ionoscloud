@@ -3,12 +3,13 @@ package redisdb
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	redisdb "github.com/ionos-cloud/sdk-go-dbaas-redis"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"log"
-	"strings"
 )
 
 var locationToURL = map[string]string{
@@ -155,7 +156,12 @@ func (c *RedisDBClient) SetRedisDBReplicaSetData(d *schema.ResourceData, replica
 		}
 	}
 
-	// TODO -- Check if we need to set anything for 'credentials'
+	// Password is write only, the API always responds with null password
+	if replicaSet.Properties.Credentials != nil && replicaSet.Properties.Credentials.Username != nil {
+		if err := d.Set("username", *replicaSet.Properties.Credentials.Username); err != nil {
+			return utils.GenerateSetError(resourceName, "username", err)
+		}
+	}
 
 	if replicaSet.Properties.PersistenceMode != nil {
 		if err := d.Set("persistence_mode", *replicaSet.Properties.PersistenceMode); err != nil {
@@ -201,6 +207,12 @@ func (c *RedisDBClient) SetRedisDBReplicaSetData(d *schema.ResourceData, replica
 		maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
 		if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
 			return utils.GenerateSetError(resourceName, "maintenance_window", err)
+		}
+	}
+
+	if replicaSet.Metadata != nil && replicaSet.Metadata.DnsName != nil {
+		if err := d.Set("dns_name", *replicaSet.Metadata.DnsName); err != nil {
+			return utils.GenerateSetError(resourceName, "dns_name", err)
 		}
 	}
 

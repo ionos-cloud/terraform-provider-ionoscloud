@@ -33,6 +33,11 @@ func dataSourceDBaaSRedisDBReplicaSet() *schema.Resource {
 				Description: "The display name of the Redis Replicaset.",
 				Optional:    true,
 			},
+			"dns_name": {
+				Type:        schema.TypeString,
+				Description: "The DNS name of the Redis Replicaset.",
+				Computed:    true,
+			},
 			"connections": {
 				Type:        schema.TypeList,
 				Description: "The network connection for your Replicaset. Only one connection is allowed.",
