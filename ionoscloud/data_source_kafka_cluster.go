@@ -40,18 +40,37 @@ func dataSourceKafkaCluster() *schema.Resource {
 				Description: "The size of the Kafka Cluster",
 				Computed:    true,
 			},
-			"server_address": {
-				Type:        schema.TypeString,
-				Description: "The server address of the Kafka Cluster",
-				Computed:    true,
-			},
-			"broker_addresses": {
+			"connections": {
 				Type:        schema.TypeList,
-				Description: "The broker addresses of the Kafka Cluster",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+				Description: "The network connection for your cluster. Only one connection is allowed.",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"datacenter_id": {
+							Type:        schema.TypeString,
+							Description: "The datacenter to connect your cluster to.",
+							Computed:    true,
+						},
+						"lan_id": {
+							Type:        schema.TypeString,
+							Description: "The numeric LAN ID to connect your cluster to.",
+							Computed:    true,
+						},
+						"cidr": {
+							Type:        schema.TypeString,
+							Description: "The IP and subnet for your cluster.",
+							Computed:    true,
+						},
+						"broker_addresses": {
+							Type:        schema.TypeList,
+							Description: "The broker addresses of the Kafka Cluster",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Computed: true,
+						},
+					},
 				},
-				Computed: true,
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,
@@ -77,7 +96,7 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(fmt.Errorf("please provide either the kafka pipeline ID or name"))
 	}
 	partialMatch := d.Get("partial_match").(bool)
-	var pipeline kafka.KafkaClusterByIdResponseData
+	var pipeline kafka.ClusterRead
 	var err error
 	if idOk {
 		pipeline, _, err = client.GetClusterById(ctx, id)
@@ -85,7 +104,7 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 			return diag.FromErr(fmt.Errorf("an error occured while fetching the kafka pipeline with ID: %s, error: %w", id, err))
 		}
 	} else {
-		var results []kafka.KafkaClusterByIdResponseData
+		var results []kafka.ClusterRead
 		clusters, _, err := client.ListClusters(ctx)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching kafka clusters: %w", err))
@@ -104,10 +123,6 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 	if err := client.SetKafkaClusterData(d, &pipeline); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := client.SetKafkaClusterMetadata(d, &pipeline); err != nil {
 		return diag.FromErr(err)
 	}
 
