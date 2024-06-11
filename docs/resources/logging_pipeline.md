@@ -9,11 +9,9 @@ description: |-
 
 # ionoscloud_logging_pipeline
 
-⚠️ **Note:** Logging Service is currently in the Early Access (EA) phase.
-We recommend keeping usage and testing to non-production critical applications.
-Please contact your sales representative or support for more information.
-
 Manages a **Logging pipeline**.
+
+> ⚠️  Only tokens are accepted for authorization in the **logging_pipeline** resource. Please ensure you are using tokens as other methods will not be valid.
 
 ## Usage example
 

@@ -9,12 +9,10 @@ description: |-
 
 # ionoscloud_logging_pipeline
 
-⚠️ **Note:** Logging Service is currently in the Early Access (EA) phase.
-We recommend keeping usage and testing to non-production critical applications.
-Please contact your sales representative or support for more information.
-
 The **Logging pipeline** datasource can be used to search for and return an existing Logging pipeline.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+
+> ⚠️  Only tokens are accepted for authorization in the **logging_pipeline** data source. Please ensure you are using tokens as other methods will not be valid.
 
 ## Example Usage
 
