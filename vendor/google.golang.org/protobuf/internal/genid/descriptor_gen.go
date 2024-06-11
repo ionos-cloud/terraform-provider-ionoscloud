@@ -860,13 +860,19 @@ const (
 	EnumValueOptions_Deprecated_field_name          protoreflect.Name = "deprecated"
 	EnumValueOptions_Features_field_name            protoreflect.Name = "features"
 	EnumValueOptions_DebugRedact_field_name         protoreflect.Name = "debug_redact"
+<<<<<<< HEAD
 	EnumValueOptions_FeatureSupport_field_name      protoreflect.Name = "feature_support"
+=======
+>>>>>>> 1ed84bd3 (feat: Implement functionality for 'create' method, update Redis SDK version)
 	EnumValueOptions_UninterpretedOption_field_name protoreflect.Name = "uninterpreted_option"
 
 	EnumValueOptions_Deprecated_field_fullname          protoreflect.FullName = "google.protobuf.EnumValueOptions.deprecated"
 	EnumValueOptions_Features_field_fullname            protoreflect.FullName = "google.protobuf.EnumValueOptions.features"
 	EnumValueOptions_DebugRedact_field_fullname         protoreflect.FullName = "google.protobuf.EnumValueOptions.debug_redact"
+<<<<<<< HEAD
 	EnumValueOptions_FeatureSupport_field_fullname      protoreflect.FullName = "google.protobuf.EnumValueOptions.feature_support"
+=======
+>>>>>>> 1ed84bd3 (feat: Implement functionality for 'create' method, update Redis SDK version)
 	EnumValueOptions_UninterpretedOption_field_fullname protoreflect.FullName = "google.protobuf.EnumValueOptions.uninterpreted_option"
 )
 
@@ -875,7 +881,10 @@ const (
 	EnumValueOptions_Deprecated_field_number          protoreflect.FieldNumber = 1
 	EnumValueOptions_Features_field_number            protoreflect.FieldNumber = 2
 	EnumValueOptions_DebugRedact_field_number         protoreflect.FieldNumber = 3
+<<<<<<< HEAD
 	EnumValueOptions_FeatureSupport_field_number      protoreflect.FieldNumber = 4
+=======
+>>>>>>> 1ed84bd3 (feat: Implement functionality for 'create' method, update Redis SDK version)
 	EnumValueOptions_UninterpretedOption_field_number protoreflect.FieldNumber = 999
 )
 

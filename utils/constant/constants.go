@@ -268,6 +268,9 @@ const (
 	DBaasMongoUserResource           = "ionoscloud_mongo_user"
 	DBaaSMongoTemplateResource       = "ionoscloud_mongo_template"
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
+
+	// RedisDB constants
+	DBaaSRedisDBReplicaSetResource = "ionoscloud_redisdb_replica_set"
 )
 
 // Locations slice represents the locations in which services are available.

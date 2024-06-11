@@ -52,7 +52,11 @@ import (
 const (
 	Major      = 1
 	Minor      = 34
+<<<<<<< HEAD
 	Patch      = 2
+=======
+	Patch      = 1
+>>>>>>> 1ed84bd3 (feat: Implement functionality for 'create' method, update Redis SDK version)
 	PreRelease = ""
 )
 

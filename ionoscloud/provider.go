@@ -140,6 +140,7 @@ func Provider() *schema.Provider {
 			constant.DBaaSMariaDBClusterResource:               resourceDBaaSMariaDBCluster(),
 			constant.DBaasMongoClusterResource:                 resourceDbaasMongoDBCluster(),
 			constant.DBaasMongoUserResource:                    resourceDbaasMongoUser(),
+			constant.DBaaSRedisDBReplicaSetResource:            resourceDBaaSRedisDBReplicaSet(),
 			constant.ALBResource:                               resourceApplicationLoadBalancer(),
 			constant.ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			constant.TargetGroupResource:                       resourceTargetGroup(),
