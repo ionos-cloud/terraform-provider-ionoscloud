@@ -2,6 +2,11 @@
 ### Enhancements
 - Add `grafana_address` attribute to `ionoscloud_logging_pipeline` resource and data source
 
+### Documentation
+- Updated documentation to specify that `ionoscloud_logging_pipeline`, `ionoscloud_dns_record` and `ionoscloud_dns_zone` only accept tokens for authorization.
+- Removed Early Access (EA) warning for `ionoscloud_logging_pipeline`.
+
+
 ## 6.4.17
 ### Fixes
 - Correctly raise immutable error for changes to `template_uuid` when running `terraform plan` for Cube servers
