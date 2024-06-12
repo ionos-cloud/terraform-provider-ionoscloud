@@ -259,7 +259,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find Backup Unit %q", buId)
 		}
-		return nil, fmt.Errorf("unable to retreive Backup Unit %q", buId)
+		return nil, fmt.Errorf("unable to retreive Backup Unit %q, error:%w", buId, err)
 	}
 
 	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)

@@ -412,9 +412,9 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("dbaas cluster does not exist %q", clusterId)
+			return nil, fmt.Errorf("dbaas cluster does not exist %q, error:%w", clusterId, err)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of dbaas cluster %q", clusterId)
+		return nil, fmt.Errorf("an error occured while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err)
 	}
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)

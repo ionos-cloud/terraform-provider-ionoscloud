@@ -310,11 +310,12 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the user %q", userId)
+			return nil, fmt.Errorf("user does not exist%q", userId)
 		}
-		return nil, fmt.Errorf("user does not exist%q", userId)
+		return nil, fmt.Errorf("an error occured while trying to fetch the user %q, error:%w", userId, err)
+
 	}
 
 	if err := setUserData(d, &user); err != nil {

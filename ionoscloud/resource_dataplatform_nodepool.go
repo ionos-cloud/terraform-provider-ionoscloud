@@ -244,7 +244,7 @@ func resourceDataplatformNodePoolImport(ctx context.Context, d *schema.ResourceD
 			d.SetId("")
 			return nil, fmt.Errorf("dataplatform Node Pool does not exist %q", nodePoolId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of Dataplatform Node Pool %q", nodePoolId)
+		return nil, fmt.Errorf("an error occured while trying to fetch the import of Dataplatform Node Pool %q, error:%w", nodePoolId, err)
 	}
 
 	log.Printf("[INFO] Dataplatform Node Pool found: %+v", dataplatformNodePool)

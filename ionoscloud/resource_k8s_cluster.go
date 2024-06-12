@@ -516,7 +516,7 @@ func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find k8s cluster %q", clusterId)
 		}
-		return nil, fmt.Errorf("unable to retreive k8s cluster %q", d.Id())
+		return nil, fmt.Errorf("unable to retreive k8s cluster %q, error:%w", d.Id(), err)
 	}
 
 	log.Printf("[INFO] K8s cluster found: %+v", cluster)

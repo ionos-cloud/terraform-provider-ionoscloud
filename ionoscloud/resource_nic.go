@@ -322,11 +322,13 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if !apiResponse.HttpNotFound() {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the nic %q", nicId)
+			return nil, fmt.Errorf("lan does not exist%q", nicId)
 		}
-		return nil, fmt.Errorf("lan does not exist%q", nicId)
+
+		return nil, fmt.Errorf("an error occured while trying to fetch the nic %q, error:%w", nicId, err)
+
 	}
 
 	err = d.Set("datacenter_id", dcId)

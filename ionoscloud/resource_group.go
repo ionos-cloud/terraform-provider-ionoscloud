@@ -413,9 +413,10 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the group %q", grpId)
+			return nil, fmt.Errorf("group does not exist%q", grpId)
 		}
-		return nil, fmt.Errorf("group does not exist%q", grpId)
+		return nil, fmt.Errorf("an error occured while trying to fetch the group %q, error:%w", grpId, err)
+
 	}
 
 	log.Printf("[INFO] group found: %+v", group)

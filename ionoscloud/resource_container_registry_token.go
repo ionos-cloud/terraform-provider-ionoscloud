@@ -215,7 +215,7 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 			d.SetId("")
 			return nil, fmt.Errorf("registry does not exist %q", registryTokenId)
 		}
-		return nil, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q", registryTokenId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q, error:%w", registryTokenId, err)
 	}
 
 	log.Printf("[INFO] registry token found: %+v", registryToken)

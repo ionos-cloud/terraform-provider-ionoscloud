@@ -205,9 +205,10 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the ipBlock %q", ipBlockId)
+			return nil, fmt.Errorf("ipBlock does not exist %q", ipBlockId)
 		}
-		return nil, fmt.Errorf("ipBlock does not exist %q", ipBlockId)
+		return nil, fmt.Errorf("an error occured while trying to fetch the ipBlock %q, error:%w", ipBlockId, err)
+
 	}
 
 	log.Printf("[INFO] ipBlock found: %+v", ipBlock)

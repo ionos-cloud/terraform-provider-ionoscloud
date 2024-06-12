@@ -260,7 +260,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find PCC %q", pccId)
 		}
-		return nil, fmt.Errorf("unable to retreive PCC %q", pccId)
+		return nil, fmt.Errorf("unable to retreive PCC %q, error:%w", pccId, err)
 	}
 
 	log.Printf("[INFO] PCC found: %+v", pcc)

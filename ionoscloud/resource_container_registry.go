@@ -223,7 +223,7 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil, fmt.Errorf("registry does not exist %q", registryId)
 		}
-		return nil, fmt.Errorf("an error occurred while trying to fetch the import of registry %q", registryId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryId, err)
 	}
 
 	log.Printf("[INFO] registry found: %+v", containerRegistry)

@@ -217,7 +217,7 @@ func resourceDataplatformClusterImport(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil, fmt.Errorf("dataplatform Cluster does not exist %q", clusterId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of Dataplatform Cluster %q", clusterId)
+		return nil, fmt.Errorf("an error occured while trying to fetch the import of Dataplatform Cluster %q, error:%w", clusterId, err)
 	}
 
 	log.Printf("[INFO] Dataplatform Cluster found: %+v", dataplatformCluster)

@@ -257,11 +257,11 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the loadbalancer %q", lbId)
+			return nil, fmt.Errorf("loadbalancer does not exist %q", lbId)
 		}
-		return nil, fmt.Errorf("loadbalancer does not exist %q", lbId)
+		return nil, fmt.Errorf("an error occured while trying to fetch the loadbalancer %q, error:%w", lbId, err)
 	}
 
 	log.Printf("[INFO] loadbalancer found: %+v", loadbalancer)
