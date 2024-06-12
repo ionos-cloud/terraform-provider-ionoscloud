@@ -3,7 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"strconv"
+	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,9 +21,9 @@ func resourceNetworkSecurityGroup() *schema.Resource {
 		ReadContext:   resourceNetworkSecurityGroupRead,
 		UpdateContext: resourceNetworkSecurityGroupUpdate,
 		DeleteContext: resourceNetworkSecurityGroupDelete,
-		// Importer: &schema.ResourceImporter{
-		// 	StateContext: resourceFirewallImport,
-		// },
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceNetworkSecurityGroupImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -84,33 +85,9 @@ func resourceNetworkSecurityGroupRead(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while retrieving a network security group: %w", err))
 	}
-	if securityGroup.Properties != nil {
-		if securityGroup.Properties.Name != nil {
-			err := d.Set("name", *securityGroup.Properties.Name)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("error while setting Network Security Group name  %s: %w", d.Id(), err))
-			}
-		}
-		if securityGroup.Properties.Description != nil {
-			err := d.Set("description", *securityGroup.Properties.Description)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("error while setting Network Security Group description  %s: %w", d.Id(), err))
-			}
-		}
-	}
-	if securityGroup.Entities != nil {
-		if securityGroup.Entities.Rules != nil && securityGroup.Entities.Rules.Items != nil {
-			rule_ids := make([]string, 0)
-			for _, rule := range *securityGroup.Entities.Rules.Items {
-				rule_ids = append(rule_ids, *rule.Id)
 
-			}
-			if len(rule_ids) > 0 {
-				if err := d.Set("rule_ids", rule_ids); err != nil {
-					return diag.FromErr(fmt.Errorf("error while setting rule_ids property for NetworkSecurityGroup  %s: %w", d.Id(), err))
-				}
-			}
-		}
+	if err := setNetworkSecurityGroupData(d, &securityGroup); err != nil {
+		return diag.FromErr(err)
 	}
 	return nil
 }
@@ -157,75 +134,72 @@ func resourceNetworkSecurityGroupDelete(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func getFirewallRulesData(d *schema.ResourceData, onUpdate bool) ([]ionoscloud.FirewallRule, diag.Diagnostics) {
-	rules, ok := d.GetOk("firewall_rule")
-	if !ok {
-		return []ionoscloud.FirewallRule{}, diag.Diagnostics{}
+func resourceNetworkSecurityGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(services.SdkBundle).CloudApiClient
+
+	parts := strings.Split(d.Id(), "/")
+
+	if len(parts) < 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter UUID}/{nsg UUID}", d.Id())
 	}
-	var firewallRules []ionoscloud.FirewallRule
-	for i := range rules.([]interface{}) {
-		var ruleId *string
-		rulePath := fmt.Sprintf("firewall_rule.%d.", i)
-		idValue, idOk := d.GetOk(rulePath + "id")
-		if onUpdate && idOk {
-			idStr := idValue.(string)
-			ruleId = &idStr
+
+	datacenterId := parts[0]
+	nsgId := parts[1]
+
+	nsg, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterId, nsgId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if httpNotFound(apiResponse) {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find Network Security Group %q", nsgId)
 		}
-		rule, err := getFirewallData(d, rulePath, onUpdate && idOk)
-		if err != nil {
-			return []ionoscloud.FirewallRule{}, diag.Diagnostics{}
-		}
-		rule.Id = ruleId
-		firewallRules = append(firewallRules, rule)
+		return nil, fmt.Errorf("an error occured while retrieving the Network Security Group %q, %q", d.Id(), err)
 	}
-	return firewallRules, nil
+
+	log.Printf("[INFO] Datacenter found: %+v", nsg)
+
+	if err := setNetworkSecurityGroupData(d, &nsg); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
 
-func setFirewallRulesData(d *schema.ResourceData, rules []ionoscloud.FirewallRule) diag.Diagnostics {
+func setNetworkSecurityGroupData(d *schema.ResourceData, securityGroup *ionoscloud.SecurityGroup) error {
 
-	var rulesData []map[string]any
-	for _, rule := range rules {
-		ruleProperties := rule.Properties
-		ruleData := make(map[string]any)
-		if rule.Id != nil {
-			ruleData["id"] = *rule.Id
-		}
-		if ruleProperties != nil {
-			if ruleProperties.Name != nil {
-				ruleData["name"] = *ruleProperties.Name
-			}
-			if ruleProperties.Protocol != nil {
-				ruleData["protocol"] = *ruleProperties.Protocol
-			}
-			if ruleProperties.SourceMac != nil {
-				ruleData["source_mac"] = *ruleProperties.SourceMac
-			}
-			if ruleProperties.SourceIp != nil {
-				ruleData["source_ip"] = *ruleProperties.SourceIp
-			}
-			if ruleProperties.Name != nil {
-				ruleData["target_ip"] = *ruleProperties.TargetIp
-			}
-			if ruleProperties.PortRangeStart != nil {
-				ruleData["port_range_start"] = *ruleProperties.PortRangeStart
-			}
-			if ruleProperties.PortRangeEnd != nil {
-				ruleData["port_range_end"] = *ruleProperties.PortRangeEnd
-			}
-			if ruleProperties.IcmpType != nil {
-				ruleData["icmp_type"] = strconv.Itoa(int(*ruleProperties.IcmpType))
-			}
-			if ruleProperties.IcmpCode != nil {
-				ruleData["icmp_code"] = strconv.Itoa(int(*ruleProperties.IcmpCode))
-			}
-			if ruleProperties.Type != nil {
-				ruleData["type"] = *ruleProperties.Type
+	if securityGroup.Id != nil {
+		d.SetId(*securityGroup.Id)
+	}
+
+	if securityGroup.Properties != nil {
+		if securityGroup.Properties.Name != nil {
+			err := d.Set("name", *securityGroup.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting Network Security Group name  %s: %w", d.Id(), err)
 			}
 		}
-		rulesData = append(rulesData, ruleData)
+		if securityGroup.Properties.Description != nil {
+			err := d.Set("description", *securityGroup.Properties.Description)
+			if err != nil {
+				return fmt.Errorf("error while setting Network Security Group description  %s: %w", d.Id(), err)
+			}
+		}
 	}
-	if err := d.Set("firewall_rule", rulesData); err != nil {
-		return diag.FromErr(fmt.Errorf("error while setting firewall rules for NetworkSecurityGroup %s: %w", d.Id(), err))
+	if securityGroup.Entities != nil {
+		if securityGroup.Entities.Rules != nil && securityGroup.Entities.Rules.Items != nil {
+			rule_ids := make([]string, 0)
+			for _, rule := range *securityGroup.Entities.Rules.Items {
+				rule_ids = append(rule_ids, *rule.Id)
+
+			}
+			if len(rule_ids) > 0 {
+				if err := d.Set("rule_ids", rule_ids); err != nil {
+					return fmt.Errorf("error while setting rule_ids property for NetworkSecurityGroup  %s: %w", d.Id(), err)
+				}
+			}
+		}
 	}
-	return diag.Diagnostics{}
+
+	return nil
 }
