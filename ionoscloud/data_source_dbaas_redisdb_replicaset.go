@@ -23,9 +23,10 @@ func dataSourceDBaaSRedisDBReplicaSet() *schema.Resource {
 				Optional:    true,
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      "The cluster location",
-				Optional:         true,
+				Type:        schema.TypeString,
+				Description: "The cluster location",
+				Required:    true,
+				// TODO https://github.com/ionos-cloud/terraform-provider-ionoscloud/pull/566#discussion_r1636037402
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
 			},
 			"display_name": {
@@ -68,11 +69,6 @@ func dataSourceDBaaSRedisDBReplicaSet() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"password": {
-							Type:        schema.TypeString,
-							Description: "The password for your Replicaset.",
-							Computed:    true,
-						},
 						"username": {
 							Type:        schema.TypeString,
 							Description: "The username for your Replicaset.",
@@ -151,28 +147,28 @@ func dataSourceDBaaSRedisDBReplicaSet() *schema.Resource {
 func dataSourceDBaaSRedisDBReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).RedisDBClient
 	id, idOk := d.GetOk("id")
-	name, nameOk := d.GetOk("display_name")
+	displayName, displayNameOk := d.GetOk("display_name")
 	location := d.Get("location").(string)
 
-	if idOk && nameOk {
+	if idOk && displayNameOk {
 		return diag.FromErr(fmt.Errorf("ID and display_name cannot be both specified at the same time"))
 	}
-	if !idOk && !nameOk {
+	if !idOk && !displayNameOk {
 		return diag.FromErr(fmt.Errorf("please provide either the Redis replicaset ID or display_name"))
 	}
 
-	var cluster redisdb.ReplicaSetRead
+	var replica redisdb.ReplicaSetRead
 	var err error
 
 	if idOk {
 		// search by ID
-		cluster, _, err = client.GetReplicaSet(ctx, id.(string), location)
+		replica, _, err = client.GetReplicaSet(ctx, id.(string), location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Redis cluster with ID %v: %w", id.(string), err))
 		}
 	} else {
 		// list, then filter by name
-		clusters, _, err := client.ListReplicaSets(ctx, name.(string), location)
+		clusters, _, err := client.ListReplicaSets(ctx, displayName.(string), location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching Redis clusters: %w", err))
 		}
@@ -181,27 +177,27 @@ func dataSourceDBaaSRedisDBReplicaSetRead(ctx context.Context, d *schema.Resourc
 
 		if clusters.Items != nil {
 			for _, clusterItem := range *clusters.Items {
-				if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, name.(string)) {
+				if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, displayName.(string)) {
 					results = append(results, clusterItem)
 				}
 			}
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no Redis cluster found with the specified display name: %v", name))
+			return diag.FromErr(fmt.Errorf("no Redis cluster found with the specified display name: %v", displayName))
 		} else if len(results) > 1 {
 			var ids []string
 			for _, r := range results {
 				ids = append(ids, *r.Id)
 			}
-			return diag.FromErr(fmt.Errorf("more than one Redis cluster found with the specified criteria name '%v': (%v)", name, strings.Join(ids, ", ")))
+			return diag.FromErr(fmt.Errorf("more than one Redis cluster found with the specified criteria name '%v': (%v)", displayName, strings.Join(ids, ", ")))
 		} else {
-			cluster = results[0]
+			replica = results[0]
 		}
 
 	}
 
-	if err := client.SetRedisDBReplicaSetData(d, cluster); err != nil {
+	if err := client.SetRedisDBReplicaSetData(d, replica); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
