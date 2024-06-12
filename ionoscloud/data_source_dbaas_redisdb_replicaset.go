@@ -182,7 +182,7 @@ func dataSourceDBaaSRedisDBReplicaSetRead(ctx context.Context, d *schema.Resourc
 		}
 	}
 
-	if results == nil || len(results) == 0 {
+	if results == nil {
 		return diag.FromErr(fmt.Errorf("no Redis cluster found with the specified display name: %v", displayName))
 	}
 
