@@ -169,6 +169,7 @@ func Provider() *schema.Provider {
 			constant.ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
 			constant.TargetGroupResource:                       dataSourceTargetGroup(),
 			constant.DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
+			constant.DBaaSRedisDBReplicaSetResource:            dataSourceDBaaSRedisDBReplicaSet(),
 			constant.CertificateResource:                       dataSourceCertificate(),
 			constant.ContainerRegistryResource:                 dataSourceContainerRegistry(),
 			constant.ContainerRegistryTokenResource:            dataSourceContainerRegistryToken(),
