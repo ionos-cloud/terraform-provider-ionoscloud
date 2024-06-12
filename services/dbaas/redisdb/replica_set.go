@@ -41,6 +41,39 @@ func (c *RedisDBClient) CreateRedisDPReplicaSet(ctx context.Context, replicaSet 
 	return replicaSetResponse, apiResponse, err
 }
 
+func (c *RedisDBClient) IsReplicaSetReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	replicaSetID := d.Id()
+	location := d.Get("location").(string)
+	replicaSet, _, err := c.GetReplicaSet(ctx, replicaSetID, location)
+	if err != nil {
+		return false, fmt.Errorf("status check failed for Redis DB replica set with ID: %v, error: %w", replicaSetID, err)
+	}
+	if replicaSet.Metadata == nil || replicaSet.Metadata.State == nil {
+		return false, fmt.Errorf("metadata or state is empty for Redis DB replica set with ID: %v", replicaSetID)
+	}
+	log.Printf("[INFO] state of the RedisDB replica set with ID: %v is: %v", replicaSetID, *replicaSet.Metadata.State)
+	return strings.EqualFold(string(*replicaSet.Metadata.State), constant.Available), nil
+}
+
+func (c *RedisDBClient) DeleteRedisDBReplicaSet(ctx context.Context, replicaSetID, location string) (*redisdb.APIResponse, error) {
+	c.modifyConfigURL(location)
+	apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsDelete(ctx, replicaSetID).Execute()
+	apiResponse.LogInfo()
+	return apiResponse, err
+}
+
+func (c *RedisDBClient) IsReplicaSetDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	replicaSetID := d.Id()
+	_, apiResponse, err := c.GetReplicaSet(ctx, replicaSetID, d.Get("location").(string))
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return true, nil
+		}
+		return false, fmt.Errorf("check failed for RedisDB replica set with ID: %v, error: %w", replicaSetID, err)
+	}
+	return false, nil
+}
+
 func (c *RedisDBClient) GetReplicaSet(ctx context.Context, replicaSetID, location string) (redisdb.ReplicaSetRead, *redisdb.APIResponse, error) {
 	c.modifyConfigURL(location)
 	replicaSet, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsFindById(ctx, replicaSetID).Execute()
@@ -57,20 +90,6 @@ func (c *RedisDBClient) ListReplicaSets(ctx context.Context, filterName, locatio
 	replicaSets, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsGetExecute(request)
 	apiResponse.LogInfo()
 	return replicaSets, apiResponse, err
-}
-
-func (c *RedisDBClient) IsReplicaSetReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	replicaSetID := d.Id()
-	location := d.Get("location").(string)
-	replicaSet, _, err := c.GetReplicaSet(ctx, replicaSetID, location)
-	if err != nil {
-		return false, fmt.Errorf("status check failed for Redis DB replica set with ID: %v, error: %w", replicaSetID, err)
-	}
-	if replicaSet.Metadata == nil || replicaSet.Metadata.State == nil {
-		return false, fmt.Errorf("metadata or state is empty for Redis DB replica set with ID: %v", replicaSetID)
-	}
-	log.Printf("[INFO] state of the RedisDB replica set with ID: %v is: %v", replicaSetID, *replicaSet.Metadata.State)
-	return strings.EqualFold(string(*replicaSet.Metadata.State), constant.Available), nil
 }
 
 // GetRedisDBReplicaSetDataCreate reads the data from the tf configuration files and populates a
@@ -134,9 +153,15 @@ func (c *RedisDBClient) SetRedisDBReplicaSetData(d *schema.ResourceData, replica
 	if replicaSet.Id != nil {
 		d.SetId(*replicaSet.Id)
 	}
+
+	if replicaSet.Metadata == nil {
+		return fmt.Errorf("response metadata should not be empty for RedisDB replica set with ID: %v", *replicaSet.Id)
+	}
+
 	if replicaSet.Properties == nil {
 		return fmt.Errorf("response properties should not be empty for RedisDB replica set with ID: %v", *replicaSet.Id)
 	}
+
 	if replicaSet.Properties.DisplayName != nil {
 		if err := d.Set("display_name", *replicaSet.Properties.DisplayName); err != nil {
 			return utils.GenerateSetError(resourceName, "display_name", err)
@@ -172,6 +197,12 @@ func (c *RedisDBClient) SetRedisDBReplicaSetData(d *schema.ResourceData, replica
 	if replicaSet.Properties.InitialSnapshotId != nil {
 		if err := d.Set("initial_snapshot_id", *replicaSet.Properties.InitialSnapshotId); err != nil {
 			return utils.GenerateSetError(resourceName, "initial_snapshot_id", err)
+		}
+	}
+
+	if replicaSet.Metadata.DnsName != nil {
+		if err := d.Set("dns_name", *replicaSet.Metadata.DnsName); err != nil {
+			return utils.GenerateSetError(resourceName, "dns_name", err)
 		}
 	}
 

@@ -10,6 +10,9 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/redisdb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"log"
+	"slices"
+	"strings"
 )
 
 func resourceDBaaSRedisDBReplicaSet() *schema.Resource {
@@ -177,6 +180,11 @@ func resourceDBaaSRedisDBReplicaSet() *schema.Resource {
 				Description: "The ID of a snapshot to restore the replica set from. If set, the replica set will be created from the snapshot.",
 				Optional:    true,
 			},
+			"dns_name": {
+				Type:        schema.TypeString,
+				Description: "The DNS name pointing to your replica set. Will be used to connect to the active/standalone instance.",
+				Computed:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -203,10 +211,39 @@ func redisDBReplicaSetCreate(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func redisDBReplicaSetDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).RedisDBClient
+	replicaSetID := d.Id()
+	apiResponse, err := client.DeleteRedisDBReplicaSet(ctx, replicaSetID, d.Get("location").(string))
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(fmt.Errorf("error while deleting RedisDB replica set with ID: %v, error: %w", replicaSetID, err))
+	}
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsReplicaSetDeleted)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("deletion check failed for RedisDB replica set with ID: %v, error: %w", replicaSetID, err))
+	}
+	// TODO -- Check if we need to wait after replica set deletion in order to free the LAN.
 	return nil
 }
 
 func redisDBReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).RedisDBClient
+	replicaSetID := d.Id()
+	replicaSet, apiResponse, err := client.GetReplicaSet(ctx, replicaSetID, d.Get("location").(string))
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(fmt.Errorf("error while fetching RedisDB replica set with ID: %v, error: %w", replicaSetID, err))
+	}
+	log.Printf("[INFO] Successfully retrieved RedisDB replica set with ID: %v, replica set info: %+v", replicaSetID, replicaSet)
+	if err := client.SetRedisDBReplicaSetData(d, replicaSet); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -215,5 +252,31 @@ func redisDBReplicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func redisDBReplicaSetImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	return nil, nil
+	client := meta.(services.SdkBundle).RedisDBClient
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<replica_set_id>'", d.Id())
+	}
+	location := parts[0]
+	// TODO -- Change the name of the constant here
+	if !slices.Contains(constant.MariaDBClusterLocations, location) {
+		return nil, fmt.Errorf("invalid import ID: %q, location must be one of %v", d.Id(), constant.MariaDBClusterLocations)
+	}
+	replicaSetID := parts[1]
+	replicaSet, apiResponse, err := client.GetReplicaSet(ctx, replicaSetID, location)
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			d.SetId("")
+			return nil, fmt.Errorf("RedisDB replica set with ID: %v does not exist, error: %w", err)
+		}
+		return nil, fmt.Errorf("an error occurred while trying to import RedisDB replica set with ID: %v, error: %w", replicaSetID, err)
+	}
+	log.Printf("[INFO] RedisDB replica set found: %+v", replicaSet)
+	if err := d.Set("location", location); err != nil {
+		return nil, utils.GenerateSetError("RedisDB replica set", "location", err)
+	}
+	if err := client.SetRedisDBReplicaSetData(d, replicaSet); err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
 }
