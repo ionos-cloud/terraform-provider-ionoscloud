@@ -24,12 +24,10 @@ func resourceNSGFirewallRule() *schema.Resource {
 			StateContext: resourceNSGFirewallImport,
 		},
 		Schema: map[string]*schema.Schema{
-
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"protocol": {
 				Type:             schema.TypeString,
 				Required:         true,
@@ -59,7 +57,6 @@ func resourceNSGFirewallRule() *schema.Resource {
 					return
 				}),
 			},
-
 			"port_range_end": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -87,13 +84,13 @@ func resourceNSGFirewallRule() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"nsg_id": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -111,7 +108,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a nsg firewall rule: %w", err))
 		return diags
 	}
 	d.SetId(*fw.Id)
@@ -122,7 +119,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 			log.Printf("[DEBUG] firewall resource failed to be created")
 			d.SetId("")
 		}
-		return diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule dcId: %s _id: %s %w", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState))
+		return diag.FromErr(fmt.Errorf("an error occured while creating a nsg firewall rule dcId: %s _id: %s %w", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState))
 	}
 
 	return resourceNSGFirewallRead(ctx, d, meta)
@@ -164,12 +161,12 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a nsg firewall rule ID %s %w", d.Id(), err))
 		return diags
 	}
 
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(fmt.Errorf("error getting state change for firewall patch %w", errState))
+		return diag.FromErr(fmt.Errorf("error getting state change for nsg firewall patch %w", errState))
 	}
 
 	return resourceNSGFirewallRead(ctx, d, meta)
@@ -185,7 +182,7 @@ func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta
 		Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a firewall rule ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nsg firewall rule ID %s %w", d.Id(), err))
 		return diags
 	}
 

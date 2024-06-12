@@ -42,7 +42,7 @@ func resourceNetworkSecurityGroup() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -188,13 +188,12 @@ func setNetworkSecurityGroupData(d *schema.ResourceData, securityGroup *ionosclo
 	}
 	if securityGroup.Entities != nil {
 		if securityGroup.Entities.Rules != nil && securityGroup.Entities.Rules.Items != nil {
-			rule_ids := make([]string, 0)
+			ruleIDs := make([]string, 0, len(*securityGroup.Entities.Rules.Items))
 			for _, rule := range *securityGroup.Entities.Rules.Items {
-				rule_ids = append(rule_ids, *rule.Id)
-
+				ruleIDs = append(ruleIDs, *rule.Id)
 			}
-			if len(rule_ids) > 0 {
-				if err := d.Set("rule_ids", rule_ids); err != nil {
+			if len(ruleIDs) > 0 {
+				if err := d.Set("rule_ids", ruleIDs); err != nil {
 					return fmt.Errorf("error while setting rule_ids property for NetworkSecurityGroup  %s: %w", d.Id(), err)
 				}
 			}

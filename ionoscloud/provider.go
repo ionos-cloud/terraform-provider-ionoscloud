@@ -124,7 +124,6 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  resourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
-			"ionoscloud_networksecuritygroup":                  resourceNetworkSecurityGroup(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -148,6 +147,7 @@ func Provider() *schema.Provider {
 			constant.NatGatewayRuleResource:                    dataSourceNatGatewayRule(),
 			constant.NetworkLoadBalancerResource:               dataSourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: dataSourceNetworkLoadBalancerForwardingRule(),
+			constant.NetworkSecurityGroupResource:              dataSourceNetworkSecurityGroup(),
 			constant.TemplateResource:                          dataSourceTemplate(),
 			constant.BackupUnitResource:                        dataSourceBackupUnit(),
 			constant.FirewallResource:                          dataSourceFirewall(),
