@@ -32,78 +32,10 @@ func resourceNetworkSecurityGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"firewall_rule": {
+			"rule_ids": {
 				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"protocol": {
-							Type:             schema.TypeString,
-							Required:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-						},
-						"source_mac": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						// "ip_version": {
-						// 	Type:             schema.TypeString,
-						// 	Optional:         true,
-						// 	ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"IPv4", "IPv6"}, false)),
-						// },
-						"source_ip": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"target_ip": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"port_range_start": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							ValidateDiagFunc: validation.ToDiagFunc(func(v any, k string) (ws []string, errors []error) {
-								if v.(int) < 1 && v.(int) > 65534 {
-									errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
-								}
-								return
-							}),
-						},
-						"port_range_end": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							ValidateDiagFunc: validation.ToDiagFunc(func(v any, k string) (ws []string, errors []error) {
-								if v.(int) < 1 && v.(int) > 65534 {
-									errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
-								}
-								return
-							}),
-						},
-						"icmp_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"icmp_code": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-					},
-				},
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"datacenter_id": {
 				Type:             schema.TypeString,
@@ -130,24 +62,13 @@ func resourceNetworkSecurityGroupCreate(ctx context.Context, d *schema.ResourceD
 		},
 	}
 
-	sg.Entities = ionoscloud.NewSecurityGroupRequestEntities()
-	firewallRules, diags := getFirewallRulesData(d, false)
-	if diags != nil {
-		return diags
-	}
-	sg.Entities.SetRules(ionoscloud.FirewallRules{Items: &firewallRules})
-	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPost(ctx, datacenterID).SecurityGroup(sg).Depth(2).Execute()
+	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPost(ctx, datacenterID).SecurityGroup(sg).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while creating a Network Security Group for datacenter dcID: %s, %w", datacenterID, err))
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while waiting for Network Security Group to be created for datacenter dcID: %s,  %w", datacenterID, err))
-	}
-	if securityGroup.Entities != nil {
-		if securityGroup.Entities.Rules != nil && securityGroup.Entities.Rules.Items != nil {
-			setFirewallRulesData(d, *securityGroup.Entities.Rules.Items)
-		}
 	}
 	d.SetId(*securityGroup.Id)
 
@@ -179,7 +100,16 @@ func resourceNetworkSecurityGroupRead(ctx context.Context, d *schema.ResourceDat
 	}
 	if securityGroup.Entities != nil {
 		if securityGroup.Entities.Rules != nil && securityGroup.Entities.Rules.Items != nil {
-			return setFirewallRulesData(d, *securityGroup.Entities.Rules.Items)
+			rule_ids := make([]string, 0)
+			for _, rule := range *securityGroup.Entities.Rules.Items {
+				rule_ids = append(rule_ids, *rule.Id)
+
+			}
+			if len(rule_ids) > 0 {
+				if err := d.Set("rule_ids", rule_ids); err != nil {
+					return diag.FromErr(fmt.Errorf("error while setting rule_ids property for NetworkSecurityGroup  %s: %w", d.Id(), err))
+				}
+			}
 		}
 	}
 	return nil
@@ -189,58 +119,21 @@ func resourceNetworkSecurityGroupUpdate(ctx context.Context, d *schema.ResourceD
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
-	if d.HasChange("name") || d.HasChange("description") {
-		sgName := d.Get("name").(string)
-		sgDescription := d.Get("description").(string)
+	sgName := d.Get("name").(string)
+	sgDescription := d.Get("description").(string)
 
-		sg := ionoscloud.SecurityGroupRequest{
-			Properties: &ionoscloud.SecurityGroupProperties{
-				Name:        &sgName,
-				Description: &sgDescription,
-			},
-		}
+	sg := ionoscloud.SecurityGroupRequest{
+		Properties: &ionoscloud.SecurityGroupProperties{
+			Name:        &sgName,
+			Description: &sgDescription,
+		},
+	}
 
-		_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPut(ctx, datacenterID, d.Id()).SecurityGroup(sg).Execute()
-		apiResponse.LogInfo()
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while updating a network security group: %w", err))
-			return diags
-		}
-	}
-	if !d.HasChange("firewall_rule") {
-		return nil
-	}
-	o, n := d.GetChange("firewall_rule")
-	fmt.Println(o)
-	fmt.Println(n)
-	firewallRules, diags := getFirewallRulesData(d, true)
-	if diags != nil {
+	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPut(ctx, datacenterID, d.Id()).SecurityGroup(sg).Execute()
+	apiResponse.LogInfo()
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating security group: %w", err))
 		return diags
-	}
-	for _, r := range firewallRules {
-		if r.Id != nil {
-			ruleId := *r.Id
-			r.Id = nil
-			_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesPut(ctx, datacenterID, d.Id(), ruleId).Rule(r).Execute()
-			apiResponse.LogInfo()
-			if err != nil {
-				diags = diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule for network security group: nsgID: %s, ruleID: %s, %w", d.Id(), *r.Id, err))
-				return diags
-			}
-			if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-				return diag.FromErr(fmt.Errorf("an error occured while waiting for a firewall rule to be updated for Network Security Group: nsgID: %s, ruleID: %s, %w", d.Id(), *r.Id, err))
-			}
-			continue
-		}
-		_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFirewallrulesPost(ctx, datacenterID, d.Id()).FirewallRule(r).Execute()
-		apiResponse.LogInfo()
-		if err != nil {
-			diags = diag.FromErr(fmt.Errorf("an error occured while adding a new firewall rule for network security group: nsgID: %s, %w", d.Id(), err))
-			return diags
-		}
-		if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while waiting for a firewall rule to be created for Network Security Group: nsgID: %s, %w", d.Id(), err))
-		}
 	}
 	return nil
 }

@@ -103,6 +103,8 @@ func Provider() *schema.Provider {
 			constant.NatGatewayRuleResource:                    resourceNatGatewayRule(),
 			constant.NetworkLoadBalancerResource:               resourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
+			constant.NetworkSecurityGroupResource:              resourceNetworkSecurityGroup(),
+			constant.NSGFirewallRuleResource:                   resourceNSGFirewallRule(),
 			constant.PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
 			constant.PsqlUserResource:                          resourceDbaasPgSqlUser(),
 			constant.PsqlDatabaseResource:                      resourceDbaasPgSqlDatabase(),
