@@ -190,7 +190,11 @@ func dataSourceDBaaSRedisDBReplicaSetRead(ctx context.Context, d *schema.Resourc
 		if results == nil || len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no Redis cluster found with the specified display name: %v", name))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one Redis cluster found with the specified criteria name: %v", name))
+			var ids []string
+			for _, r := range results {
+				ids = append(ids, *r.Id)
+			}
+			return diag.FromErr(fmt.Errorf("more than one Redis cluster found with the specified criteria name '%v': (%v)", name, strings.Join(ids, ", ")))
 		} else {
 			cluster = results[0]
 		}
