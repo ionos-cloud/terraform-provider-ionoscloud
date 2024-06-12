@@ -161,44 +161,39 @@ func dataSourceDBaaSRedisDBReplicaSetRead(ctx context.Context, d *schema.Resourc
 	var err error
 
 	if idOk {
-		// search by ID
 		replica, _, err = client.GetReplicaSet(ctx, id.(string), location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Redis cluster with ID %v: %w", id.(string), err))
 		}
-	} else {
-		// list, then filter by name
-		clusters, _, err := client.ListReplicaSets(ctx, displayName.(string), location)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching Redis clusters: %w", err))
-		}
-
-		var results []redisdb.ReplicaSetRead
-
-		if clusters.Items != nil {
-			for _, clusterItem := range *clusters.Items {
-				if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, displayName.(string)) {
-					results = append(results, clusterItem)
-				}
-			}
-		}
-
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no Redis cluster found with the specified display name: %v", displayName))
-		} else if len(results) > 1 {
-			var ids []string
-			for _, r := range results {
-				ids = append(ids, *r.Id)
-			}
-			return diag.FromErr(fmt.Errorf("more than one Redis cluster found with the specified criteria name '%v': (%v)", displayName, strings.Join(ids, ", ")))
-		} else {
-			replica = results[0]
-		}
-
+		return diag.FromErr(client.SetRedisDBReplicaSetData(d, replica))
 	}
 
-	if err := client.SetRedisDBReplicaSetData(d, replica); err != nil {
-		return diag.FromErr(err)
+	clusters, _, err := client.ListReplicaSets(ctx, displayName.(string), location)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching Redis clusters: %w", err))
 	}
-	return nil
+
+	var results []redisdb.ReplicaSetRead
+	if clusters.Items != nil {
+		for _, clusterItem := range *clusters.Items {
+			if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, displayName.(string)) {
+				results = append(results, clusterItem)
+			}
+		}
+	}
+
+	if results == nil || len(results) == 0 {
+		return diag.FromErr(fmt.Errorf("no Redis cluster found with the specified display name: %v", displayName))
+	}
+
+	if len(results) > 1 {
+		var ids []string
+		for _, r := range results {
+			ids = append(ids, *r.Id)
+		}
+		return diag.FromErr(fmt.Errorf("more than one Redis cluster found with the specified criteria name '%v': (%v)", displayName, strings.Join(ids, ", ")))
+	}
+
+	replica = results[0]
+	return diag.FromErr(client.SetRedisDBReplicaSetData(d, replica))
 }
