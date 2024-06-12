@@ -195,6 +195,11 @@ const (
 	ServerDataSourceByName = "test_server_name"
 )
 
+const (
+	NetworkSecurityGroupResource = "ionoscloud_nsg"
+	NSGFirewallRuleResource      = "ionoscloud_nsg_firewallrule"
+)
+
 // S3Key Constants
 const (
 	S3KeyResource       = "ionoscloud_s3_key"
