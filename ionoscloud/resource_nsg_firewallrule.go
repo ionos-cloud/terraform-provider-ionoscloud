@@ -125,7 +125,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule dcId: %s _id: %s %w", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState))
 	}
 
-	return resourceFirewallRead(ctx, d, meta)
+	return resourceNSGFirewallRead(ctx, d, meta)
 }
 
 func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -172,7 +172,7 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(fmt.Errorf("error getting state change for firewall patch %w", errState))
 	}
 
-	return resourceFirewallRead(ctx, d, meta)
+	return resourceNSGFirewallRead(ctx, d, meta)
 }
 
 func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
