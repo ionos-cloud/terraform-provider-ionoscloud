@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
@@ -23,6 +22,8 @@ import (
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 var Version = "DEV"
@@ -102,6 +103,8 @@ func Provider() *schema.Provider {
 			constant.NatGatewayRuleResource:                    resourceNatGatewayRule(),
 			constant.NetworkLoadBalancerResource:               resourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
+			constant.NetworkSecurityGroupResource:              resourceNetworkSecurityGroup(),
+			constant.NSGFirewallRuleResource:                   resourceNSGFirewallRule(),
 			constant.PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
 			constant.PsqlUserResource:                          resourceDbaasPgSqlUser(),
 			constant.PsqlDatabaseResource:                      resourceDbaasPgSqlDatabase(),
@@ -144,6 +147,7 @@ func Provider() *schema.Provider {
 			constant.NatGatewayRuleResource:                    dataSourceNatGatewayRule(),
 			constant.NetworkLoadBalancerResource:               dataSourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: dataSourceNetworkLoadBalancerForwardingRule(),
+			constant.NetworkSecurityGroupResource:              dataSourceNetworkSecurityGroup(),
 			constant.TemplateResource:                          dataSourceTemplate(),
 			constant.BackupUnitResource:                        dataSourceBackupUnit(),
 			constant.FirewallResource:                          dataSourceFirewall(),
