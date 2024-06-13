@@ -342,7 +342,7 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a application loadbalancer forwarding rule ID %s %w",
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a application loadbalancer forwarding rule ID %s %w",
 			d.Id(), err))
 		return diags
 	}
@@ -364,7 +364,7 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a application loadbalancer forwarding rule %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a application loadbalancer forwarding rule %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -398,7 +398,7 @@ func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find alb forwarding rule %q", ruleId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the alb forwarding rule %q, %w", ruleId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving the alb forwarding rule %q, %w", ruleId, err)
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {

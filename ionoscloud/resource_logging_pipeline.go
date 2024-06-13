@@ -90,12 +90,12 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	client := meta.(services.SdkBundle).LoggingClient
 	pipelineResponse, _, err := client.CreatePipeline(ctx, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while creating a Logging pipeline: %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while creating a Logging pipeline: %w", err))
 	}
 	d.SetId(*pipelineResponse.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for the pipeline with ID: %s to become available: %w", *pipelineResponse.Id, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the pipeline with ID: %s to become available: %w", *pipelineResponse.Id, err))
 	}
 	// Make another read and set the data in the state because 'grafanaAdress` is not returned in the create response
 	return pipelineRead(ctx, d, meta)
@@ -138,7 +138,7 @@ func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsPipelineDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while wainting for Logging pipeline with ID: %s to be deleted, error: %w", pipelineId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while wainting for Logging pipeline with ID: %s to be deleted, error: %w", pipelineId, err))
 	}
 	return nil
 }
@@ -149,11 +149,11 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	pipelineResponse, _, err := client.UpdatePipeline(ctx, pipelineId, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while updating the Logging pipeline with ID: %s, error: %w", pipelineId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while updating the Logging pipeline with ID: %s, error: %w", pipelineId, err))
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for the Logging pipeline with ID: %s to become available: %w", pipelineId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the Logging pipeline with ID: %s to become available: %w", pipelineId, err))
 	}
 	if err := client.SetPipelineData(d, pipelineResponse); err != nil {
 		return diag.FromErr(err)

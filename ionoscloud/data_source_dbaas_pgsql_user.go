@@ -47,7 +47,7 @@ func dataSourceDbaasPgSqlReadUser(ctx context.Context, d *schema.ResourceData, m
 		if apiResponse.HttpNotFound() {
 			return diag.FromErr(fmt.Errorf("no PgSql user found with the specified username: %s and cluster ID: %s", username, clusterId))
 		}
-		return diag.FromErr(fmt.Errorf("an error occured while fetching the PgSql user: %s, cluster ID: %s, err: %w", username, clusterId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching the PgSql user: %s, cluster ID: %s, err: %w", username, clusterId, err))
 	}
 	if err := dbaas.SetUserPgSqlData(d, &user); err != nil {
 		return diag.FromErr(err)

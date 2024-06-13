@@ -297,7 +297,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse)))
 		return diags
 	}
 
@@ -317,7 +317,7 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network loadbalancer %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a network loadbalancer %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -350,7 +350,7 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find network load balancer %q", networkLoadBalancerId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving network load balancer  %q: %q ", networkLoadBalancerId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving network load balancer  %q: %q ", networkLoadBalancerId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {

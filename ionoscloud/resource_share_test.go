@@ -108,7 +108,7 @@ func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.Te
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Share of resource  %s in group %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"])
+			return fmt.Errorf("error occurred while fetching Share of resource  %s in group %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"])
 		}
 		if *foundshare.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

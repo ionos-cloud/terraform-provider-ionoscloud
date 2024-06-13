@@ -122,7 +122,7 @@ func testAccLoggingPipelineDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.GetPipelineById(ctx, pipelineId)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occured while checking the destruction of Logging pipeline with ID: %s, error: %w", pipelineId, err)
+				return fmt.Errorf("an error occurred while checking the destruction of Logging pipeline with ID: %s, error: %w", pipelineId, err)
 			}
 		} else {
 			return fmt.Errorf("Logging pipeline with ID: %s still exists", pipelineId)
@@ -147,7 +147,7 @@ func testAccLoggingPipelineExistenceCheck(path string, pipeline *logging.Pipelin
 		pipelineId := rs.Primary.ID
 		pipelineResponse, _, err := client.GetPipelineById(ctx, pipelineId)
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching Logging pipeline with ID: %s, error: %w", pipelineId, err)
+			return fmt.Errorf("an error occurred while fetching Logging pipeline with ID: %s, error: %w", pipelineId, err)
 		}
 		pipeline = &pipelineResponse
 		return nil

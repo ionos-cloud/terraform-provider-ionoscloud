@@ -197,7 +197,7 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Firewall rule: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching Firewall rule: %s", rs.Primary.ID)
 		}
 		if *foundServer.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

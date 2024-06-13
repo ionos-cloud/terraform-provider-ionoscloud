@@ -122,7 +122,7 @@ func testAccCheckPrivateCrossConnectExists(n string, privateCrossConnect *ionosc
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching private cross-connect: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching private cross-connect: %s", rs.Primary.ID)
 		}
 		if *foundPrivateCrossConnect.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

@@ -225,7 +225,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 	dbaasClusterResponse, _, err := client.CreateCluster(ctx, *dbaasCluster)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a DBaaS psql cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a DBaaS psql cluster: %w", err))
 		return diags
 	}
 
@@ -275,7 +275,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 	dbaasClusterResponse, _, err := client.UpdateCluster(ctx, d.Id(), *cluster)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a dbaas cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a dbaas cluster: %w", err))
 		return diags
 	}
 
@@ -328,7 +328,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil, fmt.Errorf("dbaas cluster does not exist %q", clusterId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err)
 	}
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)

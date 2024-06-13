@@ -155,7 +155,7 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching DC: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching DC: %s", rs.Primary.ID)
 		}
 		if *foundDC.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

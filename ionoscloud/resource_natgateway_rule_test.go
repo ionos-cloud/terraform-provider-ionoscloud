@@ -110,7 +110,7 @@ func testAccCheckNatGatewayRuleDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured at checking deletion of nat gateway rule %s %w", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred at checking deletion of nat gateway rule %s %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("nat gateway rule still exists %s %w", rs.Primary.ID, err)
@@ -143,7 +143,7 @@ func testAccCheckNatGatewayRuleExists(n string, natGateway *ionoscloud.NatGatewa
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching NatGatewayRule: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching NatGatewayRule: %s", rs.Primary.ID)
 		}
 		if *foundNatGatewayRule.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

@@ -91,7 +91,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 	lan, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while patching a lans IP failover group, LAN ID: %s, error: %w", lanId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while patching a lans IP failover group, LAN ID: %s, error: %w", lanId, err))
 	}
 
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
@@ -186,7 +186,7 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 		_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while patching the lan with ID: %s, error: %w", lanId, err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while patching the lan with ID: %s, error: %w", lanId, err))
 			return diags
 		}
 
@@ -225,7 +225,7 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 	_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while removing an IP failover group with IP: %s for the LAN with ID: %s, datacenter ID: %s, error: %w", ip, lanId, dcId, err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while removing an IP failover group with IP: %s for the LAN with ID: %s, datacenter ID: %s, error: %w", ip, lanId, dcId, err))
 		return diags
 	}
 

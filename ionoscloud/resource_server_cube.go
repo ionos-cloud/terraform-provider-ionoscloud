@@ -450,7 +450,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if _, ok := d.GetOk("nic"); ok {
 		nic, err = cloudapinic.GetNicFromSchema(d, "nic.0.")
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("cube error occured while getting nic from schema: %w", err))
+			diags := diag.FromErr(fmt.Errorf("cube error occurred while getting nic from schema: %w", err))
 			return diags
 		}
 	}
@@ -594,7 +594,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 	if server.Properties != nil {
@@ -656,7 +656,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		nic, _, err := ns.Get(ctx, dcId, serverId, primarynic.(string), 0)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occured while fetching nic %s for server ID %s %s", primarynic.(string), d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error occurred while fetching nic %s for server ID %s %s", primarynic.(string), d.Id(), err))
 			return diags
 		}
 
@@ -677,7 +677,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error occured while fetching firewallrule %s for server ID %s %s", firewallId.(string), serverId, err))
+				diags := diag.FromErr(fmt.Errorf("error occurred while fetching firewallrule %s for server ID %s %s", firewallId.(string), serverId, err))
 				return diags
 			}
 
@@ -778,7 +778,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while updating server ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -799,7 +799,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), volumeIdStr).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("an error occured while getting a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), volumeId, err))
+					diags := diag.FromErr(fmt.Errorf("an error occurred while getting a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), volumeId, err))
 					return diags
 				}
 				if v, ok := d.GetOk(volumePath + "name"); ok {
@@ -915,7 +915,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 			if err != nil {
 				if !httpNotFound(apiResponse) {
-					diags := diag.FromErr(fmt.Errorf("error occured at checking existance of firewall %s %s", firewallId, err))
+					diags := diag.FromErr(fmt.Errorf("error occurred at checking existance of firewall %s %s", firewallId, err))
 					return diags
 				} else if httpNotFound(apiResponse) {
 					diags := diag.FromErr(fmt.Errorf("firewall does not exist %s", firewallId))
@@ -931,12 +931,12 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occured while running firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %s", dcId, *server.Id, *nic.Id, firewallId, err))
+				diags := diag.FromErr(fmt.Errorf("an error occurred while running firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %s", dcId, *server.Id, *nic.Id, firewallId, err))
 				return diags
 			}
 
 			if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-				return diag.FromErr(fmt.Errorf("an error occured while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, errState))
+				return diag.FromErr(fmt.Errorf("an error occurred while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, errState))
 			}
 
 			if firewallId == "" && firewall.Id != nil {
@@ -1011,7 +1011,7 @@ func resourceCubeServerDelete(ctx context.Context, d *schema.ResourceData, meta 
 	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a server ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a server ID %s %w", d.Id(), err))
 		return diags
 
 	}
@@ -1044,7 +1044,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find server %q", serverId)
 		}
-		return nil, fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err)
+		return nil, fmt.Errorf("error occurred while fetching a server ID %s %w", d.Id(), err)
 	}
 
 	d.SetId(*server.Id)

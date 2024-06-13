@@ -173,7 +173,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	nic, err := cloudapinic.GetNicFromSchema(d, "")
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while getting nic from schema: %w", err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while getting nic from schema: %w", err))
 		return diags
 	}
 
@@ -181,7 +181,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	srvid := d.Get("server_id").(string)
 	createdNic, apiResponse, err := ns.Create(ctx, dcid, srvid, nic)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %w", err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while creating a nic: %w", err))
 		return diags
 	}
 
@@ -230,7 +230,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a nic ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a nic ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -279,13 +279,13 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	nic, err := cloudapinic.GetNicFromSchema(d, "")
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("update error occured while getting nic from schema: %w", err))
+		diags := diag.FromErr(fmt.Errorf("update error occurred while getting nic from schema: %w", err))
 		return diags
 	}
 
 	_, _, err = ns.Update(ctx, dcId, srvId, nicId, *nic.Properties)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %w", err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while updating a nic: %w", err))
 		return diags
 	}
 
@@ -300,7 +300,7 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	nicid := d.Id()
 	_, err := ns.Delete(ctx, dcid, srvid, nicid)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
 		return diags
 	}
 	d.SetId("")
@@ -327,7 +327,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 			return nil, fmt.Errorf("lan does not exist%q", nicId)
 		}
 
-		return nil, fmt.Errorf("an error occured while trying to fetch the nic %q, error:%w", nicId, err)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the nic %q, error:%w", nicId, err)
 
 	}
 

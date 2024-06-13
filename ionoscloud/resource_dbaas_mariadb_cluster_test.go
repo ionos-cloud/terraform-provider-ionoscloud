@@ -118,7 +118,7 @@ func testAccCheckDBaaSMariaDBClusterDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID, rs.Primary.Attributes[clusterLocationAttribute])
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occured while checking the destruction of MariaDB cluster with ID: %v, error: %w", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking the destruction of MariaDB cluster with ID: %v, error: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("MariaDB cluster with ID: %v still exists", rs.Primary.ID)
@@ -143,7 +143,7 @@ func testAccCheckDBaaSMariaDBClusterExists(n string, cluster *mariadb.ClusterRes
 
 		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID, rs.Primary.Attributes[clusterLocationAttribute])
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching MariaDB cluster with ID: %v, error: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching MariaDB cluster with ID: %v, error: %w", rs.Primary.ID, err)
 		}
 		if *foundCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("resource not found")

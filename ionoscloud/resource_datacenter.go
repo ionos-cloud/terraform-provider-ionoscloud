@@ -190,7 +190,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while update the data center ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while update the data center ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -234,7 +234,7 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find datacenter %q", dcId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the datacenter %q, error:%w", dcId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving the datacenter %q, error:%w", dcId, err)
 	}
 
 	log.Printf("[INFO] Datacenter found: %+v", datacenter)

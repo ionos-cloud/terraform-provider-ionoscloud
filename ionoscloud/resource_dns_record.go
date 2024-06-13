@@ -72,7 +72,7 @@ func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 	recordResponse, _, err := client.CreateRecord(ctx, zoneId, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while creating a record for the DNS zone with ID: %s, error: %w", zoneId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while creating a record for the DNS zone with ID: %s, error: %w", zoneId, err))
 	}
 	if recordResponse.Metadata == nil {
 		return diag.FromErr(fmt.Errorf("expected metadata in the response for the record with ID: %s, but received 'nil' instead", *recordResponse.Id))
@@ -115,7 +115,7 @@ func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 	recordResponse, _, err := client.UpdateRecord(ctx, zoneId, recordId, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while updating the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while updating the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err))
 	}
 	if recordResponse.Metadata.State != nil {
 		if *recordResponse.Metadata.State == dns.FAILED {
@@ -142,7 +142,7 @@ func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsRecordDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for the DNS Record with ID: %s to be deleted, error: %w", recordId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the DNS Record with ID: %s to be deleted, error: %w", recordId, err))
 	}
 	return nil
 }
@@ -164,7 +164,7 @@ func recordImport(ctx context.Context, d *schema.ResourceData, meta interface{})
 			d.SetId("")
 			return nil, fmt.Errorf("DNS Record with ID: %s does not exist, zone ID: %s", recordId, zoneId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to import the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err)
+		return nil, fmt.Errorf("an error occurred while trying to import the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err)
 	}
 	log.Printf("[INFO] DNS Record found: %+v", record)
 	if err := client.SetRecordData(d, record); err != nil {

@@ -54,7 +54,7 @@ func zoneCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 	zoneResponse, _, err := client.CreateZone(ctx, d)
 
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while creating a DNS Zone: %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while creating a DNS Zone: %w", err))
 	}
 	if zoneResponse.Metadata.State != nil {
 		if *zoneResponse.Metadata.State == dns.FAILED {
@@ -95,7 +95,7 @@ func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 
 	zoneResponse, _, err := client.UpdateZone(ctx, zoneId, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while updating the DNS Zone with ID: %s, error: %w", zoneId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while updating the DNS Zone with ID: %s, error: %w", zoneId, err))
 	}
 	if zoneResponse.Metadata.State != nil {
 		if *zoneResponse.Metadata.State == dns.FAILED {
@@ -122,7 +122,7 @@ func zoneDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsZoneDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for the DNS Zone with ID: %s to be deleted, error: %w", zoneId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the DNS Zone with ID: %s to be deleted, error: %w", zoneId, err))
 	}
 	return nil
 }
@@ -137,7 +137,7 @@ func zoneImport(ctx context.Context, d *schema.ResourceData, meta interface{}) (
 			d.SetId("")
 			return nil, fmt.Errorf("DNS Zone with ID: %s does not exist", zoneId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to import the DNS Zone with ID: %s, error: %w", zoneId, err)
+		return nil, fmt.Errorf("an error occurred while trying to import the DNS Zone with ID: %s, error: %w", zoneId, err)
 	}
 	log.Printf("[INFO DNS Zone with ID: %s found: %+v", zoneId, zone)
 

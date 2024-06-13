@@ -104,7 +104,7 @@ func testAccDNSZoneDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.GetZoneById(ctx, zoneId)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occured while checking the destruction of DNS Zone with ID: %s, error: %w", zoneId, err)
+				return fmt.Errorf("an error occurred while checking the destruction of DNS Zone with ID: %s, error: %w", zoneId, err)
 			}
 		} else {
 			return fmt.Errorf("DNS Zone with ID: %s still exists", zoneId)
@@ -130,7 +130,7 @@ func testAccDNSZoneExistenceCheck(path string, zone *dns.ZoneRead) resource.Test
 		zoneResponse, _, err := client.GetZoneById(ctx, zoneId)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching DNS Zone with ID: %s, error: %w", zoneId, err)
+			return fmt.Errorf("an error occurred while fetching DNS Zone with ID: %s, error: %w", zoneId, err)
 		}
 		zone = &zoneResponse
 		return nil

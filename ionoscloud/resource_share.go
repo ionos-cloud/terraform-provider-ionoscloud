@@ -66,7 +66,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a share: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a share: %w", err))
 		return diags
 	}
 	d.SetId(*rsp.Id)
@@ -91,7 +91,7 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Share ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a Share ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -123,7 +123,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a share ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while patching a share ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -154,7 +154,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %w", d.Id(), err))
+				diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a share %s %w", d.Id(), err))
 				return diags
 			}
 		}
@@ -185,7 +185,7 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the share of resource %q for group %q", rscId, grpId)
+			return nil, fmt.Errorf("an error occurred while trying to fetch the share of resource %q for group %q", rscId, grpId)
 		}
 		return nil, fmt.Errorf("share does not exist of resource %q for group %q", rscId, grpId)
 	}

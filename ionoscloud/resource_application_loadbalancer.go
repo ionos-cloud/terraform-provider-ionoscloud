@@ -301,7 +301,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating application loadbalancer ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating application loadbalancer ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -321,7 +321,7 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting an application loadbalancer %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting an application loadbalancer %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -354,7 +354,7 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find alb %q", albId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the alb %q, %w", albId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving the alb %q, %w", albId, err)
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {

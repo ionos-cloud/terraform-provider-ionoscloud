@@ -88,7 +88,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %w", err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while creating a loadbalancer %w", err))
 		return diags
 	}
 
@@ -114,7 +114,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a lan ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -191,7 +191,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 					that contain it, behind the scenes - therefore our call will yield 404 */
 					log.Printf("[WARN] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
 				} else {
-					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %w", err))
+					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occurred while deleting a balanced nic: %w", err))
 					return diags
 				}
 			} else {
@@ -209,7 +209,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %w", err))
+				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occurred while creating a balanced nic: %w", err))
 				return diags
 			}
 			if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -230,7 +230,7 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %w", err))
+		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occurred while deleting a loadbalancer: %w", err))
 		return diags
 	}
 
@@ -261,7 +261,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 			d.SetId("")
 			return nil, fmt.Errorf("loadbalancer does not exist %q", lbId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the loadbalancer %q, error:%w", lbId, err)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the loadbalancer %q, error:%w", lbId, err)
 	}
 
 	log.Printf("[INFO] loadbalancer found: %+v", loadbalancer)

@@ -147,14 +147,14 @@ func resourceDataplatformNodePoolCreate(ctx context.Context, d *schema.ResourceD
 
 	dataplatformNodePoolResponse, _, err := client.CreateNodePool(ctx, clusterId, d)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a Dataplatform NodePool: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a Dataplatform NodePool: %w", err))
 		return diags
 	}
 
 	d.SetId(*dataplatformNodePoolResponse.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsNodePoolReady)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while dataplaform nodepool waiting to be ready: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while dataplaform nodepool waiting to be ready: %w", err))
 		return diags
 	}
 
@@ -195,7 +195,7 @@ func resourceDataplatformNodePoolUpdate(ctx context.Context, d *schema.ResourceD
 
 	dataplatformNodePoolResponse, _, err := client.UpdateNodePool(ctx, clusterId, nodePoolId, d)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a Dataplatform NodePool: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a Dataplatform NodePool: %w", err))
 		return diags
 	}
 
@@ -203,7 +203,7 @@ func resourceDataplatformNodePoolUpdate(ctx context.Context, d *schema.ResourceD
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsNodePoolReady)
 	if err != nil {
-		diag.FromErr(fmt.Errorf("an error occured waiting until ready %w", err))
+		diag.FromErr(fmt.Errorf("an error occurred waiting until ready %w", err))
 	}
 	return resourceDataplatformNodePoolRead(ctx, d, meta)
 }
@@ -244,7 +244,7 @@ func resourceDataplatformNodePoolImport(ctx context.Context, d *schema.ResourceD
 			d.SetId("")
 			return nil, fmt.Errorf("dataplatform Node Pool does not exist %q", nodePoolId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of Dataplatform Node Pool %q, error:%w", nodePoolId, err)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of Dataplatform Node Pool %q, error:%w", nodePoolId, err)
 	}
 
 	log.Printf("[INFO] Dataplatform Node Pool found: %+v", dataplatformNodePool)

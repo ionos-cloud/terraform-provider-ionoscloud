@@ -162,7 +162,7 @@ func testAccCheckContainerRegistryTokenExists(n string, registry *cr.TokenRespon
 		foundToken, _, err := client.GetToken(ctx, rs.Primary.Attributes["registry_id"], rs.Primary.ID)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching container registry token %s: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching container registry token %s: %w", rs.Primary.ID, err)
 		}
 		if *foundToken.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

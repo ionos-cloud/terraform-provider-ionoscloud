@@ -304,7 +304,7 @@ func testAccCheckK8sNodePoolExists(n string, k8sNodepool *ionoscloud.KubernetesN
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching k8s node pool: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching k8s node pool: %s", rs.Primary.ID)
 		}
 		if *foundK8sNodepool.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

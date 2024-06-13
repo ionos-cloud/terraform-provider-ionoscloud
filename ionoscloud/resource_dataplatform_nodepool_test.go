@@ -215,7 +215,7 @@ func testAccCheckDataplatformNodePoolExists(n string, nodePool *dataplatform.Nod
 		foundNodePool, _, err := client.GetNodePool(ctx, clusterId, nodePoolId)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching Dataplatform Node Pool %s: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching Dataplatform Node Pool %s: %w", rs.Primary.ID, err)
 		}
 		if *foundNodePool.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

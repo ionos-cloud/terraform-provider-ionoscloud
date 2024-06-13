@@ -82,7 +82,7 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 
 		certificates, _, err := client.ListCertificates(ctx)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching certificates: %w ", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching certificates: %w ", err))
 		}
 
 		var results []certmanager.CertificateDto

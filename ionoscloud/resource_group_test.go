@@ -213,7 +213,7 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Group: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching Group: %s", rs.Primary.ID)
 		}
 		if *foundgroup.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

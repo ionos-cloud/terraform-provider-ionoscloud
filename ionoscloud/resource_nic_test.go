@@ -183,7 +183,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching nic: %s %w", rs.Primary.ID, err)
+			return fmt.Errorf("error occurred while fetching nic: %s %w", rs.Primary.ID, err)
 		}
 		if *foundNic.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

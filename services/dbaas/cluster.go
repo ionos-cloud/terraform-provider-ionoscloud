@@ -638,7 +638,7 @@ func GetPsqlClusterFromBackupData(d *schema.ResourceData) (*psql.CreateRestoreRe
 		layout := "2006-01-02T15:04:05Z"
 		convertedTime, err := time.Parse(layout, targetTime)
 		if err != nil {
-			return nil, fmt.Errorf("an error occured while converting recovery_target_time to time.Time: %w", err)
+			return nil, fmt.Errorf("an error occurred while converting recovery_target_time to time.Time: %w", err)
 
 		}
 		ionosTime.Time = convertedTime
@@ -662,7 +662,7 @@ func GetMongoClusterFromBackupData(d *schema.ResourceData) (*mongo.CreateRestore
 		layout := "2006-01-02T15:04:05Z"
 		convertedTime, err := time.Parse(layout, targetTime)
 		if err != nil {
-			return nil, fmt.Errorf("an error occured while converting recovery_target_time to time.Time: %w", err)
+			return nil, fmt.Errorf("an error occurred while converting recovery_target_time to time.Time: %w", err)
 
 		}
 		ionosTime.Time = convertedTime

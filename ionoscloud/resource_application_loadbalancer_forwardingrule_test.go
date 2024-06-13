@@ -192,7 +192,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured and checking deletion of application loadbalancer forwarding rule %s %s", rs.Primary.ID, responseBody(apiResponse))
+				return fmt.Errorf("an error occurred and checking deletion of application loadbalancer forwarding rule %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
 			return fmt.Errorf("application loadbalancer still exists %s %w", rs.Primary.ID, err)
@@ -229,7 +229,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *iono
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Application Loadbalancer Forwarding Rule: %s %w \n\n", rs.Primary.ID, err)
+			return fmt.Errorf("error occurred while fetching Application Loadbalancer Forwarding Rule: %s %w \n\n", rs.Primary.ID, err)
 		}
 
 		if *foundAlbFw.Id != rs.Primary.ID {

@@ -86,7 +86,7 @@ func DiffSliceOneWay(a, b []string) []string {
 }
 
 func GenerateSetError(resource, field string, err error) error {
-	return fmt.Errorf("occured while setting %s property for %s, %w", field, resource, err)
+	return fmt.Errorf("occurred while setting %s property for %s, %w", field, resource, err)
 }
 
 func GenerateImmutableError(resource, field string) error {

@@ -117,7 +117,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while fetching IonosCloud images %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching IonosCloud images %w", err))
 	}
 
 	nameValue, nameOk := d.GetOk("name")

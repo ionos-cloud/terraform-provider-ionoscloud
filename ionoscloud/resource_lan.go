@@ -117,7 +117,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating LAN: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating LAN: %w", err))
 		return diags
 	}
 
@@ -177,7 +177,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 			return nil
 		}
 
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a LAN %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a LAN %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -230,7 +230,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while patching a lan ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -253,7 +253,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
 		return diags
 
 	}
@@ -286,7 +286,7 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find lan %q", lanId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the lan %q, %w", lanId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving the lan %q, %w", lanId, err)
 	}
 
 	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
@@ -403,7 +403,7 @@ func lanNicsDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return false, fmt.Errorf("an error occured while searching for nics in datacenter with id: %s for lan with: id %s %w", dcId, d.Id(), err)
+		return false, fmt.Errorf("an error occurred while searching for nics in datacenter with id: %s for lan with: id %s %w", dcId, d.Id(), err)
 	}
 
 	if nics.Items != nil && len(*nics.Items) > 0 {

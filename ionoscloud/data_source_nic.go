@@ -215,7 +215,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	} else {
 		nics, err := ns.List(ctx, datacenterId, serverId, 3)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching nics: %w ", err))
 		}
 
 		var results []ionoscloud.Nic

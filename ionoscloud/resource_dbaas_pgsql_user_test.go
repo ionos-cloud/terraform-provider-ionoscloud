@@ -68,7 +68,7 @@ func pgSqlUserExistsCheck(path string, user *pgsql.UserResource) resource.TestCh
 		foundUser, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
 		apiResponse.LogInfo()
 		if err != nil {
-			return fmt.Errorf("error occured while fetching the PgSql user: %s, cluster ID: %s, error: %w", username, clusterId, err)
+			return fmt.Errorf("error occurred while fetching the PgSql user: %s, cluster ID: %s, error: %w", username, clusterId, err)
 		}
 		user = &foundUser
 		return nil
@@ -90,7 +90,7 @@ func pgSqlUserDestroyCheck(s *terraform.State) error {
 		apiResponse.LogInfo()
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occured while checking the deletion of PgSql username: %s, cluster ID: %s, error: %w", username, clusterId, err)
+				return fmt.Errorf("an error occurred while checking the deletion of PgSql username: %s, cluster ID: %s, error: %w", username, clusterId, err)
 			}
 		} else {
 			return fmt.Errorf("PgSql user %s still exists in the cluster with ID: %s", username, clusterId)

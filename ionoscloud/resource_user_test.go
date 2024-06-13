@@ -179,7 +179,7 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching User: %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("error occurred while fetching User: %s %s", rs.Primary.ID, err)
 		}
 		if *foundUser.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
