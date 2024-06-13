@@ -150,7 +150,7 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived registry token %s: %+v", d.Id(), registryToken)
+	log.Printf("[INFO] Successfully retrieved registry token %s: %+v", d.Id(), registryToken)
 
 	if registryToken.Properties == nil {
 		return diag.FromErr(fmt.Errorf("no token properties found with the specified id = %s", *registryToken.Id))

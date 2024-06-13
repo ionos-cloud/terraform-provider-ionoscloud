@@ -116,13 +116,13 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
+	log.Printf("[INFO] Successfully retrieved contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
 
 	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Successfully retreived backup unit %s: %+v", d.Id(), backupUnit)
+	log.Printf("[INFO] Successfully retrieved backup unit %s: %+v", d.Id(), backupUnit)
 
 	return nil
 }
@@ -259,7 +259,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find Backup Unit %q", buId)
 		}
-		return nil, fmt.Errorf("unable to retreive Backup Unit %q, error:%w", buId, err)
+		return nil, fmt.Errorf("unable to retrieve Backup Unit %q, error:%w", buId, err)
 	}
 
 	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)

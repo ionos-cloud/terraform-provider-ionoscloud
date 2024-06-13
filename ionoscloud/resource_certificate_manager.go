@@ -129,7 +129,7 @@ func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Successfully retreived certificate %s: %+v", d.Id(), certDto)
+	log.Printf("[INFO] Successfully retrieved certificate %s: %+v", d.Id(), certDto)
 
 	if err := cert.SetCertificateData(d, &certDto); err != nil {
 		return diag.FromErr(err)

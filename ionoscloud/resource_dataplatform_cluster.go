@@ -152,7 +152,7 @@ func resourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived Dataplatform Cluster %s: %+v", d.Id(), dataplatformCluster)
+	log.Printf("[INFO] Successfully retrieved Dataplatform Cluster %s: %+v", d.Id(), dataplatformCluster)
 
 	if err := dataplatformService.SetDataplatformClusterData(d, dataplatformCluster); err != nil {
 		return diag.FromErr(err)

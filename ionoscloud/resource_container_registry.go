@@ -137,7 +137,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived registry %s: %+v", d.Id(), registry)
+	log.Printf("[INFO] Successfully retrieved registry %s: %+v", d.Id(), registry)
 
 	if err := crService.SetRegistryData(d, registry); err != nil {
 		return diag.FromErr(err)

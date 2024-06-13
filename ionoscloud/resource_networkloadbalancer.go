@@ -194,7 +194,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	log.Printf("[INFO] Successfully retreived network load balancer %s: %+v", d.Id(), networkLoadBalancer)
+	log.Printf("[INFO] Successfully retrieved network load balancer %s: %+v", d.Id(), networkLoadBalancer)
 
 	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
 		return diag.FromErr(err)

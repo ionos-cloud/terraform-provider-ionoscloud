@@ -200,7 +200,7 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 		}
 	}
 
-	log.Printf("[INFO] Successfully retreived application loadbalancer %s: %+v", d.Id(), applicationLoadBalancer)
+	log.Printf("[INFO] Successfully retrieved application loadbalancer %s: %+v", d.Id(), applicationLoadBalancer)
 	fw := cloudapiflowlog.Service{
 		Client: client,
 		Meta:   meta,

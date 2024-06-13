@@ -270,7 +270,7 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 		}
 	}
 
-	log.Printf("[INFO] Successfully retreived application load balancer forwarding rule %s: %+v", d.Id(), applicationLoadBalancerForwardingRule)
+	log.Printf("[INFO] Successfully retrieved application load balancer forwarding rule %s: %+v", d.Id(), applicationLoadBalancerForwardingRule)
 
 	if err := setApplicationLoadBalancerForwardingRuleData(d, &applicationLoadBalancerForwardingRule); err != nil {
 		return diag.FromErr(err)

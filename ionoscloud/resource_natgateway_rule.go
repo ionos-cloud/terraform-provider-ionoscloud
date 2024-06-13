@@ -225,7 +225,7 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	log.Printf("[INFO] Successfully retreived nat gateway rule %s: %+v", d.Id(), natGatewayRule)
+	log.Printf("[INFO] Successfully retrieved nat gateway rule %s: %+v", d.Id(), natGatewayRule)
 
 	if err := setNatGatewayRuleData(d, &natGatewayRule); err != nil {
 		return diag.FromErr(err)

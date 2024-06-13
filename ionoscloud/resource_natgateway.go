@@ -182,7 +182,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	log.Printf("[INFO] Successfully retreived nat gateway %s: %+v", d.Id(), natGateway)
+	log.Printf("[INFO] Successfully retrieved nat gateway %s: %+v", d.Id(), natGateway)
 
 	if err := setNatGatewayData(d, &natGateway); err != nil {
 		diags := diag.FromErr(err)

@@ -151,7 +151,7 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived PCC %s: %+v", d.Id(), pcc)
+	log.Printf("[INFO] Successfully retrieved PCC %s: %+v", d.Id(), pcc)
 
 	if err = setPccDataSource(d, &pcc); err != nil {
 		return diag.FromErr(err)
@@ -260,7 +260,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find PCC %q", pccId)
 		}
-		return nil, fmt.Errorf("unable to retreive PCC %q, error:%w", pccId, err)
+		return nil, fmt.Errorf("unable to retrieve PCC %q, error:%w", pccId, err)
 	}
 
 	log.Printf("[INFO] PCC found: %+v", pcc)

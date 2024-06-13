@@ -178,7 +178,7 @@ func resourceDataplatformNodePoolRead(ctx context.Context, d *schema.ResourceDat
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived Dataplatform Node Pool %s: %+v", d.Id(), dataplatformNodePool)
+	log.Printf("[INFO] Successfully retrieved Dataplatform Node Pool %s: %+v", d.Id(), dataplatformNodePool)
 
 	if err := dataplatformService.SetDataplatformNodePoolData(d, dataplatformNodePool); err != nil {
 		return diag.FromErr(err)
