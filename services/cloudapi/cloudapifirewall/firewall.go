@@ -55,7 +55,7 @@ func (fs *Service) Delete(ctx context.Context, datacenterId, serverId, nicId, fi
 		return apiResponse, err
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutDelete); errState != nil {
-		return apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterId, serverId, nicId, firewallId, errState)
+		return apiResponse, fmt.Errorf("an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterId, serverId, nicId, firewallId, errState)
 	}
 	return apiResponse, nil
 }
@@ -64,10 +64,10 @@ func (fs *Service) Create(ctx context.Context, datacenterId, serverId, nicId str
 	firewall, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, datacenterId, serverId, nicId).Firewallrule(firewallrule).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while creating firewall rule for dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while creating firewall rule for dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, err)
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutCreate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
 	return &firewall, apiResponse, nil
 }
@@ -76,10 +76,10 @@ func (fs *Service) Update(ctx context.Context, datacenterId, serverId, nicId, id
 	firewall, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPut(ctx, datacenterId, serverId, nicId, id).Firewallrule(firewallrule).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while updating firewall rule for dcId: %s, server_id: %s, nic_id: %s, id %s, Response: (%w)", datacenterId, serverId, nicId, id, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while updating firewall rule for dcId: %s, server_id: %s, nic_id: %s, id %s, Response: (%w)", datacenterId, serverId, nicId, id, err)
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
 	return &firewall, apiResponse, nil
 }
@@ -163,7 +163,7 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, ni
 				if deleteRule := !utils.IsValueInSliceOfMap(onlyNew, "id", oldId); deleteRule {
 					_, err = fs.Delete(ctx, dcId, serverId, nicId, oldId)
 					if err != nil {
-						return firewallRules, []string{}, diag.FromErr(fmt.Errorf("an error occured while deleting firewall prop for dcId: %s, server_id: %s, "+
+						return firewallRules, []string{}, diag.FromErr(fmt.Errorf("an error occurred while deleting firewall prop for dcId: %s, server_id: %s, "+
 							"nic_id %s, ID: %s, (%w)", dcId, serverId, nicId, oldId, err))
 					}
 

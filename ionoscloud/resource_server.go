@@ -605,7 +605,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				nicPath := fmt.Sprintf("nic.%d.", nicIndex)
 				nic, err := cloudapinic.GetNicFromSchema(d, nicPath)
 				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("create error occured while getting nic from schema: %w", err))
+					diags := diag.FromErr(fmt.Errorf("create error occurred while getting nic from schema: %w", err))
 					return diags
 				}
 				*serverReq.Entities.Nics.Items = append(*serverReq.Entities.Nics.Items, nic)
@@ -781,7 +781,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 	if err := setResourceServerData(ctx, client, d, &server); err != nil {
@@ -897,7 +897,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while updating server ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -918,7 +918,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), volumeIdStr).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("an error occured while getting a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), volumeId, err))
+					diags := diag.FromErr(fmt.Errorf("an error occurred while getting a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), volumeId, err))
 					return diags
 				}
 				if v, ok := d.GetOk(volumePath + "name"); ok {
@@ -1147,7 +1147,7 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, volumeId.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occured while deleting volume with ID: %s of server ID %s %w", volumeId.(string), d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error occurred while deleting volume with ID: %s of server ID %s %w", volumeId.(string), d.Id(), err))
 			return diags
 		}
 
@@ -1167,7 +1167,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -1181,7 +1181,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a server ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a server ID %s %w", d.Id(), err))
 		return diags
 
 	}
@@ -1215,7 +1215,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find server %q", serverId)
 		}
-		return nil, fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err)
+		return nil, fmt.Errorf("error occurred while fetching a server ID %s %w", d.Id(), err)
 	}
 	var primaryNic ionoscloud.Nic
 	d.SetId(*server.Id)

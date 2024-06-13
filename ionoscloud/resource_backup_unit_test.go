@@ -133,7 +133,7 @@ func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching backup unit: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching backup unit: %s", rs.Primary.ID)
 		}
 		if *foundBackupUnit.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

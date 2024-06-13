@@ -256,7 +256,7 @@ func testAccCheckK8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching k8s Cluster %s: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching k8s Cluster %s: %w", rs.Primary.ID, err)
 		}
 		if *foundK8sCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

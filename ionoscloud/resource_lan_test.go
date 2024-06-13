@@ -128,7 +128,7 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Server: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching Server: %s", rs.Primary.ID)
 		}
 		if *foundLan.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

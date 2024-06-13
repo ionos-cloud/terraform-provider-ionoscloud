@@ -129,7 +129,7 @@ func testAccCheckNetworkLoadBalancerDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured while checking deletion of network loadbalancer %s %s", rs.Primary.ID, responseBody(apiResponse))
+				return fmt.Errorf("an error occurred while checking deletion of network loadbalancer %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
 			return fmt.Errorf("network loadbalancer still exists %s %w", rs.Primary.ID, err)
@@ -162,7 +162,7 @@ func testAccCheckNetworkLoadBalancerExists(n string, networkLoadBalancer *ionosc
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching NetworkLoadBalancer: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching NetworkLoadBalancer: %s", rs.Primary.ID)
 		}
 		if *foundNetworkLoadBalancer.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

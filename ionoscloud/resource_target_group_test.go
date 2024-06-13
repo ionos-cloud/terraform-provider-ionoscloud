@@ -209,7 +209,7 @@ func testAccCheckTargetGroupDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured at checking deletion of forwarding rule %s %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred at checking deletion of forwarding rule %s %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("network loadbalancer forwarding rule still exists %s %s", rs.Primary.ID, err)
@@ -242,7 +242,7 @@ func testAccCheckTargetGroupExists(n string, targetGroup *ionoscloud.TargetGroup
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching TargetGroup: %s, %w", rs.Primary.ID, err)
+			return fmt.Errorf("error occurred while fetching TargetGroup: %s, %w", rs.Primary.ID, err)
 		}
 		if *foundTargetGroup.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

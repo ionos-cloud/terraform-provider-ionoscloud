@@ -369,7 +369,7 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
+	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
 
 	if err := dbaas.SetMongoDBClusterData(d, cluster); err != nil {
 		return diag.FromErr(err)
@@ -414,7 +414,7 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil, fmt.Errorf("dbaas cluster does not exist %q", clusterId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of dbaas cluster %q", clusterId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err)
 	}
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)

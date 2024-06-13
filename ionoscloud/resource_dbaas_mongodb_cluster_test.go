@@ -303,7 +303,7 @@ func testAccCheckDbaasMongoClusterExists(n string, cluster *mongo.ClusterRespons
 		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching k8s Cluster %s: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching k8s Cluster %s: %w", rs.Primary.ID, err)
 		}
 		if *foundCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

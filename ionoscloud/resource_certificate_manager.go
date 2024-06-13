@@ -129,7 +129,7 @@ func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Successfully retreived certificate %s: %+v", d.Id(), certDto)
+	log.Printf("[INFO] Successfully retrieved certificate %s: %+v", d.Id(), certDto)
 
 	if err := cert.SetCertificateData(d, &certDto); err != nil {
 		return diag.FromErr(err)
@@ -144,7 +144,7 @@ func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceDat
 
 	_, _, err := client.UpdateCertificate(ctx, d.Id(), *certPatchDto)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating certificate with ID %s, %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating certificate with ID %s, %w", d.Id(), err))
 		return diags
 	}
 
@@ -160,7 +160,7 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 
 	_, err := client.DeleteCertificate(ctx, d.Id())
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting the certificate %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting the certificate %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -186,7 +186,7 @@ func resourceCertificateManagerImport(ctx context.Context, d *schema.ResourceDat
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find cert %q", certId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the cert %q, %w", certId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving the cert %q, %w", certId, err)
 	}
 
 	if err := cert.SetCertificateData(d, &certDto); err != nil {

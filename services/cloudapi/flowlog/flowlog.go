@@ -85,12 +85,12 @@ func (fw *Service) CreateOrPatchForServer(ctx context.Context, dcId, srvID, nicI
 	if ID == "" {
 		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPost(ctx, dcId, srvID, nicID).Flowlog(flowLog).Execute()
 		if err != nil {
-			return fmt.Errorf("error occured while creating flowlog in datacenter %s, server %s nic %s : %w", dcId, srvID, nicID, err)
+			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, server %s nic %s : %w", dcId, srvID, nicID, err)
 		}
 	} else {
 		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPatch(ctx, dcId, srvID, nicID, ID).Flowlog(*flowLog.Properties).Execute()
 		if err != nil {
-			return fmt.Errorf("error occured while updating flowlog %s datacenter %s, server %s nic %s : %w", ID, dcId, srvID, nicID, err)
+			return fmt.Errorf("error occurred while updating flowlog %s datacenter %s, server %s nic %s : %w", ID, dcId, srvID, nicID, err)
 		}
 	}
 	return nil
@@ -100,12 +100,12 @@ func (fw *Service) CreateOrPatchForNLB(ctx context.Context, dcId, nlbID, ID stri
 	if ID == "" {
 		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPost(ctx, dcId, nlbID).NetworkLoadBalancerFlowLog(flowLog).Execute()
 		if err != nil {
-			return fmt.Errorf("error occured while creating flowlog in datacenter %s, nlb %s : %w", dcId, nlbID, err)
+			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, nlb %s : %w", dcId, nlbID, err)
 		}
 	} else {
 		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPatch(ctx, dcId, nlbID, ID).NetworkLoadBalancerFlowLogProperties(*flowLog.Properties).Execute()
 		if err != nil {
-			return fmt.Errorf("error occured while updating flowlog %s datacenter %s, nlb %s : %w", ID, dcId, nlbID, err)
+			return fmt.Errorf("error occurred while updating flowlog %s datacenter %s, nlb %s : %w", ID, dcId, nlbID, err)
 		}
 	}
 	return nil
@@ -115,12 +115,12 @@ func (fw *Service) CreateOrPatchForALB(ctx context.Context, dcId, albID, ID stri
 	if ID == "" {
 		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPost(ctx, dcId, albID).ApplicationLoadBalancerFlowLog(flowLog).Execute()
 		if err != nil {
-			return fmt.Errorf("error occured while creating flowlog in datacenter %s, alb %s : %w", dcId, albID, err)
+			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, alb %s : %w", dcId, albID, err)
 		}
 	} else {
 		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPatch(ctx, dcId, albID, ID).ApplicationLoadBalancerFlowLogProperties(*flowLog.Properties).Execute()
 		if err != nil {
-			return fmt.Errorf("error occured while updating flowlog %s, datacenter %s, alb %s : %w", ID, dcId, albID, err)
+			return fmt.Errorf("error occurred while updating flowlog %s, datacenter %s, alb %s : %w", ID, dcId, albID, err)
 		}
 	}
 	return nil
@@ -142,7 +142,7 @@ func (fw *Service) GetFlowLogForALB(ctx context.Context, dcId, albID string, dep
 func (fw *Service) Delete(ctx context.Context, dcId string, srvID string, nicID, ID string) error {
 	_, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsDelete(ctx, dcId, srvID, nicID, ID).Execute()
 	if err != nil {
-		return fmt.Errorf("error occured while deleting flowlog %s datacenter %s, server %s nic %s : %w", ID, dcId, srvID, nicID, err)
+		return fmt.Errorf("error occurred while deleting flowlog %s datacenter %s, server %s nic %s : %w", ID, dcId, srvID, nicID, err)
 	}
 	return nil
 }

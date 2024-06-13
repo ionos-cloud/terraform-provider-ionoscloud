@@ -132,7 +132,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
+				return fmt.Errorf("an error occurred while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
 			}
 		} else {
 			found := false

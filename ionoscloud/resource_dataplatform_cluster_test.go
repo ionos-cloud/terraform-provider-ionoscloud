@@ -143,7 +143,7 @@ func testAccCheckDataplatformClusterExists(n string, cluster *dataplatform.Clust
 		foundCluster, _, err := client.GetClusterById(ctx, clusterId)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching Dataplatform Cluster %s: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching Dataplatform Cluster %s: %w", rs.Primary.ID, err)
 		}
 		if *foundCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

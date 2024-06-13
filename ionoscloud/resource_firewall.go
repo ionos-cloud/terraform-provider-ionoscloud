@@ -119,7 +119,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a firewall rule: %w", err))
 		return diags
 	}
 	d.SetId(*fw.Id)
@@ -130,7 +130,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 			log.Printf("[DEBUG] firewall resource failed to be created")
 			d.SetId("")
 		}
-		return diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule dcId: %s server_id: %s  "+
+		return diag.FromErr(fmt.Errorf("an error occurred while creating a firewall rule dcId: %s server_id: %s  "+
 			"nic_id: %s %w", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), errState))
 	}
 
@@ -150,7 +150,7 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a firewall rule dcId: %s server_id: %s  nic_id: %s ID: %s %s",
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a firewall rule dcId: %s server_id: %s  nic_id: %s ID: %s %s",
 			d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id(), err))
 		return diags
 	}
@@ -173,7 +173,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a firewall rule ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -194,7 +194,7 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 		Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a firewall rule ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a firewall rule ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -230,7 +230,7 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find firewall rule %q", firewallId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving firewall rule %q: %q ", firewallId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving firewall rule %q: %q ", firewallId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {

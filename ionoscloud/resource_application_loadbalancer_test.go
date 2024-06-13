@@ -129,7 +129,7 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured and checking deletion of application loadbalancer %s %s", rs.Primary.ID, responseBody(apiResponse))
+				return fmt.Errorf("an error occurred and checking deletion of application loadbalancer %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
 			return fmt.Errorf("application loadbalancer still exists %s %s", rs.Primary.ID, err)
@@ -165,7 +165,7 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching NatGateway: %s, %w", rs.Primary.ID, err)
+			return fmt.Errorf("error occurred while fetching NatGateway: %s, %w", rs.Primary.ID, err)
 		}
 		if *foundNatGateway.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

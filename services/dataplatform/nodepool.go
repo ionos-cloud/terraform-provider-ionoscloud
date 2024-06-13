@@ -316,7 +316,7 @@ func SetNodePoolsData(d *schema.ResourceData, results []dataplatform.NodePoolRes
 
 		err := d.Set("node_pools", nodePools)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while setting node_pools: %w", err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while setting node_pools: %w", err))
 			return diags
 		}
 	}

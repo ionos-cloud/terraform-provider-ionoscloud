@@ -55,7 +55,7 @@ func (ls *LabelsService) datacentersServersLabelsGet(datacenterId, serverId stri
 	labelsResponse, apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsGet(ls.ctx, datacenterId, serverId).Depth(1).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, fmt.Errorf("error occured while fetching labels for server with ID: %s, datacenter ID: %s, error: %w", serverId, datacenterId, err)
+		return nil, fmt.Errorf("error occurred while fetching labels for server with ID: %s, datacenter ID: %s, error: %w", serverId, datacenterId, err)
 	}
 	labels, err := processLabelsData(labelsResponse, isDataSource)
 	if err != nil {
@@ -76,7 +76,7 @@ func (ls *LabelsService) datacentersServersLabelsCreate(datacenterId, serverId s
 				_, apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsPost(ls.ctx, datacenterId, serverId).Label(labelResource).Execute()
 				apiResponse.LogInfo()
 				if err != nil {
-					return fmt.Errorf("error occured while creating label for server with ID: %s, datacenter ID: %s, error: (%w)", serverId, datacenterId, err)
+					return fmt.Errorf("error occurred while creating label for server with ID: %s, datacenter ID: %s, error: (%w)", serverId, datacenterId, err)
 				}
 			}
 		}
@@ -95,7 +95,7 @@ func (ls *LabelsService) datacentersServersLabelsDelete(datacenterId, serverId s
 					if httpNotFound(apiResponse) {
 						log.Printf("[WARN] label with key %s has been already removed from server %s\n", labelKey, serverId)
 					} else {
-						return fmt.Errorf("[label update] an error occured while deleting label with key: %s, server ID: %s, error: %w", labelKey, serverId, err)
+						return fmt.Errorf("[label update] an error occurred while deleting label with key: %s, server ID: %s, error: %w", labelKey, serverId, err)
 					}
 				}
 			}

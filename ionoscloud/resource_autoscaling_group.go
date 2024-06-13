@@ -308,7 +308,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 
 	group, err := autoscalingService.GetAutoscalingGroupDataCreate(d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured getting data from the provided schema: %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred getting data from the provided schema: %w", err))
 	}
 	if group.Properties != nil && group.Properties.Name != nil {
 		log.Printf("[DEBUG] Autoscaling Group data extracted: %+v", *group.Properties.Name)
@@ -373,7 +373,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 	}
 	updatedGroup, _, err := client.UpdateGroup(ctx, d.Id(), *group)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while updating Autoscaling Group %s: %w", d.Id(), err))
+		return diag.FromErr(fmt.Errorf("an error occurred while updating Autoscaling Group %s: %w", d.Id(), err))
 	}
 	log.Printf("[INFO] Autoscaling Group updated.")
 
@@ -389,7 +389,7 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 
 	_, err := client.DeleteGroup(ctx, d.Id())
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while deleting an Autoscaling Group %s %w", d.Id(), err))
+		return diag.FromErr(fmt.Errorf("an error occurred while deleting an Autoscaling Group %s %w", d.Id(), err))
 	}
 
 	log.Printf("[INFO] Autoscaling Group deleted: %s.", d.Id())
@@ -410,7 +410,7 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find Autoscaling Group %q", groupId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving Autoscaling Group %q, %w", groupId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving Autoscaling Group %q, %w", groupId, err)
 	}
 
 	log.Printf("[INFO] Autoscaling Group found: %+v", group)

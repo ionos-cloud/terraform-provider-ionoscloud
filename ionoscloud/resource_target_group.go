@@ -198,7 +198,7 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a target group: %w ", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a target group: %w ", err))
 		return diags
 	}
 
@@ -224,7 +224,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a target group %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a target group %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -271,7 +271,7 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a targetGroup ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while restoring a targetGroup ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -291,7 +291,7 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a target group %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a target group %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -317,7 +317,7 @@ func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find target group %q", groupIp)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the target group %q, %w", groupIp, err)
+		return nil, fmt.Errorf("an error occurred while retrieving the target group %q, %w", groupIp, err)
 	}
 
 	if err := setTargetGroupData(d, &groupTarget); err != nil {

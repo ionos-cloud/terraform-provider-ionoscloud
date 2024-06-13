@@ -114,7 +114,7 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Loadbalancer: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching Loadbalancer: %s", rs.Primary.ID)
 		}
 		if *foundLB.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

@@ -101,7 +101,7 @@ func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestChe
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching S3 Key: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching S3 Key: %s", rs.Primary.ID)
 		}
 
 		if *foundS3Key.Id != rs.Primary.ID {

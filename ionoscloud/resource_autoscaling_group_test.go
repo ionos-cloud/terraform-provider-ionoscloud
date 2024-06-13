@@ -245,7 +245,7 @@ func testAccCheckAutoscalingGroupExists(name string, autoscalingGroup *autoscali
 
 		foundGroup, _, err := client.GetGroup(ctx, rs.Primary.ID, 0)
 		if err != nil {
-			return fmt.Errorf("error occured while fetching autoscaling group: %s, %w", rs.Primary.ID, err)
+			return fmt.Errorf("error occurred while fetching autoscaling group: %s, %w", rs.Primary.ID, err)
 		}
 
 		if *foundGroup.Id != rs.Primary.ID {

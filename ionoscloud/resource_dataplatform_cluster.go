@@ -120,7 +120,7 @@ func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceDa
 	id, _, err := client.CreateCluster(ctx, d)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured  while creating a Dataplatform Cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred  while creating a Dataplatform Cluster: %w", err))
 		return diags
 	}
 
@@ -128,7 +128,7 @@ func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceDa
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured  while dataplaform cluster waiting to be ready: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred  while dataplaform cluster waiting to be ready: %w", err))
 		return diags
 	}
 
@@ -152,7 +152,7 @@ func resourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived Dataplatform Cluster %s: %+v", d.Id(), dataplatformCluster)
+	log.Printf("[INFO] Successfully retrieved Dataplatform Cluster %s: %+v", d.Id(), dataplatformCluster)
 
 	if err := dataplatformService.SetDataplatformClusterData(d, dataplatformCluster); err != nil {
 		return diag.FromErr(err)
@@ -169,7 +169,7 @@ func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceDa
 	_, err := client.UpdateCluster(ctx, clusterId, d)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a Dataplatform Cluster: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a Dataplatform Cluster: %s", err))
 		return diags
 	}
 
@@ -199,7 +199,7 @@ func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceDa
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		diag.FromErr(fmt.Errorf("an error occured while deleting %w", err))
+		diag.FromErr(fmt.Errorf("an error occurred while deleting %w", err))
 	}
 
 	return nil
@@ -217,7 +217,7 @@ func resourceDataplatformClusterImport(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil, fmt.Errorf("dataplatform Cluster does not exist %q", clusterId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of Dataplatform Cluster %q", clusterId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of Dataplatform Cluster %q, error:%w", clusterId, err)
 	}
 
 	log.Printf("[INFO] Dataplatform Cluster found: %+v", dataplatformCluster)

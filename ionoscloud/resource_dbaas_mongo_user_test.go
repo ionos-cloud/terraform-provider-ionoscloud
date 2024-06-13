@@ -121,7 +121,7 @@ func testAccCheckMongoUserExists(n string, user *mongo.User) resource.TestCheckF
 		foundUser, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
 		apiResponse.LogInfo()
 		if err != nil {
-			return fmt.Errorf("error occured while fetching User: %s %w", rs.Primary.ID, err)
+			return fmt.Errorf("error occurred while fetching User: %s %w", rs.Primary.ID, err)
 		}
 
 		user = &foundUser

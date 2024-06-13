@@ -268,7 +268,7 @@ func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse
 		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching PgSQL cluster with ID: %v, error: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching PgSQL cluster with ID: %v, error: %w", rs.Primary.ID, err)
 		}
 		if *foundCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("resource not found")

@@ -150,7 +150,7 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived registry token %s: %+v", d.Id(), registryToken)
+	log.Printf("[INFO] Successfully retrieved registry token %s: %+v", d.Id(), registryToken)
 
 	if registryToken.Properties == nil {
 		return diag.FromErr(fmt.Errorf("no token properties found with the specified id = %s", *registryToken.Id))
@@ -215,7 +215,7 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 			d.SetId("")
 			return nil, fmt.Errorf("registry does not exist %q", registryTokenId)
 		}
-		return nil, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q", registryTokenId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q, error:%w", registryTokenId, err)
 	}
 
 	log.Printf("[INFO] registry token found: %+v", registryToken)

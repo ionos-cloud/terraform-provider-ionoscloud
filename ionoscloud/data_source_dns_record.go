@@ -96,7 +96,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 	if idOk {
 		record, _, err = client.GetRecordById(ctx, zoneId, recordId)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching the DNS Record with ID: %s, DNS Zone ID: %s, error: %w", recordId, zoneId, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the DNS Record with ID: %s, DNS Zone ID: %s, error: %w", recordId, zoneId, err))
 		}
 	} else {
 		var results []dns.RecordRead
@@ -106,7 +106,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 			// is true.
 			records, _, err := client.ListRecords(ctx, recordName)
 			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occured while fetching DNS Records: %w", err))
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Records: %w", err))
 			}
 			results = *records.Items
 		} else {
@@ -115,7 +115,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 			// filter.name only does a partial match.
 			records, _, err := client.ListRecords(ctx, "")
 			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occured while fetching DNS Records: %w", err))
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Records: %w", err))
 			}
 			for _, recordItem := range *records.Items {
 				// Since each record has a unique name, there is no need to keep on searching if

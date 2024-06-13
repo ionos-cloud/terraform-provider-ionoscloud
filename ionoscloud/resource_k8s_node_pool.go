@@ -564,7 +564,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived k8s node pool %s: %+v", d.Id(), k8sNodepool)
+	log.Printf("[INFO] Successfully retrieved k8s node pool %s: %+v", d.Id(), k8sNodepool)
 
 	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {
 		return diag.FromErr(err)
@@ -830,7 +830,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 				return nil, fmt.Errorf("unable to find k8s node pool %q", npId)
 			}
 		}
-		return nil, fmt.Errorf("unable to retreive k8s node pool %q", npId)
+		return nil, fmt.Errorf("unable to retrieve k8s node pool %q, error:%w", npId, err)
 	}
 
 	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)

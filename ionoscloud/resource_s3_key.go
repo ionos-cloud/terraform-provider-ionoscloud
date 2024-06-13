@@ -246,7 +246,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find S3 key %q", keyId)
 		}
-		return nil, fmt.Errorf("unable to retreive S3 key %q", keyId)
+		return nil, fmt.Errorf("unable to retrieve S3 key %q, error:%w", keyId, err)
 	}
 
 	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {

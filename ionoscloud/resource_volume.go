@@ -257,7 +257,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a volume: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a volume: %w", err))
 		return diags
 	}
 
@@ -275,7 +275,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volumeToAttach.Id, err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volumeToAttach.Id, err))
 		return diags
 	}
 
@@ -313,7 +313,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching volume with ID %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while fetching volume with ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -360,7 +360,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating volume with ID %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating volume with ID %s: %w", d.Id(), err))
 		return diags
 
 	}
@@ -371,7 +371,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode > 299 {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a volume ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a volume ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -382,7 +382,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volumeToAttach).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
+			diags := diag.FromErr(fmt.Errorf("an error occurred while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
 				dcId, serverID, *volume.Id, err))
 			return diags
 		}
@@ -403,7 +403,7 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a volume ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a volume ID %s %w", d.Id(), err))
 		return diags
 
 	}
@@ -436,7 +436,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil, fmt.Errorf("volume does not exist %q", volumeId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to find the volume %q", volumeId)
+		return nil, fmt.Errorf("an error occurred while trying to find the volume %q", volumeId)
 	}
 
 	log.Printf("[INFO] volume found: %+v", volume)

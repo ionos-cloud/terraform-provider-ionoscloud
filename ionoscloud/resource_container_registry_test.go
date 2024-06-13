@@ -169,7 +169,7 @@ func testAccCheckContainerRegistryExists(n string, registry *cr.RegistryResponse
 		foundRegistry, _, err := client.GetRegistry(ctx, rs.Primary.ID)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching container registry %s: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching container registry %s: %w", rs.Primary.ID, err)
 		}
 		if *foundRegistry.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
