@@ -94,7 +94,8 @@ const (
 
 // NSG Constants
 const (
-	NetworkSecurityGroupResource                 = "ionoscloud_networksecuritygroup"
+	NetworkSecurityGroupResource                 = "ionoscloud_nsg"
+	NSGFirewallRuleResource                      = "ionoscloud_nsg_firewallrule"
 	NetworkSecurityGroupTestResource             = "test_nsg"
 	NetworkSecurityGroupDataSourceById           = "test_nsg_id"
 	NetworkSecurityGroupDataSourceByName         = "test_nsg_name"
@@ -193,11 +194,6 @@ const (
 	ServerTestResource     = "test_server"
 	ServerDataSourceById   = "test_server_id"
 	ServerDataSourceByName = "test_server_name"
-)
-
-const (
-	NetworkSecurityGroupResource = "ionoscloud_nsg"
-	NSGFirewallRuleResource      = "ionoscloud_nsg_firewallrule"
 )
 
 // S3Key Constants
