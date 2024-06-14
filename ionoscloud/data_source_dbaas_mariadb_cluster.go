@@ -3,13 +3,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dbaas "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"strings"
 )
 
 func dataSourceDBaaSMariaDBCluster() *schema.Resource {
@@ -26,7 +27,7 @@ func dataSourceDBaaSMariaDBCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "The cluster location",
 				Optional:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.DBaaSClusterLocations, false)),
 			},
 			"display_name": {
 				Type:        schema.TypeString,

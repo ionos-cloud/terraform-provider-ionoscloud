@@ -239,6 +239,7 @@ const (
 	DBaaSClusterTestDataSourceById   = "test_dbaas_cluster_id"
 	DBaaSClusterTestResource         = "test_dbaas_cluster"
 	DBaaSClusterTestDataSourceByName = "test_dbaas_cluster_name"
+	DBaaSReplicaSetTestResource      = "test_dbaas_replicaset"
 
 	// PgSql constants
 	PsqlClusterResource          = "ionoscloud_pg_cluster"
@@ -264,11 +265,11 @@ const (
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
 
 	// RedisDB constants
-	DBaaSRedisDBReplicaSetResource = "ionoscloud_redisdb_replica_set"
+	DBaaSRedisDBReplicaSetResource = "ionoscloud_redis_replicaset"
 )
 
-// MariaDBClusterLocations slice represents the locations in which MariaDB clusters can be created
-var MariaDBClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
+// DBaaSClusterLocations slice represents the locations in which DBaaS clusters can be created
+var DBaaSClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
 
 // Container Registry Constants
 const (
