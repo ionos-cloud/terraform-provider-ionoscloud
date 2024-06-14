@@ -265,7 +265,9 @@ const (
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
 
 	// RedisDB constants
-	DBaaSRedisDBReplicaSetResource = "ionoscloud_redis_replicaset"
+	DBaaSReplicaSetTestDataSourceById   = "test_dbaas_replicaset_id"
+	DBaaSReplicaSetTestDataSourceByName = "test_dbaas_replicaset_name"
+	DBaaSRedisDBReplicaSetResource      = "ionoscloud_redis_replicaset"
 )
 
 // DBaaSClusterLocations slice represents the locations in which DBaaS clusters can be created
@@ -273,7 +275,7 @@ var DBaaSClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb
 
 // Container Registry Constants
 const (
-	//ContainerRegistryTestResource needs to be with -, do not change
+	// ContainerRegistryTestResource needs to be with -, do not change
 	ContainerRegistryTestResource      = "test-container-registry"
 	ContainerRegistryTokenTestResource = "test-container-registry-token"
 

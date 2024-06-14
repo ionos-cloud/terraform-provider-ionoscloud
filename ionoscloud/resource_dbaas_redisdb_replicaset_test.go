@@ -3,12 +3,13 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	redisdb "github.com/ionos-cloud/sdk-go-dbaas-redis"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"testing"
 )
 
 func TestAccDBaaSRedisDBReplicaSetBasic(t *testing.T) {
@@ -33,6 +34,7 @@ func TestAccDBaaSRedisDBReplicaSetBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, replicaSetVersionAttribute, replicaSetVersionValue),
 				),
 			},
+			{},
 		},
 	})
 }
@@ -147,6 +149,18 @@ resource ` + constant.RandomPassword + ` "replicaset_password" {
 const resources = replicaSetResourcesAttribute + `{
 	` + replicaSetCoresAttribute + ` = "` + replicaSetCoresValue + `"
 	` + replicaSetRAMAttribute + ` = "` + replicaSetRAMValue + `"
+}`
+
+const redisDBReplicaSetDataSourceMatchId = redisDBReplicaSetConfigBasic + `
+data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceById + ` {
+	id = ` + constant.DBaaSRedisDBReplicaSetResource + `.` + constant.DBaaSReplicaSetTestResource + `.id
+	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
+}`
+
+const redisDBReplicaSetDataSourceMatchName = redisDBReplicaSetConfigBasic + `
+data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceByName + ` {
+	display_name	= "` + replicaSetDisplayNameValue + `"
+	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
 }`
 
 // TODO -- Rename anything related to clusters, for the moment just reuse them from MariaDB since
