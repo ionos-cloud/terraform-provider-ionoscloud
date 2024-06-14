@@ -174,7 +174,11 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 		return diags
 	}
 
-	if err := setUserData(d, &user); err != nil {
+	if err = setUserData(d, &user); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err = d.Set("group_ids", getUserGroups(&user)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -318,7 +322,11 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 
 	}
 
-	if err := setUserData(d, &user); err != nil {
+	if err = setUserData(d, &user); err != nil {
+		return nil, err
+	}
+
+	if err = d.Set("group_ids", getUserGroups(&user)); err != nil {
 		return nil, err
 	}
 
@@ -377,7 +385,7 @@ func setUserData(d *schema.ResourceData, user *ionoscloud.User) error {
 		}
 	}
 
-	return d.Set("group_ids", getUserGroups(user))
+	return nil
 }
 
 func getUserGroups(user *ionoscloud.User) []string {

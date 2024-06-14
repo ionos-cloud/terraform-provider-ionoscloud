@@ -126,14 +126,16 @@ func TestAccUserBasic(t *testing.T) {
 					})),
 			},
 			{
+				Config:      testAccCheckNewUserGroup,
+				ExpectError: regexp.MustCompile("the plan was not empty"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccRemoveUserFromGroup(constant.GroupResource+".group1", constant.UserResource+"."+constant.NewUserResource)),
+			},
+			{
 				Config:             testAccCheckNewUserGroup,
 				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
-					testAccRemoveUserFromGroup(constant.GroupResource+".group1", constant.UserResource+"."+constant.NewUserResource),
-					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.NewUserResource, "group_ids.#", "1"),
-					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "groups.*", map[string]string{
-						"name": "group1",
-					})),
+					testAccRemoveUserFromGroup(constant.GroupResource+".group1", constant.UserResource+"."+constant.NewUserResource)),
 			},
 		},
 	})
@@ -217,13 +219,11 @@ func testAccRemoveUserFromGroup(group, user string) resource.TestCheckFunc {
 			return fmt.Errorf("testAccRemoveUserFromGroup: user not found: %s", group)
 		}
 		if u.Primary.ID == "" {
-			return fmt.Errorf("no user Record ID is set")
+			return fmt.Errorf("missing user id")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-		if cancel != nil {
-			defer cancel()
-		}
+		defer cancel()
 
 		apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, gr.Primary.ID, u.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
