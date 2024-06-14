@@ -227,8 +227,8 @@ data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestD
 	id = ` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
     ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
 }
-`
 
+`
 const mariaDBClusterDataSourceMatchName = mariaDBClusterConfigBasic + `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceByName + ` {
 	display_name	= "` + clusterDisplayNameValue + `"

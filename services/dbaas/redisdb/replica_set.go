@@ -63,6 +63,13 @@ func (c *RedisDBClient) DeleteRedisDBReplicaSet(ctx context.Context, replicaSetI
 	return apiResponse, err
 }
 
+func (c *RedisDBClient) UpdateRedisDBReplicaSet(ctx context.Context, replicaSetID, location string, replicaSet redisdb.ReplicaSetEnsure) (redisdb.ReplicaSetRead, *redisdb.APIResponse, error) {
+	c.modifyConfigURL(location)
+	replicaSetResponse, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsPut(ctx, replicaSetID).ReplicaSetEnsure(replicaSet).Execute()
+	apiResponse.LogInfo()
+	return replicaSetResponse, apiResponse, err
+}
+
 func (c *RedisDBClient) IsReplicaSetDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	replicaSetID := d.Id()
 	_, apiResponse, err := c.GetReplicaSet(ctx, replicaSetID, d.Get("location").(string))
@@ -93,60 +100,76 @@ func (c *RedisDBClient) ListReplicaSets(ctx context.Context, filterName, locatio
 	return replicaSets, apiResponse, err
 }
 
-// GetRedisDBReplicaSetDataCreate reads the data from the tf configuration files and populates a
-// request.
-func GetRedisDBReplicaSetDataCreate(d *schema.ResourceData) redisdb.ReplicaSetCreate {
-	replicaSet := redisdb.ReplicaSetCreate{
-		Properties: &redisdb.ReplicaSet{},
-	}
+// GetRedisDBReplicaSetDataProperties reads all the properties from the configuration file and returns
+// a structure that will be used to populate update/create requests.
+func GetRedisDBReplicaSetDataProperties(d *schema.ResourceData) *redisdb.ReplicaSet {
+	replicaSet := redisdb.ReplicaSet{}
 
 	if displayName, ok := d.GetOk("display_name"); ok {
 		displayName := displayName.(string)
-		replicaSet.Properties.DisplayName = &displayName
+		replicaSet.DisplayName = &displayName
 	}
 
 	if redisVersion, ok := d.GetOk("redis_version"); ok {
 		redisVersion := redisVersion.(string)
-		replicaSet.Properties.RedisVersion = &redisVersion
+		replicaSet.RedisVersion = &redisVersion
 	}
 
 	if replicas, ok := d.GetOk("replicas"); ok {
 		replicas := int32(replicas.(int))
-		replicaSet.Properties.Replicas = &replicas
+		replicaSet.Replicas = &replicas
 	}
 
 	if persistenceMode, ok := d.GetOk("persistence_mode"); ok {
 		persistenceMode := redisdb.PersistenceMode(persistenceMode.(string))
-		replicaSet.Properties.PersistenceMode = &persistenceMode
+		replicaSet.PersistenceMode = &persistenceMode
 	}
 
 	if evictionPolicy, ok := d.GetOk("eviction_policy"); ok {
 		evictionPolicy := redisdb.EvictionPolicy(evictionPolicy.(string))
-		replicaSet.Properties.EvictionPolicy = &evictionPolicy
+		replicaSet.EvictionPolicy = &evictionPolicy
 	}
 
 	if initialSnapshotId, ok := d.GetOk("initial_snapshot_id"); ok {
 		initialSnapshotId := initialSnapshotId.(string)
-		replicaSet.Properties.InitialSnapshotId = &initialSnapshotId
+		replicaSet.InitialSnapshotId = &initialSnapshotId
 	}
 
 	if _, ok := d.GetOk("resources"); ok {
-		replicaSet.Properties.Resources = getResources(d)
+		replicaSet.Resources = getResources(d)
 	}
 
 	if _, ok := d.GetOk("connections"); ok {
-		replicaSet.Properties.Connections = getConnections(d)
+		replicaSet.Connections = getConnections(d)
 	}
 
 	if _, ok := d.GetOk("credentials"); ok {
-		replicaSet.Properties.Credentials = getCredentials(d)
+		replicaSet.Credentials = getCredentials(d)
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {
-		replicaSet.Properties.MaintenanceWindow = getMaintenanceWindow(d)
+		replicaSet.MaintenanceWindow = getMaintenanceWindow(d)
 	}
 
-	return replicaSet
+	return &replicaSet
+}
+
+// GetRedisDBReplicaSetDataCreate reads the data from the tf configuration files and populates a
+// create request.
+func GetRedisDBReplicaSetDataCreate(d *schema.ResourceData) redisdb.ReplicaSetCreate {
+	return redisdb.ReplicaSetCreate{
+		Properties: GetRedisDBReplicaSetDataProperties(d),
+	}
+}
+
+// GetRedisDBReplicaSetDataUpdate reads the data from the tf configuration files and populates an
+// update request.
+func GetRedisDBReplicaSetDataUpdate(d *schema.ResourceData) redisdb.ReplicaSetEnsure {
+	replicaStateID := d.Id()
+	return redisdb.ReplicaSetEnsure{
+		Id:         &replicaStateID,
+		Properties: GetRedisDBReplicaSetDataProperties(d),
+	}
 }
 
 func (c *RedisDBClient) SetRedisDBReplicaSetData(d *schema.ResourceData, replicaSet redisdb.ReplicaSetRead) error {
@@ -178,14 +201,6 @@ func (c *RedisDBClient) SetRedisDBReplicaSetData(d *schema.ResourceData, replica
 	if replicaSet.Properties.Replicas != nil {
 		if err := d.Set("replicas", *replicaSet.Properties.Replicas); err != nil {
 			return utils.GenerateSetError(resourceName, "replicas", err)
-		}
-	}
-
-	if replicaSet.Properties.Credentials != nil {
-		if err := d.Set("credentials",
-			[]interface{}{setCredentialsProperties(*replicaSet.Properties.Credentials)},
-		); err != nil {
-			return utils.GenerateSetError(resourceName, "credentials", err)
 		}
 	}
 
