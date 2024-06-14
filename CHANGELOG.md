@@ -1,4 +1,7 @@
 ## 6.4.18
+
+### Fixes
+- wrap missing base error for resource fetching errors
 ### Enhancements
 - Add `grafana_address` attribute to `ionoscloud_logging_pipeline` resource and data source
 
