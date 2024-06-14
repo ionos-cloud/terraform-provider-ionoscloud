@@ -681,7 +681,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				}
 			}
 			if len(ids) > 0 {
-				client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, datacenterId, *postServer.Id).Securitygroups(ids)
+				_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, datacenterId, *postServer.Id).Securitygroups(ids).Execute()
+				if err != nil {
+					return diag.FromErr(err)
+				}
 			}
 		}
 	}
@@ -746,9 +749,12 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 							}
 						}
 						if len(ids) > 0 {
-							client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(
+							_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(
 								ctx, d.Get("datacenter_id").(string),
-								d.Id(), *foundFirstNic.Id).Securitygroups(ids)
+								d.Id(), *foundFirstNic.Id).Securitygroups(ids).Execute()
+							if err != nil {
+								return diag.FromErr(err)
+							}
 						}
 					}
 				}
@@ -962,7 +968,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 					}
 				}
 				if len(ids) > 0 {
-					client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(ids)
+					_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(ids).Execute()
+					if err != nil {
+						return diag.FromErr(err)
+					}
 				}
 			}
 		}
@@ -1161,7 +1170,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 								nicId = *nic.Id
 							}
 
-							client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, nicId).Securitygroups(ids)
+							_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, nicId).Securitygroups(ids).Execute()
+							if err != nil {
+								return diag.FromErr(err)
+							}
 						}
 					}
 				}

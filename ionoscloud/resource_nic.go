@@ -205,7 +205,10 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 					}
 				}
 				if len(ids) > 0 {
-					client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, dcid, srvid, d.Id()).Securitygroups(ids)
+					_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, dcid, srvid, d.Id()).Securitygroups(ids).Execute()
+					if err != nil {
+						return diag.FromErr(err)
+					}
 				}
 			}
 		}
@@ -322,7 +325,10 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 					}
 				}
 				if len(ids) > 0 {
-					client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, dcId, srvId, nicId).Securitygroups(ids)
+					_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, dcId, srvId, nicId).Securitygroups(ids).Execute()
+					if err != nil {
+						return diag.FromErr(err)
+					}
 				}
 			}
 		}
