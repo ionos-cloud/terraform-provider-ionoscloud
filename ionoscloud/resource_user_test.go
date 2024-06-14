@@ -5,6 +5,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
