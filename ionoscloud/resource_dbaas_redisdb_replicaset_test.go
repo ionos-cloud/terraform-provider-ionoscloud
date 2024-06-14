@@ -34,7 +34,20 @@ func TestAccDBaaSRedisDBReplicaSetBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, replicaSetVersionAttribute, replicaSetVersionValue),
 				),
 			},
-			{},
+			{
+				Config: redisDBReplicaSetDataSourceMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDBaaSRedisDBReplicaSetExists(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceById, &replicaSet),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceById, replicaSetVersionAttribute, replicaSetVersionValue),
+				),
+			},
+			{
+				Config: redisDBReplicaSetDataSourceMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDBaaSRedisDBReplicaSetExists(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, &replicaSet),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetVersionAttribute, replicaSetVersionValue),
+				),
+			},
 		},
 	})
 }
