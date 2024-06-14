@@ -5,7 +5,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
@@ -125,6 +124,16 @@ func TestAccUserBasic(t *testing.T) {
 						"name": "group1",
 					})),
 			},
+			{
+				Config:             testAccCheckNewUserGroup,
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccRemoveUserFromGroup(constant.GroupResource+".group1", constant.UserResource+"."+constant.NewUserResource),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.NewUserResource, "group_ids.#", "1"),
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "groups.*", map[string]string{
+						"name": "group1",
+					})),
+			},
 		},
 	})
 }
@@ -188,6 +197,37 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 		user = &foundUser
 
 		return nil
+	}
+}
+
+func testAccRemoveUserFromGroup(group, user string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		gr, ok := s.RootModule().Resources[group]
+		if !ok {
+			return fmt.Errorf("testAccRemoveUserFromGroup: group not found: %s", group)
+		}
+		if gr.Primary.ID == "" {
+			return fmt.Errorf("no group Record ID is set")
+		}
+
+		u, ok := s.RootModule().Resources[user]
+		if !ok {
+			return fmt.Errorf("testAccRemoveUserFromGroup: user not found: %s", group)
+		}
+		if u.Primary.ID == "" {
+			return fmt.Errorf("no user Record ID is set")
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		if cancel != nil {
+			defer cancel()
+		}
+
+		apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, gr.Primary.ID, u.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
+
+		return err
 	}
 }
 

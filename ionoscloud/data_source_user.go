@@ -130,8 +130,61 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(err)
 	}
 
-	if err = setUserData(d, &user); err != nil {
+	if err = setDataSourceUserData(d, &user); err != nil {
 		return diag.FromErr(err)
+	}
+
+	return nil
+}
+
+func setDataSourceUserData(d *schema.ResourceData, user *ionoscloud.User) error {
+	d.SetId(*user.Id)
+
+	if user.Properties != nil {
+		if user.Properties.Firstname != nil {
+			if err := d.Set("first_name", *user.Properties.Firstname); err != nil {
+				return err
+			}
+		}
+
+		if user.Properties.Lastname != nil {
+			if err := d.Set("last_name", *user.Properties.Lastname); err != nil {
+				return err
+			}
+		}
+		if user.Properties.Email != nil {
+			if err := d.Set("email", *user.Properties.Email); err != nil {
+				return err
+			}
+		}
+		if user.Properties.Administrator != nil {
+			if err := d.Set("administrator", *user.Properties.Administrator); err != nil {
+				return err
+			}
+		}
+		if user.Properties.ForceSecAuth != nil {
+			if err := d.Set("force_sec_auth", *user.Properties.ForceSecAuth); err != nil {
+				return err
+			}
+		}
+
+		if user.Properties.SecAuthActive != nil {
+			if err := d.Set("sec_auth_active", *user.Properties.SecAuthActive); err != nil {
+				return err
+			}
+		}
+
+		if user.Properties.S3CanonicalUserId != nil {
+			if err := d.Set("s3_canonical_user_id", *user.Properties.S3CanonicalUserId); err != nil {
+				return err
+			}
+		}
+
+		if user.Properties.Active != nil {
+			if err := d.Set("active", *user.Properties.Active); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

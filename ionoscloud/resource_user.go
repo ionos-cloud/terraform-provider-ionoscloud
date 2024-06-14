@@ -162,11 +162,11 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 
-	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
+	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -306,7 +306,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 
 	userId := d.Id()
 
-	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Execute()
+	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -377,5 +377,29 @@ func setUserData(d *schema.ResourceData, user *ionoscloud.User) error {
 		}
 	}
 
-	return nil
+	return d.Set("group_ids", getUserGroups(user))
+}
+
+func getUserGroups(user *ionoscloud.User) []string {
+	var groupIDs []string
+	if user.Entities == nil {
+		return groupIDs
+	}
+
+	if !user.Entities.HasGroups() {
+		return groupIDs
+	}
+
+	if user.Entities.Groups.Items == nil {
+		return groupIDs
+	}
+
+	groups := *user.Entities.Groups.Items
+	for _, g := range groups {
+		if g.Id != nil {
+			groupIDs = append(groupIDs, *g.Id)
+		}
+	}
+
+	return groupIDs
 }
