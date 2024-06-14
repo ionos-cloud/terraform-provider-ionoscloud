@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -47,6 +48,17 @@ func TestAccDBaaSRedisDBReplicaSetBasic(t *testing.T) {
 					testAccCheckDBaaSRedisDBReplicaSetExists(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, &replicaSet),
 					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetVersionAttribute, replicaSetVersionValue),
 				),
+			},
+			// other tests...
+			{},
+			// These should be at the very end
+			{
+				Config:      redisDBReplicaSetDataSourceWrongName,
+				ExpectError: regexp.MustCompile("no Redis cluster found with the specified display name"),
+			},
+			{
+				Config:      redisDBReplicaSetDataSourceWrongId,
+				ExpectError: regexp.MustCompile("an error occurred while fetching the Redis cluster with ID"),
 			},
 		},
 	})
@@ -164,15 +176,31 @@ const resources = replicaSetResourcesAttribute + `{
 	` + replicaSetRAMAttribute + ` = "` + replicaSetRAMValue + `"
 }`
 
+// For testing data source match by ID
 const redisDBReplicaSetDataSourceMatchId = redisDBReplicaSetConfigBasic + `
 data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceById + ` {
 	id = ` + constant.DBaaSRedisDBReplicaSetResource + `.` + constant.DBaaSReplicaSetTestResource + `.id
 	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
 }`
 
+// For testing data source match by name
 const redisDBReplicaSetDataSourceMatchName = redisDBReplicaSetConfigBasic + `
 data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceByName + ` {
 	display_name	= "` + replicaSetDisplayNameValue + `"
+	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
+}`
+
+// For negative case of data source match by name
+const redisDBReplicaSetDataSourceWrongName = redisDBReplicaSetConfigBasic + `
+data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceByName + ` {
+	display_name	= "wrong_name"
+	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
+}`
+
+// For negative case of data source match by ID - use a 0000 uuidv4
+const redisDBReplicaSetDataSourceWrongId = redisDBReplicaSetConfigBasic + `
+data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceById + ` {
+	id = "00000000-0000-0000-0000-000000000000"
 	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
 }`
 
