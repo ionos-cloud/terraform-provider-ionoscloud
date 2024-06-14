@@ -265,7 +265,7 @@ const (
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
 
 	// RedisDB constants
-	DBaaSReplicaSetTestDataSourceById   = "test_dbaas_replicaset_id"
+	DBaaSReplicaSetTestDataSourceByID   = "test_dbaas_replicaset_id"
 	DBaaSReplicaSetTestDataSourceByName = "test_dbaas_replicaset_name"
 	DBaaSRedisDBReplicaSetResource      = "ionoscloud_redis_replicaset"
 )

@@ -36,7 +36,7 @@ func TestAccDBaaSRedisDBReplicaSetBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: redisDBReplicaSetDataSourceMatchName,
+				Config: redisDBReplicaSetDataSourceMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDBaaSRedisDBReplicaSetExists(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, &replicaSet),
 					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetVersionAttribute, replicaSetVersionValue),
@@ -72,7 +72,7 @@ func TestAccDBaaSRedisDBReplicaSetBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile("no Redis cluster found with the specified display name"),
 			},
 			{
-				Config:      redisDBReplicaSetDataSourceWrongId,
+				Config:      redisDBReplicaSetDataSourceWrongID,
 				ExpectError: regexp.MustCompile("an error occurred while fetching the Redis cluster with ID"),
 			},
 		},
@@ -192,8 +192,8 @@ const resources = replicaSetResourcesAttribute + `{
 }`
 
 // For testing data source match by ID
-const redisDBReplicaSetDataSourceMatchId = redisDBReplicaSetConfigBasic + `
-data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceById + ` {
+const redisDBReplicaSetDataSourceMatchID = redisDBReplicaSetConfigBasic + `
+data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceByID + ` {
 	id = ` + constant.DBaaSRedisDBReplicaSetResource + `.` + constant.DBaaSReplicaSetTestResource + `.id
 	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
 }`
@@ -213,8 +213,8 @@ data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSe
 }`
 
 // For negative case of data source match by ID - use a 0000 uuidv4
-const redisDBReplicaSetDataSourceWrongId = redisDBReplicaSetConfigBasic + `
-data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceById + ` {
+const redisDBReplicaSetDataSourceWrongID = redisDBReplicaSetConfigBasic + `
+data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceByID + ` {
 	id = "00000000-0000-0000-0000-000000000000"
 	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
 }`
