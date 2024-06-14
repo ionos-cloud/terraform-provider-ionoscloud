@@ -23,11 +23,10 @@ func dataSourceDBaaSRedisDBReplicaSet() *schema.Resource {
 				Optional:    true,
 			},
 			"location": {
-				Type:        schema.TypeString,
-				Description: "The cluster location",
-				Required:    true,
-				// TODO https://github.com/ionos-cloud/terraform-provider-ionoscloud/pull/566#discussion_r1636037402
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
+				Type:             schema.TypeString,
+				Description:      "The cluster location",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.DBaaSClusterLocations, false)),
 			},
 			"display_name": {
 				Type:        schema.TypeString,

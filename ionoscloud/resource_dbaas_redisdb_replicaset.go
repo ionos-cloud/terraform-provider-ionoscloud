@@ -3,6 +3,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+	"slices"
+	"strings"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -10,9 +15,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/redisdb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"log"
-	"slices"
-	"strings"
 )
 
 func resourceDBaaSRedisDBReplicaSet() *schema.Resource {
@@ -31,12 +33,11 @@ func resourceDBaaSRedisDBReplicaSet() *schema.Resource {
 				Required:    true,
 			},
 			"location": {
-				Type:        schema.TypeString,
-				Description: "The replica set location",
-				Required:    true,
-				ForceNew:    true,
-				// TODO -- Change the name of this constant since the value can be used for both MariaDB and RedisDB
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
+				Type:             schema.TypeString,
+				Description:      "The replica set location",
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.DBaaSClusterLocations, false)),
 			},
 			"redis_version": {
 				Type:        schema.TypeString,
@@ -73,11 +74,8 @@ func resourceDBaaSRedisDBReplicaSet() *schema.Resource {
 					},
 				},
 			},
-			// TODO -- Check if we need to add validation here
-			// TODO -- Check what to do with the default values
 			"persistence_mode": {
-				Type: schema.TypeString,
-				// TODO -- In documentation, add the full description from the swagger.
+				Type:        schema.TypeString,
 				Description: "Specifies How and If data is persisted.",
 				Required:    true,
 			},
@@ -118,7 +116,6 @@ func resourceDBaaSRedisDBReplicaSet() *schema.Resource {
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						// TODO -- Check if we need to add validation here
 						"username": {
 							Type:        schema.TypeString,
 							Description: "The username for the initial RedisDB user. Some system usernames are restricted (e.g. 'admin', 'standby').",
@@ -174,7 +171,6 @@ func resourceDBaaSRedisDBReplicaSet() *schema.Resource {
 					},
 				},
 			},
-			// TODO -- Check if this needs to be marked as 'Computed'
 			"initial_snapshot_id": {
 				Type:        schema.TypeString,
 				Description: "The ID of a snapshot to restore the replica set from. If set, the replica set will be created from the snapshot.",
@@ -225,7 +221,9 @@ func redisDBReplicaSetDelete(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("deletion check failed for RedisDB replica set with ID: %v, error: %w", replicaSetID, err))
 	}
-	// TODO -- Check if we need to wait after replica set deletion in order to free the LAN.
+
+	// wait for the lan to be freed after the deletion of the replica set
+	time.Sleep(constant.SleepInterval * 10)
 	return nil
 }
 
@@ -248,6 +246,20 @@ func redisDBReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func redisDBReplicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).RedisDBClient
+	replicaSetID := d.Id()
+	replicaSet := redisdb.GetRedisDBReplicaSetDataUpdate(d)
+	response, _, err := client.UpdateRedisDBReplicaSet(ctx, replicaSetID, d.Get("location").(string), replicaSet)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("an error occurred while updating RedisDB replica set with ID: %v, error: %w", replicaSetID, err))
+	}
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsReplicaSetReady)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error occurred while checking the status for RedisDB replica set after update, replica set ID: %v, error: %w", replicaSetID, err))
+	}
+	if err := client.SetRedisDBReplicaSetData(d, response); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -258,16 +270,15 @@ func redisDBReplicaSetImport(ctx context.Context, d *schema.ResourceData, meta i
 		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<replica_set_id>'", d.Id())
 	}
 	location := parts[0]
-	// TODO -- Change the name of the constant here
-	if !slices.Contains(constant.MariaDBClusterLocations, location) {
-		return nil, fmt.Errorf("invalid import ID: %q, location must be one of %v", d.Id(), constant.MariaDBClusterLocations)
+	if !slices.Contains(constant.DBaaSClusterLocations, location) {
+		return nil, fmt.Errorf("invalid import ID: %q, location must be one of %v", d.Id(), constant.DBaaSClusterLocations)
 	}
 	replicaSetID := parts[1]
 	replicaSet, apiResponse, err := client.GetReplicaSet(ctx, replicaSetID, location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("RedisDB replica set with ID: %v does not exist, error: %w", err)
+			return nil, fmt.Errorf("RedisDB replica set does not exist, error: %w", err)
 		}
 		return nil, fmt.Errorf("an error occurred while trying to import RedisDB replica set with ID: %v, error: %w", replicaSetID, err)
 	}
