@@ -537,7 +537,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 			if len(ids) > 0 {
 				_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, d.Get("datacenter_id").(string),
-					*createdServer.Id).Securitygroups(ids).Execute()
+					*createdServer.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
 				if err != nil {
 					return diag.FromErr(err)
 				}
@@ -582,7 +582,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 					_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(
 						ctx, d.Get("datacenter_id").(string),
 						*createdServer.Id,
-						*(*createdServer.Entities.Nics.Items)[0].Id).Securitygroups(ids).Execute()
+						*(*createdServer.Entities.Nics.Items)[0].Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
 					if err != nil {
 						return diag.FromErr(err)
 					}
@@ -863,7 +863,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 					}
 				}
 				if len(ids) > 0 {
-					_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(ids).Execute()
+					_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
 					if err != nil {
 						return diag.FromErr(err)
 					}
@@ -1063,7 +1063,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 						}
 					}
 					if len(ids) > 0 {
-						_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Securitygroups(ids).Execute()
+						_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
 						if err != nil {
 							return diag.FromErr(err)
 						}
