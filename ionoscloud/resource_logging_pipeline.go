@@ -116,7 +116,8 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 
 	log.Printf("[INFO] Successfully retrieved Logging pipeline with ID: %s: %+v", pipelineId, pipeline)
-	if err := client.SetPipelineData(d, pipeline); err != nil {
+	d.SetId(*pipeline.Id)
+	if err := client.SetPipelineData(d, pipeline.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -155,7 +156,8 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the Logging pipeline with ID: %s to become available: %w", pipelineId, err))
 	}
-	if err := client.SetPipelineData(d, pipelineResponse); err != nil {
+	d.SetId(*pipelineResponse.Id)
+	if err := client.SetPipelineData(d, pipelineResponse.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil

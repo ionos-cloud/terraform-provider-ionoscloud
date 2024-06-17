@@ -13,7 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	logging "github.com/ionos-cloud/sdk-go-logging"
+	logging "github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
 )
 
 func TestAccLoggingPipeline(t *testing.T) {

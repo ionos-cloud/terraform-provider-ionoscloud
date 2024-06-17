@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	logging "github.com/ionos-cloud/sdk-go-logging"
+	"github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
 )
 
 func dataSourceLoggingPipeline() *schema.Resource {
@@ -112,7 +112,7 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching Logging pipelines: %w", err))
 		}
-		for _, pipelineItem := range *pipelines.Items {
+		for _, pipelineItem := range pipelines.Items {
 			if pipelineItem.Properties != nil && pipelineItem.Properties.Name != nil && strings.EqualFold(*pipelineItem.Properties.Name, name) {
 				results = append(results, pipelineItem)
 			}
@@ -125,7 +125,8 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta in
 			pipeline = results[0]
 		}
 	}
-	if err := client.SetPipelineData(d, pipeline); err != nil {
+	d.SetId(*pipeline.Id)
+	if err := client.SetPipelineData(d, pipeline.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil

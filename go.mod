@@ -6,6 +6,8 @@ require (
 	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
 	github.com/iancoleman/strcase v0.3.0
+	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0
+	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.0
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
 	github.com/ionos-cloud/sdk-go-container-registry v1.1.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.0.3
@@ -13,7 +15,6 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
-	github.com/ionos-cloud/sdk-go-logging v1.0.1
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 	github.com/ionos-cloud/sdk-go/v6 v6.1.11
 	golang.org/x/crypto v0.17.0

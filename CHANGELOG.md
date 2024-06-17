@@ -1,14 +1,15 @@
 ## 6.4.18
 
 ### Fixes
-- wrap missing base error for resource fetching errors
+- Wrap missing base error for resource fetching errors
+
 ### Enhancements
 - Add `grafana_address` attribute to `ionoscloud_logging_pipeline` resource and data source
-
+- Move to `sdk-go-bundle` logging sdk
+- 
 ### Documentation
 - Updated documentation to specify that `ionoscloud_logging_pipeline`, `ionoscloud_dns_record` and `ionoscloud_dns_zone` only accept tokens for authorization.
 - Removed Early Access (EA) warning for `ionoscloud_logging_pipeline`.
-
 
 ## 6.4.17
 ### Fixes
@@ -23,7 +24,6 @@
 - Add configurable fields to `ionoscloud_share` resource. Fields that can be set on creation: `description`, `sec_auth_protection`, `licence_type`. 
 Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug`, `disc_virtio_hot_unplug`, `ram_hot_plug`.
 - Allow MariaDB cluster creation in other zones than `de/txl` by adding `location` parameter to resources and data sources
-
 
 ## 6.4.16
 ### Enhancements

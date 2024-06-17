@@ -3,13 +3,13 @@ package logging
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"runtime"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	logging "github.com/ionos-cloud/sdk-go-logging"
+	"github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -18,11 +18,8 @@ type Client struct {
 }
 
 func NewClient(username, password, token, url, version, terraformVersion string) *Client {
-	newConfigLogging := logging.NewConfiguration(username, password, token, url)
+	newConfigLogging := shared.NewConfiguration(username, password, token, url)
 
-	if os.Getenv(constant.IonosDebug) != "" {
-		newConfigLogging.Debug = true
-	}
 	newConfigLogging.MaxRetries = constant.MaxRetries
 	newConfigLogging.MaxWaitTime = constant.MaxWaitTime
 	newConfigLogging.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
