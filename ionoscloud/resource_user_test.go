@@ -210,7 +210,7 @@ func testAccRemoveUserFromGroup(group, user string) resource.TestCheckFunc {
 
 		u, ok := s.RootModule().Resources[user]
 		if !ok {
-			return fmt.Errorf("testAccRemoveUserFromGroup: user not found: %s", group)
+			return fmt.Errorf("testAccRemoveUserFromGroup: user not found: %s", user)
 		}
 		if u.Primary.ID == "" {
 			return fmt.Errorf("missing user id")
