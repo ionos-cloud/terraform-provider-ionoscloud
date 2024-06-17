@@ -136,6 +136,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	return nil
 }
+
 func setUsersForGroup(ctx context.Context, d *schema.ResourceData, user *ionoscloud.User, client ionoscloud.APIClient) error {
 	if user == nil {
 		return fmt.Errorf("did not expect empty user")
