@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"runtime"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -24,8 +24,7 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	newConfigLogging.MaxWaitTime = constant.MaxWaitTime
 	newConfigLogging.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigLogging.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-logging/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, logging.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
+		"terraform-provider/%s_ionos-cloud-sdk-go-logging/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch",
+		logging.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 	return &Client{sdkClient: *logging.NewAPIClient(newConfigLogging)}
 }
