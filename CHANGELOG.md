@@ -1,7 +1,13 @@
 ## 6.4.18
 
+<<<<<<< test/add-import-tests-for-mongo
 ### Features
 - Add tests for Mongo cluster and user
+=======
+### Fixes
+- Wrap missing base error for resource fetching errors
+- Properly persist user group ids in state when syncing with remote configuration 
+>>>>>>> master
 ### Enhancements
 - Add `grafana_address` attribute to `ionoscloud_logging_pipeline` resource and data source
 
