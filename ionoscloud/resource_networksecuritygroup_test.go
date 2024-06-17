@@ -34,6 +34,30 @@ func TestAccNetworkSecurityGroupBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccCheckNetworkSecurityGroupDataSourceMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
+					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "testing-name"),
+					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description", "testing-description"),
+					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#", "0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "name", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "description", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rule_ids.#", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#"),
+				),
+			},
+			{
+				Config: testAccCheckNetworkSecurityGroupDataSourceMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
+					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "testing-name"),
+					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description", "testing-description"),
+					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#", "0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByName, "id", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByName, "description", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByName, "rule_ids.#", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#"),
+				),
+			},
+			{
 				Config: testAccCheckNetworkSecurityGroupConfigBasicUpdated,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
@@ -174,18 +198,27 @@ func TestAccNetworkSecurityGroupFirewallRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_type", "1"),
 					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_code", "8"),
 					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "type", "INGRESS"),
-					// The NSG Resource is not refreshed since the changes are happening in the firewall rules resources so at this point the 'rule_ids' list still has 3 entries
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#", "3"),
 				),
 			},
 			{
-				Config: testAccCheckNetworkSecurityGroupFirewallRulesBasicDeleteRules,
+				Config: testAccCheckNetworkSecurityGroupFirewallRulesDataSource,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
 					testAccCheckNSGFirewallRuleExists(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", rule1),
 					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "testing-name"),
-					// New test step refreshes the state so the 'rule_ids' list reflects the correct value
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#", "1"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "name", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "description", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rule_ids.#", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rules.#", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rules.0.id", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rules.0.name", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rules.0.protocol", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "protocol"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rules.0.source_mac", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_mac"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rules.0.source_ip", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rules.0.target_ip", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "target_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rules.0.icmp_type", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rules.0.icmp_code", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_code"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceById, "rules.0.type", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "type"),
 				),
 			},
 		},
@@ -302,10 +335,30 @@ resource ` + constant.NetworkSecurityGroupResource + ` ` + constant.NetworkSecur
 }
 `
 
+const testAccCheckNetworkSecurityGroupDataSourceMatchId = testAccCheckNetworkSecurityGroupConfigBasic + `
+data ` + constant.NetworkSecurityGroupResource + ` ` + constant.NetworkSecurityGroupDataSourceById + ` {
+  id            = ` + constant.NetworkSecurityGroupResource + `.` + constant.NetworkSecurityGroupTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccCheckNetworkSecurityGroupDataSourceMatchName = testAccCheckNetworkSecurityGroupConfigBasic + `
+data ` + constant.NetworkSecurityGroupResource + ` ` + constant.NetworkSecurityGroupDataSourceByName + ` {
+  name          = "testing-name"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
 const testAccCheckNetworkSecurityGroupFirewallRulesBasic = testAccCheckNetworkSecurityGroupConfigBasic + firewallRule1 + firewallRule2
 const testAccCheckNetworkSecurityGroupFirewallRulesBasicAddRule = testAccCheckNetworkSecurityGroupFirewallRulesBasic + firewallRule3
 const testAccCheckNetworkSecurityGroupFirewallRulesBasicUpdateRule = testAccCheckNetworkSecurityGroupFirewallRulesBasic + firewallRule3Updated
 const testAccCheckNetworkSecurityGroupFirewallRulesBasicDeleteRules = testAccCheckNetworkSecurityGroupConfigBasic + firewallRule1
+const testAccCheckNetworkSecurityGroupFirewallRulesDataSource = testAccCheckNetworkSecurityGroupFirewallRulesBasicDeleteRules + `
+data ` + constant.NetworkSecurityGroupResource + ` ` + constant.NetworkSecurityGroupDataSourceById + ` {
+  id            = ` + constant.NetworkSecurityGroupResource + `.` + constant.NetworkSecurityGroupTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
 
 const firewallRule1 = `
 resource ` + constant.NetworkSecurityGroupFirewallRuleResource + ` ` + constant.NetworkSecurityGroupFirewallRuleTestResource + `_1` + ` {
