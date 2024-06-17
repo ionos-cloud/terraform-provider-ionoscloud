@@ -126,12 +126,6 @@ func TestAccUserBasic(t *testing.T) {
 					})),
 			},
 			{
-				Config:      testAccCheckNewUserGroup,
-				ExpectError: regexp.MustCompile("the plan was not empty"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccRemoveUserFromGroup(constant.GroupResource+".group1", constant.UserResource+"."+constant.NewUserResource)),
-			},
-			{
 				Config:             testAccCheckNewUserGroup,
 				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
