@@ -125,6 +125,12 @@ func TestAccUserBasic(t *testing.T) {
 						"name": "group1",
 					})),
 			},
+			{
+				Config:             testAccCheckNewUserGroup,
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccRemoveUserFromGroup(constant.GroupResource+".group1", constant.UserResource+"."+constant.NewUserResource)),
+			},
 		},
 	})
 }
@@ -188,6 +194,35 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 		user = &foundUser
 
 		return nil
+	}
+}
+
+func testAccRemoveUserFromGroup(group, user string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		gr, ok := s.RootModule().Resources[group]
+		if !ok {
+			return fmt.Errorf("testAccRemoveUserFromGroup: group not found: %s", group)
+		}
+		if gr.Primary.ID == "" {
+			return fmt.Errorf("missing group id")
+		}
+
+		u, ok := s.RootModule().Resources[user]
+		if !ok {
+			return fmt.Errorf("testAccRemoveUserFromGroup: user not found: %s", user)
+		}
+		if u.Primary.ID == "" {
+			return fmt.Errorf("missing user id")
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		defer cancel()
+
+		apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, gr.Primary.ID, u.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
+
+		return err
 	}
 }
 

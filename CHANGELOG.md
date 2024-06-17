@@ -3,6 +3,7 @@
 ### Fixes
 - Wrap missing base error for resource fetching errors
 - Properly persist user group ids in state when syncing with remote configuration
+
 ### Enhancements
 - Add `grafana_address` attribute to `ionoscloud_logging_pipeline` resource and data source
 - Move to `sdk-go-bundle` logging sdk
