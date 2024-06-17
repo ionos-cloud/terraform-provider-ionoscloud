@@ -1,5 +1,5 @@
-//go:build all || dbaas
-// +build all dbaas
+//go:build all || dbaas || mongo
+// +build all dbaas mongo
 
 package ionoscloud
 
