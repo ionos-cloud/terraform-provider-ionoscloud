@@ -1,4 +1,7 @@
 ## 6.4.18
+
+### Features
+- Add tests for mongo cluster and user
 ### Enhancements
 - Add `grafana_address` attribute to `ionoscloud_logging_pipeline` resource and data source
 
