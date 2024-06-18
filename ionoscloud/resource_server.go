@@ -953,21 +953,19 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if d.HasChange("security_groups_ids") {
+		var ids []string
 		if v, ok := d.GetOk("security_groups_ids"); ok {
 			raw := v.([]interface{})
-			ids := make([]string, 0, len(raw))
 			for _, rawId := range raw {
 				if rawId != nil {
 					id := rawId.(string)
 					ids = append(ids, id)
 				}
 			}
-			if len(ids) > 0 {
-				_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-				if err != nil {
-					return diag.FromErr(err)
-				}
-			}
+		}
+		_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+		if err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
@@ -1146,27 +1144,22 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 
 			if d.HasChange("nic.0.security_groups_ids") {
+				var ids []string
 				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
 					raw := v.([]interface{})
-					ids := make([]string, 0, len(raw))
 					for _, rawId := range raw {
 						if rawId != nil {
 							id := rawId.(string)
 							ids = append(ids, id)
 						}
 					}
-					if len(ids) > 0 {
-						nicId := ""
-						if createNic {
-							nicId = *createdNic.Id
-						} else {
-							nicId = *nic.Id
-						}
-						_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, nicId).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-						if err != nil {
-							return diag.FromErr(err)
-						}
-					}
+				}
+				if createNic {
+					nicId = *createdNic.Id
+				}
+				_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, nicId).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+				if err != nil {
+					return diag.FromErr(err)
 				}
 			}
 

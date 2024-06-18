@@ -11,11 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func resourceNic() *schema.Resource {
@@ -129,7 +130,7 @@ and log the extent to which your instances are being accessed.`,
 // on the field that changes. This is needed because the API does not support PATCH for all flowlog fields except name.
 // The API also does not support DELETE on the flowlog, so the whole resource needs to be re-created.
 func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	//we do not want to check in case of resource creation
+	// we do not want to check in case of resource creation
 	if d.Id() == "" {
 		return nil
 	}
@@ -196,27 +197,25 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		if v, ok := d.GetOk("security_groups_ids"); ok {
 			raw := v.([]interface{})
-			if len(raw) > 0 {
-				ids := make([]string, 0)
-				for _, rawId := range raw {
-					if rawId != nil {
-						id := rawId.(string)
-						ids = append(ids, id)
-					}
+			ids := make([]string, 0)
+			for _, rawId := range raw {
+				if rawId != nil {
+					id := rawId.(string)
+					ids = append(ids, id)
 				}
-				if len(ids) > 0 {
-					_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, dcid, srvid, d.Id()).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-					if err != nil {
-						return diag.FromErr(err)
-					}
+			}
+			if len(ids) > 0 {
+				_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, dcid, srvid, d.Id()).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+				if err != nil {
+					return diag.FromErr(err)
 				}
 			}
 		}
 	}
 
-	//Sometimes there is an error because the nic is not found after it's created.
-	//Probably a read write consistency issue.
-	//We're retrying for 5 minutes. 404 - means we keep on trying.
+	// Sometimes there is an error because the nic is not found after it's created.
+	// Probably a read write consistency issue.
+	// We're retrying for 5 minutes. 404 - means we keep on trying.
 	var foundNic = &ionoscloud.Nic{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error
@@ -290,7 +289,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 					}
 					err = fw.CreateOrPatchForServer(ctx, dcId, srvId, nicId, firstFlowLogId, flowLog)
 					if err != nil {
-						//if we have a create that failed, we do not want to save in state
+						// if we have a create that failed, we do not want to save in state
 						// saving in state would mean a diff that would force a re-create
 						if firstFlowLogId == "" {
 							_ = d.Set("flowlog", nil)
@@ -314,23 +313,19 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 	if d.HasChange("security_groups_ids") {
+		var ids []string
 		if v, ok := d.GetOk("security_groups_ids"); ok {
 			raw := v.([]interface{})
-			if len(raw) > 0 {
-				ids := make([]string, 0)
-				for _, rawId := range raw {
-					if rawId != nil {
-						id := rawId.(string)
-						ids = append(ids, id)
-					}
-				}
-				if len(ids) > 0 {
-					_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, dcId, srvId, nicId).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-					if err != nil {
-						return diag.FromErr(err)
-					}
+			for _, rawId := range raw {
+				if rawId != nil {
+					id := rawId.(string)
+					ids = append(ids, id)
 				}
 			}
+		}
+		_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, dcId, srvId, nicId).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+		if err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
