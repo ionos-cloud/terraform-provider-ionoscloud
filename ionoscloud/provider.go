@@ -123,6 +123,7 @@ func Provider() *schema.Provider {
 			constant.AutoscalingGroupResource:                  resourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
 			constant.KafkaClusterResource:                      resourceKafkaCluster(),
+			constant.KafkaClusterTopicResource:                 resourceKafkaTopic(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -183,6 +184,7 @@ func Provider() *schema.Provider {
 			constant.AutoscalingGroupResource:                  dataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           dataSourceAutoscalingGroupServers(),
 			constant.KafkaClusterResource:                      dataSourceKafkaCluster(),
+			constant.KafkaClusterTopicResource:                 dataSourceKafkaTopic(),
 		},
 	}
 
@@ -278,7 +280,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
 			newConfig.UserAgent = fmt.Sprintf(
 				"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH,
+			)
 			if os.Getenv(constant.IonosDebug) != "" {
 				newConfig.Debug = true
 			}
@@ -288,25 +291,45 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			return ionoscloud.NewAPIClient(newConfig)
 		}
 	case autoscalingClient:
-		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return autoscalingService.NewClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
 	case certManagerClient:
-		return cert.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return cert.NewClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
 	case containerRegistryClient:
-		return crService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return crService.NewClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
 	case dataplatformClient:
-		return dataplatformService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return dataplatformService.NewClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
 	case dnsClient:
-		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return dnsService.NewClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
 	case loggingClient:
-		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return loggingService.NewClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
 	case mariaDBClient:
-		return mariadb.NewMariaDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return mariadb.NewMariaDBClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
 	case mongoClient:
-		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return dbaasService.NewMongoClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
 	case psqlClient:
-		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+		return dbaasService.NewPsqlClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username,
+		)
 	case kafkaClient:
-		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+		return kafkaService.NewClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username,
+		)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
