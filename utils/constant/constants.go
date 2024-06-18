@@ -413,5 +413,6 @@ const (
 )
 
 const (
-	KafkaClusterResource = "ionoscloud_kafka_cluster"
+	KafkaClusterResource      = "ionoscloud_kafka_cluster"
+	KafkaClusterTopicResource = "ionoscloud_kafka_cluster_topic"
 )

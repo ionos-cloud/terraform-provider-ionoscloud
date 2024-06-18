@@ -68,7 +68,24 @@ func setClusterPostRequest(d *schema.ResourceData) *kafka.ClusterCreate {
 	clusterName := d.Get("name").(string)
 	version := d.Get("version").(string)
 	size := d.Get("size").(string)
-	return kafka.NewClusterCreate(*kafka.NewCluster(clusterName, version, size, nil))
+	datacenterId := d.Get("connections.0.datacenter_id").(string)
+	lanId := d.Get("connections.0.lan_id").(string)
+	cidr := d.Get("connections.0.cidr").(string)
+	brokerAddressesRaw := d.Get("connections.0.broker_addresses").([]interface{})
+
+	brokerAddresses := make([]string, 0)
+	for _, v := range brokerAddressesRaw {
+		brokerAddresses = append(brokerAddresses, v.(string))
+	}
+
+	connection := kafka.KafkaClusterConnection{
+		DatacenterId:    &datacenterId,
+		LanId:           &lanId,
+		Cidr:            &cidr,
+		BrokerAddresses: &brokerAddresses,
+	}
+
+	return kafka.NewClusterCreate(*kafka.NewCluster(clusterName, version, size, []kafka.KafkaClusterConnection{connection}))
 }
 
 func (c *Client) SetKafkaClusterData(d *schema.ResourceData, cluster *kafka.ClusterRead) error {
