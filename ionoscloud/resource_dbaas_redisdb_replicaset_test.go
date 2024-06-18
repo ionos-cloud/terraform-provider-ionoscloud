@@ -38,26 +38,28 @@ func TestAccDBaaSRedisDBReplicaSetBasic(t *testing.T) {
 			{
 				Config: redisDBReplicaSetDataSourceMatchID,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDBaaSRedisDBReplicaSetExists(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, &replicaSet),
-					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetVersionAttribute, replicaSetVersionValue),
-					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetReplicasAttribute, replicaSetReplicasValue),
-					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetCoresAttribute, replicaSetCoresValue),
-					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetRAMAttribute, replicaSetRAMValue),
-					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetDisplayNameAttribute, replicaSetDisplayNameValue),
-					resource.TestCheckResourceAttrPair(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
-					resource.TestCheckResourceAttrPair(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
-					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
-					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
+					testAccCheckDBaaSRedisDBReplicaSetExists(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, &replicaSet),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetLocationAttribute, replicaSetLocationValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetVersionAttribute, replicaSetVersionValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetReplicasAttribute, replicaSetReplicasValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetResourcesAttribute+".0."+replicaSetCoresAttribute, replicaSetCoresValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetResourcesAttribute+".0."+replicaSetRAMAttribute, replicaSetRAMValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetDisplayNameAttribute, replicaSetDisplayNameValue),
+					resource.TestCheckResourceAttrPair(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
+					resource.TestCheckResourceAttrPair(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
 				),
 			},
 			{
 				Config: redisDBReplicaSetDataSourceMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDBaaSRedisDBReplicaSetExists(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, &replicaSet),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetLocationAttribute, replicaSetLocationValue),
 					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetVersionAttribute, replicaSetVersionValue),
 					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetReplicasAttribute, replicaSetReplicasValue),
-					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetCoresAttribute, replicaSetCoresValue),
-					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetRAMAttribute, replicaSetRAMValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetResourcesAttribute+".0."+replicaSetCoresAttribute, replicaSetCoresValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetResourcesAttribute+".0."+replicaSetRAMAttribute, replicaSetRAMValue),
 					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetDisplayNameAttribute, replicaSetDisplayNameValue),
 					resource.TestCheckResourceAttrPair(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
 					resource.TestCheckResourceAttrPair(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
@@ -239,6 +241,7 @@ const credentials = clusterCredentialsAttribute + `{
 
 // Attributes
 const (
+	replicaSetLocationAttribute          = "location"
 	replicaSetVersionAttribute           = "redis_version"
 	replicaSetDisplayNameAttribute       = "display_name"
 	replicaSetReplicasAttribute          = "replicas"
