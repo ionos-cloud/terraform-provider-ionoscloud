@@ -672,19 +672,17 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
 		raw := v.([]interface{})
-		if len(raw) > 0 {
-			ids := make([]string, 0)
-			for _, rawId := range raw {
-				if rawId != nil {
-					id := rawId.(string)
-					ids = append(ids, id)
-				}
+		ids := make([]string, 0, len(raw))
+		for _, rawId := range raw {
+			if rawId != nil {
+				id := rawId.(string)
+				ids = append(ids, id)
 			}
-			if len(ids) > 0 {
-				_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, datacenterId, *postServer.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-				if err != nil {
-					return diag.FromErr(err)
-				}
+		}
+		if len(ids) > 0 {
+			_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, datacenterId, *postServer.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+			if err != nil {
+				return diag.FromErr(err)
 			}
 		}
 	}
@@ -740,21 +738,19 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
 					raw := v.([]interface{})
-					if len(raw) > 0 {
-						ids := make([]string, 0)
-						for _, rawId := range raw {
-							if rawId != nil {
-								id := rawId.(string)
-								ids = append(ids, id)
-							}
+					ids := make([]string, 0, len(raw))
+					for _, rawId := range raw {
+						if rawId != nil {
+							id := rawId.(string)
+							ids = append(ids, id)
 						}
-						if len(ids) > 0 {
-							_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(
-								ctx, d.Get("datacenter_id").(string),
-								d.Id(), *foundFirstNic.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-							if err != nil {
-								return diag.FromErr(err)
-							}
+					}
+					if len(ids) > 0 {
+						_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(
+							ctx, d.Get("datacenter_id").(string),
+							d.Id(), *foundFirstNic.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+						if err != nil {
+							return diag.FromErr(err)
 						}
 					}
 				}
@@ -959,19 +955,17 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	if d.HasChange("security_groups_ids") {
 		if v, ok := d.GetOk("security_groups_ids"); ok {
 			raw := v.([]interface{})
-			if len(raw) > 0 {
-				ids := make([]string, 0)
-				for _, rawId := range raw {
-					if rawId != nil {
-						id := rawId.(string)
-						ids = append(ids, id)
-					}
+			ids := make([]string, 0, len(raw))
+			for _, rawId := range raw {
+				if rawId != nil {
+					id := rawId.(string)
+					ids = append(ids, id)
 				}
-				if len(ids) > 0 {
-					_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-					if err != nil {
-						return diag.FromErr(err)
-					}
+			}
+			if len(ids) > 0 {
+				_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+				if err != nil {
+					return diag.FromErr(err)
 				}
 			}
 		}
@@ -1154,26 +1148,23 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			if d.HasChange("nic.0.security_groups_ids") {
 				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
 					raw := v.([]interface{})
-					if len(raw) > 0 {
-						ids := make([]string, 0)
-						for _, rawId := range raw {
-							if rawId != nil {
-								id := rawId.(string)
-								ids = append(ids, id)
-							}
+					ids := make([]string, 0, len(raw))
+					for _, rawId := range raw {
+						if rawId != nil {
+							id := rawId.(string)
+							ids = append(ids, id)
 						}
-						if len(ids) > 0 {
-							nicId := ""
-							if createNic {
-								nicId = *createdNic.Id
-							} else {
-								nicId = *nic.Id
-							}
-
-							_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, nicId).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-							if err != nil {
-								return diag.FromErr(err)
-							}
+					}
+					if len(ids) > 0 {
+						nicId := ""
+						if createNic {
+							nicId = *createdNic.Id
+						} else {
+							nicId = *nic.Id
+						}
+						_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, nicId).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+						if err != nil {
+							return diag.FromErr(err)
 						}
 					}
 				}
@@ -1579,17 +1570,17 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			}
 		}
 
+		nsgIDs := make([]string, 0)
 		if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
-			ids := make([]string, 0)
 			for _, group := range *server.Entities.Securitygroups.Items {
 				if group.Id != nil {
 					id := *group.Id
-					ids = append(ids, id)
+					nsgIDs = append(nsgIDs, id)
 				}
 			}
-			if err := d.Set("security_groups_ids", ids); err != nil {
-				return fmt.Errorf("error setting security_groups_ids %w", err)
-			}
+		}
+		if err := d.Set("security_groups_ids", nsgIDs); err != nil {
+			return fmt.Errorf("error setting security_groups_ids %w", err)
 		}
 	}
 
