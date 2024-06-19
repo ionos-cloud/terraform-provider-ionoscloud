@@ -8,8 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceServer() *schema.Resource {
@@ -179,6 +180,11 @@ func dataSourceServer() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     nicServerDSResource,
+			},
+			"security_groups_ids": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
 			},
 			"labels": {
 				Type:     schema.TypeList,
@@ -405,12 +411,35 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				entry["firewall_rules"] = firewallRules
 			}
 
+			ids := make([]string, 0)
+			if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
+				for _, group := range *nic.Entities.Securitygroups.Items {
+					if group.Id != nil {
+						id := *group.Id
+						ids = append(ids, id)
+					}
+				}
+			}
+			entry["security_groups_ids"] = ids
+
 			nics = append(nics, entry)
 		}
 
 		if err := d.Set("nics", nics); err != nil {
 			return err
 		}
+	}
+
+	var nsgIDs []string
+	if server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+		for _, nsg := range *server.Entities.Securitygroups.Items {
+			if nsg.Id != nil {
+				nsgIDs = append(nsgIDs, *nsg.Id)
+			}
+		}
+	}
+	if err := d.Set("security_groups_ids", nsgIDs); err != nil {
+		return err
 	}
 
 	if token != nil {
