@@ -117,17 +117,17 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 			network["ips"] = *nic.Properties.Ips
 		}
 	}
-
+	nsgIDs := make([]string, 0)
 	if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
-		ids := make([]string, 0)
 		for _, group := range *nic.Entities.Securitygroups.Items {
 			if group.Id != nil {
 				id := *group.Id
-				ids = append(ids, id)
+				nsgIDs = append(nsgIDs, id)
 			}
 		}
-		utils.SetPropWithNilCheck(network, "security_groups_ids", ids)
 	}
+	utils.SetPropWithNilCheck(network, "security_groups_ids", nsgIDs)
+
 	return network
 }
 
