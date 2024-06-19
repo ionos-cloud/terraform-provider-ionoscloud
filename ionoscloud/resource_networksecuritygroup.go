@@ -73,7 +73,7 @@ func resourceNetworkSecurityGroupCreate(ctx context.Context, d *schema.ResourceD
 	}
 	d.SetId(*securityGroup.Id)
 
-	return nil
+	return diag.FromErr(setNetworkSecurityGroupData(d, &securityGroup))
 }
 
 func resourceNetworkSecurityGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -186,19 +186,17 @@ func setNetworkSecurityGroupData(d *schema.ResourceData, securityGroup *ionosclo
 			}
 		}
 	}
+	var ruleIDs []string
 	if securityGroup.Entities != nil {
 		if securityGroup.Entities.Rules != nil && securityGroup.Entities.Rules.Items != nil {
-			ruleIDs := make([]string, 0, len(*securityGroup.Entities.Rules.Items))
+			ruleIDs = make([]string, 0, len(*securityGroup.Entities.Rules.Items))
 			for _, rule := range *securityGroup.Entities.Rules.Items {
 				ruleIDs = append(ruleIDs, *rule.Id)
 			}
-			if len(ruleIDs) > 0 {
-				if err := d.Set("rule_ids", ruleIDs); err != nil {
-					return fmt.Errorf("error while setting rule_ids property for NetworkSecurityGroup  %s: %w", d.Id(), err)
-				}
-			}
 		}
 	}
-
+	if err := d.Set("rule_ids", ruleIDs); err != nil {
+		return fmt.Errorf("error while setting rule_ids property for NetworkSecurityGroup  %s: %w", d.Id(), err)
+	}
 	return nil
 }
