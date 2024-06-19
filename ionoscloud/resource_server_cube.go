@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
@@ -19,6 +18,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func resourceCubeServer() *schema.Resource {
@@ -101,6 +102,12 @@ func resourceCubeServer() *schema.Resource {
 				ConflictsWith: []string{"volume.0.ssh_key_path"},
 				Optional:      true,
 				Computed:      true,
+			},
+			"security_groups_ids": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "The list of Security Group IDs for the server",
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -288,6 +295,12 @@ func resourceCubeServer() *schema.Resource {
 						"pci_slot": {
 							Type:     schema.TypeInt,
 							Computed: true,
+						},
+						"security_groups_ids": {
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Description: "The list of Security Group IDs for the NIC",
 						},
 						"firewall": {
 							Type:     schema.TypeList,
@@ -513,6 +526,23 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		diags := diag.FromErr(fmt.Errorf("error fetching server: (%w)", err))
 		return diags
 	}
+	if v, ok := d.GetOk("security_groups_ids"); ok {
+		raw := v.([]interface{})
+		ids := make([]string, 0, len(raw))
+		for _, rawId := range raw {
+			if rawId != nil {
+				id := rawId.(string)
+				ids = append(ids, id)
+			}
+		}
+		if len(ids) > 0 {
+			_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(
+				ctx, dcId, *createdServer.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
 
 	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
 		*createdServer.Id, *(*createdServer.Entities.Nics.Items)[0].Id).Execute()
@@ -532,10 +562,28 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if (*createdServer.Entities.Nics.Items)[0].Id != nil {
-		err := d.Set("primary_nic", *(*createdServer.Entities.Nics.Items)[0].Id)
+		primaryNicID := *(*createdServer.Entities.Nics.Items)[0].Id
+		err := d.Set("primary_nic", primaryNicID)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
 			return diags
+		}
+		if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
+			raw := v.([]interface{})
+			ids := make([]string, 0, len(raw))
+			for _, rawId := range raw {
+				if rawId != nil {
+					id := rawId.(string)
+					ids = append(ids, id)
+				}
+			}
+			if len(ids) > 0 {
+				_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(
+					ctx, dcId, d.Id(), primaryNicID).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+				if err != nil {
+					return diag.FromErr(err)
+				}
+			}
 		}
 	}
 
@@ -637,6 +685,19 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 				return diag.FromErr(utils.GenerateSetError("cube_server", "inline_volume_ids", err))
 			}
 		}
+	}
+
+	nsgIDs := make([]string, 0)
+	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+		for _, group := range *server.Entities.Securitygroups.Items {
+			if group.Id != nil {
+				id := *group.Id
+				nsgIDs = append(nsgIDs, id)
+			}
+		}
+	}
+	if err := d.Set("security_groups_ids", nsgIDs); err != nil {
+		return diag.FromErr(fmt.Errorf("error setting security_groups_ids %w", err))
 	}
 
 	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
@@ -784,6 +845,23 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
+	}
+
+	if d.HasChange("security_groups_ids") {
+		ids := make([]string, 0)
+		if v, ok := d.GetOk("security_groups_ids"); ok {
+			raw := v.([]interface{})
+			for _, rawId := range raw {
+				if rawId != nil {
+					id := rawId.(string)
+					ids = append(ids, id)
+				}
+			}
+		}
+		_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	// Volume stuff
@@ -964,6 +1042,23 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			diags := diag.FromErr(fmt.Errorf("error updating nic (%w)", err))
 			return diags
 		}
+
+		if d.HasChange("nic.0.security_groups_ids") {
+			ids := make([]string, 0)
+			if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
+				raw := v.([]interface{})
+				for _, rawId := range raw {
+					if rawId != nil {
+						id := rawId.(string)
+						ids = append(ids, id)
+					}
+				}
+				_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+				if err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
 	}
 
 	// Suspend a Cube server last, after applying other changes
@@ -1057,6 +1152,19 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
 			return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
 		}
+	}
+
+	nsgIDs := make([]string, 0)
+	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+		for _, group := range *server.Entities.Securitygroups.Items {
+			if group.Id != nil {
+				id := *group.Id
+				nsgIDs = append(nsgIDs, id)
+			}
+		}
+	}
+	if err := d.Set("security_groups_ids", nsgIDs); err != nil {
+		return nil, fmt.Errorf("error setting security_groups_ids %w", err)
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {

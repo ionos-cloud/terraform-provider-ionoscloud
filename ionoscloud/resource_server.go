@@ -163,6 +163,12 @@ func resourceServer() *schema.Resource {
 				//	return false
 				// },
 			},
+			"security_groups_ids": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "The list of Security Group IDs for the server",
+			},
 			"volume": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -390,6 +396,12 @@ func resourceServer() *schema.Resource {
 						"pci_slot": {
 							Type:     schema.TypeInt,
 							Computed: true,
+						},
+						"security_groups_ids": {
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Description: "The list of Security Group IDs for the NIC",
 						},
 						"firewall": {
 							Description: "Firewall rules created in the server resource. The rules can also be created as separate resources outside the server resource",
@@ -658,6 +670,22 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 		return diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
 	}
+	if v, ok := d.GetOk("security_groups_ids"); ok {
+		raw := v.([]interface{})
+		ids := make([]string, 0, len(raw))
+		for _, rawId := range raw {
+			if rawId != nil {
+				id := rawId.(string)
+				ids = append(ids, id)
+			}
+		}
+		if len(ids) > 0 {
+			_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, datacenterId, *postServer.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
 
 	// Logic for labels creation
 	ls := LabelsService{ctx: ctx, client: client}
@@ -706,6 +734,25 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
 					return diags
+				}
+
+				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
+					raw := v.([]interface{})
+					ids := make([]string, 0, len(raw))
+					for _, rawId := range raw {
+						if rawId != nil {
+							id := rawId.(string)
+							ids = append(ids, id)
+						}
+					}
+					if len(ids) > 0 {
+						_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(
+							ctx, d.Get("datacenter_id").(string),
+							d.Id(), *foundFirstNic.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+						if err != nil {
+							return diag.FromErr(err)
+						}
+					}
 				}
 			}
 			foundNicProps := foundFirstNic.Properties
@@ -905,6 +952,23 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(errState)
 	}
 
+	if d.HasChange("security_groups_ids") {
+		var ids []string
+		if v, ok := d.GetOk("security_groups_ids"); ok {
+			raw := v.([]interface{})
+			for _, rawId := range raw {
+				if rawId != nil {
+					id := rawId.(string)
+					ids = append(ids, id)
+				}
+			}
+		}
+		_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	// Volume stuff
 	if d.HasChange("volume") {
 		properties := ionoscloud.VolumeProperties{}
@@ -1077,6 +1141,26 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("error nic (%w)", err))
 				return diags
+			}
+
+			if d.HasChange("nic.0.security_groups_ids") {
+				var ids []string
+				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
+					raw := v.([]interface{})
+					for _, rawId := range raw {
+						if rawId != nil {
+							id := rawId.(string)
+							ids = append(ids, id)
+						}
+					}
+				}
+				if createNic {
+					nicId = *createdNic.Id
+				}
+				_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, nicId).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
+				if err != nil {
+					return diag.FromErr(err)
+				}
 			}
 
 			if createNic {
@@ -1477,6 +1561,19 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 				return fmt.Errorf("error setting boot_image %w", err)
 			}
+		}
+
+		nsgIDs := make([]string, 0)
+		if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+			for _, group := range *server.Entities.Securitygroups.Items {
+				if group.Id != nil {
+					id := *group.Id
+					nsgIDs = append(nsgIDs, id)
+				}
+			}
+		}
+		if err := d.Set("security_groups_ids", nsgIDs); err != nil {
+			return fmt.Errorf("error setting security_groups_ids %w", err)
 		}
 	}
 

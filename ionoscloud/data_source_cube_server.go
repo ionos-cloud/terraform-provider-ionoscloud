@@ -8,11 +8,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+
+	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceCubeServer() *schema.Resource {
@@ -166,6 +167,11 @@ func dataSourceCubeServer() *schema.Resource {
 				Computed: true,
 				Elem:     nicServerDSResource,
 			},
+			"security_groups_ids": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+			},
 			"ram": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -316,6 +322,19 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 				nicsIntf = nics
 			}
 		}
+	}
+
+	nsgIDs := make([]string, 0)
+	if server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+		for _, group := range *server.Entities.Securitygroups.Items {
+			if group.Id != nil {
+				id := *group.Id
+				nsgIDs = append(nsgIDs, id)
+			}
+		}
+	}
+	if err := d.Set("security_groups_ids", nsgIDs); err != nil {
+		return fmt.Errorf("error setting security_groups_ids %w", err)
 	}
 
 	if token != nil {

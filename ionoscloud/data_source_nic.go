@@ -7,10 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceNIC() *schema.Resource {
@@ -94,6 +95,11 @@ func dataSourceNIC() *schema.Resource {
 							IP addresses, source and destination ports, number of packets, amount of bytes, 
 							the start and end time of the recording, and the type of protocol – 
 							and log the extent to which your instances are being accessed.`,
+			},
+			"security_groups_ids": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
