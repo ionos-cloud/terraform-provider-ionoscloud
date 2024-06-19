@@ -38,10 +38,10 @@ func (r ApiBackupsFindByIdRequest) Execute() (BackupResponse, *APIResponse, erro
 }
 
 /*
-  - BackupsFindById Fetch a cluster's backups
-  - Retrieve a MariaDB cluster's backups by using its ID. This value can be
+  - BackupsFindById Fetch backups
+  - Retrieve a MariaDB backup by ID. This value can be
 
-found when you GET the list of MariaDB cluster backups.
+found when you GET the list of MariaDB backups.
 
   - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
   - @param backupId The unique ID of the backup.
@@ -271,7 +271,7 @@ func (r ApiBackupsGetRequest) Execute() (BackupList, *APIResponse, error) {
 }
 
 /*
-* BackupsGet List of cluster's backups.
+* BackupsGet List of backups.
 * Retrieves all lists of backups for all MariaDB clusters in this contract.
 
 * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
