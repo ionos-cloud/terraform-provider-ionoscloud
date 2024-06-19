@@ -3,12 +3,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	redisdb "github.com/ionos-cloud/sdk-go-dbaas-redis"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"testing"
 )
 
 func TestAccDBaaSRedisDBReplicaSetBasic(t *testing.T) {
@@ -32,6 +34,48 @@ func TestAccDBaaSRedisDBReplicaSetBasic(t *testing.T) {
 					testAccCheckDBaaSRedisDBReplicaSetExists(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, &replicaSet),
 					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, replicaSetVersionAttribute, replicaSetVersionValue),
 				),
+			},
+			{
+				Config: redisDBReplicaSetDataSourceMatchID,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDBaaSRedisDBReplicaSetExists(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, &replicaSet),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetLocationAttribute, replicaSetLocationValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetVersionAttribute, replicaSetVersionValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetReplicasAttribute, replicaSetReplicasValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetResourcesAttribute+".0."+replicaSetCoresAttribute, replicaSetCoresValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetResourcesAttribute+".0."+replicaSetRAMAttribute, replicaSetRAMValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetDisplayNameAttribute, replicaSetDisplayNameValue),
+					resource.TestCheckResourceAttrPair(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
+					resource.TestCheckResourceAttrPair(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
+				),
+			},
+			{
+				Config: redisDBReplicaSetDataSourceMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDBaaSRedisDBReplicaSetExists(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, &replicaSet),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetLocationAttribute, replicaSetLocationValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetVersionAttribute, replicaSetVersionValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetReplicasAttribute, replicaSetReplicasValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetResourcesAttribute+".0."+replicaSetCoresAttribute, replicaSetCoresValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetResourcesAttribute+".0."+replicaSetRAMAttribute, replicaSetRAMValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetDisplayNameAttribute, replicaSetDisplayNameValue),
+					resource.TestCheckResourceAttrPair(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
+					resource.TestCheckResourceAttrPair(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
+					resource.TestCheckResourceAttr(constant.DBaaSRedisDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue)),
+			},
+			// other tests...
+			{},
+			// These should be at the very end
+			{
+				Config:      redisDBReplicaSetDataSourceWrongName,
+				ExpectError: regexp.MustCompile("no Redis cluster found with the specified display name"),
+			},
+			{
+				Config:      redisDBReplicaSetDataSourceWrongID,
+				ExpectError: regexp.MustCompile("an error occurred while fetching the Redis cluster with ID"),
 			},
 		},
 	})
@@ -149,6 +193,34 @@ const resources = replicaSetResourcesAttribute + `{
 	` + replicaSetRAMAttribute + ` = "` + replicaSetRAMValue + `"
 }`
 
+// For testing data source match by ID
+const redisDBReplicaSetDataSourceMatchID = redisDBReplicaSetConfigBasic + `
+data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceByID + ` {
+	id = ` + constant.DBaaSRedisDBReplicaSetResource + `.` + constant.DBaaSReplicaSetTestResource + `.id
+	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
+}`
+
+// For testing data source match by name
+const redisDBReplicaSetDataSourceMatchName = redisDBReplicaSetConfigBasic + `
+data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceByName + ` {
+	display_name	= "` + replicaSetDisplayNameValue + `"
+	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
+}`
+
+// For negative case of data source match by name
+const redisDBReplicaSetDataSourceWrongName = redisDBReplicaSetConfigBasic + `
+data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceByName + ` {
+	display_name	= "wrong_name"
+	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
+}`
+
+// For negative case of data source match by ID - use a 0000 uuidv4
+const redisDBReplicaSetDataSourceWrongID = redisDBReplicaSetConfigBasic + `
+data ` + constant.DBaaSRedisDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestDataSourceByID + ` {
+	id = "00000000-0000-0000-0000-000000000000"
+	` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"
+}`
+
 // TODO -- Rename anything related to clusters, for the moment just reuse them from MariaDB since
 // they are the same
 const connections = clusterConnectionsAttribute + `{
@@ -169,6 +241,7 @@ const credentials = clusterCredentialsAttribute + `{
 
 // Attributes
 const (
+	replicaSetLocationAttribute          = "location"
 	replicaSetVersionAttribute           = "redis_version"
 	replicaSetDisplayNameAttribute       = "display_name"
 	replicaSetReplicasAttribute          = "replicas"
