@@ -271,7 +271,9 @@ const (
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
 
 	// RedisDB constants
-	DBaaSRedisDBReplicaSetResource = "ionoscloud_redis_replicaset"
+	DBaaSReplicaSetTestDataSourceByID   = "test_dbaas_replicaset_id"
+	DBaaSReplicaSetTestDataSourceByName = "test_dbaas_replicaset_name"
+	DBaaSRedisDBReplicaSetResource      = "ionoscloud_redis_replicaset"
 )
 
 // Locations slice represents the locations in which services are available.
