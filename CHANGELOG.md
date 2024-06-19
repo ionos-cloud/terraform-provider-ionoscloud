@@ -8,7 +8,8 @@
 - Quick fix for MariaDB State metadata values
 ### Enhancements
 - Add `grafana_address` attribute to `ionoscloud_logging_pipeline` resource and data source
-
+### Misc
+- Replace deprecated `--rm-dist` with `--clean` in release workflow
 ### Documentation
 - Updated documentation to specify that `ionoscloud_logging_pipeline`, `ionoscloud_dns_record` and `ionoscloud_dns_zone` only accept tokens for authorization.
 - Removed Early Access (EA) warning for `ionoscloud_logging_pipeline`.
