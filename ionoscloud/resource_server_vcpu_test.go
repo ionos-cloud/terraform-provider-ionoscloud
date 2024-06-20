@@ -18,7 +18,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-//ToDo: add backup unit back in tests when stable
+// ToDo: add backup unit back in tests when stable
 
 func TestAccServerVCPUBasic(t *testing.T) {
 	var server ionoscloud.Server
@@ -218,6 +218,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cpu_family"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "type", constant.VCPUType),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "security_groups_ids.#", "1"),
 					utils.TestImageNotNull(constant.ServerVCPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password_updated", "result"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.name", constant.UpdatedResources),
@@ -229,6 +230,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.dhcp", "false"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "false"),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.security_groups_ids.#", "1"),
 					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.ips.0", "ionoscloud_ipblock.webserver_ipblock_update", "ips.0"),
 					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.ips.1", "ionoscloud_ipblock.webserver_ipblock_update", "ips.1"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
@@ -893,6 +895,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
+  security_groups_ids   = [ionoscloud_nsg.example_1.id]
   volume {
     name = "` + constant.UpdatedResources + `"
     size = 6
@@ -906,6 +909,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     name = "` + constant.UpdatedResources + `"
     dhcp = false
     firewall_active = false
+    security_groups_ids   = [ionoscloud_nsg.example_2.id]
     ips            = [ ionoscloud_ipblock.webserver_ipblock_update.ips[0], ionoscloud_ipblock.webserver_ipblock_update.ips[1] ]
     firewall {
       protocol = "TCP"
@@ -919,7 +923,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     }
   }
 }
-` + ServerImagePasswordUpdated
+` + ServerImagePasswordUpdated + SecurityGroups
 
 const testAccDataSourceServerVCPUMatchId = testAccCheckServerVCPUConfigBasic + `
 data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceById + ` {

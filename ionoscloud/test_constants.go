@@ -271,6 +271,19 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   }
 }`
 
+const SecurityGroups = `
+resource ` + constant.NetworkSecurityGroupResource + ` example_1 {
+  name          = "testing-name-1"
+  description   = "testing-description-1"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+resource ` + constant.NetworkSecurityGroupResource + ` example_2 {
+  name          = "testing-name-2"
+  description   = "testing-description-2"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
 const testAccCheckServerConfigBasic = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"

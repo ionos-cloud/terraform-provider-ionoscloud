@@ -8,9 +8,10 @@ import (
 	"regexp"
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -40,6 +41,7 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(constant.FullNicResourceName, "mac"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_active", "true"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_type", "INGRESS"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "security_groups_ids.#", "2"),
 					resource.TestCheckResourceAttrPair(constant.FullNicResourceName, "ips.0", "ionoscloud_ipblock.test_server", "ips.0"),
 					resource.TestCheckResourceAttrPair(constant.FullNicResourceName, "ips.1", "ionoscloud_ipblock.test_server", "ips.1"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "flowlog.0.name", "test_flowlog"),
@@ -108,6 +110,7 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcpv6", "false"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_active", "false"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_type", "BIDIRECTIONAL"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "security_groups_ids.#", "1"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "flowlog.0.name", "test_flowlog_updated"),
@@ -198,7 +201,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 const testCreateDataCenterAndServer = `
 resource "ionoscloud_datacenter" "test_datacenter" {
   name = "nic-test"
-  location = "us/las"
+	location = "de/fkb"
 }
 resource "ionoscloud_ipblock" "test_server" {
   location = ionoscloud_datacenter.test_datacenter.location
@@ -248,6 +251,7 @@ resource ` + constant.NicResource + ` "database_nic" {
   firewall_type = "INGRESS"
   ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
   name = "%s"
+  security_groups_ids   = [ionoscloud_nsg.example_1.id, ionoscloud_nsg.example_2.id]
   flowlog {
     name = "test_flowlog"
     action = "ALL"
@@ -255,7 +259,7 @@ resource ` + constant.NicResource + ` "database_nic" {
     bucket = "` + constant.FlowlogBucket + `"
   }
 }
-`
+` + SecurityGroups
 
 const testAccCheckNicConfigUpdate = testCreateDataCenterAndServer + `
 resource ` + constant.NicResource + ` "database_nic" {
@@ -268,6 +272,7 @@ resource ` + constant.NicResource + ` "database_nic" {
   firewall_type = "BIDIRECTIONAL"
   ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
   name = "updated"
+  security_groups_ids   = [ionoscloud_nsg.example_1.id]
   ipv6_cidr_block = cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12)
   ipv6_ips = [ 
                 cidrhost(cidrsubnet(ionoscloud_lan.test_lan_2.ipv6_cidr_block,16,12),1),
@@ -287,7 +292,7 @@ data ` + constant.NicResource + ` test_nic_data {
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   id = ` + constant.FullNicResourceName + `.id
 }
-`
+` + SecurityGroups
 
 const testAccCheckNicConfigUpdateIpv6 = testCreateDataCenterAndServer + `
 resource ` + constant.NicResource + ` "database_nic" {
