@@ -284,16 +284,16 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 				return fmt.Errorf("error setting pci_slot %w", err)
 			}
 		}
-		ids := make([]string, 0)
+		nsgIDs := make([]string, 0)
 		if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
 			for _, group := range *nic.Entities.Securitygroups.Items {
 				if group.Id != nil {
 					id := *group.Id
-					ids = append(ids, id)
+					nsgIDs = append(nsgIDs, id)
 				}
 			}
 		}
-		if err := d.Set("security_groups_ids", ids); err != nil {
+		if err := d.Set("security_groups_ids", nsgIDs); err != nil {
 			return fmt.Errorf("error setting security_groups_ids %w", err)
 		}
 	}

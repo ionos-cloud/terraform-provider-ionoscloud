@@ -164,7 +164,7 @@ func resourceServer() *schema.Resource {
 				// },
 			},
 			"security_groups_ids": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
 				Description: "The list of Security Group IDs for the server",
@@ -398,7 +398,7 @@ func resourceServer() *schema.Resource {
 							Computed: true,
 						},
 						"security_groups_ids": {
-							Type:        schema.TypeList,
+							Type:        schema.TypeSet,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 							Optional:    true,
 							Description: "The list of Security Group IDs for the NIC",
@@ -1146,7 +1146,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			if d.HasChange("nic.0.security_groups_ids") {
 				var ids []string
 				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
-					raw := v.([]interface{})
+					raw := v.(*schema.Set).List()
 					for _, rawId := range raw {
 						if rawId != nil {
 							id := rawId.(string)

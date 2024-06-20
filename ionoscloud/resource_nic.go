@@ -115,7 +115,7 @@ the start and end time of the recording, and the type of protocol –
 and log the extent to which your instances are being accessed.`,
 			},
 			"security_groups_ids": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
 				Description: "The list of Security Group IDs",
@@ -196,7 +196,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		d.SetId(*createdNic.Id)
 
 		if v, ok := d.GetOk("security_groups_ids"); ok {
-			raw := v.([]interface{})
+			raw := v.(*schema.Set).List()
 			ids := make([]string, 0)
 			for _, rawId := range raw {
 				if rawId != nil {
@@ -315,7 +315,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	if d.HasChange("security_groups_ids") {
 		var ids []string
 		if v, ok := d.GetOk("security_groups_ids"); ok {
-			raw := v.([]interface{})
+			raw := v.(*schema.Set).List()
 			for _, rawId := range raw {
 				if rawId != nil {
 					id := rawId.(string)

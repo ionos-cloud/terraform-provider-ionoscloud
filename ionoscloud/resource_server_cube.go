@@ -104,7 +104,7 @@ func resourceCubeServer() *schema.Resource {
 				Computed:      true,
 			},
 			"security_groups_ids": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
 				Description: "The list of Security Group IDs for the server",
@@ -297,7 +297,7 @@ func resourceCubeServer() *schema.Resource {
 							Computed: true,
 						},
 						"security_groups_ids": {
-							Type:        schema.TypeList,
+							Type:        schema.TypeSet,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 							Optional:    true,
 							Description: "The list of Security Group IDs for the NIC",
@@ -527,7 +527,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
-		raw := v.([]interface{})
+		raw := v.(*schema.Set).List()
 		ids := make([]string, 0, len(raw))
 		for _, rawId := range raw {
 			if rawId != nil {
@@ -569,7 +569,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 			return diags
 		}
 		if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
-			raw := v.([]interface{})
+			raw := v.(*schema.Set).List()
 			ids := make([]string, 0, len(raw))
 			for _, rawId := range raw {
 				if rawId != nil {
@@ -850,7 +850,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("security_groups_ids") {
 		ids := make([]string, 0)
 		if v, ok := d.GetOk("security_groups_ids"); ok {
-			raw := v.([]interface{})
+			raw := v.(*schema.Set).List()
 			for _, rawId := range raw {
 				if rawId != nil {
 					id := rawId.(string)
@@ -1046,7 +1046,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		if d.HasChange("nic.0.security_groups_ids") {
 			ids := make([]string, 0)
 			if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
-				raw := v.([]interface{})
+				raw := v.(*schema.Set).List()
 				for _, rawId := range raw {
 					if rawId != nil {
 						id := rawId.(string)
