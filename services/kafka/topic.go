@@ -97,13 +97,16 @@ func (c *Client) SetKafkaTopicData(d *schema.ResourceData, topic *kafka.TopicRea
 		}
 
 		if topic.Properties.LogRetention != nil {
-			logRetention := map[string]interface{}{}
+			if topic.Properties.LogRetention.RetentionTime != nil {
+				if err := d.Set("retention_time", *topic.Properties.LogRetention.RetentionTime); err != nil {
+					return err
+				}
+			}
 
-			utils.SetPropWithNilCheck(logRetention, "retention_time", topic.Properties.LogRetention.RetentionTime)
-			utils.SetPropWithNilCheck(logRetention, "segment_bytes", topic.Properties.LogRetention.SegmentBytes)
-
-			if err := d.Set("log_retention", []interface{}{logRetention}); err != nil {
-				return err
+			if topic.Properties.LogRetention.SegmentBytes != nil {
+				if err := d.Set("segment_bytes", *topic.Properties.LogRetention.SegmentBytes); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -115,9 +118,8 @@ func setTopicPostRequest(d *schema.ResourceData) *kafka.TopicCreate {
 	topicName := d.Get("name").(string)
 	replicationFactor := d.Get("replication_factor").(int32)
 	partitionCount := d.Get("number_of_partitions").(int32)
-	logRetention := d.Get("log_retention").([]interface{})[0].(map[string]interface{})
-	retentionTime := logRetention["retention_time"].(int32)
-	segmentBytes := logRetention["segment_bytes"].(int32)
+	retentionTime := d.Get("retention_time").(int32)
+	segmentBytes := d.Get("segment_bytes").(int32)
 
 	return kafka.NewTopicCreate(
 		*kafka.NewTopic(

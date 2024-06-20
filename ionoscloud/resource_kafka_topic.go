@@ -47,25 +47,19 @@ func resourceKafkaTopic() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
-			"log_retention": {
-				Type:        schema.TypeList,
-				Description: "Log retention settings for the topic.",
+			"retention_time": {
+				Type:        schema.TypeInt,
+				Description: "The time in milliseconds that a message is retained in the topic log. Messages older than the retention time are deleted. If value is `0`, messages are retained indefinitely unless other retention is set.",
+				Optional:    true,
+				Default:     0,
 				ForceNew:    true,
-				MaxItems:    1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"retention_time": {
-							Type:        schema.TypeInt,
-							Description: "The time in milliseconds that a message is retained in the topic log. Messages older than the retention time are deleted. If value is `0`, messages are retained indefinitely unless other retention is set.",
-							Default:     0,
-						},
-						"segment_bytes": {
-							Type:        schema.TypeInt,
-							Description: "The maximum size in bytes that the topic log can grow to. When the log reaches this size, the oldest messages are deleted. If value is `0`, messages are retained indefinitely unless other retention is set.",
-							Default:     0,
-						},
-					},
-				},
+			},
+			"segment_bytes": {
+				Type:        schema.TypeInt,
+				Description: "The maximum size in bytes that the topic log can grow to. When the log reaches this size, the oldest messages are deleted. If value is `0`, messages are retained indefinitely unless other retention is set.",
+				Optional:    true,
+				Default:     0,
+				ForceNew:    true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
