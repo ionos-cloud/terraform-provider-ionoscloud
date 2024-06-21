@@ -76,6 +76,11 @@ func dataSourceDataCenter() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"default_security_group_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
