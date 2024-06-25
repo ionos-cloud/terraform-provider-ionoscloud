@@ -1,4 +1,4 @@
-package ionoscloud
+package asg
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 )
 
-func dataSourceAutoscalingGroupServers() *schema.Resource {
+func DataSourceAutoscalingGroupServers() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceAutoscalingServersRead,
 		Schema: map[string]*schema.Schema{

@@ -266,7 +266,7 @@ func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn 
 			return nil
 		}
 		if err != nil {
-			retry.NonRetryableError(err)
+			return retry.NonRetryableError(err)
 		}
 		log.Printf("[DEBUG] resource with id %s still has not been deleted", d.Id())
 		return retry.RetryableError(fmt.Errorf("resource with id %s found, still trying ", d.Id()))
@@ -387,4 +387,15 @@ func MergeMaps(maps ...map[string]any) map[string]any {
 		}
 	}
 	return merged
+}
+
+// ConfigCompose can be called to concatenate multiple strings to build test configurations
+func ConfigCompose(config ...string) string {
+	var str strings.Builder
+
+	for _, conf := range config {
+		str.WriteString(conf)
+	}
+
+	return str.String()
 }

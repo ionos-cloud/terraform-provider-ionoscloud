@@ -1,9 +1,10 @@
 //go:build all || autoscaling
 // +build all autoscaling
 
-package ionoscloud
+package asg
 
 import (
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -14,10 +15,10 @@ import (
 func TestAccDataSourceAutoscalingGroupServers(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			ionoscloud.testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		ExternalProviders: randomProviderVersion343(),
+		ProviderFactories: ionoscloud.testAccProviderFactories,
+		ExternalProviders: ionoscloud.randomProviderVersion343(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAG_ConfigBasic,

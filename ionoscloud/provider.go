@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud/asg"
 	"log"
 	"net/http"
 	"os"
@@ -119,7 +120,7 @@ func Provider() *schema.Provider {
 			constant.DNSZoneResource:                           resourceDNSZone(),
 			constant.DNSRecordResource:                         resourceDNSRecord(),
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
-			constant.AutoscalingGroupResource:                  resourceAutoscalingGroup(),
+			constant.AutoscalingGroupResource:                  asg.ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -178,8 +179,8 @@ func Provider() *schema.Provider {
 			constant.DNSZoneDataSource:                         dataSourceDNSZone(),
 			constant.DNSRecordDataSource:                       dataSourceDNSRecord(),
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
-			constant.AutoscalingGroupResource:                  dataSourceAutoscalingGroup(),
-			constant.AutoscalingGroupServersResource:           dataSourceAutoscalingGroupServers(),
+			constant.AutoscalingGroupResource:                  asg.DataSourceAutoscalingGroup(),
+			constant.AutoscalingGroupServersResource:           asg.DataSourceAutoscalingGroupServers(),
 		},
 	}
 
