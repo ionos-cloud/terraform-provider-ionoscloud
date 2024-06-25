@@ -2,6 +2,8 @@
 
 ### Features
 - Add tests for Mongo cluster and user
+- Add new fields for NICs in VM Autoscaling group (firewall_active, firewall_type, firewall_rule, flow_log, target_group)
+- Refactor VM Autoscaling group
 ### Fixes
 - Wrap missing base error for resource fetching errors
 - Properly persist user group ids in state when syncing with remote configuration
