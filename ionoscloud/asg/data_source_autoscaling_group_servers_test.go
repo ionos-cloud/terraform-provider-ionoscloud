@@ -4,10 +4,10 @@
 package asg
 
 import (
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
