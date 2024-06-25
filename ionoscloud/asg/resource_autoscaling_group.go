@@ -3,7 +3,6 @@ package asg
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
@@ -528,32 +527,6 @@ func getAttachedServers(ctx context.Context, client *autoscalingService.Client, 
 	}
 
 	return serverIds, nil
-}
-
-func waitForServerCleanup(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, serverIds []string) error {
-	return utils.WaitForResourceToBeDeleted(ctx, d, func(ctx context.Context, d *schema.ResourceData) (bool, error) {
-		remainingServers := make([]string, 0)
-		for _, serverID := range serverIds {
-			_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
-			if apiResponse.HttpNotFound() {
-				continue
-			}
-
-			if err != nil {
-				return false, fmt.Errorf("error retrieving servers for Autoscaling Group %s: %w", d.Id(), err)
-			}
-
-			remainingServers = append(remainingServers, serverID)
-		}
-
-		if len(remainingServers) > 0 {
-			serverIds = remainingServers
-			return false, nil
-		}
-
-		return true, nil
-	})
-
 }
 
 func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
