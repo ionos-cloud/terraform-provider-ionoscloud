@@ -11,6 +11,7 @@ import (
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 )
 
+// DataSourceAutoscalingGroupServers defines the schema for the Autoscaling Group Servers data source
 func DataSourceAutoscalingGroupServers() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceAutoscalingServersRead,

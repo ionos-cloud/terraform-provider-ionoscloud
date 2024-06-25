@@ -3,12 +3,13 @@ package asg
 import (
 	"context"
 	"fmt"
-	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"regexp"
 	"strings"
 	"time"
+
+	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,6 +20,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// ResourceAutoscalingGroup defines the schema for the Autoscaling Group resource
 func ResourceAutoscalingGroup() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceAutoscalingGroupCreate,
@@ -41,14 +43,14 @@ func ResourceAutoscalingGroup() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
 			},
-			//will be left until GA in case it is added again in swagger
-			//"target_replica_count": {
-			//	Type:             schema.TypeInt,
+			// will be left until GA in case it is added again in swagger
+			// "target_replica_count": {
+			// 	Type:             schema.TypeInt,
 			//	Description:      "The target number of VMs in this Group. Depending on the scaling policy, this number will be adjusted automatically. VMs will be created or destroyed automatically in order to adjust the actual number of VMs to this number. If targetReplicaCount is given in the request body then it must be >= minReplicaCount and <= maxReplicaCount.",
 			//	Optional:         true,
 			//	Computed:         true,
 			//	ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 200)),
-			//},
+			// },
 			"name": {
 				Type:             schema.TypeString,
 				Description:      "User-defined name for the Autoscaling Group.",
@@ -508,27 +510,6 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 	return resourceAutoscalingGroupRead(ctx, d, meta)
 }
 
-func getAttachedServers(ctx context.Context, client *autoscalingService.Client, d *schema.ResourceData) ([]string, error) {
-	servers, _, err := client.GetAllGroupServers(ctx, d.Id())
-	if err != nil {
-		return nil, fmt.Errorf("error retrieving servers for Autoscaling Group %s: %w", d.Id(), err)
-	}
-
-	if servers.Items == nil {
-		return nil, nil
-	}
-
-	// Get list of server ids from servers
-	serverIds := make([]string, 0)
-	for _, server := range *servers.Items {
-		if server.Id != nil {
-			serverIds = append(serverIds, *server.Id)
-		}
-	}
-
-	return serverIds, nil
-}
-
 func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(services.SdkBundle).AutoscalingClient
 	if _, err := client.DeleteGroup(ctx, d.Id()); err != nil {
@@ -545,15 +526,15 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(services.SdkBundle).AutoscalingClient
 
-	groupId := d.Id()
+	groupID := d.Id()
 
 	group, apiResponse, err := client.GetGroup(ctx, d.Id(), 0)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find Autoscaling Group %q", groupId)
+			return nil, fmt.Errorf("unable to find Autoscaling Group %q", groupID)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving Autoscaling Group %q, %w", groupId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving Autoscaling Group %q, %w", groupID, err)
 	}
 
 	log.Printf("[INFO] Autoscaling Group found: %+v", group)
@@ -831,11 +812,11 @@ func expandTargetGroup(l []any) *autoscaling.TargetGroup {
 	s := l[0].(map[string]interface{})
 
 	// required fields
-	targetGroupId := s["target_group_id"].(string)
+	targetGroupID := s["target_group_id"].(string)
 	port := int32(s["port"].(int))
 	weight := int32(s["weight"].(int))
 	return &autoscaling.TargetGroup{
-		TargetGroupId: &targetGroupId,
+		TargetGroupId: &targetGroupID,
 		Port:          &port,
 		Weight:        &weight,
 	}
@@ -908,7 +889,7 @@ func setAutoscalingGroupData(d *schema.ResourceData, groupProperties *autoscalin
 			}
 		}
 
-		//if groupProperties.TargetReplicaCount != nil {
+		// if groupProperties.TargetReplicaCount != nil {
 		//	if err := d.Set("target_replica_count", *groupProperties.TargetReplicaCount); err != nil {
 		//		return utils.GenerateSetError(resourceName, "target_replica_count", err)
 		//	}
@@ -1118,7 +1099,7 @@ func flattenVolume(d *schema.ResourceData, replicaVolumes *[]autoscaling.Replica
 		utils.SetPropWithNilCheck(trVolume, "type", volume.Type)
 		utils.SetPropWithNilCheck(trVolume, "bus", volume.Bus)
 		utils.SetPropWithNilCheck(trVolume, "boot_order", volume.BootOrder)
-		//we need to take these from schema as they are not returned by API
+		// we need to take these from schema as they are not returned by API
 		volumeMap, ok := d.GetOk("replica_configuration.0.volume")
 		if ok {
 			volumeMap := (volumeMap).(*schema.Set).List()[i].(map[string]any)
@@ -1130,9 +1111,9 @@ func flattenVolume(d *schema.ResourceData, replicaVolumes *[]autoscaling.Replica
 	}
 	return volumes
 }
-func actionReady(ctx context.Context, client *autoscalingService.Client, d *schema.ResourceData, actionId string) (bool, error) {
+func actionReady(ctx context.Context, client *autoscalingService.Client, d *schema.ResourceData, actionID string) (bool, error) {
 
-	action, _, err := client.GetAction(ctx, d.Id(), actionId)
+	action, _, err := client.GetAction(ctx, d.Id(), actionID)
 	if err != nil {
 		return true, fmt.Errorf("error checking action status: %w", err)
 	}
@@ -1168,7 +1149,7 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 
 	actionID := *(*actions.Items)[0].Id
 
-	//wait for completion of triggered action
+	// wait for completion of triggered action
 	for {
 		log.Printf("[INFO] waiting for action %s to be ready...", actionID)
 

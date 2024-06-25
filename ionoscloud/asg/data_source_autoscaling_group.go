@@ -3,9 +3,10 @@ package asg
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -15,6 +16,7 @@ import (
 	as "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 )
 
+// DataSourceAutoscalingGroup defines the schema for the Autoscaling Group data source
 func DataSourceAutoscalingGroup() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceAutoscalingGroupRead,
