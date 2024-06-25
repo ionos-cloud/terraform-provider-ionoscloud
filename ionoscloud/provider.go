@@ -3,16 +3,18 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud/asg"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud/asg"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
