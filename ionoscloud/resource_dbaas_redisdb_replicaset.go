@@ -200,10 +200,8 @@ func redisDBReplicaSetCreate(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error occurred while checking the status for RedisDB replica set with ID: %v, error: %w", replicaSetID, err))
 	}
-	if err := client.SetRedisDBReplicaSetData(d, response); err != nil {
-		return diag.FromErr(err)
-	}
-	return nil
+	// Call the read function to save the DNS name in the state (DNS name is not present in the create response).
+	return redisDBReplicaSetRead(ctx, d, meta)
 }
 
 func redisDBReplicaSetDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
