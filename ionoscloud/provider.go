@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
@@ -121,6 +122,8 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  resourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
+			constant.ApiGatewayResource: 					    resourceApiGateway(),
+			constant.ApiGatewayRouteResource: 				    resourceApiGatewayRoute(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -180,6 +183,8 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  dataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           dataSourceAutoscalingGroupServers(),
+			constant.ApiGatewayResource: 					    dataSourceApiGateway(),
+			constant.ApiGatewayRouteResource: 				    dataSourceApiGatewayRoute(),
 		},
 	}
 
@@ -248,6 +253,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		MariaDBClient:      NewClientByType(clientOpts, mariaDBClient).(*mariadb.MariaDBClient),
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
+		ApiGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
 	}, nil
 }
 
@@ -264,6 +270,7 @@ const (
 	mariaDBClient
 	mongoClient
 	psqlClient
+	apiGatewayClient
 )
 
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
@@ -273,7 +280,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
 			newConfig.UserAgent = fmt.Sprintf(
 				"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH,
+			)
 			if os.Getenv(constant.IonosDebug) != "" {
 				newConfig.Debug = true
 			}
@@ -300,6 +308,10 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case psqlClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case apiGatewayClient:
+		return apiGatewayService.NewClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}

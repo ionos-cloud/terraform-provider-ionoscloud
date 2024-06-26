@@ -405,3 +405,8 @@ const (
 	TargetGroupLimit = 200
 	IPBlockLimit     = 1000
 )
+
+const (
+	ApiGatewayResource = "ionoscloud_apigateway"
+	ApiGatewayRouteResource = "ionoscloud_apigateway_route"
+)
