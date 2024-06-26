@@ -671,7 +671,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
-		raw := v.([]interface{})
+		raw := v.(*schema.Set).List()
 		ids := make([]string, 0, len(raw))
 		for _, rawId := range raw {
 			if rawId != nil {
@@ -737,7 +737,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				}
 
 				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
-					raw := v.([]interface{})
+					raw := v.(*schema.Set).List()
 					ids := make([]string, 0, len(raw))
 					for _, rawId := range raw {
 						if rawId != nil {
@@ -955,7 +955,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	if d.HasChange("security_groups_ids") {
 		var ids []string
 		if v, ok := d.GetOk("security_groups_ids"); ok {
-			raw := v.([]interface{})
+			raw := v.(*schema.Set).List()
 			for _, rawId := range raw {
 				if rawId != nil {
 					id := rawId.(string)
