@@ -79,34 +79,36 @@ func (c *Client) SetKafkaTopicData(d *schema.ResourceData, topic *kafka.TopicRea
 		d.SetId(*topic.Id)
 	}
 
-	if topic.Properties != nil {
-		if topic.Properties.Name != nil {
-			if err := d.Set("name", *topic.Properties.Name); err != nil {
-				return err
-			}
+	if topic.Properties == nil {
+		return fmt.Errorf("expected properties in the response for the Kafka cluster topic with ID: %s, but received 'nil' instead", *topic.Id)
+	}
+
+	if topic.Properties.Name != nil {
+		if err := d.Set("name", *topic.Properties.Name); err != nil {
+			return err
 		}
-		if topic.Properties.NumberOfPartitions != nil {
-			if err := d.Set("number_of_partitions", *topic.Properties.NumberOfPartitions); err != nil {
-				return err
-			}
+	}
+	if topic.Properties.NumberOfPartitions != nil {
+		if err := d.Set("number_of_partitions", *topic.Properties.NumberOfPartitions); err != nil {
+			return err
 		}
-		if topic.Properties.ReplicationFactor != nil {
-			if err := d.Set("replication_factor", *topic.Properties.ReplicationFactor); err != nil {
+	}
+	if topic.Properties.ReplicationFactor != nil {
+		if err := d.Set("replication_factor", *topic.Properties.ReplicationFactor); err != nil {
+			return err
+		}
+	}
+
+	if topic.Properties.LogRetention != nil {
+		if topic.Properties.LogRetention.RetentionTime != nil {
+			if err := d.Set("retention_time", *topic.Properties.LogRetention.RetentionTime); err != nil {
 				return err
 			}
 		}
 
-		if topic.Properties.LogRetention != nil {
-			if topic.Properties.LogRetention.RetentionTime != nil {
-				if err := d.Set("retention_time", *topic.Properties.LogRetention.RetentionTime); err != nil {
-					return err
-				}
-			}
-
-			if topic.Properties.LogRetention.SegmentBytes != nil {
-				if err := d.Set("segment_bytes", *topic.Properties.LogRetention.SegmentBytes); err != nil {
-					return err
-				}
+		if topic.Properties.LogRetention.SegmentBytes != nil {
+			if err := d.Set("segment_bytes", *topic.Properties.LogRetention.SegmentBytes); err != nil {
+				return err
 			}
 		}
 	}

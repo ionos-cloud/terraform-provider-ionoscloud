@@ -94,34 +94,36 @@ func (c *Client) SetKafkaClusterData(d *schema.ResourceData, cluster *kafka.Clus
 		d.SetId(*cluster.Id)
 	}
 
-	if cluster.Properties != nil {
-		if cluster.Properties.Name != nil {
-			if err := d.Set("name", *cluster.Properties.Name); err != nil {
-				return err
-			}
+	if cluster.Properties == nil {
+		return fmt.Errorf("expected properties in the response for the Kafka cluster with ID: %s, but received 'nil' instead", *cluster.Id)
+	}
+
+	if cluster.Properties.Name != nil {
+		if err := d.Set("name", *cluster.Properties.Name); err != nil {
+			return err
 		}
-		if cluster.Properties.Version != nil {
-			if err := d.Set("version", *cluster.Properties.Version); err != nil {
-				return err
-			}
+	}
+	if cluster.Properties.Version != nil {
+		if err := d.Set("version", *cluster.Properties.Version); err != nil {
+			return err
 		}
-		if cluster.Properties.Size != nil {
-			if err := d.Set("size", *cluster.Properties.Size); err != nil {
-				return err
-			}
+	}
+	if cluster.Properties.Size != nil {
+		if err := d.Set("size", *cluster.Properties.Size); err != nil {
+			return err
+		}
+	}
+
+	if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
+		var connections []interface{}
+
+		for _, connection := range *cluster.Properties.Connections {
+			connectionEntry := c.SetConnectionProperties(connection)
+			connections = append(connections, connectionEntry)
 		}
 
-		if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
-			var connections []interface{}
-
-			for _, connection := range *cluster.Properties.Connections {
-				connectionEntry := c.SetConnectionProperties(connection)
-				connections = append(connections, connectionEntry)
-			}
-
-			if err := d.Set("connections", connections); err != nil {
-				return err
-			}
+		if err := d.Set("connections", connections); err != nil {
+			return err
 		}
 	}
 
