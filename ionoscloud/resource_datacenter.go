@@ -58,11 +58,20 @@ func resourceDatacenter() *schema.Resource {
 				},
 			},
 			"create_default_security_group": {
-				Type:     schema.TypeBool,
+				Type: schema.TypeBool,
+				Description: "If this field is set on true and this datacenter has no default security group then a default security group, with predefined rules, will be created for this datacenter." +
+					"Default value is false. Cannot be provided together with the 'default_security_group_id'. Only one such security group can be created for the datacenter.",
 				Optional: true,
 			},
+			"created_security_group": {
+				Type:        schema.TypeString,
+				Description: "The ID of the security group created by enabling the 'create_default_security_group' field.",
+				Computed:    true,
+			},
 			"default_security_group_id": {
-				Type:             schema.TypeString,
+				Type: schema.TypeString,
+				Description: "The ID of the security group which is set as default for this datacenter. If 'create_default_security_group' has been set to true at creation or at update, " +
+					"a default group with predefined rules, will be created for this datacenter and set to this field. Can also set the ID of a custom user defined security group.",
 				Optional:         true,
 				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
@@ -117,20 +126,20 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if attr, ok := d.GetOk("description"); ok {
 		attrStr := attr.(string)
-		datacenter.Properties.Description = &attrStr
+		datacenterReq.Properties.Description = &attrStr
 	}
 
 	if attr, ok := d.GetOk("sec_auth_protection"); ok {
 		attrStr := attr.(bool)
-		datacenter.Properties.SecAuthProtection = &attrStr
+		datacenterReq.Properties.SecAuthProtection = &attrStr
 	}
 
-	if attr, ok := d.GetOk("create_default_security_group"); ok {
-		attrBool := attr.(bool)
-		datacenter.Properties.CreateDefaultSecurityGroup = &attrBool
+	createSecurityGroup := d.Get("create_default_security_group").(bool)
+	if createSecurityGroup {
+		datacenterReq.Properties.CreateDefaultSecurityGroup = &createSecurityGroup
 	}
 
-	createdDatacenter, apiResponse, err := client.DataCentersApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
+	createdDatacenter, apiResponse, err := client.DataCentersApi.DatacentersPost(ctx).Datacenter(datacenterReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error creating data center (%s) (%w)", d.Id(), err))
@@ -147,7 +156,25 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(errState)
 	}
 
-	return resourceDatacenterRead(ctx, d, meta)
+	// Get the newly created Datacenter and save the ID of the created NSG if 'create_default_security_group' has been set.
+	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		if httpNotFound(apiResponse) {
+			d.SetId("")
+			return nil
+		}
+		diags := diag.FromErr(fmt.Errorf("error while fetching a data center ID %s %w", d.Id(), err))
+		return diags
+	}
+
+	if createSecurityGroup && datacenter.Properties.DefaultSecurityGroupId != nil {
+		if err = d.Set("created_security_group", *datacenter.Properties.DefaultSecurityGroupId); err != nil {
+			return diag.FromErr(fmt.Errorf("error while setting 'created_security_group' on datacenter creation: %w", err))
+		}
+	}
+
+	return diag.FromErr(setDatacenterData(d, &datacenter))
 }
 
 func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -208,13 +235,14 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		obj.DefaultSecurityGroupId = &newDefaultSecurityGroupIdStr
 	}
 
+	var createDefaultSecurityGroup bool
 	if d.HasChange("create_default_security_group") {
-		_, newDefaultSecurityGroupId := d.GetChange("create_default_security_group")
-		a := newDefaultSecurityGroupId.(bool)
-		obj.CreateDefaultSecurityGroup = &a
+		_, newValue := d.GetChange("create_default_security_group")
+		createDefaultSecurityGroup = newValue.(bool)
+		obj.CreateDefaultSecurityGroup = &createDefaultSecurityGroup
 	}
 
-	_, apiResponse, err := client.DataCentersApi.DatacentersPatch(ctx, d.Id()).Datacenter(obj).Execute()
+	_, apiResponse, err := client.DataCentersApi.DatacentersPut(ctx, d.Id()).Datacenter(ionoscloud.DatacenterPut{Properties: &obj}).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -224,6 +252,11 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
+	}
+
+	// Save ID of new NSG created via 'create_default_security_group' field.
+	if createDefaultSecurityGroup && d.Get("created_security_group").(string) == "" {
+		return diag.FromErr(setCreatedDefaultGroupID(ctx, client, d))
 	}
 
 	return resourceDatacenterRead(ctx, d, meta)
@@ -376,4 +409,20 @@ func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter
 	}
 
 	return nil
+}
+
+func setCreatedDefaultGroupID(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) error {
+	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		if httpNotFound(apiResponse) {
+			d.SetId("")
+			return nil
+		}
+		return fmt.Errorf("error while fetching a data center ID %s %w", d.Id(), err)
+	}
+	if err = d.Set("created_security_group", *datacenter.Properties.DefaultSecurityGroupId); err != nil {
+		return fmt.Errorf("error while setting 'created_security_group' on datacenter update: %w", err)
+	}
+	return setDatacenterData(d, &datacenter)
 }
