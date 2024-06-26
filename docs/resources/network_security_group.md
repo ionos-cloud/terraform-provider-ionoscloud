@@ -7,7 +7,7 @@ description: |-
   Creates and manages IonosCloud Network Security Group.
 ---
 
-# ionoscloud\_ionoscloud_nsg
+# ionoscloud\_nsg
 
 Manages a **Network Security Group** on IonosCloud.
 
@@ -72,12 +72,6 @@ resource "ionoscloud_datacenter" "example" {
   create_default_security_group = true    # NSG created by this flag
 }
 
-resource "ionoscloud_nsg" "example" {
-  name              = "Example NSG"
-  description       = "Example NSG Description"
-  datacenter_id     = ionoscloud_datacenter.example.id
-}
-
 import {
   to = ionoscloud_nsg.imported
   id = "{datacenter uuid}/{default nsg uuid}" 
@@ -85,7 +79,5 @@ import {
   
 resource "ionoscloud_nsg" "imported_default" {  # Imported here
   datacenter_id     = ionoscloud_datacenter.example.id
-  name              = "Imported"
-  description       = "Imported Description"
 }
 ```

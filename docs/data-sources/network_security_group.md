@@ -7,7 +7,7 @@ description: |-
   Get information on a IonosCloud Network Security Groups
 ---
 
-# ionoscloud\_datacenter
+# ionoscloud\_nsg
 
 The **NSG Data source** can be used to search for and return an existing security groups.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
