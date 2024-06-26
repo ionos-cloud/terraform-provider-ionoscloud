@@ -42,7 +42,7 @@ func resourceNetworkSecurityGroup() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -158,8 +158,10 @@ func resourceNetworkSecurityGroupImport(ctx context.Context, d *schema.ResourceD
 	}
 
 	log.Printf("[INFO] Datacenter found: %+v", nsg)
-
-	if err := setNetworkSecurityGroupData(d, &nsg); err != nil {
+	if err = d.Set("datacenter_id", datacenterId); err != nil {
+		return nil, err
+	}
+	if err = setNetworkSecurityGroupData(d, &nsg); err != nil {
 		return nil, err
 	}
 

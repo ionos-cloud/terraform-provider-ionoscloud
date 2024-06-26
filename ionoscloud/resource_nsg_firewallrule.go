@@ -200,7 +200,7 @@ func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 4 || parts[0] == "" || parts[1] == "" || parts[2] == "" || parts[3] == "" {
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
 		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{nsg}/{firewall}", d.Id())
 	}
 
