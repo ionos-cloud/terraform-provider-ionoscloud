@@ -44,7 +44,8 @@ func resourceTargetGroup() *schema.Resource {
 			"targets": {
 				Type:        schema.TypeList,
 				Description: "Array of items in the collection.",
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {

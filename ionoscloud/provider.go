@@ -8,10 +8,13 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud/asg"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
@@ -119,7 +122,7 @@ func Provider() *schema.Provider {
 			constant.DNSZoneResource:                           resourceDNSZone(),
 			constant.DNSRecordResource:                         resourceDNSRecord(),
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
-			constant.AutoscalingGroupResource:                  resourceAutoscalingGroup(),
+			constant.AutoscalingGroupResource:                  asg.ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -178,8 +181,8 @@ func Provider() *schema.Provider {
 			constant.DNSZoneDataSource:                         dataSourceDNSZone(),
 			constant.DNSRecordDataSource:                       dataSourceDNSRecord(),
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
-			constant.AutoscalingGroupResource:                  dataSourceAutoscalingGroup(),
-			constant.AutoscalingGroupServersResource:           dataSourceAutoscalingGroupServers(),
+			constant.AutoscalingGroupResource:                  asg.DataSourceAutoscalingGroup(),
+			constant.AutoscalingGroupServersResource:           asg.DataSourceAutoscalingGroupServers(),
 		},
 	}
 

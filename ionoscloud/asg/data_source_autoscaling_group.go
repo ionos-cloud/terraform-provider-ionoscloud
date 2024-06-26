@@ -1,26 +1,31 @@
-package ionoscloud
+package asg
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
+	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
+	as "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 )
 
-func dataSourceAutoscalingGroup() *schema.Resource {
+// DataSourceAutoscalingGroup defines the schema for the Autoscaling Group data source
+func DataSourceAutoscalingGroup() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceAutoscalingGroupRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:             schema.TypeString,
-				Description:      "UUID of the Autoscaling Group.",
 				Optional:         true,
+				Description:      "UUID of the Autoscaling Group.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"name": {
@@ -178,6 +183,105 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 										Type:        schema.TypeBool,
 										Description: "Dhcp flag for this replica Nic. This is an optional attribute with default value of 'true' if not given in the request payload or given as null.",
 									},
+									"firewall_active": {
+										Computed:    true,
+										Type:        schema.TypeBool,
+										Description: "Activate or deactivate the firewall. By default, an active firewall without any defined rules will block all incoming network traffic except for the firewall rules that explicitly allows certain protocols, IP addresses and ports.",
+									},
+									"firewall_type": {
+										Computed:    true,
+										Type:        schema.TypeString,
+										Description: "The type of firewall rules that will be allowed on the NIC. If not specified, the default INGRESS value is used.",
+									},
+									"flow_log": {
+										Computed:    true,
+										Type:        schema.TypeList,
+										Description: "Flow log configuration for the NIC. By default, the flow log is inactive. If you want to activate the flow log, you must specify the target resource and the type of traffic to log.",
+										Elem:        cloudapiflowlog.FlowlogSchemaDatasource,
+									},
+									"firewall_rule": {
+										Type:        schema.TypeSet,
+										Computed:    true,
+										Description: "List of all firewall rules for the specified NIC.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"protocol": {
+													Computed:    true,
+													Type:        schema.TypeString,
+													Description: "The protocol for the rule. The property cannot be modified after its creation (not allowed in update requests).",
+												},
+												"name": {
+													Computed:    true,
+													Type:        schema.TypeString,
+													Description: "The name of the firewall rule.",
+												},
+												"source_mac": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Only traffic originating from the respective MAC address is permitted. Valid format: 'aa:bb:cc:dd:ee:ff'. The value 'null' allows traffic from any MAC address.",
+												},
+												"source_ip": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Only traffic originating from the respective IPv4 address is permitted. The value 'null' allows traffic from any IP address.",
+												},
+												"target_ip": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "If the target NIC has multiple IP addresses, only the traffic directed to the respective IP address of the NIC is allowed. The value 'null' allows traffic to any target IP address.",
+												},
+												"icmp_code": {
+													Type:        schema.TypeInt,
+													Computed:    true,
+													Description: "Sets the allowed code (from 0 to 254) when ICMP protocol is selected. The value 'null' allows all codes.",
+												},
+												"icmp_type": {
+													Type:        schema.TypeInt,
+													Computed:    true,
+													Description: "Sets the allowed type (from 0 to 254) if the protocol ICMP is selected. The value 'null' allows all types.",
+												},
+												"port_range_start": {
+													Type:        schema.TypeInt,
+													Computed:    true,
+													Description: "Sets the initial range of the allowed port (from 1 to 65535) if the protocol TCP or UDP is selected. The value 'null' for 'port_range_start' and 'port_range_end' allows all ports.",
+												},
+												"port_range_end": {
+													Type:        schema.TypeInt,
+													Computed:    true,
+													Description: "Sets the end range of the allowed port (from 1 to 65535) if the protocol TCP or UDP is selected. The value 'null' for 'port_range_start' and 'port_range_end' allows all ports.",
+												},
+												"type": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The firewall rule type. If not specified, the default value 'INGRESS' is used.",
+												},
+											},
+										},
+									},
+									"target_group": {
+										Computed:    true,
+										Type:        schema.TypeList,
+										Description: "In order to link VM to ALB, target group must be provided.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"target_group_id": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The ID of the target group.",
+												},
+												"port": {
+													Type:        schema.TypeInt,
+													Computed:    true,
+													Description: "The port for the target group.",
+												},
+												"weight": {
+													Type:        schema.TypeInt,
+													Computed:    true,
+													Description: "The weight for the target group.",
+												},
+											},
+										},
+									},
 								}},
 						},
 						"ram": {
@@ -252,7 +356,12 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 				Computed:    true,
 			},
 		},
-		Timeouts: &resourceDefaultTimeouts,
+		Timeouts: &schema.ResourceTimeout{
+			Create:  schema.DefaultTimeout(utils.DefaultTimeout),
+			Update:  schema.DefaultTimeout(utils.DefaultTimeout),
+			Delete:  schema.DefaultTimeout(utils.DefaultTimeout),
+			Default: schema.DefaultTimeout(utils.DefaultTimeout),
+		},
 	}
 }
 
@@ -262,51 +371,23 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
-	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("id and name cannot be both specified at the same time"))
-	}
-	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the group id or name"))
+	if err := validateIDAndName(idOk, nameOk); err != nil {
+		return diag.FromErr(err)
 	}
 
-	var group autoscaling.Group
-	var err error
+	var (
+		group *autoscaling.Group
+		err   error
+	)
 
 	if idOk {
-		group, _, err = client.GetGroup(ctx, id.(string), 2)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
-		}
+		group, err = fetchGroupByID(ctx, client, id.(string))
 	} else {
-		groups, _, err := client.ListGroups(ctx)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while getting groups: %w", err))
-		}
+		group, err = fetchGroupByName(ctx, client, name.(string))
+	}
 
-		var results []autoscaling.Group
-
-		if groups.Items != nil {
-			for _, g := range *groups.Items {
-				// TODO: this will not be necessary once the swagger is fixed and list returns the full properties
-				if g.Id == nil {
-					return diag.FromErr(fmt.Errorf("expected a valid ID for the Autoscaling Group, but received 'nil' instead"))
-				}
-				tmpGroup, _, err := client.GetGroup(ctx, *g.Id, 2)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err))
-				}
-
-				if tmpGroup.Properties != nil && tmpGroup.Properties.Name != nil && strings.EqualFold(*tmpGroup.Properties.Name, name.(string)) {
-					results = append(results, tmpGroup)
-					break
-				}
-			}
-		}
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no group found with the specified criteria: name = %s", name.(string)))
-		} else {
-			group = results[0]
-		}
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	if group.Id == nil {
@@ -314,10 +395,55 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(*group.Id)
-
-	if err := autoscalingService.SetAutoscalingGroupData(d, group.Properties); err != nil {
+	if err = setAutoscalingGroupData(d, group.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
+}
+
+func validateIDAndName(idOk, nameOk bool) error {
+	if idOk && nameOk {
+		return fmt.Errorf("id and name cannot be both specified at the same time")
+	}
+	if !idOk && !nameOk {
+		return fmt.Errorf("please provide either the group id or name")
+	}
+	return nil
+}
+
+func fetchGroupByID(ctx context.Context, client *as.Client, id string) (*autoscaling.Group, error) {
+	group, _, err := client.GetGroup(ctx, id, 2)
+	if err != nil {
+		return nil, fmt.Errorf("an error occurred while fetching group with ID %s: %w", id, err)
+	}
+	return &group, nil
+}
+
+func fetchGroupByName(ctx context.Context, client *as.Client, name string) (*autoscaling.Group, error) {
+	groups, _, err := client.ListGroups(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("an error occurred while getting groups: %w", err)
+	}
+
+	if groups.Items == nil {
+		return nil, fmt.Errorf("no group found")
+	}
+
+	for _, g := range *groups.Items {
+		if g.Id == nil {
+			return nil, fmt.Errorf("expected a valid ID for the Autoscaling Group, but received 'nil' instead")
+		}
+
+		tmpGroup, _, err := client.GetGroup(ctx, *g.Id, 2)
+		if err != nil {
+			return nil, fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err)
+		}
+
+		if tmpGroup.Properties != nil && tmpGroup.Properties.Name != nil && strings.EqualFold(*tmpGroup.Properties.Name, name) {
+			return &tmpGroup, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no group found with the specified criteria: name = %s", name)
 }
