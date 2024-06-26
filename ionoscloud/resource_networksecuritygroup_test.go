@@ -79,7 +79,7 @@ func TestAccNetworkSecurityGroupFirewallRules(t *testing.T) {
 		},
 		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckNetworkSecurityGroupDestroyCheck,
+		CheckDestroy:      testAccCheckNSGRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckNetworkSecurityGroupFirewallRulesBasic,
@@ -284,6 +284,34 @@ func testAccCheckNetworkSecurityGroupExists(n string, nsg *ionoscloud.SecurityGr
 		nsg = &foundNSG
 		return nil
 	}
+}
+
+func testAccCheckNSGRuleDestroyCheck(s *terraform.State) error {
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != constant.NetworkSecurityGroupFirewallRuleResource {
+			continue
+		}
+		_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["nsg_id"], rs.Primary.ID).Execute()
+
+		if err != nil {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while checking the destruction of the network security group rule %s: %w", rs.Primary.ID, err)
+			}
+		} else {
+			return fmt.Errorf("network security group rule %s still exists", rs.Primary.ID)
+		}
+
+	}
+
+	return nil
 }
 
 func testAccCheckNSGFirewallRuleExists(n string, rule *ionoscloud.FirewallRule) resource.TestCheckFunc {
