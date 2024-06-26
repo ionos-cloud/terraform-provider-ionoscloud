@@ -118,7 +118,7 @@ func dataSourceNetworkSecurityGroupRead(ctx context.Context, d *schema.ResourceD
 		securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, id.(string)).Depth(3).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while retrieving network security group with ID: %s, %w", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while retrieving network security group with ID: %s, %w", id.(string), err))
 		}
 		return diag.FromErr(setNetworkSecurityGroupDataSource(d, &securityGroup))
 	}
