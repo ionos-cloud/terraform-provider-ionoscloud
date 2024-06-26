@@ -21,6 +21,12 @@ func (c *Client) ListApiGateways(ctx context.Context) (apigateway.GatewayReadLis
 	return apiGateways, apiResponse, err
 }
 
+func (c *Client) DeleteApiGateway(ctx context.Context, id string) (*apigateway.APIResponse, error) {
+	apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysDelete(ctx, id).Execute()
+	apiResponse.LogInfo()
+	return apiResponse, err
+}
+
 func (c *Client) SetApiGatewayData(d *schema.ResourceData, apiGateway apigateway.GatewayRead) error {
 	d.SetId(*apiGateway.Id)
 
