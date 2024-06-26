@@ -31,7 +31,7 @@ data "ionoscloud_redis_replicaset" "example" {
 
 * `id` - (Optional) The ID of the RedisDB Replica Set.
 * `display_name` - (Optional) The display name of the RedisDB Replica Set.
-* `location` -  The location of the RedisDB Replica Set.
+* `location` - (Required) The location of the RedisDB Replica Set.
 
 > **Note:** Either `id` or `display_name` must be provided. If none, or both are provided, the datasource will return an error.
 
