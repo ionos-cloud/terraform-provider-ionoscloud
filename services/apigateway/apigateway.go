@@ -118,28 +118,34 @@ func (c *Client) IsGatewayDeleted(ctx context.Context, d *schema.ResourceData) (
 }
 
 func GetGatewayDataCreate(d *schema.ResourceData) (*apigateway.GatewayCreate, error) {
-	cluster := apigateway.GatewayCreate{
+	gateway := apigateway.GatewayCreate{
 		Properties: &apigateway.Gateway{},
 	}
 
-	cluster.Properties = &apigateway.Gateway{
-		Name:    utils.String(d.Get("name").(string)),
-		Logs:    utils.Bool(d.Get("logs").(bool)),
-		Metrics: utils.Bool(d.Get("metrics").(bool)),
+	if v, ok := d.GetOk("name"); ok {
+		gateway.Properties.Name = apigateway.ToPtr(v.(string))
+	}
+
+	if v, ok := d.GetOk("logs"); ok {
+		gateway.Properties.Logs = apigateway.ToPtr(v.(bool))
+	}
+
+	if v, ok := d.GetOk("metrics"); ok {
+		gateway.Properties.Metrics = apigateway.ToPtr(v.(bool))
 	}
 
 	if v, ok := d.GetOk("custom_domains"); ok {
 		domains := v.([]interface{})
-		customDomains := make([]services.GatewayCustomDomains, len(domains))
+		customDomains := make([]apigateway.GatewayCustomDomains, len(domains))
 		for i, domain := range domains {
 			domainMap := domain.(map[string]interface{})
-			customDomains[i] = services.GatewayCustomDomains{
-				Name:          utils.String(domainMap["name"].(string)),
-				CertificateId: utils.String(domainMap["certificate_id"].(string)),
+			customDomains[i] = apigateway.GatewayCustomDomains{
+				Name:          apigateway.ToPtr(domainMap["name"].(string)),
+				CertificateId: apigateway.ToPtr(domainMap["certificate_id"].(string)),
 			}
 		}
 		gateway.Properties.CustomDomains = &customDomains
 	}
 
-	return &cluster, nil
+	return &gateway, nil
 }
