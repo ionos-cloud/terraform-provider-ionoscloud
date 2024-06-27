@@ -30,6 +30,12 @@ func (c *Client) DeleteApiGateway(ctx context.Context, id string) (*apigateway.A
 	return apiResponse, err
 }
 
+func (c *Client) UpdateApiGateway(ctx context.Context, id string, gw apigateway.GatewayEnsure) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
+	gateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysPut(ctx, id).GatewayEnsure(gw).Execute()
+	apiResponse.LogInfo()
+	return gateway, apiResponse, err
+}
+
 func (c *Client) CreateApiGateway(ctx context.Context, gw apigateway.GatewayCreate) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
 	gateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysPost(ctx).GatewayCreate(gw).Execute()
 	apiResponse.LogInfo()
@@ -148,4 +154,9 @@ func GetGatewayDataCreate(d *schema.ResourceData) (*apigateway.GatewayCreate, er
 	}
 
 	return &gateway, nil
+}
+
+func GetGatewayDataEnsure(d *schema.ResourceData) (*apigateway.GatewayEnsure, error) {
+	// TODO: This doesn't exist for MariaDB. Check if it's needed for API Gateway
+	return &apigateway.GatewayEnsure{}, nil
 }

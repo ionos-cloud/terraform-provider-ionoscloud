@@ -109,32 +109,16 @@ func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(services.SdkBundle).ApiGatewayClient
 	gatewayID := d.Id()
 
-	gateway := sdk..GatewayUpdate{
-		Properties: &services.Gateway{
-			Name:    utils.String(d.Get("name").(string)),
-			Logs:    utils.Bool(d.Get("logs").(bool)),
-			Metrics: utils.Bool(d.Get("metrics").(bool)),
-		},
+	gateway, err := apigateway.GetGatewayDataEnsure(d)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error updating API Gateway: %w", err))
 	}
 
-	if v, ok := d.GetOk("custom_domains"); ok {
-		domains := v.([]interface{})
-		customDomains := make([]services.GatewayCustomDomains, len(domains))
-		for i, domain := range domains {
-			domainMap := domain.(map[string]interface{})
-			customDomains[i] = services.GatewayCustomDomains{
-				Name:          utils.String(domainMap["name"].(string)),
-				CertificateId: utils.String(domainMap["certificate_id"].(string)),
-			}
-		}
-		gateway.Properties.CustomDomains = &customDomains
-	}
-
-	response, _, err := client.(ctx, gatewayID, gateway)
+	response, _, err := client.UpdateApiGateway(ctx, gatewayID, *gateway)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error updating API Gateway with ID: %v, error: %w", gatewayID, err))
 	}
-	err = utils.WaitForResourceToBeReady(ctx, d, client.IsApiGatewayReady)
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsGatewayReady)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error checking status for API Gateway with ID: %v after update, error: %w", gatewayID, err))
 	}
@@ -151,7 +135,7 @@ func resourceApiGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error deleting API Gateway with ID: %v, error: %w", gatewayID, err))
 	}
-	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsApiGatewayDeleted)
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsGatewayDeleted)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("deletion check failed for API Gateway with ID: %v, error: %w", gatewayID, err))
 	}
