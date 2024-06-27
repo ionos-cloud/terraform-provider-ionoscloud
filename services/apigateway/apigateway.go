@@ -3,10 +3,13 @@ package apigateway
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	apigateway "github.com/ionos-cloud/sdk-go-apigateway"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func (c *Client) GetApiGatewayById(ctx context.Context, id string) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
@@ -25,6 +28,12 @@ func (c *Client) DeleteApiGateway(ctx context.Context, id string) (*apigateway.A
 	apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
+}
+
+func (c *Client) CreateApiGateway(ctx context.Context, gw apigateway.GatewayCreate) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
+	gateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysPost(ctx).GatewayCreate(gw).Execute()
+	apiResponse.LogInfo()
+	return gateway, apiResponse, err
 }
 
 func (c *Client) SetApiGatewayData(d *schema.ResourceData, apiGateway apigateway.GatewayRead) error {
@@ -79,4 +88,58 @@ func (c *Client) SetApiGatewayData(d *schema.ResourceData, apiGateway apigateway
 	}
 
 	return nil
+}
+
+func (c *Client) IsGatewayReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	gatewayID := d.Id()
+	gateway, _, err := c.GetApiGatewayById(ctx, gatewayID)
+	if err != nil {
+		return true, fmt.Errorf("status check failed for Gateway ID: %v, error: %w", gatewayID, err)
+	}
+
+	if gateway.Metadata == nil || gateway.Metadata.Status == nil {
+		return false, fmt.Errorf("metadata or status is empty for Gateway ID: %v", gatewayID)
+	}
+
+	log.Printf("[INFO] state of the MariaDB cluster with ID: %v is: %s ", gatewayID, *gateway.Metadata.Status)
+	return strings.EqualFold(*gateway.Metadata.Status, constant.Available), nil
+}
+
+func (c *Client) IsGatewayDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	gatewayID := d.Id()
+	_, apiResponse, err := c.GetApiGatewayById(ctx, gatewayID)
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return true, nil
+		}
+		return false, fmt.Errorf("check failed for Gateway deletion status, ID: %v, error: %w", gatewayID, err)
+	}
+	return false, nil
+}
+
+func GetGatewayDataCreate(d *schema.ResourceData) (*apigateway.GatewayCreate, error) {
+	cluster := apigateway.GatewayCreate{
+		Properties: &apigateway.Gateway{},
+	}
+
+	cluster.Properties = &apigateway.Gateway{
+		Name:    utils.String(d.Get("name").(string)),
+		Logs:    utils.Bool(d.Get("logs").(bool)),
+		Metrics: utils.Bool(d.Get("metrics").(bool)),
+	}
+
+	if v, ok := d.GetOk("custom_domains"); ok {
+		domains := v.([]interface{})
+		customDomains := make([]services.GatewayCustomDomains, len(domains))
+		for i, domain := range domains {
+			domainMap := domain.(map[string]interface{})
+			customDomains[i] = services.GatewayCustomDomains{
+				Name:          utils.String(domainMap["name"].(string)),
+				CertificateId: utils.String(domainMap["certificate_id"].(string)),
+			}
+		}
+		gateway.Properties.CustomDomains = &customDomains
+	}
+
+	return &cluster, nil
 }

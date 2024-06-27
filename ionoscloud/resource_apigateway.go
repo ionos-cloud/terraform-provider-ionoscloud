@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -65,34 +66,18 @@ func resourceApiGateway() *schema.Resource {
 func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 
-	gateway := services.GatewayCreate{
-		Properties: &services.Gateway{
-			Name:    utils.String(d.Get("name").(string)),
-			Logs:    utils.Bool(d.Get("logs").(bool)),
-			Metrics: utils.Bool(d.Get("metrics").(bool)),
-		},
+	gateway, err := apigateway.GetGatewayDataCreate(d)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	if v, ok := d.GetOk("custom_domains"); ok {
-		domains := v.([]interface{})
-		customDomains := make([]services.GatewayCustomDomains, len(domains))
-		for i, domain := range domains {
-			domainMap := domain.(map[string]interface{})
-			customDomains[i] = services.GatewayCustomDomains{
-				Name:          utils.String(domainMap["name"].(string)),
-				CertificateId: utils.String(domainMap["certificate_id"].(string)),
-			}
-		}
-		gateway.Properties.CustomDomains = &customDomains
-	}
-
-	response, _, err := client.CreateApiGateway(ctx, gateway)
+	response, _, err := client.CreateApiGateway(ctx, *gateway)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating API Gateway: %w", err))
 	}
 	gatewayID := *response.Id
 	d.SetId(gatewayID)
-	err = utils.WaitForResourceToBeReady(ctx, d, client.IsApiGatewayReady)
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsGatewayReady)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error checking status for API Gateway with ID: %v, error: %w", gatewayID, err))
 	}
@@ -105,9 +90,9 @@ func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceApiGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 	gatewayID := d.Id()
-	gateway, _, err := client.GetApiGatewayById(ctx, gatewayID)
+	gateway, resp, err := client.GetApiGatewayById(ctx, gatewayID)
 	if err != nil {
-		if utils.IsNotFoundError(err) {
+		if resp.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -124,7 +109,7 @@ func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(services.SdkBundle).ApiGatewayClient
 	gatewayID := d.Id()
 
-	gateway := services.GatewayUpdate{
+	gateway := sdk..GatewayUpdate{
 		Properties: &services.Gateway{
 			Name:    utils.String(d.Get("name").(string)),
 			Logs:    utils.Bool(d.Get("logs").(bool)),
@@ -145,7 +130,7 @@ func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		gateway.Properties.CustomDomains = &customDomains
 	}
 
-	response, _, err := client.UpdateApiGateway(ctx, gatewayID, gateway)
+	response, _, err := client.(ctx, gatewayID, gateway)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error updating API Gateway with ID: %v, error: %w", gatewayID, err))
 	}
@@ -166,7 +151,7 @@ func resourceApiGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error deleting API Gateway with ID: %v, error: %w", gatewayID, err))
 	}
-	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsDeleted)
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsApiGatewayDeleted)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("deletion check failed for API Gateway with ID: %v, error: %w", gatewayID, err))
 	}
@@ -179,10 +164,13 @@ func resourceApiGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 	gateway, resp, err := client.GetApiGatewayById(ctx, gatewayID)
 	if err != nil {
 		if resp.HttpNotFound() {
+			d.SetId("")
 			return nil, fmt.Errorf("API Gateway does not exist, error: %w", err)
 		}
 		return nil, fmt.Errorf("error importing API Gateway with ID: %v, error: %w", gatewayID, err)
 	}
+	log.Printf("[INFO] Gateway found: %+v", gateway)
+
 	if err := client.SetApiGatewayData(d, gateway); err != nil {
 		return nil, err
 	}
