@@ -26,7 +26,7 @@ func dataSourceKafkaCluster() *schema.Resource {
 			},
 			"name": {
 				Type:        schema.TypeString,
-				Description: "The name of the kafka pipeline",
+				Description: "The name of the kafka cluster",
 				Computed:    true,
 				Optional:    true,
 			},
@@ -93,36 +93,41 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the kafka pipeline ID or name"))
+		return diag.FromErr(fmt.Errorf("please provide either the kafka cluster ID or name"))
 	}
+
 	partialMatch := d.Get("partial_match").(bool)
-	var pipeline kafka.ClusterRead
+	var cluster kafka.ClusterRead
 	var err error
 	if idOk {
-		pipeline, _, err = client.GetClusterById(ctx, id)
+		cluster, _, err = client.GetClusterById(ctx, id)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching the kafka pipeline with ID: %s, error: %w", id, err))
+			return diag.FromErr(fmt.Errorf("an error occured while fetching the kafka cluster with ID: %s, error: %w", id, err))
 		}
 	} else {
 		var results []kafka.ClusterRead
+
 		clusters, _, err := client.ListClusters(ctx)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching kafka clusters: %w", err))
 		}
+
 		for _, cluster := range *clusters.Items {
 			if cluster.Properties != nil && cluster.Properties.Name != nil && utils.NameMatches(*cluster.Properties.Name, name, partialMatch) {
 				results = append(results, cluster)
 			}
 		}
+
 		if results == nil || len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no kafka clusters found with the specified name: %s", name))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one kafka pipeline found with the specified name: %s", name))
+			return diag.FromErr(fmt.Errorf("more than one kafka cluster found with the specified name: %s", name))
 		} else {
-			pipeline = results[0]
+			cluster = results[0]
 		}
 	}
-	if err := client.SetKafkaClusterData(d, &pipeline); err != nil {
+
+	if err := client.SetKafkaClusterData(d, &cluster); err != nil {
 		return diag.FromErr(err)
 	}
 

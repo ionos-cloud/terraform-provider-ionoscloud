@@ -2,7 +2,7 @@
 subcategory: "Kafka"
 layout: "ionoscloud"
 page_title: "IonosCloud: cluster"
-sidebar_current: "docs-resource-kafka-cluster"
+sidebar_current: "docs-datasource-kafka-cluster"
 description: |-
   Reads IonosCloud Kafka Cluster objects.
 ---
@@ -19,7 +19,7 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_kafka_cluster" "example" {
-  id       = <kafka_cluster_id>
+  id = <your_kafka_cluster_id>
 }
 ```
 
@@ -29,7 +29,7 @@ Needs to have the resource be previously created, or a depends_on clause to ensu
 
 ```hcl
 data "ionoscloud_kafka_cluster" "example" {
-  name     = "kafka-cluster"
+  name = "kafka-cluster"
 }
 ```
 
@@ -41,9 +41,12 @@ data "ionoscloud_kafka_cluster" "example" {
 
 The following attributes are returned by the datasource:
 
-* `id` - UUID of the Kafka cluster
-* `name` - The name of the Kafka cluster
-* `version` - The version of the Kafka cluster
-* `size` - The size of the Kafka cluster
-* `broker_addresses` - List of Kafka broker addresses
-* `server_address` - The server address of the Kafka cluster
+* `id` - UUID of the Kafka cluster.
+* `name` - The name of the Kafka cluster.
+* `version` - The version of the Kafka cluster.
+* `size` - The size of the Kafka cluster.
+* `connections` - Connection information of the Kafka cluster. Minimum items: 1, maximum items: 1.
+    * `datacenter_id` - The datacenter that your instance is connected to.
+    * `lan_id` - The numeric LAN ID your instance is connected to.
+    * `cidr` - The IP and subnet for your instance.
+    * `broker_addresses` - IP addresses and subnet of cluster brokers.
