@@ -17,17 +17,34 @@ This resource will create an operational kafka cluster. After this section compl
 
 ```hcl
 resource "ionoscloud_kafka_cluster" "kafka_cluster" {
-  name = "kafka-cluster"
-  version = "3.5.1"
-  size = "S"
+  name    = "kafka-cluster"
+  version = "3.7.0"
+  size    = "S"
+  connections {
+    datacenter_id = <your_datacenter_id>
+    lan_id = <your_lan_id>
+    cidr = "192.168.1.100/24"
+    broker_addresses = [
+      "192.168.1.101/24",
+      "192.168.1.102/24",
+      "192.168.1.103/24"
+    ]
+  }
 }
 ```
 
 ## Argument reference
 
 * `name` - (Required)[string] Name of the Kafka Cluster.
-* `version` - (Required)[string] Version of the Kafka Cluster.
+* `version` - (Required)[string] Version of the Kafka Cluster. Possible values: `3.7.0`
 * `size` - (Required)[string] Size of the Kafka Cluster. Possible values: `S`
+* `connections` - (Required) Connection information of the Kafka cluster. Minimum items: 1, maximum items: 1.
+    * `datacenter_id` - (Required)[string] The datacenter to connect your instance to.
+    * `lan_id` - (Required)[string] The numeric LAN ID to connect your instance to.
+    * `cidr` - (Required)[string] The IP and subnet for your instance. **Note** the following unavailable IP range:
+      10.244.0.0/11
+    * `broker_addresses` - (Required)[list] IP addresses and subnet of cluster brokers. **Note** the following
+      unavailable IP range: 10.224.0.0/11
 
 ## Import
 

@@ -30,6 +30,11 @@ func dataSourceKafkaTopic() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
+			"cluster_id": {
+				Type:        schema.TypeString,
+				Description: "The ID of the Kafka cluster that the topic belongs to",
+				Required:    true,
+			},
 			"replication_factor": {
 				Type:        schema.TypeInt,
 				Description: "The number of replicas of the topic. The replication factor determines how many copies of the topic are stored on different brokers. The replication factor must be less than or equal to the number of brokers in the Kafka cluster.",
@@ -64,11 +69,10 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(services.SdkBundle).KafkaClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
-	clusterIdValue, clusterIdOk := d.GetOk("cluster_id")
+	clusterId := d.Get("cluster_id").(string)
 
 	id := idValue.(string)
 	name := nameValue.(string)
-	clusterId := clusterIdValue.(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
@@ -76,11 +80,9 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 	if !idOk && !nameOk {
 		return diag.FromErr(fmt.Errorf("please provide either the kafka cluster topic ID or name"))
 	}
-	if !clusterIdOk {
-		return diag.FromErr(fmt.Errorf("please provide the kafka cluster ID that the topic belongs to"))
-	}
 
 	partialMatch := d.Get("partial_match").(bool)
+
 	var topic kafka.TopicRead
 	var err error
 	if idOk {
@@ -90,15 +92,18 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	} else {
 		var results []kafka.TopicRead
+
 		clusters, _, err := client.ListTopics(ctx, clusterId)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching kafka clusters topics: %w", err))
 		}
+
 		for _, cluster := range *clusters.Items {
 			if cluster.Properties != nil && cluster.Properties.Name != nil && utils.NameMatches(*cluster.Properties.Name, name, partialMatch) {
 				results = append(results, cluster)
 			}
 		}
+
 		if results == nil || len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no kafka cluster topic found with the specified name: %s", name))
 		} else if len(results) > 1 {
@@ -107,7 +112,8 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 			topic = results[0]
 		}
 	}
-	if err := client.SetKafkaTopicData(d, &topic); err != nil {
+
+	if err = client.SetKafkaTopicData(d, &topic); err != nil {
 		return diag.FromErr(err)
 	}
 

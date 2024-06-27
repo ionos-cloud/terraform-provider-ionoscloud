@@ -322,35 +322,21 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			return ionoscloud.NewAPIClient(newConfig)
 		}
 	case autoscalingClient:
-		return autoscalingService.NewClient(
-			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
-		)
+		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case certManagerClient:
-		return cert.NewClient(
-			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
-		)
+		return cert.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case containerRegistryClient:
-		return crService.NewClient(
-			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
-		)
+		return crService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case dataplatformClient:
-		return dataplatformService.NewClient(
-			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
-		)
+		return dataplatformService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case dnsClient:
-		return dnsService.NewClient(
-			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
-		)
+		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case loggingClient:
 		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.TerraformVersion)
 	case mariaDBClient:
-		return mariadb.NewMariaDBClient(
-			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
-		)
+		return mariadb.NewMariaDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case mongoClient:
-		return dbaasService.NewMongoClient(
-			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
-		)
+		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case nfsClient:
 		return nfsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case psqlClient:
@@ -358,9 +344,7 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	case s3Client:
 		return s3.NewAPIClient(s3.NewConfiguration())
 	case kafkaClient:
-		return kafkaService.NewClient(
-			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username,
-		)
+		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
