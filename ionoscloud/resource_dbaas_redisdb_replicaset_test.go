@@ -1,3 +1,6 @@
+//go:build all || dbaas || redis
+// +build all dbaas redis
+
 package ionoscloud
 
 import (
