@@ -524,7 +524,6 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Waiting for k8s node pool %s to be ready...", d.Id())
 
 		nodepoolReady, rsErr := k8sNodepoolReady(ctx, client, d)
-
 		if rsErr != nil {
 			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s node pool %s: %w", d.Id(), rsErr))
 			return diags
@@ -784,7 +783,6 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Waiting for k8s node pool %s to be deleted...", d.Id())
 
 		nodepoolDeleted, dsErr := k8sNodepoolDeleted(ctx, client, d)
-
 		if dsErr != nil {
 			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of k8s node pool %s: %w", d.Id(), dsErr))
 			return diags
@@ -988,16 +986,22 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 	return nil
 }
 func k8sNodepoolReady(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	subjectNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+	resource, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		return true, fmt.Errorf("error checking k8s node pool status: %w", err)
 	}
-	return *subjectNodepool.Metadata.State == "ACTIVE", nil
+	if resource.Metadata == nil || resource.Metadata.State == nil {
+		return false, fmt.Errorf("error while checking k8s node pool status: state is nil")
+	}
+	if isStateFailed(*resource.Metadata.State) {
+		return false, fmt.Errorf("error while checking if k8s nodepool is ready %s, state %s", *resource.Id, *resource.Metadata.State)
+	}
+	return *resource.Metadata.State == "ACTIVE", nil
 }
 
 func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+	resource, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -1005,6 +1009,9 @@ func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sc
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking k8s node pool deletion status: %w", err)
+	}
+	if isStateFailed(*resource.Metadata.State) {
+		return false, fmt.Errorf("error while deleting k8s nodepool %s, state %s", *resource.Id, *resource.Metadata.State)
 	}
 	return false, nil
 }
