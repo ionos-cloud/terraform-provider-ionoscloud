@@ -627,7 +627,7 @@ func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schem
 		return true, fmt.Errorf("error checking k8s cluster status: %w", err)
 	}
 	if resource.Metadata == nil || resource.Metadata.State == nil {
-		return false, fmt.Errorf("error while checking k8s node pool status: state is nil")
+		return false, fmt.Errorf("error while checking k8s cluster status: state is nil")
 	}
 	if isStateFailed(*resource.Metadata.State) {
 		return false, fmt.Errorf("error while checking if k8s cluster is ready %s, state %s", *resource.Id, *resource.Metadata.State)
