@@ -8,8 +8,6 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud/asg"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
@@ -122,7 +120,7 @@ func Provider() *schema.Provider {
 			constant.DNSZoneResource:                           resourceDNSZone(),
 			constant.DNSRecordResource:                         resourceDNSRecord(),
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
-			constant.AutoscalingGroupResource:                  asg.ResourceAutoscalingGroup(),
+			constant.AutoscalingGroupResource:                  ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -181,8 +179,8 @@ func Provider() *schema.Provider {
 			constant.DNSZoneDataSource:                         dataSourceDNSZone(),
 			constant.DNSRecordDataSource:                       dataSourceDNSRecord(),
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
-			constant.AutoscalingGroupResource:                  asg.DataSourceAutoscalingGroup(),
-			constant.AutoscalingGroupServersResource:           asg.DataSourceAutoscalingGroupServers(),
+			constant.AutoscalingGroupResource:                  DataSourceAutoscalingGroup(),
+			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
 		},
 	}
 
