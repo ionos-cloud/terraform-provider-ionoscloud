@@ -1826,4 +1826,6 @@ const clusterCredentialsPasswordAttribute = "password"
 
 // Values
 const clusterMaintenanceWindowDayOfTheWeekValue = "Sunday"
+const clusterMaintenanceWindowDayOfTheWeekUpdateValue = "Monday"
 const clusterMaintenanceWindowTimeValue = "09:00:00"
+const clusterMaintenanceWindowTimeUpdateValue = "10:00:00"

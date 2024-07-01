@@ -239,6 +239,7 @@ const (
 	DBaaSClusterTestDataSourceById   = "test_dbaas_cluster_id"
 	DBaaSClusterTestResource         = "test_dbaas_cluster"
 	DBaaSClusterTestDataSourceByName = "test_dbaas_cluster_name"
+	DBaaSReplicaSetTestResource      = "test_dbaas_replicaset"
 
 	// PgSql constants
 	PsqlClusterResource          = "ionoscloud_pg_cluster"
@@ -262,14 +263,19 @@ const (
 	DBaasMongoUserResource           = "ionoscloud_mongo_user"
 	DBaaSMongoTemplateResource       = "ionoscloud_mongo_template"
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
+
+	// RedisDB constants
+	DBaaSReplicaSetTestDataSourceByID   = "test_dbaas_replicaset_id"
+	DBaaSReplicaSetTestDataSourceByName = "test_dbaas_replicaset_name"
+	DBaaSRedisDBReplicaSetResource      = "ionoscloud_redis_replicaset"
 )
 
-// MariaDBClusterLocations slice represents the locations in which MariaDB clusters can be created
-var MariaDBClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
+// DBaaSClusterLocations slice represents the locations in which DBaaS clusters can be created
+var DBaaSClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
 
 // Container Registry Constants
 const (
-	//ContainerRegistryTestResource needs to be with -, do not change
+	// ContainerRegistryTestResource needs to be with -, do not change
 	ContainerRegistryTestResource      = "test-container-registry"
 	ContainerRegistryTokenTestResource = "test-container-registry-token"
 

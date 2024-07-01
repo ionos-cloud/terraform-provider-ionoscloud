@@ -22,6 +22,7 @@ import (
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/redisdb"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -111,6 +112,7 @@ func Provider() *schema.Provider {
 			constant.DBaaSMariaDBClusterResource:               resourceDBaaSMariaDBCluster(),
 			constant.DBaasMongoClusterResource:                 resourceDbaasMongoDBCluster(),
 			constant.DBaasMongoUserResource:                    resourceDbaasMongoUser(),
+			constant.DBaaSRedisDBReplicaSetResource:            resourceDBaaSRedisDBReplicaSet(),
 			constant.ALBResource:                               resourceApplicationLoadBalancer(),
 			constant.ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			constant.TargetGroupResource:                       resourceTargetGroup(),
@@ -170,6 +172,7 @@ func Provider() *schema.Provider {
 			constant.ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
 			constant.TargetGroupResource:                       dataSourceTargetGroup(),
 			constant.DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
+			constant.DBaaSRedisDBReplicaSetResource:            dataSourceDBaaSRedisDBReplicaSet(),
 			constant.CertificateResource:                       dataSourceCertificate(),
 			constant.ContainerRegistryResource:                 dataSourceContainerRegistry(),
 			constant.ContainerRegistryTokenResource:            dataSourceContainerRegistryToken(),
@@ -251,6 +254,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		MariaDBClient:      NewClientByType(clientOpts, mariaDBClient).(*mariadb.MariaDBClient),
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
+		RedisDBClient:      NewClientByType(clientOpts, redisDBClient).(*redisdb.RedisDBClient),
 	}, nil
 }
 
@@ -267,6 +271,7 @@ const (
 	mariaDBClient
 	mongoClient
 	psqlClient
+	redisDBClient
 )
 
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
@@ -303,6 +308,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case psqlClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case redisDBClient:
+		return redisdb.NewRedisDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
