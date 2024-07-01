@@ -58,6 +58,11 @@ func resourceApiGateway() *schema.Resource {
 					},
 				},
 			},
+			"public_endpoint": {
+				Type:        schema.TypeString,
+				Description: "The public endpoint of the API Gateway.",
+				Computed:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}

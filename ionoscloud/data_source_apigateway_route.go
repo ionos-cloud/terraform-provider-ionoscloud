@@ -83,6 +83,7 @@ func dataSourceApiGatewayRoute() *schema.Resource {
 						},
 						"weight": {
 							Type:        schema.TypeInt,
+							Computed:    true, // Alex: Added because of a panic, please remove if wrong
 							Description: "Weight with which to split traffic to the upstream.",
 						},
 					},

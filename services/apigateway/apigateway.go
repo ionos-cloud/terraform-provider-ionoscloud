@@ -83,7 +83,7 @@ func (c *Client) SetApiGatewayData(d *schema.ResourceData, apiGateway apigateway
 		}
 
 		if err := d.Set("custom_domains", customDomains); err != nil {
-			return fmt.Errorf("error setting custom_domains for the ApiGateway with ID: %s", *apiGateway.Id)
+			return fmt.Errorf("error setting custom_domains for the ApiGateway with ID %s: %w", *apiGateway.Id, err)
 		}
 	}
 
