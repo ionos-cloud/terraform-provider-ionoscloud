@@ -55,12 +55,14 @@ func (c *Client) IsPipelineDeleted(ctx context.Context, d *schema.ResourceData) 
 	return apiResponse.HttpNotFound(), err
 }
 
+// GetPipelineById returns a pipeline by its ID
 func (c *Client) GetPipelineById(ctx context.Context, id string) (logging.Pipeline, *shared.APIResponse, error) {
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return pipeline, apiResponse, err
 }
 
+// ListPipelines returns a list of all pipelines
 func (c *Client) ListPipelines(ctx context.Context) (logging.PipelineListResponse, *shared.APIResponse, error) {
 	pipelines, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesGet(ctx).Execute()
 	apiResponse.LogInfo()

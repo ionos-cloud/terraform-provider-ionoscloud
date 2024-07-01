@@ -17,6 +17,7 @@ type Client struct {
 	sdkClient logging.APIClient
 }
 
+// NewClient returns a new ionoscloud logging client
 func NewClient(username, password, token, url, terraformVersion string) *Client {
 	newConfigLogging := shared.NewConfiguration(username, password, token, url)
 
