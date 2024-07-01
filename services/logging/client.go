@@ -26,7 +26,7 @@ func NewClient(username, password, token, url, terraformVersion string) *Client 
 	newConfigLogging.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigLogging.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-logging/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch",
-		logging.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		logging.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	return &Client{sdkClient: *logging.NewAPIClient(newConfigLogging)}
 }

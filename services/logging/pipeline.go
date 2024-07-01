@@ -25,7 +25,7 @@ func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (lo
 
 func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	pipelineId := d.Id()
-	pipeline, _, err := c.GetPipelineById(ctx, pipelineId)
+	pipeline, _, err := c.GetPipelineByID(ctx, pipelineId)
 	if err != nil {
 		return false, err
 	}
@@ -55,8 +55,8 @@ func (c *Client) IsPipelineDeleted(ctx context.Context, d *schema.ResourceData) 
 	return apiResponse.HttpNotFound(), err
 }
 
-// GetPipelineById returns a pipeline by its ID
-func (c *Client) GetPipelineById(ctx context.Context, id string) (logging.Pipeline, *shared.APIResponse, error) {
+// GetPipelineByID returns a pipeline by its ID
+func (c *Client) GetPipelineByID(ctx context.Context, id string) (logging.Pipeline, *shared.APIResponse, error) {
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return pipeline, apiResponse, err
