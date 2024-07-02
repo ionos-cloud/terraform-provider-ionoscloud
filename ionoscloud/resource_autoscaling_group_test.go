@@ -607,10 +607,10 @@ resource "ionoscloud_target_group" "autoscaling_target_group" {
     protocol                  = "HTTP"
 }
 
-resource "time_sleep" "wait_5_minutes" {
+resource "time_sleep" "wait_10_minutes" {
   depends_on = [ionoscloud_target_group.autoscaling_target_group]
 
-  destroy_duration = "5m"
+  destroy_duration = "10m"
 }
 
 resource  "ionoscloud_autoscaling_group"  %[1]q {
@@ -655,7 +655,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 		}
 	}
 
-	depends_on = [time_sleep.wait_5_minutes]
+	depends_on = [time_sleep.wait_10_minutes]
 }
 `, rName))
 }
