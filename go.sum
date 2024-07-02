@@ -96,6 +96,8 @@ github.com/hashicorp/yamux v0.1.1 h1:yrQxtgseBDrq9Y652vSRDvsKCJKOUD+GzTS4Y0Y8pvE
 github.com/hashicorp/yamux v0.1.1/go.mod h1:CtWFDAQgb7dxtzFs4tWbplKIe2jSi3+5vKbgIO0SLnQ=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
+github.com/ionos-cloud/sdk-go-apigateway v0.0.0-20240618102110-09613e8cad5d h1:5G8Sj3UFVzsvF01SdSsm9HTpQXhlqpM2/Ee1dA0vTB8=
+github.com/ionos-cloud/sdk-go-apigateway v0.0.0-20240618102110-09613e8cad5d/go.mod h1:HMwZB0CUwSxD6eY5YR2WJ4wUN2rAq6FBZWFxydtVV8o=
 github.com/ionos-cloud/sdk-go-cert-manager v1.0.1 h1:QGnenRREavvU0ZrXvY4hmCMXRyvmKj5jaXsFX9Apfd0=
 github.com/ionos-cloud/sdk-go-cert-manager v1.0.1/go.mod h1:EYDegkY6fUSkx0BL0GpNMpKvp33AId2vTZL44YLPreA=
 github.com/ionos-cloud/sdk-go-container-registry v1.1.0 h1:H92gzx9oj0vvbozbXwn2RLNEw7++1Ns3Kl9PGrh5Waw=

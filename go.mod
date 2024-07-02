@@ -6,7 +6,6 @@ require (
 	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
 	github.com/iancoleman/strcase v0.3.0
-	github.com/ionos-cloud/sdk-go-apigateway v0.1.0
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
 	github.com/ionos-cloud/sdk-go-container-registry v1.1.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.0.3
@@ -21,10 +20,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-
-// TODO: replace before merge
-replace github.com/ionos-cloud/sdk-go-apigateway => /tmp/sdk-go-apigateway
+require (
+	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
+	github.com/ionos-cloud/sdk-go-apigateway v0.0.0-20240618102110-09613e8cad5d // indirect
+)
 
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // indirect

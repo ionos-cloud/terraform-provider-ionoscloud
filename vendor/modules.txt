@@ -190,6 +190,9 @@ github.com/hashicorp/yamux
 # github.com/iancoleman/strcase v0.3.0
 ## explicit; go 1.16
 github.com/iancoleman/strcase
+# github.com/ionos-cloud/sdk-go-apigateway v0.0.0-20240618102110-09613e8cad5d
+## explicit; go 1.18
+github.com/ionos-cloud/sdk-go-apigateway
 # github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go-cert-manager
