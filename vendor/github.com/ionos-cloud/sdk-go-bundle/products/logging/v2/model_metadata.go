@@ -32,7 +32,7 @@ type Metadata struct {
 	LastModifiedByUserId   *string    `json:"lastModifiedByUserId,omitempty"`
 	LastModifiedByUserUuid *string    `json:"lastModifiedByUserUuid,omitempty"`
 	// The current state reported back by the pipeline.
-	Status *string `json:"state,omitempty"`
+	State *string `json:"state,omitempty"`
 }
 
 // NewMetadata instantiates a new Metadata object
@@ -311,25 +311,25 @@ func (o *Metadata) SetLastModifiedByUserUuid(v string) {
 
 // GetState returns the State field value if set, zero value otherwise.
 func (o *Metadata) GetState() string {
-	if o == nil || IsNil(o.Status) {
+	if o == nil || IsNil(o.State) {
 		var ret string
 		return ret
 	}
-	return *o.Status
+	return *o.State
 }
 
 // GetStateOk returns a tuple with the State field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Metadata) GetStateOk() (*string, bool) {
-	if o == nil || IsNil(o.Status) {
+	if o == nil || IsNil(o.State) {
 		return nil, false
 	}
-	return o.Status, true
+	return o.State, true
 }
 
 // HasState returns a boolean if a field has been set.
 func (o *Metadata) HasState() bool {
-	if o != nil && !IsNil(o.Status) {
+	if o != nil && !IsNil(o.State) {
 		return true
 	}
 
@@ -338,7 +338,7 @@ func (o *Metadata) HasState() bool {
 
 // SetState gets a reference to the given string and assigns it to the State field.
 func (o *Metadata) SetState(v string) {
-	o.Status = &v
+	o.State = &v
 }
 
 func (o Metadata) MarshalJSON() ([]byte, error) {
@@ -375,8 +375,8 @@ func (o Metadata) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.LastModifiedByUserUuid) {
 		toSerialize["lastModifiedByUserUuid"] = o.LastModifiedByUserUuid
 	}
-	if !IsNil(o.Status) {
-		toSerialize["state"] = o.Status
+	if !IsNil(o.State) {
+		toSerialize["state"] = o.State
 	}
 	return toSerialize, nil
 }
