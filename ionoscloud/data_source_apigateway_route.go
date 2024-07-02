@@ -19,16 +19,18 @@ func dataSourceApiGatewayRoute() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The ID (UUID) of the API Gateway route.",
 				Optional:    true,
+				Computed:    true,
 			},
-			"apigateway_id": {
+			"gateway_id": {
 				Type:        schema.TypeString,
-				Description: "The ID (UUID) of the API Gateway.",
+				Description: "The ID of the API Gateway that the route belongs to.",
 				Required:    true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the API Gateway.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"websocket": {
 				Type:        schema.TypeBool,
@@ -83,8 +85,8 @@ func dataSourceApiGatewayRoute() *schema.Resource {
 						},
 						"weight": {
 							Type:        schema.TypeInt,
-							Computed:    true, // Alex: Added because of a panic, please remove if wrong
 							Description: "Weight with which to split traffic to the upstream.",
+							Computed:    true,
 						},
 					},
 				},
@@ -109,7 +111,7 @@ func dataSourceApiGatewayRouteRead(ctx context.Context, d *schema.ResourceData, 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	partialMatch := d.Get("partial_match").(bool)
-	gatewayId := d.Get("apigateway_id").(string)
+	gatewayId := d.Get("gateway_id").(string)
 
 	id := idValue.(string)
 	name := nameValue.(string)
@@ -150,7 +152,7 @@ func dataSourceApiGatewayRouteRead(ctx context.Context, d *schema.ResourceData, 
 		}
 	}
 
-	if err = client.SetApiGatewayRouteRead(d, route); err != nil {
+	if err = client.SetApiGatewayRouteData(d, route); err != nil {
 		return diag.FromErr(err)
 	}
 
