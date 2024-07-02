@@ -1012,7 +1012,7 @@ func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sc
 	}
 	if resource.Metadata != nil && resource.Metadata.State != nil {
 		if isStateFailed(*resource.Metadata.State) {
-			return false, fmt.Errorf("error while deleting k8s nodepool %s, state %s", *resource.Id, *resource.Metadata.State)
+			return false, fmt.Errorf("error while checking if k8s nodepool is properly deleted, nodepool ID: %s, state: %s", *resource.Id, *resource.Metadata.State)
 		}
 	}
 	return false, nil
