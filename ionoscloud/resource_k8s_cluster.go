@@ -648,7 +648,7 @@ func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sch
 	}
 	if cluster.Metadata != nil && cluster.Metadata.State != nil {
 		if isStateFailed(*cluster.Metadata.State) {
-			return false, fmt.Errorf("error while deleting k8s cluster %s, state %s", *cluster.Id, *cluster.Metadata.State)
+			return false, fmt.Errorf("error while checking if k8s cluster is deleted properly, cluster ID: %s, state: %s", *cluster.Id, *cluster.Metadata.State)
 		}
 	}
 
