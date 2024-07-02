@@ -1,10 +1,13 @@
 //go:build all || autoscaling
 // +build all autoscaling
 
-package asg
+package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -365,6 +368,69 @@ func TestAccAutoscalingGroup_replicaWithVolume(t *testing.T) {
 
 }
 
+func testAccCheckAutoscalingGroupDestroyCheck(s *terraform.State) error {
+	client := testAccProvider.Meta().(services.SdkBundle).AutoscalingClient
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	for _, rs := range s.RootModule().Resources {
+
+		if rs.Type != constant.AutoscalingGroupResource {
+			continue
+		}
+		_, apiResponse, err := client.GetGroup(ctx, rs.Primary.ID, 0)
+		if err != nil {
+			if !apiResponse.HttpNotFound() {
+				return fmt.Errorf("an error occurred while checking for the destruction of autoscaling group %s: %w",
+					rs.Primary.ID, err)
+			}
+		} else {
+			return fmt.Errorf("autoscaling group %s still exists", rs.Primary.ID)
+		}
+
+	}
+
+	return nil
+}
+
+func testAccCheckAutoscalingGroupExists(name string, autoscalingGroup *autoscaling.Group) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client := testAccProvider.Meta().(services.SdkBundle).AutoscalingClient
+
+		rs, ok := s.RootModule().Resources[name]
+
+		if !ok {
+			return fmt.Errorf("not found: %s", name)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no Record ID is set")
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		foundGroup, _, err := client.GetGroup(ctx, rs.Primary.ID, 0)
+		if err != nil {
+			return fmt.Errorf("error occurred while fetching autoscaling group: %s, %w", rs.Primary.ID, err)
+		}
+
+		if *foundGroup.Id != rs.Primary.ID {
+			return fmt.Errorf("record not found")
+		}
+		autoscalingGroup = &foundGroup
+
+		return nil
+	}
+}
+
 func testAGConfig_base() string {
 	return fmt.Sprintf(`
 resource "ionoscloud_datacenter" "autoscaling_datacenter" {
@@ -541,10 +607,10 @@ resource "ionoscloud_target_group" "autoscaling_target_group" {
     protocol                  = "HTTP"
 }
 
-resource "time_sleep" "wait_5_minutes" {
+resource "time_sleep" "wait_10_minutes" {
   depends_on = [ionoscloud_target_group.autoscaling_target_group]
 
-  destroy_duration = "5m"
+  destroy_duration = "10m"
 }
 
 resource  "ionoscloud_autoscaling_group"  %[1]q {
@@ -589,7 +655,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 		}
 	}
 
-	depends_on = [time_sleep.wait_5_minutes]
+	depends_on = [time_sleep.wait_10_minutes]
 }
 `, rName))
 }

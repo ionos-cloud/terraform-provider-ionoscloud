@@ -1,4 +1,4 @@
-package asg
+package ionoscloud
 
 import (
 	"context"
