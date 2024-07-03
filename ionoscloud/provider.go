@@ -123,7 +123,7 @@ func Provider() *schema.Provider {
 			constant.AutoscalingGroupResource:                  resourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
 			constant.ApiGatewayResource:                        resourceApiGateway(),
-			constant.ApiGatewayRouteResource:                   resourceApiGatewayRoute(),
+			constant.ApiGatewayRouteResource:                   resourceAPIGatewayRoute(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -184,7 +184,7 @@ func Provider() *schema.Provider {
 			constant.AutoscalingGroupResource:                  dataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           dataSourceAutoscalingGroupServers(),
 			constant.ApiGatewayResource:                        dataSourceApiGateway(),
-			constant.ApiGatewayRouteResource:                   dataSourceApiGatewayRoute(),
+			constant.ApiGatewayRouteResource:                   dataSourceAPIGatewayRoute(),
 		},
 	}
 
