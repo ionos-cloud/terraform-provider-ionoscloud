@@ -11,13 +11,13 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-func dataSourceApiGatewayRoute() *schema.Resource {
+func dataSourceAPIGatewayRoute() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceApiGatewayRouteRead,
+		ReadContext: dataSourceAPIGatewayRouteRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,
-				Description: "The ID (UUID) of the API Gateway route.",
+				Description: "The ID (UUID) of the API Gateway Route.",
 				Optional:    true,
 				Computed:    true,
 			},
@@ -28,7 +28,7 @@ func dataSourceApiGatewayRoute() *schema.Resource {
 			},
 			"name": {
 				Type:        schema.TypeString,
-				Description: "The name of the API Gateway.",
+				Description: "The name of the API Gateway Route.",
 				Optional:    true,
 				Computed:    true,
 			},
@@ -106,7 +106,7 @@ func dataSourceApiGatewayRoute() *schema.Resource {
 	}
 }
 
-func dataSourceApiGatewayRouteRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
@@ -120,7 +120,7 @@ func dataSourceApiGatewayRouteRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the ApiGateway route ID or name"))
+		return diag.FromErr(fmt.Errorf("please provide either the API Gateway Route ID or name"))
 	}
 
 	var route apigateway.RouteRead
@@ -128,12 +128,12 @@ func dataSourceApiGatewayRouteRead(ctx context.Context, d *schema.ResourceData, 
 	if idOk {
 		route, _, err = client.GetRouteById(ctx, gatewayId, id)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the ApiGateway route with ID: %s, error: %w", idValue, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the API Gateway Route with ID: %s, error: %w", idValue, err))
 		}
 	} else {
 		routes, _, err := client.ListRoutes(ctx, gatewayId)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching ApiGateways route: %w", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching API Gateway Route: %w", err))
 		}
 
 		var results []apigateway.RouteRead
@@ -144,15 +144,15 @@ func dataSourceApiGatewayRouteRead(ctx context.Context, d *schema.ResourceData, 
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no ApiGateway route found with the specified name: %s", name))
+			return diag.FromErr(fmt.Errorf("no API Gateway Route found with the specified name: %s", name))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one ApiGateway route found with the specified name: %s", name))
+			return diag.FromErr(fmt.Errorf("more than one API Gateway Route found with the specified name: %s", name))
 		} else {
 			route = results[0]
 		}
 	}
 
-	if err = client.SetApiGatewayRouteData(d, route); err != nil {
+	if err = client.SetAPIGatewayRouteData(d, route); err != nil {
 		return diag.FromErr(err)
 	}
 

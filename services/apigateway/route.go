@@ -59,9 +59,9 @@ func (c *Client) IsApiGatewayRouteAvailable(ctx context.Context, d *schema.Resou
 	}
 
 	if route.Metadata == nil || route.Metadata.Status == nil {
-		return false, fmt.Errorf("expected metadata, got empty for ApiGateway Route with ID: %s", route)
+		return false, fmt.Errorf("expected metadata, got empty for API Gateway Route with ID: %s", route)
 	}
-	log.Printf("[DEBUG] ApiGateway Route status: %s", *route.Metadata.Status)
+	log.Printf("[DEBUG] API Gateway Route status: %s", *route.Metadata.Status)
 	return strings.EqualFold(*route.Metadata.Status, constant.Available), nil
 }
 
@@ -73,15 +73,15 @@ func (c *Client) IsApiGatewayRouteDeleted(ctx context.Context, d *schema.Resourc
 	return apiResponse.HttpNotFound(), err
 }
 
-func (c *Client) SetApiGatewayRouteData(d *schema.ResourceData, route apigateway.RouteRead) error {
+func (c *Client) SetAPIGatewayRouteData(d *schema.ResourceData, route apigateway.RouteRead) error {
 	d.SetId(*route.Id)
 
 	if route.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the ApiGateway route with ID: %s, but received 'nil' instead", *route.Id)
+		return fmt.Errorf("expected properties in the response for the API Gateway Route with ID: %s, but received 'nil' instead", *route.Id)
 	}
 
 	if route.Metadata == nil {
-		return fmt.Errorf("expected metadata in the response for the ApiGateway route with ID: %s, but received 'nil' instead", *route.Id)
+		return fmt.Errorf("expected metadata in the response for the API Gateway Route with ID: %s, but received 'nil' instead", *route.Id)
 
 	}
 
@@ -130,7 +130,7 @@ func (c *Client) SetApiGatewayRouteData(d *schema.ResourceData, route apigateway
 		}
 
 		if err := d.Set("upstreams", upstreams); err != nil {
-			return fmt.Errorf("error setting upstreams for the ApiGateway route with ID: %s", *route.Id)
+			return fmt.Errorf("error setting upstreams for the API Gateway Route with ID: %s", *route.Id)
 		}
 	}
 

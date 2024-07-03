@@ -11,16 +11,24 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-func resourceApiGatewayRoute() *schema.Resource {
+func resourceAPIGatewayRoute() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceApiGatewayRouteCreate,
-		ReadContext:   resourceApiGatewayRouteRead,
-		UpdateContext: resourceApiGatewayRouteUpdate,
-		DeleteContext: resourceApiGatewayRouteDelete,
+		CreateContext: resourceAPIGatewayRouteCreate,
+		ReadContext:   resourceAPIGatewayRouteRead,
+		UpdateContext: resourceAPIGatewayRouteUpdate,
+		DeleteContext: resourceAPIGatewayRouteDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceAPIGatewayImport,
+		},
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:        schema.TypeString,
+				Description: "The ID (UUID) of the API Gateway Route.",
+				Computed:    true,
+			},
 			"name": {
 				Type:        schema.TypeString,
-				Description: "The name of the API Gateway route.",
+				Description: "The name of the API Gateway Route.",
 				Required:    true,
 			},
 			"gateway_id": {
@@ -97,16 +105,17 @@ func resourceApiGatewayRoute() *schema.Resource {
 				},
 			},
 		},
+		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
-func resourceApiGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAPIGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 
 	createdRoute, _, err := client.CreateRoute(ctx, d)
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating apigateway route: %w", err))
+		diags := diag.FromErr(fmt.Errorf("error creating API Gateway Route: %w", err))
 		return diags
 	}
 
@@ -115,14 +124,14 @@ func resourceApiGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, 
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsApiGatewayRouteAvailable)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error waiting for apigateway route to be ready: %w", err))
+		diags := diag.FromErr(fmt.Errorf("error waiting for API Gateway Route to be ready: %w", err))
 		return diags
 	}
 
-	return resourceApiGatewayRouteRead(ctx, d, meta)
+	return resourceAPIGatewayRouteRead(ctx, d, meta)
 }
 
-func resourceApiGatewayRouteRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 
 	routeId := d.Id()
@@ -135,41 +144,41 @@ func resourceApiGatewayRouteRead(ctx context.Context, d *schema.ResourceData, me
 			return nil
 		}
 
-		diags := diag.FromErr(fmt.Errorf("error while fetching apigateway route %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching API Gateway Route %s: %w", d.Id(), err))
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived apigateway route %s: %+v", d.Id(), route)
-	if err = client.SetApiGatewayRouteData(d, route); err != nil {
+	log.Printf("[INFO] Successfully retreived API Gateway Route %s: %+v", d.Id(), route)
+	if err = client.SetAPIGatewayRouteData(d, route); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceApiGatewayRouteUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAPIGatewayRouteUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 
 	updatedRoute, _, err := client.UpdateRoute(ctx, d)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error updating apigateway route: %w", err))
+		diags := diag.FromErr(fmt.Errorf("error updating API Gateway Route: %w", err))
 		return diags
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsApiGatewayRouteAvailable)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error waiting for apigateway route to be ready: %w", err))
+		diags := diag.FromErr(fmt.Errorf("error waiting for API Gateway Route to be ready: %w", err))
 		return diags
 	}
 
-	if err = client.SetApiGatewayRouteData(d, updatedRoute); err != nil {
+	if err = client.SetAPIGatewayRouteData(d, updatedRoute); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceApiGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAPIGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 	gatewayId := d.Get("gateway_id").(string)
 	routeId := d.Id()
@@ -180,11 +189,16 @@ func resourceApiGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error deleting apigateway route: %w", err))
+		diags := diag.FromErr(fmt.Errorf("error deleting API Gateway Route: %w", err))
 		return diags
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsApiGatewayRouteDeleted)
 
 	return nil
+}
+
+func resourceAPIGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	resourceApiGatewayRead(ctx, d, meta)
+	return []*schema.ResourceData{d}, nil
 }
