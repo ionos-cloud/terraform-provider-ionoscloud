@@ -1,7 +1,7 @@
 //go:build all || autoscaling
 // +build all autoscaling
 
-package asg
+package ionoscloud
 
 import (
 	"fmt"
@@ -20,9 +20,9 @@ const dataSourceAutoscalingGroupName = constant.DataSource + "." + constant.Auto
 func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
-			ionoscloud.testAccPreCheck(t)
+			testAccPreCheck(t)
 		},
-		ProviderFactories: ionoscloud.testAccProviderFactories,
+		ProviderFactories: testAccProviderFactories,
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {
 				VersionConstraint: "3.4.3",
@@ -230,7 +230,7 @@ resource "ionoscloud_autoscaling_group"  %[1]q {
       name        = "volume_1"
       image_password = random_password.image_password.result
       size        = 30
-      ssh_keys    = ["`+ionoscloud.sshKey+`"]
+      ssh_keys    = ["`+sshKey+`"]
       type        = "HDD"
       user_data    = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
       boot_order = "AUTO"

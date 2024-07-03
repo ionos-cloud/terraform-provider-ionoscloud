@@ -1,7 +1,7 @@
 //go:build all || autoscaling
 // +build all autoscaling
 
-package asg
+package ionoscloud
 
 import (
 	"testing"
@@ -15,13 +15,13 @@ import (
 func TestAccDataSourceAutoscalingGroupServers(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			ionoscloud.testAccPreCheck(t)
+			testAccPreCheck(t)
 		},
-		ProviderFactories: ionoscloud.testAccProviderFactories,
-		ExternalProviders: ionoscloud.randomProviderVersion343(),
+		ProviderFactories: testAccProviderFactories,
+		ExternalProviders: randomProviderVersion343(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAG_ConfigBasic,
+				Config: testAGConfig_basic(constant.AutoscalingGroupTestResource),
 			},
 			{
 				Config: testAccDataSourceAutoscalingGroupServers,
@@ -34,7 +34,7 @@ func TestAccDataSourceAutoscalingGroupServers(t *testing.T) {
 
 }
 
-const testAccDataSourceAutoscalingGroupServers = testAG_ConfigBasic + `
+var testAccDataSourceAutoscalingGroupServers = testAGConfig_basic(constant.AutoscalingGroupTestResource) + `
 data ` + constant.AutoscalingGroupServersResource + ` ` + constant.AutoscalingGroupServersTestDataSource + ` {
   group_id = ` + constant.AutoscalingGroupResource + `.` + constant.AutoscalingGroupTestResource + `.id
 }

@@ -2,6 +2,11 @@
 ### Enhancements
 - Move to `sdk-go-bundle` for logging sdk
 
+### Fixes 
+- Fail on k8s cluster and nodepool if creation or deletion entered failed state
+
+## 6.4.18
+
 ## 6.4.18
 ### Features
 - Add tests for Mongo cluster and user
