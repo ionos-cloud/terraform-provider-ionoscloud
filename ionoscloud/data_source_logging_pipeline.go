@@ -102,7 +102,7 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta in
 	var pipeline logging.Pipeline
 	var err error
 	if idOk {
-		pipeline, _, err = client.GetPipelineById(ctx, id)
+		pipeline, _, err = client.GetPipelineByID(ctx, id)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Logging pipeline with ID: %s, error: %w", id, err))
 		}

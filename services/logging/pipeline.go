@@ -29,11 +29,11 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return false, err
 	}
-	if pipeline.Metadata == nil || pipeline.Metadata.Status == nil {
+	if pipeline.Metadata == nil || pipeline.Metadata.State == nil {
 		return false, fmt.Errorf("expected metadata, got empty for pipeline with ID: %s", pipelineId)
 	}
-	log.Printf("[DEBUG] pipeline status: %s", *pipeline.Metadata.Status)
-	return strings.EqualFold(*pipeline.Metadata.Status, constant.Available), nil
+	log.Printf("[DEBUG] pipeline status: %s", *pipeline.Metadata.State)
+	return strings.EqualFold(*pipeline.Metadata.State, constant.Available), nil
 }
 
 func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (logging.Pipeline, utils.ApiResponseInfo, error) {
