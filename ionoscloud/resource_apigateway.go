@@ -92,24 +92,6 @@ func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceApiGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ApiGatewayClient
-	gatewayID := d.Id()
-	gateway, resp, err := client.GetApiGatewayById(ctx, gatewayID)
-	if err != nil {
-		if resp.HttpNotFound() {
-			d.SetId("")
-			return nil
-		}
-		return diag.FromErr(fmt.Errorf("error reading API Gateway with ID: %v, error: %w", gatewayID, err))
-	}
-	log.Printf("[INFO] Successfully retrieved API Gateway with ID: %v, gateway info: %+v", gatewayID, gateway)
-	if err := client.SetApiGatewayData(d, gateway); err != nil {
-		return diag.FromErr(err)
-	}
-	return nil
-}
-
 func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 	gatewayID := d.Id()
@@ -143,6 +125,14 @@ func resourceApiGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsGatewayDeleted)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("deletion check failed for API Gateway with ID: %v, error: %w", gatewayID, err))
+	}
+	return nil
+}
+
+func resourceApiGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	_, err := resourceApiGatewayImport(ctx, d, meta)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error reading API Gateway with ID: %v, error: %w", d.Id(), err))
 	}
 	return nil
 }

@@ -49,19 +49,6 @@ func resourceApiGatewayRoute() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			// Alex: I commented this because of TypeInvalid caused by upstreams.destination.
-			// If merge conflicts please remove my commented code
-			//
-			// "upstreams": {
-			// 	Type:     schema.TypeList,
-			// 	Required: true,
-			// 	MinItems: 1,
-			// 	Elem: &schema.Resource{
-			// 		Schema: map[string]*schema.Schema{
-			// 			"destination": {},
-			// 		},
-			// 	},
-			// },
 		},
 	}
 }
