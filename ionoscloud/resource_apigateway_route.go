@@ -134,10 +134,10 @@ func resourceAPIGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, 
 func resourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 
-	routeId := d.Id()
-	gatewayId := d.Get("gateway_id").(string)
+	routeID := d.Id()
+	gatewayID := d.Get("gateway_id").(string)
 
-	route, apiResponse, err := client.GetRouteById(ctx, gatewayId, routeId)
+	route, apiResponse, err := client.GetRouteByID(ctx, gatewayID, routeID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -180,10 +180,10 @@ func resourceAPIGatewayRouteUpdate(ctx context.Context, d *schema.ResourceData, 
 
 func resourceAPIGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
-	gatewayId := d.Get("gateway_id").(string)
-	routeId := d.Id()
+	gatewayID := d.Get("gateway_id").(string)
+	routeID := d.Id()
 
-	apiResponse, err := client.DeleteRoute(ctx, gatewayId, routeId)
+	apiResponse, err := client.DeleteRoute(ctx, gatewayID, routeID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -194,11 +194,19 @@ func resourceAPIGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsAPIGatewayRouteDeleted)
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error waiting for API Gateway Route to be deleted: %w", err))
+		return diags
+	}
 
 	return nil
 }
 
 func resourceAPIGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	resourceApiGatewayRead(ctx, d, meta)
+	diags := resourceApiGatewayRead(ctx, d, meta)
+	if diags != nil && diags.HasError() {
+		return nil, fmt.Errorf(diags[0].Summary)
+	}
+
 	return []*schema.ResourceData{d}, nil
 }

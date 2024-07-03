@@ -111,7 +111,7 @@ func dataSourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	partialMatch := d.Get("partial_match").(bool)
-	gatewayId := d.Get("gateway_id").(string)
+	gatewayID := d.Get("gateway_id").(string)
 
 	id := idValue.(string)
 	name := nameValue.(string)
@@ -126,12 +126,12 @@ func dataSourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, 
 	var route apigateway.RouteRead
 	var err error
 	if idOk {
-		route, _, err = client.GetRouteById(ctx, gatewayId, id)
+		route, _, err = client.GetRouteByID(ctx, gatewayID, id)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the API Gateway Route with ID: %s, error: %w", idValue, err))
 		}
 	} else {
-		routes, _, err := client.ListRoutes(ctx, gatewayId)
+		routes, _, err := client.ListRoutes(ctx, gatewayID)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching API Gateway Route: %w", err))
 		}

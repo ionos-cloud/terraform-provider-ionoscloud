@@ -12,67 +12,75 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// CreateRoute sends a POST request with the given data to the API to create a route.
 func (c *Client) CreateRoute(ctx context.Context, d *schema.ResourceData) (apigateway.RouteRead, *apigateway.APIResponse, error) {
 	request := setRoutePostRequest(d)
-	gatewayId := d.Get("gateway_id").(string)
+	gatewayID := d.Get("gateway_id").(string)
 
-	route, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesPost(ctx, gatewayId).RouteCreate(*request).Execute()
+	route, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesPost(ctx, gatewayID).RouteCreate(*request).Execute()
 	apiResponse.LogInfo()
 	return route, apiResponse, err
 }
 
+// UpdateRoute sends a PUT request with the given data to the API to update the route.
 func (c *Client) UpdateRoute(ctx context.Context, d *schema.ResourceData) (apigateway.RouteRead, *apigateway.APIResponse, error) {
 	request := setRoutePutRequest(d)
-	gatewayId := d.Get("gateway_id").(string)
-	routeId := d.Id()
+	gatewayID := d.Get("gateway_id").(string)
+	routeID := d.Id()
 
-	route, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesPut(ctx, gatewayId, routeId).RouteEnsure(*request).Execute()
+	route, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesPut(ctx, gatewayID, routeID).RouteEnsure(*request).Execute()
 	apiResponse.LogInfo()
 	return route, apiResponse, err
 }
 
-func (c *Client) GetRouteById(ctx context.Context, gatewayId string, routeId string) (apigateway.RouteRead, *apigateway.APIResponse, error) {
-	route, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesFindById(ctx, gatewayId, routeId).Execute()
+// GetRouteByID sends a GET request to the API to retrieve a route by ID from a given gateway.
+func (c *Client) GetRouteByID(ctx context.Context, gatewayID string, routeID string) (apigateway.RouteRead, *apigateway.APIResponse, error) {
+	route, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesFindById(ctx, gatewayID, routeID).Execute()
 	apiResponse.LogInfo()
 	return route, apiResponse, err
 }
 
-func (c *Client) ListRoutes(ctx context.Context, gatewayId string) (apigateway.RouteReadList, *apigateway.APIResponse, error) {
-	routes, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesGet(ctx, gatewayId).Execute()
+// ListRoutes sends a GET request to the API to retrieve all routes from a given gateway.
+func (c *Client) ListRoutes(ctx context.Context, gatewayID string) (apigateway.RouteReadList, *apigateway.APIResponse, error) {
+	routes, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesGet(ctx, gatewayID).Execute()
 	apiResponse.LogInfo()
 	return routes, apiResponse, err
 }
 
-func (c *Client) DeleteRoute(ctx context.Context, gatewayId string, routeId string) (*apigateway.APIResponse, error) {
-	apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesDelete(ctx, gatewayId, routeId).Execute()
+// DeleteRoute sends a DELETE request to the API to delete a route by ID from a given gateway.
+func (c *Client) DeleteRoute(ctx context.Context, gatewayID string, routeID string) (*apigateway.APIResponse, error) {
+	apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesDelete(ctx, gatewayID, routeID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
+// IsAPIGatewayRouteAvailable checks if the API Gateway Route is available.
 func (c *Client) IsAPIGatewayRouteAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	routeId := d.Id()
-	gatewayId := d.Get("gateway_id").(string)
+	routeID := d.Id()
+	gatewayID := d.Get("gateway_id").(string)
 
-	route, _, err := c.GetRouteById(ctx, gatewayId, routeId)
+	route, _, err := c.GetRouteByID(ctx, gatewayID, routeID)
 	if err != nil {
 		return false, err
 	}
 
 	if route.Metadata == nil || route.Metadata.Status == nil {
-		return false, fmt.Errorf("expected metadata, got empty for API Gateway Route with ID: %s", route)
+		return false, fmt.Errorf("expected metadata, got empty for API Gateway Route with ID: %s", routeID)
 	}
 	log.Printf("[DEBUG] API Gateway Route status: %s", *route.Metadata.Status)
 	return strings.EqualFold(*route.Metadata.Status, constant.Available), nil
 }
 
+// IsAPIGatewayRouteDeleted checks if the API Gateway Route has been deleted.
 func (c *Client) IsAPIGatewayRouteDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	routeId := d.Id()
-	gatewayId := d.Get("gateway_id").(string)
+	routeID := d.Id()
+	gatewayID := d.Get("gateway_id").(string)
 
-	_, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesFindById(ctx, gatewayId, routeId).Execute()
+	_, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesFindById(ctx, gatewayID, routeID).Execute()
 	return apiResponse.HttpNotFound(), err
 }
 
+// SetAPIGatewayRouteData sets the data for the API Gateway Route.
 func (c *Client) SetAPIGatewayRouteData(d *schema.ResourceData, route apigateway.RouteRead) error {
 	d.SetId(*route.Id)
 
@@ -142,10 +150,10 @@ func setRoutePostRequest(d *schema.ResourceData) *apigateway.RouteCreate {
 }
 
 func setRoutePutRequest(d *schema.ResourceData) *apigateway.RouteEnsure {
-	routeId := d.Id()
+	routeID := d.Id()
 	route := setRouteConfig(d)
 
-	return apigateway.NewRouteEnsure(routeId, *route)
+	return apigateway.NewRouteEnsure(routeID, *route)
 }
 
 func setRouteConfig(d *schema.ResourceData) *apigateway.Route {
@@ -156,17 +164,17 @@ func setRouteConfig(d *schema.ResourceData) *apigateway.Route {
 	websocket := d.Get("websocket").(bool)
 	upstreamsRaw := d.Get("upstreams").([]interface{})
 
-	var paths []string
+	paths := make([]string, 0)
 	for _, path := range pathsRaw {
 		paths = append(paths, path.(string))
 	}
 
-	var methods []string
+	methods := make([]string, 0)
 	for _, method := range methodsRaw {
 		methods = append(methods, method.(string))
 	}
 
-	var upstreams []apigateway.RouteUpstreams
+	upstreams := make([]apigateway.RouteUpstreams, 0)
 	for _, upstream := range upstreamsRaw {
 		upstreamData := upstream.(map[string]interface{})
 		scheme := upstreamData["scheme"].(string)
