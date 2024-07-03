@@ -164,18 +164,18 @@ func setRouteConfig(d *schema.ResourceData) *apigateway.Route {
 	websocket := d.Get("websocket").(bool)
 	upstreamsRaw := d.Get("upstreams").([]interface{})
 
-	paths := make([]string, 0)
-	for _, path := range pathsRaw {
-		paths = append(paths, path.(string))
+	paths := make([]string, len(pathsRaw))
+	for i, path := range pathsRaw {
+		paths[i] = path.(string)
 	}
 
-	methods := make([]string, 0)
-	for _, method := range methodsRaw {
-		methods = append(methods, method.(string))
+	methods := make([]string, len(methodsRaw))
+	for i, method := range methodsRaw {
+		methods[i] = method.(string)
 	}
 
-	upstreams := make([]apigateway.RouteUpstreams, 0)
-	for _, upstream := range upstreamsRaw {
+	upstreams := make([]apigateway.RouteUpstreams, len(upstreamsRaw))
+	for i, upstream := range upstreamsRaw {
 		upstreamData := upstream.(map[string]interface{})
 		scheme := upstreamData["scheme"].(string)
 		host := upstreamData["host"].(string)
@@ -191,7 +191,7 @@ func setRouteConfig(d *schema.ResourceData) *apigateway.Route {
 			Weight:       &weight,
 		}
 
-		upstreams = append(upstreams, upstreamObj)
+		upstreams[i] = upstreamObj
 	}
 
 	route := apigateway.NewRoute(routeName, routeType, paths, methods, upstreams)
