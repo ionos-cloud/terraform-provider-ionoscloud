@@ -87,7 +87,7 @@ func resourceAPIGatewayRoute() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "The port of the upstream.",
 							Optional:    true,
-							Default:     50,
+							Default:     80,
 						},
 						"loadbalancer": {
 							Type:        schema.TypeString,
@@ -122,7 +122,7 @@ func resourceAPIGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, 
 	d.SetId(*createdRoute.Id)
 	log.Printf("[INFO] Created API Gateway Route: %s", d.Id())
 
-	err = utils.WaitForResourceToBeReady(ctx, d, client.IsApiGatewayRouteAvailable)
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsAPIGatewayRouteAvailable)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error waiting for API Gateway Route to be ready: %w", err))
 		return diags
@@ -165,7 +165,7 @@ func resourceAPIGatewayRouteUpdate(ctx context.Context, d *schema.ResourceData, 
 		return diags
 	}
 
-	err = utils.WaitForResourceToBeReady(ctx, d, client.IsApiGatewayRouteAvailable)
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsAPIGatewayRouteAvailable)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error waiting for API Gateway Route to be ready: %w", err))
 		return diags
@@ -193,7 +193,7 @@ func resourceAPIGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, 
 		return diags
 	}
 
-	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsApiGatewayRouteDeleted)
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsAPIGatewayRouteDeleted)
 
 	return nil
 }

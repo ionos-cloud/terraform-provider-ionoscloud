@@ -49,7 +49,7 @@ func (c *Client) DeleteRoute(ctx context.Context, gatewayId string, routeId stri
 	return apiResponse, err
 }
 
-func (c *Client) IsApiGatewayRouteAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
+func (c *Client) IsAPIGatewayRouteAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	routeId := d.Id()
 	gatewayId := d.Get("gateway_id").(string)
 
@@ -65,7 +65,7 @@ func (c *Client) IsApiGatewayRouteAvailable(ctx context.Context, d *schema.Resou
 	return strings.EqualFold(*route.Metadata.Status, constant.Available), nil
 }
 
-func (c *Client) IsApiGatewayRouteDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+func (c *Client) IsAPIGatewayRouteDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	routeId := d.Id()
 	gatewayId := d.Get("gateway_id").(string)
 
