@@ -2,7 +2,7 @@
 
 ### Fixes 
 - Fail on k8s cluster and nodepool if creation or deletion entered failed state
-
+- K8s and dataplatform tests
 ## 6.4.18
 
 ### Features
