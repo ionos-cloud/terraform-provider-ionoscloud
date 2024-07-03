@@ -407,6 +407,6 @@ const (
 )
 
 const (
-	ApiGatewayResource = "ionoscloud_apigateway"
+	ApiGatewayResource      = "ionoscloud_apigateway"
 	ApiGatewayRouteResource = "ionoscloud_apigateway_route"
 )

@@ -3,24 +3,51 @@ package apigateway
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	apigateway "github.com/ionos-cloud/sdk-go-apigateway"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// GetApiGatewayById returns a gateway given an ID
 func (c *Client) GetApiGatewayById(ctx context.Context, id string) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
 	apiGateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiGateway, apiResponse, err
 }
 
+// ListApiGateways returns a list of all gateways
 func (c *Client) ListApiGateways(ctx context.Context) (apigateway.GatewayReadList, *apigateway.APIResponse, error) {
 	apiGateways, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return apiGateways, apiResponse, err
 }
 
+// DeleteApiGateway deletes a gateway given an ID
+func (c *Client) DeleteApiGateway(ctx context.Context, id string) (*apigateway.APIResponse, error) {
+	apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysDelete(ctx, id).Execute()
+	apiResponse.LogInfo()
+	return apiResponse, err
+}
+
+// UpdateApiGateway updates a gateway given an ID or creates a new one if it doesn't exist
+func (c *Client) UpdateApiGateway(ctx context.Context, id string, gw apigateway.GatewayEnsure) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
+	gateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysPut(ctx, id).GatewayEnsure(gw).Execute()
+	apiResponse.LogInfo()
+	return gateway, apiResponse, err
+}
+
+// CreateApiGateway creates a new gateway
+func (c *Client) CreateApiGateway(ctx context.Context, gw apigateway.GatewayCreate) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
+	gateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysPost(ctx).GatewayCreate(gw).Execute()
+	apiResponse.LogInfo()
+	return gateway, apiResponse, err
+}
+
+// SetApiGatewayData sets the data of the gateway in the terraform resource
 func (c *Client) SetApiGatewayData(d *schema.ResourceData, apiGateway apigateway.GatewayRead) error {
 	d.SetId(*apiGateway.Id)
 
@@ -62,7 +89,7 @@ func (c *Client) SetApiGatewayData(d *schema.ResourceData, apiGateway apigateway
 		}
 
 		if err := d.Set("custom_domains", customDomains); err != nil {
-			return fmt.Errorf("error setting custom_domains for the ApiGateway with ID: %s", *apiGateway.Id)
+			return fmt.Errorf("error setting custom_domains for the ApiGateway with ID %s: %w", *apiGateway.Id, err)
 		}
 	}
 
@@ -73,4 +100,73 @@ func (c *Client) SetApiGatewayData(d *schema.ResourceData, apiGateway apigateway
 	}
 
 	return nil
+}
+
+// IsGatewayReady checks if the gateway is ready
+func (c *Client) IsGatewayReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	gatewayID := d.Id()
+	gateway, _, err := c.GetApiGatewayById(ctx, gatewayID)
+	if err != nil {
+		return true, fmt.Errorf("status check failed for Gateway ID: %v, error: %w", gatewayID, err)
+	}
+
+	if gateway.Metadata == nil || gateway.Metadata.Status == nil {
+		return false, fmt.Errorf("metadata or status is empty for Gateway ID: %v", gatewayID)
+	}
+
+	log.Printf("[INFO] state of the MariaDB cluster with ID: %v is: %s ", gatewayID, *gateway.Metadata.Status)
+	return strings.EqualFold(*gateway.Metadata.Status, constant.Available), nil
+}
+
+// IsGatewayDeleted checks if the gateway is deleted
+func (c *Client) IsGatewayDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	gatewayID := d.Id()
+	_, apiResponse, err := c.GetApiGatewayById(ctx, gatewayID)
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return true, nil
+		}
+		return false, fmt.Errorf("check failed for Gateway deletion status, ID: %v, error: %w", gatewayID, err)
+	}
+	return false, nil
+}
+
+// GetGatewayDataCreate gets the gateway data from the terraform resource
+func GetGatewayDataCreate(d *schema.ResourceData) (*apigateway.GatewayCreate, error) {
+	gateway := apigateway.GatewayCreate{
+		Properties: &apigateway.Gateway{},
+	}
+
+	if v, ok := d.GetOk("name"); ok {
+		gateway.Properties.Name = apigateway.ToPtr(v.(string))
+	}
+
+	if v, ok := d.GetOk("logs"); ok {
+		gateway.Properties.Logs = apigateway.ToPtr(v.(bool))
+	}
+
+	if v, ok := d.GetOk("metrics"); ok {
+		gateway.Properties.Metrics = apigateway.ToPtr(v.(bool))
+	}
+
+	if v, ok := d.GetOk("custom_domains"); ok {
+		domains := v.([]interface{})
+		customDomains := make([]apigateway.GatewayCustomDomains, len(domains))
+		for i, domain := range domains {
+			domainMap := domain.(map[string]interface{})
+			customDomains[i] = apigateway.GatewayCustomDomains{
+				Name:          apigateway.ToPtr(domainMap["name"].(string)),
+				CertificateId: apigateway.ToPtr(domainMap["certificate_id"].(string)),
+			}
+		}
+		gateway.Properties.CustomDomains = &customDomains
+	}
+
+	return &gateway, nil
+}
+
+// GetGatewayDataEnsure gets the gateway data from the terraform resource
+func GetGatewayDataEnsure(d *schema.ResourceData) (*apigateway.GatewayEnsure, error) {
+	// TODO: This doesn't exist for MariaDB. Check if it's needed for API Gateway
+	return &apigateway.GatewayEnsure{}, nil
 }

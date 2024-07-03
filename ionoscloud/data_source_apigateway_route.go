@@ -23,7 +23,7 @@ func dataSourceApiGatewayRoute() *schema.Resource {
 			"apigateway_id": {
 				Type:        schema.TypeString,
 				Description: "The ID (UUID) of the API Gateway.",
-				Required: true,
+				Required:    true,
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -57,8 +57,8 @@ func dataSourceApiGatewayRoute() *schema.Resource {
 				},
 			},
 			"upstreams": {
-				Type:        schema.TypeList,
-				Computed:    true,
+				Type:     schema.TypeList,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"scheme": {
@@ -83,6 +83,7 @@ func dataSourceApiGatewayRoute() *schema.Resource {
 						},
 						"weight": {
 							Type:        schema.TypeInt,
+							Computed:    true, // Alex: Added because of a panic, please remove if wrong
 							Description: "Weight with which to split traffic to the upstream.",
 						},
 					},
