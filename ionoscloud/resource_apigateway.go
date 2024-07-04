@@ -22,6 +22,12 @@ func resourceApiGateway() *schema.Resource {
 			StateContext: resourceApiGatewayImport,
 		},
 		Schema: map[string]*schema.Schema{
+			// computed ID
+			"id": {
+				Type:        schema.TypeString,
+				Description: "The ID (UUID) of the API Gateway.",
+				Computed:    true,
+			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the API Gateway.",

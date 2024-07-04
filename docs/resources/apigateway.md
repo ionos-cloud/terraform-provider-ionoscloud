@@ -33,6 +33,7 @@ resource "ionoscloud_apigateway" "example" {
 
 ## Argument reference
 
+* `id` - (Computed)[string] The ID of the API Gateway.
 * `name` - (Required)[string] The name of the API Gateway.
 * `logs` - (Optional)[bool] Enable or disable logging. Defaults to `false`.
 * `metrics` - (Optional)[bool] Enable or disable metrics. Defaults to `false`.
