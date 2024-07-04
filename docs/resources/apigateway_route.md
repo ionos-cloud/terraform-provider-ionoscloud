@@ -35,7 +35,7 @@ resource "ionoscloud_apigateway_route" "apigateway_route" {
     port         = 80
     weight       = 100
   }
-  gateway_id = <your_apigateway_id>
+  gateway_id = <your_gateway_id>
 }
 ```
 

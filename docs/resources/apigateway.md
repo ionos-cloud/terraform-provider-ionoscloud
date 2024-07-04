@@ -52,9 +52,9 @@ resource "ionoscloud_apigateway" "example" {
 ```
 
 
-The resource can be imported using the `apigateway_id`, for example:
+The resource can be imported using the `gateway_id`, for example:
 
 ```
-terraform import ionoscloud_apigateway.example {apigateway_id}
+terraform import ionoscloud_apigateway.example {gateway_id}
 ```
 
