@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	validation "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -104,7 +105,7 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).LoggingClient
 	pipelineId := d.Id()
-	pipeline, apiResponse, err := client.GetPipelineById(ctx, pipelineId)
+	pipeline, apiResponse, err := client.GetPipelineByID(ctx, pipelineId)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
