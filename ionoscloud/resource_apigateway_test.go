@@ -5,6 +5,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -34,6 +35,52 @@ resource "ionoscloud_apigateway" "example" {
     name = "example_updated.com"
     certificate_id = "example-certificate-id-updated"
   }
+}
+`
+
+var testAccDataSourceApiGatewayMatchId = testAccCheckApiGatewayConfig_basic + `
+data "ionoscloud_apigateway" "example_by_id" {
+  id = ionoscloud_apigateway.example.id
+}
+`
+
+var testAccDataSourceApiGatewayMatchName = testAccCheckApiGatewayConfig_basic + `
+data "ionoscloud_apigateway" "example_by_name" {
+  name = ionoscloud_apigateway.example.name
+}
+`
+
+var testAccDataSourceApiGatewayMatching = testAccCheckApiGatewayConfig_basic + `
+data "ionoscloud_apigateway" "example_matching" {
+  name = ionoscloud_apigateway.example.name
+  custom_domains {
+    name = ionoscloud_apigateway.example.custom_domains.0.name
+  }
+}
+`
+
+var testAccDataSourceApiGatewayMultipleResultsError = testAccCheckApiGatewayConfig_basic + `
+resource "ionoscloud_apigateway" "example_multiple" {
+  name = "example"
+  logs = true
+  metrics = true
+  custom_domains {
+    name = "example.com"
+    certificate_id = "example-certificate-id"
+  }
+}
+
+data "ionoscloud_apigateway" "example_matching" {
+  name = ionoscloud_apigateway.example.name
+  custom_domains {
+    name = ionoscloud_apigateway.example.custom_domains.0.name
+  }
+}
+`
+
+var testAccDataSourceApiGatewayWrongNameError = testAccCheckApiGatewayConfig_basic + `
+data "ionoscloud_apigateway" "example_wrong_name" {
+  name = "wrong_name"
 }
 `
 
@@ -68,6 +115,44 @@ func TestAccApiGateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.name", "example_updated.com"),
 					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.certificate_id", "example-certificate-id-updated"),
 				),
+			},
+			{
+				Config: testAccDataSourceApiGatewayMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "name", "ionoscloud_apigateway.example", "name"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "logs", "ionoscloud_apigateway.example", "logs"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "metrics", "ionoscloud_apigateway.example", "metrics"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "custom_domains.0.name", "ionoscloud_apigateway.example", "custom_domains.0.name"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "custom_domains.0.certificate_id", "ionoscloud_apigateway.example", "custom_domains.0.certificate_id"),
+				),
+			},
+			{
+				Config: testAccDataSourceApiGatewayMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_name", "name", "ionoscloud_apigateway.example", "name"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_name", "logs", "ionoscloud_apigateway.example", "logs"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_name", "metrics", "ionoscloud_apigateway.example", "metrics"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_name", "custom_domains.0.name", "ionoscloud_apigateway.example", "custom_domains.0.name"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_name", "custom_domains.0.certificate_id", "ionoscloud_apigateway.example", "custom_domains.0.certificate_id"),
+				),
+			},
+			{
+				Config: testAccDataSourceApiGatewayMatching,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_matching", "name", "ionoscloud_apigateway.example", "name"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_matching", "logs", "ionoscloud_apigateway.example", "logs"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_matching", "metrics", "ionoscloud_apigateway.example", "metrics"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_matching", "custom_domains.0.name", "ionoscloud_apigateway.example", "custom_domains.0.name"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_matching", "custom_domains.0.certificate_id", "ionoscloud_apigateway.example", "custom_domains.0.certificate_id"),
+				),
+			},
+			{
+				Config:      testAccDataSourceApiGatewayMultipleResultsError,
+				ExpectError: regexp.MustCompile("more than one API Gateway found with the specified criteria"),
+			},
+			{
+				Config:      testAccDataSourceApiGatewayWrongNameError,
+				ExpectError: regexp.MustCompile("no API Gateway found with the specified criteria"),
 			},
 		},
 	})
