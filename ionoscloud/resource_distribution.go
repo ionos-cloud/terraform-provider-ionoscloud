@@ -54,7 +54,9 @@ func resourceDistribution() *schema.Resource {
 							Required:    true,
 						},
 						"upstream": {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
+							Required: true,
+							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"host": {
@@ -63,29 +65,30 @@ func resourceDistribution() *schema.Resource {
 										Required:    true,
 									},
 									"caching": {
-										Type:        schema.TypeString,
+										Type:        schema.TypeBool,
 										Description: "Enable or disable caching. If enabled, the CDN will cache the responses from the upstream host. Subsequent requests for the same resource will be served from the cache.",
 										Required:    true,
 									},
 									"waf": {
-										Type:        schema.TypeString,
+										Type:        schema.TypeBool,
 										Description: "Enable or disable WAF to protect the upstream host.",
 										Required:    true,
 									},
 									"geo_restrictions": {
 										Type:     schema.TypeList,
 										Optional: true,
+										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"block_list": {
-													Type: schema.TypeSet,
+													Type: schema.TypeList,
 													Elem: &schema.Schema{
 														Type: schema.TypeString,
 													},
 													Optional: true,
 												},
 												"allow_list": {
-													Type: schema.TypeSet,
+													Type: schema.TypeList,
 													Elem: &schema.Schema{
 														Type: schema.TypeString,
 													},
@@ -118,7 +121,7 @@ func resourceDistributionCreate(ctx context.Context, d *schema.ResourceData, met
 	distributionDomain := d.Get("domain").(string)
 
 	distribution := ionoscloud_cdn.DistributionCreate{
-		Properties: &ionoscloud_cdn.Distribution{
+		Properties: &ionoscloud_cdn.DistributionProperties{
 			Domain: &distributionDomain,
 		},
 	}
@@ -172,31 +175,27 @@ func resourceDistributionRead(ctx context.Context, d *schema.ResourceData, meta 
 func resourceDistributionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CdnClient
 
-	request := ionoscloud_cdn.DistributionEnsure{
-		Properties: &ionoscloud_cdn.Distribution{},
+	distributionDomain := d.Get("domain").(string)
+
+	request := ionoscloud_cdn.DistributionUpdate{
+		Id: ionoscloud_cdn.ToPtr(d.Id()),
+		Properties: &ionoscloud_cdn.DistributionProperties{
+			Domain: &distributionDomain,
+		},
 	}
 
-	if d.HasChange("domain") {
-		_, v := d.GetChange("domain")
-		vStr := v.(string)
-		request.Properties.Domain = &vStr
+	if attr, ok := d.GetOk("certificate_id"); ok {
+		attrStr := attr.(string)
+		request.Properties.CertificateId = &attrStr
 	}
 
-	if d.HasChange("certificate_id") {
-		_, v := d.GetChange("certificate_id")
-		vStr := v.(string)
-		request.Properties.CertificateId = &vStr
+	if routingRules, err := cdnService.GetRoutingRulesData(d); err == nil {
+		request.Properties.RoutingRules = routingRules
+	} else {
+		return diag.FromErr(err)
 	}
 
-	if d.HasChange("routing_rules") {
-		if routingRules, err := cdnService.GetRoutingRulesData(d); err == nil {
-			request.Properties.RoutingRules = routingRules
-		} else {
-			return diag.FromErr(err)
-		}
-	}
-
-	_, _, err := client.DistributionsApi.DistributionsPut(ctx, d.Id()).DistributionEnsure(request).Execute()
+	_, _, err := client.DistributionsApi.DistributionsPut(ctx, d.Id()).DistributionUpdate(request).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a distribution ID %s %w",

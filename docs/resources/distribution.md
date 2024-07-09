@@ -40,7 +40,7 @@ resource "ionoscloud_distribution" "example" {
       waf                 = false
       rate_limit_class    = "R10000"
       geo_restrictions {
-        clock_list = [ "CN", "RU"]
+        block_list = [ "CN", "RU"]
       }
     }
   }

@@ -14,9 +14,9 @@ import (
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 )
 
-func dataSourceDistibution() *schema.Resource {
+func dataSourceDistribution() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceDistibutionRead,
+		ReadContext: dataSourceDistributionRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -40,7 +40,6 @@ func dataSourceDistibution() *schema.Resource {
 			},
 			"routing_rules": {
 				Type:        schema.TypeList,
-				MaxItems:    20,
 				Description: "The routing rules for the distribution.",
 				Computed:    true,
 				Elem: &schema.Resource{
@@ -113,7 +112,7 @@ func dataSourceDistibution() *schema.Resource {
 	}
 }
 
-func dataSourceDistibutionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CdnClient
 
 	idValue, idOk := d.GetOk("id")
@@ -131,7 +130,7 @@ func dataSourceDistibutionRead(ctx context.Context, d *schema.ResourceData, meta
 		return diags
 	}
 
-	var distribution cdn.DistributionRead
+	var distribution cdn.Distribution
 	var err error
 
 	if idOk {
@@ -142,7 +141,7 @@ func dataSourceDistibutionRead(ctx context.Context, d *schema.ResourceData, meta
 			return diags
 		}
 	} else {
-		var results []cdn.DistributionRead
+		var results []cdn.Distribution
 
 		distributions, _, err := client.DistributionsApi.DistributionsGet(ctx).Execute()
 		if err != nil {
@@ -157,7 +156,7 @@ func dataSourceDistibutionRead(ctx context.Context, d *schema.ResourceData, meta
 			log.Printf("[INFO] Using data source for container registry by domain with partial_match %t and domain: %s", partialMatch, domain)
 
 			if distributions.Items != nil && len(*distributions.Items) > 0 {
-				var distributionsByDomain []cdn.DistributionRead
+				var distributionsByDomain []cdn.Distribution
 				for _, distributionItem := range *distributions.Items {
 					if distributionItem.Properties != nil && distributionItem.Properties.Domain != nil &&
 						(partialMatch && strings.Contains(*distributionItem.Properties.Domain, domain) ||

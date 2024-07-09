@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-cdn"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
@@ -124,6 +125,7 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  asg.ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
+			constant.DistributionResource:                      resourceDistribution(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -183,6 +185,7 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  asg.DataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           asg.DataSourceAutoscalingGroupServers(),
+			constant.DistributionResource:                      dataSourceDistribution(),
 		},
 	}
 
@@ -241,6 +244,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.TerraformVersion = terraformVersion
 
 	return services.SdkBundle{
+		CdnClient:          NewClientByType(clientOpts, cdnClient).(*ionoscloud_cdn.APIClient),
 		AutoscalingClient:  NewClientByType(clientOpts, autoscalingClient).(*autoscalingService.Client),
 		CertManagerClient:  NewClientByType(clientOpts, certManagerClient).(*cert.Client),
 		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
@@ -258,6 +262,7 @@ type clientType int
 
 const (
 	ionosClient clientType = iota
+	cdnClient
 	autoscalingClient
 	certManagerClient
 	containerRegistryClient
@@ -284,6 +289,20 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig.WaitTime = constant.MaxWaitTime
 			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 			return ionoscloud.NewAPIClient(newConfig)
+		}
+	case cdnClient:
+		{
+			newConfig := ionoscloud_cdn.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
+			newConfig.UserAgent = fmt.Sprintf(
+				"terraform-provider/%s_ionos-cloud-sdk-go-cdn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+				Version, ionoscloud_cdn.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+			if os.Getenv(constant.IonosDebug) != "" {
+				newConfig.Debug = true
+			}
+			newConfig.MaxRetries = constant.MaxRetries
+			newConfig.WaitTime = constant.MaxWaitTime
+			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+			return ionoscloud_cdn.NewAPIClient(newConfig)
 		}
 	case autoscalingClient:
 		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)

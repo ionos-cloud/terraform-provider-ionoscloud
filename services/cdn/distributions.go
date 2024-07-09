@@ -9,7 +9,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-func SetDistributionData(d *schema.ResourceData, distribution cdn.DistributionRead) error {
+func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) error {
 	resourceName := "distribution"
 
 	if distribution.Id != nil {
@@ -23,7 +23,7 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.DistributionRe
 	}
 
 	if distribution.Properties.CertificateId != nil {
-		if err := d.Set("certificateId", *distribution.Properties.CertificateId); err != nil {
+		if err := d.Set("certificate_id", *distribution.Properties.CertificateId); err != nil {
 			return utils.GenerateSetError(resourceName, "certificateId", err)
 		}
 	}
@@ -68,10 +68,13 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.DistributionRe
 					if rule.Upstream.GeoRestrictions.BlockList != nil {
 						geoRestrictionsEntry["block_list"] = *rule.Upstream.GeoRestrictions.BlockList
 					}
-					upstreamEntry["geo_restrictions"] = geoRestrictionsEntry
+					geoRestrictionsList := make([]interface{}, 0)
+					geoRestrictionsList = append(geoRestrictionsList, geoRestrictionsEntry)
+					upstreamEntry["geo_restrictions"] = geoRestrictionsList
 				}
-
-				ruleEntry["upstream"] = upstreamEntry
+				upstreamList := make([]interface{}, 0)
+				upstreamList = append(upstreamList, upstreamEntry)
+				ruleEntry["upstream"] = upstreamList
 			}
 
 			routingRules = append(routingRules, ruleEntry)
@@ -108,31 +111,53 @@ func GetRoutingRulesData(d *schema.ResourceData) (*[]cdn.RoutingRule, error) {
 
 		if _, upstreamOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream", routingRuleIndex)); upstreamOk {
 			routingRule.Upstream = &cdn.Upstream{}
-			if host, hostOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.host", routingRuleIndex)); hostOk {
+			if host, hostOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.host", routingRuleIndex)); hostOk {
 				host := host.(string)
 				routingRule.Upstream.Host = &host
 			}
-			if caching, cachingOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.caching", routingRuleIndex)); cachingOk {
+			if caching, cachingOk := d.GetOkExists(fmt.Sprintf("routing_rules.%d.upstream.0.caching", routingRuleIndex)); cachingOk {
 				caching := caching.(bool)
 				routingRule.Upstream.Caching = &caching
 			}
-			if waf, wafOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.waf", routingRuleIndex)); wafOk {
+			if waf, wafOk := d.GetOkExists(fmt.Sprintf("routing_rules.%d.upstream.0.waf", routingRuleIndex)); wafOk {
 				waf := waf.(bool)
 				routingRule.Upstream.Waf = &waf
 			}
 
-			if _, geo_restrictionsOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.geo_restrictions", routingRuleIndex)); geo_restrictionsOk {
+			if _, geo_restrictionsOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions", routingRuleIndex)); geo_restrictionsOk {
 				routingRule.Upstream.GeoRestrictions = &cdn.UpstreamGeoRestrictions{}
-				if allowList, allowListOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.geo_restrictions.allow_list", routingRuleIndex)); allowListOk {
-					allowList := allowList.([]string)
-					routingRule.Upstream.GeoRestrictions.AllowList = &allowList
+				if allowList, allowListOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions.0.allow_list", routingRuleIndex)); allowListOk {
+					raw := allowList.([]interface{})
+					if len(raw) > 0 {
+						countries := make([]string, 0)
+						for _, rawCountry := range raw {
+							if rawCountry != nil {
+								ip := rawCountry.(string)
+								countries = append(countries, ip)
+							}
+						}
+						if len(countries) > 0 {
+							routingRule.Upstream.GeoRestrictions.AllowList = &countries
+						}
+					}
 				}
-				if blockList, blockListOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.geo_restrictions.block_list", routingRuleIndex)); blockListOk {
-					blockList := blockList.([]string)
-					routingRule.Upstream.GeoRestrictions.BlockList = &blockList
+				if blockList, blockListOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions.0.block_list", routingRuleIndex)); blockListOk {
+					raw := blockList.([]interface{})
+					if len(raw) > 0 {
+						countries := make([]string, 0)
+						for _, rawCountry := range raw {
+							if rawCountry != nil {
+								ip := rawCountry.(string)
+								countries = append(countries, ip)
+							}
+						}
+						if len(countries) > 0 {
+							routingRule.Upstream.GeoRestrictions.BlockList = &countries
+						}
+					}
 				}
 			}
-			if rateLimitClass, rateLimitClassOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.rateLimitClass", routingRuleIndex)); rateLimitClassOk {
+			if rateLimitClass, rateLimitClassOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.rate_limit_class", routingRuleIndex)); rateLimitClassOk {
 				rateLimitClass := rateLimitClass.(string)
 				routingRule.Upstream.RateLimitClass = &rateLimitClass
 			}

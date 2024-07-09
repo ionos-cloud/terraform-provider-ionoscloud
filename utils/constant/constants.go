@@ -321,6 +321,10 @@ const (
 )
 
 const (
+	DistributionResource = "ionoscloud_distribution"
+)
+
+const (
 	ResourceIpFailover         = "ionoscloud_ipfailover"
 	IpfailoverResourceFullName = ResourceIpFailover + "." + IpfailoverName
 	IpfailoverName             = "failover-group"
