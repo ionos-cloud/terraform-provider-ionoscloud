@@ -34,15 +34,17 @@ func (c *Client) DeleteApiGateway(ctx context.Context, id string) (*apigateway.A
 }
 
 // UpdateApiGateway updates a gateway given an ID or creates a new one if it doesn't exist
-func (c *Client) UpdateApiGateway(ctx context.Context, id string, gw apigateway.GatewayEnsure) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
-	gateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysPut(ctx, id).GatewayEnsure(gw).Execute()
+func (c *Client) UpdateApiGateway(ctx context.Context, d *schema.ResourceData) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
+	gateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysPut(ctx, d.Id()).
+		GatewayEnsure(*setGatewayPutRequest(d)).Execute()
 	apiResponse.LogInfo()
 	return gateway, apiResponse, err
 }
 
 // CreateApiGateway creates a new gateway
-func (c *Client) CreateApiGateway(ctx context.Context, gw apigateway.GatewayCreate) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
-	gateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysPost(ctx).GatewayCreate(gw).Execute()
+func (c *Client) CreateApiGateway(ctx context.Context, d *schema.ResourceData) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
+	gateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysPost(ctx).
+		GatewayCreate(*setGatewayPostRequest(d)).Execute()
 	apiResponse.LogInfo()
 	return gateway, apiResponse, err
 }
@@ -131,42 +133,41 @@ func (c *Client) IsGatewayDeleted(ctx context.Context, d *schema.ResourceData) (
 	return false, nil
 }
 
-// GetGatewayDataCreate gets the gateway data from the terraform resource
-func GetGatewayDataCreate(d *schema.ResourceData) (*apigateway.GatewayCreate, error) {
-	gateway := apigateway.GatewayCreate{
-		Properties: &apigateway.Gateway{},
-	}
-
-	if v, ok := d.GetOk("name"); ok {
-		gateway.Properties.Name = apigateway.ToPtr(v.(string))
-	}
-
-	if v, ok := d.GetOk("logs"); ok {
-		gateway.Properties.Logs = apigateway.ToPtr(v.(bool))
-	}
-
-	if v, ok := d.GetOk("metrics"); ok {
-		gateway.Properties.Metrics = apigateway.ToPtr(v.(bool))
-	}
-
-	if v, ok := d.GetOk("custom_domains"); ok {
-		domains := v.([]interface{})
-		customDomains := make([]apigateway.GatewayCustomDomains, len(domains))
-		for i, domain := range domains {
-			domainMap := domain.(map[string]interface{})
-			customDomains[i] = apigateway.GatewayCustomDomains{
-				Name:          apigateway.ToPtr(domainMap["name"].(string)),
-				CertificateId: apigateway.ToPtr(domainMap["certificate_id"].(string)),
-			}
-		}
-		gateway.Properties.CustomDomains = &customDomains
-	}
-
-	return &gateway, nil
+func setGatewayPostRequest(d *schema.ResourceData) *apigateway.GatewayCreate {
+	return apigateway.NewGatewayCreate(setGatewayConfig(d))
 }
 
-// GetGatewayDataEnsure gets the gateway data from the terraform resource
-func GetGatewayDataEnsure(d *schema.ResourceData) (*apigateway.GatewayEnsure, error) {
-	// TODO: This doesn't exist for MariaDB. Check if it's needed for API Gateway
-	return &apigateway.GatewayEnsure{}, nil
+func setGatewayPutRequest(d *schema.ResourceData) *apigateway.GatewayEnsure {
+	gatewayID := d.Id()
+	gateway := setGatewayConfig(d)
+
+	return apigateway.NewGatewayEnsure(gatewayID, gateway)
+}
+
+func setGatewayConfig(d *schema.ResourceData) apigateway.Gateway {
+	gatewayName := d.Get("name").(string)
+	logs := d.Get("logs").(bool)
+	metrics := d.Get("metrics").(bool)
+	customDomainsRaw := d.Get("custom_domains").([]interface{})
+
+	customDomains := make([]apigateway.GatewayCustomDomains, len(customDomainsRaw))
+	for i, domain := range customDomainsRaw {
+		domainData := domain.(map[string]interface{})
+		name := domainData["name"].(string)
+		certificateId := domainData["certificate_id"].(string)
+
+		customDomainObj := apigateway.GatewayCustomDomains{
+			Name:          &name,
+			CertificateId: &certificateId,
+		}
+
+		customDomains[i] = customDomainObj
+	}
+
+	return apigateway.Gateway{
+		Name:          apigateway.ToPtr(gatewayName),
+		Logs:          apigateway.ToPtr(logs),
+		Metrics:       apigateway.ToPtr(metrics),
+		CustomDomains: &customDomains,
+	}
 }
