@@ -33,7 +33,7 @@ func resourceDistribution() *schema.Resource {
 			"certificate_id": {
 				Type:        schema.TypeString,
 				Description: "The ID of the certificate to use for the distribution.",
-				Required:    true,
+				Optional:    true,
 			},
 			"routing_rules": {
 				Type:        schema.TypeList,
