@@ -33,16 +33,16 @@ func (c *Client) DeleteApiGateway(ctx context.Context, id string) (*apigateway.A
 	return apiResponse, err
 }
 
-// UpdateApiGateway updates a gateway given an ID or creates a new one if it doesn't exist
-func (c *Client) UpdateApiGateway(ctx context.Context, d *schema.ResourceData) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
+// UpdateAPIGateway updates a gateway given an ID or creates a new one if it doesn't exist
+func (c *Client) UpdateAPIGateway(ctx context.Context, d *schema.ResourceData) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
 	gateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysPut(ctx, d.Id()).
 		GatewayEnsure(*setGatewayPutRequest(d)).Execute()
 	apiResponse.LogInfo()
 	return gateway, apiResponse, err
 }
 
-// CreateApiGateway creates a new gateway
-func (c *Client) CreateApiGateway(ctx context.Context, d *schema.ResourceData) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
+// CreateAPIGateway creates a new gateway
+func (c *Client) CreateAPIGateway(ctx context.Context, d *schema.ResourceData) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
 	gateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysPost(ctx).
 		GatewayCreate(*setGatewayPostRequest(d)).Execute()
 	apiResponse.LogInfo()
@@ -154,11 +154,11 @@ func setGatewayConfig(d *schema.ResourceData) apigateway.Gateway {
 	for i, domain := range customDomainsRaw {
 		domainData := domain.(map[string]interface{})
 		name := domainData["name"].(string)
-		certificateId := domainData["certificate_id"].(string)
+		certificateID := domainData["certificate_id"].(string)
 
 		customDomainObj := apigateway.GatewayCustomDomains{
 			Name:          &name,
-			CertificateId: &certificateId,
+			CertificateId: &certificateID,
 		}
 
 		customDomains[i] = customDomainObj

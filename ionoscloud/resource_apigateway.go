@@ -76,7 +76,7 @@ func resourceApiGateway() *schema.Resource {
 func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 
-	response, _, err := client.CreateApiGateway(ctx, d)
+	response, _, err := client.CreateAPIGateway(ctx, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating API Gateway: %w", err))
 	}
@@ -95,7 +95,7 @@ func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 
-	response, _, err := client.UpdateApiGateway(ctx, d)
+	response, _, err := client.UpdateAPIGateway(ctx, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error updating API Gateway: %w", err))
 	}
