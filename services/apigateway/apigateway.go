@@ -114,7 +114,7 @@ func (c *Client) IsGatewayReady(ctx context.Context, d *schema.ResourceData) (bo
 		return false, fmt.Errorf("metadata or status is empty for Gateway ID: %v", gatewayID)
 	}
 
-	log.Printf("[INFO] state of the MariaDB cluster with ID: %v is: %s ", gatewayID, *gateway.Metadata.Status)
+	log.Printf("[INFO] state of the gateway with ID %s is: %s ", gatewayID, *gateway.Metadata.Status)
 	return strings.EqualFold(*gateway.Metadata.Status, constant.Available), nil
 }
 
