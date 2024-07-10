@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -22,6 +21,12 @@ func resourceApiGateway() *schema.Resource {
 			StateContext: resourceApiGatewayImport,
 		},
 		Schema: map[string]*schema.Schema{
+			// computed ID
+			"id": {
+				Type:        schema.TypeString,
+				Description: "The ID (UUID) of the API Gateway.",
+				Computed:    true,
+			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the API Gateway.",
@@ -71,12 +76,7 @@ func resourceApiGateway() *schema.Resource {
 func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
 
-	gateway, err := apigateway.GetGatewayDataCreate(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	response, _, err := client.CreateApiGateway(ctx, *gateway)
+	response, _, err := client.CreateAPIGateway(ctx, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating API Gateway: %w", err))
 	}
@@ -84,7 +84,7 @@ func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 	d.SetId(gatewayID)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsGatewayReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error checking status for API Gateway with ID: %v, error: %w", gatewayID, err))
+		return diag.FromErr(fmt.Errorf("error checking status for API Gateway with ID %v: %w", gatewayID, err))
 	}
 	if err := client.SetApiGatewayData(d, response); err != nil {
 		return diag.FromErr(err)
@@ -94,20 +94,14 @@ func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
-	gatewayID := d.Id()
 
-	gateway, err := apigateway.GetGatewayDataEnsure(d)
+	response, _, err := client.UpdateAPIGateway(ctx, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error updating API Gateway: %w", err))
 	}
-
-	response, _, err := client.UpdateApiGateway(ctx, gatewayID, *gateway)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("error updating API Gateway with ID: %v, error: %w", gatewayID, err))
-	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsGatewayReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error checking status for API Gateway with ID: %v after update, error: %w", gatewayID, err))
+		return diag.FromErr(fmt.Errorf("error checking status for API Gateway %w", err))
 	}
 	if err := client.SetApiGatewayData(d, response); err != nil {
 		return diag.FromErr(err)

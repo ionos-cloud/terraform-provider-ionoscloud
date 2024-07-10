@@ -33,6 +33,7 @@ resource "ionoscloud_apigateway" "example" {
 
 ## Argument reference
 
+* `id` - (Computed)[string] The ID of the API Gateway.
 * `name` - (Required)[string] The name of the API Gateway.
 * `logs` - (Optional)[bool] Enable or disable logging. Defaults to `false`.
 * `metrics` - (Optional)[bool] Enable or disable metrics. Defaults to `false`.
@@ -52,9 +53,9 @@ resource "ionoscloud_apigateway" "example" {
 ```
 
 
-The resource can be imported using the `apigateway_id`, for example:
+The resource can be imported using the `gateway_id`, for example:
 
 ```
-terraform import ionoscloud_apigateway.example {apigateway_id}
+terraform import ionoscloud_apigateway.example {gateway_id}
 ```
 
