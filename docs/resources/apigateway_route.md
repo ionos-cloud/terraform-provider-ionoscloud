@@ -1,7 +1,7 @@
 ---
 subcategory: "ApiGateway"
 layout: "ionoscloud"
-page_title: "IonosCloud: route"
+page_title: "IonosCloud: ionoscloud_apigateway_route"
 sidebar_current: "docs-resource-apigateway-route"
 description: |-
   Creates and manages IonosCloud API Gateway Route objects.
