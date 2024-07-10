@@ -35,8 +35,12 @@ func TestAccAPIGatewayRouteBasic(t *testing.T) {
 			CheckDestroy:      testAccCheckAPIGatewayRouteDestroyCheck,
 			Steps: []resource.TestStep{
 				{
-					Config: testAPIGatewayRouteBasic(routeResourceName),
-					Check:  checkAPIGatewayRouteResourceCreate(),
+					Config: configAPIGatewayRouteBasic(routeResourceName, routeAttributeNameValue),
+					Check:  checkAPIGatewayRouteResource(routeAttributeNameValue),
+				},
+				{
+					Config: configAPIGatewayRouteBasic(routeResourceName, routeAttributeNameValueUpdated),
+					Check:  checkAPIGatewayRouteResource(routeAttributeNameValueUpdated),
 				},
 			},
 		},
@@ -63,11 +67,11 @@ func TestAccAPIGatewayRouteDataSourceGetByID(t *testing.T) {
 			CheckDestroy:      testAccCheckAPIGatewayRouteDestroyCheck,
 			Steps: []resource.TestStep{
 				{
-					Config: testAPIGatewayRouteDataSourceGetByID(routeResourceName, routeDataName, constant.ApiGatewayRouteResource+"."+routeResourceName+".id"),
-					Check:  checkAPIGatewayRouteDataSourceGet(),
+					Config: configAPIGatewayRouteDataSourceGetByID(routeResourceName, routeDataName, constant.ApiGatewayRouteResource+"."+routeResourceName+".id"),
+					Check:  checkAPIGatewayRouteAttributes(constant.DataSource + "." + constant.ApiGatewayRouteResource + "." + routeDataName, routeAttributeNameValue),
 				},
 				{
-					Config:      testAPIGatewayRouteDataSourceGetByID(routeResourceName, routeDataName, `"00000000-0000-0000-0000-000000000000"`),
+					Config:      configAPIGatewayRouteDataSourceGetByID(routeResourceName, routeDataName, `"00000000-0000-0000-0000-000000000000"`),
 					ExpectError: regexp.MustCompile("an error occurred while fetching the API Gateway Route with ID"),
 				},
 			},
@@ -95,11 +99,11 @@ func TestAccAPIGatewayRouteDataSourceGetByName(t *testing.T) {
 			CheckDestroy:      testAccCheckAPIGatewayRouteDestroyCheck,
 			Steps: []resource.TestStep{
 				{
-					Config: testAPIGatewayRouteDataSourceGetByName(routeResourceName, routeDataName, constant.ApiGatewayRouteResource+"."+routeResourceName+".name"),
-					Check:  checkAPIGatewayRouteDataSourceGet(),
+					Config: configAPIGatewayRouteDataSourceGetByName(routeResourceName, routeDataName, constant.ApiGatewayRouteResource+"."+routeResourceName+".name"),
+					Check:  checkAPIGatewayRouteAttributes(constant.DataSource + "." + constant.ApiGatewayRouteResource + "." + routeDataName, routeAttributeNameValue),
 				},
 				{
-					Config:      testAPIGatewayRouteDataSourceGetByName(routeResourceName, routeDataName, `"wrongname"`),
+					Config:      configAPIGatewayRouteDataSourceGetByName(routeResourceName, routeDataName, `"wrongname"`),
 					ExpectError: regexp.MustCompile("no API Gateway Route found with the specified name"),
 				},
 			},
@@ -156,94 +160,86 @@ func testAccCheckAPIGatewayRouteDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func checkAPIGatewayRouteResourceCreate() resource.TestCheckFunc {
+func checkAPIGatewayRouteResource(attributeNameValueReference string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		testAccCheckAPIGatewayRouteExists(constant.ApiGatewayRouteResource+"."+routeResourceName),
-		resource.TestCheckResourceAttr(constant.ApiGatewayRouteResource+"."+routeResourceName, routeAttributeName, routeAttributeNameValue),
-		resource.TestCheckResourceAttr(constant.ApiGatewayRouteResource+"."+routeResourceName, routeAttributeType, routeAttributeTypeValue),
-		resource.TestCheckResourceAttr(constant.ApiGatewayRouteResource+"."+routeResourceName, routeAttributePaths, routeAttributePathsValue),
-		resource.TestCheckResourceAttr(constant.ApiGatewayRouteResource+"."+routeResourceName, routeAttributeMethods, routeAttributeMethodsValue),
-		resource.TestCheckResourceAttr(constant.ApiGatewayRouteResource+"."+routeResourceName, routeAttributeWebsocket, routeAttributeWebsocketValue),
-		resource.TestCheckResourceAttr(constant.ApiGatewayRouteResource+"."+routeResourceName, routeAttributeUpstreamsScheme, routeAttributeUpstreamsSchemeValue),
-		resource.TestCheckResourceAttr(constant.ApiGatewayRouteResource+"."+routeResourceName, routeAttributeUpstreamsLoadbalancer, routeAttributeUpstreamsLoadbalancerValue),
-		resource.TestCheckResourceAttr(constant.ApiGatewayRouteResource+"."+routeResourceName, routeAttributeUpstreamsHost, routeAttributeUpstreamsHostValue),
-		resource.TestCheckResourceAttr(constant.ApiGatewayRouteResource+"."+routeResourceName, routeAttributeUpstreamsPort, routeAttributeUpstreamsPortValue),
-		resource.TestCheckResourceAttr(constant.ApiGatewayRouteResource+"."+routeResourceName, routeAttributeUpstreamsWeight, routeAttributeUpstreamsWeightValue),
+		checkAPIGatewayRouteAttributes(constant.ApiGatewayRouteResource+"."+routeResourceName, attributeNameValueReference),
 	)
 }
 
-func testAPIGatewayRouteBasic(name string) string {
+func configAPIGatewayRouteBasic(resourceName, attributeName string) string {
 	pathsValue := fmt.Sprintf(`"%s"`, routeAttributePathsValue)
 	methodsValue := fmt.Sprintf(`"%s"`, routeAttributeMethodsValue)
 
 	routeBasicConfig := fmt.Sprintf(
-		templateAPIGatewayRouteConfig, name, routeAttributeNameValue, routeAttributeTypeValue, pathsValue, methodsValue, routeAttributeWebsocketValue,
+		templateAPIGatewayRouteConfig, resourceName, attributeName, routeAttributeTypeValue, pathsValue, methodsValue, routeAttributeWebsocketValue,
 		routeAttributeUpstreamsSchemeValue, routeAttributeUpstreamsLoadbalancerValue, routeAttributeUpstreamsHostValue, routeAttributeUpstreamsPortValue,
 		routeAttributeUpstreamsWeightValue,
 	)
 	return strings.Join([]string{defaultAPIGatewayConfig, routeBasicConfig}, "\n")
 }
 
-func checkAPIGatewayRouteDataSourceGet() resource.TestCheckFunc {
+func checkAPIGatewayRouteAttributes(fullResourceName, attributeNameReferenceValue string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
-		resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeName, routeAttributeNameValue),
-		resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeType, routeAttributeTypeValue),
-		resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributePaths, routeAttributePathsValue),
-		resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeMethods, routeAttributeMethodsValue),
-		resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeWebsocket, routeAttributeWebsocketValue),
-		resource.TestCheckResourceAttr(
-			constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeUpstreamsScheme, routeAttributeUpstreamsSchemeValue,
-		),
-		resource.TestCheckResourceAttr(
-			constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeUpstreamsLoadbalancer, routeAttributeUpstreamsLoadbalancerValue,
-		),
-		resource.TestCheckResourceAttr(
-			constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeUpstreamsHost, routeAttributeUpstreamsHostValue,
-		),
-		resource.TestCheckResourceAttr(
-			constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeUpstreamsPort, routeAttributeUpstreamsPortValue,
-		),
-		resource.TestCheckResourceAttr(
-			constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeUpstreamsWeight, routeAttributeUpstreamsWeightValue,
-		),
+		resource.TestCheckResourceAttr(fullResourceName, routeAttributeName, attributeNameReferenceValue),
+		resource.TestCheckResourceAttr(fullResourceName, routeAttributeType, routeAttributeTypeValue),
+		resource.TestCheckResourceAttr(fullResourceName, routeAttributePaths, routeAttributePathsValue),
+		resource.TestCheckResourceAttr(fullResourceName, routeAttributeMethods, routeAttributeMethodsValue),
+		resource.TestCheckResourceAttr(fullResourceName, routeAttributeWebsocket, routeAttributeWebsocketValue),
+		resource.TestCheckResourceAttr(fullResourceName, routeAttributeUpstreamsScheme, routeAttributeUpstreamsSchemeValue),
+		resource.TestCheckResourceAttr(fullResourceName, routeAttributeUpstreamsLoadbalancer, routeAttributeUpstreamsLoadbalancerValue),
+		resource.TestCheckResourceAttr(fullResourceName, routeAttributeUpstreamsHost, routeAttributeUpstreamsHostValue),
+		resource.TestCheckResourceAttr(fullResourceName, routeAttributeUpstreamsPort, routeAttributeUpstreamsPortValue),
+		resource.TestCheckResourceAttr(fullResourceName, routeAttributeUpstreamsWeight, routeAttributeUpstreamsWeightValue),
 	)
 }
 
-func testAPIGatewayRouteDataSourceGetByID(resourceName, dataSourceName, attributeId string) string {
+func configAPIGatewayRouteDataSourceGetByID(resourceName, dataSourceName, attributeId string) string {
 	dataSourceBasicConfig := fmt.Sprintf(templateAPIGatewayRouteDataIDConfig, dataSourceName, attributeId)
-	baseConfig := testAPIGatewayRouteBasic(resourceName)
+	baseConfig := configAPIGatewayRouteBasic(resourceName, routeAttributeNameValue)
 
 	return strings.Join([]string{baseConfig, dataSourceBasicConfig}, "\n")
 }
 
-func testAPIGatewayRouteDataSourceGetByName(resourceName, dataSourceName, attributeName string) string {
+func configAPIGatewayRouteDataSourceGetByName(resourceName, dataSourceName, attributeName string) string {
 	dataSourceBasicConfig := fmt.Sprintf(templateAPIGatewayRouteDataNameConfig, dataSourceName, attributeName)
-	baseConfig := testAPIGatewayRouteBasic(resourceName)
+	baseConfig := configAPIGatewayRouteBasic(resourceName, routeAttributeNameValue)
 
 	return strings.Join([]string{baseConfig, dataSourceBasicConfig}, "\n")
 }
 
 var (
-	routeResourceName                        = "example_route"
-	routeDataName                            = "example_route_data"
-	routeAttributeName                       = "name"
-	routeAttributeNameValue                  = "exampleroute"
-	routeAttributeType                       = "type"
-	routeAttributeTypeValue                  = "http"
-	routeAttributePaths                      = "paths.0"
-	routeAttributePathsValue                 = "/foo/*"
-	routeAttributeMethods                    = "methods.0"
-	routeAttributeMethodsValue               = "GET"
-	routeAttributeWebsocket                  = "websocket"
-	routeAttributeWebsocketValue             = "false"
-	routeAttributeUpstreamsScheme            = "upstreams.0.scheme"
-	routeAttributeUpstreamsSchemeValue       = "http"
-	routeAttributeUpstreamsHost              = "upstreams.0.host"
-	routeAttributeUpstreamsHostValue         = "example.com"
-	routeAttributeUpstreamsPort              = "upstreams.0.port"
-	routeAttributeUpstreamsPortValue         = "80"
-	routeAttributeUpstreamsWeight            = "upstreams.0.weight"
-	routeAttributeUpstreamsWeightValue       = "100"
+	routeResourceName = "example_route"
+	routeDataName     = "example_route_data"
+
+	routeAttributeName             = "name"
+	routeAttributeNameValue        = "exampleroute"
+	routeAttributeNameValueUpdated = "examplerouteupdated"
+
+	routeAttributeType      = "type"
+	routeAttributeTypeValue = "http"
+
+	routeAttributePaths      = "paths.0"
+	routeAttributePathsValue = "/foo/*"
+
+	routeAttributeMethods      = "methods.0"
+	routeAttributeMethodsValue = "GET"
+
+	routeAttributeWebsocket      = "websocket"
+	routeAttributeWebsocketValue = "false"
+
+	routeAttributeUpstreamsScheme      = "upstreams.0.scheme"
+	routeAttributeUpstreamsSchemeValue = "http"
+
+	routeAttributeUpstreamsHost      = "upstreams.0.host"
+	routeAttributeUpstreamsHostValue = "example.com"
+
+	routeAttributeUpstreamsPort      = "upstreams.0.port"
+	routeAttributeUpstreamsPortValue = "80"
+
+	routeAttributeUpstreamsWeight      = "upstreams.0.weight"
+	routeAttributeUpstreamsWeightValue = "100"
+
 	routeAttributeUpstreamsLoadbalancer      = "upstreams.0.loadbalancer"
 	routeAttributeUpstreamsLoadbalancerValue = "round-robin"
 )
