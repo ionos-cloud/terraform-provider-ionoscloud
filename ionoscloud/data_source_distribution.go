@@ -65,12 +65,12 @@ func dataSourceDistribution() *schema.Resource {
 										Computed:    true,
 									},
 									"caching": {
-										Type:        schema.TypeString,
+										Type:        schema.TypeBool,
 										Description: "Enable or disable caching. If enabled, the CDN will cache the responses from the upstream host. Subsequent requests for the same resource will be served from the cache.",
 										Computed:    true,
 									},
 									"waf": {
-										Type:        schema.TypeString,
+										Type:        schema.TypeBool,
 										Description: "Enable or disable WAF to protect the upstream host.",
 										Computed:    true,
 									},

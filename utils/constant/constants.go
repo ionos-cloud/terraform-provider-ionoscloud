@@ -321,8 +321,11 @@ const (
 )
 
 const (
-	DistributionResource     = "ionoscloud_distribution"
-	DistributionTestResource = "test_distribution"
+	DistributionResource           = "ionoscloud_distribution"
+	DistributionTestResource       = "test_distribution"
+	DistributionDataSourceById     = "test_distribution_id"
+	DistributionDataSourceByDomain = "test_distribution_domain"
+	DistributionDataSourceMatching = "test_distribution_matching"
 )
 
 const (
