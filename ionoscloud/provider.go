@@ -214,6 +214,7 @@ func Provider() *schema.Provider {
 			constant.TargetGroupResource:                       dataSourceTargetGroup(),
 			constant.DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
 			constant.DBaaSRedisDBReplicaSetResource:            dataSourceDBaaSRedisDBReplicaSet(),
+			constant.DBaaSRedisDBSnapshotResource:              dataSourceDBaaSRedisDBSnapshot(),
 			constant.CertificateResource:                       dataSourceCertificate(),
 			constant.AutoCertificateProviderResource:           dataSourceCertificateManagerProvider(),
 			constant.AutoCertificateResource:                   dataSourceCertificateManagerAutoCertificate(),

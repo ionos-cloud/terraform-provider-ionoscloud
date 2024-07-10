@@ -89,6 +89,13 @@ func (c *RedisDBClient) GetReplicaSet(ctx context.Context, replicaSetID, locatio
 	return replicaSet, apiResponse, err
 }
 
+func (c *RedisDBClient) GetSnapshot(ctx context.Context, snapshotID, location string) (redisdb.SnapshotRead, *redisdb.APIResponse, error) {
+	c.modifyConfigURL(location)
+	snapshot, apiResponse, err := c.sdkClient.SnapshotApi.SnapshotsFindById(ctx, snapshotID).Execute()
+	apiResponse.LogInfo()
+	return snapshot, apiResponse, err
+}
+
 func (c *RedisDBClient) ListReplicaSets(ctx context.Context, filterName, location string) (redisdb.ReplicaSetReadList, *redisdb.APIResponse, error) {
 	c.modifyConfigURL(location)
 	request := c.sdkClient.ReplicaSetApi.ReplicasetsGet(ctx)
@@ -263,6 +270,38 @@ func (c *RedisDBClient) SetRedisDBReplicaSetData(d *schema.ResourceData, replica
 		}
 	}
 
+	return nil
+}
+
+func (c *RedisDBClient) SetSnapshotData(d *schema.ResourceData, snapshot redisdb.SnapshotRead) error {
+	if snapshot.Id == nil {
+		return fmt.Errorf("expected a valid ID for RedisDB snapshot, but got 'nil' instead")
+	}
+	d.SetId(*snapshot.Id)
+	if snapshot.Metadata == nil {
+		return fmt.Errorf("response metadata should not be empty for RedisDB snapshot with ID: %v", *snapshot.Id)
+	}
+	var metadata []interface{}
+	metadataEntry := make(map[string]interface{})
+	if snapshot.Metadata.CreatedDate != nil {
+		metadataEntry["created_date"] = (*snapshot.Metadata.CreatedDate).Time.Format("2006-01-02T15:04:05Z")
+	}
+	if snapshot.Metadata.LastModifiedDate != nil {
+		metadataEntry["last_modified_date"] = (*snapshot.Metadata.LastModifiedDate).Time.Format("2006-01-02T15:04:05Z")
+	}
+	if snapshot.Metadata.ReplicasetId != nil {
+		metadataEntry["replica_set_id"] = *snapshot.Metadata.ReplicasetId
+	}
+	if snapshot.Metadata.SnapshotTime != nil {
+		metadataEntry["snapshot_time"] = (*snapshot.Metadata.SnapshotTime).Time.Format("2006-01-02T15:04:05Z")
+	}
+	if snapshot.Metadata.DatacenterId != nil {
+		metadataEntry["datacenter_id"] = *snapshot.Metadata.DatacenterId
+	}
+	metadata = append(metadata, metadataEntry)
+	if err := d.Set("metadata", metadata); err != nil {
+		return utils.GenerateSetError(constant.DBaaSRedisDBSnapshotResource, "metadata", err)
+	}
 	return nil
 }
 

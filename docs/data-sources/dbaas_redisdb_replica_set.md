@@ -29,6 +29,8 @@ data "ionoscloud_redis_replicaset" "example" {
 }
 ```
 
+## Argument Reference
+
 * `id` - (Optional) The ID of the RedisDB Replica Set.
 * `display_name` - (Optional) The display name of the RedisDB Replica Set.
 * `location` - (Required) The location of the RedisDB Replica Set.

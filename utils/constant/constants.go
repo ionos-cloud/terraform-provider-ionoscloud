@@ -274,6 +274,7 @@ const (
 	DBaaSReplicaSetTestDataSourceByID   = "test_dbaas_replicaset_id"
 	DBaaSReplicaSetTestDataSourceByName = "test_dbaas_replicaset_name"
 	DBaaSRedisDBReplicaSetResource      = "ionoscloud_redis_replicaset"
+	DBaaSRedisDBSnapshotResource        = "ionoscloud_redis_snapshot"
 )
 
 // Locations slice represents the locations in which services are available.

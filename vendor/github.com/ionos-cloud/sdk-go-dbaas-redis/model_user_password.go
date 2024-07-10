@@ -18,8 +18,8 @@ import (
 
 // UserPassword - struct for UserPassword
 type UserPassword struct {
-	HashedPassword *HashedPassword
-	PlaintextPassword         *string
+	HashedPassword    *HashedPassword
+	PlaintextPassword *string
 }
 
 // HashedPasswordAsUserPassword is a convenience function that returns HashedPassword wrapped in UserPassword

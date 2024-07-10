@@ -140,6 +140,7 @@ func dataSourceDBaaSRedisDBReplicaSet() *schema.Resource {
 				},
 			},
 		},
+		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
