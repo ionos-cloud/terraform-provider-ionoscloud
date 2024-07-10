@@ -68,7 +68,7 @@ func TestAccAPIGatewayRouteDataSourceGetByID(t *testing.T) {
 			Steps: []resource.TestStep{
 				{
 					Config: configAPIGatewayRouteDataSourceGetByID(routeResourceName, routeDataName, constant.ApiGatewayRouteResource+"."+routeResourceName+".id"),
-					Check:  checkAPIGatewayRouteAttributes(constant.DataSource + "." + constant.ApiGatewayRouteResource + "." + routeDataName, routeAttributeNameValue),
+					Check:  checkAPIGatewayRouteAttributes(constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeNameValue),
 				},
 				{
 					Config:      configAPIGatewayRouteDataSourceGetByID(routeResourceName, routeDataName, `"00000000-0000-0000-0000-000000000000"`),
@@ -100,7 +100,7 @@ func TestAccAPIGatewayRouteDataSourceGetByName(t *testing.T) {
 			Steps: []resource.TestStep{
 				{
 					Config: configAPIGatewayRouteDataSourceGetByName(routeResourceName, routeDataName, constant.ApiGatewayRouteResource+"."+routeResourceName+".name"),
-					Check:  checkAPIGatewayRouteAttributes(constant.DataSource + "." + constant.ApiGatewayRouteResource + "." + routeDataName, routeAttributeNameValue),
+					Check:  checkAPIGatewayRouteAttributes(constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeNameValue),
 				},
 				{
 					Config:      configAPIGatewayRouteDataSourceGetByName(routeResourceName, routeDataName, `"wrongname"`),
