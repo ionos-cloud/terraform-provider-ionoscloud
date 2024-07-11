@@ -20,6 +20,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
+replace "github.com/ionos-cloud/sdk-go/v6" => /home/cbeti/work/openapi-tools/generated-sdks/go
+
 require github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 
 require (
