@@ -14,8 +14,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
 )
 
@@ -32,8 +32,8 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckContainerRegistryTokenDestroyCheck,
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckContainerRegistryTokenDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: getConfigurationFromTemplate(testAccCheckContainerRegistryTokenConfigBasic, templateData),

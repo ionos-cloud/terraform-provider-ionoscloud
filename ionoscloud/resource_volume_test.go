@@ -13,8 +13,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccVolumeBasic(t *testing.T) {
@@ -24,9 +24,9 @@ func TestAccVolumeBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckVolumeDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				//added to test - #266. crash when using image_alias on volume
@@ -115,9 +115,9 @@ func TestAccVolumeNoPassword(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckVolumeDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckVolumeConfigNoPassword,
@@ -146,9 +146,9 @@ func TestAccVolumeResolveImageName(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckVolumeDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckVolumeResolveImageName,

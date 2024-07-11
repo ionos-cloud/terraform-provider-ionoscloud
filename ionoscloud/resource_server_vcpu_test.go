@@ -11,8 +11,8 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -27,9 +27,9 @@ func TestAccServerVCPUBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerVCPUDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckServerVCPUNoPwdOrSSH,
@@ -253,9 +253,9 @@ func TestAccServerVCPUNoBootVolumeBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerVCPUDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerVCPUConfigNoBootVolume,
@@ -299,8 +299,8 @@ func TestAccServerVCPUBootCdromNoImageAndInlineFwRules(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerVCPUDestroyCheck,
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerVCPUConfigBootCdromNoImage,
@@ -441,9 +441,9 @@ func TestAccServerVCPUResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerVCPUDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerVCPUResolveImageNameNoNic,
@@ -591,9 +591,9 @@ func TestAccServerVCPUWithSnapshotAnd5FwRulesInline(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerVCPUDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerVCPUWithSnapshot,
@@ -626,9 +626,9 @@ func TestAccServerVCPUWithICMP(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerVCPUDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerVCPUNoFirewall,
@@ -699,9 +699,9 @@ func TestAccServerVCPUWithLabels(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerVCPUDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			// Clean server creation using labels in configuration.
 			{

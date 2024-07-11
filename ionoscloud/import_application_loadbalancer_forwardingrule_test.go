@@ -9,15 +9,15 @@ import (
 
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccApplicationLoadBalancerForwardingRuleImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic,

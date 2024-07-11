@@ -8,17 +8,17 @@ import (
 
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccServerVCPUImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerVCPUDestroyCheck,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerVCPUConfigBasic,
@@ -36,10 +36,10 @@ func TestAccServerVCPUImportBasic(t *testing.T) {
 
 func TestAccServerVCPUWithLabelsImport(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		ExternalProviders: randomProviderVersion343(),
-		CheckDestroy:      testAccCheckServerVCPUDestroyCheck,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ExternalProviders:        randomProviderVersion343(),
+		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 
 		Steps: []resource.TestStep{
 			{

@@ -14,8 +14,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccK8sClusterBasic(t *testing.T) {
@@ -25,8 +25,8 @@ func TestAccK8sClusterBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckK8sClusterConfigBasic,
@@ -104,8 +104,8 @@ func TestAccK8sClusterPrivate(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckK8sClusterConfigPrivateCluster,
@@ -151,8 +151,8 @@ func TestAccK8sClusters(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceK8sClusters,

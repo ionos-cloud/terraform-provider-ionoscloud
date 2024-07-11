@@ -14,8 +14,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 const bootCdromImageIdCube = "83f21679-3321-11eb-a681-1e659523cb7b"
@@ -27,9 +27,9 @@ func TestAccCubeServerBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckCubeServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckCubeServerConfigBasic,
@@ -200,7 +200,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 //		},
-//		ProviderFactories: testAccProviderFactories,
+//		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
 //		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
 //		Steps: []resource.TestStep{
 //			{
@@ -232,9 +232,9 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckCubeServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckCubeServerResolveImageName,
@@ -267,7 +267,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 //			testAccPreCheck(t)
 //		},
 //		ExternalProviders: randomProviderVersion343(),
-//		ProviderFactories: testAccProviderFactories,
+//		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
 //		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
 //		Steps: []resource.TestStep{
 //			{
@@ -295,9 +295,9 @@ func TestAccCubeServerWithICMP(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckCubeServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckCubeServerNoFirewall,

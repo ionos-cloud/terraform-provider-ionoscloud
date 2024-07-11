@@ -2,11 +2,15 @@ package ionoscloud
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/provider"
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -36,6 +40,39 @@ func TestProvider(t *testing.T) {
 
 func TestProvider_impl(t *testing.T) {
 	var _ = Provider()
+}
+
+func testAccProtoV5ProviderFactoriesInternal(t *testing.T, v **schema.Provider) map[string]func() (tfprotov5.ProviderServer, error) {
+	providerServerFactory, p, err := ProtoV5ProviderServerFactory(context.Background())
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	providerServer := providerServerFactory()
+	*v = p
+
+	return map[string]func() (tfprotov5.ProviderServer, error){
+		"ionoscloud": func() (tfprotov5.ProviderServer, error) {
+			return providerServer, nil
+		},
+	}
+}
+
+func ProtoV5ProviderServerFactory(ctx context.Context) (func() tfprotov5.ProviderServer, *schema.Provider, error) {
+	primary := Provider()
+	servers := []func() tfprotov5.ProviderServer{
+		primary.GRPCProvider,
+		providerserver.NewProtocol5(provider.New()),
+	}
+
+	muxServer, err := tf5muxserver.NewMuxServer(ctx, servers...)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return muxServer.ProviderServer, primary, nil
 }
 
 func testAccPreCheck(t *testing.T) {

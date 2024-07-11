@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -23,8 +23,8 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckDbaasMongoClusterDestroyCheck,
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckDbaasMongoClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckDbaasMongoClusterConfigBasic,
@@ -118,8 +118,8 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckDbaasMongoClusterDestroyCheck,
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckDbaasMongoClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckMongoClusterEnterpriseBasic,

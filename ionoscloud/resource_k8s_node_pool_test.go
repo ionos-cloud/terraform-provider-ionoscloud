@@ -14,8 +14,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccK8sNodePoolBasic(t *testing.T) {
@@ -25,8 +25,8 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sNodePoolDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckK8sNodePoolConfigBasic,
@@ -170,7 +170,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 //		},
-//		ProviderFactories: testAccProviderFactories,
+//		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
 //		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
 //		Steps: []resource.TestStep{
 //			{
@@ -212,8 +212,8 @@ func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
+		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sNodePoolDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckK8sNodePoolConfigNoOptionalFields,
