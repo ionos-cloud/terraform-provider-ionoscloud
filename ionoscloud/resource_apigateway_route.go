@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,7 +19,7 @@ func resourceAPIGatewayRoute() *schema.Resource {
 		UpdateContext: resourceAPIGatewayRouteUpdate,
 		DeleteContext: resourceAPIGatewayRouteDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceAPIGatewayImport,
+			StateContext: resourceAPIGatewayRouteImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -202,8 +203,16 @@ func resourceAPIGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceAPIGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	diags := resourceApiGatewayRead(ctx, d, meta)
+func resourceAPIGatewayRouteImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("expected ID in the format gateway_id:route_id")
+	}
+
+	d.Set("gateway_id", parts[0])
+	d.SetId(parts[1])
+
+	diags := resourceAPIGatewayRouteRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
 		return nil, fmt.Errorf(diags[0].Summary)
 	}

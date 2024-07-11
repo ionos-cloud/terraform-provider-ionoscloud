@@ -62,5 +62,5 @@ resource "ionoscloud_apigateway_route" "apigateway_route" {
 ApiGateway route can be imported using the `apigateway route id`:
 
 ```shell
-terraform import ionoscloud_apigateway_route.myroute {apigateway route uuid}
+terraform import ionoscloud_apigateway_route.myroute {apigateway uuid}:{apigateway route uuid}
 ```
