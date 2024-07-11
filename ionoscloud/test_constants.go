@@ -1678,16 +1678,16 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   }
 }`
 
-const testAccCheckDistributionConfigBasic = `resource ` + constant.DistributionResource + ` ` + constant.DistributionTestResource + ` {
+const testAccCheckCdnDistributionConfigBasic = `resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + ` {
 	domain         = "example.com"
 	routing_rules {
-		scheme = "https"
+		scheme = "http"
 		prefix = "/api"
 		upstream {
 			host             = "server.example.com"
 			caching          = true
 			waf              = true
-			rate_limit_class = "none"
+			rate_limit_class = "R100"
 			geo_restrictions {
 				allow_list = [ "RO"]
 			}

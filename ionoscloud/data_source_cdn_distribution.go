@@ -14,9 +14,9 @@ import (
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 )
 
-func dataSourceDistribution() *schema.Resource {
+func dataSourceCdnDistribution() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceDistributionRead,
+		ReadContext: dataSourceCdnDistributionRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -112,7 +112,7 @@ func dataSourceDistribution() *schema.Resource {
 	}
 }
 
-func dataSourceDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCdnDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CdnClient
 
 	idValue, idOk := d.GetOk("id")
@@ -157,14 +157,13 @@ func dataSourceDistributionRead(ctx context.Context, d *schema.ResourceData, met
 
 			if distributions.Items != nil && len(*distributions.Items) > 0 {
 				var distributionsByDomain []cdn.Distribution
+
 				for _, distributionItem := range *distributions.Items {
-					if distributionItem.Properties != nil && distributionItem.Properties.Domain != nil &&
-						(partialMatch && strings.Contains(*distributionItem.Properties.Domain, domain) ||
-							!partialMatch && strings.EqualFold(*distributionItem.Properties.Domain, domain)) {
+					if isValidDomain(distributionItem.Properties, domain, partialMatch) {
 						distributionsByDomain = append(distributionsByDomain, distributionItem)
 					}
 				}
-				if distributionsByDomain != nil && len(distributionsByDomain) > 0 {
+				if len(distributionsByDomain) > 0 {
 					results = distributionsByDomain
 				} else {
 					return diag.FromErr(fmt.Errorf("no distribution found with the specified criteria: domain = %v", domain))
@@ -186,4 +185,14 @@ func dataSourceDistributionRead(ctx context.Context, d *schema.ResourceData, met
 
 	return nil
 
+}
+
+func isValidDomain(properties *cdn.DistributionProperties, domain string, partialMatch bool) bool {
+	if properties == nil || properties.Domain == nil {
+		return false
+	}
+	if partialMatch {
+		return strings.Contains(*properties.Domain, domain)
+	}
+	return strings.EqualFold(*properties.Domain, domain)
 }

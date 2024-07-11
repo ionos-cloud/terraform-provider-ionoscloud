@@ -1,21 +1,21 @@
 ---
 subcategory: "Cdn"
 layout: "ionoscloud"
-page_title: "IonosCloud: distribution"
-sidebar_current: "docs-resource-distribution"
+page_title: "IonosCloud: cdn)distribution"
+sidebar_current: "docs-resource-cdn-distribution"
 description: |-
   Creates and manages IonosCloud CDN Distributions.
 ---
 
-# ionoscloud_distribution
+# ionoscloud_cdn_distribution
 
-Manages a **Distribution** on IonosCloud.
+Manages a **CDN Distribution** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
 
-resource "ionoscloud_distribution" "example" {
+resource "ionoscloud_cdn_distribution" "example" {
   domain         = "example.com"
   certificate_id = ionoscloud_certificate.cert.id
   routing_rules {
@@ -78,5 +78,5 @@ The following arguments are supported:
 Resource Distribution can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_distribution.myDistribution {distribution uuid}
+terraform import ionoscloud_cdn_distribution.myDistribution {distribution uuid}
 ```

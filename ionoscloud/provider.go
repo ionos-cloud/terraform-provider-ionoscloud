@@ -125,7 +125,7 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  asg.ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
-			constant.DistributionResource:                      resourceDistribution(),
+			constant.CdnDistributionResource:                   resourceCdnDistribution(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -185,7 +185,7 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  asg.DataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           asg.DataSourceAutoscalingGroupServers(),
-			constant.DistributionResource:                      dataSourceDistribution(),
+			constant.CdnDistributionResource:                   dataSourceCdnDistribution(),
 		},
 	}
 

@@ -1,13 +1,13 @@
 ---
 subcategory: "Cdn"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_distribution"
-sidebar_current: "docs-ionoscloud_distribution"
+page_title: "IonosCloud : ionoscloud_cdn_distribution"
+sidebar_current: "docs-ionoscloud_cdn_distribution"
 description: |-
-  Get information on an Distribution
+  Get information on an CDN Distribution
 ---
 
-# ionoscloud_distribution
+# ionoscloud_cdn_distribution
 
 The Distribution data source can be used to search for and return an existing Distributions.
 You can provide a string for the domain parameter which will be compared with provisioned Distributions.
@@ -18,21 +18,21 @@ When this happens, please refine your search and make sure that your resources h
 
 ### By Id
 ```hcl
-data "ionoscloud_distribution" "example" {
+data "ionoscloud_cdn_distribution" "example" {
   id = <distr_id>
 }
 ```
 
 ### By Name
 ```hcl
-data "ionoscloud_distribution" "example" {
+data "ionoscloud_cdn_distribution" "example" {
   domain = "example.com"
 }
 ```
 
 ### By Name with Partial Match
 ```hcl
-data "ionoscloud_distribution" "example" {
+data "ionoscloud_cdn_distribution" "example" {
   name    		= "example"
   partial_match = true
 }

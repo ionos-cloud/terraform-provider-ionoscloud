@@ -14,14 +14,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceDistribution() *schema.Resource {
+func resourceCdnDistribution() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDistributionCreate,
-		ReadContext:   resourceDistributionRead,
-		UpdateContext: resourceDistributionUpdate,
-		DeleteContext: resourceDistributionDelete,
+		CreateContext: resourceCdnDistributionCreate,
+		ReadContext:   resourceCdnDistributionRead,
+		UpdateContext: resourceCdnDistributionUpdate,
+		DeleteContext: resourceCdnDistributionDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceDistributionImport,
+			StateContext: resourceCdnDistributionImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"domain": {
@@ -101,7 +101,7 @@ func resourceDistribution() *schema.Resource {
 										Type:             schema.TypeString,
 										Description:      "Rate limit class that will be applied to limit the number of incoming requests per IP.",
 										Required:         true,
-										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"none", "R10", "R100", "R1000", "R10000"}, true)),
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"R1", "R5", "R10", "R25", "R50", "R100", "R250", "R500"}, true)),
 									},
 								},
 							},
@@ -114,7 +114,7 @@ func resourceDistribution() *schema.Resource {
 	}
 }
 
-func resourceDistributionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCdnDistributionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(services.SdkBundle).CdnClient
 
@@ -139,17 +139,17 @@ func resourceDistributionCreate(ctx context.Context, d *schema.ResourceData, met
 
 	createdDistribution, _, err := client.DistributionsApi.DistributionsPost(ctx).DistributionCreate(distribution).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating distribution (%s) (%w)", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error creating CDN distribution (%s) (%w)", d.Id(), err))
 		return diags
 	}
 	d.SetId(*createdDistribution.Id)
 
-	log.Printf("[INFO] Distribution Id: %s", d.Id())
+	log.Printf("[INFO] CDN Distribution Id: %s", d.Id())
 
-	return resourceDistributionRead(ctx, d, meta)
+	return resourceCdnDistributionRead(ctx, d, meta)
 }
 
-func resourceDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCdnDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CdnClient
 
 	distribution, apiResponse, err := client.DistributionsApi.DistributionsFindById(ctx, d.Id()).Execute()
@@ -159,11 +159,11 @@ func resourceDistributionRead(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching distribution %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching CDN distribution %s: %w", d.Id(), err))
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retrieved distribution %s: %+v", d.Id(), distribution)
+	log.Printf("[INFO] Successfully retrieved CDN distribution %s: %+v", d.Id(), distribution)
 
 	if err := cdnService.SetDistributionData(d, distribution); err != nil {
 		return diag.FromErr(err)
@@ -172,7 +172,7 @@ func resourceDistributionRead(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceDistributionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCdnDistributionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CdnClient
 
 	distributionDomain := d.Get("domain").(string)
@@ -198,15 +198,15 @@ func resourceDistributionUpdate(ctx context.Context, d *schema.ResourceData, met
 	_, _, err := client.DistributionsApi.DistributionsPut(ctx, d.Id()).DistributionUpdate(request).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a distribution ID %s %w",
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a CDN distribution ID %s %w",
 			d.Id(), err))
 		return diags
 	}
 
-	return resourceDistributionRead(ctx, d, meta)
+	return resourceCdnDistributionRead(ctx, d, meta)
 }
 
-func resourceDistributionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCdnDistributionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CdnClient
 
 	_, err := client.DistributionsApi.DistributionsDelete(ctx, d.Id()).Execute()
@@ -220,7 +220,7 @@ func resourceDistributionDelete(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceDistributionImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCdnDistributionImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(services.SdkBundle).CdnClient
 
 	distributionId := d.Id()
@@ -232,10 +232,10 @@ func resourceDistributionImport(ctx context.Context, d *schema.ResourceData, met
 			d.SetId("")
 			return nil, fmt.Errorf("registry does not exist %q", distributionId)
 		}
-		return nil, fmt.Errorf("an error occurred while trying to fetch the import of distribution %q, error:%w", distributionId, err)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of CDN distribution %q, error:%w", distributionId, err)
 	}
 
-	log.Printf("[INFO] distribution found: %+v", distribution)
+	log.Printf("[INFO] CDN distribution found: %+v", distribution)
 
 	if err := cdnService.SetDistributionData(d, distribution); err != nil {
 		return nil, err
