@@ -145,9 +145,9 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		region = clientOpts.Region.ValueString()
 	}
 
-	if accessKey == "" || secretKey == "" {
-		resp.Diagnostics.AddError("s3 keys missing", "access_key and secret_key must be set")
-	}
+	// if accessKey == "" || secretKey == "" {
+	// 	resp.Diagnostics.AddError("s3 keys missing", "access_key and secret_key must be set")
+	// }
 
 	if token == "" && (username == "" || password == "") {
 		resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
