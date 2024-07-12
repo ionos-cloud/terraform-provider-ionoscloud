@@ -25,7 +25,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckK8sNodePoolDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -153,24 +153,24 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cores_count", "2"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "ram_size", "2048"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_size", "40"),
-					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "public_ips"),
+					// resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "public_ips"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "lans.#", "0"),
-					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "labels"),
-					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "annotations")
+					// resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "labels"),
+					// resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "annotations")
 				),
 			},
 		},
 	})
 }
 
-//func TestAccK8sNodePoolGatewayIP(t *testing.T) {
+// func TestAccK8sNodePoolGatewayIP(t *testing.T) {
 //	var k8sNodepool ionoscloud.KubernetesNodePool
 //
 //	resource.Test(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 //		},
-//		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+//		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 //		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
 //		Steps: []resource.TestStep{
 //			{
@@ -203,7 +203,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 //			},
 //		},
 //	})
-//}
+// }
 
 func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 	var k8sNodepool ionoscloud.KubernetesNodePool
@@ -212,7 +212,7 @@ func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckK8sNodePoolDestroyCheck,
 		Steps: []resource.TestStep{
 			{

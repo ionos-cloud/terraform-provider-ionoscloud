@@ -26,7 +26,7 @@ func TestAccAutoscalingGroup_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -70,7 +70,7 @@ func TestAccAutoscalingGroup_requiredUpdated(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -113,7 +113,7 @@ func TestAccAutoscalingGroup_policyWithOptionals(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -157,7 +157,7 @@ func TestAccAutoscalingGroup_replicaNic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -190,7 +190,7 @@ func TestAccAutoscalingGroup_nicWithTargetGroup(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {
 				VersionConstraint: "3.4.3",
@@ -230,7 +230,7 @@ func TestAccAutoscalingGroup_nicWithFlowLog(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -260,7 +260,7 @@ func TestAccAutoscalingGroup_nicWithTcpFirewall(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -293,7 +293,7 @@ func TestAccAutoscalingGroup_nicWithICMPFirewall(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -326,7 +326,7 @@ func TestAccAutoscalingGroup_replicaWithVolume(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		ExternalProviders:        randomProviderVersion343(),
 		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{

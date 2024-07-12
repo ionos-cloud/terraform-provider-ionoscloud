@@ -18,7 +18,7 @@ func TestAccServerImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -38,7 +38,7 @@ func TestAccServerImportBasic(t *testing.T) {
 func TestAccServerWithLabelsImport(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		ExternalProviders:        randomProviderVersion343(),
 		CheckDestroy:             testAccCheckServerDestroyCheck,
 
@@ -81,7 +81,7 @@ func testAccServerImportStateIdWithNicAndFw(s *terraform.State) (string, error) 
 		}
 
 		importID = fmt.Sprintf("%s/%s", rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["id"])
-		//we might get the primary nic id and the primary firewall id here as import optionals
+		// we might get the primary nic id and the primary firewall id here as import optionals
 		if nicID, ok := rs.Primary.Attributes["primary_nic"]; ok {
 			importID += "/" + nicID
 			if primaryFwID, ok := rs.Primary.Attributes["firewallrule_id"]; ok {

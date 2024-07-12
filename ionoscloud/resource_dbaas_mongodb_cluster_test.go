@@ -23,7 +23,7 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckDbaasMongoClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -118,7 +118,7 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckDbaasMongoClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -134,9 +134,9 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example", "id"),
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example", "id"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list.0", "192.168.1.108/24"),
-					//enterprise edition
-					//add after api adds support
-					//resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.whitelist.0", "192.168.1.108/24"),
+					// enterprise edition
+					// add after api adds support
+					// resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.whitelist.0", "192.168.1.108/24"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "edition", "enterprise"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "type", "sharded-cluster"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "2048"),
@@ -157,7 +157,7 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example", "id"),
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example", "id"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list.0", "192.168.1.108/24"),
-					//enterprise edition
+					// enterprise edition
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "edition", "enterprise"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "type", "sharded-cluster"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "shards", "3"),
@@ -194,7 +194,7 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 						constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "template_id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connection_string",
 						constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connection_string"),
-					//enterprise here
+					// enterprise here
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "edition",
 						constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "edition"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "type",
@@ -229,7 +229,7 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connections.0.cidr_list", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "template_id", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "template_id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connection_string", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connection_string"),
-					//enterprise here
+					// enterprise here
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "edition",
 						constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "edition"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "type",

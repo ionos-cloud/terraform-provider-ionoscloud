@@ -166,6 +166,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		s3.NewBucketResource,
+		s3.NewBucketPolicyResource,
 	}
 }
 

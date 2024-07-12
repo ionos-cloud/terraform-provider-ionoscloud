@@ -18,7 +18,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-//ToDo: add backup unit back in tests when stable
+// ToDo: add backup unit back in tests when stable
 
 func TestAccServerVCPUBasic(t *testing.T) {
 	var server ionoscloud.Server
@@ -28,7 +28,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -254,7 +254,7 @@ func TestAccServerVCPUNoBootVolumeBasic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -299,7 +299,7 @@ func TestAccServerVCPUBootCdromNoImageAndInlineFwRules(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -442,7 +442,7 @@ func TestAccServerVCPUResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -592,7 +592,7 @@ func TestAccServerVCPUWithSnapshotAnd5FwRulesInline(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -627,7 +627,7 @@ func TestAccServerVCPUWithICMP(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -700,7 +700,7 @@ func TestAccServerVCPUWithLabels(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
 		Steps: []resource.TestStep{
 			// Clean server creation using labels in configuration.

@@ -32,7 +32,7 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 				VersionConstraint: "0.11.1",
 			},
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckDBaaSMariaDBClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{

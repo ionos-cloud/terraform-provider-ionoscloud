@@ -35,9 +35,8 @@ require (
 	gopkg.in/validator.v2 v2.0.1 // indirect
 )
 
-replace github.com/ionos-cloud/sdk-go-s3 => /home/dinga/Work/repos/sdk-resources/s3-go
-
-replace github.com/ionos-cloud/sdk-go-bundle/shared => /home/dinga/Work/repos/shared
+replace github.com/ionos-cloud/sdk-go-s3 => /home/cbeti/devtools/sdks/generated-sdks/s3-go
+replace github.com/ionos-cloud/sdk-go-bundle/shared => /home/cbeti/devtools/sdks/shared
 
 require (
 	github.com/ProtonMail/go-crypto v1.1.0-alpha.2 // indirect

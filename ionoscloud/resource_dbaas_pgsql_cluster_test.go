@@ -27,7 +27,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -171,8 +171,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				),
 			},
 			{
-				//we need this as a separate test because the psql cluster needs to be deleted first
-				//in order to be able to delete the associated lan after
+				// we need this as a separate test because the psql cluster needs to be deleted first
+				// in order to be able to delete the associated lan after
 				// otherwise we get 'Access Denied: Lan 1 is delete-protected by DBAAS'
 				Config: testAccCheckDbaasPgSqlClusterConfigUpdateRemoveDBaaS,
 			},
@@ -193,7 +193,7 @@ func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{

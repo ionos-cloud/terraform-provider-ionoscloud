@@ -8,10 +8,11 @@ import (
 	"regexp"
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -25,11 +26,11 @@ func TestAccVolumeBasic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				//added to test - #266. crash when using image_alias on volume
+				// added to test - #266. crash when using image_alias on volume
 				Config:      testAccCheckVolumeConfigBasicErrorNoPassOrSSHPath,
 				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided`),
 			},
@@ -116,7 +117,7 @@ func TestAccVolumeNoPassword(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -147,7 +148,7 @@ func TestAccVolumeResolveImageName(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
