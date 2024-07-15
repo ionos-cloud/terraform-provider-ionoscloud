@@ -2,12 +2,14 @@ package s3
 
 import (
 	"bytes"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
-	s3 "github.com/ionos-cloud/sdk-go-s3"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
+
+	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
 func NewClient(id, secret, region string) *s3.APIClient {
