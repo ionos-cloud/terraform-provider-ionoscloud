@@ -3,15 +3,17 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	s3 "github.com/ionos-cloud/sdk-go-s3"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
 
+	s3 "github.com/ionos-cloud/sdk-go-s3"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
