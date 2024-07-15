@@ -24,7 +24,7 @@ func TestAccS3KeyBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccChecks3KeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
@@ -44,14 +44,14 @@ func TestAccS3KeyBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "active"),
 				),
 			},
-			//{
+			// {
 			//	Config: testAccChecks3KeyConfigUpdate,
 			//	Check: resource.ComposeTestCheckFunc(
 			//		testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
 			//		resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "secret_key"),
 			//		resource.TestCheckResourceAttr(S3KeyResource+"."+S3KeyTestResource, "active", "true"),
 			//	),
-			//},
+			// },
 		},
 	})
 }

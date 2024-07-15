@@ -30,7 +30,7 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
 			{

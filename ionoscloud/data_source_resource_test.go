@@ -17,7 +17,7 @@ func TestAccResourceBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceResourceBasic,

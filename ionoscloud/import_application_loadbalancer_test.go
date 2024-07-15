@@ -17,7 +17,7 @@ func TestAccApplicationLoadBalancerImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ExternalProviders:        randomProviderVersion343(),
-		ProtoV5ProviderFactories: testAccProtoV5ProviderFactoriesInternal(t, &testAccProvider),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccCheckApplicationLoadBalancerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
