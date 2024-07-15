@@ -13,13 +13,14 @@ Manages a **Kafka Cluster** on IonosCloud.
 
 ## Example Usage
 
-This resource will create an operational kafka cluster. After this section completes, the provisioner can be called.
+This resource will create an operational Kafka Cluster. After this section completes, the provisioner can be called.
 
 ```hcl
 resource "ionoscloud_kafka_cluster" "kafka_cluster" {
-  name    = "kafka-cluster"
-  version = "3.7.0"
-  size    = "S"
+  name     = "kafka-cluster"
+  location = "de/fra"
+  version  = "3.7.0"
+  size     = "S"
   connections {
     datacenter_id = <your_datacenter_id>
     lan_id = <your_lan_id>
@@ -35,16 +36,21 @@ resource "ionoscloud_kafka_cluster" "kafka_cluster" {
 
 ## Argument reference
 
+* `id` - (Computed)[string] The UUID of the Kafka Cluster.
 * `name` - (Required)[string] Name of the Kafka Cluster.
+* `location` - (Required)[string] The location of the Kafka Cluster. Possible values: `de/fra`, `de/txl`, `es/vit`,
+  `gb/lhr`, `us/ewr`, `us/las`, `us/mci`, `fr/par`
 * `version` - (Required)[string] Version of the Kafka Cluster. Possible values: `3.7.0`
 * `size` - (Required)[string] Size of the Kafka Cluster. Possible values: `S`
-* `connections` - (Required) Connection information of the Kafka cluster. Minimum items: 1, maximum items: 1.
+* `connections` - (Required) Connection information of the Kafka Cluster. Minimum items: 1, maximum items: 1.
     * `datacenter_id` - (Required)[string] The datacenter to connect your instance to.
     * `lan_id` - (Required)[string] The numeric LAN ID to connect your instance to.
     * `cidr` - (Required)[string] The IP and subnet for your instance. **Note** the following unavailable IP range:
       10.244.0.0/11
     * `broker_addresses` - (Required)[list] IP addresses and subnet of cluster brokers. **Note** the following
       unavailable IP range: 10.224.0.0/11
+* `bootstrap_address` - (Computed)[string] The bootstrap IP address and port.
+* `broker_addresses` - (Computed)[list] IP address and port of cluster brokers.
 
 ## Import
 

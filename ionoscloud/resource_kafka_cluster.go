@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceKafkaCluster() *schema.Resource {
@@ -20,14 +21,25 @@ func resourceKafkaCluster() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceKafkaClusterImport,
 		},
-
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:        schema.TypeString,
+				Description: "The ID of the Kafka Cluster.",
+				Computed:    true,
+			},
 			"name": {
 				Type:             schema.TypeString,
-				Description:      "The name of your Kafka cluster. Must be 63 characters or less and must begin and end with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between.",
+				Description:      "The name of your Kafka Cluster. Must be 63 characters or less and must begin and end with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between.",
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			"location": {
+				Type:             schema.TypeString,
+				Description:      "The location of your Kafka Cluster. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
 			},
 			"version": {
 				Type:        schema.TypeString,
@@ -37,7 +49,7 @@ func resourceKafkaCluster() *schema.Resource {
 			},
 			"size": {
 				Type:             schema.TypeString,
-				Description:      "The size of your Kafka cluster. The size of the Kafka cluster is given in T-shirt sizes. Valid values are: S",
+				Description:      "The size of your Kafka Cluster. The size of the Kafka Cluster is given in T-shirt sizes. Valid values are: S",
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
@@ -46,31 +58,29 @@ func resourceKafkaCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				MinItems:    1,
 				MaxItems:    1,
-				Description: "The network connection for your cluster. Only one connection is allowed.",
+				Description: "The network connection for your Kafka Cluster. Only one connection is allowed.",
 				Required:    true,
 				ForceNew:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"datacenter_id": {
 							Type:             schema.TypeString,
-							Description:      "The datacenter to connect your Kafka cluster to.",
+							Description:      "The datacenter to connect your Kafka Cluster to.",
 							Required:         true,
 							ForceNew:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 						},
 						"lan_id": {
-							Type:             schema.TypeString,
-							Description:      "The numeric LAN ID to connect your Kafka cluster to.",
-							Required:         true,
-							ForceNew:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							Type:        schema.TypeString,
+							Description: "The numeric LAN ID to connect your Kafka Cluster to.",
+							Required:    true,
+							ForceNew:    true,
 						},
 						"cidr": {
-							Type:             schema.TypeString,
-							Description:      "The IP and subnet for your Kafka cluster.",
-							Required:         true,
-							ForceNew:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(VerifyUnavailableIPs),
+							Type:        schema.TypeString,
+							Description: "The IP and subnet for your Kafka Cluster.",
+							Required:    true,
+							ForceNew:    true,
 						},
 						"broker_addresses": {
 							Type:        schema.TypeList,
@@ -84,26 +94,40 @@ func resourceKafkaCluster() *schema.Resource {
 					},
 				},
 			},
+			"bootstrap_address": {
+				Type:        schema.TypeString,
+				Description: "The bootstrap IP address and port.",
+				Computed:    true,
+			},
+			"broker_addresses": {
+				Type:        schema.TypeList,
+				Description: "IP address and port of cluster brokers.",
+				Computed:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
+
 func resourceKafkaClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).KafkaClient
 
 	createdCluster, _, err := client.CreateCluster(ctx, d)
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating kafka cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("error creating Kafka Cluster: %w", err))
 		return diags
 	}
 
 	d.SetId(*createdCluster.Id)
-	log.Printf("[INFO] Created kafka cluster: %s", d.Id())
+	log.Printf("[INFO] Created Kafka Cluster: %s", d.Id())
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterAvailable)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured  while kafka cluster waiting to be ready: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while Kafka Cluster waiting to be ready: %w", err))
 		return diags
 	}
 
@@ -113,17 +137,17 @@ func resourceKafkaClusterCreate(ctx context.Context, d *schema.ResourceData, met
 func resourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).KafkaClient
 
-	cluster, apiResponse, err := client.GetClusterById(ctx, d.Id())
+	cluster, apiResponse, err := client.GetClusterById(ctx, d.Id(), d.Get("location").(string))
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching kafka cluster %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching Kafka Cluster %s: %w", d.Id(), err))
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
+	log.Printf("[INFO] Successfully retreived Kafka Cluster %s: %+v", d.Id(), cluster)
 
 	if err := client.SetKafkaClusterData(d, &cluster); err != nil {
 		return diag.FromErr(err)
@@ -133,22 +157,21 @@ func resourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceKafkaClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	client := meta.(services.SdkBundle).KafkaClient
 
-	apiResponse, err := client.DeleteCluster(ctx, d.Id())
+	apiResponse, err := client.DeleteCluster(ctx, d.Id(), d.Get("location").(string))
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting kafka cluster %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting Kafka Cluster %s: %w", d.Id(), err))
 		return diags
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("the check for cluster deletion failed with the following error: %w", err))
+		return diag.FromErr(fmt.Errorf("the check for Kafka Cluster deletion failed with the following error: %w", err))
 	}
 
 	d.SetId("")
@@ -157,6 +180,10 @@ func resourceKafkaClusterDelete(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceKafkaClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	resourceKafkaClusterRead(ctx, d, meta)
+	diags := resourceKafkaClusterRead(ctx, d, meta)
+	if diags != nil && diags.HasError() {
+		return nil, fmt.Errorf(diags[0].Summary)
+	}
+
 	return []*schema.ResourceData{d}, nil
 }

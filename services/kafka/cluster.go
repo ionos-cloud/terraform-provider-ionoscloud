@@ -19,6 +19,8 @@ func (c *Client) CreateCluster(ctx context.Context, d *schema.ResourceData) (
 	kafka.ClusterRead, utils.ApiResponseInfo,
 	error,
 ) {
+	c.changeConfigURL(d.Get("location").(string))
+
 	request := setClusterPostRequest(d)
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).ClusterCreate(*request).Execute()
 	apiResponse.LogInfo()
@@ -27,7 +29,7 @@ func (c *Client) CreateCluster(ctx context.Context, d *schema.ResourceData) (
 
 func (c *Client) IsClusterAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	ClusterId := d.Id()
-	Cluster, _, err := c.GetClusterById(ctx, ClusterId)
+	Cluster, _, err := c.GetClusterById(ctx, ClusterId, d.Get("location").(string))
 	if err != nil {
 		return false, err
 	}
@@ -38,27 +40,35 @@ func (c *Client) IsClusterAvailable(ctx context.Context, d *schema.ResourceData)
 	return strings.EqualFold(*Cluster.Metadata.State, constant.Available), nil
 }
 
-func (c *Client) DeleteCluster(ctx context.Context, id string) (utils.ApiResponseInfo, error) {
+func (c *Client) DeleteCluster(ctx context.Context, id string, location string) (utils.ApiResponseInfo, error) {
+	c.changeConfigURL(location)
+
 	apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
 func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	c.changeConfigURL(d.Get("location").(string))
+
 	_, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
 }
 
-func (c *Client) GetClusterById(ctx context.Context, id string) (
+func (c *Client) GetClusterById(ctx context.Context, id string, location string) (
 	kafka.ClusterRead, utils.ApiResponseInfo, error,
 ) {
+	c.changeConfigURL(location)
+
 	Cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return Cluster, apiResponse, err
 }
 
-func (c *Client) ListClusters(ctx context.Context) (kafka.ClusterReadList, *kafka.APIResponse, error) {
+func (c *Client) ListClusters(ctx context.Context, location string) (kafka.ClusterReadList, *kafka.APIResponse, error) {
+	c.changeConfigURL(location)
+
 	Clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return Clusters, apiResponse, err
@@ -94,8 +104,8 @@ func (c *Client) SetKafkaClusterData(d *schema.ResourceData, cluster *kafka.Clus
 		d.SetId(*cluster.Id)
 	}
 
-	if cluster.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the Kafka cluster with ID: %s, but received 'nil' instead", *cluster.Id)
+	if cluster.Properties == nil || cluster.Metadata == nil {
+		return fmt.Errorf("expected properties and metadata in the response for the Kafka Cluster with ID: %s, but received 'nil' instead", *cluster.Id)
 	}
 
 	if cluster.Properties.Name != nil {
@@ -123,6 +133,18 @@ func (c *Client) SetKafkaClusterData(d *schema.ResourceData, cluster *kafka.Clus
 		}
 
 		if err := d.Set("connections", connections); err != nil {
+			return err
+		}
+	}
+
+	if cluster.Metadata.BootstrapAddress != nil {
+		if err := d.Set("bootstrap_address", *cluster.Metadata.BootstrapAddress); err != nil {
+			return err
+		}
+	}
+
+	if cluster.Metadata.BrokerAddresses != nil {
+		if err := d.Set("broker_addresses", *cluster.Metadata.BrokerAddresses); err != nil {
 			return err
 		}
 	}

@@ -15,6 +15,8 @@ import (
 func (c *Client) CreateTopic(ctx context.Context, d *schema.ResourceData) (
 	kafka.TopicRead, utils.ApiResponseInfo, error,
 ) {
+	c.changeConfigURL(d.Get("location").(string))
+
 	topic := setTopicPostRequest(d)
 	clusterId := d.Get("cluster_id").(string)
 
@@ -24,25 +26,31 @@ func (c *Client) CreateTopic(ctx context.Context, d *schema.ResourceData) (
 	return topicResponse, apiResponse, err
 }
 
-func (c *Client) GetTopicById(ctx context.Context, clusterId string, topicId string) (
+func (c *Client) GetTopicById(ctx context.Context, clusterId string, topicId string, location string) (
 	kafka.TopicRead, utils.ApiResponseInfo, error,
 ) {
+	c.changeConfigURL(location)
+
 	topic, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, clusterId, topicId).Execute()
 	apiResponse.LogInfo()
 
 	return topic, apiResponse, err
 }
 
-func (c *Client) ListTopics(ctx context.Context, clusterId string) (
+func (c *Client) ListTopics(ctx context.Context, clusterId string, location string) (
 	kafka.TopicReadList, utils.ApiResponseInfo, error,
 ) {
+	c.changeConfigURL(location)
+
 	topics, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsGet(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 
 	return topics, apiResponse, err
 }
 
-func (c *Client) DeleteTopic(ctx context.Context, clusterId string, topicId string) (utils.ApiResponseInfo, error) {
+func (c *Client) DeleteTopic(ctx context.Context, clusterId string, topicId string, location string) (utils.ApiResponseInfo, error) {
+	c.changeConfigURL(location)
+
 	apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsDelete(ctx, clusterId, topicId).Execute()
 	apiResponse.LogInfo()
 
@@ -52,8 +60,9 @@ func (c *Client) DeleteTopic(ctx context.Context, clusterId string, topicId stri
 func (c *Client) IsTopicAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	topicId := d.Id()
 	clusterId := d.Get("cluster_id").(string)
+	location := d.Get("location").(string)
 
-	topic, _, err := c.GetTopicById(ctx, clusterId, topicId)
+	topic, _, err := c.GetTopicById(ctx, clusterId, topicId, location)
 	if err != nil {
 		return false, err
 	}
@@ -67,6 +76,9 @@ func (c *Client) IsTopicAvailable(ctx context.Context, d *schema.ResourceData) (
 func (c *Client) IsTopicDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	clusterId := d.Get("cluster_id").(string)
 	topicId := d.Id()
+	location := d.Get("location").(string)
+
+	c.changeConfigURL(location)
 
 	_, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, topicId, clusterId).Execute()
 	apiResponse.LogInfo()
@@ -80,7 +92,7 @@ func (c *Client) SetKafkaTopicData(d *schema.ResourceData, topic *kafka.TopicRea
 	}
 
 	if topic.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the Kafka cluster topic with ID: %s, but received 'nil' instead", *topic.Id)
+		return fmt.Errorf("expected properties in the response for the Kafka Cluster Topic with ID: %s, but received 'nil' instead", *topic.Id)
 	}
 
 	if topic.Properties.Name != nil {

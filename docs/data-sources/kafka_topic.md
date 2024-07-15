@@ -21,7 +21,8 @@ When this happens, please refine your search string so that it is specific enoug
 ```hcl
 data "ionoscloud_kafka_cluster_topic" "example" {
   id = <your_kafka_cluster_topic_id>
-  cluster_id = <your_kafka_cluster_id>
+cluster_id = <your_kafka_cluster_id>
+location = <your_kafka_cluster_location>
 }
 ```
 
@@ -34,14 +35,17 @@ this data source is called.
 data "ionoscloud_kafka_cluster_topic" "example" {
   name       = "kafka-cluster-topic"
   cluster_id = <your_kafka_cluster_id>
+  location = <location_of_kafka_cluster>
 }
 ```
 
 ## Argument Reference
 
-* `id` - (Optional) Id of an existing Kafka cluster topic that you want to search for.
+* `id` - (Optional) ID of an existing Kafka cluster topic that you want to search for.
 * `name` - (Optional) Name of an existing Kafka cluster topic that you want to search for.
-* `cluster_id` - (Required) Id of the Kafka cluster that the topic belongs to.
+* `cluster_id` - (Required) ID of the Kafka cluster that the topic belongs to.
+* `location` - (Required) The location of the Kafka Cluster Topic. Must be the same as the location of the Kafka
+  Cluster. Possible values: `de/fra`, `de/txl`, `es/vit`,`gb/lhr`, `us/ewr`, `us/las`, `us/mci`, `fr/par`
 
 ## Attributes Reference
 

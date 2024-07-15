@@ -17,25 +17,32 @@ When this happens, please refine your search string so that it is specific enoug
 ## Example Usage
 
 ### By ID
+
 ```hcl
 data "ionoscloud_kafka_cluster" "example" {
   id = <your_kafka_cluster_id>
+  location = <location_of_kafka_cluster>
 }
 ```
 
 ### By Name
 
-Needs to have the resource be previously created, or a depends_on clause to ensure that the resource is created before this data source is called.
+Needs to have the resource be previously created, or a depends_on clause to ensure that the resource is created before
+this data source is called.
 
 ```hcl
 data "ionoscloud_kafka_cluster" "example" {
-  name = "kafka-cluster"
+  name     = "kafka-cluster"
+  location = <location_of_kafka_cluster>
 }
 ```
 
 ## Argument Reference
-* `id` - (Optional) Id of an existing Kafka cluster that you want to search for.
+
+* `id` - (Optional) ID of an existing Kafka cluster that you want to search for.
 * `name` - (Optional) Name of an existing Kafka cluster that you want to search for.
+* `location` - (Required) The location of the Kafka Cluster. Possible values: `de/fra`, `de/txl`, `es/vit`, `gb/lhr`,
+  `us/ewr`, `us/las`, `us/mci`, `fr/par`
 
 ## Attributes Reference
 
@@ -50,3 +57,5 @@ The following attributes are returned by the datasource:
     * `lan_id` - The numeric LAN ID your instance is connected to.
     * `cidr` - The IP and subnet for your instance.
     * `broker_addresses` - IP addresses and subnet of cluster brokers.
+* `bootstrap_address` - The bootstrap IP address and port.
+* `broker_addresses` - IP address and port of cluster brokers.
