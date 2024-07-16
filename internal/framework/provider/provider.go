@@ -167,6 +167,7 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 	return []func() resource.Resource{
 		s3.NewBucketResource,
 		s3.NewBucketPolicyResource,
+		s3.NewS3BucketObjectResource,
 	}
 }
 
