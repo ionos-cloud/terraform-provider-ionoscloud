@@ -1,7 +1,7 @@
 ---
 subcategory: "Kafka"
 layout: "ionoscloud"
-page_title: "IonosCloud: topic"
+page_title: "IonosCloud: ionoscloud_kafka_cluster_topic"
 sidebar_current: "docs-resource-kafka-topic"
 description: |-
   Creates and manages IonosCloud Kafka Cluster Topic objects.
@@ -40,10 +40,10 @@ resource "ionoscloud_kafka_cluster_topic" "kafka_cluster_topic" {
   of brokers in the Kafka Cluster. Minimum value: 1.
 * `number_of_partitions` - (Required)[int] The number of partitions of the topic. Partitions allow for parallel
   processing of messages. The partition count must be greater than or equal to the replication factor. Minimum value: 1.
-* `retention_time` - (Required)[int] The time in milliseconds that a message is retained in the topic log. Messages
+* `retention_time` - (Optional)[int] The time in milliseconds that a message is retained in the topic log. Messages
   older than the retention time are deleted. If value is 0, messages are retained indefinitely unless other retention is
   set. Default value: 0.
-* `segment_bytes` - (Required)[int] The maximum size in bytes that the topic log can grow to. When the log reaches this
+* `segment_bytes` - (Optional)[int] The maximum size in bytes that the topic log can grow to. When the log reaches this
   size, the oldest messages are deleted. If value is 0, messages are retained indefinitely unless other retention is
   set. Default value: 0.
 

@@ -1,7 +1,7 @@
 ---
 subcategory: "Kafka"
 layout: "ionoscloud"
-page_title: "IonosCloud: cluster"
+page_title: "IonosCloud: ionoscloud_kafka_cluster"
 sidebar_current: "docs-datasource-kafka-cluster"
 description: |-
   Reads IonosCloud Kafka Cluster objects.
@@ -9,8 +9,8 @@ description: |-
 
 # ionoscloud_kafka_cluster
 
-The **Kafka cluster data source** can be used to search for and return an existing Kafka Cluster.
-You can provide a string for the name parameter which will be compared with provisioned Kafka clusters.
+The **Kafka Cluster data source** can be used to search for and return an existing Kafka Cluster.
+You can provide a string for the name parameter which will be compared with provisioned Kafka Clusters.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
@@ -39,8 +39,8 @@ data "ionoscloud_kafka_cluster" "example" {
 
 ## Argument Reference
 
-* `id` - (Optional) ID of an existing Kafka cluster that you want to search for.
-* `name` - (Optional) Name of an existing Kafka cluster that you want to search for.
+* `id` - (Optional) ID of an existing Kafka Cluster that you want to search for.
+* `name` - (Optional) Name of an existing Kafka Cluster that you want to search for.
 * `location` - (Required) The location of the Kafka Cluster. Possible values: `de/fra`, `de/txl`, `es/vit`, `gb/lhr`,
   `us/ewr`, `us/las`, `us/mci`, `fr/par`
 
@@ -48,11 +48,11 @@ data "ionoscloud_kafka_cluster" "example" {
 
 The following attributes are returned by the datasource:
 
-* `id` - UUID of the Kafka cluster.
-* `name` - The name of the Kafka cluster.
-* `version` - The version of the Kafka cluster.
-* `size` - The size of the Kafka cluster.
-* `connections` - Connection information of the Kafka cluster. Minimum items: 1, maximum items: 1.
+* `id` - UUID of the Kafka Cluster.
+* `name` - The name of the Kafka Cluster.
+* `version` - The version of the Kafka Cluster.
+* `size` - The size of the Kafka Cluster.
+* `connections` - Connection information of the Kafka Cluster. Minimum items: 1, maximum items: 1.
     * `datacenter_id` - The datacenter that your instance is connected to.
     * `lan_id` - The numeric LAN ID your instance is connected to.
     * `cidr` - The IP and subnet for your instance.

@@ -51,7 +51,7 @@ func resourceKafkaTopic() *schema.Resource {
 			},
 			"replication_factor": {
 				Type:        schema.TypeInt,
-				Description: "The number of replicas of the topic. The replication factor determines how many copies of the topic are stored on different brokers. The replication factor must be less than or equal to the number of brokers in the Kafka cluster.",
+				Description: "The number of replicas of the topic. The replication factor determines how many copies of the topic are stored on different brokers. The replication factor must be less than or equal to the number of brokers in the Kafka Cluster.",
 				Required:    true,
 				ForceNew:    true,
 			},

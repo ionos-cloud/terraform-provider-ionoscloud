@@ -1,7 +1,7 @@
 ---
 subcategory: "Kafka"
 layout: "ionoscloud"
-page_title: "IonosCloud: cluster"
+page_title: "IonosCloud: ionoscloud_kafka_cluster"
 sidebar_current: "docs-resource-kafka-cluster"
 description: |-
   Creates and manages IonosCloud Kafka Cluster objects.

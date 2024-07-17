@@ -24,12 +24,16 @@ require (
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
 	github.com/ionos-cloud/sdk-go-nfs v1.0.0
 	github.com/ionos-cloud/sdk-go-s3 v1.0.0
-	github.com/ionos-cloud/sdk-go-kafka v0.1.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 	github.com/ionos-cloud/sdk-go/v6 v6.1.11
 	github.com/mitchellh/go-homedir v1.1.0
 	golang.org/x/crypto v0.25.0
 	gopkg.in/yaml.v3 v3.0.1
+)
+
+require (
+	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
+	github.com/ionos-cloud/sdk-go-kafka v0.0.0-20240716142734-39b495504026 // indirect
 )
 
 require (
