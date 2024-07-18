@@ -6,8 +6,8 @@ require (
 	github.com/aws/aws-sdk-go v1.54.12
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/gofrs/uuid/v5 v5.0.0
-	github.com/hashicorp/terraform-plugin-framework v1.9.0
-	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
+	github.com/hashicorp/terraform-plugin-framework v1.10.0
+	github.com/hashicorp/terraform-plugin-framework-validators v0.13.0
 	github.com/hashicorp/terraform-plugin-mux v0.16.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
 	github.com/hashicorp/terraform-plugin-testing v1.8.0
@@ -36,6 +36,7 @@ require (
 )
 
 replace github.com/ionos-cloud/sdk-go-s3 => /home/cbeti/devtools/sdks/generated-sdks/s3-go
+
 replace github.com/ionos-cloud/sdk-go-bundle/shared => /home/cbeti/devtools/sdks/shared
 
 require (
