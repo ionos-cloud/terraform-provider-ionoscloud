@@ -25,7 +25,7 @@ resource "ionoscloud_cdn_distribution" "example" {
       host                = "server.example.com"
       caching             = true
       waf                 = true
-      rate_limit_class    = "none"
+      rate_limit_class    = "R500"
       geo_restrictions {
         allow_list = [ "CN", "RU"]
       }
@@ -38,7 +38,7 @@ resource "ionoscloud_cdn_distribution" "example" {
       host                = "server2.example.com"
       caching             = false
       waf                 = false
-      rate_limit_class    = "R10000"
+      rate_limit_class    = "10"
       geo_restrictions {
         block_list = [ "CN", "RU"]
       }

@@ -68,7 +68,7 @@ func TestAccDistributionBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceCdnDistributionMultipleResultsError,
-				ExpectError: regexp.MustCompile("more than one registry found with the specified criteria"),
+				ExpectError: regexp.MustCompile("more than one CDN distribution found with the specified criteria"),
 			},
 			{
 				Config:      testAccDataSourceCdnDistributionWrongDomainError,
@@ -91,7 +91,7 @@ func TestAccDistributionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.1.upstream.0.host", "server2.example.com"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.1.upstream.0.caching", "true"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.1.upstream.0.waf", "false"),
-					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.1.upstream.0.rate_limit_class", "R10000"),
+					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.1.upstream.0.rate_limit_class", "R100"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.1.upstream.0.geo_restrictions.0.allow_list.0", "CN"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.1.upstream.0.geo_restrictions.0.allow_list.1", "RU"),
 				),
@@ -114,7 +114,7 @@ func testAccCheckCdnDistributionDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		_, apiResponse, err := client.DistributionsApi.DistributionsFindById(ctx, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			if apiResponse.StatusCode != 404 {
@@ -148,7 +148,7 @@ func testAccCheckCdnDistributionExists(n string, distribution *ionoscloud_cdn.Di
 			defer cancel()
 		}
 
-		foundDistribution, _, err := client.DistributionsApi.DistributionsFindById(ctx, rs.Primary.ID).Execute()
+		foundDistribution, _, err := client.SdkClient.DistributionsApi.DistributionsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("error occurred while fetching distribution: %s", rs.Primary.ID)
