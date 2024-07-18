@@ -396,6 +396,11 @@ const (
 	TestServerBootDeviceSelectionResource = "boot_device_selection_example"
 )
 
+const (
+	WireGuardGatewayResource     = "ionoscloud_vpn_wireguard_gateway"
+	WireGuardGatewayTestResource = "test_wireguard_gateway"
+)
+
 var ForwardingRuleAlgorithms = []string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}
 var LBTargetProxyProtocolVersions = []string{"none", "v1", "v2", "v2ssl"}
 

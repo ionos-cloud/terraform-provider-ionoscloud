@@ -193,6 +193,9 @@ github.com/iancoleman/strcase
 # github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.0 => /tmp/sdk-go
+## explicit; go 1.21
+github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
 # github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
 ## explicit; go 1.20
 github.com/ionos-cloud/sdk-go-bundle/shared
@@ -428,3 +431,4 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
+# github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 => /tmp/sdk-go

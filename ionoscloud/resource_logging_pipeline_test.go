@@ -30,7 +30,7 @@ func TestAccLoggingPipeline(t *testing.T) {
 				Config: LoggingPipelineConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccLoggingPipelineExistenceCheck(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, &Pipeline),
-					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineNameAttribute, pipelineNameValue),
+					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, nameAttribute, pipelineNameValue),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".*", map[string]string{
 						pipelineLogSourceAttribute:   pipelineLogSourceValue,
 						pipelineLogTagAttribute:      pipelineLogTagValue,
@@ -47,7 +47,7 @@ func TestAccLoggingPipeline(t *testing.T) {
 				Config: LoggingPipelineDataSourceMatchById,
 				Check: resource.ComposeTestCheckFunc(
 					testAccLoggingPipelineExistenceCheck(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, &Pipeline),
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineNameAttribute, pipelineNameValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, nameAttribute, pipelineNameValue),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineLogAttribute+".*", map[string]string{
 						pipelineLogSourceAttribute:   pipelineLogSourceValue,
 						pipelineLogTagAttribute:      pipelineLogTagValue,
@@ -64,7 +64,7 @@ func TestAccLoggingPipeline(t *testing.T) {
 				Config: LoggingPipelineDataSourceMatchByName,
 				Check: resource.ComposeTestCheckFunc(
 					testAccLoggingPipelineExistenceCheck(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, &Pipeline),
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineNameAttribute, pipelineNameValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, nameAttribute, pipelineNameValue),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineLogAttribute+".*", map[string]string{
 						pipelineLogSourceAttribute:   pipelineLogSourceValue,
 						pipelineLogTagAttribute:      pipelineLogTagValue,
@@ -93,7 +93,7 @@ func TestAccLoggingPipeline(t *testing.T) {
 				Config: LoggingPipelineConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccLoggingPipelineExistenceCheck(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, &Pipeline),
-					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineNameAttribute, pipelineNameUpdatedValue),
+					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, nameAttribute, pipelineNameUpdatedValue),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".*", map[string]string{
 						pipelineLogSourceAttribute:   pipelineLogSourceUpdatedValue,
 						pipelineLogTagAttribute:      pipelineLogTagUpdatedValue,
@@ -186,7 +186,7 @@ const LoggingPipelineDataSourceWrongNameError = `
 
 const LoggingPipelineConfigUpdate = `
 resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestResourceName + ` {
-	` + pipelineNameAttribute + ` = "` + pipelineNameUpdatedValue + `"
+	` + nameAttribute + ` = "` + pipelineNameUpdatedValue + `"
 	` + pipelineLogUpdated + `
 }
 `
