@@ -3,7 +3,7 @@
  *
  * An managed Apache Kafka cluster is designed to be highly fault-tolerant and scalable, allowing large volumes of data to be ingested, stored, and processed in real-time. By distributing data across multiple brokers, Kafka achieves high throughput and low latency, making it suitable for applications requiring real-time data processing and analytics.
  *
- * API version: 1.2.1
+ * API version: 1.4.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -17,20 +17,22 @@ import (
 
 // TopicLogRetention struct for TopicLogRetention
 type TopicLogRetention struct {
-	// The time in milliseconds that a message is retained in the topic log. Messages older than the retention time are deleted. If value is `0`, messages are retained indefinitely unless other retention is set.
-	RetentionTime *int32 `json:"retentionTime"`
-	// The maximum size in bytes that the topic log can grow to. When the log reaches this size, the oldest messages are deleted. If value is `0`, messages are retained indefinitely unless other retention is set.
-	SegmentBytes *int32 `json:"segmentBytes"`
+	// This configuration controls the maximum time we will retain a log before we will discard old log  segments to free up space.  This represents an SLA on how soon consumers must read their data. If set to -1,  no time limit is applied.
+	RetentionTime *int32 `json:"retentionTime,omitempty"`
+	// This configuration controls the segment file size for the log. Retention and cleaning is always done a file at a time so a larger segment size means fewer files but less granular control over retention.
+	SegmentBytes *int32 `json:"segmentBytes,omitempty"`
 }
 
 // NewTopicLogRetention instantiates a new TopicLogRetention object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTopicLogRetention(retentionTime int32, segmentBytes int32) *TopicLogRetention {
+func NewTopicLogRetention() *TopicLogRetention {
 	this := TopicLogRetention{}
 
+	var retentionTime int32 = 604800000
 	this.RetentionTime = &retentionTime
+	var segmentBytes int32 = 1073741824
 	this.SegmentBytes = &segmentBytes
 
 	return &this
@@ -41,9 +43,9 @@ func NewTopicLogRetention(retentionTime int32, segmentBytes int32) *TopicLogRete
 // but it doesn't guarantee that properties required by API are set
 func NewTopicLogRetentionWithDefaults() *TopicLogRetention {
 	this := TopicLogRetention{}
-	var retentionTime int32 = 0
+	var retentionTime int32 = 604800000
 	this.RetentionTime = &retentionTime
-	var segmentBytes int32 = 0
+	var segmentBytes int32 = 1073741824
 	this.SegmentBytes = &segmentBytes
 	return &this
 }

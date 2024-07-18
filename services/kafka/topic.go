@@ -130,14 +130,20 @@ func (c *Client) SetKafkaTopicData(d *schema.ResourceData, topic *kafka.TopicRea
 
 func setTopicPostRequest(d *schema.ResourceData) *kafka.TopicCreate {
 	topicName := d.Get("name").(string)
-	replicationFactor := d.Get("replication_factor").(int32)
-	partitionCount := d.Get("number_of_partitions").(int32)
-	retentionTime := d.Get("retention_time").(int32)
-	segmentBytes := d.Get("segment_bytes").(int32)
+	replicationFactor := int32(d.Get("replication_factor").(int))
+	partitionCount := int32(d.Get("number_of_partitions").(int))
+	retentionTime := int32(d.Get("retention_time").(int))
+	segmentBytes := int32(d.Get("segment_bytes").(int))
 
 	return kafka.NewTopicCreate(
-		*kafka.NewTopic(
-			topicName, replicationFactor, partitionCount, *kafka.NewTopicLogRetention(retentionTime, segmentBytes),
-		),
+		kafka.Topic{
+			Name:               &topicName,
+			NumberOfPartitions: &partitionCount,
+			ReplicationFactor:  &replicationFactor,
+			LogRetention: &kafka.TopicLogRetention{
+				RetentionTime: &retentionTime,
+				SegmentBytes:  &segmentBytes,
+			},
+		},
 	)
 }

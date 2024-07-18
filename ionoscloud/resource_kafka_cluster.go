@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -184,6 +185,16 @@ func resourceKafkaClusterDelete(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceKafkaClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("expected ID in the format location:cluster_id")
+	}
+
+	if err := d.Set("location", parts[0]); err != nil {
+		return nil, fmt.Errorf("failed to set location Kafka Cluster for import: %w", err)
+	}
+	d.SetId(parts[1])
+
 	diags := resourceKafkaClusterRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
 		return nil, fmt.Errorf(diags[0].Summary)

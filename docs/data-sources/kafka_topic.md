@@ -21,8 +21,8 @@ When this happens, please refine your search string so that it is specific enoug
 ```hcl
 data "ionoscloud_kafka_cluster_topic" "example" {
   id = <your_kafka_cluster_topic_id>
-cluster_id = <your_kafka_cluster_id>
-location = <your_kafka_cluster_location>
+  cluster_id = <your_kafka_cluster_id>
+  location = <your_kafka_cluster_location>
 }
 ```
 
@@ -57,7 +57,8 @@ The following attributes are returned by the datasource:
 * `replication_factor` - The number of replicas of the topic. The replication factor determines how many copies of the
   topic are stored on different brokers.
 * `number_of_partitions` - The number of partitions of the topic. Partitions allow for parallel processing of messages.
-* `retention_time` - The time in milliseconds that a message is retained in the topic log. Messages older than the
-  retention time are deleted.
-* `segment_bytes` - The maximum size in bytes that the topic log can grow to. When the log reaches this size, the oldest
-  messages are deleted.
+* `retention_time` - This configuration controls the maximum time we will retain a log before we will discard old log
+  segments to free up space. This represents an SLA on how soon consumers must read their data. If set to -1, no time
+  limit is applied.
+* `segment_bytes` - This configuration controls the segment file size for the log. Retention and cleaning is always done
+  a file at a time so a larger segment size means fewer files but less granular control over retention.

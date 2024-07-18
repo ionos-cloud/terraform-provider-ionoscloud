@@ -3,7 +3,7 @@
  *
  * An managed Apache Kafka cluster is designed to be highly fault-tolerant and scalable, allowing large volumes of data to be ingested, stored, and processed in real-time. By distributing data across multiple brokers, Kafka achieves high throughput and low latency, making it suitable for applications requiring real-time data processing and analytics.
  *
- * API version: 1.2.1
+ * API version: 1.4.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -54,7 +54,7 @@ const (
 	Version = "0.1.0"
 )
 
-// APIClient manages communication with the Kafka as a Service API API v1.2.1
+// APIClient manages communication with the Kafka as a Service API API v1.4.0
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration

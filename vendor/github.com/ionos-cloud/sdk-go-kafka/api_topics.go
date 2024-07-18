@@ -3,7 +3,7 @@
  *
  * An managed Apache Kafka cluster is designed to be highly fault-tolerant and scalable, allowing large volumes of data to be ingested, stored, and processed in real-time. By distributing data across multiple brokers, Kafka achieves high throughput and low latency, making it suitable for applications requiring real-time data processing and analytics.
  *
- * API version: 1.2.1
+ * API version: 1.4.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -158,6 +158,15 @@ func (a *TopicsApiService) ClustersTopicsDeleteExecute(r ApiClustersTopicsDelete
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarAPIResponse, newErr
+			}
+			newErr.model = v
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -346,6 +355,15 @@ func (a *TopicsApiService) ClustersTopicsFindByIdExecute(r ApiClustersTopicsFind
 			}
 			newErr.model = v
 		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarAPIResponse, newErr
+			}
+			newErr.model = v
+		}
 		if localVarHTTPResponse.StatusCode == 429 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
@@ -518,6 +536,15 @@ func (a *TopicsApiService) ClustersTopicsGetExecute(r ApiClustersTopicsGetReques
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarAPIResponse, newErr
+			}
+			newErr.model = v
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -710,6 +737,15 @@ func (a *TopicsApiService) ClustersTopicsPostExecute(r ApiClustersTopicsPostRequ
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarAPIResponse, newErr
+			}
+			newErr.model = v
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

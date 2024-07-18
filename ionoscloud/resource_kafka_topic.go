@@ -52,27 +52,29 @@ func resourceKafkaTopic() *schema.Resource {
 			"replication_factor": {
 				Type:        schema.TypeInt,
 				Description: "The number of replicas of the topic. The replication factor determines how many copies of the topic are stored on different brokers. The replication factor must be less than or equal to the number of brokers in the Kafka Cluster.",
-				Required:    true,
+				Optional:    true,
+				Default:     3,
 				ForceNew:    true,
 			},
 			"number_of_partitions": {
 				Type:        schema.TypeInt,
 				Description: "The number of partitions of the topic. Partitions allow for parallel processing of messages. The partition count must be greater than or equal to the replication factor.",
-				Required:    true,
+				Optional:    true,
+				Default:     3,
 				ForceNew:    true,
 			},
 			"retention_time": {
 				Type:        schema.TypeInt,
-				Description: "The time in milliseconds that a message is retained in the topic log. Messages older than the retention time are deleted. If value is `0`, messages are retained indefinitely unless other retention is set.",
+				Description: "This configuration controls the maximum time we will retain a log before we will discard old log segments to free up space. This represents an SLA on how soon consumers must read their data. If set to -1, no time limit is applied.",
 				Optional:    true,
-				Default:     0,
+				Default:     604800000,
 				ForceNew:    true,
 			},
 			"segment_bytes": {
 				Type:        schema.TypeInt,
-				Description: "The maximum size in bytes that the topic log can grow to. When the log reaches this size, the oldest messages are deleted. If value is `0`, messages are retained indefinitely unless other retention is set.",
+				Description: "This configuration controls the segment file size for the log. Retention and cleaning is always done a file at a time so a larger segment size means fewer files but less granular control over retention.",
 				Optional:    true,
-				Default:     0,
+				Default:     1073741824,
 				ForceNew:    true,
 			},
 		},
@@ -156,12 +158,17 @@ func resourceKafkaTopicImport(ctx context.Context, d *schema.ResourceData, meta 
 	[]*schema.ResourceData, error,
 ) {
 	parts := strings.Split(d.Id(), ":")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("expected ID in the format cluster_id:topic_id")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("expected ID in the format location:cluster_id:topic_id")
 	}
 
-	_ = d.Set("cluster_id", parts[0])
-	d.SetId(parts[1])
+	if err := d.Set("location", parts[0]); err != nil {
+		return nil, fmt.Errorf("failed to set location for Kafka Cluster Topic import: %w", err)
+	}
+	if err := d.Set("cluster_id", parts[1]); err != nil {
+		return nil, fmt.Errorf("failed to set cluster_id for Kafka Cluster Topic import: %w", err)
+	}
+	d.SetId(parts[2])
 
 	diags := resourceKafkaTopicRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {

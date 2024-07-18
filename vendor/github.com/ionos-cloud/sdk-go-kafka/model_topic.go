@@ -3,7 +3,7 @@
  *
  * An managed Apache Kafka cluster is designed to be highly fault-tolerant and scalable, allowing large volumes of data to be ingested, stored, and processed in real-time. By distributing data across multiple brokers, Kafka achieves high throughput and low latency, making it suitable for applications requiring real-time data processing and analytics.
  *
- * API version: 1.2.1
+ * API version: 1.4.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -20,23 +20,24 @@ type Topic struct {
 	// The name of the Kafka cluster topic. Must be 63 characters or less and must begin and end with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between.
 	Name *string `json:"name"`
 	// The number of replicas of the topic. The replication factor determines how many copies of the topic are stored on different brokers. The replication factor must be less than or equal to the number of brokers in the Kafka cluster.
-	ReplicationFactor *int32 `json:"replicationFactor"`
-	// The number of partitions of the topic. Partitions allow for parallel processing of messages. The partition count must be greater than or equal to the replication factor.
-	NumberOfPartitions *int32             `json:"numberOfPartitions"`
-	LogRetention       *TopicLogRetention `json:"logRetention"`
+	ReplicationFactor *int32 `json:"replicationFactor,omitempty"`
+	// The number of partitions of the topic. Partitions allow for parallel processing of messages.
+	NumberOfPartitions *int32             `json:"numberOfPartitions,omitempty"`
+	LogRetention       *TopicLogRetention `json:"logRetention,omitempty"`
 }
 
 // NewTopic instantiates a new Topic object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTopic(name string, replicationFactor int32, numberOfPartitions int32, logRetention TopicLogRetention) *Topic {
+func NewTopic(name string) *Topic {
 	this := Topic{}
 
 	this.Name = &name
+	var replicationFactor int32 = 3
 	this.ReplicationFactor = &replicationFactor
+	var numberOfPartitions int32 = 3
 	this.NumberOfPartitions = &numberOfPartitions
-	this.LogRetention = &logRetention
 
 	return &this
 }
@@ -46,6 +47,10 @@ func NewTopic(name string, replicationFactor int32, numberOfPartitions int32, lo
 // but it doesn't guarantee that properties required by API are set
 func NewTopicWithDefaults() *Topic {
 	this := Topic{}
+	var replicationFactor int32 = 3
+	this.ReplicationFactor = &replicationFactor
+	var numberOfPartitions int32 = 3
+	this.NumberOfPartitions = &numberOfPartitions
 	return &this
 }
 

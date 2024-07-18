@@ -19,12 +19,12 @@ called.
 ```hcl
 resource "ionoscloud_kafka_cluster_topic" "kafka_cluster_topic" {
   cluster_id = <your_kafka_cluster_id>
-  name                 = "kafka-cluster-topic"
-  location             = <location_of_kafka_cluster>
-  replication_factor   = 1
+  name     = "kafka-cluster-topic"
+  location = <location_of_kafka_cluster>
+  replication_factor = 1
   number_of_partitions = 1
-  retention_time       = 86400000
-  segment_bytes        = 1073741824
+  retention_time = 86400000
+  segment_bytes = 1073741824
 }
 ```
 
@@ -35,22 +35,23 @@ resource "ionoscloud_kafka_cluster_topic" "kafka_cluster_topic" {
 * `location` - (Required)[string] The location of the Kafka Cluster Topic. Possible values: `de/fra`, `de/txl`,
   `es/vit`,`gb/lhr`, `us/ewr`, `us/las`, `us/mci`, `fr/par`
 * `cluster_id` - (Required)[string] ID of the Kafka Cluster that the topic belongs to.
-* `replication_factor` - (Required)[int] The number of replicas of the topic. The replication factor determines how many
+* `replication_factor` - (Optional)[int] The number of replicas of the topic. The replication factor determines how many
   copies of the topic are stored on different brokers. The replication factor must be less than or equal to the number
-  of brokers in the Kafka Cluster. Minimum value: 1.
-* `number_of_partitions` - (Required)[int] The number of partitions of the topic. Partitions allow for parallel
+  of brokers in the Kafka Cluster. Minimum value: 1. Default value: 3.
+* `number_of_partitions` - (Optional)[int] The number of partitions of the topic. Partitions allow for parallel
   processing of messages. The partition count must be greater than or equal to the replication factor. Minimum value: 1.
-* `retention_time` - (Optional)[int] The time in milliseconds that a message is retained in the topic log. Messages
-  older than the retention time are deleted. If value is 0, messages are retained indefinitely unless other retention is
-  set. Default value: 0.
-* `segment_bytes` - (Optional)[int] The maximum size in bytes that the topic log can grow to. When the log reaches this
-  size, the oldest messages are deleted. If value is 0, messages are retained indefinitely unless other retention is
-  set. Default value: 0.
+  Default value: 3.
+* `retention_time` - (Optional)[int] This configuration controls the maximum time we will retain a log before we will
+  discard old log segments to free up space. This represents an SLA on how soon consumers must read their data. If set
+  to -1, no time limit is applied. Default value: 604800000.
+* `segment_bytes` - (Optional)[int] This configuration controls the segment file size for the log. Retention and
+  cleaning is always done a file at a time so a larger segment size means fewer files but less granular control over
+  retention. Default value: 1073741824.
 
 ## Import
 
-Kafka Cluster Topic can be imported using the `kafka cluster topic id` and the `kafka cluster id`:
+Kafka Cluster Topic can be imported using the `location`, `kafka cluster id` and the `kafka cluster topic id`:
 
 ```shell
-terraform import ionoscloud_kafka_cluster_topic.my_topic {kafka cluster uuid}:{kafka cluster topic uuid}
+terraform import ionoscloud_kafka_cluster_topic.my_topic {location}:{kafka cluster uuid}:{kafka cluster topic uuid}
 ```
