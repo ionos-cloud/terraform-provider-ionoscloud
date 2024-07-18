@@ -45,6 +45,7 @@ func TestWaitForResourceToBeReady(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt.args.d.SetId("test")
 		t.Run(tt.name, func(t *testing.T) {
 			if err := WaitForResourceToBeReady(tt.args.ctx, tt.args.d, tt.args.fn); (err != nil) != tt.wantErr {
 				t.Errorf("WaitForResourceToBeReady() error = %v, wantErr %v", err, tt.wantErr)

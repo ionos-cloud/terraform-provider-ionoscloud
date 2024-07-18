@@ -13,7 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	logging "github.com/ionos-cloud/sdk-go-logging"
+	"github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
 )
 
 func TestAccLoggingPipeline(t *testing.T) {
@@ -119,7 +119,7 @@ func testAccLoggingPipelineDestroyCheck(s *terraform.State) error {
 			continue
 		}
 		pipelineId := rs.Primary.ID
-		_, apiResponse, err := client.GetPipelineById(ctx, pipelineId)
+		_, apiResponse, err := client.GetPipelineByID(ctx, pipelineId)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
 				return fmt.Errorf("an error occurred while checking the destruction of Logging pipeline with ID: %s, error: %w", pipelineId, err)
@@ -145,7 +145,7 @@ func testAccLoggingPipelineExistenceCheck(path string, pipeline *logging.Pipelin
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
 		pipelineId := rs.Primary.ID
-		pipelineResponse, _, err := client.GetPipelineById(ctx, pipelineId)
+		pipelineResponse, _, err := client.GetPipelineByID(ctx, pipelineId)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching Logging pipeline with ID: %s, error: %w", pipelineId, err)
 		}

@@ -8,8 +8,6 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud/asg"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
@@ -123,7 +121,7 @@ func Provider() *schema.Provider {
 			constant.DNSZoneResource:                           resourceDNSZone(),
 			constant.DNSRecordResource:                         resourceDNSRecord(),
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
-			constant.AutoscalingGroupResource:                  asg.ResourceAutoscalingGroup(),
+			constant.AutoscalingGroupResource:                  ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
 			constant.CdnDistributionResource:                   resourceCdnDistribution(),
 		},
@@ -183,8 +181,8 @@ func Provider() *schema.Provider {
 			constant.DNSZoneDataSource:                         dataSourceDNSZone(),
 			constant.DNSRecordDataSource:                       dataSourceDNSRecord(),
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
-			constant.AutoscalingGroupResource:                  asg.DataSourceAutoscalingGroup(),
-			constant.AutoscalingGroupServersResource:           asg.DataSourceAutoscalingGroupServers(),
+			constant.AutoscalingGroupResource:                  DataSourceAutoscalingGroup(),
+			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
 			constant.CdnDistributionResource:                   dataSourceCdnDistribution(),
 		},
 	}
@@ -303,7 +301,7 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	case dnsClient:
 		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case loggingClient:
-		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.TerraformVersion)
 	case mariaDBClient:
 		return mariadb.NewMariaDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case mongoClient:
