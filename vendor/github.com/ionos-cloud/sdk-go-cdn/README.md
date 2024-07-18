@@ -58,7 +58,7 @@ Note, enum values are always validated and all unused variables are silently ign
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://cdn.infra.cluster.ionos.com*
+All URIs are relative to *https://cdn.de-fra.ionos.com*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------

@@ -27,7 +27,7 @@ const (
 	IonosApiUrlEnvVar     = "IONOS_API_URL"
 	IonosPinnedCertEnvVar = "IONOS_PINNED_CERT"
 	IonosLogLevelEnvVar   = "IONOS_LOG_LEVEL"
-	DefaultIonosServerUrl = "cdn.infra.cluster.ionos.com"
+	DefaultIonosServerUrl = "https://cdn.de-fra.ionos.com"
 	DefaultIonosBasePath  = ""
 	defaultMaxRetries     = 3
 	defaultWaitTime       = time.Duration(100) * time.Millisecond
@@ -36,7 +36,7 @@ const (
 
 var (
 	IonosServerUrls = []string{
-		"cdn.infra.cluster.ionos.com",
+		"https://cdn.de-fra.ionos.com",
 	}
 )
 
@@ -147,7 +147,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		Servers: ServerConfigurations{
 			{
 				URL:         getServerUrl(hostUrl),
-				Description: "No description provided",
+				Description: "Frankfurt",
 			},
 		},
 		OperationServers: map[string]ServerConfigurations{},
