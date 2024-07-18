@@ -135,7 +135,7 @@ func dataSourceCdnDistributionRead(ctx context.Context, d *schema.ResourceData, 
 
 	if idOk {
 		/* search by ID */
-		distribution, _, err = client.DistributionsApi.DistributionsFindById(ctx, id).Execute()
+		distribution, _, err = client.SdkClient.DistributionsApi.DistributionsFindById(ctx, id).Execute()
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the distribution with ID %s: %w", id, err))
 			return diags
@@ -143,7 +143,7 @@ func dataSourceCdnDistributionRead(ctx context.Context, d *schema.ResourceData, 
 	} else {
 		var results []cdn.Distribution
 
-		distributions, _, err := client.DistributionsApi.DistributionsGet(ctx).Execute()
+		distributions, _, err := client.SdkClient.DistributionsApi.DistributionsGet(ctx).Execute()
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching container distributions: %w", err))
 			return diags
@@ -171,12 +171,13 @@ func dataSourceCdnDistributionRead(ctx context.Context, d *schema.ResourceData, 
 			}
 		}
 
-		if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one registry found with the specified criteria: domain = %s", domain))
+		if len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no CDN distribution found with the specified criteria: domain = %s", domain))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one CDN distribution found with the specified criteria: domain = %s", domain))
+		} else {
+			distribution = results[0]
 		}
-
-		distribution = results[0]
-
 	}
 
 	if err := cdnService.SetDistributionData(d, distribution); err != nil {

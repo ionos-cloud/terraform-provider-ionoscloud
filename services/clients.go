@@ -1,9 +1,9 @@
 package services
 
 import (
-	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-cdn"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
@@ -24,5 +24,5 @@ type SdkBundle struct {
 	DNSClient          *dns.Client
 	LoggingClient      *logging.Client
 	AutoscalingClient  *autoscaling.Client
-	CdnClient          *ionoscloud_cdn.APIClient
+	CdnClient          *cdn.CdnClient
 }

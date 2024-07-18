@@ -8,6 +8,7 @@ import (
 	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -137,12 +138,16 @@ func resourceCdnDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	createdDistribution, _, err := client.DistributionsApi.DistributionsPost(ctx).DistributionCreate(distribution).Execute()
+	createdDistribution, _, err := client.SdkClient.DistributionsApi.DistributionsPost(ctx).DistributionCreate(distribution).Execute()
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error creating CDN distribution (%s) (%w)", d.Id(), err))
 		return diags
 	}
 	d.SetId(*createdDistribution.Id)
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsDistributionReady)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error occurred while checking the status for the CDN Distribution with ID: %v, error: %w", d.Id(), err))
+	}
 
 	log.Printf("[INFO] CDN Distribution Id: %s", d.Id())
 
@@ -152,7 +157,7 @@ func resourceCdnDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 func resourceCdnDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CdnClient
 
-	distribution, apiResponse, err := client.DistributionsApi.DistributionsFindById(ctx, d.Id()).Execute()
+	distribution, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -195,12 +200,16 @@ func resourceCdnDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	_, _, err := client.DistributionsApi.DistributionsPut(ctx, d.Id()).DistributionUpdate(request).Execute()
+	_, _, err := client.SdkClient.DistributionsApi.DistributionsPut(ctx, d.Id()).DistributionUpdate(request).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a CDN distribution ID %s %w",
 			d.Id(), err))
 		return diags
+	}
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsDistributionReady)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error occurred while checking the status for the CDN Distribution with ID: %v, error: %w", d.Id(), err))
 	}
 
 	return resourceCdnDistributionRead(ctx, d, meta)
@@ -209,7 +218,7 @@ func resourceCdnDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 func resourceCdnDistributionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CdnClient
 
-	_, err := client.DistributionsApi.DistributionsDelete(ctx, d.Id()).Execute()
+	_, err := client.SdkClient.DistributionsApi.DistributionsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(err)
@@ -221,11 +230,11 @@ func resourceCdnDistributionDelete(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceCdnDistributionImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CdnClient
+	client := *meta.(services.SdkBundle).CdnClient
 
 	distributionId := d.Id()
 
-	distribution, apiResponse, err := client.DistributionsApi.DistributionsFindById(ctx, distributionId).Execute()
+	distribution, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsFindById(ctx, distributionId).Execute()
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
