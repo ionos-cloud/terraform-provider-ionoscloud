@@ -12,7 +12,7 @@ description: |-
 The Distribution data source can be used to search for and return an existing Distributions.
 You can provide a string for the domain parameter which will be compared with provisioned Distributions.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please refine your search and make sure that your resources have unique names.
+When this happens, please refine your search and make sure that your resources have unique domains.
 
 ## Example Usage
 
@@ -23,17 +23,17 @@ data "ionoscloud_cdn_distribution" "example" {
 }
 ```
 
-### By Name
+### By Domain
 ```hcl
 data "ionoscloud_cdn_distribution" "example" {
   domain = "example.com"
 }
 ```
 
-### By Name with Partial Match
+### By Domain with Partial Match
 ```hcl
 data "ionoscloud_cdn_distribution" "example" {
-  name    		= "example"
+  domain    		= "example"
   partial_match = true
 }
 ```
