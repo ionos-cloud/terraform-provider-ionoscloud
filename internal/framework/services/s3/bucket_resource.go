@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -102,7 +103,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	_, err := r.client.BucketsApi.CreateBucket(ctx, data.Bucket.ValueString()).CreateBucketConfiguration(createBucketConfig).Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("failed to create bucket", err.Error())
+		resp.Diagnostics.AddError("failed to create bucket", formatXMLError(err).Error())
 		return
 	}
 
@@ -145,13 +146,13 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 			return
 		}
 
-		resp.Diagnostics.AddError("Failed to read bucket", err.Error())
+		resp.Diagnostics.AddError("Failed to read bucket", formatXMLError(err).Error())
 		return
 	}
 
 	location, _, err := r.client.BucketsApi.GetBucketLocation(ctx, data.Bucket.ValueString()).Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read bucket location", err.Error())
+		resp.Diagnostics.AddError("Failed to read bucket location", formatXMLError(err).Error())
 		return
 	}
 
@@ -199,7 +200,7 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 			return
 		}
 
-		resp.Diagnostics.AddError("failed to delete bucket", err.Error())
+		resp.Diagnostics.AddError("failed to delete bucket", formatXMLError(err).Error())
 		return
 	}
 
@@ -233,7 +234,7 @@ func bucketExists(ctx context.Context, client *s3.APIClient, bucket string) erro
 		if apiResponse.HttpNotFound() {
 			return fmt.Errorf("bucket not found")
 		}
-		return backoff.Permanent(fmt.Errorf("failed to check if bucket exists: %w", err))
+		return backoff.Permanent(fmt.Errorf("failed to check if bucket exists: %w", formatXMLError(err)))
 	}
 	return nil
 }
