@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -445,7 +446,7 @@ func setBucketPolicyData(ctx context.Context, policy *s3.BucketPolicy, data *buc
 	data.ID = types.StringPointerValue(policy.Id)
 	data.Version = types.StringPointerValue(policy.Version)
 
-	var statementsModel []bucketPolicyStatementModel
+	var statementsModel = make([]bucketPolicyStatementModel, 0, len(policy.Statement))
 	var diags diag.Diagnostics
 	for _, statement := range policy.Statement {
 		statementModel := bucketPolicyStatementModel{}
