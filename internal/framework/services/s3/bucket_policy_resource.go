@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -93,6 +95,9 @@ func (r *bucketPolicyResource) Schema(_ context.Context, req resource.SchemaRequ
 			"bucket_name": schema.StringAttribute{
 				Description: "Name of the S3 bucket to which this policy will be applied.",
 				Required:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"id": schema.StringAttribute{
 				Description: "Optional identifier for the bucket policy.",
@@ -113,6 +118,7 @@ func (r *bucketPolicyResource) Schema(_ context.Context, req resource.SchemaRequ
 							Description: "List of allowed or denied actions.",
 							ElementType: types.StringType,
 							Required:    true,
+							Validators:  bucketPolicyStatementActionValidators(),
 						},
 						"effect": schema.StringAttribute{
 							Description: "The outcome when the user requests a particular action.",
