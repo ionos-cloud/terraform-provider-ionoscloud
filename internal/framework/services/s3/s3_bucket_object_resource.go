@@ -14,9 +14,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	s3 "github.com/ionos-cloud/sdk-go-s3"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 var (
@@ -34,10 +36,13 @@ type s3BucketObjectResource struct {
 }
 
 type s3BucketObjectModel struct {
-	BucketName                                types.String `tfsdk:"bucket_name"`
-	ObjectKey                                 types.String `tfsdk:"object_key"`
-	Body                                      types.String `tfsdk:"body"`
-	BodyFile                                  types.String `tfsdk:"body_file"`
+	BucketName types.String `tfsdk:"bucket_name"`
+	ObjectKey  types.String `tfsdk:"object_key"`
+	Body       types.String `tfsdk:"body"`
+	BodyFile   types.String `tfsdk:"body_file"`
+	Options    types.Object `tfsdk:"options"`
+}
+type bucketObjectOptionsModel struct {
 	CacheControl                              types.String `tfsdk:"cache_control"`
 	ContentDisposition                        types.String `tfsdk:"content_disposition"`
 	ContentEncoding                           types.String `tfsdk:"content_encoding"`
@@ -82,106 +87,112 @@ func (r *s3BucketObjectResource) Schema(_ context.Context, req resource.SchemaRe
 				Required:    true,
 			},
 			"body": schema.StringAttribute{
-				Description: "The body.",
+				Description: "Object data.",
 				Computed:    true,
 			},
-			"cache_control": schema.StringAttribute{
-				Description: "Can be used to specify caching behavior along the request/reply chain.",
-				Optional:    true,
-			},
-			"content_disposition": schema.StringAttribute{
-				Description: "Specifies presentational information for the object.",
-				Optional:    true,
-			},
-			"content_encoding": schema.StringAttribute{
-				Description: "Specifies what content encodings have been applied to the object and thus what decoding mechanisms must be applied to obtain the media-type referenced by the Content-Type header field.",
-				Optional:    true,
-			},
-			"content_language": schema.StringAttribute{
-				Description: "The language the content is in.",
-				Optional:    true,
-			},
-			"content_length": schema.Int64Attribute{
-				Description: "Size of the body in bytes. This parameter is useful when the size of the body cannot be determined automatically.",
-				Optional:    true,
-			},
-			"content_md5": schema.StringAttribute{
-				Description: "he base64 encoded MD5 digest of the message (without the headers) according to RFC 1864",
-				Optional:    true,
-			},
-			"content_type": schema.StringAttribute{
-				Description: "A standard MIME type describing the format of the contents.",
-				Optional:    true,
-			},
-			"expires": schema.StringAttribute{
-				Description: "The date and time at which the object is no longer cacheable.",
-				Optional:    true,
-			},
-			"x_amz_server_side_encryption": schema.StringAttribute{
-				Description: "The server-side encryption algorithm used when storing this object in IONOS S3 Object Storage (AES256).",
-				Optional:    true,
-				Validators: []validator.String{
-					stringvalidator.OneOf("AES256"),
+			"options": schema.SingleNestedAttribute{
+				Description: "Conditions for when a policy is in effect.",
+				Attributes: map[string]schema.Attribute{
+					"cache_control": schema.StringAttribute{
+						Description: "Can be used to specify caching behavior along the request/reply chain.",
+						Optional:    true,
+					},
+					"content_disposition": schema.StringAttribute{
+						Description: "Specifies presentational information for the object.",
+						Optional:    true,
+					},
+					"content_encoding": schema.StringAttribute{
+						Description: "Specifies what content encodings have been applied to the object and thus what decoding mechanisms must be applied to obtain the media-type referenced by the Content-Type header field.",
+						Optional:    true,
+					},
+					"content_language": schema.StringAttribute{
+						Description: "The language the content is in.",
+						Optional:    true,
+					},
+					"content_length": schema.Int64Attribute{
+						Description: "Size of the body in bytes. This parameter is useful when the size of the body cannot be determined automatically.",
+						Optional:    true,
+					},
+					"content_md5": schema.StringAttribute{
+						Description: "he base64 encoded MD5 digest of the message (without the headers) according to RFC 1864",
+						Optional:    true,
+					},
+					"content_type": schema.StringAttribute{
+						Description: "A standard MIME type describing the format of the contents.",
+						Optional:    true,
+					},
+					"expires": schema.StringAttribute{
+						Description: "The date and time at which the object is no longer cacheable.",
+						Optional:    true,
+					},
+					"x_amz_server_side_encryption": schema.StringAttribute{
+						Description: "The server-side encryption algorithm used when storing this object in IONOS S3 Object Storage (AES256).",
+						Optional:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("AES256"),
+						},
+					},
+					"x_amz_storage_class": schema.StringAttribute{
+						Description: "The storage class. The valid value is STANDARD.",
+						Optional:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("STANDARD"),
+						},
+					},
+					"x_amz_website_redirect_location": schema.StringAttribute{
+						Description: "If the bucket is configured as a website, redirects requests for this object to another object in the same bucket or to an external URL. IONOS S3 Object Storage stores the value of this header in the object metadata.",
+						Optional:    true,
+					},
+					"x_amz_server_side_encryption_customer_algorithm": schema.StringAttribute{
+						Description: "Specifies the algorithm to use to when encrypting the object. The valid option is AES256.",
+						Optional:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("AES256"),
+						},
+					},
+					"x_amz_server_side_encryption_customer_key": schema.StringAttribute{
+						Description: "Specifies the 256-bit, base64-encoded encryption key to use to encrypt and decrypt your data.",
+						Optional:    true,
+					},
+					"x_amz_server_side_encryption_customer_key_md5": schema.StringAttribute{
+						Description: "Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS S3 Object Storage uses this header for a message integrity check to ensure that the encryption key was transmitted without error.",
+						Optional:    true,
+					},
+					"x_amz_server_side_encryption_context": schema.StringAttribute{
+						Description: "Specifies the IONOS S3 Object Storage Encryption Context to use for object encryption. The value of this header is a base64-encoded UTF-8 string holding JSON with the encryption context key-value pairs.",
+						Optional:    true,
+					},
+					"x_amz_request_payer": schema.StringAttribute{
+						Description: "The value is requester",
+						Optional:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("requester"),
+						},
+					},
+					"x_amz_tagging": schema.StringAttribute{
+						Description: "The tag-set for the object. The tag-set must be encoded as URL Query parameters.",
+						Optional:    true,
+					},
+					"x_amz_object_lock_mode": schema.StringAttribute{
+						Description: "The Object Lock mode that you want to apply to this object.",
+						Optional:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("GOVERNANCE", "COMPLIANCE"),
+						},
+					},
+					"x_amz_object_lock_retain_until_date": schema.StringAttribute{
+						Description: "The date and time when you want this object's Object Lock to expire. Must be formatted as a timestamp parameter.",
+						Optional:    true,
+					},
+					"x_amz_object_lock_legal_hold": schema.StringAttribute{
+						Description: "Specifies whether a legal hold will be applied to this object.",
+						Optional:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("ON", "OFF"),
+						},
+					},
 				},
-			},
-			"x_amz_storage_class": schema.StringAttribute{
-				Description: "The storage class. The valid value is STANDARD.",
-				Optional:    true,
-				Validators: []validator.String{
-					stringvalidator.OneOf("STANDARD"),
-				},
-			},
-			"x_amz_website_redirect_location": schema.StringAttribute{
-				Description: "If the bucket is configured as a website, redirects requests for this object to another object in the same bucket or to an external URL. IONOS S3 Object Storage stores the value of this header in the object metadata.",
-				Optional:    true,
-			},
-			"x_amz_server_side_encryption_customer_algorithm": schema.StringAttribute{
-				Description: "Specifies the algorithm to use to when encrypting the object. The valid option is AES256.",
-				Optional:    true,
-				Validators: []validator.String{
-					stringvalidator.OneOf("AES256"),
-				},
-			},
-			"x_amz_server_side_encryption_customer_key": schema.StringAttribute{
-				Description: "Specifies the 256-bit, base64-encoded encryption key to use to encrypt and decrypt your data.",
-				Optional:    true,
-			},
-			"x_amz_server_side_encryption_customer_key_md5": schema.StringAttribute{
-				Description: "Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS S3 Object Storage uses this header for a message integrity check to ensure that the encryption key was transmitted without error.",
-				Optional:    true,
-			},
-			"x_amz_server_side_encryption_context": schema.StringAttribute{
-				Description: "Specifies the IONOS S3 Object Storage Encryption Context to use for object encryption. The value of this header is a base64-encoded UTF-8 string holding JSON with the encryption context key-value pairs.",
-				Optional:    true,
-			},
-			"x_amz_request_payer": schema.StringAttribute{
-				Description: "The value is requester",
-				Optional:    true,
-				Validators: []validator.String{
-					stringvalidator.OneOf("requester"),
-				},
-			},
-			"x_amz_tagging": schema.StringAttribute{
-				Description: "The tag-set for the object. The tag-set must be encoded as URL Query parameters.",
-				Optional:    true,
-			},
-			"x_amz_object_lock_mode": schema.StringAttribute{
-				Description: "The Object Lock mode that you want to apply to this object.",
-				Optional:    true,
-				Validators: []validator.String{
-					stringvalidator.OneOf("GOVERNANCE", "COMPLIANCE"),
-				},
-			},
-			"x_amz_object_lock_retain_until_date": schema.StringAttribute{
-				Description: "The date and time when you want this object's Object Lock to expire. Must be formatted as a timestamp parameter.",
-				Optional:    true,
-			},
-			"x_amz_object_lock_legal_hold": schema.StringAttribute{
-				Description: "Specifies whether a legal hold will be applied to this object.",
-				Optional:    true,
-				Validators: []validator.String{
-					stringvalidator.OneOf("ON", "OFF"),
-				},
+				Optional: true,
 			},
 		},
 	}
@@ -231,7 +242,7 @@ func (r *s3BucketObjectResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 	request := r.client.ObjectsApi.PutObject(ctx, data.BucketName.ValueString(), data.ObjectKey.ValueString()).Body(f)
-	addRequestHeaders(data, &request, resp)
+	addRequestHeaders(ctx, data, &request, resp)
 	_, err = request.Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create bucket", err.Error())
@@ -303,7 +314,7 @@ func (r *s3BucketObjectResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 	request := r.client.ObjectsApi.PutObject(ctx, data.BucketName.ValueString(), data.ObjectKey.ValueString()).Body(f)
-	addRequestHeaders(data, &request, resp)
+	addRequestHeaders(ctx, data, &request, resp)
 
 	_, err = request.Execute()
 	if err != nil {
@@ -341,35 +352,38 @@ func (r *s3BucketObjectResource) Delete(ctx context.Context, req resource.Delete
 	}
 }
 
-func addRequestHeaders(data s3BucketObjectModel, request *s3.ApiPutObjectRequest, respInt interface{}) {
+func addRequestHeaders(ctx context.Context, data s3BucketObjectModel, request *s3.ApiPutObjectRequest, respInt interface{}) {
 
 	var convertedTime time.Time
 	var err error
+	var options bucketObjectOptionsModel
 
-	if !data.CacheControl.IsNull() {
-		*request = request.CacheControl(data.CacheControl.ValueString())
+	data.Options.As(ctx, &options, basetypes.ObjectAsOptions{})
+
+	if !options.CacheControl.IsNull() {
+		*request = request.CacheControl(options.CacheControl.ValueString())
 	}
-	if !data.ContentDisposition.IsNull() {
-		*request = request.ContentDisposition(data.ContentDisposition.ValueString())
+	if !options.ContentDisposition.IsNull() {
+		*request = request.ContentDisposition(options.ContentDisposition.ValueString())
 	}
-	if !data.ContentEncoding.IsNull() {
-		*request = request.ContentEncoding(data.ContentEncoding.ValueString())
+	if !options.ContentEncoding.IsNull() {
+		*request = request.ContentEncoding(options.ContentEncoding.ValueString())
 	}
-	if !data.ContentLanguage.IsNull() {
-		*request = request.ContentLanguage(data.ContentLanguage.ValueString())
+	if !options.ContentLanguage.IsNull() {
+		*request = request.ContentLanguage(options.ContentLanguage.ValueString())
 	}
-	if !data.ContentLength.IsNull() {
-		*request = request.ContentLength(int32(data.ContentLength.ValueInt64()))
+	if !options.ContentLength.IsNull() {
+		*request = request.ContentLength(int32(options.ContentLength.ValueInt64()))
 	}
-	if !data.ContentMD5.IsNull() {
-		*request = request.ContentMD5(data.ContentMD5.ValueString())
+	if !options.ContentMD5.IsNull() {
+		*request = request.ContentMD5(options.ContentMD5.ValueString())
 	}
-	if !data.ContentType.IsNull() {
-		*request = request.ContentType(data.ContentType.ValueString())
+	if !options.ContentType.IsNull() {
+		*request = request.ContentType(options.ContentType.ValueString())
 	}
-	if !data.Expires.IsNull() {
-		if convertedTime, err = time.Parse(constant.DatetimeTZOffsetLayout, data.Expires.ValueString()); err != nil {
-			if convertedTime, err = time.Parse(constant.DatetimeZLayout, data.Expires.ValueString()); err != nil {
+	if !options.Expires.IsNull() {
+		if convertedTime, err = time.Parse(constant.DatetimeTZOffsetLayout, options.Expires.ValueString()); err != nil {
+			if convertedTime, err = time.Parse(constant.DatetimeZLayout, options.Expires.ValueString()); err != nil {
 				if resp, ok := respInt.(*resource.CreateResponse); ok {
 					resp.Diagnostics.AddError("an error occurred while converting from IonosTime string to time.Time", err.Error())
 				} else {
@@ -382,39 +396,39 @@ func addRequestHeaders(data s3BucketObjectModel, request *s3.ApiPutObjectRequest
 		}
 		*request = request.Expires(convertedTime)
 	}
-	if !data.XAmzServerSideEncryption.IsNull() {
-		*request = request.XAmzServerSideEncryption(data.XAmzServerSideEncryption.ValueString())
+	if !options.XAmzServerSideEncryption.IsNull() {
+		*request = request.XAmzServerSideEncryption(options.XAmzServerSideEncryption.ValueString())
 	}
-	if !data.XAmzStorageClass.IsNull() {
-		*request = request.XAmzStorageClass(data.XAmzStorageClass.ValueString())
+	if !options.XAmzStorageClass.IsNull() {
+		*request = request.XAmzStorageClass(options.XAmzStorageClass.ValueString())
 	}
-	if !data.XAmzWebsiteRedirectLocation.IsNull() {
-		*request = request.XAmzWebsiteRedirectLocation(data.XAmzWebsiteRedirectLocation.ValueString())
+	if !options.XAmzWebsiteRedirectLocation.IsNull() {
+		*request = request.XAmzWebsiteRedirectLocation(options.XAmzWebsiteRedirectLocation.ValueString())
 	}
-	if !data.XAmzServerSideEncryptionCustomerAlgorithm.IsNull() {
-		*request = request.XAmzServerSideEncryptionCustomerAlgorithm(data.XAmzServerSideEncryptionCustomerAlgorithm.ValueString())
+	if !options.XAmzServerSideEncryptionCustomerAlgorithm.IsNull() {
+		*request = request.XAmzServerSideEncryptionCustomerAlgorithm(options.XAmzServerSideEncryptionCustomerAlgorithm.ValueString())
 	}
-	if !data.XAmzServerSideEncryptionCustomerKey.IsNull() {
-		*request = request.XAmzServerSideEncryptionCustomerKey(data.XAmzServerSideEncryptionCustomerKey.ValueString())
+	if !options.XAmzServerSideEncryptionCustomerKey.IsNull() {
+		*request = request.XAmzServerSideEncryptionCustomerKey(options.XAmzServerSideEncryptionCustomerKey.ValueString())
 	}
-	if !data.XAmzServerSideEncryptionCustomerKeyMD5.IsNull() {
-		*request = request.XAmzServerSideEncryptionCustomerKeyMD5(data.XAmzServerSideEncryptionCustomerKeyMD5.ValueString())
+	if !options.XAmzServerSideEncryptionCustomerKeyMD5.IsNull() {
+		*request = request.XAmzServerSideEncryptionCustomerKeyMD5(options.XAmzServerSideEncryptionCustomerKeyMD5.ValueString())
 	}
-	if !data.XAmzServerSideEncryptionContext.IsNull() {
-		*request = request.XAmzServerSideEncryptionContext(data.XAmzServerSideEncryptionContext.ValueString())
+	if !options.XAmzServerSideEncryptionContext.IsNull() {
+		*request = request.XAmzServerSideEncryptionContext(options.XAmzServerSideEncryptionContext.ValueString())
 	}
-	if !data.XAmzRequestPayer.IsNull() {
-		*request = request.XAmzRequestPayer(data.XAmzRequestPayer.ValueString())
+	if !options.XAmzRequestPayer.IsNull() {
+		*request = request.XAmzRequestPayer(options.XAmzRequestPayer.ValueString())
 	}
-	if !data.XAmzTagging.IsNull() {
-		*request = request.XAmzTagging(data.XAmzTagging.ValueString())
+	if !options.XAmzTagging.IsNull() {
+		*request = request.XAmzTagging(options.XAmzTagging.ValueString())
 	}
-	if !data.XAmzObjectLockMode.IsNull() {
-		*request = request.XAmzObjectLockMode(data.XAmzObjectLockMode.ValueString())
+	if !options.XAmzObjectLockMode.IsNull() {
+		*request = request.XAmzObjectLockMode(options.XAmzObjectLockMode.ValueString())
 	}
-	if !data.XAmzObjectLockRetainUntilDate.IsNull() {
-		if convertedTime, err = time.Parse(constant.DatetimeTZOffsetLayout, data.Expires.ValueString()); err != nil {
-			if convertedTime, err = time.Parse(constant.DatetimeZLayout, data.Expires.ValueString()); err != nil {
+	if !options.XAmzObjectLockRetainUntilDate.IsNull() {
+		if convertedTime, err = time.Parse(constant.DatetimeTZOffsetLayout, options.Expires.ValueString()); err != nil {
+			if convertedTime, err = time.Parse(constant.DatetimeZLayout, options.Expires.ValueString()); err != nil {
 				if resp, ok := respInt.(*resource.CreateResponse); ok {
 					resp.Diagnostics.AddError("an error occurred while converting from IonosTime string to time.Time", err.Error())
 				} else {
@@ -427,7 +441,7 @@ func addRequestHeaders(data s3BucketObjectModel, request *s3.ApiPutObjectRequest
 		}
 		*request = request.XAmzObjectLockRetainUntilDate(convertedTime)
 	}
-	if !data.XAmzObjectLockLegalHold.IsNull() {
-		*request = request.XAmzObjectLockLegalHold(data.XAmzObjectLockLegalHold.ValueString())
+	if !options.XAmzObjectLockLegalHold.IsNull() {
+		*request = request.XAmzObjectLockLegalHold(options.XAmzObjectLockLegalHold.ValueString())
 	}
 }
