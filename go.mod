@@ -7,6 +7,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/hashicorp/terraform-plugin-framework v1.10.0
+	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.1.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.13.0
 	github.com/hashicorp/terraform-plugin-mux v0.16.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0

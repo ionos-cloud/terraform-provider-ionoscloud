@@ -2,22 +2,20 @@ package s3
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -42,46 +40,31 @@ type bucketPolicyResource struct {
 }
 
 type bucketPolicyModel struct {
-	BucketName types.String `tfsdk:"bucket_name"`
-	ID         types.String `tfsdk:"id"`
-	Version    types.String `tfsdk:"version"`
-	Statements types.List   `tfsdk:"statements"`
+	Bucket types.String         `tfsdk:"bucket"`
+	Policy jsontypes.Normalized `tfsdk:"policy"`
 }
 
-type bucketPolicyStatementModel struct {
-	SID       types.String `tfsdk:"sid"`
-	Effect    types.String `tfsdk:"effect"`
-	Actions   types.List   `tfsdk:"actions"`
-	Resources types.List   `tfsdk:"resources"`
-	Principal types.List   `tfsdk:"principal"`
-	Condition types.Object `tfsdk:"condition"`
+// Intermediary structs for policy string serialization/deserialization
+type bucketPolicy struct {
+	ID        *string                 `json:"Id,omitempty"`
+	Version   *string                 `json:"Version,omitempty"`
+	Statement []bucketPolicyStatement `json:"Statement"`
 }
 
-func (m bucketPolicyStatementModel) AttributeTypes() map[string]attr.Type {
-	return map[string]attr.Type{
-		"sid":       types.StringType,
-		"effect":    types.StringType,
-		"actions":   types.ListType{ElemType: types.StringType},
-		"resources": types.ListType{ElemType: types.StringType},
-		"principal": types.ListType{ElemType: types.StringType},
-		"condition": types.ObjectType{AttrTypes: bucketPolicyStatementConditionModel{}.AttributeTypes()},
-	}
+type bucketPolicyStatement struct {
+	SID       *string                         `json:"Sid,omitempty"`
+	Effect    string                          `json:"Effect"`
+	Action    []string                        `json:"Action"`
+	Resources []string                        `json:"Resource"`
+	Principal []string                        `json:"Principal"`
+	Condition *bucketPolicyStatementCondition `json:"Condition,omitempty"`
 }
 
-type bucketPolicyStatementConditionModel struct {
-	IPs             types.List   `tfsdk:"ip_addresses"`
-	ExcludedIPs     types.List   `tfsdk:"excluded_ip_addresses"`
-	DateGreaterThan types.String `tfsdk:"date_greater_than"`
-	DateLessThan    types.String `tfsdk:"date_less_than"`
-}
-
-func (m bucketPolicyStatementConditionModel) AttributeTypes() map[string]attr.Type {
-	return map[string]attr.Type{
-		"ip_addresses":          types.ListType{ElemType: types.StringType},
-		"excluded_ip_addresses": types.ListType{ElemType: types.StringType},
-		"date_greater_than":     types.StringType,
-		"date_less_than":        types.StringType,
-	}
+type bucketPolicyStatementCondition struct {
+	IPs             []string `json:"IpAddress,omitempty"`
+	ExcludedIPs     []string `json:"NotIpAddress,omitempty"`
+	DateGreaterThan *string  `json:"DateGreaterThan,omitempty"`
+	DateLessThan    *string  `json:"DateLessThan,omitempty"`
 }
 
 // Metadata returns the metadata for the bucket policy resource.
@@ -93,78 +76,17 @@ func (r *bucketPolicyResource) Metadata(_ context.Context, req resource.Metadata
 func (r *bucketPolicyResource) Schema(_ context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"bucket_name": schema.StringAttribute{
+			"bucket": schema.StringAttribute{
 				Description: "Name of the S3 bucket to which this policy will be applied.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"id": schema.StringAttribute{
-				Description: "Optional identifier for the bucket policy.",
-				Optional:    true,
-			},
-			"version": schema.StringAttribute{
-				Description: "The version of the bucket policy.",
-				Optional:    true,
-			},
-			"statements": schema.ListNestedAttribute{
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"sid": schema.StringAttribute{
-							Description: "Optional identifier for the policy statement.",
-							Optional:    true,
-						},
-						"actions": schema.ListAttribute{
-							Description: "List of allowed or denied actions.",
-							ElementType: types.StringType,
-							Required:    true,
-							Validators:  bucketPolicyStatementActionValidators(),
-						},
-						"effect": schema.StringAttribute{
-							Description: "The outcome when the user requests a particular action.",
-							Required:    true,
-							Validators: []validator.String{
-								stringvalidator.OneOf("Allow", "Deny"),
-							},
-						},
-						"resources": schema.ListAttribute{
-							Description: "The bucket or object that the policy applies to.",
-							ElementType: types.StringType,
-							Required:    true,
-						},
-						"condition": schema.SingleNestedAttribute{
-							Description: "Conditions for when a policy is in effect.",
-							Attributes: map[string]schema.Attribute{
-								"ip_addresses": schema.ListAttribute{
-									Description: "List of affected IP addresses.",
-									ElementType: types.StringType,
-									Optional:    true,
-								},
-								"excluded_ip_addresses": schema.ListAttribute{
-									Description: "List of unaffected IP addresses.",
-									ElementType: types.StringType,
-									Optional:    true,
-								},
-								"date_greater_than": schema.StringAttribute{
-									Description: "Minimum date time.",
-									Optional:    true,
-								},
-								"date_less_than": schema.StringAttribute{
-									Description: "Maximum date time.",
-									Optional:    true,
-								},
-							},
-							Optional: true,
-						},
-						"principal": schema.ListAttribute{
-							Description: "Users to which the policy applies to.",
-							ElementType: types.StringType,
-							Optional:    true,
-						},
-					},
-				},
-				Required: true,
+			"policy": schema.StringAttribute{
+				CustomType:  jsontypes.NormalizedType{},
+				Description: "Text of the policy",
+				Required:    true,
 			},
 		},
 	}
@@ -203,13 +125,13 @@ func (r *bucketPolicyResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	requestInput, diags := putBucketPolicyInput(ctx, &data)
+	requestInput, diags := putBucketPolicyInput(&data)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	_, err := r.client.PolicyApi.PutBucketPolicy(ctx, data.BucketName.ValueString()).BucketPolicy(requestInput).Execute()
+	_, err := r.client.PolicyApi.PutBucketPolicy(ctx, data.Bucket.ValueString()).BucketPolicy(requestInput).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create bucket policy", err.Error())
 		return
@@ -217,7 +139,7 @@ func (r *bucketPolicyResource) Create(ctx context.Context, req resource.CreateRe
 
 	// Ensure policy is created
 	err = backoff.Retry(func() error {
-		if _, retryErr := getBucketPolicy(ctx, r.client, data.BucketName.ValueString()); retryErr != nil {
+		if _, retryErr := getBucketPolicy(ctx, r.client, data.Bucket.ValueString()); retryErr != nil {
 			if errors.Is(retryErr, errBucketPolicyNotFound) {
 				return retryErr
 			}
@@ -247,7 +169,7 @@ func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	policy, err := getBucketPolicy(ctx, r.client, data.BucketName.ValueString())
+	policy, err := getBucketPolicy(ctx, r.client, data.Bucket.ValueString())
 	if err != nil {
 		if errors.Is(err, errBucketPolicyNotFound) {
 			resp.State.RemoveResource(ctx)
@@ -257,7 +179,7 @@ func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	resp.Diagnostics.Append(setBucketPolicyData(ctx, policy, &data)...)
+	resp.Diagnostics.Append(setBucketPolicyData(policy, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -280,13 +202,13 @@ func (r *bucketPolicyResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	requestInput, diags := putBucketPolicyInput(ctx, &data)
+	requestInput, diags := putBucketPolicyInput(&data)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	_, err := r.client.PolicyApi.PutBucketPolicy(ctx, data.BucketName.ValueString()).BucketPolicy(requestInput).Execute()
+	_, err := r.client.PolicyApi.PutBucketPolicy(ctx, data.Bucket.ValueString()).BucketPolicy(requestInput).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update bucket policy", err.Error())
 		return
@@ -309,7 +231,7 @@ func (r *bucketPolicyResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	if apiResponse, err := r.client.PolicyApi.DeleteBucketPolicy(ctx, data.BucketName.ValueString()).Execute(); err != nil {
+	if apiResponse, err := r.client.PolicyApi.DeleteBucketPolicy(ctx, data.Bucket.ValueString()).Execute(); err != nil {
 		if apiResponse.HttpNotFound() {
 			return
 		}
@@ -319,7 +241,7 @@ func (r *bucketPolicyResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 
 	err := backoff.Retry(func() error {
-		if _, retryErr := getBucketPolicy(ctx, r.client, data.BucketName.ValueString()); retryErr != nil {
+		if _, retryErr := getBucketPolicy(ctx, r.client, data.Bucket.ValueString()); retryErr != nil {
 			if errors.Is(retryErr, errBucketPolicyNotFound) {
 				return nil
 			}
@@ -335,102 +257,6 @@ func (r *bucketPolicyResource) Delete(ctx context.Context, req resource.DeleteRe
 
 }
 
-func putBucketPolicyInput(ctx context.Context, policyModel *bucketPolicyModel) (s3.BucketPolicy, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	policy := s3.BucketPolicy{
-		Id:        policyModel.ID.ValueStringPointer(),
-		Version:   policyModel.Version.ValueStringPointer(),
-		Statement: []s3.BucketPolicyStatement{},
-	}
-	statementsModel := make([]bucketPolicyStatementModel, len(policyModel.Statements.Elements()))
-	if diags = policyModel.Statements.ElementsAs(ctx, &statementsModel, false); diags.HasError() {
-		return s3.BucketPolicy{}, diags
-	}
-
-	for _, statementModel := range statementsModel {
-		statement := s3.BucketPolicyStatement{
-			Sid:    statementModel.SID.ValueStringPointer(),
-			Effect: statementModel.Effect.ValueString(),
-		}
-
-		statement.Action = make([]string, len(statementModel.Actions.Elements()))
-		if diags = statementModel.Actions.ElementsAs(ctx, &statement.Action, false); diags.HasError() {
-			return s3.BucketPolicy{}, diags
-		}
-
-		statement.Resource = make([]string, len(statementModel.Resources.Elements()))
-		if diags = statementModel.Resources.ElementsAs(ctx, &statement.Resource, false); diags.HasError() {
-			return s3.BucketPolicy{}, diags
-		}
-
-		principalList := make([]string, len(statementModel.Principal.Elements()))
-		if diags = statementModel.Principal.ElementsAs(ctx, &principalList, false); diags.HasError() {
-			return s3.BucketPolicy{}, diags
-		}
-		principal := s3.BucketPolicyStatementPrincipal{BucketPolicyStatementPrincipalAnyOf: s3.NewBucketPolicyStatementPrincipalAnyOf(principalList)}
-		statement.Principal = &principal
-
-		if !statementModel.Condition.IsNull() {
-			if statement.Condition, diags = putBucketPolicyStatementConditionInput(ctx, statementModel); diags.HasError() {
-				return s3.BucketPolicy{}, diags
-			}
-		}
-
-		policy.Statement = append(policy.Statement, statement)
-	}
-
-	return policy, diags
-}
-
-func putBucketPolicyStatementConditionInput(ctx context.Context, statementModel bucketPolicyStatementModel) (*s3.BucketPolicyStatementCondition, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var err error
-
-	condition := s3.NewBucketPolicyStatementCondition()
-	conditionModel := bucketPolicyStatementConditionModel{}
-	if diags = statementModel.Condition.As(ctx, &conditionModel, basetypes.ObjectAsOptions{}); diags.HasError() {
-		return nil, diags
-	}
-
-	IPs := s3.BucketPolicyStatementConditionIpAddress{}
-	IPs.AwsSourceIp = make([]string, len(conditionModel.IPs.Elements()))
-	if diags = conditionModel.IPs.ElementsAs(ctx, &IPs.AwsSourceIp, false); diags.HasError() {
-		return nil, diags
-	}
-	condition.IpAddress = &IPs
-
-	excludedIPs := s3.BucketPolicyStatementConditionIpAddress{}
-	excludedIPs.AwsSourceIp = make([]string, len(conditionModel.ExcludedIPs.Elements()))
-	if diags = conditionModel.ExcludedIPs.ElementsAs(ctx, &excludedIPs.AwsSourceIp, false); diags.HasError() {
-		return nil, diags
-	}
-	condition.NotIpAddress = &excludedIPs
-
-	if !conditionModel.DateGreaterThan.IsNull() {
-		var t *s3.IonosTime
-		if t, err = convertToIonosTime(conditionModel.DateGreaterThan.ValueString()); err != nil {
-			diags.AddError("Error converting policy condition 'greater than' date", err.Error())
-			return nil, diags
-		}
-		dateTime := s3.BucketPolicyStatementConditionDateGreaterThan{BucketPolicyStatementConditionDateGreaterThanOneOf: s3.NewBucketPolicyStatementConditionDateGreaterThanOneOf()}
-		dateTime.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime = t
-		condition.DateGreaterThan = &dateTime
-	}
-	if !conditionModel.DateLessThan.IsNull() {
-		var t *s3.IonosTime
-		if t, err = convertToIonosTime(conditionModel.DateLessThan.ValueString()); err != nil {
-			diags.AddError("Error converting policy condition 'less than' date", err.Error())
-			return nil, diags
-		}
-		dateTime := s3.BucketPolicyStatementConditionDateLessThan{BucketPolicyStatementConditionDateGreaterThanOneOf: s3.NewBucketPolicyStatementConditionDateGreaterThanOneOf()}
-		dateTime.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime = t
-		condition.DateLessThan = &dateTime
-	}
-
-	return condition, diags
-}
-
 func getBucketPolicy(ctx context.Context, client *s3.APIClient, bucketName string) (*s3.BucketPolicy, error) {
 	policy, apiResponse, err := client.PolicyApi.GetBucketPolicy(ctx, bucketName).Execute()
 	if err != nil {
@@ -442,68 +268,115 @@ func getBucketPolicy(ctx context.Context, client *s3.APIClient, bucketName strin
 	return policy, nil
 }
 
-func setBucketPolicyData(ctx context.Context, policy *s3.BucketPolicy, data *bucketPolicyModel) diag.Diagnostics {
-	data.ID = types.StringPointerValue(policy.Id)
-	data.Version = types.StringPointerValue(policy.Version)
-
-	var statementsModel = make([]bucketPolicyStatementModel, 0, len(policy.Statement))
+func putBucketPolicyInput(policyModel *bucketPolicyModel) (s3.BucketPolicy, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	for _, statement := range policy.Statement {
-		statementModel := bucketPolicyStatementModel{}
-		statementModel.SID = types.StringPointerValue(statement.Sid)
-		statementModel.Effect = types.StringValue(statement.Effect)
-		if statementModel.Actions, diags = types.ListValueFrom(ctx, types.StringType, statement.Action); diags.HasError() {
-			return diags
-		}
-		if statementModel.Resources, diags = types.ListValueFrom(ctx, types.StringType, statement.Resource); diags.HasError() {
-			return diags
-		}
-		if statement.Principal != nil {
-			if statementModel.Principal, diags = types.ListValueFrom(ctx, types.StringType, statement.Principal.BucketPolicyStatementPrincipalAnyOf.AWS); diags.HasError() {
-				return diags
+	policyInput := s3.BucketPolicy{}
+	policyData := bucketPolicy{}
+
+	// Can't unmarshal directly in the API object, need to use an intermediary
+	if diags = policyModel.Policy.Unmarshal(&policyData); diags.HasError() {
+		return s3.BucketPolicy{}, diags
+	}
+
+	policyInput.Id = policyData.ID
+	policyInput.Version = policyData.Version
+	policyInput.Statement = make([]s3.BucketPolicyStatement, 0, len(policyData.Statement))
+	for _, statementData := range policyData.Statement {
+		statementInput := s3.BucketPolicyStatement{}
+		statementInput.Sid = statementData.SID
+		statementInput.Effect = statementData.Effect
+		statementInput.Resource = statementData.Resources
+		statementInput.Action = statementData.Action
+
+		principalInput := s3.BucketPolicyStatementPrincipal{BucketPolicyStatementPrincipalAnyOf: s3.NewBucketPolicyStatementPrincipalAnyOf(statementData.Principal)}
+		statementInput.Principal = &principalInput
+
+		if statementData.Condition != nil {
+			statementInput.Condition = s3.NewBucketPolicyStatementCondition()
+
+			statementInput.Condition.IpAddress = s3.NewBucketPolicyStatementConditionIpAddress()
+			statementInput.Condition.IpAddress.AwsSourceIp = statementData.Condition.IPs
+			statementInput.Condition.NotIpAddress = s3.NewBucketPolicyStatementConditionIpAddress()
+			statementInput.Condition.NotIpAddress.AwsSourceIp = statementData.Condition.ExcludedIPs
+			if statementData.Condition.DateGreaterThan != nil {
+				var t *s3.IonosTime
+				var err error
+				if t, err = convertToIonosTime(*statementData.Condition.DateGreaterThan); err != nil {
+					diags.AddError("Error converting policy condition 'greater than' date", err.Error())
+					return s3.BucketPolicy{}, diags
+				}
+				dateGreater := s3.BucketPolicyStatementConditionDateGreaterThan{
+					BucketPolicyStatementConditionDateGreaterThanOneOf: s3.NewBucketPolicyStatementConditionDateGreaterThanOneOf(),
+				}
+				dateGreater.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime = t
+				statementInput.Condition.DateGreaterThan = &dateGreater
+			}
+			if statementData.Condition.DateLessThan != nil {
+				var t *s3.IonosTime
+				var err error
+				if t, err = convertToIonosTime(*statementData.Condition.DateLessThan); err != nil {
+					diags.AddError("Error converting policy condition 'less than' date", err.Error())
+					return s3.BucketPolicy{}, diags
+				}
+				dateLess := s3.BucketPolicyStatementConditionDateLessThan{
+					BucketPolicyStatementConditionDateGreaterThanOneOf: s3.NewBucketPolicyStatementConditionDateGreaterThanOneOf(),
+				}
+				dateLess.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime = t
+				statementInput.Condition.DateLessThan = &dateLess
 			}
 		}
-		setBucketPolicyStatementConditionData(ctx, statement.Condition, &statementModel.Condition)
-
-		statementsModel = append(statementsModel, statementModel)
+		policyInput.Statement = append(policyInput.Statement, statementInput)
 	}
 
-	data.Statements, diags = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: bucketPolicyStatementModel{}.AttributeTypes()}, statementsModel)
-	return diags
+	return policyInput, diags
 }
 
-func setBucketPolicyStatementConditionData(ctx context.Context, condition *s3.BucketPolicyStatementCondition, model *types.Object) diag.Diagnostics {
-	var conditionModel bucketPolicyStatementConditionModel
+func setBucketPolicyData(policyResponse *s3.BucketPolicy, data *bucketPolicyModel) diag.Diagnostics {
 	var diags diag.Diagnostics
-	if condition == nil {
-		*model = types.ObjectNull(conditionModel.AttributeTypes())
+
+	policyData := bucketPolicy{
+		ID:      policyResponse.Id,
+		Version: policyResponse.Version,
+	}
+	policyData.Statement = make([]bucketPolicyStatement, 0, len(policyResponse.Statement))
+
+	for _, statementResponse := range policyResponse.Statement {
+		statementData := bucketPolicyStatement{
+			SID:       statementResponse.Sid,
+			Effect:    statementResponse.Effect,
+			Action:    statementResponse.Action,
+			Resources: statementResponse.Resource,
+		}
+		if statementResponse.Principal != nil && statementResponse.Principal.BucketPolicyStatementPrincipalAnyOf != nil {
+			statementData.Principal = statementResponse.Principal.BucketPolicyStatementPrincipalAnyOf.AWS
+		}
+		if statementResponse.Condition != nil {
+			conditionData := bucketPolicyStatementCondition{
+				IPs:         statementResponse.Condition.GetIpAddress().AwsSourceIp,
+				ExcludedIPs: statementResponse.Condition.GetNotIpAddress().AwsSourceIp,
+			}
+			if statementResponse.Condition.DateGreaterThan != nil &&
+				statementResponse.Condition.DateGreaterThan.BucketPolicyStatementConditionDateGreaterThanOneOf != nil &&
+				statementResponse.Condition.DateGreaterThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime != nil {
+				dateString := statementResponse.Condition.DateGreaterThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime.Format(constant.DatetimeZLayout)
+				conditionData.DateGreaterThan = &dateString
+			}
+			if statementResponse.Condition.DateLessThan != nil &&
+				statementResponse.Condition.DateLessThan.BucketPolicyStatementConditionDateGreaterThanOneOf != nil &&
+				statementResponse.Condition.DateLessThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime != nil {
+				dateString := statementResponse.Condition.DateLessThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime.Format(constant.DatetimeZLayout)
+				conditionData.DateLessThan = &dateString
+			}
+			statementData.Condition = &conditionData
+		}
+		policyData.Statement = append(policyData.Statement, statementData)
+	}
+	policyString, err := json.Marshal(policyData)
+	if err != nil {
+		diags.AddError("Error serializing policy data", err.Error())
 		return diags
 	}
-
-	if condition.IpAddress != nil {
-		if conditionModel.IPs, diags = types.ListValueFrom(ctx, types.StringType, condition.IpAddress.AwsSourceIp); diags.HasError() {
-			return diags
-		}
-	}
-	if condition.NotIpAddress != nil {
-		if conditionModel.ExcludedIPs, diags = types.ListValueFrom(ctx, types.StringType, condition.NotIpAddress.AwsSourceIp); diags.HasError() {
-			return diags
-		}
-	}
-
-	if condition.DateGreaterThan != nil &&
-		condition.DateGreaterThan.BucketPolicyStatementConditionDateGreaterThanOneOf != nil &&
-		condition.DateGreaterThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime != nil {
-		conditionModel.DateGreaterThan = types.StringValue(condition.DateGreaterThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime.Format(constant.DatetimeZLayout))
-	}
-
-	if condition.DateLessThan != nil &&
-		condition.DateLessThan.BucketPolicyStatementConditionDateGreaterThanOneOf != nil &&
-		condition.DateLessThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime != nil {
-		conditionModel.DateLessThan = types.StringValue(condition.DateLessThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime.Format(constant.DatetimeZLayout))
-	}
-
-	*model, diags = types.ObjectValueFrom(ctx, conditionModel.AttributeTypes(), conditionModel)
+	data.Policy = jsontypes.NewNormalizedValue(string(policyString))
 	return diags
 }
 
