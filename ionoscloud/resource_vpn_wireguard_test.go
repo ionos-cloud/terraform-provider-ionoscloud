@@ -34,7 +34,7 @@ func TestAccWireguardGateway(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "interface_ipv6_cidr", "2001:0db8:85a3::/24"),
 					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "gateway_ip", constant.IpBlockResource+"."+constant.IpBlockTestResource, "ips.0"),
 					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "connections.0.datacenter_id", "ionoscloud_datacenter.datacenter_example", "id"),
-					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "connections.0.lan_id", "ionoscloud_lan.lan_example.id"),
+					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "connections.0.lan_id", "ionoscloud_lan.lan_example", "id"),
 					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "connections.0.ipv4_cidr", "192.168.1.108/24"),
 				),
 			},

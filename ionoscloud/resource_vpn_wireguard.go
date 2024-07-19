@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	_ "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
+	"log"
 	"time"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
@@ -14,7 +15,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-func resourceVpnWireguard() *schema.Resource {
+func resourceVpnWireguardGateway() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceVpnWireguardGatewayCreate,
 		ReadContext:   resourceVpnWireguardGatewayRead,
@@ -128,8 +129,18 @@ func resourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData
 	return diag.FromErr(vpn.SetWireguardGWData(d, wireguard))
 }
 func resourceVpnWireguardGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// Implementation for resource creation
-	return nil
+	client := meta.(services.SdkBundle).VPNClient
+
+	wireguard, _, err := client.UpdateWireguardGateway(ctx, d.Id(), d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsWireguardGatewayReady)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("creating %w ", err))
+	}
+
+	return diag.FromErr(vpn.SetWireguardGWData(d, wireguard))
 }
 
 func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -144,11 +155,16 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 		diags := diag.FromErr(fmt.Errorf("error while deleting wireguard gateway %s: %w", d.Id(), err))
 		return diags
 	}
+	//todo: for now we need to keep this because otherwise we get an internal server error on the first find after the delete
+	// remove when no longer necessary
 	time.Sleep(5 * time.Second)
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsWireguardGatewayDeleted)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("while deleting wireguard gateway %s : %w", d.Id(), err))
 	}
+
+	log.Printf("[INFO] Successfully deleted Wireguard Gateway %s", d.Id())
+	d.SetId("")
 
 	return nil
 }

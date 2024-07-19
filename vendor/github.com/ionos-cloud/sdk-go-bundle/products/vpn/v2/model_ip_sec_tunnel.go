@@ -30,16 +30,16 @@ type IPSecTunnel struct {
 	Ike        *IKEEncryption  `json:"ike,omitempty"`
 	Esp        *ESPEncryption  `json:"esp,omitempty"`
 	// The network CIDRs on the \"Left\" side that are allowed to connect to the IPSec tunnel, i.e the CIDRs within your IONOS Cloud LAN.  Specify \"0.0.0.0/0\" or \"::/0\" for all addresses.
-	CloudNetworkCIDRs []CIDR `json:"cloudNetworkCIDRs"`
+	CloudNetworkCIDRs []string `json:"cloudNetworkCIDRs"`
 	// The network CIDRs on the \"Right\" side that are allowed to connect to the IPSec tunnel.  Specify \"0.0.0.0/0\" or \"::/0\" for all addresses.
-	PeerNetworkCIDRs []CIDR `json:"peerNetworkCIDRs"`
+	PeerNetworkCIDRs []string `json:"peerNetworkCIDRs"`
 }
 
 // NewIPSecTunnel instantiates a new IPSecTunnel object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewIPSecTunnel(name string, remoteHost string, auth IPSecTunnelAuth, cloudNetworkCIDRs []CIDR, peerNetworkCIDRs []CIDR) *IPSecTunnel {
+func NewIPSecTunnel(name string, remoteHost string, auth IPSecTunnelAuth, cloudNetworkCIDRs []string, peerNetworkCIDRs []string) *IPSecTunnel {
 	this := IPSecTunnel{}
 
 	this.Name = name
@@ -228,9 +228,9 @@ func (o *IPSecTunnel) SetEsp(v ESPEncryption) {
 }
 
 // GetCloudNetworkCIDRs returns the CloudNetworkCIDRs field value
-func (o *IPSecTunnel) GetCloudNetworkCIDRs() []CIDR {
+func (o *IPSecTunnel) GetCloudNetworkCIDRs() []string {
 	if o == nil {
-		var ret []CIDR
+		var ret []string
 		return ret
 	}
 
@@ -239,7 +239,7 @@ func (o *IPSecTunnel) GetCloudNetworkCIDRs() []CIDR {
 
 // GetCloudNetworkCIDRsOk returns a tuple with the CloudNetworkCIDRs field value
 // and a boolean to check if the value has been set.
-func (o *IPSecTunnel) GetCloudNetworkCIDRsOk() ([]CIDR, bool) {
+func (o *IPSecTunnel) GetCloudNetworkCIDRsOk() ([]string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -247,14 +247,14 @@ func (o *IPSecTunnel) GetCloudNetworkCIDRsOk() ([]CIDR, bool) {
 }
 
 // SetCloudNetworkCIDRs sets field value
-func (o *IPSecTunnel) SetCloudNetworkCIDRs(v []CIDR) {
+func (o *IPSecTunnel) SetCloudNetworkCIDRs(v []string) {
 	o.CloudNetworkCIDRs = v
 }
 
 // GetPeerNetworkCIDRs returns the PeerNetworkCIDRs field value
-func (o *IPSecTunnel) GetPeerNetworkCIDRs() []CIDR {
+func (o *IPSecTunnel) GetPeerNetworkCIDRs() []string {
 	if o == nil {
-		var ret []CIDR
+		var ret []string
 		return ret
 	}
 
@@ -263,7 +263,7 @@ func (o *IPSecTunnel) GetPeerNetworkCIDRs() []CIDR {
 
 // GetPeerNetworkCIDRsOk returns a tuple with the PeerNetworkCIDRs field value
 // and a boolean to check if the value has been set.
-func (o *IPSecTunnel) GetPeerNetworkCIDRsOk() ([]CIDR, bool) {
+func (o *IPSecTunnel) GetPeerNetworkCIDRsOk() ([]string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -271,7 +271,7 @@ func (o *IPSecTunnel) GetPeerNetworkCIDRsOk() ([]CIDR, bool) {
 }
 
 // SetPeerNetworkCIDRs sets field value
-func (o *IPSecTunnel) SetPeerNetworkCIDRs(v []CIDR) {
+func (o *IPSecTunnel) SetPeerNetworkCIDRs(v []string) {
 	o.PeerNetworkCIDRs = v
 }
 

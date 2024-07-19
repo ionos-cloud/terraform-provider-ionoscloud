@@ -398,7 +398,9 @@ const (
 
 const (
 	WireGuardGatewayResource     = "ionoscloud_vpn_wireguard_gateway"
+	WireGuardPeerResource        = "ionoscloud_vpn_wireguard_peer"
 	WireGuardGatewayTestResource = "test_wireguard_gateway"
+	WireGuardPeerTestResource    = "test_wireguard_peer"
 )
 
 var ForwardingRuleAlgorithms = []string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}

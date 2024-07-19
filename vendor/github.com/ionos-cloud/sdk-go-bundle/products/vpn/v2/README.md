@@ -225,7 +225,6 @@ All URIs are relative to *https://vpn.de-fra.ionos.com*
 <details >
 <summary title="Click to toggle">API models list</summary>
 
- - [CIDR](docs/models/CIDR)
  - [Connection](docs/models/Connection)
  - [ESPEncryption](docs/models/ESPEncryption)
  - [Error](docs/models/Error)

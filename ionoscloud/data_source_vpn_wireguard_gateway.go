@@ -99,7 +99,6 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("please provide either the wireguard gateway ID or name"))
 	}
 
-	// Assuming the SDK has a method to list or get the VPN Wireguard resource by name
 	var wireguardGw vpnSdk.WireguardGatewayRead
 	var err error
 	if idOk {

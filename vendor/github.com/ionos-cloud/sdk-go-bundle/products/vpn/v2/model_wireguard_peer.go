@@ -26,7 +26,7 @@ type WireguardPeer struct {
 	Description *string            `json:"description,omitempty"`
 	Endpoint    *WireguardEndpoint `json:"endpoint,omitempty"`
 	// The subnet CIDRs that are allowed to connect to the WireGuard Gateway.  Specify \"a.b.c.d/32\" for an individual IP address.  Specify \"0.0.0.0/0\" or \"::/0\" for all addresses.
-	AllowedIPs []CIDR `json:"allowedIPs"`
+	AllowedIPs []string `json:"allowedIPs"`
 	// WireGuard public key of the connecting peer
 	PublicKey string `json:"publicKey"`
 }
@@ -35,7 +35,7 @@ type WireguardPeer struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWireguardPeer(name string, allowedIPs []CIDR, publicKey string) *WireguardPeer {
+func NewWireguardPeer(name string, allowedIPs []string, publicKey string) *WireguardPeer {
 	this := WireguardPeer{}
 
 	this.Name = name
@@ -142,9 +142,9 @@ func (o *WireguardPeer) SetEndpoint(v WireguardEndpoint) {
 }
 
 // GetAllowedIPs returns the AllowedIPs field value
-func (o *WireguardPeer) GetAllowedIPs() []CIDR {
+func (o *WireguardPeer) GetAllowedIPs() []string {
 	if o == nil {
-		var ret []CIDR
+		var ret []string
 		return ret
 	}
 
@@ -153,7 +153,7 @@ func (o *WireguardPeer) GetAllowedIPs() []CIDR {
 
 // GetAllowedIPsOk returns a tuple with the AllowedIPs field value
 // and a boolean to check if the value has been set.
-func (o *WireguardPeer) GetAllowedIPsOk() ([]CIDR, bool) {
+func (o *WireguardPeer) GetAllowedIPsOk() ([]string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -161,7 +161,7 @@ func (o *WireguardPeer) GetAllowedIPsOk() ([]CIDR, bool) {
 }
 
 // SetAllowedIPs sets field value
-func (o *WireguardPeer) SetAllowedIPs(v []CIDR) {
+func (o *WireguardPeer) SetAllowedIPs(v []string) {
 	o.AllowedIPs = v
 }
 

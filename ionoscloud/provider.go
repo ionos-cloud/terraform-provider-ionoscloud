@@ -123,7 +123,8 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
-			constant.WireGuardGatewayResource:                  resourceVpnWireguard(),
+			constant.WireGuardGatewayResource:                  resourceVpnWireguardGateway(),
+			constant.WireGuardPeerResource:                     resourceVpnWireguardPeer(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -184,6 +185,7 @@ func Provider() *schema.Provider {
 			constant.AutoscalingGroupResource:                  DataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
 			constant.WireGuardGatewayResource:                  dataSourceVpnWireguardGateway(),
+			constant.WireGuardPeerResource:                     dataSourceVpnWireguardPeer(),
 		},
 	}
 

@@ -2,19 +2,31 @@ package ionoscloud
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func resourceVpnWireguardPeer() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceVpnWireguardPeerCreate,
 		ReadContext:   resourceVpnWireguardPeerRead,
-		//UpdateContext: resourceVpnWireguardPeerUpdate,
-		//DeleteContext: resourceVpnWireguardPeerDelete,
+		UpdateContext: resourceVpnWireguardPeerUpdate,
+		DeleteContext: resourceVpnWireguardPeerDelete,
 
 		Schema: map[string]*schema.Schema{
+			"gateway_id": {
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "The ID of the WireguardGateway that the peer will connect to.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+			},
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -56,59 +68,83 @@ func resourceVpnWireguardPeer() *schema.Resource {
 				Description: "The subnet CIDRs that are allowed to connect to the WireGuard Gateway.",
 				MinItems:    1,
 				MaxItems:    20,
-				ValidateFunc: validation.All(
-					validation.StringIsNotEmpty,
-					validation.Any(validation.IsCIDR, validation.IsIPAddress),
-				),
 			},
 			"public_key": {
 				Type:         schema.TypeString,
 				Required:     true,
 				Description:  "WireGuard public key of the connecting peer",
-				ValidateFunc: validation.StringIsNotEmpty, // Add more specific validation if needed
+				ValidateFunc: validation.StringIsNotEmpty,
+			},
+			"status": {
+				Type:        schema.TypeString,
+				Description: "The status of the WireGuard Gateway",
+				Computed:    true,
 			},
 		},
 	}
 }
 
 func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	//client := m.(*ionoscloud.Client)
-	//
-	//// Extract fields from schema.ResourceData
-	//name := d.Get("name").(string)
-	//description := d.Get("description").(string)
-	//publicKey := d.Get("public_key").(string)
-	//// Assuming endpoint and allowed_ips need to be handled similarly
-	//
-	//// Construct request object (pseudo-code, adjust according to actual API client)
-	//createRequest := ionoscloud.WireguardPeerCreateRequest{
-	//	Name:        name,
-	//	Description: description,
-	//	PublicKey:   publicKey,
-	//	// Add other fields as necessary
-	//}
-	//
-	//// Send request to API
-	//peer, _, err := client.WireguardPeers.Create(ctx, createRequest)
-	//if err != nil {
-	//	return diag.FromErr(err)
-	//}
-	//
-	//// Set the resource ID
-	//d.SetId(peer.ID)
-
-	return resourceVpnWireguardPeerRead(ctx, d, m)
+	client := m.(services.SdkBundle).VPNClient
+	gatewayID := d.Get("gateway_id").(string)
+	peer, _, err := client.CreateWireguardGatewayPeers(ctx, d, gatewayID)
+	if err != nil {
+		d.SetId("")
+		return diag.FromErr(fmt.Errorf("error creating Wireguard peer: %w", err))
+	}
+	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
+		d.SetId("")
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//client := meta.(services.SdkBundle).VPNClient
+	client := meta.(services.SdkBundle).VPNClient
+	gatewayID := d.Get("gateway_id").(string)
+	peer, apiResponse, err := client.GetWireguardPeerByID(ctx, gatewayID, d.Id())
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			log.Printf("[DEBUG] cannot find peer by gatewayID %s and id %s", gatewayID, d.Id())
+			d.SetId("")
+			return nil
+		}
+	}
+	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
+		return diag.FromErr(err)
+	}
 
-	// Use the ID to read the resource
-	//peer, _, err := client.WireguardPeers.GetByID(ctx, d.Id())
-	//if err != nil {
-	//	return diag.FromErr(err)
-	//}
+	return nil
+}
 
-	// Update the state
+func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(services.SdkBundle).VPNClient
+	gatewayID := d.Get("gateway_id").(string)
+	_, _, err := client.UpdateWireguardPeer(ctx, gatewayID, d.Id(), d)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error updating Wireguard peer: %w", err))
+	}
+	return nil
+}
+
+func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(services.SdkBundle).VPNClient
+	gatewayID := d.Get("gateway_id").(string)
+	apiResponse, err := client.DeleteWireguardPeer(ctx, gatewayID, d.Id())
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return nil
+		}
+		return diag.FromErr(fmt.Errorf("error deleting Wireguard peer: %w", err))
+	}
+
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsWireguardPeerDeleted)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("deleting %w", err))
+	}
+
+	log.Printf("[INFO] Successfully deleted wireguard perr: %s", d.Id())
+
+	d.SetId("")
 	return nil
 }

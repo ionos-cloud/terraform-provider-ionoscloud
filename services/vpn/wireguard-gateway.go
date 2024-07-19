@@ -23,10 +23,30 @@ func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceD
 	apiResponse.LogInfo()
 	return wireguard, apiResponse, err
 }
+func (c *Client) CreateWireguardGatewayPeers(ctx context.Context, d *schema.ResourceData, gatewayID string) (vpn.WireguardPeerRead, utils.ApiResponseInfo, error) {
+	request, err := setWireguardPeersPostRequest(d)
+	if err != nil {
+		return vpn.WireguardPeerRead{}, nil, fmt.Errorf("error decoding endpoint: %w", err)
+	}
+	wireguard, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersPost(ctx, gatewayID).WireguardPeerCreate(*request).Execute()
+	apiResponse.LogInfo()
+	return wireguard, apiResponse, err
+}
 
 func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	wireguardId := d.Id()
 	wireguard, _, err := c.GetWireguardGatewayByID(ctx, wireguardId)
+	if err != nil {
+		return false, err
+	}
+	log.Printf("[DEBUG] wireguard status: %s", wireguard.Metadata.Status)
+	return strings.EqualFold(wireguard.Metadata.Status, constant.Available), nil
+}
+
+func (c *Client) IsWireguardPeerAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	wireguardId := d.Id()
+	gatewayID := d.Get("gateway_id").(string)
+	wireguard, _, err := c.GetWireguardPeerByID(ctx, gatewayID, wireguardId)
 	if err != nil {
 		return false, err
 	}
@@ -41,14 +61,36 @@ func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schem
 	return wireguardResponse, apiResponse, err
 }
 
+func (c *Client) UpdateWireguardPeer(ctx context.Context, gatewayID, id string, d *schema.ResourceData) (vpn.WireguardPeerRead, utils.ApiResponseInfo, error) {
+	request, err := setWireguardPeerPatchRequest(d)
+	if err != nil {
+		return vpn.WireguardPeerRead{}, nil, fmt.Errorf("error decoding endpoint: %w", err)
+	}
+	wireguardResponse, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersPut(ctx, gatewayID, id).WireguardPeerEnsure(request).Execute()
+	apiResponse.LogInfo()
+	return wireguardResponse, apiResponse, err
+}
+
 func (c *Client) DeleteWireguardGateway(ctx context.Context, id string) (utils.ApiResponseInfo, error) {
 	apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysDelete(ctx, id).Execute()
+	apiResponse.LogInfo()
+	return apiResponse, err
+}
+func (c *Client) DeleteWireguardPeer(ctx context.Context, gatewayID, id string) (utils.ApiResponseInfo, error) {
+	apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersDelete(ctx, gatewayID, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
 func (c *Client) IsWireguardGatewayDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysFindById(ctx, d.Id()).Execute()
+	apiResponse.LogInfo()
+	return apiResponse.HttpNotFound(), err
+}
+
+func (c *Client) IsWireguardPeerDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	gatewayID := d.Get("gateway_id").(string)
+	_, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersFindById(ctx, gatewayID, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
 }
@@ -60,9 +102,23 @@ func (c *Client) GetWireguardGatewayByID(ctx context.Context, id string) (vpn.Wi
 	return wireguard, apiResponse, err
 }
 
+// GetWireguardPeerByID returns a wireguard by its ID
+func (c *Client) GetWireguardPeerByID(ctx context.Context, gatewayID, id string) (vpn.WireguardPeerRead, *shared.APIResponse, error) {
+	wireguard, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersFindById(ctx, gatewayID, id).Execute()
+	apiResponse.LogInfo()
+	return wireguard, apiResponse, err
+}
+
 // ListWireguardGateways returns a list of all wireguards
 func (c *Client) ListWireguardGateways(ctx context.Context) (vpn.WireguardGatewayReadList, *shared.APIResponse, error) {
 	wireguards, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysGet(ctx).Execute()
+	apiResponse.LogInfo()
+	return wireguards, apiResponse, err
+}
+
+// ListWireguardPeers returns a list of all wireguards
+func (c *Client) ListWireguardPeers(ctx context.Context, gatewayID string) (vpn.WireguardPeerReadList, *shared.APIResponse, error) {
+	wireguards, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersGet(ctx, gatewayID).Execute()
 	apiResponse.LogInfo()
 	return wireguards, apiResponse, err
 }
@@ -72,7 +128,17 @@ func (c *Client) IsWireguardGatewayReady(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return false, err
 	}
-	log.Printf("[DEBUG] dataplatform cluster state %s", cluster.Metadata.Status)
+	log.Printf("[DEBUG] wierguard gateway state %s", cluster.Metadata.Status)
+	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
+}
+
+func (c *Client) IsWireguardPeerReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	gatewayID := d.Get("gateway_id").(string)
+	cluster, _, err := c.GetWireguardPeerByID(ctx, gatewayID, d.Id())
+	if err != nil {
+		return false, err
+	}
+	log.Printf("[DEBUG] wierguard gateway state %s", cluster.Metadata.Status)
 	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
 }
 
@@ -105,6 +171,40 @@ func setWireguardGWPostRequest(d *schema.ResourceData) *vpn.WireguardGatewayCrea
 	request.Properties.Connections = GetWireguardGwConnectionsData(d)
 
 	return &request
+}
+
+func setWireguardPeersPostRequest(d *schema.ResourceData) (*vpn.WireguardPeerCreate, error) {
+	request := vpn.WireguardPeerCreate{Properties: vpn.WireguardPeer{}}
+	name := d.Get("name").(string)
+
+	request.Properties.Name = name
+
+	if value, ok := d.GetOk("description"); ok {
+		valueStr := value.(string)
+		request.Properties.Description = &valueStr
+	}
+
+	if value, ok := d.GetOk("endpoint"); ok {
+		raw := value.(interface{})
+		//vpn.WireguardEndpoint
+		endpoint := vpn.NewWireguardEndpointWithDefaults()
+		err := utils.DecodeInterfaceToStruct(raw, endpoint)
+		if err != nil {
+			return &request, err
+		}
+		request.Properties.Endpoint = endpoint
+	}
+
+	if value, ok := d.GetOk("allowed_ips"); ok {
+		valueStr := value.([]string)
+		request.Properties.AllowedIPs = valueStr
+	}
+	if value, ok := d.GetOk("public_key"); ok {
+		valueStr := value.(string)
+		request.Properties.PublicKey = valueStr
+	}
+
+	return &request, nil
 }
 
 func GetWireguardGwConnectionsData(d *schema.ResourceData) []vpn.Connection {
@@ -140,7 +240,6 @@ func GetWireguardGwConnectionsData(d *schema.ResourceData) []vpn.Connection {
 				connections = append(connections, connection)
 			}
 		}
-
 	}
 
 	return connections
@@ -157,9 +256,7 @@ func setWireguardGatewayPatchRequest(d *schema.ResourceData) *vpn.WireguardGatew
 		_, val := d.GetChange("gateway_ip")
 		request.Properties.GatewayIP = val.(string)
 	}
-	if d.HasChange("private_key") {
 
-	}
 	if d.HasChange("description") {
 		_, val := d.GetChange("description")
 		request.Properties.Description = ionoscloud.ToPtr(val.(string))
@@ -181,6 +278,40 @@ func setWireguardGatewayPatchRequest(d *schema.ResourceData) *vpn.WireguardGatew
 	}
 
 	return &request
+}
+
+func setWireguardPeerPatchRequest(d *schema.ResourceData) (vpn.WireguardPeerEnsure, error) {
+	request := vpn.WireguardPeerEnsure{Properties: vpn.WireguardPeer{}}
+
+	if d.HasChange("name") {
+		_, val := d.GetChange("name")
+		request.Properties.Name = val.(string)
+	}
+
+	if d.HasChange("description") {
+		_, val := d.GetChange("description")
+		request.Properties.Description = ionoscloud.ToPtr(val.(string))
+	}
+	if d.HasChange("endpoint") {
+		_, val := d.GetChange("endpoint")
+		raw := val.(interface{})
+		endpoint := vpn.NewWireguardEndpointWithDefaults()
+		err := utils.DecodeInterfaceToStruct(raw, endpoint)
+		if err != nil {
+			return request, err
+		}
+		request.Properties.Endpoint = endpoint
+	}
+	if d.HasChange("allowed_ips") {
+		_, val := d.GetChange("allowed_ips")
+		request.Properties.AllowedIPs = val.([]string)
+	}
+	if d.HasChange("public_key") {
+		_, val := d.GetChange("public_key")
+		request.Properties.PublicKey = val.(string)
+	}
+
+	return request, nil
 }
 
 func SetWireguardGWData(d *schema.ResourceData, wireguard vpn.WireguardGatewayRead) error {
@@ -221,37 +352,33 @@ func SetWireguardGWData(d *schema.ResourceData, wireguard vpn.WireguardGatewayRe
 		return utils.GenerateSetError(wireguardResourceName, "status", err)
 	}
 
-	//if wireguard.Properties.GrafanaAddress != nil {
-	//	if err := d.Set("grafana_address", *wireguard.Properties.GrafanaAddress); err != nil {
-	//		return utils.GenerateSetError(wireguardResourceName, "grafana_address", err)
-	//	}
-	//}
-	//
-	//if wireguard.Properties.Logs != nil {
-	//	logs := make([]interface{}, len(wireguard.Properties.Logs))
-	//	for i, logElem := range wireguard.Properties.Logs {
-	//		// Populate the logElem entry.
-	//		logEntry := make(map[string]interface{})
-	//		logEntry["source"] = *logElem.Source
-	//		logEntry["tag"] = *logElem.Tag
-	//		logEntry["protocol"] = *logElem.Protocol
-	//		logEntry["public"] = *logElem.Public
-	//
-	//		// Logic for destinations
-	//		destinations := make([]interface{}, len(logElem.Destinations))
-	//		for i, destination := range logElem.Destinations {
-	//			destinationEntry := make(map[string]interface{})
-	//			destinationEntry["type"] = *destination.Type
-	//			destinationEntry["retention_in_days"] = *destination.RetentionInDays
-	//			destinations[i] = destinationEntry
-	//		}
-	//		logEntry["destinations"] = destinations
-	//		logs[i] = logEntry
-	//	}
-	//	if err := d.Set("log", logs); err != nil {
-	//		return utils.GenerateSetError(wireguardResourceName, "log", err)
-	//	}
-	//}
+	return nil
+}
+
+var resPeerName = "vpn wireguard peer"
+
+func SetWireguardPeerData(d *schema.ResourceData, wireguard vpn.WireguardPeerRead) error {
+	d.SetId(wireguard.Id)
+
+	if err := d.Set("name", wireguard.Properties.Name); err != nil {
+		return utils.GenerateSetError(resPeerName, "name", err)
+	}
+	if err := d.Set("description", wireguard.Properties.Description); err != nil {
+		return utils.GenerateSetError(resPeerName, "description", err)
+	}
+	if err := d.Set("endpoint", wireguard.Properties.Endpoint); err != nil {
+		return utils.GenerateSetError(resPeerName, "endpoint", err)
+	}
+	if err := d.Set("allowed_ips", wireguard.Properties.AllowedIPs); err != nil {
+		return utils.GenerateSetError(resPeerName, "allowed_ips", err)
+	}
+	if err := d.Set("public_key", wireguard.Properties.PublicKey); err != nil {
+		return utils.GenerateSetError(resPeerName, "public_key", err)
+	}
+
+	if err := d.Set("status", wireguard.Metadata.Status); err != nil {
+		return utils.GenerateSetError(wireguardResourceName, "status", err)
+	}
 
 	return nil
 }
