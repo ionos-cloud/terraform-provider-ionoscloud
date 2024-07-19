@@ -226,7 +226,7 @@ func parameterAddToHeaderOrQuery(headerOrQueryParams interface{}, keyPrefix stri
 			iter := indValue.MapRange()
 			for iter.Next() {
 				k, v := iter.Key(), iter.Value()
-				parameterAddToHeaderOrQuery(headerOrQueryParams, fmt.Sprintf("%s[%s]", keyPrefix, k.String()), v.Interface(), collectionType)
+				parameterAddToHeaderOrQuery(headerOrQueryParams, fmt.Sprintf("%s-%s", keyPrefix, k.String()), v.Interface(), collectionType)
 			}
 			return
 

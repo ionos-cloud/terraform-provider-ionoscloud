@@ -35,30 +35,32 @@ type bucketResource struct {
 }
 
 type bucketResourceModel struct {
-	Bucket types.String `tfsdk:"bucket"`
+	Name   types.String `tfsdk:"name"`
 	Region types.String `tfsdk:"region"`
 }
 
 // Metadata returns the metadata for the bucket resource.
 func (r *bucketResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_bucket"
+	resp.TypeName = req.ProviderTypeName + "_s3_bucket"
 }
 
 // Schema returns the schema for the bucket resource.
 func (r *bucketResource) Schema(_ context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"bucket": schema.StringAttribute{
-				Required:   true,
-				Validators: []validator.String{stringvalidator.LengthBetween(3, 63)},
+			"name": schema.StringAttribute{
+				Description: "The name of the bucket",
+				Required:    true,
+				Validators:  []validator.String{stringvalidator.LengthBetween(3, 63)},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"region": schema.StringAttribute{
-				Optional: true,
-				Computed: true,
-				Default:  stringdefault.StaticString("eu-central-3"),
+				Description: "The region of the bucket",
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString("eu-central-3"),
 			},
 		},
 	}
@@ -101,7 +103,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 		LocationConstraint: data.Region.ValueStringPointer(),
 	}
 
-	_, err := r.client.BucketsApi.CreateBucket(ctx, data.Bucket.ValueString()).CreateBucketConfiguration(createBucketConfig).Execute()
+	_, err := r.client.BucketsApi.CreateBucket(ctx, data.Name.ValueString()).CreateBucketConfiguration(createBucketConfig).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create bucket", formatXMLError(err).Error())
 		return
@@ -109,14 +111,14 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	// Wait for bucket creation
 	err = backoff.Retry(func() error {
-		return bucketExists(ctx, r.client, data.Bucket.ValueString())
+		return bucketExists(ctx, r.client, data.Name.ValueString())
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(utils.DefaultTimeout)))
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create bucket", fmt.Sprintf("error verifying bucket creation: %s", err))
 		return
 	}
 
-	location, _, err := r.client.BucketsApi.GetBucketLocation(ctx, data.Bucket.ValueString()).Execute()
+	location, _, err := r.client.BucketsApi.GetBucketLocation(ctx, data.Name.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get bucket location", err.Error())
 		return
@@ -139,7 +141,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	apiResponse, err := r.client.BucketsApi.HeadBucket(ctx, data.Bucket.ValueString()).Execute()
+	apiResponse, err := r.client.BucketsApi.HeadBucket(ctx, data.Name.ValueString()).Execute()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			resp.State.RemoveResource(ctx)
@@ -150,7 +152,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	location, _, err := r.client.BucketsApi.GetBucketLocation(ctx, data.Bucket.ValueString()).Execute()
+	location, _, err := r.client.BucketsApi.GetBucketLocation(ctx, data.Name.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read bucket location", formatXMLError(err).Error())
 		return
@@ -194,7 +196,7 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	apiResponse, err := r.client.BucketsApi.DeleteBucket(ctx, data.Bucket.ValueString()).Execute()
+	apiResponse, err := r.client.BucketsApi.DeleteBucket(ctx, data.Name.ValueString()).Execute()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return
@@ -207,7 +209,7 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	// Wait for deletion
 	backOff := backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(utils.DefaultTimeout))
 	err = backoff.Retry(func() error {
-		return IsBucketDeleted(ctx, r.client, data.Bucket.ValueString())
+		return IsBucketDeleted(ctx, r.client, data.Name.ValueString())
 	}, backOff)
 
 	if err != nil {

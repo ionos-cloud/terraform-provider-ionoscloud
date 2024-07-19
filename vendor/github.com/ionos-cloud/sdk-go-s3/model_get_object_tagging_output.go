@@ -22,9 +22,9 @@ var _ MappedNullable = &GetObjectTaggingOutput{}
 
 // GetObjectTaggingOutput struct for GetObjectTaggingOutput
 type GetObjectTaggingOutput struct {
-	XMLName xml.Name `xml:"GetObjectTaggingOutput"`
+	XMLName xml.Name `xml:"Tagging"`
 	// Contains the tag set.
-	TagSet []Tag `json:"TagSet" xml:"TagSet"`
+	TagSet []Tag `json:"TagSet" xml:"TagSet>Tag"`
 }
 
 // NewGetObjectTaggingOutput instantiates a new GetObjectTaggingOutput object

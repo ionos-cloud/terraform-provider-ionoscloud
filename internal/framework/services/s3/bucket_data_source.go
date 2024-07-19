@@ -28,7 +28,7 @@ type bucketDataSourceModel struct {
 
 // Metadata returns the metadata for the data source.
 func (d *bucketDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_bucket"
+	resp.TypeName = req.ProviderTypeName + "_s3_bucket"
 }
 
 // Configure configures the data source.
@@ -84,7 +84,7 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	apiResponse, err := d.client.BucketsApi.HeadBucket(ctx, data.Bucket.ValueString()).Execute()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			resp.Diagnostics.AddError("Bucket not found", "The specified bucket does not exist")
+			resp.Diagnostics.AddError("Name not found", "The specified bucket does not exist")
 			return
 		}
 

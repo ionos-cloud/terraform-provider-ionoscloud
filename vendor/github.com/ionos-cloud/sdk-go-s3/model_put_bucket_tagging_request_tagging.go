@@ -24,7 +24,7 @@ var _ MappedNullable = &PutBucketTaggingRequestTagging{}
 type PutBucketTaggingRequestTagging struct {
 	XMLName xml.Name `xml:"PutBucketTaggingRequestTagging"`
 	// Contains the tag set.
-	TagSet []Tag `json:"TagSet,omitempty" xml:"TagSet"`
+	TagSet []Tag `json:"TagSet,omitempty" xml:"TagSet>Tag"`
 }
 
 // NewPutBucketTaggingRequestTagging instantiates a new PutBucketTaggingRequestTagging object

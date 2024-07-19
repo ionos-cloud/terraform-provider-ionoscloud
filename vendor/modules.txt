@@ -154,7 +154,7 @@ github.com/hashicorp/terraform-exec/tfexec
 # github.com/hashicorp/terraform-json v0.22.1
 ## explicit; go 1.18
 github.com/hashicorp/terraform-json
-# github.com/hashicorp/terraform-plugin-framework v1.10.0
+# github.com/hashicorp/terraform-plugin-framework v1.9.0
 ## explicit; go 1.21
 github.com/hashicorp/terraform-plugin-framework/attr
 github.com/hashicorp/terraform-plugin-framework/attr/xattr
@@ -186,6 +186,7 @@ github.com/hashicorp/terraform-plugin-framework/provider/schema
 github.com/hashicorp/terraform-plugin-framework/providerserver
 github.com/hashicorp/terraform-plugin-framework/resource
 github.com/hashicorp/terraform-plugin-framework/resource/schema
+github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault
 github.com/hashicorp/terraform-plugin-framework/resource/schema/defaults
 github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier
 github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault
@@ -194,11 +195,16 @@ github.com/hashicorp/terraform-plugin-framework/schema/validator
 github.com/hashicorp/terraform-plugin-framework/tfsdk
 github.com/hashicorp/terraform-plugin-framework/types
 github.com/hashicorp/terraform-plugin-framework/types/basetypes
-# github.com/hashicorp/terraform-plugin-framework-validators v0.13.0
+# github.com/hashicorp/terraform-plugin-framework-timetypes v0.4.0
 ## explicit; go 1.21
+github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes
+# github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
+## explicit; go 1.19
 github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag
+github.com/hashicorp/terraform-plugin-framework-validators/internal/configvalidator
 github.com/hashicorp/terraform-plugin-framework-validators/internal/schemavalidator
-github.com/hashicorp/terraform-plugin-framework-validators/listvalidator
+github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator
+github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator
 github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator
 # github.com/hashicorp/terraform-plugin-go v0.23.0
 ## explicit; go 1.21
@@ -230,11 +236,7 @@ github.com/hashicorp/terraform-plugin-log/tfsdklog
 # github.com/hashicorp/terraform-plugin-mux v0.16.0
 ## explicit; go 1.21
 github.com/hashicorp/terraform-plugin-mux/internal/logging
-github.com/hashicorp/terraform-plugin-mux/internal/tfprotov5tov6
-github.com/hashicorp/terraform-plugin-mux/internal/tfprotov6tov5
 github.com/hashicorp/terraform-plugin-mux/tf5muxserver
-github.com/hashicorp/terraform-plugin-mux/tf5to6server
-github.com/hashicorp/terraform-plugin-mux/tf6muxserver
 # github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
 ## explicit; go 1.21
 github.com/hashicorp/terraform-plugin-sdk/v2/diag
@@ -286,7 +288,7 @@ github.com/iancoleman/strcase
 # github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2
-# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.0 => /home/cbeti/devtools/sdks/shared
+# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.0 => /home/dinga/Work/repos/shared
 ## explicit; go 1.20
 github.com/ionos-cloud/sdk-go-bundle/shared
 # github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
@@ -310,7 +312,7 @@ github.com/ionos-cloud/sdk-go-dbaas-postgres
 # github.com/ionos-cloud/sdk-go-dns v1.1.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dns
-# github.com/ionos-cloud/sdk-go-s3 v1.0.0 => /home/cbeti/devtools/sdks/generated-sdks/s3-go
+# github.com/ionos-cloud/sdk-go-s3 v1.0.0 => /home/dinga/Work/repos/sdk-resources/s3-go
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go-s3
 # github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
@@ -556,5 +558,5 @@ gopkg.in/validator.v2
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# github.com/ionos-cloud/sdk-go-s3 => /home/cbeti/devtools/sdks/generated-sdks/s3-go
-# github.com/ionos-cloud/sdk-go-bundle/shared => /home/cbeti/devtools/sdks/shared
+# github.com/ionos-cloud/sdk-go-s3 => /home/dinga/Work/repos/sdk-resources/s3-go
+# github.com/ionos-cloud/sdk-go-bundle/shared => /home/dinga/Work/repos/shared

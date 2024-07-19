@@ -2085,7 +2085,7 @@ type ApiPOSTObjectRequest struct {
 	ApiService                                *ObjectsApiService
 	bucket                                    string
 	key                                       string
-	pOSTObjectRequest                         *POSTObjectRequest
+	uploadPartRequest                         *UploadPartRequest
 	cacheControl                              *string
 	contentDisposition                        *string
 	contentEncoding                           *string
@@ -2109,8 +2109,8 @@ type ApiPOSTObjectRequest struct {
 	xAmzObjectLockLegalHold                   *string
 }
 
-func (r ApiPOSTObjectRequest) POSTObjectRequest(pOSTObjectRequest POSTObjectRequest) ApiPOSTObjectRequest {
-	r.pOSTObjectRequest = &pOSTObjectRequest
+func (r ApiPOSTObjectRequest) UploadPartRequest(uploadPartRequest UploadPartRequest) ApiPOSTObjectRequest {
+	r.uploadPartRequest = &uploadPartRequest
 	return r
 }
 
@@ -2295,8 +2295,8 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 	if shared.Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
-	if r.pOSTObjectRequest == nil {
-		return localVarReturnValue, nil, reportError("pOSTObjectRequest is required and must be specified")
+	if r.uploadPartRequest == nil {
+		return localVarReturnValue, nil, reportError("uploadPartRequest is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -2380,7 +2380,7 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-object-lock-legal-hold", r.xAmzObjectLockLegalHold, "")
 	}
 	// body params
-	localVarPostBody = r.pOSTObjectRequest
+	localVarPostBody = r.uploadPartRequest
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -2466,6 +2466,7 @@ type ApiPutObjectRequest struct {
 	xAmzObjectLockMode                        *string
 	xAmzObjectLockRetainUntilDate             *time.Time
 	xAmzObjectLockLegalHold                   *string
+	xAmzMeta                                  *map[string]string
 }
 
 func (r ApiPutObjectRequest) Body(body *os.File) ApiPutObjectRequest {
@@ -2588,6 +2589,12 @@ func (r ApiPutObjectRequest) XAmzObjectLockRetainUntilDate(xAmzObjectLockRetainU
 // Specifies whether a legal hold will be applied to this object.
 func (r ApiPutObjectRequest) XAmzObjectLockLegalHold(xAmzObjectLockLegalHold string) ApiPutObjectRequest {
 	r.xAmzObjectLockLegalHold = &xAmzObjectLockLegalHold
+	return r
+}
+
+// A map of metadata to store with the object in S3.
+func (r ApiPutObjectRequest) XAmzMeta(xAmzMeta map[string]string) ApiPutObjectRequest {
+	r.xAmzMeta = &xAmzMeta
 	return r
 }
 
@@ -2727,6 +2734,9 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.API
 	}
 	if r.xAmzObjectLockLegalHold != nil {
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-object-lock-legal-hold", r.xAmzObjectLockLegalHold, "")
+	}
+	if r.xAmzMeta != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-meta", r.xAmzMeta, "")
 	}
 	// body params
 	localVarPostBody = r.body

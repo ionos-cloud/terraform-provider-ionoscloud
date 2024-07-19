@@ -24,7 +24,7 @@ var _ MappedNullable = &GetBucketTaggingOutput{}
 type GetBucketTaggingOutput struct {
 	XMLName xml.Name `xml:"GetBucketTaggingOutput"`
 	// Contains the tag set.
-	TagSet []Tag `json:"TagSet" xml:"TagSet"`
+	TagSet []Tag `json:"TagSet" xml:"TagSet>Tag"`
 }
 
 // NewGetBucketTaggingOutput instantiates a new GetBucketTaggingOutput object

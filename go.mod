@@ -6,8 +6,9 @@ require (
 	github.com/aws/aws-sdk-go v1.54.12
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/gofrs/uuid/v5 v5.0.0
-	github.com/hashicorp/terraform-plugin-framework v1.10.0
-	github.com/hashicorp/terraform-plugin-framework-validators v0.13.0
+	github.com/hashicorp/terraform-plugin-framework v1.9.0
+	github.com/hashicorp/terraform-plugin-framework-timetypes v0.4.0
+	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/hashicorp/terraform-plugin-mux v0.16.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
 	github.com/hashicorp/terraform-plugin-testing v1.8.0
@@ -35,9 +36,9 @@ require (
 	gopkg.in/validator.v2 v2.0.1 // indirect
 )
 
-replace github.com/ionos-cloud/sdk-go-s3 => /home/cbeti/devtools/sdks/generated-sdks/s3-go
+replace github.com/ionos-cloud/sdk-go-s3 => /home/dinga/Work/repos/sdk-resources/s3-go
 
-replace github.com/ionos-cloud/sdk-go-bundle/shared => /home/cbeti/devtools/sdks/shared
+replace github.com/ionos-cloud/sdk-go-bundle/shared => /home/dinga/Work/repos/shared
 
 require (
 	github.com/ProtonMail/go-crypto v1.1.0-alpha.2 // indirect
