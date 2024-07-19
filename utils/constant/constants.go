@@ -405,6 +405,10 @@ const (
 	WireGuardGatewayTestResource = "test_wireguard_gateway"
 	// WireGuardPeerTestResource is the name used for testing
 	WireGuardPeerTestResource = "test_wireguard_peer"
+	// IPSecGatewayResource is the full name of the IPSecGatewayResource
+	IPSecGatewayResource         = "ionoscloud_vpn_ipsec_gateway"
+	// IPSecTunnelResource is the full name of the IPSecTunnelResource
+	IPSecTunnelResource          = "ionoscloud_vpn_ipsec_tunnel"
 )
 
 var ForwardingRuleAlgorithms = []string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}

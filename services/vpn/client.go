@@ -18,6 +18,17 @@ type Client struct {
 	sdkClient vpn.APIClient
 }
 
+var locationToURL = map[string]string{
+	"de/fra": "https://vpn.de-fra.ionos.com",
+	"de/txl": "https://vpn.de-txl.ionos.com",
+	"es/vit": "https://vpn.es-vit.ionos.com",
+	"gb/lhr": "https://vpn.gb-lhr.ionos.com",
+	"us/ewr": "https://vpn.us-ewr.ionos.com",
+	"us/las": "https://vpn.us-las.ionos.com",
+	"us/mci": "https://vpn.us-mci.ionos.com",
+	"fr/par": "https://vpn.fr-par.ionos.com",
+}
+
 // NewClient returns a new ionoscloud logging client
 func NewClient(username, password, token, url, terraformVersion string) *Client {
 	newConfigLogging := shared.NewConfiguration(username, password, token, url)
@@ -29,4 +40,13 @@ func NewClient(username, password, token, url, terraformVersion string) *Client 
 		vpn.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	return &Client{sdkClient: *vpn.NewAPIClient(newConfigLogging)}
+}
+
+func (c *Client) changeConfigURL(location string) {
+	config := c.sdkClient.GetConfig()
+	config.Servers = shared.ServerConfigurations{
+		{
+			URL: locationToURL[location],
+		},
+	}
 }
