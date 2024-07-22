@@ -28,7 +28,8 @@ var (
 	_ resource.ResourceWithConfigure   = (*bucketPolicyResource)(nil)
 )
 
-var errBucketPolicyNotFound = errors.New("s3 bucket policy not found")
+// ErrBucketPolicyNotFound returned for 404
+var ErrBucketPolicyNotFound = errors.New("s3 bucket policy not found")
 
 // NewBucketPolicyResource creates a new resource for the bucket resource.
 func NewBucketPolicyResource() resource.Resource {
@@ -139,8 +140,8 @@ func (r *bucketPolicyResource) Create(ctx context.Context, req resource.CreateRe
 
 	// Ensure policy is created
 	err = backoff.Retry(func() error {
-		if _, retryErr := getBucketPolicy(ctx, r.client, data.Bucket.ValueString()); retryErr != nil {
-			if errors.Is(retryErr, errBucketPolicyNotFound) {
+		if _, retryErr := GetBucketPolicy(ctx, r.client, data.Bucket.ValueString()); retryErr != nil {
+			if errors.Is(retryErr, ErrBucketPolicyNotFound) {
 				return retryErr
 			}
 			return backoff.Permanent(fmt.Errorf("failed to check if bucket policy exists: %w", retryErr))
@@ -169,13 +170,13 @@ func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	policy, err := getBucketPolicy(ctx, r.client, data.Bucket.ValueString())
+	policy, err := GetBucketPolicy(ctx, r.client, data.Bucket.ValueString())
 	if err != nil {
-		if errors.Is(err, errBucketPolicyNotFound) {
+		if errors.Is(err, ErrBucketPolicyNotFound) {
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read bucket policy", err.Error())
+		resp.Diagnostics.AddError("Failed to retrieve bucket policy", err.Error())
 		return
 	}
 
@@ -190,7 +191,7 @@ func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadReques
 
 // ImportState imports the state of the bucket policy.
 func (r *bucketPolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("bucket_policy"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("bucket"), req, resp)
 }
 
 // Update updates the bucket policy.
@@ -241,8 +242,8 @@ func (r *bucketPolicyResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 
 	err := backoff.Retry(func() error {
-		if _, retryErr := getBucketPolicy(ctx, r.client, data.Bucket.ValueString()); retryErr != nil {
-			if errors.Is(retryErr, errBucketPolicyNotFound) {
+		if _, retryErr := GetBucketPolicy(ctx, r.client, data.Bucket.ValueString()); retryErr != nil {
+			if errors.Is(retryErr, ErrBucketPolicyNotFound) {
 				return nil
 			}
 			return backoff.Permanent(fmt.Errorf("failed to check if bucket policy is deleted: %w", retryErr))
@@ -257,11 +258,12 @@ func (r *bucketPolicyResource) Delete(ctx context.Context, req resource.DeleteRe
 
 }
 
-func getBucketPolicy(ctx context.Context, client *s3.APIClient, bucketName string) (*s3.BucketPolicy, error) {
+// GetBucketPolicy retrieves the policy of the bucket specified by bucketName
+func GetBucketPolicy(ctx context.Context, client *s3.APIClient, bucketName string) (*s3.BucketPolicy, error) {
 	policy, apiResponse, err := client.PolicyApi.GetBucketPolicy(ctx, bucketName).Execute()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			return nil, errBucketPolicyNotFound
+			return nil, ErrBucketPolicyNotFound
 		}
 		return nil, err
 	}
