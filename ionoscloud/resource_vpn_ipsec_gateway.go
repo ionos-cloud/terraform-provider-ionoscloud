@@ -31,6 +31,7 @@ func resourceVpnIPSecGateway() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The location of the IPSec Gateway. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
 				Required:    true,
+				ForceNew:    true,
 			},
 			"gateway_ip": {
 				Type:             schema.TypeString,
@@ -39,11 +40,11 @@ func resourceVpnIPSecGateway() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPAddress),
 			},
 			"connections": {
-				Type:     schema.TypeList,
+				Type:        schema.TypeList,
 				Description: "The network connection for your gateway. Note: all connections must belong to the same datacenter.",
-				MinItems: 1,
-				MaxItems: 10,
-				Required: true,
+				MinItems:    1,
+				MaxItems:    10,
+				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"datacenter_id": {

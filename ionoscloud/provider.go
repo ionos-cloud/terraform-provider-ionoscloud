@@ -126,6 +126,7 @@ func Provider() *schema.Provider {
 			constant.WireGuardGatewayResource:                  resourceVpnWireguardGateway(),
 			constant.WireGuardPeerResource:                     resourceVpnWireguardPeer(),
 			constant.IPSecGatewayResource:                      resourceVpnIPSecGateway(),
+			constant.IPSecTunnelResource:                       resourceVpnIPSecTunnel(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -188,6 +189,7 @@ func Provider() *schema.Provider {
 			constant.WireGuardGatewayResource:                  dataSourceVpnWireguardGateway(),
 			constant.WireGuardPeerResource:                     dataSourceVpnWireguardPeer(),
 			constant.IPSecGatewayResource:                      dataSourceVpnIPSecGateway(),
+			constant.IPSecTunnelResource:                       dataSourceVpnIPSecTunnel(),
 		},
 	}
 

@@ -2,7 +2,7 @@
 subcategory: "VPNGateway"
 layout: "ionoscloud"
 page_title: "IonosCloud: ionoscloud_vpn_ipsec_gateway"
-sidebar_current: "docs-resource-vpn-ipsec-gateway"
+sidebar_current: "docs-ionoscloud-datasource-vpn-ipsec-gateway"
 description: |-
   Reads IonosCloud VPN IPSec Gateway objects.
 ---
@@ -47,15 +47,14 @@ data "ionoscloud_vpn_ipsec_gateway" "example" {
 
 The following attributes are returned by the datasource:
 
-* `id` - ID of the API Gateway Route.
-* `name` - The name of the API Gateway Route.
+* `name` - The name of the IPSec Gateway.
 * `location` - The location of the IPSec Gateway. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las,
   us/mci, fr/par
 * `gateway_ip` - Public IP address to be assigned to the gateway.
-* `version` - The IKE version that is permitted for the VPN tunnels.
-* `connections` - The network connection for your gateway:
+* `connections` - The network connection for your gateway.
     * `datacenter_id` - The datacenter to connect your VPN Gateway to.
     * `lan_id` - The numeric LAN ID to connect your VPN Gateway to.
-    * `ipv4_cidr` - Describes the private ipv4 subnet in your LAN that should be accessible by the VPN Gateway.
+    * `ipv4_cidr` - Describes the private ipv4 subnet in your LAN that should be accessible by the
+      VPN Gateway.
     * `ipv6_cidr` - Describes the ipv6 subnet in your LAN that should be accessible by the VPN Gateway.
-* `public_endpoint` - The public endpoint of the API Gateway.
+* `version` - The IKE version that is permitted for the VPN tunnels.

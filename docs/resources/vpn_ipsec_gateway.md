@@ -2,14 +2,14 @@
 subcategory: "VPN Gateway"
 layout: "ionoscloud"
 page_title: "IonosCloud: ionoscloud_vpn_ipsec_gateway"
-sidebar_current: "docs-resource-vpn_ipsec_gateway"
+sidebar_current: "docs-resource-vpn-ipsec-gateway"
 description: |-
   IPSec Gateway
 ---
 
 # ionoscloud_vpn_ipsec_gateway
 
-An IPSec Gateway consists of the generic rules and configurations.
+An IPSec Gateway TODO: Add description
 
 ## Usage example
 
@@ -31,19 +31,19 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
 
 ## Argument reference
 
-* `name` - (Required)[string] The name of the API Gateway.
+* `name` - (Required)[string] The name of the IPSec Gateway.
 * `location` - (Required)[string] The location of the IPSec Gateway. Supported locations: de/fra, de/txl, es/vit,
   gb/lhr, us/ewr, us/las, us/mci, fr/par
 * `gateway_ip` - (Required)[string] Public IP address to be assigned to the gateway. Note: This must be an IP address in
   the same datacenter as the connections.
-* `connections` - (Required)[list] The network connection for your gateway. Note: all connections must belong to the
+* `connections` - (Required)[list] The network connection for your gateway. **Note**: all connections must belong to the
   same datacenter. Minimum items: 1. Maximum items: 10.
     * `datacenter_id` - (Required)[string] The datacenter to connect your VPN Gateway to.
     * `lan_id` - (Required)[string] The numeric LAN ID to connect your VPN Gateway to.
     * `ipv4_cidr` - (Required)[string] Describes the private ipv4 subnet in your LAN that should be accessible by the
       VPN Gateway. Note: this should be the subnet already assigned to the LAN
     * `ipv6_cidr` - (Optional)[string] Describes the ipv6 subnet in your LAN that should be accessible by the VPN
-      Gateway. Note: this should be the subnet already assigned to the LAN
+      Gateway. **Note**: this should be the subnet already assigned to the LAN
 * `version` - (Required)[string] The IKE version that is permitted for the VPN tunnels. Default: `IKEv2`. Possible
   values: `IKEv2`.
 
@@ -52,5 +52,5 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
 The resource can be imported using the `location` and `gateway_id`, for example:
 
 ```
-terraform import ionoscloud_apigateway.example {location}:{gateway_id}
+terraform import ionoscloud_vpn_ipsec_gateway.example {location}:{gateway_id}
 ```
