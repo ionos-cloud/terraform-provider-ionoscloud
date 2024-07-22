@@ -370,7 +370,7 @@ type ApiCreateMultipartUploadRequest struct {
 	xAmzObjectLockMode                        *string
 	xAmzObjectLockRetainUntilDate             *time.Time
 	xAmzObjectLockLegalHold                   *string
-	xAmzMeta                                  *string
+	xAmzMeta                                  *map[string]string
 }
 
 func (r ApiCreateMultipartUploadRequest) Uploads(uploads bool) ApiCreateMultipartUploadRequest {
@@ -463,7 +463,7 @@ func (r ApiCreateMultipartUploadRequest) XAmzObjectLockLegalHold(xAmzObjectLockL
 }
 
 // A map of metadata to store with the object in S3.
-func (r ApiCreateMultipartUploadRequest) XAmzMeta(xAmzMeta string) ApiCreateMultipartUploadRequest {
+func (r ApiCreateMultipartUploadRequest) XAmzMeta(xAmzMeta map[string]string) ApiCreateMultipartUploadRequest {
 	r.xAmzMeta = &xAmzMeta
 	return r
 }
@@ -590,7 +590,7 @@ func (a *UploadsApiService) CreateMultipartUploadExecute(r ApiCreateMultipartUpl
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-object-lock-legal-hold", r.xAmzObjectLockLegalHold, "")
 	}
 	if r.xAmzMeta != nil {
-		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-meta-", r.xAmzMeta, "")
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-meta", r.xAmzMeta, "")
 	}
 	if r.ctx != nil {
 		// API Key Authentication

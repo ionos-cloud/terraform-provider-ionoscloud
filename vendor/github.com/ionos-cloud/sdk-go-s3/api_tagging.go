@@ -29,12 +29,6 @@ type ApiDeleteBucketTaggingRequest struct {
 	ctx        context.Context
 	ApiService *TaggingApiService
 	bucket     string
-	tagging    *bool
-}
-
-func (r ApiDeleteBucketTaggingRequest) Tagging(tagging bool) ApiDeleteBucketTaggingRequest {
-	r.tagging = &tagging
-	return r
 }
 
 func (r ApiDeleteBucketTaggingRequest) Execute() (*shared.APIResponse, error) {
@@ -85,11 +79,7 @@ func (a *TaggingApiService) DeleteBucketTaggingExecute(r ApiDeleteBucketTaggingR
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.tagging == nil {
-		return nil, reportError("tagging is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "tagging", r.tagging, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -162,13 +152,7 @@ type ApiDeleteObjectTaggingRequest struct {
 	ApiService *TaggingApiService
 	bucket     string
 	key        string
-	tagging    *bool
 	versionId  *string
-}
-
-func (r ApiDeleteObjectTaggingRequest) Tagging(tagging bool) ApiDeleteObjectTaggingRequest {
-	r.tagging = &tagging
-	return r
 }
 
 // The versionId of the object that the tag-set will be removed from.
@@ -234,14 +218,10 @@ func (a *TaggingApiService) DeleteObjectTaggingExecute(r ApiDeleteObjectTaggingR
 	if shared.Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
-	if r.tagging == nil {
-		return localVarReturnValue, nil, reportError("tagging is required and must be specified")
-	}
 
 	if r.versionId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "versionId", r.versionId, "")
 	}
-	parameterAddToHeaderOrQuery(localVarQueryParams, "tagging", r.tagging, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -322,12 +302,6 @@ type ApiGetBucketTaggingRequest struct {
 	ctx        context.Context
 	ApiService *TaggingApiService
 	bucket     string
-	tagging    *bool
-}
-
-func (r ApiGetBucketTaggingRequest) Tagging(tagging bool) ApiGetBucketTaggingRequest {
-	r.tagging = &tagging
-	return r
 }
 
 func (r ApiGetBucketTaggingRequest) Execute() (*GetBucketTaggingOutput, *shared.APIResponse, error) {
@@ -381,11 +355,7 @@ func (a *TaggingApiService) GetBucketTaggingExecute(r ApiGetBucketTaggingRequest
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.tagging == nil {
-		return localVarReturnValue, nil, reportError("tagging is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "tagging", r.tagging, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -467,13 +437,7 @@ type ApiGetObjectTaggingRequest struct {
 	ApiService *TaggingApiService
 	bucket     string
 	key        string
-	tagging    *bool
 	versionId  *string
-}
-
-func (r ApiGetObjectTaggingRequest) Tagging(tagging bool) ApiGetObjectTaggingRequest {
-	r.tagging = &tagging
-	return r
 }
 
 // The versionId of the object for which to get the tagging information.
@@ -539,14 +503,10 @@ func (a *TaggingApiService) GetObjectTaggingExecute(r ApiGetObjectTaggingRequest
 	if shared.Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
-	if r.tagging == nil {
-		return localVarReturnValue, nil, reportError("tagging is required and must be specified")
-	}
 
 	if r.versionId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "versionId", r.versionId, "")
 	}
-	parameterAddToHeaderOrQuery(localVarQueryParams, "tagging", r.tagging, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -627,14 +587,8 @@ type ApiPutBucketTaggingRequest struct {
 	ctx                     context.Context
 	ApiService              *TaggingApiService
 	bucket                  string
-	tagging                 *bool
 	putBucketTaggingRequest *PutBucketTaggingRequest
 	contentMD5              *string
-}
-
-func (r ApiPutBucketTaggingRequest) Tagging(tagging bool) ApiPutBucketTaggingRequest {
-	r.tagging = &tagging
-	return r
 }
 
 func (r ApiPutBucketTaggingRequest) PutBucketTaggingRequest(putBucketTaggingRequest PutBucketTaggingRequest) ApiPutBucketTaggingRequest {
@@ -695,14 +649,10 @@ func (a *TaggingApiService) PutBucketTaggingExecute(r ApiPutBucketTaggingRequest
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.tagging == nil {
-		return nil, reportError("tagging is required and must be specified")
-	}
 	if r.putBucketTaggingRequest == nil {
 		return nil, reportError("putBucketTaggingRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "tagging", r.tagging, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 
@@ -780,15 +730,9 @@ type ApiPutObjectTaggingRequest struct {
 	ApiService              *TaggingApiService
 	bucket                  string
 	key                     string
-	tagging                 *bool
 	putBucketTaggingRequest *PutBucketTaggingRequest
 	versionId               *string
 	contentMD5              *string
-}
-
-func (r ApiPutObjectTaggingRequest) Tagging(tagging bool) ApiPutObjectTaggingRequest {
-	r.tagging = &tagging
-	return r
 }
 
 func (r ApiPutObjectTaggingRequest) PutBucketTaggingRequest(putBucketTaggingRequest PutBucketTaggingRequest) ApiPutObjectTaggingRequest {
@@ -864,9 +808,6 @@ func (a *TaggingApiService) PutObjectTaggingExecute(r ApiPutObjectTaggingRequest
 	if shared.Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
-	if r.tagging == nil {
-		return localVarReturnValue, nil, reportError("tagging is required and must be specified")
-	}
 	if r.putBucketTaggingRequest == nil {
 		return localVarReturnValue, nil, reportError("putBucketTaggingRequest is required and must be specified")
 	}
@@ -874,7 +815,6 @@ func (a *TaggingApiService) PutObjectTaggingExecute(r ApiPutObjectTaggingRequest
 	if r.versionId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "versionId", r.versionId, "")
 	}
-	parameterAddToHeaderOrQuery(localVarQueryParams, "tagging", r.tagging, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 
