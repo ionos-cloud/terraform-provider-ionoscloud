@@ -54,7 +54,7 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 		name = t.(string)
 	}
 
-	var certificate certmanager.CertificateDto
+	var certificate certmanager.CertificateRead
 	var err error
 
 	if !idOk && !nameOk {
@@ -85,10 +85,10 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching certificates: %w ", err))
 		}
 
-		var results []certmanager.CertificateDto
+		var results []certmanager.CertificateRead
 
 		if certificates.Items != nil {
-			var certsFound []certmanager.CertificateDto
+			var certsFound []certmanager.CertificateRead
 			for _, certItem := range *certificates.Items {
 				if certItem.Properties != nil && certItem.Properties.Name != nil && *certItem.Properties.Name == name {
 					certsFound = append(certsFound, certItem)

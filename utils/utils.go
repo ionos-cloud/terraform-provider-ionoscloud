@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -405,4 +407,8 @@ func NameMatches(name, value string, partialMatch bool) bool {
 		return strings.Contains(name, value)
 	}
 	return strings.EqualFold(name, value)
+}
+
+func IsStateFailed(state string) bool {
+	return state == ionoscloud.Failed || state == ionoscloud.FailedSuspended || state == ionoscloud.FailedUpdating || state == ionoscloud.FailedDestroying
 }

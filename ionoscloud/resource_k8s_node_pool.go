@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -994,7 +995,7 @@ func k8sNodepoolReady(ctx context.Context, client *ionoscloud.APIClient, d *sche
 	if resource.Metadata == nil || resource.Metadata.State == nil {
 		return false, fmt.Errorf("error while checking k8s node pool status: state is nil")
 	}
-	if isStateFailed(*resource.Metadata.State) {
+	if utils.IsStateFailed(*resource.Metadata.State) {
 		return false, fmt.Errorf("error while checking if k8s nodepool is ready %s, state %s", *resource.Id, *resource.Metadata.State)
 	}
 	return *resource.Metadata.State == "ACTIVE", nil
@@ -1011,7 +1012,7 @@ func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sc
 		return true, fmt.Errorf("error checking k8s node pool deletion status: %w", err)
 	}
 	if resource.Metadata != nil && resource.Metadata.State != nil {
-		if isStateFailed(*resource.Metadata.State) {
+		if utils.IsStateFailed(*resource.Metadata.State) {
 			return false, fmt.Errorf("error while checking if k8s nodepool is properly deleted, nodepool ID: %s, state: %s", *resource.Id, *resource.Metadata.State)
 		}
 	}

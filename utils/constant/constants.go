@@ -353,8 +353,12 @@ const (
 const ServersDataSource = "ionoscloud_servers"
 
 const (
-	CertificateResource = "ionoscloud_certificate"
-	TestCertName        = "certTest"
+	CertificateResource             = "ionoscloud_certificate"
+	AutoCertificateProviderResource = "ionoscloud_auto_certificate_provider"
+	AutoCertificateResource         = "ionoscloud_auto_certificate"
+	TestCertName                    = "certTest"
+	TestCMProviderName              = "CMProviderTest"
+	TestCMAutoCertificateName       = "CMAutoCertificateTest"
 )
 
 // Server type constants
