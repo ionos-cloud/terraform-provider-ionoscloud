@@ -33,3 +33,19 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 
 	return &Client{sdkClient: *sdk.NewAPIClient(config)}
 }
+
+func (c *Client) Location(location string) *Client {
+	var locationToURL = map[string]string{
+		"de/fra":    "nfs.de-fra.ionos.com",
+		"de/txl":    "nfs.de-txl.ionos.com",
+		"qa/de/txl": "qa.nfs.de-txl.ionos.com",
+	}
+
+	c.sdkClient.GetConfig().Servers = sdk.ServerConfigurations{
+		{
+			URL: locationToURL[location],
+		},
+	}
+
+	return c
+}

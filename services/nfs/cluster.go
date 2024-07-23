@@ -12,37 +12,37 @@ import (
 )
 
 // GetNFSClusterById returns a cluster given an ID
-func (c *Client) GetNFSClusterById(ctx context.Context, id string) (sdk.ClusterRead, *sdk.APIResponse, error) {
-	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, id).Execute()
+func (c *Client) GetNFSClusterById(ctx context.Context, id string, location string) (sdk.ClusterRead, *sdk.APIResponse, error) {
+	cluster, apiResponse, err := c.Location(location).sdkClient.ClustersApi.ClustersFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
 
 // ListNFSClusters returns a list of all clusters
-func (c *Client) ListNFSClusters(ctx context.Context) (sdk.ClusterReadList, *sdk.APIResponse, error) {
-	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGet(ctx).Execute()
+func (c *Client) ListNFSClusters(ctx context.Context, location string) (sdk.ClusterReadList, *sdk.APIResponse, error) {
+	clusters, apiResponse, err := c.Location(location).sdkClient.ClustersApi.ClustersGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return clusters, apiResponse, err
 }
 
 // DeleteNFSCluster deletes a cluster given an ID
-func (c *Client) DeleteNFSCluster(ctx context.Context, id string) (*sdk.APIResponse, error) {
-	apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, id).Execute()
+func (c *Client) DeleteNFSCluster(ctx context.Context, id string, location string) (*sdk.APIResponse, error) {
+	apiResponse, err := c.Location(location).sdkClient.ClustersApi.ClustersDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
 // UpdateNFSCluster updates a cluster given an ID or creates a new one if it doesn't exist
-func (c *Client) UpdateNFSCluster(ctx context.Context, d *schema.ResourceData) (sdk.ClusterRead, *sdk.APIResponse, error) {
-	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPut(ctx, d.Id()).
+func (c *Client) UpdateNFSCluster(ctx context.Context, d *schema.ResourceData, location string) (sdk.ClusterRead, *sdk.APIResponse, error) {
+	cluster, apiResponse, err := c.Location(location).sdkClient.ClustersApi.ClustersPut(ctx, d.Id()).
 		ClusterEnsure(*setClusterPutRequest(d)).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
 
 // CreateNFSCluster creates a new cluster
-func (c *Client) CreateNFSCluster(ctx context.Context, d *schema.ResourceData) (sdk.ClusterRead, *sdk.APIResponse, error) {
-	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).
+func (c *Client) CreateNFSCluster(ctx context.Context, d *schema.ResourceData, location string) (sdk.ClusterRead, *sdk.APIResponse, error) {
+	cluster, apiResponse, err := c.Location(location).sdkClient.ClustersApi.ClustersPost(ctx).
 		ClusterCreate(*setClusterPostRequest(d)).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
@@ -100,7 +100,8 @@ func (c *Client) SetNFSClusterData(d *schema.ResourceData, cluster sdk.ClusterRe
 // IsClusterReady checks if the cluster is ready
 func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	clusterID := d.Id()
-	cluster, _, err := c.GetNFSClusterById(ctx, clusterID)
+	location := d.Get("location").(string)
+	cluster, _, err := c.GetNFSClusterById(ctx, clusterID, location)
 	if err != nil {
 		return true, fmt.Errorf("status check failed for Cluster ID: %v, error: %w", clusterID, err)
 	}
@@ -116,7 +117,8 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 // IsClusterDeleted checks if the cluster is deleted
 func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	clusterID := d.Id()
-	_, apiResponse, err := c.GetNFSClusterById(ctx, clusterID)
+	location := d.Get("location").(string)
+	_, apiResponse, err := c.GetNFSClusterById(ctx, clusterID, location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return true, nil
