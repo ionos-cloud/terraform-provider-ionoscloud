@@ -316,12 +316,9 @@ github.com/ionos-cloud/sdk-go-dbaas-postgres
 # github.com/ionos-cloud/sdk-go-dns v1.1.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dns
-# github.com/ionos-cloud/sdk-go-nfs v1.0.0
+# github.com/ionos-cloud/sdk-go-nfs v0.0.0-20240722090320-198959d508ba
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-nfs
-# github.com/ionos-cloud/sdk-go-s3 v1.0.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-s3
 # github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-vm-autoscaling
