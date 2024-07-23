@@ -2,13 +2,17 @@ package ionoscloud
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	sdk "github.com/ionos-cloud/sdk-go-nfs"
 )
+
+var locations = []string{"de/fra", "de/txl", "qa/de/txl"}
 
 func resourceNFSCluster() *schema.Resource {
 	return &schema.Resource{
@@ -20,6 +24,15 @@ func resourceNFSCluster() *schema.Resource {
 			StateContext: resourceNFSClusterImport,
 		},
 		Schema: map[string]*schema.Schema{
+			"location": {
+				// Affects the Host of the SDK
+				Type: schema.TypeString,
+				Description: fmt.Sprintf("The location of the Network File Storage Cluster. "+
+					"Available locations: %s", strings.Join(locations, ", ")),
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(locations, false)),
+			},
 			"id": {
 				Type:        schema.TypeString,
 				Description: "The ID of the Network File Storage Cluster.",
