@@ -20,7 +20,7 @@ func TestAccBucketPublicAccessBlockResource(t *testing.T) {
 	name := "ionoscloud_bucket_access_block.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		ProtoV5ProviderFactories: acctest.TestAccProtoV5ProviderFactories,
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
 		},

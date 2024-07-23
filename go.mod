@@ -26,6 +26,7 @@ require (
 	github.com/ionos-cloud/sdk-go-s3 v1.0.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 	github.com/ionos-cloud/sdk-go/v6 v6.1.11
+	github.com/mitchellh/go-homedir v1.1.0
 	golang.org/x/crypto v0.23.0
 	gopkg.in/yaml.v3 v3.0.1
 )

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -24,6 +25,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	s3 "github.com/ionos-cloud/sdk-go-s3"
+	"github.com/mitchellh/go-homedir"
 )
 
 var (
@@ -207,10 +209,11 @@ func (r *objectResource) Schema(_ context.Context, req resource.SchemaRequest, r
 			},
 			"version_id": schema.StringAttribute{
 				Description: "The version of the object",
-				Computed:    true,
+				// TODO this may be also computed, we need to check if it's sent in the response
+				Optional: true,
 			},
 			"mfa": schema.StringAttribute{
-				Description: "  The concatenation of the authentication device's serial number, a space, and the value that is displayed on your authentication device. Required to permanently delete a versioned object if versioning is configured with MFA Delete enabled.",
+				Description: "The concatenation of the authentication device's serial number, a space, and the value that is displayed on your authentication device. Required to permanently delete a versioned object if versioning is configured with MFA Delete enabled.",
 				Optional:    true,
 			},
 			"force_destroy": schema.BoolAttribute{
@@ -278,7 +281,11 @@ func (r *objectResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	data.Etag = types.StringValue(apiResponse.Header.Get("ETag"))
-	data.VersionID = types.StringValue(apiResponse.Header.Get("VersionId"))
+	versionID := apiResponse.Header.Get("VersionId")
+	if versionID != "" {
+		data.VersionID = types.StringValue(versionID)
+	}
+
 	contentType, err := getContentType(ctx, &data, r.client)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get content type", err.Error())
@@ -302,7 +309,7 @@ func (r *objectResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	_, apiResponse, err := findObject(ctx, r.client, data)
+	_, apiResponse, err := FindObject(ctx, r.client, data)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			resp.State.RemoveResource(ctx)
@@ -331,16 +338,8 @@ func (r *objectResource) ImportState(ctx context.Context, req resource.ImportSta
 		return
 	}
 
-	state := objectResourceModel{
-		Bucket: types.StringValue(bucket),
-		Key:    types.StringValue(key),
-	}
-
-	diags := resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("bucket"), bucket)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("key"), key)...)
 }
 
 // Update updates the object.
@@ -504,6 +503,7 @@ func (r *objectResource) setTagsData(ctx context.Context, data *objectResourceMo
 
 func setMetadata(ctx context.Context, data *objectResourceModel, apiResponse *shared.APIResponse) diag.Diagnostics {
 	metadataMap := getMetadataMapFromHeaders(apiResponse, "X-Amz-Meta-")
+
 	if len(metadataMap) > 0 {
 		metadata, diagErr := types.MapValueFrom(ctx, types.StringType, metadataMap)
 		if diagErr.HasError() {
@@ -581,7 +581,7 @@ func getMetadataMapFromHeaders(apiResponse *shared.APIResponse, prefix string) m
 }
 
 func getContentType(ctx context.Context, data *objectResourceModel, client *s3.APIClient) (string, error) {
-	_, apiResponse, err := findObject(ctx, client, *data)
+	_, apiResponse, err := FindObject(ctx, client, *data)
 	if err != nil {
 		return "", err
 	}
@@ -611,7 +611,8 @@ func deleteObject(ctx context.Context, client *s3.APIClient, data objectResource
 	return req.Execute()
 }
 
-func findObject(ctx context.Context, client *s3.APIClient, data objectResourceModel) (*s3.HeadObjectOutput, *shared.APIResponse, error) {
+// FindObject finds the object.
+func FindObject(ctx context.Context, client *s3.APIClient, data objectResourceModel) (*s3.HeadObjectOutput, *shared.APIResponse, error) {
 	req := client.ObjectsApi.HeadObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.Etag.IsNull() {
 		req = req.IfMatch(data.Etag.ValueString())
@@ -669,7 +670,14 @@ func fillContentData(data *objectResourceModel, req *s3.ApiPutObjectRequest) dia
 	}
 
 	if !data.Source.IsNull() {
-		file, err := os.Open(data.Source.ValueString())
+		filePath, err := homedir.Expand(data.Source.ValueString())
+		if err != nil {
+			diags := diag.Diagnostics{}
+			diags.AddError("failed to expand source path", err.Error())
+			return diags
+		}
+
+		file, err := os.Open(filepath.Clean(filePath))
 		if err != nil {
 			diags := diag.Diagnostics{}
 			diags.AddError("failed to open source file", err.Error())
@@ -794,7 +802,12 @@ func createTempFile(fileName, content string) (*os.File, error) {
 		return nil, err
 	}
 
-	return file, nil
+	f, err := os.Open(file.Name())
+	if err != nil {
+		return nil, err
+	}
+
+	return f, nil
 }
 
 // hasObjectContentChanges returns true if the plan has changes to the object content.

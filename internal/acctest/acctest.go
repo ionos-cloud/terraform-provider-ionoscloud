@@ -3,13 +3,16 @@ package acctest
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"sync"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
+	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
+
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
-	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/envar"
@@ -32,16 +35,26 @@ const (
 var testAccProviderConfigure sync.Once
 
 var (
-	// TestAccProtoV5ProviderFactories is a map of provider names to provider factories
-	TestAccProtoV5ProviderFactories = map[string]func() (tfprotov5.ProviderServer, error){
-		ProviderName: func() (tfprotov5.ProviderServer, error) {
+	// TestAccProtoV6ProviderFactories is a map of provider names to provider factories
+	TestAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
+		ProviderName: func() (tfprotov6.ProviderServer, error) {
 			ctx := context.Background()
-			providers := []func() tfprotov5.ProviderServer{
-				providerserver.NewProtocol5(provider.New()), // Example terraform-plugin-framework provider
-				ionoscloud.Provider().GRPCProvider,          // Example terraform-plugin-sdk provider
+			upgradedSdkServer, err := tf5to6server.UpgradeServer(
+				ctx,
+				ionoscloud.Provider().GRPCProvider, // Example terraform-plugin-sdk provider
+			)
+			if err != nil {
+				log.Fatal(err)
 			}
 
-			muxServer, err := tf5muxserver.NewMuxServer(ctx, providers...)
+			providers := []func() tfprotov6.ProviderServer{
+				providerserver.NewProtocol6(provider.New()), // Example terraform-plugin-framework provider
+				func() tfprotov6.ProviderServer {
+					return upgradedSdkServer
+				}, // Example terraform-plugin-sdk provider
+			}
+
+			muxServer, err := tf6muxserver.NewMuxServer(ctx, providers...)
 			if err != nil {
 				return nil, err
 			}

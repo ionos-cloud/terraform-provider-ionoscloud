@@ -17,10 +17,10 @@ import (
 
 func TestAccBucketResource(t *testing.T) {
 	rName := "acctest-tf-bucket"
-	name := "ionoscloud_bucket.test"
+	name := "ionoscloud_s3_bucket.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		ProtoV5ProviderFactories: acctest.TestAccProtoV5ProviderFactories,
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
 		},
@@ -59,7 +59,7 @@ func testAccCheckBucketDestroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_bucket" {
+		if rs.Type != "ionoscloud_s3_bucket" {
 			continue
 		}
 
