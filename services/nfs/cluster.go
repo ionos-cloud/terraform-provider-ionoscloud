@@ -100,28 +100,30 @@ func (c *Client) SetNFSClusterData(d *schema.ResourceData, cluster sdk.ClusterRe
 // IsClusterReady checks if the cluster is ready
 func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	clusterID := d.Id()
-	cluster, _, err := c.GetNFSClusterById(ctx, "", "")
+	location := d.Get("location").(string)
+	cluster, _, err := c.GetNFSClusterById(ctx, clusterID, location)
 	if err != nil {
-		return true, fmt.Errorf("status check failed for Cluster ID: %v, error: %w", clusterID, err)
+		return false, fmt.Errorf("failed checking if Cluster %s from %s is ready: %w", clusterID, location, err)
 	}
 
 	if cluster.Metadata == nil || cluster.Metadata.Status == nil {
 		return false, fmt.Errorf("metadata or status is empty for Cluster ID: %v", clusterID)
 	}
 
-	log.Printf("[INFO] state of the cluster with ID %s is: %s ", clusterID, *cluster.Metadata.Status)
+	log.Printf("[INFO] state of the cluster with ID %s is: %s", clusterID, *cluster.Metadata.Status)
 	return strings.EqualFold(*cluster.Metadata.Status, constant.Available), nil
 }
 
 // IsClusterDeleted checks if the cluster is deleted
 func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	clusterID := d.Id()
-	_, apiResponse, err := c.GetNFSClusterById(ctx, "", "")
+	location := d.Get("location").(string)
+	_, apiResponse, err := c.GetNFSClusterById(ctx, clusterID, location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return true, nil
 		}
-		return false, fmt.Errorf("check failed for Cluster deletion status, ID: %v, error: %w", clusterID, err)
+		return false, fmt.Errorf("failed checking if Cluster %s from %s has been deleted: %w", clusterID, location, err)
 	}
 	return false, nil
 }
