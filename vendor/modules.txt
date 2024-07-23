@@ -195,6 +195,9 @@ github.com/hashicorp/terraform-plugin-framework/schema/validator
 github.com/hashicorp/terraform-plugin-framework/tfsdk
 github.com/hashicorp/terraform-plugin-framework/types
 github.com/hashicorp/terraform-plugin-framework/types/basetypes
+# github.com/hashicorp/terraform-plugin-framework-jsontypes v0.1.0
+## explicit; go 1.19
+github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes
 # github.com/hashicorp/terraform-plugin-framework-timetypes v0.4.0
 ## explicit; go 1.21
 github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes
@@ -236,7 +239,11 @@ github.com/hashicorp/terraform-plugin-log/tfsdklog
 # github.com/hashicorp/terraform-plugin-mux v0.16.0
 ## explicit; go 1.21
 github.com/hashicorp/terraform-plugin-mux/internal/logging
+github.com/hashicorp/terraform-plugin-mux/internal/tfprotov5tov6
+github.com/hashicorp/terraform-plugin-mux/internal/tfprotov6tov5
 github.com/hashicorp/terraform-plugin-mux/tf5muxserver
+github.com/hashicorp/terraform-plugin-mux/tf5to6server
+github.com/hashicorp/terraform-plugin-mux/tf6muxserver
 # github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
 ## explicit; go 1.21
 github.com/hashicorp/terraform-plugin-sdk/v2/diag

@@ -98,6 +98,13 @@ type ServerConfiguration struct {
 // ServerConfigurations stores multiple ServerConfiguration items
 type ServerConfigurations []ServerConfiguration
 
+type AWSSignatureConfig struct {
+	AccessKey string
+	SecretKey string
+	Region    string
+	Service   string
+}
+
 // shared.Configuration stores the configuration of the API client
 type Configuration struct {
 	Host               string            `json:"host,omitempty"`
@@ -114,6 +121,7 @@ type Configuration struct {
 	MaxRetries         int           `json:"maxRetries,omitempty"`
 	WaitTime           time.Duration `json:"waitTime,omitempty"`
 	MaxWaitTime        time.Duration `json:"maxWaitTime,omitempty"`
+	AWSSignatureConfig AWSSignatureConfig
 }
 
 // NewConfiguration returns a new shared.Configuration object

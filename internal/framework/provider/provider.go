@@ -168,6 +168,7 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		s3.NewBucketResource,
 		s3.NewBucketPolicyResource,
 		s3.NewObjectResource,
+		s3.NewBucketPublicAccessBlockResource,
 	}
 }
 
@@ -176,5 +177,7 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 	return []func() datasource.DataSource{
 		s3.NewBucketDataSource,
 		s3.NewObjectDataSource,
+		s3.NewBucketPolicyDataSource,
+		s3.NewBucketPublicAccessBlockDataSource,
 	}
 }

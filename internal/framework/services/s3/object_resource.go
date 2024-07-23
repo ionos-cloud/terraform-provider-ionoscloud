@@ -291,20 +291,6 @@ func (r *objectResource) Create(ctx context.Context, req resource.CreateRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func getContentType(ctx context.Context, data *objectResourceModel, client *s3.APIClient) (string, error) {
-	_, apiResponse, err := findObject(ctx, client, *data)
-	if err != nil {
-		return "", err
-	}
-
-	contentType := apiResponse.Header.Get("Content-Type")
-	if contentType != "" {
-		data.ContentType = types.StringValue(contentType)
-	}
-
-	return contentType, nil
-}
-
 // Read reads the object.
 func (r *objectResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
@@ -363,38 +349,6 @@ func (r *objectResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func getTags(ctx context.Context, client *s3.APIClient, data objectResourceModel) (map[string]string, error) {
-	output, apiResponse, err := client.TaggingApi.GetObjectTagging(ctx, data.Bucket.ValueString(), data.Key.ValueString()).Execute()
-	if err != nil {
-		if apiResponse.HttpNotFound() {
-			return nil, nil
-		}
-
-		return nil, err
-	}
-
-	tagsMap := map[string]string{}
-	for _, tag := range output.TagSet {
-		tagsMap[tag.Key] = tag.Value
-	}
-
-	return tagsMap, nil
-}
-
-func getMetadataMapFromHeaders(apiResponse *shared.APIResponse, prefix string) map[string]string {
-	metaHeaders := map[string]string{}
-	for name, values := range apiResponse.Header {
-		if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-			if len(values) > 0 {
-				metaKey := strings.TrimPrefix(strings.ToLower(name), strings.ToLower(prefix))
-				metaHeaders[metaKey] = values[0]
-			}
-		}
-	}
-
-	return metaHeaders
 }
 
 // ImportState imports the state of the object.
@@ -470,6 +424,52 @@ func (r *objectResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		resp.Diagnostics.AddError("failed to delete object", err.Error())
 		return
 	}
+}
+
+func getTags(ctx context.Context, client *s3.APIClient, data objectResourceModel) (map[string]string, error) {
+	output, apiResponse, err := client.TaggingApi.GetObjectTagging(ctx, data.Bucket.ValueString(), data.Key.ValueString()).Execute()
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	tagsMap := map[string]string{}
+	for _, tag := range output.TagSet {
+		tagsMap[tag.Key] = tag.Value
+	}
+
+	return tagsMap, nil
+}
+
+func getMetadataMapFromHeaders(apiResponse *shared.APIResponse, prefix string) map[string]string {
+	metaHeaders := map[string]string{}
+	for name, values := range apiResponse.Header {
+		if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+			if len(values) > 0 {
+				metaKey := strings.TrimPrefix(strings.ToLower(name), strings.ToLower(prefix))
+				metaHeaders[metaKey] = values[0]
+			}
+		}
+	}
+
+	return metaHeaders
+}
+
+func getContentType(ctx context.Context, data *objectResourceModel, client *s3.APIClient) (string, error) {
+	_, apiResponse, err := findObject(ctx, client, *data)
+	if err != nil {
+		return "", err
+	}
+
+	contentType := apiResponse.Header.Get("Content-Type")
+	if contentType != "" {
+		data.ContentType = types.StringValue(contentType)
+	}
+
+	return contentType, nil
 }
 
 func deleteObject(ctx context.Context, client *s3.APIClient, data objectResourceModel) (map[string]interface{}, *shared.APIResponse, error) {
@@ -653,7 +653,7 @@ func createTempFile(fileName, content string) (*os.File, error) {
 
 // hasObjectContentChanges returns true if the plan has changes to the object content.
 func hasObjectContentChanges(plan, state objectResourceModel) bool {
-	return !(plan.Source.Equal(state.Source) &&
+	needsChange := !(plan.Source.Equal(state.Source) &&
 		plan.CacheControl.Equal(state.CacheControl) &&
 		plan.ContentDisposition.Equal(state.ContentDisposition) &&
 		plan.ContentEncoding.Equal(state.ContentEncoding) &&
@@ -671,6 +671,7 @@ func hasObjectContentChanges(plan, state objectResourceModel) bool {
 		plan.ServerSideEncryptionCustomerKeyMD5.Equal(state.ServerSideEncryptionCustomerKeyMD5) &&
 		plan.ServerSideEncryptionContext.Equal(state.ServerSideEncryptionContext) &&
 		plan.Metadata.Equal(state.Metadata))
+	return needsChange
 }
 
 func buildQueryString(m types.Map) (string, error) {
