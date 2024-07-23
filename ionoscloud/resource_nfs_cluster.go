@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go-nfs"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -100,14 +103,6 @@ func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	_, err := resourceNFSClusterImport(ctx, d, meta)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("error reading NFS Cluster with ID: %v, error: %w", d.Id(), err))
-	}
-	return nil
-}
-
 func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).NFSClient
 
@@ -141,19 +136,52 @@ func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(services.SdkBundle).NFSClient
-	clusterID := d.Id()
-	cluster, resp, err := client.GetNFSClusterById(ctx, d)
-	if err != nil {
-		if resp.HttpNotFound() {
-			d.SetId("")
-			return nil, fmt.Errorf("NFS Cluster does not exist, error: %w", err)
-		}
-		return nil, fmt.Errorf("error importing NFS Cluster with ID: %v, error: %w", clusterID, err)
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<replica_set_id>'", d.Id())
 	}
-	log.Printf("[INFO] Cluster found: %+v", cluster)
+	location := parts[0]
+	if !slices.Contains(locations, location) {
+		return nil, fmt.Errorf("invalid import ID: %q, location must be one of '%s'", d.Id(), strings.Join(locations, ", '"))
+	}
+	id := parts[1]
 
+	d.Set("location", location)
+	d.Set("id", id)
+
+	cluster, err := findCluster(ctx, d, id, location, client)
+	if err != nil {
+		return nil, fmt.Errorf("error finding NFS Cluster: %w", err)
+	}
 	if err := client.SetNFSClusterData(d, cluster); err != nil {
 		return nil, err
 	}
 	return []*schema.ResourceData{d}, nil
+}
+
+func resourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).NFSClient
+	cluster, err := findCluster(ctx, d, d.Id(), d.Get("location").(string), client)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error finding NFS Cluster: %w", err))
+	}
+	if errSetData := client.SetNFSClusterData(d, cluster); errSetData != nil {
+		return diag.FromErr(fmt.Errorf("failed to set NFS Cluster data: %w", errSetData))
+	}
+	return nil
+}
+
+func findCluster(ctx context.Context, d *schema.ResourceData, id, location string, client *nfs.Client) (ionoscloud.ClusterRead, error) {
+	cluster, resp, err := client.GetNFSClusterById(ctx, id, location)
+	if err != nil {
+		if resp.HttpNotFound() {
+			d.SetId("")
+			return ionoscloud.ClusterRead{},
+				fmt.Errorf("NFS Cluster %s does not exist in %s: %w", id, location, err)
+		}
+		return ionoscloud.ClusterRead{},
+			fmt.Errorf("couldn't find NFS Cluster %s in %s: %w", id, location, err)
+	}
+	log.Printf("[INFO] Cluster found: %+v", cluster)
+	return cluster, nil
 }
