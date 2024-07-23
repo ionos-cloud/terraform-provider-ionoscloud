@@ -27,8 +27,8 @@ type IPSecTunnel struct {
 	// The remote peer host fully qualified domain name or IPV4 IP to connect to. * __Note__: This should be the public IP of the remote peer. * Tunnels only support IPV4 or hostname (fully qualified DNS name).
 	RemoteHost string          `json:"remoteHost"`
 	Auth       IPSecTunnelAuth `json:"auth"`
-	Ike        *IKEEncryption  `json:"ike,omitempty"`
-	Esp        *ESPEncryption  `json:"esp,omitempty"`
+	Ike        IKEEncryption   `json:"ike"`
+	Esp        ESPEncryption   `json:"esp"`
 	// The network CIDRs on the \"Left\" side that are allowed to connect to the IPSec tunnel, i.e the CIDRs within your IONOS Cloud LAN.  Specify \"0.0.0.0/0\" or \"::/0\" for all addresses.
 	CloudNetworkCIDRs []string `json:"cloudNetworkCIDRs"`
 	// The network CIDRs on the \"Right\" side that are allowed to connect to the IPSec tunnel.  Specify \"0.0.0.0/0\" or \"::/0\" for all addresses.
@@ -39,12 +39,14 @@ type IPSecTunnel struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewIPSecTunnel(name string, remoteHost string, auth IPSecTunnelAuth, cloudNetworkCIDRs []string, peerNetworkCIDRs []string) *IPSecTunnel {
+func NewIPSecTunnel(name string, remoteHost string, auth IPSecTunnelAuth, ike IKEEncryption, esp ESPEncryption, cloudNetworkCIDRs []string, peerNetworkCIDRs []string) *IPSecTunnel {
 	this := IPSecTunnel{}
 
 	this.Name = name
 	this.RemoteHost = remoteHost
 	this.Auth = auth
+	this.Ike = ike
+	this.Esp = esp
 	this.CloudNetworkCIDRs = cloudNetworkCIDRs
 	this.PeerNetworkCIDRs = peerNetworkCIDRs
 
@@ -163,68 +165,52 @@ func (o *IPSecTunnel) SetAuth(v IPSecTunnelAuth) {
 	o.Auth = v
 }
 
-// GetIke returns the Ike field value if set, zero value otherwise.
+// GetIke returns the Ike field value
 func (o *IPSecTunnel) GetIke() IKEEncryption {
-	if o == nil || IsNil(o.Ike) {
+	if o == nil {
 		var ret IKEEncryption
 		return ret
 	}
-	return *o.Ike
+
+	return o.Ike
 }
 
-// GetIkeOk returns a tuple with the Ike field value if set, nil otherwise
+// GetIkeOk returns a tuple with the Ike field value
 // and a boolean to check if the value has been set.
 func (o *IPSecTunnel) GetIkeOk() (*IKEEncryption, bool) {
-	if o == nil || IsNil(o.Ike) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Ike, true
+	return &o.Ike, true
 }
 
-// HasIke returns a boolean if a field has been set.
-func (o *IPSecTunnel) HasIke() bool {
-	if o != nil && !IsNil(o.Ike) {
-		return true
-	}
-
-	return false
-}
-
-// SetIke gets a reference to the given IKEEncryption and assigns it to the Ike field.
+// SetIke sets field value
 func (o *IPSecTunnel) SetIke(v IKEEncryption) {
-	o.Ike = &v
+	o.Ike = v
 }
 
-// GetEsp returns the Esp field value if set, zero value otherwise.
+// GetEsp returns the Esp field value
 func (o *IPSecTunnel) GetEsp() ESPEncryption {
-	if o == nil || IsNil(o.Esp) {
+	if o == nil {
 		var ret ESPEncryption
 		return ret
 	}
-	return *o.Esp
+
+	return o.Esp
 }
 
-// GetEspOk returns a tuple with the Esp field value if set, nil otherwise
+// GetEspOk returns a tuple with the Esp field value
 // and a boolean to check if the value has been set.
 func (o *IPSecTunnel) GetEspOk() (*ESPEncryption, bool) {
-	if o == nil || IsNil(o.Esp) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Esp, true
+	return &o.Esp, true
 }
 
-// HasEsp returns a boolean if a field has been set.
-func (o *IPSecTunnel) HasEsp() bool {
-	if o != nil && !IsNil(o.Esp) {
-		return true
-	}
-
-	return false
-}
-
-// SetEsp gets a reference to the given ESPEncryption and assigns it to the Esp field.
+// SetEsp sets field value
 func (o *IPSecTunnel) SetEsp(v ESPEncryption) {
-	o.Esp = &v
+	o.Esp = v
 }
 
 // GetCloudNetworkCIDRs returns the CloudNetworkCIDRs field value
@@ -297,10 +283,10 @@ func (o IPSecTunnel) ToMap() (map[string]interface{}, error) {
 	if !IsZero(o.Auth) {
 		toSerialize["auth"] = o.Auth
 	}
-	if !IsNil(o.Ike) {
+	if !IsZero(o.Ike) {
 		toSerialize["ike"] = o.Ike
 	}
-	if !IsNil(o.Esp) {
+	if !IsZero(o.Esp) {
 		toSerialize["esp"] = o.Esp
 	}
 	if !IsZero(o.CloudNetworkCIDRs) {

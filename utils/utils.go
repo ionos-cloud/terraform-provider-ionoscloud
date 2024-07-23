@@ -17,7 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iancoleman/strcase"
+	"github.com/huandu/xstrings"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/crypto/ssh"
 )
@@ -300,7 +300,7 @@ func DecodeInterfaceToStruct(input, output interface{}) error {
 }
 
 func IsSnakeEqualToCamelCase(a, b string) bool {
-	return strings.EqualFold(strcase.ToCamel(a), b)
+	return strings.EqualFold(xstrings.ToCamelCase(a), b)
 }
 
 func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
@@ -348,14 +348,14 @@ func DecodeStructToMap(input interface{}) (map[string]interface{}, error) {
 
 	newResult := make(map[string]interface{})
 	for k, v := range result {
-		newResult[strcase.ToSnake(k)] = v
+		newResult[xstrings.ToSnakeCase(k)] = v
 	}
 
 	return newResult, nil
 }
 
 func IsCamelCaseEqualToSnakeCase(a, b string) bool {
-	return strings.EqualFold(strcase.ToSnake(a), b)
+	return strings.EqualFold(xstrings.ToSnakeCase(a), b)
 }
 
 // ReadPublicKey Reads public key from file or directly provided and returns key string if valid

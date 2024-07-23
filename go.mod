@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
+	github.com/huandu/xstrings v1.3.2
 	github.com/iancoleman/strcase v0.3.0
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.0
@@ -23,7 +24,9 @@ require (
 )
 
 require github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
+
 replace github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 => /tmp/sdk-go
+
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect

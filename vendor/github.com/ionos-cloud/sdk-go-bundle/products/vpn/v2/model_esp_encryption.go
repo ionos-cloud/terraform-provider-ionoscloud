@@ -20,11 +20,11 @@ var _ MappedNullable = &ESPEncryption{}
 
 // ESPEncryption Settings for the IPSec SA (ESP) phase.
 type ESPEncryption struct {
-	// The Diffie-Hellman Group to use for IPSec Encryption.\\ Options:   - 14-MODP2048   - 15-MODP3072   - 16-MODP4096   - 17-MODP6144   - 18-MODP8192   - 22-MODP1024S160   - 23-MODP2048S224   - 24-MODP2048S256   - 25-ECP192   - 26-ECP224   - 19-ECP256   - 20-ECP384   - 21-ECP521   - 27-ECP224BP   - 28-ECP256BP   - 29-ECP384BP   - 30-ECP512BP   - 31-CURVE25519   - 32-CURVE448
+	// The Diffie-Hellman Group to use for IPSec Encryption.\\ Options:   - 15-MODP3072   - 16-MODP4096   - 19-ECP256   - 20-ECP384   - 21-ECP521   - 28-ECP256BP   - 29-ECP384BP   - 30-ECP512BP
 	DiffieHellmanGroup *string `json:"diffieHellmanGroup,omitempty"`
-	// The encryption algorithm to use for IPSec Encryption.\\ Options: - AES128 - AES192 - AES256 - AES128-CTR - AES192-CTR - AES256-CTR
+	// The encryption algorithm to use for IPSec Encryption.\\ Options: - AES128-CTR - AES256-CTR - AES128-GCM-16 - AES256-GCM-16 - AES128-GCM-12 - AES256-GCM-12 - AES128-CCM-12 - AES256-CCM-12 - AES128 - AES256
 	EncryptionAlgorithm *string `json:"encryptionAlgorithm,omitempty"`
-	// The integrity algorithm to use for IPSec Encryption.\\ Options: - MD5 - SHA1 - SHA256 - SHA384 - SHA512
+	// The integrity algorithm to use for IPSec Encryption.\\ Options: - SHA256 - SHA384 - SHA512 - AES-XCBC
 	IntegrityAlgorithm *string `json:"integrityAlgorithm,omitempty"`
 	// The phase lifetime in seconds.
 	Lifetime *int32 `json:"lifetime,omitempty"`

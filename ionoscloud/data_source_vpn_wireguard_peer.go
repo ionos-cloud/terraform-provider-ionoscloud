@@ -106,7 +106,7 @@ func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData,
 		if results == nil || len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no vpn wireguard peer found with the specified name = %s", name))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one vpn wireguard [eer] found with the specified name = %s", name))
+			return diag.FromErr(fmt.Errorf("more than one vpn wireguard peer found with the specified name = %s", name))
 		} else {
 			peer = results[0]
 		}

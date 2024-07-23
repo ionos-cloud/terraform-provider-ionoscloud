@@ -21,6 +21,9 @@ func resourceVpnWireguardGateway() *schema.Resource {
 		ReadContext:   resourceVpnWireguardGatewayRead,
 		UpdateContext: resourceVpnWireguardGatewayUpdate,
 		DeleteContext: resourceVpnWireguardGatewayDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -160,7 +163,7 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 	time.Sleep(5 * time.Second)
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsWireguardGatewayDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("while deleting wireguard gateway %s : %w", d.Id(), err))
+		return diag.FromErr(fmt.Errorf("while waiting for the wireguard gateway to be deleted %s : %w", d.Id(), err))
 	}
 
 	log.Printf("[INFO] Successfully deleted Wireguard Gateway %s", d.Id())

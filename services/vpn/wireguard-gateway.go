@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	vpn "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
 
@@ -55,7 +54,7 @@ func (c *Client) IsWireguardPeerAvailable(ctx context.Context, d *schema.Resourc
 }
 
 func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schema.ResourceData) (vpn.WireguardGatewayRead, utils.ApiResponseInfo, error) {
-	request := setWireguardGatewayPatchRequest(d)
+	request := setWireguardGatewayPutRequest(d)
 	wireguardResponse, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysPut(ctx, id).WireguardGatewayEnsure(*request).Execute()
 	apiResponse.LogInfo()
 	return wireguardResponse, apiResponse, err
@@ -184,20 +183,19 @@ func setWireguardPeersPostRequest(d *schema.ResourceData) (*vpn.WireguardPeerCre
 		request.Properties.Description = &valueStr
 	}
 
-	if value, ok := d.GetOk("endpoint"); ok {
-		raw := value.(interface{})
-		//vpn.WireguardEndpoint
-		endpoint := vpn.NewWireguardEndpointWithDefaults()
-		err := utils.DecodeInterfaceToStruct(raw, endpoint)
-		if err != nil {
-			return &request, err
-		}
-		request.Properties.Endpoint = endpoint
+	if _, ok := d.GetOk("endpoint"); ok {
+		request.Properties.Endpoint = GetEndpointData(d)
 	}
-
-	if value, ok := d.GetOk("allowed_ips"); ok {
-		valueStr := value.([]string)
-		request.Properties.AllowedIPs = valueStr
+	if v, ok := d.GetOk("allowed_ips"); ok {
+		raw := v.([]interface{})
+		ips := make([]string, len(raw))
+		err := utils.DecodeInterfaceToStruct(raw, ips)
+		if err != nil {
+			return nil, err
+		}
+		if len(ips) > 0 {
+			request.Properties.AllowedIPs = ips
+		}
 	}
 	if value, ok := d.GetOk("public_key"); ok {
 		valueStr := value.(string)
@@ -206,33 +204,46 @@ func setWireguardPeersPostRequest(d *schema.ResourceData) (*vpn.WireguardPeerCre
 
 	return &request, nil
 }
+func GetEndpointData(d *schema.ResourceData) *vpn.WireguardEndpoint {
+	endpoint := vpn.NewWireguardEndpointWithDefaults()
+	if endpointValues, ok := d.GetOk("endpoint"); ok {
+		endpointMap := endpointValues.([]any)
+		if endpointMap != nil {
+			if host, ok := d.GetOk("endpoint.0.host"); ok {
+				host := host.(string)
+				endpoint.Host = host
+			}
+			if port, ok := d.GetOk("endpoint.0.port"); ok {
+				port := port.(int)
+				endpoint.Port = shared.ToPtr(int32(port))
+			}
+		}
+	}
+	return endpoint
 
+}
 func GetWireguardGwConnectionsData(d *schema.ResourceData) []vpn.Connection {
 	connections := make([]vpn.Connection, 0)
 
 	if connectionValues, ok := d.GetOk("connections"); ok {
 		connectionsItf := connectionValues.([]any)
 		if connectionsItf != nil {
-			for vdcIndex := range connectionsItf {
-
+			for idx := range connectionsItf {
 				connection := vpn.Connection{}
-
-				if datacenterId, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", vdcIndex)); ok {
+				if datacenterId, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", idx)); ok {
 					datacenterId := datacenterId.(string)
 					connection.DatacenterId = datacenterId
 				}
-
-				if lanId, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", vdcIndex)); ok {
+				if lanId, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", idx)); ok {
 					lanId := lanId.(string)
 					connection.LanId = lanId
 				}
-
-				if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv4_cidr", vdcIndex)); ok {
+				if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv4_cidr", idx)); ok {
 					cidr := cidr.(string)
 					connection.Ipv4CIDR = cidr
 				}
 
-				if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv6_cidr", vdcIndex)); ok {
+				if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv6_cidr", idx)); ok {
 					cidr := cidr.(string)
 					connection.Ipv6CIDR = &cidr
 				}
@@ -245,70 +256,52 @@ func GetWireguardGwConnectionsData(d *schema.ResourceData) []vpn.Connection {
 	return connections
 }
 
-func setWireguardGatewayPatchRequest(d *schema.ResourceData) *vpn.WireguardGatewayEnsure {
+func setWireguardGatewayPutRequest(d *schema.ResourceData) *vpn.WireguardGatewayEnsure {
 	request := vpn.WireguardGatewayEnsure{Properties: vpn.WireguardGateway{}}
-
-	if d.HasChange("name") {
-		_, val := d.GetChange("name")
-		request.Properties.Name = val.(string)
+	request.Id = d.Id()
+	request.Properties.GatewayIP = d.Get("gateway_ip").(string)
+	request.Properties.Name = d.Get("name").(string)
+	request.Properties.PrivateKey = d.Get("private_key").(string)
+	request.Properties.Connections = GetWireguardGwConnectionsData(d)
+	if val, ok := d.GetOk("interface_ipv4_cidr"); ok {
+		request.Properties.InterfaceIPv4CIDR = shared.ToPtr(val.(string))
 	}
-	if d.HasChange("gateway_ip") {
-		_, val := d.GetChange("gateway_ip")
-		request.Properties.GatewayIP = val.(string)
+	if v, ok := d.GetOk("description"); ok {
+		request.Properties.Description = shared.ToPtr(v.(string))
 	}
-
-	if d.HasChange("description") {
-		_, val := d.GetChange("description")
-		request.Properties.Description = ionoscloud.ToPtr(val.(string))
+	if v, ok := d.GetOk("interface_ipv6_cidr"); ok {
+		request.Properties.InterfaceIPv6CIDR = shared.ToPtr(v.(string))
 	}
-	if d.HasChange("interface_ipv4_cidr") {
-		_, val := d.GetChange("interface_ipv4_cidr")
-		request.Properties.InterfaceIPv4CIDR = ionoscloud.ToPtr(val.(string))
+	if v, ok := d.GetOk("listen_port"); ok {
+		request.Properties.ListenPort = shared.ToPtr(int32(v.(int)))
 	}
-	if d.HasChange("interface_ipv6_cidr") {
-		_, val := d.GetChange("interface_ipv6_cidr")
-		request.Properties.InterfaceIPv6CIDR = ionoscloud.ToPtr(val.(string))
-	}
-	if d.HasChange("listen_port") {
-		_, val := d.GetChange("listen_port")
-		request.Properties.ListenPort = ionoscloud.ToPtr(int32(val.(int)))
-	}
-	if d.HasChange("connections") {
-		request.Properties.Connections = GetWireguardGwConnectionsData(d)
-	}
-
 	return &request
 }
 
 func setWireguardPeerPatchRequest(d *schema.ResourceData) (vpn.WireguardPeerEnsure, error) {
 	request := vpn.WireguardPeerEnsure{Properties: vpn.WireguardPeer{}}
 
-	if d.HasChange("name") {
-		_, val := d.GetChange("name")
-		request.Properties.Name = val.(string)
+	request.Id = d.Id()
+	request.Properties.Name = d.Get("name").(string)
+	request.Properties.PublicKey = d.Get("public_key").(string)
+
+	if v, ok := d.GetOk("description"); ok {
+		request.Properties.Description = shared.ToPtr(v.(string))
+	}
+	if _, ok := d.GetOk("endpoint"); ok {
+		request.Properties.Endpoint = GetEndpointData(d)
 	}
 
-	if d.HasChange("description") {
-		_, val := d.GetChange("description")
-		request.Properties.Description = ionoscloud.ToPtr(val.(string))
-	}
-	if d.HasChange("endpoint") {
-		_, val := d.GetChange("endpoint")
-		raw := val.(interface{})
-		endpoint := vpn.NewWireguardEndpointWithDefaults()
-		err := utils.DecodeInterfaceToStruct(raw, endpoint)
+	if v, ok := d.GetOk("allowed_ips"); ok {
+		raw := v.([]interface{})
+		ips := make([]string, len(raw))
+		err := utils.DecodeInterfaceToStruct(raw, ips)
 		if err != nil {
 			return request, err
 		}
-		request.Properties.Endpoint = endpoint
-	}
-	if d.HasChange("allowed_ips") {
-		_, val := d.GetChange("allowed_ips")
-		request.Properties.AllowedIPs = val.([]string)
-	}
-	if d.HasChange("public_key") {
-		_, val := d.GetChange("public_key")
-		request.Properties.PublicKey = val.(string)
+		if len(ips) > 0 {
+			request.Properties.AllowedIPs = ips
+		}
 	}
 
 	return request, nil
@@ -344,6 +337,9 @@ func SetWireguardGWData(d *schema.ResourceData, wireguard vpn.WireguardGatewayRe
 		}
 		connections = append(connections, connection)
 	}
+	if err := d.Set("connections", connections); err != nil {
+		return utils.GenerateSetError(wireguardResourceName, "connections", err)
+	}
 
 	if err := d.Set("listen_port", wireguard.Properties.ListenPort); err != nil {
 		return utils.GenerateSetError(wireguardResourceName, "listenPort", err)
@@ -366,9 +362,18 @@ func SetWireguardPeerData(d *schema.ResourceData, wireguard vpn.WireguardPeerRea
 	if err := d.Set("description", wireguard.Properties.Description); err != nil {
 		return utils.GenerateSetError(resPeerName, "description", err)
 	}
-	if err := d.Set("endpoint", wireguard.Properties.Endpoint); err != nil {
-		return utils.GenerateSetError(resPeerName, "endpoint", err)
+	if wireguard.Properties.Endpoint != nil {
+		var endpoiontSlice []any
+		endpointEntry, err := wireguard.Properties.Endpoint.ToMap()
+		if err != nil {
+			return err
+		}
+		endpoiontSlice = append(endpoiontSlice, endpointEntry)
+		if err := d.Set("endpoint", endpoiontSlice); err != nil {
+			return utils.GenerateSetError(resPeerName, "endpoint", err)
+		}
 	}
+
 	if err := d.Set("allowed_ips", wireguard.Properties.AllowedIPs); err != nil {
 		return utils.GenerateSetError(resPeerName, "allowed_ips", err)
 	}

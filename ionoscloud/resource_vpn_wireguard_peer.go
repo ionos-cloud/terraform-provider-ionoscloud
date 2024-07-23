@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
+	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
@@ -19,7 +20,9 @@ func resourceVpnWireguardPeer() *schema.Resource {
 		ReadContext:   resourceVpnWireguardPeerRead,
 		UpdateContext: resourceVpnWireguardPeerUpdate,
 		DeleteContext: resourceVpnWireguardPeerDelete,
-
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceVpnWireguardPeerImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"gateway_id": {
 				Type:             schema.TypeString,
@@ -147,4 +150,25 @@ func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData,
 
 	d.SetId("")
 	return nil
+}
+
+func resourceVpnWireguardPeerImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	client := m.(services.SdkBundle).VPNClient
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import format: %s, expecting the following format: {gateway_id}/{id}", d.Id())
+	}
+	gatewayID := parts[0]
+	peerID := parts[1]
+	peer, _, err := client.GetWireguardPeerByID(ctx, gatewayID, peerID)
+	if err != nil {
+		return nil, err
+	}
+	if err := d.Set("gateway_id", gatewayID); err != nil {
+		return nil, err
+	}
+	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
 }
