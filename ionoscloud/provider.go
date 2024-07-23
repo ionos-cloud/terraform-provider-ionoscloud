@@ -127,7 +127,7 @@ func Provider() *schema.Provider {
 			constant.NetworkLoadBalancerResource:               resourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
 			constant.NFSClusterResource:                        resourceNFSCluster(),
-			constant.NFSShareResource:                          resourceNFSShare(),
+			constant.NFSShareResource:                          nil, // TODO
 			constant.PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
 			constant.PsqlUserResource:                          resourceDbaasPgSqlUser(),
 			constant.PsqlDatabaseResource:                      resourceDbaasPgSqlDatabase(),
@@ -170,8 +170,8 @@ func Provider() *schema.Provider {
 			constant.NatGatewayRuleResource:                    dataSourceNatGatewayRule(),
 			constant.NetworkLoadBalancerResource:               dataSourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: dataSourceNetworkLoadBalancerForwardingRule(),
-			constant.NFSClusterResource:                        dataSourceNFSCluster(),
-			constant.NFSShareResource:                          dataSourceNFSShare(),
+			constant.NFSClusterResource:                        nil, // TODO
+			constant.NFSShareResource:                          nil, // TODO
 			constant.TemplateResource:                          dataSourceTemplate(),
 			constant.BackupUnitResource:                        dataSourceBackupUnit(),
 			constant.FirewallResource:                          dataSourceFirewall(),
