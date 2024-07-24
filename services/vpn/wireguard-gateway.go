@@ -17,12 +17,15 @@ import (
 
 var wireguardResourceName = "vpnSdk wireguard gateway"
 
+// CreateWireguardGateway creates a new wireguard gateway
 func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceData) (vpnSdk.WireguardGatewayRead, utils.ApiResponseInfo, error) {
 	request := setWireguardGWPostRequest(d)
 	wireguard, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysPost(ctx).WireguardGatewayCreate(*request).Execute()
 	apiResponse.LogInfo()
 	return wireguard, apiResponse, err
 }
+
+// CreateWireguardGatewayPeers creates a new wireguard peer
 func (c *Client) CreateWireguardGatewayPeers(ctx context.Context, d *schema.ResourceData, gatewayID string) (vpnSdk.WireguardPeerRead, utils.ApiResponseInfo, error) {
 	request, err := setWireguardPeersPostRequest(d)
 	if err != nil {
@@ -33,9 +36,10 @@ func (c *Client) CreateWireguardGatewayPeers(ctx context.Context, d *schema.Reso
 	return wireguard, apiResponse, err
 }
 
+// IsWireguardAvailable checks if the wireguard is available
 func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	wireguardId := d.Id()
-	wireguard, _, err := c.GetWireguardGatewayByID(ctx, wireguardId)
+	wireguardID := d.Id()
+	wireguard, _, err := c.GetWireguardGatewayByID(ctx, wireguardID)
 	if err != nil {
 		return false, err
 	}
@@ -43,10 +47,11 @@ func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceDat
 	return strings.EqualFold(wireguard.Metadata.Status, constant.Available), nil
 }
 
+// IsWireguardPeerAvailable checks if the wireguard peer is available
 func (c *Client) IsWireguardPeerAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	wireguardId := d.Id()
+	wireguardID := d.Id()
 	gatewayID := d.Get("gateway_id").(string)
-	wireguard, _, err := c.GetWireguardPeerByID(ctx, gatewayID, wireguardId)
+	wireguard, _, err := c.GetWireguardPeerByID(ctx, gatewayID, wireguardID)
 	if err != nil {
 		return false, err
 	}
@@ -54,6 +59,7 @@ func (c *Client) IsWireguardPeerAvailable(ctx context.Context, d *schema.Resourc
 	return strings.EqualFold(wireguard.Metadata.Status, constant.Available), nil
 }
 
+// UpdateWireguardGateway updates a wireguard gateway
 func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schema.ResourceData) (vpnSdk.WireguardGatewayRead, utils.ApiResponseInfo, error) {
 	request := setWireguardGatewayPutRequest(d)
 	wireguardResponse, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysPut(ctx, id).WireguardGatewayEnsure(*request).Execute()
@@ -61,6 +67,7 @@ func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schem
 	return wireguardResponse, apiResponse, err
 }
 
+// UpdateWireguardPeer updates a wireguard peer
 func (c *Client) UpdateWireguardPeer(ctx context.Context, gatewayID, id string, d *schema.ResourceData) (vpnSdk.WireguardPeerRead, utils.ApiResponseInfo, error) {
 	request, err := setWireguardPeerPatchRequest(d)
 	if err != nil {
@@ -71,23 +78,28 @@ func (c *Client) UpdateWireguardPeer(ctx context.Context, gatewayID, id string, 
 	return wireguardResponse, apiResponse, err
 }
 
+// DeleteWireguardGateway deletes a wireguard gateway
 func (c *Client) DeleteWireguardGateway(ctx context.Context, id string) (utils.ApiResponseInfo, error) {
 	apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
+
+// DeleteWireguardPeer deletes a wireguard peer
 func (c *Client) DeleteWireguardPeer(ctx context.Context, gatewayID, id string) (utils.ApiResponseInfo, error) {
 	apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersDelete(ctx, gatewayID, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
+// IsWireguardGatewayDeleted checks if the wireguard gateway is deleted
 func (c *Client) IsWireguardGatewayDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
 }
 
+// IsWireguardPeerDeleted checks if the wireguard peer is deleted
 func (c *Client) IsWireguardPeerDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	gatewayID := d.Get("gateway_id").(string)
 	_, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersFindById(ctx, gatewayID, d.Id()).Execute()
@@ -123,6 +135,7 @@ func (c *Client) ListWireguardPeers(ctx context.Context, gatewayID string) (vpnS
 	return wireguards, apiResponse, err
 }
 
+// IsWireguardGatewayReady checks if the wireguard gateway is ready
 func (c *Client) IsWireguardGatewayReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	cluster, _, err := c.GetWireguardGatewayByID(ctx, d.Id())
 	if err != nil {
@@ -132,6 +145,7 @@ func (c *Client) IsWireguardGatewayReady(ctx context.Context, d *schema.Resource
 	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
 }
 
+// IsWireguardPeerReady checks if the wireguard peer is ready
 func (c *Client) IsWireguardPeerReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	gatewayID := d.Get("gateway_id").(string)
 	cluster, _, err := c.GetWireguardPeerByID(ctx, gatewayID, d.Id())
@@ -168,7 +182,7 @@ func setWireguardGWPostRequest(d *schema.ResourceData) *vpnSdk.WireguardGatewayC
 		valueStr := (int32)(value.(int))
 		request.Properties.ListenPort = &valueStr
 	}
-	request.Properties.Connections = GetWireguardGwConnectionsData(d)
+	request.Properties.Connections = getWireguardGwConnectionsData(d)
 
 	return &request
 }
@@ -185,7 +199,7 @@ func setWireguardPeersPostRequest(d *schema.ResourceData) (*vpnSdk.WireguardPeer
 	}
 
 	if _, ok := d.GetOk("endpoint"); ok {
-		request.Properties.Endpoint = GetEndpointData(d)
+		request.Properties.Endpoint = getEndpointData(d)
 	}
 	if v, ok := d.GetOk("allowed_ips"); ok {
 		raw := v.([]interface{})
@@ -205,7 +219,7 @@ func setWireguardPeersPostRequest(d *schema.ResourceData) (*vpnSdk.WireguardPeer
 
 	return &request, nil
 }
-func GetEndpointData(d *schema.ResourceData) *vpnSdk.WireguardEndpoint {
+func getEndpointData(d *schema.ResourceData) *vpnSdk.WireguardEndpoint {
 	endpoint := vpnSdk.NewWireguardEndpointWithDefaults()
 	if endpointValues, ok := d.GetOk("endpoint"); ok {
 		endpointMap := endpointValues.([]any)
@@ -223,7 +237,8 @@ func GetEndpointData(d *schema.ResourceData) *vpnSdk.WireguardEndpoint {
 	return endpoint
 
 }
-func GetWireguardGwConnectionsData(d *schema.ResourceData) []vpnSdk.Connection {
+
+func getWireguardGwConnectionsData(d *schema.ResourceData) []vpnSdk.Connection {
 	connections := make([]vpnSdk.Connection, 0)
 
 	if connectionValues, ok := d.GetOk("connections"); ok {
@@ -231,12 +246,12 @@ func GetWireguardGwConnectionsData(d *schema.ResourceData) []vpnSdk.Connection {
 		if connectionsItf != nil {
 			for idx := range connectionsItf {
 				connection := vpnSdk.Connection{}
-				if datacenterId, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", idx)); ok {
-					datacenterId := datacenterId.(string)
+				if datacenterID, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", idx)); ok {
+					datacenterId := datacenterID.(string)
 					connection.DatacenterId = datacenterId
 				}
-				if lanId, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", idx)); ok {
-					lanId := lanId.(string)
+				if lanID, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", idx)); ok {
+					lanId := lanID.(string)
 					connection.LanId = lanId
 				}
 				if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv4_cidr", idx)); ok {
@@ -263,7 +278,7 @@ func setWireguardGatewayPutRequest(d *schema.ResourceData) *vpnSdk.WireguardGate
 	request.Properties.GatewayIP = d.Get("gateway_ip").(string)
 	request.Properties.Name = d.Get("name").(string)
 	request.Properties.PrivateKey = d.Get("private_key").(string)
-	request.Properties.Connections = GetWireguardGwConnectionsData(d)
+	request.Properties.Connections = getWireguardGwConnectionsData(d)
 	if val, ok := d.GetOk("interface_ipv4_cidr"); ok {
 		request.Properties.InterfaceIPv4CIDR = shared.ToPtr(val.(string))
 	}
@@ -290,7 +305,7 @@ func setWireguardPeerPatchRequest(d *schema.ResourceData) (vpnSdk.WireguardPeerE
 		request.Properties.Description = shared.ToPtr(v.(string))
 	}
 	if _, ok := d.GetOk("endpoint"); ok {
-		request.Properties.Endpoint = GetEndpointData(d)
+		request.Properties.Endpoint = getEndpointData(d)
 	}
 
 	if v, ok := d.GetOk("allowed_ips"); ok {
