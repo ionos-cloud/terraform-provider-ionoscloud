@@ -8,6 +8,9 @@ default: build
 build: fmtcheck
 	go install
 
+run: build
+	$(GOPATH)/bin/terraform-provider-ionoscloud -debuggable
+
 test: fmtcheck
 	go test -i $(TEST) || exit 1
 	echo $(TEST) | \
