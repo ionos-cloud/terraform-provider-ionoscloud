@@ -270,11 +270,11 @@ const (
 	DBaaSMongoTemplateResource       = "ionoscloud_mongo_template"
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
 
-	// RedisDB constants
+	// InMemoryDB constants
 	DBaaSReplicaSetTestDataSourceByID   = "test_dbaas_replicaset_id"
 	DBaaSReplicaSetTestDataSourceByName = "test_dbaas_replicaset_name"
-	DBaaSRedisDBReplicaSetResource      = "ionoscloud_redis_replicaset"
-	DBaaSRedisDBSnapshotResource        = "ionoscloud_redis_snapshot"
+	DBaaSInMemoryDBReplicaSetResource   = "ionoscloud_inmemorydb_replicaset"
+	DBaaSInMemoryDBSnapshotResource     = "ionoscloud_inmemorydb_snapshot"
 )
 
 // Locations slice represents the locations in which services are available.

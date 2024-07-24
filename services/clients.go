@@ -10,8 +10,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/redisdb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
@@ -21,7 +21,7 @@ import (
 
 type SdkBundle struct {
 	CloudApiClient     *ionoscloud.APIClient
-	RedisDBClient      *redisdb.RedisDBClient
+	InMemoryDBClient      *inmemorydb.InMemoryDBClient
 	PsqlClient         *dbaas.PsqlClient
 	MongoClient        *dbaas.MongoClient
 	MariaDBClient      *mariadb.MariaDBClient

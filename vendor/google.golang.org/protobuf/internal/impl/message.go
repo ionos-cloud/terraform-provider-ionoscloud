@@ -201,11 +201,7 @@ fieldLoop:
 	}
 	for _, fn := range methods {
 		for _, v := range fn.Func.Call([]reflect.Value{reflect.Zero(fn.Type.In(0))}) {
-<<<<<<< HEAD
 			if vs, ok := v.Interface().([]any); ok {
-=======
-			if vs, ok := v.Interface().([]interface{}); ok {
->>>>>>> 1ed84bd3 (feat: Implement functionality for 'create' method, update Redis SDK version)
 				oneofWrappers = vs
 			}
 		}

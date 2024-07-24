@@ -18,6 +18,7 @@
 - Add s3 bucket, object, policy resources with base functionality
 ### Enhancements
 - Move to `sdk-go-bundle` for logging sdk
+- Add support for In-Memory DB
 ### Fixes 
 - Fixes #607. Container registry should wait until the resource is ready before returning the ID.
 - Move tests from AMD_OPTERON to INTEL_XEON
