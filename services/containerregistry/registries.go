@@ -96,7 +96,7 @@ func (c *Client) PutToken(ctx context.Context, registryId, tokenId string, token
 
 }
 
-func GetRegistryDataCreate(d *schema.ResourceData) *cr.PostRegistryInput {
+func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error) {
 
 	registry := cr.PostRegistryInput{
 		Properties: &cr.PostRegistryProperties{},
@@ -116,10 +116,22 @@ func GetRegistryDataCreate(d *schema.ResourceData) *cr.PostRegistryInput {
 		registry.Properties.Name = &name
 	}
 
-	return &registry
+	if v, ok := d.GetOk("api_subnet_allow_list"); ok {
+		raw := v.([]interface{})
+		ips := make([]string, len(raw))
+		err := utils.DecodeInterfaceToStruct(raw, ips)
+		if err != nil {
+			return nil, err
+		}
+		if len(ips) > 0 {
+			registry.Properties.ApiSubnetAllowList = &ips
+		}
+	}
+
+	return &registry, nil
 }
 
-func GetRegistryDataUpdate(d *schema.ResourceData) *cr.PatchRegistryInput {
+func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, error) {
 
 	registry := cr.PatchRegistryInput{}
 
@@ -127,7 +139,19 @@ func GetRegistryDataUpdate(d *schema.ResourceData) *cr.PatchRegistryInput {
 		registry.GarbageCollectionSchedule = GetWeeklySchedule(d, "garbage_collection_schedule")
 	}
 
-	return &registry
+	if v, ok := d.GetOk("api_subnet_allow_list"); ok {
+		raw := v.([]interface{})
+		ips := make([]string, len(raw))
+		err := utils.DecodeInterfaceToStruct(raw, ips)
+		if err != nil {
+			return nil, err
+		}
+		if len(ips) > 0 {
+			registry.ApiSubnetAllowList = &ips
+		}
+	}
+
+	return &registry, nil
 }
 
 func GetWeeklySchedule(d *schema.ResourceData, property string) *cr.WeeklySchedule {
@@ -190,6 +214,12 @@ func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error
 		storage = append(storage, storageEntry)
 		if err := d.Set("storage_usage", storage); err != nil {
 			return utils.GenerateSetError(resourceName, "storage_usage", err)
+		}
+	}
+
+	if registry.Properties.ApiSubnetAllowList != nil {
+		if err := d.Set("api_subnet_allow_list", *registry.Properties.ApiSubnetAllowList); err != nil {
+			return fmt.Errorf("error setting api_subnet_allow_list %w", err)
 		}
 	}
 

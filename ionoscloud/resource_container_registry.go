@@ -65,6 +65,12 @@ func resourceContainerRegistry() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[a-z][-a-z0-9]{1,61}[a-z0-9]$"), "")),
 				ForceNew:         true,
 			},
+			"api_subnet_allow_list": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "The subnet CIDRs that are allowed to connect to the registry. Specify 'a.b.c.d/32' for an individual IP address. __Note__: If this list is empty or not set, there are no restrictions.",
+			},
 			"storage_usage": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -105,7 +111,11 @@ func resourceContainerRegistry() *schema.Resource {
 func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ContainerClient
 
-	containerRegistry := crService.GetRegistryDataCreate(d)
+	containerRegistry, err := crService.GetRegistryDataCreate(d)
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error occurred while getting container registry from schema: %w", err))
+		return diags
+	}
 
 	containerRegistryFeatures, warnings := crService.GetRegistryFeatures(d)
 	containerRegistry.Properties.Features = containerRegistryFeatures
@@ -149,7 +159,11 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ContainerClient
 
-	containerRegistry := crService.GetRegistryDataUpdate(d)
+	containerRegistry, err := crService.GetRegistryDataUpdate(d)
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error occurred while getting container registry from schema: %w", err))
+		return diags
+	}
 	containerRegistryFeatures, warnings := crService.GetRegistryFeatures(d)
 	containerRegistry.Features = containerRegistryFeatures
 	// suppress warnings if there are no changes to the features set
@@ -159,7 +173,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	registryId := d.Id()
 
-	_, _, err := client.PatchRegistry(ctx, registryId, *containerRegistry)
+	_, _, err = client.PatchRegistry(ctx, registryId, *containerRegistry)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a registry: %w", err))
 		return diags

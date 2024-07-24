@@ -57,6 +57,7 @@ The following attributes are returned by the datasource:
     * `time`
     * `days`
 * `hostname`
+* `api_subnet_allow_list` - The subnet CIDRs that are allowed to connect to the registry.  Specify "a.b.c.d/32" for an individual IP address. __Note__: If this list is empty or not set, there are no restrictions.
 * `maintenance_window`
   * `time`
   * `days`
