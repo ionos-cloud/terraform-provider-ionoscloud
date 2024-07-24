@@ -7,19 +7,11 @@ import (
 	sdk "github.com/ionos-cloud/sdk-go-nfs"
 )
 
-// GetNFSShareByID returns a share given an ID
-func (c *Client) GetNFSShareByID(ctx context.Context, clusterID, shareID string, location string) (sdk.ShareRead, *sdk.APIResponse, error) {
+// GetNFSShareById returns a share given an ID
+func (c *Client) GetNFSShareById(ctx context.Context, clusterID, shareID string, location string) (sdk.ShareRead, *sdk.APIResponse, error) {
 	share, apiResponse, err := c.Location(location).sdkClient.SharesApi.ClustersSharesFindById(ctx, clusterID, shareID).Execute()
 	apiResponse.LogInfo()
 	return share, apiResponse, err
-}
-
-// ListNFSShares returns a list of all shares
-func (c *Client) ListNFSShares(ctx context.Context, d *schema.ResourceData) (sdk.ShareReadList, *sdk.APIResponse, error) {
-	shares, apiResponse, err := c.Location(d.Get("location").(string)).sdkClient.SharesApi.
-		ClustersSharesGet(ctx, d.Get("cluster_id").(string)).Execute()
-	apiResponse.LogInfo()
-	return shares, apiResponse, err
 }
 
 // DeleteNFSShare deletes a share given an ID
@@ -66,7 +58,7 @@ func setShareConfig(d *schema.ResourceData) sdk.Share {
 	uid := int32(d.Get("uid").(int))
 
 	clientGroupsRaw := d.Get("client_groups").([]interface{})
-	clientGroups := make([]sdk.ShareClientGroups, 0, len(clientGroupsRaw))
+	var clientGroups []sdk.ShareClientGroups
 	for _, cgRaw := range clientGroupsRaw {
 		cg := cgRaw.(map[string]interface{})
 		description := cg["description"].(string)
@@ -80,12 +72,8 @@ func setShareConfig(d *schema.ResourceData) sdk.Share {
 		for _, host := range hostsRaw {
 			hosts = append(hosts, host.(string))
 		}
-		nfsRaw := cg["nfs"].([]interface{})
-		var squash string
-		if len(nfsRaw) > 0 {
-			nfsData := nfsRaw[0].(map[string]interface{})
-			squash = nfsData["squash"].(string)
-		}
+		nfsData := cg["nfs"].(map[string]interface{})
+		squash := nfsData["squash"].(string)
 
 		clientGroups = append(clientGroups, sdk.ShareClientGroups{
 			Description: &description,
@@ -112,9 +100,6 @@ func (c *Client) SetNFSShareData(d *schema.ResourceData, share sdk.ShareRead) er
 	if err := d.Set("name", *share.Properties.Name); err != nil {
 		return err
 	}
-	if err := d.Set("nfs_path", *share.Metadata.NfsPath); err != nil {
-		return err
-	}
 	if err := d.Set("quota", int(*share.Properties.Quota)); err != nil {
 		return err
 	}
@@ -137,10 +122,8 @@ func flattenClientGroups(clientGroups []sdk.ShareClientGroups) []map[string]inte
 			"description": *cg.Description,
 			"ip_networks": *cg.IpNetworks,
 			"hosts":       *cg.Hosts,
-			"nfs": []map[string]interface{}{
-				{
-					"squash": *cg.Nfs.Squash,
-				},
+			"nfs": map[string]interface{}{
+				"squash": *cg.Nfs.Squash,
 			},
 		}
 		result[i] = flattened
