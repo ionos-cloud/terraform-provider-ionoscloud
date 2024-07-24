@@ -69,10 +69,19 @@ func resourceNFSCluster() *schema.Resource {
 					},
 				},
 			},
-			"min_version": {
-				Type:        schema.TypeString,
-				Description: "The minimum Network File Storage version. Current options are '4.2'.",
-				Required:    true,
+			"nfs": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"min_version": {
+							Description: "The minimum Network File Storage version",
+							Type:        schema.TypeString,
+							Optional:    true,
+						},
+					},
+				},
 			},
 			"size": {
 				Type:        schema.TypeInt,

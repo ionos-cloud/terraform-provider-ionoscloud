@@ -72,9 +72,14 @@ func (c *Client) SetNFSClusterData(d *schema.ResourceData, cluster sdk.ClusterRe
 		}
 	}
 
-	if cluster.Properties.Nfs != nil && cluster.Properties.Nfs.MinVersion != nil {
-		if err := d.Set("min_version", *cluster.Properties.Nfs.MinVersion); err != nil {
-			return err
+	if cluster.Properties.Nfs != nil {
+		nfs := []map[string]interface{}{
+			{
+				"min_version": *cluster.Properties.Nfs.MinVersion,
+			},
+		}
+		if err := d.Set("nfs", nfs); err != nil {
+			return fmt.Errorf("error setting nfs data for the NFS Cluster with ID %s: %w", *cluster.Id, err)
 		}
 	}
 
@@ -142,31 +147,38 @@ func setClusterPutRequest(d *schema.ResourceData) *sdk.ClusterEnsure {
 func setClusterConfig(d *schema.ResourceData) sdk.Cluster {
 	name := d.Get("name").(string)
 	size := int32(d.Get("size").(int))
-	minVersion := d.Get("min_version").(string)
-	connectionsRaw := d.Get("connections").([]interface{})
 
-	connections := make([]sdk.ClusterConnections, len(connectionsRaw))
-	for i, conn := range connectionsRaw {
-		connData := conn.(map[string]interface{})
+	nfsRaw := d.Get("nfs").([]interface{})
+	nfs := sdk.ClusterNfs{}
+	var minVersion string
+	if len(nfsRaw) > 0 && nfsRaw[0] != nil {
+		nfsData := nfsRaw[0].(map[string]interface{})
+		minVersion = nfsData["min_version"].(string)
+
+		nfs = sdk.ClusterNfs{
+			MinVersion: &minVersion,
+		}
+	}
+
+	connectionsRaw := d.Get("connections").([]interface{})
+	connections := make([]sdk.ClusterConnections, 1)
+	if len(connectionsRaw) > 0 && connectionsRaw[0] != nil {
+		connData := connectionsRaw[0].(map[string]interface{})
 		datacenterID := connData["datacenter_id"].(string)
 		lan := connData["lan"].(string)
 		ipAddress := connData["ip_address"].(string)
 
-		connectionObj := sdk.ClusterConnections{
+		connections[0] = sdk.ClusterConnections{
 			DatacenterId: &datacenterID,
 			Lan:          &lan,
 			IpAddress:    &ipAddress,
 		}
-
-		connections[i] = connectionObj
 	}
 
 	return sdk.Cluster{
-		Name: &name,
-		Size: &size,
-		Nfs: &sdk.ClusterNfs{
-			MinVersion: &minVersion,
-		},
+		Name:        &name,
+		Size:        &size,
+		Nfs:         &nfs,
 		Connections: &connections,
 	}
 }
