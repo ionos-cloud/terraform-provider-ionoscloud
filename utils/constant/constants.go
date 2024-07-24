@@ -397,10 +397,14 @@ const (
 )
 
 const (
-	WireGuardGatewayResource     = "ionoscloud_vpn_wireguard_gateway"
-	WireGuardPeerResource        = "ionoscloud_vpn_wireguard_peer"
+	// WireGuardGatewayResource is the full name of the WireGuardGatewayResource
+	WireGuardGatewayResource = "ionoscloud_vpn_wireguard_gateway"
+	// WireGuardPeerResource is the full name of the WireGuardGatewayResource
+	WireGuardPeerResource = "ionoscloud_vpn_wireguard_peer"
+	// WireGuardGatewayTestResource is the name used for testing
 	WireGuardGatewayTestResource = "test_wireguard_gateway"
-	WireGuardPeerTestResource    = "test_wireguard_peer"
+	// WireGuardPeerTestResource is the name used for testing
+	WireGuardPeerTestResource = "test_wireguard_peer"
 )
 
 var ForwardingRuleAlgorithms = []string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}
