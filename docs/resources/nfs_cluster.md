@@ -64,9 +64,12 @@ resource "ionoscloud_server" "nfs_server" {
 resource "ionoscloud_nfs_cluster" "example" {
   name = "test"
   location = "de/txl"
-  min_version = "4.2"
   size = 2
 
+  nfs {
+    min_version = "4.2"
+  }
+  
   connections {
     datacenter_id = ionoscloud_datacenter.nfs_dc.id
     ip_address    = format("%s/24", ionoscloud_server.nfs_server.nic[0].ips[0])
@@ -83,8 +86,9 @@ The following arguments are supported:
 - `location` - (Required) The location where the Network File Storage cluster is located.
   - `de/fra` - Frankfurt
   - `de/txl` - Berlin
-- `min_version` - (Optional) The minimum supported version of the NFS cluster. Default is `4.2`.
-- `size` - (Optional) The size of the Network File Storage cluster in TiB. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees. Default is `2`. The minimum value is `2` and the maximum value is `42`.
+- `size` - (Required) The size of the Network File Storage cluster in TiB. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees. Default is `2`. The minimum value is `2` and the maximum value is `42`.
+- `nfs` - (Optional) The NFS configuration for the Network File Storage cluster. Each NFS configuration supports the following:
+    - `min_version` - (Optional) The minimum supported version of the NFS cluster. Default is `4.2`
 - `connections` - (Required) A list of connections for the Network File Storage cluster. You can specify only one connection. Each connection supports the following:
     - `datacenter_id` - (Required) The ID of the datacenter where the Network File Storage cluster is located.
     - `ip_address` - (Required) The IP address and prefix of the Network File Storage cluster. The IP address can be either IPv4 or IPv6. The IP address has to be given with CIDR notation. 
