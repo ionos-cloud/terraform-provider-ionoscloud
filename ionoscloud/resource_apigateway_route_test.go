@@ -241,7 +241,7 @@ var (
 	routeAttributeUpstreamsWeightValue = "100"
 
 	routeAttributeUpstreamsLoadbalancer      = "upstreams.0.loadbalancer"
-	routeAttributeUpstreamsLoadbalancerValue = "round-robin"
+	routeAttributeUpstreamsLoadbalancerValue = "roundrobin"
 )
 
 var templateAPIGatewayRouteConfig = `resource "ionoscloud_apigateway_route" "%s" {
