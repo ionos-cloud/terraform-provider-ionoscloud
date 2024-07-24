@@ -27,9 +27,6 @@ resource "ionoscloud_nfs_share" "example" {
     description = "Client Group 1"
     ip_networks = ["10.234.50.0/24"]
     hosts = ["10.234.62.123"]
-    nfs {
-      squash = "all-anonymous"
-    }
   }
 }
 ```
@@ -61,5 +58,5 @@ The following arguments are supported:
 A Network File Storage Share resource can be imported using its `location`, `cluster_id` and `resource id`:
 
 ```shell
-terraform import ionoscloud_nfs_share.name location:cluster_id:resource_id
+terraform import ionoscloud_nfs_share.location:cluster_id:resource_id
 ```

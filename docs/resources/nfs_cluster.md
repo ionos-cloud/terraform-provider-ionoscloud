@@ -1,5 +1,5 @@
 ---
-subcategory: "Network Load Balancer"
+subcategory: "Network File Storage"
 layout: "ionoscloud"
 page_title: "IonosCloud: nfs_cluster"
 sidebar_current: "docs-resource-nfs_cluster"
