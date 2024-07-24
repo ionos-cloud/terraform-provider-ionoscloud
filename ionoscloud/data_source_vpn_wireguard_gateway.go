@@ -3,11 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	vpnSdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
-	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
@@ -120,11 +121,12 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 				results = append(results, recordItem)
 			}
 		}
-		if results == nil || len(results) == 0 {
+		switch {
+		case results == nil || len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no vpn wireguard gateway found with the specified name = %s", name))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one vpn wireguard gateway found with the specified name = %s", name))
-		} else {
+		default:
 			wireguardGw = results[0]
 		}
 	}

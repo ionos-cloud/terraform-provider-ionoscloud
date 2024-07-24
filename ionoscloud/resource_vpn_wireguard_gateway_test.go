@@ -114,29 +114,6 @@ func testWireguardGatewayDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-//func testAccWireguardGatewayExistenceCheck(path string, pipeline *logging.Pipeline) resource.TestCheckFunc {
-//	return func(s *terraform.State) error {
-//		client := testAccProvider.Meta().(services.SdkBundle).VPNClient
-//		rs, ok := s.RootModule().Resources[path]
-//
-//		if !ok {
-//			return fmt.Errorf("not found: %s", path)
-//		}
-//		if rs.Primary.ID == "" {
-//			return fmt.Errorf("no ID is set for the Logging pipeline")
-//		}
-//		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-//		defer cancel()
-//		ID := rs.Primary.ID
-//		pipelineResponse, _, err := client.GetWireguardGatewayByID(ctx, ID)
-//		if err != nil {
-//			return fmt.Errorf("an error occurred while fetching Logging pipeline with ID: %s, error: %w", ID, err)
-//		}
-//		pipeline = &pipelineResponse
-//		return nil
-//	}
-//}
-
 const WireguardGwDataSourceMatchById = WireguardGatewayConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
   id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id

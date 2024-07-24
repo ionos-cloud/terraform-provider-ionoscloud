@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"net/url"
 	"time"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"

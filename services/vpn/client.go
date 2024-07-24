@@ -13,14 +13,14 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// Client is a wrapper for the VPN SDK client
 type Client struct {
 	sdkClient vpn.APIClient
 }
 
 // NewClient returns a new ionoscloud logging client
 func NewClient(username, password, token, url, terraformVersion string) *Client {
-	//todo remove this, we use a hardcoded url for now
-	newConfigLogging := shared.NewConfiguration(username, password, token, "https://vpn.de-fra.ionos.com")
+	newConfigLogging := shared.NewConfiguration(username, password, token, url)
 	newConfigLogging.MaxRetries = constant.MaxRetries
 	newConfigLogging.MaxWaitTime = constant.MaxWaitTime
 	newConfigLogging.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
