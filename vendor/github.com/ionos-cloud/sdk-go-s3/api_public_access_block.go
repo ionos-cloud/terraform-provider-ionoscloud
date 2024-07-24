@@ -28,12 +28,6 @@ type ApiDeletePublicAccessBlockRequest struct {
 	ctx        context.Context
 	ApiService *PublicAccessBlockApiService
 	bucket     string
-	policy     *bool
-}
-
-func (r ApiDeletePublicAccessBlockRequest) Policy(policy bool) ApiDeletePublicAccessBlockRequest {
-	r.policy = &policy
-	return r
 }
 
 func (r ApiDeletePublicAccessBlockRequest) Execute() (*APIResponse, error) {
@@ -91,11 +85,7 @@ func (a *PublicAccessBlockApiService) DeletePublicAccessBlockExecute(r ApiDelete
 	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.policy == nil {
-		return nil, reportError("policy is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "policy", r.policy, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -186,12 +176,6 @@ type ApiGetPublicAccessBlockRequest struct {
 	ctx        context.Context
 	ApiService *PublicAccessBlockApiService
 	bucket     string
-	policy     *bool
-}
-
-func (r ApiGetPublicAccessBlockRequest) Policy(policy bool) ApiGetPublicAccessBlockRequest {
-	r.policy = &policy
-	return r
 }
 
 func (r ApiGetPublicAccessBlockRequest) Execute() (*BlockPublicAccessOutput, *APIResponse, error) {
@@ -252,11 +236,7 @@ func (a *PublicAccessBlockApiService) GetPublicAccessBlockExecute(r ApiGetPublic
 	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.policy == nil {
-		return localVarReturnValue, nil, reportError("policy is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "policy", r.policy, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -356,14 +336,8 @@ type ApiPutPublicAccessBlockRequest struct {
 	ctx                      context.Context
 	ApiService               *PublicAccessBlockApiService
 	bucket                   string
-	policy                   *bool
 	blockPublicAccessPayload *BlockPublicAccessPayload
 	contentMD5               *string
-}
-
-func (r ApiPutPublicAccessBlockRequest) Policy(policy bool) ApiPutPublicAccessBlockRequest {
-	r.policy = &policy
-	return r
 }
 
 func (r ApiPutPublicAccessBlockRequest) BlockPublicAccessPayload(blockPublicAccessPayload BlockPublicAccessPayload) ApiPutPublicAccessBlockRequest {
@@ -436,14 +410,10 @@ func (a *PublicAccessBlockApiService) PutPublicAccessBlockExecute(r ApiPutPublic
 	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.policy == nil {
-		return nil, reportError("policy is required and must be specified")
-	}
 	if r.blockPublicAccessPayload == nil {
 		return nil, reportError("blockPublicAccessPayload is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "policy", r.policy, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 
