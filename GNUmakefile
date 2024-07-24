@@ -11,9 +11,6 @@ build: fmtcheck
 run: build
 	$(GOPATH)/bin/terraform-provider-ionoscloud -debuggable
 
-lint:
-	golangci-lint run --new-from-rev $$(git merge-base origin/master HEAD)
-
 test: fmtcheck
 	go test -i $(TEST) || exit 1
 	echo $(TEST) | \

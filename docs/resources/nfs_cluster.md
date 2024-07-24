@@ -1,5 +1,5 @@
 ---
-subcategory: "Network File Storage"
+subcategory: "Network Load Balancer"
 layout: "ionoscloud"
 page_title: "IonosCloud: nfs_cluster"
 sidebar_current: "docs-resource-nfs_cluster"
@@ -39,7 +39,6 @@ resource "random_password" "password" {
   special = false
 }
 
-# needed for the NIC - which provides the IP address for the NFS cluster.
 resource "ionoscloud_server" "nfs_server" {
   name              = "Server for NFS"
   datacenter_id     = ionoscloud_datacenter.nfs_dc.id
@@ -65,12 +64,9 @@ resource "ionoscloud_server" "nfs_server" {
 resource "ionoscloud_nfs_cluster" "example" {
   name = "test"
   location = "de/txl"
+  min_version = "4.2"
   size = 2
 
-  nfs {
-    min_version = "4.2"
-  }
-  
   connections {
     datacenter_id = ionoscloud_datacenter.nfs_dc.id
     ip_address    = format("%s/24", ionoscloud_server.nfs_server.nic[0].ips[0])
@@ -87,9 +83,8 @@ The following arguments are supported:
 - `location` - (Required) The location where the Network File Storage cluster is located.
   - `de/fra` - Frankfurt
   - `de/txl` - Berlin
-- `size` - (Required) The size of the Network File Storage cluster in TiB. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees. Default is `2`. The minimum value is `2` and the maximum value is `42`.
-- `nfs` - (Optional) The NFS configuration for the Network File Storage cluster. Each NFS configuration supports the following:
-    - `min_version` - (Optional) The minimum supported version of the NFS cluster. Default is `4.2`
+- `min_version` - (Optional) The minimum supported version of the NFS cluster. Default is `4.2`.
+- `size` - (Optional) The size of the Network File Storage cluster in TiB. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees. Default is `2`. The minimum value is `2` and the maximum value is `42`.
 - `connections` - (Required) A list of connections for the Network File Storage cluster. You can specify only one connection. Each connection supports the following:
     - `datacenter_id` - (Required) The ID of the datacenter where the Network File Storage cluster is located.
     - `ip_address` - (Required) The IP address and prefix of the Network File Storage cluster. The IP address can be either IPv4 or IPv6. The IP address has to be given with CIDR notation. 
@@ -100,5 +95,5 @@ The following arguments are supported:
 A Network File Storage Cluster resource can be imported using its `location` and `resource id`:
 
 ```shell
-terraform import ionoscloud_nfs_cluster.name {location}:{uuid}
+terraform import ionoscloud_nfs_cluster {location}/{uuid}
 ```
