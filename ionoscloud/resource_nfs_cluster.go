@@ -15,7 +15,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-var locations = []string{"de/fra", "de/txl", "qa/de/txl"}
+var ValidNFSLocations = []string{"de/fra", "de/txl", "qa/de/txl"}
 
 func resourceNFSCluster() *schema.Resource {
 	return &schema.Resource{
@@ -30,7 +30,7 @@ func resourceNFSCluster() *schema.Resource {
 			"location": {
 				Type: schema.TypeString,
 				Description: fmt.Sprintf("The location of the Network File Storage Cluster. "+
-					"Available locations: '%s'", strings.Join(locations, ", '")),
+					"Available locations: '%s'", strings.Join(ValidNFSLocations, ", '")),
 				Required: true,
 				ForceNew: true,
 			},
@@ -150,8 +150,8 @@ func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<replica_set_id>'", d.Id())
 	}
 	location := parts[0]
-	if !slices.Contains(locations, location) {
-		return nil, fmt.Errorf("invalid import ID: %q, location must be one of '%s'", d.Id(), strings.Join(locations, ", '"))
+	if !slices.Contains(ValidNFSLocations, location) {
+		return nil, fmt.Errorf("invalid import ID: %q, location must be one of '%s'", d.Id(), strings.Join(ValidNFSLocations, ", '"))
 	}
 	id := parts[1]
 
