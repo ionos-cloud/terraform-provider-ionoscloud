@@ -1,5 +1,5 @@
 ---
-subcategory: "Compute Engine"
+subcategory: "Certificate Manager Service"
 layout: "ionoscloud"
 page_title: "IonosCloud: certificate"
 sidebar_current: "docs-resource-certificate"
