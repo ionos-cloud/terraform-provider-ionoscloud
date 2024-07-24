@@ -291,12 +291,16 @@ func putBucketPolicyInput(policyModel *bucketPolicyModel) (s3.BucketPolicy, diag
 
 		if statementData.Condition != nil {
 			statementInput.Condition = s3.NewBucketPolicyCondition()
-			statementInput.Condition.IpAddress = s3.NewBucketPolicyConditionIpAddress()
-			ips := statementData.Condition.IPs
-			statementInput.Condition.IpAddress.AwsSourceIp = &ips
-			statementInput.Condition.NotIpAddress = s3.NewBucketPolicyConditionIpAddress()
-			excludedIPs := statementData.Condition.ExcludedIPs
-			statementInput.Condition.NotIpAddress.AwsSourceIp = &excludedIPs
+			if statementData.Condition.IPs != nil {
+				statementInput.Condition.IpAddress = s3.NewBucketPolicyConditionIpAddress()
+				ips := statementData.Condition.IPs
+				statementInput.Condition.IpAddress.AwsSourceIp = &ips
+			}
+			if statementData.Condition.ExcludedIPs != nil {
+				statementInput.Condition.NotIpAddress = s3.NewBucketPolicyConditionIpAddress()
+				excludedIPs := statementData.Condition.ExcludedIPs
+				statementInput.Condition.NotIpAddress.AwsSourceIp = &excludedIPs
+			}
 			if statementData.Condition.DateGreaterThan != nil {
 				var t *s3.IonosTime
 				var err error
@@ -333,34 +337,38 @@ func setBucketPolicyData(policyResponse *s3.BucketPolicy, data *bucketPolicyMode
 		Version: policyResponse.Version,
 	}
 
-	policyData.Statement = make([]bucketPolicyStatement, 0, len(*policyResponse.Statement))
-
-	for _, statementResponse := range *policyResponse.Statement {
-		statementData := bucketPolicyStatement{
-			SID:       statementResponse.Sid,
-			Effect:    *statementResponse.Effect,
-			Action:    *statementResponse.Action,
-			Resources: *statementResponse.Resource,
-		}
-		if statementResponse.Principal != nil {
-			statementData.Principal = *statementResponse.Principal.AWS
-		}
-		if statementResponse.Condition != nil {
-			conditionData := bucketPolicyStatementCondition{
-				IPs:         *statementResponse.Condition.GetIpAddress().AwsSourceIp,
-				ExcludedIPs: *statementResponse.Condition.GetNotIpAddress().AwsSourceIp,
+	if policyResponse.Statement != nil {
+		policyData.Statement = make([]bucketPolicyStatement, 0, len(*policyResponse.Statement))
+		for _, statementResponse := range *policyResponse.Statement {
+			statementData := bucketPolicyStatement{
+				SID:       statementResponse.Sid,
+				Effect:    *statementResponse.Effect,
+				Action:    *statementResponse.Action,
+				Resources: *statementResponse.Resource,
 			}
-			if statementResponse.Condition.DateGreaterThan != nil {
-				dateString := statementResponse.Condition.DateGreaterThan.AwsCurrentTime.Format(constant.DatetimeZLayout)
-				conditionData.DateGreaterThan = &dateString
+			if statementResponse.Principal != nil && statementResponse.Principal.AWS != nil {
+				statementData.Principal = *statementResponse.Principal.AWS
 			}
-			if statementResponse.Condition.DateLessThan != nil {
-				dateString := statementResponse.Condition.DateLessThan.AwsCurrentTime.Format(constant.DatetimeZLayout)
-				conditionData.DateLessThan = &dateString
+			if statementResponse.Condition != nil {
+				conditionData := bucketPolicyStatementCondition{}
+				if statementResponse.Condition.IpAddress != nil && statementResponse.Condition.IpAddress.AwsSourceIp != nil {
+					conditionData.IPs = *statementResponse.Condition.IpAddress.AwsSourceIp
+				}
+				if statementResponse.Condition.NotIpAddress != nil && statementResponse.Condition.NotIpAddress.AwsSourceIp != nil {
+					conditionData.ExcludedIPs = *statementResponse.Condition.NotIpAddress.AwsSourceIp
+				}
+				if statementResponse.Condition.DateGreaterThan != nil {
+					dateString := statementResponse.Condition.DateGreaterThan.AwsCurrentTime.Format(constant.DatetimeZLayout)
+					conditionData.DateGreaterThan = &dateString
+				}
+				if statementResponse.Condition.DateLessThan != nil {
+					dateString := statementResponse.Condition.DateLessThan.AwsCurrentTime.Format(constant.DatetimeZLayout)
+					conditionData.DateLessThan = &dateString
+				}
+				statementData.Condition = &conditionData
 			}
-			statementData.Condition = &conditionData
+			policyData.Statement = append(policyData.Statement, statementData)
 		}
-		policyData.Statement = append(policyData.Statement, statementData)
 	}
 	policyString, err := json.Marshal(policyData)
 	if err != nil {

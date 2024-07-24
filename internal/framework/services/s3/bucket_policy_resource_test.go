@@ -31,7 +31,14 @@ func TestAccBucketPolicyResource(t *testing.T) {
 				Config: testAccBucketPolicyConfig_basic(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "bucket", rName),
-					testAccCheckBucketPolicyData,
+					testAccCheckBucketPolicyData(PolicyJSON),
+				),
+			},
+			{
+				Config: testAccBucketPolicyConfig_updated(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(name, "bucket", rName),
+					testAccCheckBucketPolicyData(policyJSONUpdated),
 				),
 			},
 			{
@@ -55,7 +62,20 @@ resource "ionoscloud_bucket_policy" "test" {
  bucket = ionoscloud_bucket.test.bucket
  policy = %[2]q
 }
-`, bucketName, policyJSON)
+`, bucketName, PolicyJSON)
+}
+
+func testAccBucketPolicyConfig_updated(bucketName string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_bucket" "test" {
+  bucket = %[1]q
+}
+
+resource "ionoscloud_bucket_policy" "test" {
+ bucket = ionoscloud_bucket.test.bucket
+ policy = %[2]q
+}
+`, bucketName, policyJSONUpdated)
 }
 
 func testAccCheckBucketPolicyDestroy(s *terraform.State) error {
@@ -80,26 +100,27 @@ func testAccCheckBucketPolicyDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckBucketPolicyData(s *terraform.State) error {
+func testAccCheckBucketPolicyData(policy string) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "ionoscloud_bucket_policy" {
+				continue
+			}
 
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_bucket_policy" {
-			continue
-		}
-
-		if rs.Primary.Attributes["policy"] != "" {
-			n := jsontypes.NewNormalizedValue(rs.Primary.Attributes["policy"])
-			v := jsontypes.NewNormalizedValue(policyJSON)
-			if eq, _ := n.StringSemanticEquals(context.Background(), v); !eq {
-				return fmt.Errorf("Policy attribute not equal")
+			if rs.Primary.Attributes["policy"] != "" {
+				n := jsontypes.NewNormalizedValue(rs.Primary.Attributes["policy"])
+				v := jsontypes.NewNormalizedValue(policy)
+				if eq, _ := n.StringSemanticEquals(context.Background(), v); !eq {
+					return fmt.Errorf("Policy attribute not equal")
+				}
 			}
 		}
-	}
 
-	return nil
+		return nil
+	}
 }
 
-const policyJSON = `{
+const PolicyJSON = `{
 "Statement": [
 {
   "Action": [
@@ -156,6 +177,33 @@ const policyJSON = `{
 	  ]
   },
   "Effect": "Deny",
+  "Principal": [
+	"*"
+  ],
+  "Resource": [
+	"arn:aws:s3:::tf-test-bucket-10189",
+	"arn:aws:s3:::tf-test-bucket-10189/*"
+  ]
+}
+],
+"Version": "2008-10-17"
+}`
+
+const policyJSONUpdated = `{
+"Statement": [
+{
+  "Action": [
+	"s3:GetBucketTagging",
+	"s3:GetBucketVersioning"
+  ],
+  "Condition": {
+	  "DateLessThan": "2026-01-13 16:27:42Z",
+	  "IpAddress": [
+		"10.10.10.10",
+		"11.11.11.11"
+	  ]
+  },
+  "Effect": "Allow",
   "Principal": [
 	"*"
   ],
