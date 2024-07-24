@@ -15,6 +15,7 @@ import (
 
 const ipsecGatewayResourceName = "VPN IPSec Gateway"
 
+// CreateIPSecGateway creates a new VPN IPSec Gateway
 func (c *Client) CreateIPSecGateway(ctx context.Context, d *schema.ResourceData) (vpn.IPSecGatewayRead, *shared.APIResponse, error) {
 	c.changeConfigURL(d.Get("location").(string))
 
@@ -24,6 +25,7 @@ func (c *Client) CreateIPSecGateway(ctx context.Context, d *schema.ResourceData)
 	return gateway, apiResponse, err
 }
 
+// GetIPSecGatewayByID retrieves a VPN IPSec Gateway by its ID and location
 func (c *Client) GetIPSecGatewayByID(ctx context.Context, id string, location string) (vpn.IPSecGatewayRead, *shared.APIResponse, error) {
 	c.changeConfigURL(location)
 
@@ -32,6 +34,7 @@ func (c *Client) GetIPSecGatewayByID(ctx context.Context, id string, location st
 	return gateway, apiResponse, err
 }
 
+// ListIPSecGateway retrieves all VPN IPSec Gateways from a given location
 func (c *Client) ListIPSecGateway(ctx context.Context, location string) (vpn.IPSecGatewayReadList, *shared.APIResponse, error) {
 	c.changeConfigURL(location)
 
@@ -40,6 +43,7 @@ func (c *Client) ListIPSecGateway(ctx context.Context, location string) (vpn.IPS
 	return gateways, apiResponse, err
 }
 
+// DeleteIPSecGateway deletes a VPN IPSec Gateway by its ID and location
 func (c *Client) DeleteIPSecGateway(ctx context.Context, id string, location string) (utils.ApiResponseInfo, error) {
 	c.changeConfigURL(location)
 
@@ -48,6 +52,7 @@ func (c *Client) DeleteIPSecGateway(ctx context.Context, id string, location str
 	return apiResponse, err
 }
 
+// UpdateIPSecGateway updates a VPN IPSec Gateway
 func (c *Client) UpdateIPSecGateway(ctx context.Context, d *schema.ResourceData) (vpn.IPSecGatewayRead, *shared.APIResponse, error) {
 	c.changeConfigURL(d.Get("location").(string))
 
@@ -57,6 +62,7 @@ func (c *Client) UpdateIPSecGateway(ctx context.Context, d *schema.ResourceData)
 	return gateway, apiResponse, err
 }
 
+// IsIPSecGatewayReady checks if a VPN IPSec Gateway is ready to use
 func (c *Client) IsIPSecGatewayReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	id := d.Id()
 	location := d.Get("location").(string)
@@ -70,6 +76,7 @@ func (c *Client) IsIPSecGatewayReady(ctx context.Context, d *schema.ResourceData
 	return strings.EqualFold(gateway.Metadata.Status, constant.Available), nil
 }
 
+// IsIPSecGatewayDeleted checks if a VPN IPSec Gateway has been deleted
 func (c *Client) IsIPSecGatewayDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	id := d.Id()
 	location := d.Get("location").(string)
@@ -79,6 +86,7 @@ func (c *Client) IsIPSecGatewayDeleted(ctx context.Context, d *schema.ResourceDa
 	return apiResponse.HttpNotFound(), err
 }
 
+// SetIPSecGatewayData sets the VPN IPSec Gateway data to the Terraform schema
 func SetIPSecGatewayData(d *schema.ResourceData, gateway vpn.IPSecGatewayRead) error {
 	d.SetId(gateway.Id)
 

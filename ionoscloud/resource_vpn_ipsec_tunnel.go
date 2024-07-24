@@ -227,13 +227,15 @@ func resourceVpnIPSecTunnelCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(fmt.Errorf("creating %w ", err))
 	}
 
+	auth := d.Get("auth").([]interface{})
+	auth[0].(map[string]interface{})["psk_key"] = pskKey
+	if err = d.Set("auth", auth); err != nil {
+		return diag.FromErr(err)
+	}
+
 	diags := resourceVpnIPSecTunnelRead(ctx, d, meta)
 	if diags.HasError() {
 		return diags
-	}
-
-	if err = d.Set("auth.0.psk_key", pskKey); err != nil {
-		return diag.FromErr(err)
 	}
 
 	return nil

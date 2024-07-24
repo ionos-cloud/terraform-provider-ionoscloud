@@ -14,6 +14,7 @@ import (
 
 const ipsecTunnelResourceName = "VPN IPSec Tunnel"
 
+// CreateIPSecTunnel creates a new VPN IPSec Tunnel
 func (c *Client) CreateIPSecTunnel(ctx context.Context, d *schema.ResourceData) (vpn.IPSecTunnelRead, *shared.APIResponse, error) {
 	c.changeConfigURL(d.Get("location").(string))
 	gatewayID := d.Get("gateway_id").(string)
@@ -24,6 +25,7 @@ func (c *Client) CreateIPSecTunnel(ctx context.Context, d *schema.ResourceData) 
 	return tunnel, apiResponse, err
 }
 
+// GetIPSecTunnelByID retrieves a VPN IPSec Tunnel by its ID and location
 func (c *Client) GetIPSecTunnelByID(ctx context.Context, id string, gatewayID string, location string) (vpn.IPSecTunnelRead, *shared.APIResponse, error) {
 	c.changeConfigURL(location)
 
@@ -32,6 +34,7 @@ func (c *Client) GetIPSecTunnelByID(ctx context.Context, id string, gatewayID st
 	return tunnel, apiResponse, err
 }
 
+// ListIPSecTunnel retrieves all VPN IPSec Tunnels from a given gateway and location
 func (c *Client) ListIPSecTunnel(ctx context.Context, gatewayID string, location string) (vpn.IPSecTunnelReadList, *shared.APIResponse, error) {
 	c.changeConfigURL(location)
 
@@ -40,6 +43,7 @@ func (c *Client) ListIPSecTunnel(ctx context.Context, gatewayID string, location
 	return gateways, apiResponse, err
 }
 
+// DeleteIPSecTunnel deletes a VPN IPSec Tunnel using its ID and location
 func (c *Client) DeleteIPSecTunnel(ctx context.Context, id string, gatewayID string, location string) (utils.ApiResponseInfo, error) {
 	c.changeConfigURL(location)
 
@@ -48,6 +52,7 @@ func (c *Client) DeleteIPSecTunnel(ctx context.Context, id string, gatewayID str
 	return apiResponse, err
 }
 
+// UpdateIPSecTunnel updates a VPN IPSec Tunnel
 func (c *Client) UpdateIPSecTunnel(ctx context.Context, d *schema.ResourceData) (vpn.IPSecTunnelRead, *shared.APIResponse, error) {
 	c.changeConfigURL(d.Get("location").(string))
 	gatewayID := d.Get("gateway_id").(string)
@@ -58,6 +63,7 @@ func (c *Client) UpdateIPSecTunnel(ctx context.Context, d *schema.ResourceData) 
 	return tunnel, apiResponse, err
 }
 
+// IsIPSecTunnelReady checks if a VPN IPSec Tunnel is ready to use
 func (c *Client) IsIPSecTunnelReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	id := d.Id()
 	location := d.Get("location").(string)
@@ -72,6 +78,7 @@ func (c *Client) IsIPSecTunnelReady(ctx context.Context, d *schema.ResourceData)
 	return strings.EqualFold(tunnel.Metadata.Status, constant.Available), nil
 }
 
+// IsIPSecTunnelDeleted checks if a VPN IPSec Tunnel has been deleted
 func (c *Client) IsIPSecTunnelDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	id := d.Id()
 	location := d.Get("location").(string)
@@ -82,6 +89,7 @@ func (c *Client) IsIPSecTunnelDeleted(ctx context.Context, d *schema.ResourceDat
 	return apiResponse.HttpNotFound(), err
 }
 
+// SetIPSecTunnelData sets the VPN IPSec Tunnel data to the terraform schema
 func SetIPSecTunnelData(d *schema.ResourceData, tunnel vpn.IPSecTunnelRead) error {
 	d.SetId(tunnel.Id)
 
