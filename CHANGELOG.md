@@ -14,6 +14,8 @@
 ### Fixes 
 - Fail on k8s cluster and nodepool if creation or deletion entered failed state
 - K8s, dataplatform and MariaDB tests
+### Documentation
+- Update documentation for MariaDB cluster
 ## 6.4.18
 ### Features
 - Add tests for Mongo cluster and user
