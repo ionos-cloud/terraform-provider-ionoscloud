@@ -99,5 +99,5 @@ The following arguments are supported:
 A Network File Storage Cluster resource can be imported using its `location` and `resource id`:
 
 ```shell
-terraform import ionoscloud_nfs_cluster {location}/{uuid}
+terraform import ionoscloud_nfs_cluster.name {location}:{uuid}
 ```
