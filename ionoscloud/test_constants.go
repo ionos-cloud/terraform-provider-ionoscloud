@@ -1856,4 +1856,4 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
     lan_id          =  ionoscloud_lan.lan_example.id
     ipv4_cidr       =  "192.168.1.108/24"
   }
-}`
+}` // nolint:unused
