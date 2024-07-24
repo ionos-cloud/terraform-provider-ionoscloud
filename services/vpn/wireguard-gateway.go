@@ -346,7 +346,7 @@ func SetWireguardGWData(d *schema.ResourceData, wireguard vpnSdk.WireguardGatewa
 		return utils.GenerateSetError(wireguardResourceName, "interface_ipv6_cidr", err)
 	}
 
-	var connections []map[string]any
+	var connections []map[string]any // nolint: prealloc
 	for _, connection := range wireguard.Properties.Connections {
 		connection, err := utils.DecodeStructToMap(connection)
 		if err != nil {
