@@ -25,7 +25,7 @@ func TestAccWireguardGateway(t *testing.T) {
 		CheckDestroy:      testWireguardGatewayDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: WireguardGatewayConfig,
+				Config: wireguardGatewayConfig,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, nameAttribute, constant.WireGuardGatewayTestResource),
 					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "description", "description"),
@@ -114,31 +114,31 @@ func testWireguardGatewayDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-const WireguardGwDataSourceMatchById = WireguardGatewayConfig + `
+const WireguardGwDataSourceMatchById = wireguardGatewayConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
   id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
 }
 `
 
-const WireguardGWDataSourceMatchByName = WireguardGatewayConfig + `
+const WireguardGWDataSourceMatchByName = wireguardGatewayConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
   name = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.name
 }
 `
 
-const WireguardGWDataSourceInvalidBothIDAndName = WireguardGatewayConfig + `
+const WireguardGWDataSourceInvalidBothIDAndName = wireguardGatewayConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
 	id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
 	name = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.name
 }
 `
 
-const WireguardGWDataSourceInvalidNoIDNoName = WireguardGatewayConfig + `
+const WireguardGWDataSourceInvalidNoIDNoName = wireguardGatewayConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + ` {
 }
 `
 
-const WireguardGWDataSourceWrongNameError = WireguardGatewayConfig + `
+const WireguardGWDataSourceWrongNameError = wireguardGatewayConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + ` {
   name = "nonexistent"
 }

@@ -1828,7 +1828,7 @@ const clusterCredentialsPasswordAttribute = "password"
 const clusterMaintenanceWindowDayOfTheWeekValue = "Sunday"
 const clusterMaintenanceWindowTimeValue = "09:00:00"
 
-const WireguardGatewayConfig = `
+const wireguardGatewayConfig = `
 resource "ionoscloud_datacenter" "datacenter_example" {
   name = "datacenter_example"
   location = "es/vit"

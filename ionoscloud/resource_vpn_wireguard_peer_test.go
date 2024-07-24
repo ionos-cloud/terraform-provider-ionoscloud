@@ -106,7 +106,7 @@ func testWireguardPeerDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-const WireguardPeerConfig = WireguardGatewayConfig + `
+const WireguardPeerConfig = wireguardGatewayConfig + `
 resource` + ` ` + constant.WireGuardPeerResource + ` ` + constant.WireGuardPeerTestResource + `{
   name = "` + constant.WireGuardPeerTestResource + `"
   gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
@@ -149,7 +149,7 @@ const WireguardPeerDataSourceWrongNameError = WireguardPeerConfig + `
 	  name = "wrong-name"
 }`
 
-const WireguardPeerConfigUpdate = WireguardGatewayConfig + `
+const WireguardPeerConfigUpdate = wireguardGatewayConfig + `
 resource` + ` ` + constant.WireGuardPeerResource + ` ` + constant.WireGuardPeerTestResource + `{
   name = "` + constant.WireGuardPeerTestResource + `1"
   gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
