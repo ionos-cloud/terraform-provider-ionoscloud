@@ -1,3 +1,6 @@
+## 6.4.20
+### Fixes
+- Data source `ionoscloud_mongo_template` should have id `computed` and `optional`
 ## 6.4.19
 ### Enhancements
 - Move to `sdk-go-bundle` for logging sdk
