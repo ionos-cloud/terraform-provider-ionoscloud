@@ -243,29 +243,27 @@ func getWireguardGwConnectionsData(d *schema.ResourceData) []vpnSdk.Connection {
 
 	if connectionValues, ok := d.GetOk("connections"); ok {
 		connectionsItf := connectionValues.([]any)
-		if connectionsItf != nil {
-			for idx := range connectionsItf {
-				connection := vpnSdk.Connection{}
-				if datacenterID, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", idx)); ok {
-					datacenterID := datacenterID.(string)
-					connection.DatacenterId = datacenterID
-				}
-				if lanID, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", idx)); ok {
-					lanID := lanID.(string)
-					connection.LanId = lanID
-				}
-				if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv4_cidr", idx)); ok {
-					cidr := cidr.(string)
-					connection.Ipv4CIDR = cidr
-				}
-
-				if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv6_cidr", idx)); ok {
-					cidr := cidr.(string)
-					connection.Ipv6CIDR = &cidr
-				}
-
-				connections = append(connections, connection)
+		for idx := range connectionsItf {
+			connection := vpnSdk.Connection{}
+			if datacenterID, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", idx)); ok {
+				datacenterID := datacenterID.(string)
+				connection.DatacenterId = datacenterID
 			}
+			if lanID, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", idx)); ok {
+				lanID := lanID.(string)
+				connection.LanId = lanID
+			}
+			if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv4_cidr", idx)); ok {
+				cidr := cidr.(string)
+				connection.Ipv4CIDR = cidr
+			}
+
+			if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv6_cidr", idx)); ok {
+				cidr := cidr.(string)
+				connection.Ipv6CIDR = &cidr
+			}
+
+			connections = append(connections, connection)
 		}
 	}
 
