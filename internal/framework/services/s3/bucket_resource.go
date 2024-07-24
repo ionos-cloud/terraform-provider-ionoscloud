@@ -164,7 +164,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 // ImportState imports the state of the bucket.
 func (r *bucketResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("bucket"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
 
 // Update updates the bucket.

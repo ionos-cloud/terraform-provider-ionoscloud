@@ -29,7 +29,7 @@ func TestAccBucketResource(t *testing.T) {
 			{
 				Config: testAccBucketConfig_basic(rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(name, "bucket", rName),
+					resource.TestCheckResourceAttr(name, "name", rName),
 					resource.TestCheckResourceAttr(name, "region", "eu-central-3"),
 				),
 			},
@@ -37,7 +37,7 @@ func TestAccBucketResource(t *testing.T) {
 				ResourceName:                         name,
 				ImportStateId:                        rName,
 				ImportState:                          true,
-				ImportStateVerifyIdentifierAttribute: "bucket",
+				ImportStateVerifyIdentifierAttribute: "name",
 				ImportStateVerify:                    true,
 			},
 		},
@@ -46,8 +46,8 @@ func TestAccBucketResource(t *testing.T) {
 
 func testAccBucketConfig_basic(bucketName string) string {
 	return fmt.Sprintf(`
-resource "ionoscloud_bucket" "test" {
-  bucket = %[1]q
+resource "ionoscloud_s3_bucket" "test" {
+  name = %[1]q
 }
 `, bucketName)
 }
@@ -63,8 +63,8 @@ func testAccCheckBucketDestroy(s *terraform.State) error {
 			continue
 		}
 
-		if rs.Primary.Attributes["bucket"] != "" {
-			err = s3.IsBucketDeleted(context.Background(), client, rs.Primary.Attributes["bucket"])
+		if rs.Primary.Attributes["name"] != "" {
+			err = s3.IsBucketDeleted(context.Background(), client, rs.Primary.Attributes["name"])
 			if err != nil {
 				return err
 			}

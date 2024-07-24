@@ -45,7 +45,7 @@ func TestAccObjectResourceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(objectResourceName, "key", key),
 					resource.TestCheckResourceAttr(objectResourceName, "content", "test"),
 					resource.TestCheckResourceAttrSet(objectResourceName, "etag"),
-					resource.TestCheckResourceAttrSet(objectResourceName, "content_type"),
+					resource.TestCheckResourceAttr(objectResourceName, "content_type", "text/plain"),
 					resource.TestCheckResourceAttr(objectResourceName, "storage_class", "STANDARD"),
 					resource.TestCheckResourceAttr(objectResourceName, "force_destroy", "false"),
 				),
@@ -344,6 +344,7 @@ resource "ionoscloud_s3_object" "test" {
   bucket = ionoscloud_s3_bucket.test.name
   key = %[1]q
   content = "test"
+  content_type = "text/plain"
 }
 
 `, key))

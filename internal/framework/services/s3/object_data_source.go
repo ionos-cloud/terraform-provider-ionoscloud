@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"strconv"
 
-	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -30,33 +31,33 @@ type objectDataSource struct {
 }
 
 type objectDataSourceModel struct {
-	Bucket                                types.String      `tfsdk:"bucket"`
-	Key                                   types.String      `tfsdk:"key"`
-	CacheControl                          types.String      `tfsdk:"cache_control"`
-	Content                               types.String      `tfsdk:"content"`
-	ContentDisposition                    types.String      `tfsdk:"content_disposition"`
-	ContentEncoding                       types.String      `tfsdk:"content_encoding"`
-	ContentLanguage                       types.String      `tfsdk:"content_language"`
-	ContentType                           types.String      `tfsdk:"content_type"`
-	ContentMD5                            types.String      `tfsdk:"content_md5"`
-	Expires                               timetypes.RFC3339 `tfsdk:"expires"`
-	ServerSideEncryption                  types.String      `tfsdk:"server_side_encryption"`
-	StorageClass                          types.String      `tfsdk:"storage_class"`
-	WebsiteRedirect                       types.String      `tfsdk:"website_redirect"`
-	ServerSideEncryptionCustomerAlgorithm types.String      `tfsdk:"server_side_encryption_customer_algorithm"`
-	ServerSideEncryptionCustomerKey       types.String      `tfsdk:"server_side_encryption_customer_key"`
-	ServerSideEncryptionCustomerKeyMD5    types.String      `tfsdk:"server_side_encryption_customer_key_md5"`
-	ServerSideEncryptionContext           types.String      `tfsdk:"server_side_encryption_context"`
-	RequestPayer                          types.String      `tfsdk:"request_payer"`
-	ObjectLockMode                        types.String      `tfsdk:"object_lock_mode"`
-	ObjectLockRetainUntilDate             timetypes.RFC3339 `tfsdk:"object_lock_retain_until_date"`
-	ObjectLockLegalHold                   types.String      `tfsdk:"object_lock_legal_hold"`
-	Etag                                  types.String      `tfsdk:"etag"`
-	Metadata                              types.Map         `tfsdk:"metadata"`
-	Tags                                  types.Map         `tfsdk:"tags"`
-	Range                                 types.String      `tfsdk:"range"`
-	VersionID                             types.String      `tfsdk:"version_id"`
-	Body                                  types.String      `tfsdk:"body"`
+	Bucket                                types.String `tfsdk:"bucket"`
+	Key                                   types.String `tfsdk:"key"`
+	CacheControl                          types.String `tfsdk:"cache_control"`
+	ContentDisposition                    types.String `tfsdk:"content_disposition"`
+	ContentEncoding                       types.String `tfsdk:"content_encoding"`
+	ContentLanguage                       types.String `tfsdk:"content_language"`
+	ContentType                           types.String `tfsdk:"content_type"`
+	ContentLength                         types.Int64  `tfsdk:"content_length"`
+	ContentMD5                            types.String `tfsdk:"content_md5"`
+	Expires                               types.String `tfsdk:"expires"`
+	ServerSideEncryption                  types.String `tfsdk:"server_side_encryption"`
+	StorageClass                          types.String `tfsdk:"storage_class"`
+	WebsiteRedirect                       types.String `tfsdk:"website_redirect"`
+	ServerSideEncryptionCustomerAlgorithm types.String `tfsdk:"server_side_encryption_customer_algorithm"`
+	ServerSideEncryptionCustomerKey       types.String `tfsdk:"server_side_encryption_customer_key"`
+	ServerSideEncryptionCustomerKeyMD5    types.String `tfsdk:"server_side_encryption_customer_key_md5"`
+	ServerSideEncryptionContext           types.String `tfsdk:"server_side_encryption_context"`
+	RequestPayer                          types.String `tfsdk:"request_payer"`
+	ObjectLockMode                        types.String `tfsdk:"object_lock_mode"`
+	ObjectLockRetainUntilDate             types.String `tfsdk:"object_lock_retain_until_date"`
+	ObjectLockLegalHold                   types.String `tfsdk:"object_lock_legal_hold"`
+	Etag                                  types.String `tfsdk:"etag"`
+	Metadata                              types.Map    `tfsdk:"metadata"`
+	Tags                                  types.Map    `tfsdk:"tags"`
+	Range                                 types.String `tfsdk:"range"`
+	VersionID                             types.String `tfsdk:"version_id"`
+	Body                                  types.String `tfsdk:"body"`
 }
 
 // Metadata returns the metadata for the object data source.
@@ -101,6 +102,9 @@ func (d *objectDataSource) Schema(_ context.Context, req datasource.SchemaReques
 			"cache_control": schema.StringAttribute{
 				Computed: true,
 			},
+			"content_length": schema.Int64Attribute{
+				Computed: true,
+			},
 			"content_disposition": schema.StringAttribute{
 				Computed: true,
 			},
@@ -125,7 +129,7 @@ func (d *objectDataSource) Schema(_ context.Context, req datasource.SchemaReques
 			"storage_class": schema.StringAttribute{
 				Computed: true,
 			},
-			"website_redirect_location": schema.StringAttribute{
+			"website_redirect": schema.StringAttribute{
 				Computed: true,
 			},
 			"server_side_encryption_customer_algorithm": schema.StringAttribute{
@@ -212,8 +216,11 @@ func (d *objectDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		data.Body = types.StringValue(body)
 	}
 
-	// TODO head object response is incomplete
-	// TODO Add metadata
+	diags = d.setDataModel(ctx, &data, apiResponse)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
 
 	// Set state
 	diags = resp.State.Set(ctx, &data)
@@ -279,4 +286,188 @@ func findObjectDataSource(ctx context.Context, client *s3.APIClient, data object
 	}
 
 	return req.Execute()
+}
+
+func setContentDataSource(data *objectDataSourceModel, apiResponse *shared.APIResponse) diag.Diagnostics {
+	contentType := apiResponse.Header.Get("Content-Type")
+	if contentType != "" {
+		data.ContentType = types.StringValue(contentType)
+	}
+
+	contentLength := apiResponse.Header.Get("Content-Length")
+	if contentLength != "" {
+		intLength, err := strconv.Atoi(contentLength)
+		if err != nil {
+			diagErr := diag.Diagnostics{}
+			diagErr.AddError("failed to convert content length", err.Error())
+			return diagErr
+		}
+		data.ContentLength = types.Int64Value(int64(intLength))
+	}
+
+	etag := apiResponse.Header.Get("ETag")
+	if etag != "" {
+		data.Etag = types.StringValue(etag)
+	}
+
+	cacheControl := apiResponse.Header.Get("Cache-Control")
+	if cacheControl != "" {
+		data.CacheControl = types.StringValue(cacheControl)
+	}
+
+	contentDisposition := apiResponse.Header.Get("Content-Disposition")
+	if contentDisposition != "" {
+		data.ContentDisposition = types.StringValue(contentDisposition)
+	}
+
+	contentEncoding := apiResponse.Header.Get("Content-Encoding")
+	if contentEncoding != "" {
+		data.ContentEncoding = types.StringValue(contentEncoding)
+	}
+
+	contentLanguage := apiResponse.Header.Get("Content-Language")
+	if contentLanguage != "" {
+		data.ContentLanguage = types.StringValue(contentLanguage)
+	}
+
+	contentMD5 := apiResponse.Header.Get("Content-MD5")
+	if contentMD5 != "" {
+		data.ContentMD5 = types.StringValue(contentMD5)
+	}
+
+	expires := apiResponse.Header.Get("Expires")
+	if expires != "" {
+		data.Expires = types.StringValue(expires)
+	}
+
+	return nil
+}
+
+func setServerSideEncryptionDataSource(data *objectDataSourceModel, apiResponse *shared.APIResponse) {
+	serverSideEncryption := apiResponse.Header.Get("x-amz-server-side-encryption")
+	if serverSideEncryption != "" {
+		data.ServerSideEncryption = types.StringValue(serverSideEncryption)
+	}
+
+	serverSideEncryptionCustomerAlgorithm := apiResponse.Header.Get("x-amz-server-side-encryption-customer-algorithm")
+	if serverSideEncryptionCustomerAlgorithm != "" {
+		data.ServerSideEncryptionCustomerAlgorithm = types.StringValue(serverSideEncryptionCustomerAlgorithm)
+	}
+
+	serverSideEncryptionCustomerKey := apiResponse.Header.Get("x-amz-server-side-encryption-customer-key")
+	if serverSideEncryptionCustomerKey != "" {
+		data.ServerSideEncryptionCustomerKey = types.StringValue(serverSideEncryptionCustomerKey)
+	}
+
+	serverSideEncryptionCustomerKeyMD5 := apiResponse.Header.Get("x-amz-server-side-encryption-customer-key-MD5")
+	if serverSideEncryptionCustomerKeyMD5 != "" {
+		data.ServerSideEncryptionCustomerKeyMD5 = types.StringValue(serverSideEncryptionCustomerKeyMD5)
+	}
+
+	serverSideEncryptionContext := apiResponse.Header.Get("x-amz-server-side-encryption-context")
+	if serverSideEncryptionContext != "" {
+		data.ServerSideEncryptionContext = types.StringValue(serverSideEncryptionContext)
+	}
+}
+
+func setObjectLockDataSource(data *objectDataSourceModel, apiResponse *shared.APIResponse) {
+	objectLockMode := apiResponse.Header.Get("x-amz-object-lock-mode")
+	if objectLockMode != "" {
+		data.ObjectLockMode = types.StringValue(objectLockMode)
+	}
+
+	objectLockRetainUntilDate := apiResponse.Header.Get("x-amz-object-lock-retain-until-date")
+	if objectLockRetainUntilDate != "" {
+		data.ObjectLockRetainUntilDate = types.StringValue(objectLockRetainUntilDate)
+	}
+
+	objectLockLegalHold := apiResponse.Header.Get("x-amz-object-lock-legal-hold")
+	if objectLockLegalHold != "" {
+		data.ObjectLockLegalHold = types.StringValue(objectLockLegalHold)
+	}
+}
+
+func (d *objectDataSource) setTagsData(ctx context.Context, data *objectDataSourceModel) diag.Diagnostics {
+	tagsMap, err := getTagsDataSource(ctx, d.client, data)
+	if err != nil {
+		diags := diag.Diagnostics{}
+		diags.AddError("failed to get tags", err.Error())
+		return diags
+	}
+
+	if len(tagsMap) > 0 {
+		tags, diagErr := types.MapValueFrom(ctx, types.StringType, tagsMap)
+		if diagErr.HasError() {
+			return diagErr
+		}
+		data.Tags = tags
+	}
+
+	return nil
+}
+
+func setMetadataDataSource(ctx context.Context, data *objectDataSourceModel, apiResponse *shared.APIResponse) diag.Diagnostics {
+	metadataMap := getMetadataMapFromHeaders(apiResponse, "X-Amz-Meta-")
+
+	if len(metadataMap) > 0 {
+		metadata, diagErr := types.MapValueFrom(ctx, types.StringType, metadataMap)
+		if diagErr.HasError() {
+			return diagErr
+		}
+		data.Metadata = metadata
+	}
+
+	return nil
+}
+
+func (d *objectDataSource) setDataModel(ctx context.Context, data *objectDataSourceModel, apiResponse *shared.APIResponse) diag.Diagnostics {
+	if diags := setContentDataSource(data, apiResponse); diags.HasError() {
+		return diags
+	}
+
+	setObjectLockDataSource(data, apiResponse)
+	setServerSideEncryptionDataSource(data, apiResponse)
+
+	requestPayer := apiResponse.Header.Get("x-amz-request-payer")
+	if requestPayer != "" {
+		data.RequestPayer = types.StringValue(requestPayer)
+	}
+
+	storageClass := apiResponse.Header.Get("x-amz-storage-class")
+	if storageClass != "" {
+		data.StorageClass = types.StringValue(storageClass)
+	}
+
+	websiteRedirect := apiResponse.Header.Get("x-amz-website-redirect-location")
+	if websiteRedirect != "" {
+		data.WebsiteRedirect = types.StringValue(websiteRedirect)
+	}
+
+	if diags := setMetadataDataSource(ctx, data, apiResponse); diags.HasError() {
+		return diags
+	}
+
+	if diags := d.setTagsData(ctx, data); diags.HasError() {
+		return diags
+	}
+
+	return nil
+}
+
+func getTagsDataSource(ctx context.Context, client *s3.APIClient, data *objectDataSourceModel) (map[string]string, error) {
+	output, apiResponse, err := client.TaggingApi.GetObjectTagging(ctx, data.Bucket.ValueString(), data.Key.ValueString()).Execute()
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	tagsMap := map[string]string{}
+	for _, tag := range output.TagSet {
+		tagsMap[tag.Key] = tag.Value
+	}
+
+	return tagsMap, nil
 }

@@ -22,7 +22,7 @@ type bucketDataSource struct {
 }
 
 type bucketDataSourceModel struct {
-	Bucket types.String `tfsdk:"bucket"`
+	Name   types.String `tfsdk:"name"`
 	Region types.String `tfsdk:"region"`
 }
 
@@ -56,7 +56,7 @@ func (d *bucketDataSource) Configure(ctx context.Context, req datasource.Configu
 func (d *bucketDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"bucket": schema.StringAttribute{
+			"name": schema.StringAttribute{
 				Description: "The name of the bucket",
 				Required:    true,
 			},
@@ -81,7 +81,7 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	apiResponse, err := d.client.BucketsApi.HeadBucket(ctx, data.Bucket.ValueString()).Execute()
+	apiResponse, err := d.client.BucketsApi.HeadBucket(ctx, data.Name.ValueString()).Execute()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			resp.Diagnostics.AddError("Name not found", "The specified bucket does not exist")
@@ -92,7 +92,7 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	location, _, err := d.client.BucketsApi.GetBucketLocation(ctx, data.Bucket.ValueString()).Execute()
+	location, _, err := d.client.BucketsApi.GetBucketLocation(ctx, data.Name.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read bucket location", err.Error())
 		return
