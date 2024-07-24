@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the CreateBucketConfiguration type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CreateBucketConfiguration{}
-
 // CreateBucketConfiguration The configuration information for the bucket.
 type CreateBucketConfiguration struct {
 	XMLName xml.Name `xml:"CreateBucketConfiguration"`
@@ -45,52 +42,51 @@ func NewCreateBucketConfigurationWithDefaults() *CreateBucketConfiguration {
 	return &this
 }
 
-// GetLocationConstraint returns the LocationConstraint field value if set, zero value otherwise.
-func (o *CreateBucketConfiguration) GetLocationConstraint() string {
-	if o == nil || IsNil(o.LocationConstraint) {
-		var ret string
-		return ret
+// GetLocationConstraint returns the LocationConstraint field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *CreateBucketConfiguration) GetLocationConstraint() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.LocationConstraint
+
+	return o.LocationConstraint
+
 }
 
-// GetLocationConstraintOk returns a tuple with the LocationConstraint field value if set, nil otherwise
+// GetLocationConstraintOk returns a tuple with the LocationConstraint field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *CreateBucketConfiguration) GetLocationConstraintOk() (*string, bool) {
-	if o == nil || IsNil(o.LocationConstraint) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.LocationConstraint, true
+}
+
+// SetLocationConstraint sets field value
+func (o *CreateBucketConfiguration) SetLocationConstraint(v string) {
+
+	o.LocationConstraint = &v
+
 }
 
 // HasLocationConstraint returns a boolean if a field has been set.
 func (o *CreateBucketConfiguration) HasLocationConstraint() bool {
-	if o != nil && !IsNil(o.LocationConstraint) {
+	if o != nil && o.LocationConstraint != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetLocationConstraint gets a reference to the given string and assigns it to the LocationConstraint field.
-func (o *CreateBucketConfiguration) SetLocationConstraint(v string) {
-	o.LocationConstraint = &v
-}
-
 func (o CreateBucketConfiguration) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o CreateBucketConfiguration) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.LocationConstraint) {
+	if o.LocationConstraint != nil {
 		toSerialize["LocationConstraint"] = o.LocationConstraint
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableCreateBucketConfiguration struct {

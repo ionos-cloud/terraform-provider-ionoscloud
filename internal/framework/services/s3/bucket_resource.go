@@ -116,13 +116,6 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	location, _, err := r.client.BucketsApi.GetBucketLocation(ctx, data.Bucket.ValueString()).Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("failed to get bucket location", err.Error())
-		return
-	}
-
-	data.Region = types.StringPointerValue(location.LocationConstraint)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -155,8 +148,11 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		resp.Diagnostics.AddError("Failed to read bucket location", formatXMLError(err).Error())
 		return
 	}
-
-	data.Region = types.StringValue(location.GetLocationConstraint())
+	if location.LocationConstraint == nil {
+		resp.Diagnostics.AddError("Failed to read bucket location", "location is nil.")
+		return
+	}
+	data.Region = types.StringValue(*location.LocationConstraint)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 

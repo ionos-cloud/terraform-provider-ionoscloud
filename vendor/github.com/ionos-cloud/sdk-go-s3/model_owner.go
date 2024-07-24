@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the Owner type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &Owner{}
-
 // Owner Container for the owner's ID and display name.
 type Owner struct {
 	XMLName xml.Name `xml:"Owner"`
@@ -47,87 +44,93 @@ func NewOwnerWithDefaults() *Owner {
 	return &this
 }
 
-// GetID returns the ID field value if set, zero value otherwise.
-func (o *Owner) GetID() int32 {
-	if o == nil || IsNil(o.ID) {
-		var ret int32
-		return ret
+// GetID returns the ID field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *Owner) GetID() *int32 {
+	if o == nil {
+		return nil
 	}
-	return *o.ID
+
+	return o.ID
+
 }
 
-// GetIDOk returns a tuple with the ID field value if set, nil otherwise
+// GetIDOk returns a tuple with the ID field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Owner) GetIDOk() (*int32, bool) {
-	if o == nil || IsNil(o.ID) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.ID, true
+}
+
+// SetID sets field value
+func (o *Owner) SetID(v int32) {
+
+	o.ID = &v
+
 }
 
 // HasID returns a boolean if a field has been set.
 func (o *Owner) HasID() bool {
-	if o != nil && !IsNil(o.ID) {
+	if o != nil && o.ID != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetID gets a reference to the given int32 and assigns it to the ID field.
-func (o *Owner) SetID(v int32) {
-	o.ID = &v
-}
-
-// GetDisplayName returns the DisplayName field value if set, zero value otherwise.
-func (o *Owner) GetDisplayName() string {
-	if o == nil || IsNil(o.DisplayName) {
-		var ret string
-		return ret
+// GetDisplayName returns the DisplayName field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Owner) GetDisplayName() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.DisplayName
+
+	return o.DisplayName
+
 }
 
-// GetDisplayNameOk returns a tuple with the DisplayName field value if set, nil otherwise
+// GetDisplayNameOk returns a tuple with the DisplayName field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Owner) GetDisplayNameOk() (*string, bool) {
-	if o == nil || IsNil(o.DisplayName) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.DisplayName, true
+}
+
+// SetDisplayName sets field value
+func (o *Owner) SetDisplayName(v string) {
+
+	o.DisplayName = &v
+
 }
 
 // HasDisplayName returns a boolean if a field has been set.
 func (o *Owner) HasDisplayName() bool {
-	if o != nil && !IsNil(o.DisplayName) {
+	if o != nil && o.DisplayName != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetDisplayName gets a reference to the given string and assigns it to the DisplayName field.
-func (o *Owner) SetDisplayName(v string) {
-	o.DisplayName = &v
-}
-
 func (o Owner) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o Owner) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.ID) {
+	if o.ID != nil {
 		toSerialize["ID"] = o.ID
 	}
-	if !IsNil(o.DisplayName) {
+
+	if o.DisplayName != nil {
 		toSerialize["DisplayName"] = o.DisplayName
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableOwner struct {

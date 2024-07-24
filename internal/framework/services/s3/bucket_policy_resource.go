@@ -282,24 +282,21 @@ func putBucketPolicyInput(policyModel *bucketPolicyModel) (s3.BucketPolicy, diag
 
 	policyInput.Id = policyData.ID
 	policyInput.Version = policyData.Version
-	policyInput.Statement = make([]s3.BucketPolicyStatement, 0, len(policyData.Statement))
-	for _, statementData := range policyData.Statement {
-		statementInput := s3.BucketPolicyStatement{}
-		statementInput.Sid = statementData.SID
-		statementInput.Effect = statementData.Effect
-		statementInput.Resource = statementData.Resources
-		statementInput.Action = statementData.Action
 
-		principalInput := s3.BucketPolicyStatementPrincipal{BucketPolicyStatementPrincipalAnyOf: s3.NewBucketPolicyStatementPrincipalAnyOf(statementData.Principal)}
-		statementInput.Principal = &principalInput
+	statement := make([]s3.BucketPolicyStatement, 0, len(policyData.Statement))
+	for _, statementData := range policyData.Statement {
+		statementInput := s3.NewBucketPolicyStatement(statementData.Action, statementData.Effect, statementData.Resources)
+		statementInput.Sid = statementData.SID
+		statementInput.Principal = s3.NewPrincipal(statementData.Principal)
 
 		if statementData.Condition != nil {
-			statementInput.Condition = s3.NewBucketPolicyStatementCondition()
-
-			statementInput.Condition.IpAddress = s3.NewBucketPolicyStatementConditionIpAddress()
-			statementInput.Condition.IpAddress.AwsSourceIp = statementData.Condition.IPs
-			statementInput.Condition.NotIpAddress = s3.NewBucketPolicyStatementConditionIpAddress()
-			statementInput.Condition.NotIpAddress.AwsSourceIp = statementData.Condition.ExcludedIPs
+			statementInput.Condition = s3.NewBucketPolicyCondition()
+			statementInput.Condition.IpAddress = s3.NewBucketPolicyConditionIpAddress()
+			ips := statementData.Condition.IPs
+			statementInput.Condition.IpAddress.AwsSourceIp = &ips
+			statementInput.Condition.NotIpAddress = s3.NewBucketPolicyConditionIpAddress()
+			excludedIPs := statementData.Condition.ExcludedIPs
+			statementInput.Condition.NotIpAddress.AwsSourceIp = &excludedIPs
 			if statementData.Condition.DateGreaterThan != nil {
 				var t *s3.IonosTime
 				var err error
@@ -307,10 +304,7 @@ func putBucketPolicyInput(policyModel *bucketPolicyModel) (s3.BucketPolicy, diag
 					diags.AddError("Error converting policy condition 'greater than' date", err.Error())
 					return s3.BucketPolicy{}, diags
 				}
-				dateGreater := s3.BucketPolicyStatementConditionDateGreaterThan{
-					BucketPolicyStatementConditionDateGreaterThanOneOf: s3.NewBucketPolicyStatementConditionDateGreaterThanOneOf(),
-				}
-				dateGreater.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime = t
+				dateGreater := s3.BucketPolicyConditionDate{AwsCurrentTime: t}
 				statementInput.Condition.DateGreaterThan = &dateGreater
 			}
 			if statementData.Condition.DateLessThan != nil {
@@ -320,15 +314,13 @@ func putBucketPolicyInput(policyModel *bucketPolicyModel) (s3.BucketPolicy, diag
 					diags.AddError("Error converting policy condition 'less than' date", err.Error())
 					return s3.BucketPolicy{}, diags
 				}
-				dateLess := s3.BucketPolicyStatementConditionDateLessThan{
-					BucketPolicyStatementConditionDateGreaterThanOneOf: s3.NewBucketPolicyStatementConditionDateGreaterThanOneOf(),
-				}
-				dateLess.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime = t
+				dateLess := s3.BucketPolicyConditionDate{AwsCurrentTime: t}
 				statementInput.Condition.DateLessThan = &dateLess
 			}
 		}
-		policyInput.Statement = append(policyInput.Statement, statementInput)
+		statement = append(statement, *statementInput)
 	}
+	policyInput.Statement = &statement
 
 	return policyInput, diags
 }
@@ -340,33 +332,30 @@ func setBucketPolicyData(policyResponse *s3.BucketPolicy, data *bucketPolicyMode
 		ID:      policyResponse.Id,
 		Version: policyResponse.Version,
 	}
-	policyData.Statement = make([]bucketPolicyStatement, 0, len(policyResponse.Statement))
 
-	for _, statementResponse := range policyResponse.Statement {
+	policyData.Statement = make([]bucketPolicyStatement, 0, len(*policyResponse.Statement))
+
+	for _, statementResponse := range *policyResponse.Statement {
 		statementData := bucketPolicyStatement{
 			SID:       statementResponse.Sid,
-			Effect:    statementResponse.Effect,
-			Action:    statementResponse.Action,
-			Resources: statementResponse.Resource,
+			Effect:    *statementResponse.Effect,
+			Action:    *statementResponse.Action,
+			Resources: *statementResponse.Resource,
 		}
-		if statementResponse.Principal != nil && statementResponse.Principal.BucketPolicyStatementPrincipalAnyOf != nil {
-			statementData.Principal = statementResponse.Principal.BucketPolicyStatementPrincipalAnyOf.AWS
+		if statementResponse.Principal != nil {
+			statementData.Principal = *statementResponse.Principal.AWS
 		}
 		if statementResponse.Condition != nil {
 			conditionData := bucketPolicyStatementCondition{
-				IPs:         statementResponse.Condition.GetIpAddress().AwsSourceIp,
-				ExcludedIPs: statementResponse.Condition.GetNotIpAddress().AwsSourceIp,
+				IPs:         *statementResponse.Condition.GetIpAddress().AwsSourceIp,
+				ExcludedIPs: *statementResponse.Condition.GetNotIpAddress().AwsSourceIp,
 			}
-			if statementResponse.Condition.DateGreaterThan != nil &&
-				statementResponse.Condition.DateGreaterThan.BucketPolicyStatementConditionDateGreaterThanOneOf != nil &&
-				statementResponse.Condition.DateGreaterThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime != nil {
-				dateString := statementResponse.Condition.DateGreaterThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime.Format(constant.DatetimeZLayout)
+			if statementResponse.Condition.DateGreaterThan != nil {
+				dateString := statementResponse.Condition.DateGreaterThan.AwsCurrentTime.Format(constant.DatetimeZLayout)
 				conditionData.DateGreaterThan = &dateString
 			}
-			if statementResponse.Condition.DateLessThan != nil &&
-				statementResponse.Condition.DateLessThan.BucketPolicyStatementConditionDateGreaterThanOneOf != nil &&
-				statementResponse.Condition.DateLessThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime != nil {
-				dateString := statementResponse.Condition.DateLessThan.BucketPolicyStatementConditionDateGreaterThanOneOf.AwsCurrentTime.Format(constant.DatetimeZLayout)
+			if statementResponse.Condition.DateLessThan != nil {
+				dateString := statementResponse.Condition.DateLessThan.AwsCurrentTime.Format(constant.DatetimeZLayout)
 				conditionData.DateLessThan = &dateString
 			}
 			statementData.Condition = &conditionData

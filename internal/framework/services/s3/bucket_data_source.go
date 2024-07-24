@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
@@ -97,8 +98,12 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		resp.Diagnostics.AddError("Failed to read bucket location", err.Error())
 		return
 	}
+	if location.LocationConstraint == nil {
+		resp.Diagnostics.AddError("Failed to read bucket location", "location is nil.")
+		return
+	}
 
-	data.Region = types.StringValue(location.GetLocationConstraint())
+	data.Region = types.StringValue(*location.GetLocationConstraint())
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

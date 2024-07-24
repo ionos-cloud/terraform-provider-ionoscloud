@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the PolicyStatus type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &PolicyStatus{}
-
 // PolicyStatus The container element for a bucket's policy status.
 type PolicyStatus struct {
 	XMLName xml.Name `xml:"PolicyStatus"`
@@ -45,52 +42,51 @@ func NewPolicyStatusWithDefaults() *PolicyStatus {
 	return &this
 }
 
-// GetIsPublic returns the IsPublic field value if set, zero value otherwise.
-func (o *PolicyStatus) GetIsPublic() bool {
-	if o == nil || IsNil(o.IsPublic) {
-		var ret bool
-		return ret
+// GetIsPublic returns the IsPublic field value
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *PolicyStatus) GetIsPublic() *bool {
+	if o == nil {
+		return nil
 	}
-	return *o.IsPublic
+
+	return o.IsPublic
+
 }
 
-// GetIsPublicOk returns a tuple with the IsPublic field value if set, nil otherwise
+// GetIsPublicOk returns a tuple with the IsPublic field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *PolicyStatus) GetIsPublicOk() (*bool, bool) {
-	if o == nil || IsNil(o.IsPublic) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.IsPublic, true
+}
+
+// SetIsPublic sets field value
+func (o *PolicyStatus) SetIsPublic(v bool) {
+
+	o.IsPublic = &v
+
 }
 
 // HasIsPublic returns a boolean if a field has been set.
 func (o *PolicyStatus) HasIsPublic() bool {
-	if o != nil && !IsNil(o.IsPublic) {
+	if o != nil && o.IsPublic != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetIsPublic gets a reference to the given bool and assigns it to the IsPublic field.
-func (o *PolicyStatus) SetIsPublic(v bool) {
-	o.IsPublic = &v
-}
-
 func (o PolicyStatus) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o PolicyStatus) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.IsPublic) {
+	if o.IsPublic != nil {
 		toSerialize["IsPublic"] = o.IsPublic
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullablePolicyStatus struct {

@@ -17,22 +17,19 @@ import (
 
 import "encoding/xml"
 
-// checks if the BucketPolicyStatement type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &BucketPolicyStatement{}
-
 // BucketPolicyStatement struct for BucketPolicyStatement
 type BucketPolicyStatement struct {
 	XMLName xml.Name `xml:"BucketPolicyStatement"`
 	// Custom string identifying the statement.
 	Sid *string `json:"Sid,omitempty" xml:"Sid"`
 	// The array of allowed or denied actions.   IONOS S3 Object Storage supports the use of a wildcard in your Action configuration (`\"Action\":[\"s3:*\"]`). When an Action wildcard is used together with an object-level Resource element (`\"arn:aws:s3:::<bucketName>/_*\"` or `\"arn:aws:s3:::<bucketName>/<objectName>\"`), the wildcard denotes all supported Object actions. When an Action wildcard is used together with bucket-level Resource element (`\"arn:aws:s3:::<bucketName>\"`), the wildcard denotes all the bucket actions and bucket subresource actions that IONOS S3 Object Storage supports.
-	Action []string `json:"Action" xml:"Action"`
+	Action *[]string `json:"Action" xml:"Action"`
 	// Specify the outcome when the user requests a particular action.
-	Effect string `json:"Effect" xml:"Effect"`
+	Effect *string `json:"Effect" xml:"Effect"`
 	// The bucket or object that the policy applies to.   Must be one of the following: - `\"arn:aws:s3:::<bucketName>\"` - For bucket actions (such as `s3:ListBucket`) and bucket subresource actions (such as `s3:GetBucketAcl`). - `\"arn:aws:s3:::<bucketName>/_*\"` or `\"arn:aws:s3:::<bucketName>/<objectName>\"` - For object actions (such as `s3:PutObject`).
-	Resource  []string                        `json:"Resource" xml:"Resource"`
-	Condition *BucketPolicyStatementCondition `json:"Condition,omitempty" xml:"Condition"`
-	Principal *BucketPolicyStatementPrincipal `json:"Principal,omitempty" xml:"Principal"`
+	Resource  *[]string              `json:"Resource" xml:"Resource"`
+	Condition *BucketPolicyCondition `json:"Condition,omitempty" xml:"Condition"`
+	Principal *Principal             `json:"Principal,omitempty" xml:"Principal"`
 }
 
 // NewBucketPolicyStatement instantiates a new BucketPolicyStatement object
@@ -42,9 +39,9 @@ type BucketPolicyStatement struct {
 func NewBucketPolicyStatement(action []string, effect string, resource []string) *BucketPolicyStatement {
 	this := BucketPolicyStatement{}
 
-	this.Action = action
-	this.Effect = effect
-	this.Resource = resource
+	this.Action = &action
+	this.Effect = &effect
+	this.Resource = &resource
 
 	return &this
 }
@@ -57,203 +54,261 @@ func NewBucketPolicyStatementWithDefaults() *BucketPolicyStatement {
 	return &this
 }
 
-// GetSid returns the Sid field value if set, zero value otherwise.
-func (o *BucketPolicyStatement) GetSid() string {
-	if o == nil || IsNil(o.Sid) {
-		var ret string
-		return ret
+// GetSid returns the Sid field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *BucketPolicyStatement) GetSid() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Sid
+
+	return o.Sid
+
 }
 
-// GetSidOk returns a tuple with the Sid field value if set, nil otherwise
+// GetSidOk returns a tuple with the Sid field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *BucketPolicyStatement) GetSidOk() (*string, bool) {
-	if o == nil || IsNil(o.Sid) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Sid, true
+}
+
+// SetSid sets field value
+func (o *BucketPolicyStatement) SetSid(v string) {
+
+	o.Sid = &v
+
 }
 
 // HasSid returns a boolean if a field has been set.
 func (o *BucketPolicyStatement) HasSid() bool {
-	if o != nil && !IsNil(o.Sid) {
+	if o != nil && o.Sid != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetSid gets a reference to the given string and assigns it to the Sid field.
-func (o *BucketPolicyStatement) SetSid(v string) {
-	o.Sid = &v
-}
-
 // GetAction returns the Action field value
-func (o *BucketPolicyStatement) GetAction() []string {
+// If the value is explicit nil, the zero value for []string will be returned
+func (o *BucketPolicyStatement) GetAction() *[]string {
 	if o == nil {
-		var ret []string
-		return ret
+		return nil
 	}
 
 	return o.Action
+
 }
 
 // GetActionOk returns a tuple with the Action field value
 // and a boolean to check if the value has been set.
-func (o *BucketPolicyStatement) GetActionOk() ([]string, bool) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *BucketPolicyStatement) GetActionOk() (*[]string, bool) {
 	if o == nil {
 		return nil, false
 	}
+
 	return o.Action, true
 }
 
 // SetAction sets field value
 func (o *BucketPolicyStatement) SetAction(v []string) {
-	o.Action = v
+
+	o.Action = &v
+
+}
+
+// HasAction returns a boolean if a field has been set.
+func (o *BucketPolicyStatement) HasAction() bool {
+	if o != nil && o.Action != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetEffect returns the Effect field value
-func (o *BucketPolicyStatement) GetEffect() string {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *BucketPolicyStatement) GetEffect() *string {
 	if o == nil {
-		var ret string
-		return ret
+		return nil
 	}
 
 	return o.Effect
+
 }
 
 // GetEffectOk returns a tuple with the Effect field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *BucketPolicyStatement) GetEffectOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Effect, true
+
+	return o.Effect, true
 }
 
 // SetEffect sets field value
 func (o *BucketPolicyStatement) SetEffect(v string) {
-	o.Effect = v
+
+	o.Effect = &v
+
+}
+
+// HasEffect returns a boolean if a field has been set.
+func (o *BucketPolicyStatement) HasEffect() bool {
+	if o != nil && o.Effect != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetResource returns the Resource field value
-func (o *BucketPolicyStatement) GetResource() []string {
+// If the value is explicit nil, the zero value for []string will be returned
+func (o *BucketPolicyStatement) GetResource() *[]string {
 	if o == nil {
-		var ret []string
-		return ret
+		return nil
 	}
 
 	return o.Resource
+
 }
 
 // GetResourceOk returns a tuple with the Resource field value
 // and a boolean to check if the value has been set.
-func (o *BucketPolicyStatement) GetResourceOk() ([]string, bool) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *BucketPolicyStatement) GetResourceOk() (*[]string, bool) {
 	if o == nil {
 		return nil, false
 	}
+
 	return o.Resource, true
 }
 
 // SetResource sets field value
 func (o *BucketPolicyStatement) SetResource(v []string) {
-	o.Resource = v
+
+	o.Resource = &v
+
 }
 
-// GetCondition returns the Condition field value if set, zero value otherwise.
-func (o *BucketPolicyStatement) GetCondition() BucketPolicyStatementCondition {
-	if o == nil || IsNil(o.Condition) {
-		var ret BucketPolicyStatementCondition
-		return ret
+// HasResource returns a boolean if a field has been set.
+func (o *BucketPolicyStatement) HasResource() bool {
+	if o != nil && o.Resource != nil {
+		return true
 	}
-	return *o.Condition
+
+	return false
 }
 
-// GetConditionOk returns a tuple with the Condition field value if set, nil otherwise
+// GetCondition returns the Condition field value
+// If the value is explicit nil, the zero value for BucketPolicyCondition will be returned
+func (o *BucketPolicyStatement) GetCondition() *BucketPolicyCondition {
+	if o == nil {
+		return nil
+	}
+
+	return o.Condition
+
+}
+
+// GetConditionOk returns a tuple with the Condition field value
 // and a boolean to check if the value has been set.
-func (o *BucketPolicyStatement) GetConditionOk() (*BucketPolicyStatementCondition, bool) {
-	if o == nil || IsNil(o.Condition) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *BucketPolicyStatement) GetConditionOk() (*BucketPolicyCondition, bool) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Condition, true
+}
+
+// SetCondition sets field value
+func (o *BucketPolicyStatement) SetCondition(v BucketPolicyCondition) {
+
+	o.Condition = &v
+
 }
 
 // HasCondition returns a boolean if a field has been set.
 func (o *BucketPolicyStatement) HasCondition() bool {
-	if o != nil && !IsNil(o.Condition) {
+	if o != nil && o.Condition != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetCondition gets a reference to the given BucketPolicyStatementCondition and assigns it to the Condition field.
-func (o *BucketPolicyStatement) SetCondition(v BucketPolicyStatementCondition) {
-	o.Condition = &v
-}
-
-// GetPrincipal returns the Principal field value if set, zero value otherwise.
-func (o *BucketPolicyStatement) GetPrincipal() BucketPolicyStatementPrincipal {
-	if o == nil || IsNil(o.Principal) {
-		var ret BucketPolicyStatementPrincipal
-		return ret
+// GetPrincipal returns the Principal field value
+// If the value is explicit nil, the zero value for Principal will be returned
+func (o *BucketPolicyStatement) GetPrincipal() *Principal {
+	if o == nil {
+		return nil
 	}
-	return *o.Principal
+
+	return o.Principal
+
 }
 
-// GetPrincipalOk returns a tuple with the Principal field value if set, nil otherwise
+// GetPrincipalOk returns a tuple with the Principal field value
 // and a boolean to check if the value has been set.
-func (o *BucketPolicyStatement) GetPrincipalOk() (*BucketPolicyStatementPrincipal, bool) {
-	if o == nil || IsNil(o.Principal) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *BucketPolicyStatement) GetPrincipalOk() (*Principal, bool) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Principal, true
+}
+
+// SetPrincipal sets field value
+func (o *BucketPolicyStatement) SetPrincipal(v Principal) {
+
+	o.Principal = &v
+
 }
 
 // HasPrincipal returns a boolean if a field has been set.
 func (o *BucketPolicyStatement) HasPrincipal() bool {
-	if o != nil && !IsNil(o.Principal) {
+	if o != nil && o.Principal != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetPrincipal gets a reference to the given BucketPolicyStatementPrincipal and assigns it to the Principal field.
-func (o *BucketPolicyStatement) SetPrincipal(v BucketPolicyStatementPrincipal) {
-	o.Principal = &v
-}
-
 func (o BucketPolicyStatement) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o BucketPolicyStatement) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Sid) {
+	if o.Sid != nil {
 		toSerialize["Sid"] = o.Sid
 	}
-	if !IsZero(o.Action) {
+
+	if o.Action != nil {
 		toSerialize["Action"] = o.Action
 	}
-	if !IsZero(o.Effect) {
+
+	if o.Effect != nil {
 		toSerialize["Effect"] = o.Effect
 	}
-	if !IsZero(o.Resource) {
+
+	if o.Resource != nil {
 		toSerialize["Resource"] = o.Resource
 	}
-	if !IsNil(o.Condition) {
+
+	if o.Condition != nil {
 		toSerialize["Condition"] = o.Condition
 	}
-	if !IsNil(o.Principal) {
+
+	if o.Principal != nil {
 		toSerialize["Principal"] = o.Principal
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableBucketPolicyStatement struct {

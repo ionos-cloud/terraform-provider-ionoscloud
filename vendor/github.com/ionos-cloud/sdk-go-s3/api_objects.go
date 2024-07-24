@@ -15,7 +15,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
 	"net/http"
 	"net/url"
@@ -222,7 +221,7 @@ func (r ApiCopyObjectRequest) CopyObjectRequest(copyObjectRequest CopyObjectRequ
 	return r
 }
 
-func (r ApiCopyObjectRequest) Execute() (*CopyObjectResult, *shared.APIResponse, error) {
+func (r ApiCopyObjectRequest) Execute() (*CopyObjectResult, *APIResponse, error) {
 	return r.ApiService.CopyObjectExecute(r)
 }
 
@@ -248,7 +247,7 @@ func (a *ObjectsApiService) CopyObject(ctx context.Context, bucket string, key s
 // Execute executes the request
 //
 //	@return CopyObjectResult
-func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (*CopyObjectResult, *shared.APIResponse, error) {
+func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (*CopyObjectResult, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPut
 		localVarPostBody    interface{}
@@ -258,7 +257,7 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (*CopyObje
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.CopyObject")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -270,16 +269,16 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (*CopyObje
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
 	if r.xAmzCopySource == nil {
 		return localVarReturnValue, nil, reportError("xAmzCopySource is required and must be specified")
 	}
-	if shared.Strlen(r.key) < 1 {
+	if Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
 
@@ -398,7 +397,7 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (*CopyObje
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -418,7 +417,7 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (*CopyObje
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -427,7 +426,7 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (*CopyObje
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -465,7 +464,7 @@ func (r ApiDeleteObjectRequest) XAmzBypassGovernanceRetention(xAmzBypassGovernan
 	return r
 }
 
-func (r ApiDeleteObjectRequest) Execute() (map[string]interface{}, *shared.APIResponse, error) {
+func (r ApiDeleteObjectRequest) Execute() (map[string]interface{}, *APIResponse, error) {
 	return r.ApiService.DeleteObjectExecute(r)
 }
 
@@ -491,7 +490,7 @@ func (a *ObjectsApiService) DeleteObject(ctx context.Context, bucket string, key
 // Execute executes the request
 //
 //	@return map[string]interface{}
-func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[string]interface{}, *shared.APIResponse, error) {
+func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[string]interface{}, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodDelete
 		localVarPostBody    interface{}
@@ -501,7 +500,7 @@ func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[s
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.DeleteObject")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -513,13 +512,13 @@ func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[s
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if shared.Strlen(r.key) < 1 {
+	if Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
 
@@ -569,7 +568,7 @@ func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[s
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -589,7 +588,7 @@ func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[s
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -598,7 +597,7 @@ func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[s
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -634,7 +633,7 @@ func (r ApiDeleteObjectsRequest) XAmzBypassGovernanceRetention(xAmzBypassGoverna
 	return r
 }
 
-func (r ApiDeleteObjectsRequest) Execute() (*DeleteObjectsOutput, *shared.APIResponse, error) {
+func (r ApiDeleteObjectsRequest) Execute() (*DeleteObjectsOutput, *APIResponse, error) {
 	return r.ApiService.DeleteObjectsExecute(r)
 }
 
@@ -658,7 +657,7 @@ func (a *ObjectsApiService) DeleteObjects(ctx context.Context, bucket string) Ap
 // Execute executes the request
 //
 //	@return DeleteObjectsOutput
-func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (*DeleteObjectsOutput, *shared.APIResponse, error) {
+func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (*DeleteObjectsOutput, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
@@ -668,7 +667,7 @@ func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (*De
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.DeleteObjects")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -679,10 +678,10 @@ func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (*De
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
 	if r.deleteObjectsRequest == nil {
@@ -734,7 +733,7 @@ func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (*De
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -754,7 +753,7 @@ func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (*De
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -763,7 +762,7 @@ func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (*De
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -892,7 +891,7 @@ func (r ApiGetObjectRequest) PartNumber(partNumber int32) ApiGetObjectRequest {
 	return r
 }
 
-func (r ApiGetObjectRequest) Execute() (*os.File, *shared.APIResponse, error) {
+func (r ApiGetObjectRequest) Execute() (*os.File, *APIResponse, error) {
 	return r.ApiService.GetObjectExecute(r)
 }
 
@@ -1010,7 +1009,7 @@ func (a *ObjectsApiService) GetObject(ctx context.Context, bucket string, key st
 // Execute executes the request
 //
 //	@return *os.File
-func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (*os.File, *shared.APIResponse, error) {
+func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (*os.File, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -1020,7 +1019,7 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (*os.File, *
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.GetObject")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -1032,13 +1031,13 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (*os.File, *
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if shared.Strlen(r.key) < 1 {
+	if Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
 
@@ -1127,7 +1126,7 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (*os.File, *
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -1147,7 +1146,7 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (*os.File, *
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -1185,7 +1184,7 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (*os.File, *
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -1272,7 +1271,7 @@ func (r ApiHeadObjectRequest) PartNumber(partNumber int32) ApiHeadObjectRequest 
 	return r
 }
 
-func (r ApiHeadObjectRequest) Execute() (*HeadObjectOutput, *shared.APIResponse, error) {
+func (r ApiHeadObjectRequest) Execute() (*HeadObjectOutput, *APIResponse, error) {
 	return r.ApiService.HeadObjectExecute(r)
 }
 
@@ -1298,7 +1297,7 @@ func (a *ObjectsApiService) HeadObject(ctx context.Context, bucket string, key s
 // Execute executes the request
 //
 //	@return HeadObjectOutput
-func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (*HeadObjectOutput, *shared.APIResponse, error) {
+func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (*HeadObjectOutput, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodHead
 		localVarPostBody    interface{}
@@ -1308,7 +1307,7 @@ func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (*HeadObje
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.HeadObject")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -1320,13 +1319,13 @@ func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (*HeadObje
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if shared.Strlen(r.key) < 1 {
+	if Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
 
@@ -1397,7 +1396,7 @@ func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (*HeadObje
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -1417,7 +1416,7 @@ func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (*HeadObje
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -1435,7 +1434,7 @@ func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (*HeadObje
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -1506,7 +1505,7 @@ func (r ApiListObjectsRequest) Marker2(marker2 string) ApiListObjectsRequest {
 	return r
 }
 
-func (r ApiListObjectsRequest) Execute() (*ListObjectsOutput, *shared.APIResponse, error) {
+func (r ApiListObjectsRequest) Execute() (*ListObjectsOutput, *APIResponse, error) {
 	return r.ApiService.ListObjectsExecute(r)
 }
 
@@ -1541,7 +1540,7 @@ func (a *ObjectsApiService) ListObjects(ctx context.Context, bucket string) ApiL
 // Execute executes the request
 //
 //	@return ListObjectsOutput
-func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (*ListObjectsOutput, *shared.APIResponse, error) {
+func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (*ListObjectsOutput, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -1551,7 +1550,7 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (*ListOb
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.ListObjects")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -1562,10 +1561,10 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (*ListOb
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
 
@@ -1630,7 +1629,7 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (*ListOb
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -1650,7 +1649,7 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (*ListOb
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -1678,7 +1677,7 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (*ListOb
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -1743,7 +1742,7 @@ func (r ApiListObjectsV2Request) StartAfter(startAfter string) ApiListObjectsV2R
 	return r
 }
 
-func (r ApiListObjectsV2Request) Execute() (*ListBucketResultV2, *shared.APIResponse, error) {
+func (r ApiListObjectsV2Request) Execute() (*ListBucketResultV2, *APIResponse, error) {
 	return r.ApiService.ListObjectsV2Execute(r)
 }
 
@@ -1776,7 +1775,7 @@ func (a *ObjectsApiService) ListObjectsV2(ctx context.Context, bucket string) Ap
 // Execute executes the request
 //
 //	@return ListBucketResultV2
-func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (*ListBucketResultV2, *shared.APIResponse, error) {
+func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (*ListBucketResultV2, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -1786,7 +1785,7 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (*Li
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.ListObjectsV2")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -1797,10 +1796,10 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (*Li
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
 
@@ -1868,7 +1867,7 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (*Li
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -1888,7 +1887,7 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (*Li
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -1916,7 +1915,7 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (*Li
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -1953,7 +1952,7 @@ func (r ApiOPTIONSObjectRequest) AccessControlRequestHeaders(accessControlReques
 	return r
 }
 
-func (r ApiOPTIONSObjectRequest) Execute() (*shared.APIResponse, error) {
+func (r ApiOPTIONSObjectRequest) Execute() (*APIResponse, error) {
 	return r.ApiService.OPTIONSObjectExecute(r)
 }
 
@@ -1975,7 +1974,7 @@ func (a *ObjectsApiService) OPTIONSObject(ctx context.Context, bucket string) Ap
 }
 
 // Execute executes the request
-func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*shared.APIResponse, error) {
+func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*APIResponse, error) {
 	var (
 		localVarHTTPMethod = http.MethodOptions
 		localVarPostBody   interface{}
@@ -1984,7 +1983,7 @@ func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*sh
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.OPTIONSObject")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return nil, gerr
 	}
@@ -1995,10 +1994,10 @@ func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*sh
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
 	if r.origin == nil {
@@ -2050,7 +2049,7 @@ func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*sh
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -2070,7 +2069,7 @@ func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*sh
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -2085,7 +2084,7 @@ type ApiPOSTObjectRequest struct {
 	ApiService                                *ObjectsApiService
 	bucket                                    string
 	key                                       string
-	uploadPartRequest                         *UploadPartRequest
+	pOSTObjectRequest                         *POSTObjectRequest
 	cacheControl                              *string
 	contentDisposition                        *string
 	contentEncoding                           *string
@@ -2109,8 +2108,8 @@ type ApiPOSTObjectRequest struct {
 	xAmzObjectLockLegalHold                   *string
 }
 
-func (r ApiPOSTObjectRequest) UploadPartRequest(uploadPartRequest UploadPartRequest) ApiPOSTObjectRequest {
-	r.uploadPartRequest = &uploadPartRequest
+func (r ApiPOSTObjectRequest) POSTObjectRequest(pOSTObjectRequest POSTObjectRequest) ApiPOSTObjectRequest {
+	r.pOSTObjectRequest = &pOSTObjectRequest
 	return r
 }
 
@@ -2238,7 +2237,7 @@ func (r ApiPOSTObjectRequest) XAmzObjectLockLegalHold(xAmzObjectLockLegalHold st
 	return r
 }
 
-func (r ApiPOSTObjectRequest) Execute() (map[string]interface{}, *shared.APIResponse, error) {
+func (r ApiPOSTObjectRequest) Execute() (map[string]interface{}, *APIResponse, error) {
 	return r.ApiService.POSTObjectExecute(r)
 }
 
@@ -2264,7 +2263,7 @@ func (a *ObjectsApiService) POSTObject(ctx context.Context, bucket string, key s
 // Execute executes the request
 //
 //	@return map[string]interface{}
-func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[string]interface{}, *shared.APIResponse, error) {
+func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[string]interface{}, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
@@ -2274,7 +2273,7 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.POSTObject")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -2286,17 +2285,17 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if shared.Strlen(r.key) < 1 {
+	if Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
-	if r.uploadPartRequest == nil {
-		return localVarReturnValue, nil, reportError("uploadPartRequest is required and must be specified")
+	if r.pOSTObjectRequest == nil {
+		return localVarReturnValue, nil, reportError("pOSTObjectRequest is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -2380,7 +2379,7 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-object-lock-legal-hold", r.xAmzObjectLockLegalHold, "")
 	}
 	// body params
-	localVarPostBody = r.uploadPartRequest
+	localVarPostBody = r.pOSTObjectRequest
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -2401,7 +2400,7 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -2421,7 +2420,7 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -2430,7 +2429,7 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -2598,7 +2597,7 @@ func (r ApiPutObjectRequest) XAmzMeta(xAmzMeta map[string]string) ApiPutObjectRe
 	return r
 }
 
-func (r ApiPutObjectRequest) Execute() (*shared.APIResponse, error) {
+func (r ApiPutObjectRequest) Execute() (*APIResponse, error) {
 	return r.ApiService.PutObjectExecute(r)
 }
 
@@ -2624,7 +2623,7 @@ func (a *ObjectsApiService) PutObject(ctx context.Context, bucket string, key st
 }
 
 // Execute executes the request
-func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.APIResponse, error) {
+func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*APIResponse, error) {
 	var (
 		localVarHTTPMethod = http.MethodPut
 		localVarPostBody   interface{}
@@ -2633,7 +2632,7 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.API
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.PutObject")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return nil, gerr
 	}
@@ -2645,13 +2644,13 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.API
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if shared.Strlen(r.key) < 1 {
+	if Strlen(r.key) < 1 {
 		return nil, reportError("key must have at least 1 elements")
 	}
 	if r.body == nil {
@@ -2760,7 +2759,7 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.API
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -2780,7 +2779,7 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.API
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))

@@ -17,15 +17,12 @@ import (
 
 import "encoding/xml"
 
-// checks if the DeleteObjectsOutput type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &DeleteObjectsOutput{}
-
 // DeleteObjectsOutput struct for DeleteObjectsOutput
 type DeleteObjectsOutput struct {
 	XMLName xml.Name `xml:"DeleteResult"`
 	// Container element for a successful delete. It identifies the object that was successfully deleted.
-	Deleted []DeletedObject `json:"Deleted,omitempty" xml:"Deleted"`
-	Errors  []DeletionError `json:"Errors,omitempty" xml:"Errors"`
+	Deleted *[]DeletedObject `json:"Deleted,omitempty" xml:"Deleted"`
+	Errors  *[]DeletionError `json:"Errors,omitempty" xml:"Errors"`
 }
 
 // NewDeleteObjectsOutput instantiates a new DeleteObjectsOutput object
@@ -46,87 +43,93 @@ func NewDeleteObjectsOutputWithDefaults() *DeleteObjectsOutput {
 	return &this
 }
 
-// GetDeleted returns the Deleted field value if set, zero value otherwise.
-func (o *DeleteObjectsOutput) GetDeleted() []DeletedObject {
-	if o == nil || IsNil(o.Deleted) {
-		var ret []DeletedObject
-		return ret
+// GetDeleted returns the Deleted field value
+// If the value is explicit nil, the zero value for []DeletedObject will be returned
+func (o *DeleteObjectsOutput) GetDeleted() *[]DeletedObject {
+	if o == nil {
+		return nil
 	}
+
 	return o.Deleted
+
 }
 
-// GetDeletedOk returns a tuple with the Deleted field value if set, nil otherwise
+// GetDeletedOk returns a tuple with the Deleted field value
 // and a boolean to check if the value has been set.
-func (o *DeleteObjectsOutput) GetDeletedOk() ([]DeletedObject, bool) {
-	if o == nil || IsNil(o.Deleted) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DeleteObjectsOutput) GetDeletedOk() (*[]DeletedObject, bool) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Deleted, true
+}
+
+// SetDeleted sets field value
+func (o *DeleteObjectsOutput) SetDeleted(v []DeletedObject) {
+
+	o.Deleted = &v
+
 }
 
 // HasDeleted returns a boolean if a field has been set.
 func (o *DeleteObjectsOutput) HasDeleted() bool {
-	if o != nil && !IsNil(o.Deleted) {
+	if o != nil && o.Deleted != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetDeleted gets a reference to the given []DeletedObject and assigns it to the Deleted field.
-func (o *DeleteObjectsOutput) SetDeleted(v []DeletedObject) {
-	o.Deleted = v
-}
-
-// GetErrors returns the Errors field value if set, zero value otherwise.
-func (o *DeleteObjectsOutput) GetErrors() []DeletionError {
-	if o == nil || IsNil(o.Errors) {
-		var ret []DeletionError
-		return ret
+// GetErrors returns the Errors field value
+// If the value is explicit nil, the zero value for []DeletionError will be returned
+func (o *DeleteObjectsOutput) GetErrors() *[]DeletionError {
+	if o == nil {
+		return nil
 	}
+
 	return o.Errors
+
 }
 
-// GetErrorsOk returns a tuple with the Errors field value if set, nil otherwise
+// GetErrorsOk returns a tuple with the Errors field value
 // and a boolean to check if the value has been set.
-func (o *DeleteObjectsOutput) GetErrorsOk() ([]DeletionError, bool) {
-	if o == nil || IsNil(o.Errors) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DeleteObjectsOutput) GetErrorsOk() (*[]DeletionError, bool) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Errors, true
+}
+
+// SetErrors sets field value
+func (o *DeleteObjectsOutput) SetErrors(v []DeletionError) {
+
+	o.Errors = &v
+
 }
 
 // HasErrors returns a boolean if a field has been set.
 func (o *DeleteObjectsOutput) HasErrors() bool {
-	if o != nil && !IsNil(o.Errors) {
+	if o != nil && o.Errors != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetErrors gets a reference to the given []DeletionError and assigns it to the Errors field.
-func (o *DeleteObjectsOutput) SetErrors(v []DeletionError) {
-	o.Errors = v
-}
-
 func (o DeleteObjectsOutput) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o DeleteObjectsOutput) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Deleted) {
+	if o.Deleted != nil {
 		toSerialize["Deleted"] = o.Deleted
 	}
-	if !IsNil(o.Errors) {
+
+	if o.Errors != nil {
 		toSerialize["Errors"] = o.Errors
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableDeleteObjectsOutput struct {

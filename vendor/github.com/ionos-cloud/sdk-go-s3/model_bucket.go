@@ -13,14 +13,10 @@ package ionoscloud
 
 import (
 	"encoding/json"
-
 	"time"
 )
 
 import "encoding/xml"
-
-// checks if the Bucket type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &Bucket{}
 
 // Bucket A bucket in object storage is a flat container used to store an unlimited number of objects (files).
 type Bucket struct {
@@ -49,87 +45,100 @@ func NewBucketWithDefaults() *Bucket {
 	return &this
 }
 
-// GetName returns the Name field value if set, zero value otherwise.
-func (o *Bucket) GetName() string {
-	if o == nil || IsNil(o.Name) {
-		var ret string
-		return ret
+// GetName returns the Name field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Bucket) GetName() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Name
+
+	return o.Name
+
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Bucket) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Name, true
+}
+
+// SetName sets field value
+func (o *Bucket) SetName(v string) {
+
+	o.Name = &v
+
 }
 
 // HasName returns a boolean if a field has been set.
 func (o *Bucket) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
+	if o != nil && o.Name != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetName gets a reference to the given string and assigns it to the Name field.
-func (o *Bucket) SetName(v string) {
-	o.Name = &v
-}
-
-// GetCreationDate returns the CreationDate field value if set, zero value otherwise.
-func (o *Bucket) GetCreationDate() time.Time {
-	if o == nil || IsNil(o.CreationDate) {
-		var ret time.Time
-		return ret
+// GetCreationDate returns the CreationDate field value
+// If the value is explicit nil, the zero value for time.Time will be returned
+func (o *Bucket) GetCreationDate() *time.Time {
+	if o == nil {
+		return nil
 	}
-	return o.CreationDate.Time
+
+	if o.CreationDate == nil {
+		return nil
+	}
+	return &o.CreationDate.Time
+
 }
 
-// GetCreationDateOk returns a tuple with the CreationDate field value if set, nil otherwise
+// GetCreationDateOk returns a tuple with the CreationDate field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Bucket) GetCreationDateOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.CreationDate) {
+	if o == nil {
+		return nil, false
+	}
+
+	if o.CreationDate == nil {
 		return nil, false
 	}
 	return &o.CreationDate.Time, true
+
+}
+
+// SetCreationDate sets field value
+func (o *Bucket) SetCreationDate(v time.Time) {
+
+	o.CreationDate = &IonosTime{v}
+
 }
 
 // HasCreationDate returns a boolean if a field has been set.
 func (o *Bucket) HasCreationDate() bool {
-	if o != nil && !IsNil(o.CreationDate) {
+	if o != nil && o.CreationDate != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetCreationDate gets a reference to the given time.Time and assigns it to the CreationDate field.
-func (o *Bucket) SetCreationDate(v time.Time) {
-	o.CreationDate = &IonosTime{v}
-}
-
 func (o Bucket) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o Bucket) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Name) {
+	if o.Name != nil {
 		toSerialize["Name"] = o.Name
 	}
-	if !IsNil(o.CreationDate) {
+
+	if o.CreationDate != nil {
 		toSerialize["CreationDate"] = o.CreationDate
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableBucket struct {

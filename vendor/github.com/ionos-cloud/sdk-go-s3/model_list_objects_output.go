@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the ListObjectsOutput type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &ListObjectsOutput{}
-
 // ListObjectsOutput struct for ListObjectsOutput
 type ListObjectsOutput struct {
 	XMLName xml.Name `xml:"ListBucketResult"`
@@ -30,7 +27,7 @@ type ListObjectsOutput struct {
 	// When response is truncated (the IsTruncated element value in the response is true), you can use the key name in this field as marker in the subsequent request to get next set of objects. IONOS S3 Object Storage lists objects in alphabetical order Note: This element is returned only if you have delimiter request parameter specified. If response does not include the NextMarker and it is truncated, you can use the value of the last Key in the response as the marker in the subsequent request to get the next set of object keys.
 	NextMarker *string `json:"NextMarker,omitempty" xml:"NextMarker"`
 	// Metadata about each object returned.
-	Contents []Object `json:"Contents,omitempty" xml:"Contents"`
+	Contents *[]Object `json:"Contents,omitempty" xml:"Contents"`
 	// The bucket name.
 	Name *string `json:"Name,omitempty" xml:"Name"`
 	// Object key prefix that identifies one or more objects to which this rule applies. Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests.
@@ -39,8 +36,8 @@ type ListObjectsOutput struct {
 	// The maximum number of keys returned in the response. By default the operation returns up to 1000 key names. The response might contain fewer keys but will never contain more.
 	MaxKeys *int32 `json:"MaxKeys,omitempty" xml:"MaxKeys"`
 	// All of the keys rolled up into a common prefix count as a single return when calculating the number of returns.
-	CommonPrefixes []CommonPrefix `json:"CommonPrefixes,omitempty" xml:"CommonPrefixes"`
-	EncodingType   *EncodingType  `json:"EncodingType,omitempty" xml:"EncodingType"`
+	CommonPrefixes *[]CommonPrefix `json:"CommonPrefixes,omitempty" xml:"CommonPrefixes"`
+	EncodingType   *EncodingType   `json:"EncodingType,omitempty" xml:"EncodingType"`
 }
 
 // NewListObjectsOutput instantiates a new ListObjectsOutput object
@@ -61,367 +58,429 @@ func NewListObjectsOutputWithDefaults() *ListObjectsOutput {
 	return &this
 }
 
-// GetIsTruncated returns the IsTruncated field value if set, zero value otherwise.
-func (o *ListObjectsOutput) GetIsTruncated() bool {
-	if o == nil || IsNil(o.IsTruncated) {
-		var ret bool
-		return ret
+// GetIsTruncated returns the IsTruncated field value
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *ListObjectsOutput) GetIsTruncated() *bool {
+	if o == nil {
+		return nil
 	}
-	return *o.IsTruncated
+
+	return o.IsTruncated
+
 }
 
-// GetIsTruncatedOk returns a tuple with the IsTruncated field value if set, nil otherwise
+// GetIsTruncatedOk returns a tuple with the IsTruncated field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListObjectsOutput) GetIsTruncatedOk() (*bool, bool) {
-	if o == nil || IsNil(o.IsTruncated) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.IsTruncated, true
+}
+
+// SetIsTruncated sets field value
+func (o *ListObjectsOutput) SetIsTruncated(v bool) {
+
+	o.IsTruncated = &v
+
 }
 
 // HasIsTruncated returns a boolean if a field has been set.
 func (o *ListObjectsOutput) HasIsTruncated() bool {
-	if o != nil && !IsNil(o.IsTruncated) {
+	if o != nil && o.IsTruncated != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetIsTruncated gets a reference to the given bool and assigns it to the IsTruncated field.
-func (o *ListObjectsOutput) SetIsTruncated(v bool) {
-	o.IsTruncated = &v
-}
-
-// GetMarker returns the Marker field value if set, zero value otherwise.
-func (o *ListObjectsOutput) GetMarker() string {
-	if o == nil || IsNil(o.Marker) {
-		var ret string
-		return ret
+// GetMarker returns the Marker field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ListObjectsOutput) GetMarker() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Marker
+
+	return o.Marker
+
 }
 
-// GetMarkerOk returns a tuple with the Marker field value if set, nil otherwise
+// GetMarkerOk returns a tuple with the Marker field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListObjectsOutput) GetMarkerOk() (*string, bool) {
-	if o == nil || IsNil(o.Marker) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Marker, true
+}
+
+// SetMarker sets field value
+func (o *ListObjectsOutput) SetMarker(v string) {
+
+	o.Marker = &v
+
 }
 
 // HasMarker returns a boolean if a field has been set.
 func (o *ListObjectsOutput) HasMarker() bool {
-	if o != nil && !IsNil(o.Marker) {
+	if o != nil && o.Marker != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetMarker gets a reference to the given string and assigns it to the Marker field.
-func (o *ListObjectsOutput) SetMarker(v string) {
-	o.Marker = &v
-}
-
-// GetNextMarker returns the NextMarker field value if set, zero value otherwise.
-func (o *ListObjectsOutput) GetNextMarker() string {
-	if o == nil || IsNil(o.NextMarker) {
-		var ret string
-		return ret
+// GetNextMarker returns the NextMarker field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ListObjectsOutput) GetNextMarker() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.NextMarker
+
+	return o.NextMarker
+
 }
 
-// GetNextMarkerOk returns a tuple with the NextMarker field value if set, nil otherwise
+// GetNextMarkerOk returns a tuple with the NextMarker field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListObjectsOutput) GetNextMarkerOk() (*string, bool) {
-	if o == nil || IsNil(o.NextMarker) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.NextMarker, true
+}
+
+// SetNextMarker sets field value
+func (o *ListObjectsOutput) SetNextMarker(v string) {
+
+	o.NextMarker = &v
+
 }
 
 // HasNextMarker returns a boolean if a field has been set.
 func (o *ListObjectsOutput) HasNextMarker() bool {
-	if o != nil && !IsNil(o.NextMarker) {
+	if o != nil && o.NextMarker != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetNextMarker gets a reference to the given string and assigns it to the NextMarker field.
-func (o *ListObjectsOutput) SetNextMarker(v string) {
-	o.NextMarker = &v
-}
-
-// GetContents returns the Contents field value if set, zero value otherwise.
-func (o *ListObjectsOutput) GetContents() []Object {
-	if o == nil || IsNil(o.Contents) {
-		var ret []Object
-		return ret
+// GetContents returns the Contents field value
+// If the value is explicit nil, the zero value for []Object will be returned
+func (o *ListObjectsOutput) GetContents() *[]Object {
+	if o == nil {
+		return nil
 	}
+
 	return o.Contents
+
 }
 
-// GetContentsOk returns a tuple with the Contents field value if set, nil otherwise
+// GetContentsOk returns a tuple with the Contents field value
 // and a boolean to check if the value has been set.
-func (o *ListObjectsOutput) GetContentsOk() ([]Object, bool) {
-	if o == nil || IsNil(o.Contents) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ListObjectsOutput) GetContentsOk() (*[]Object, bool) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Contents, true
+}
+
+// SetContents sets field value
+func (o *ListObjectsOutput) SetContents(v []Object) {
+
+	o.Contents = &v
+
 }
 
 // HasContents returns a boolean if a field has been set.
 func (o *ListObjectsOutput) HasContents() bool {
-	if o != nil && !IsNil(o.Contents) {
+	if o != nil && o.Contents != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetContents gets a reference to the given []Object and assigns it to the Contents field.
-func (o *ListObjectsOutput) SetContents(v []Object) {
-	o.Contents = v
-}
-
-// GetName returns the Name field value if set, zero value otherwise.
-func (o *ListObjectsOutput) GetName() string {
-	if o == nil || IsNil(o.Name) {
-		var ret string
-		return ret
+// GetName returns the Name field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ListObjectsOutput) GetName() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Name
+
+	return o.Name
+
 }
 
-// GetNameOk returns a tuple with the Name field value if set, nil otherwise
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListObjectsOutput) GetNameOk() (*string, bool) {
-	if o == nil || IsNil(o.Name) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Name, true
+}
+
+// SetName sets field value
+func (o *ListObjectsOutput) SetName(v string) {
+
+	o.Name = &v
+
 }
 
 // HasName returns a boolean if a field has been set.
 func (o *ListObjectsOutput) HasName() bool {
-	if o != nil && !IsNil(o.Name) {
+	if o != nil && o.Name != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetName gets a reference to the given string and assigns it to the Name field.
-func (o *ListObjectsOutput) SetName(v string) {
-	o.Name = &v
-}
-
-// GetPrefix returns the Prefix field value if set, zero value otherwise.
-func (o *ListObjectsOutput) GetPrefix() string {
-	if o == nil || IsNil(o.Prefix) {
-		var ret string
-		return ret
+// GetPrefix returns the Prefix field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ListObjectsOutput) GetPrefix() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Prefix
+
+	return o.Prefix
+
 }
 
-// GetPrefixOk returns a tuple with the Prefix field value if set, nil otherwise
+// GetPrefixOk returns a tuple with the Prefix field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListObjectsOutput) GetPrefixOk() (*string, bool) {
-	if o == nil || IsNil(o.Prefix) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Prefix, true
+}
+
+// SetPrefix sets field value
+func (o *ListObjectsOutput) SetPrefix(v string) {
+
+	o.Prefix = &v
+
 }
 
 // HasPrefix returns a boolean if a field has been set.
 func (o *ListObjectsOutput) HasPrefix() bool {
-	if o != nil && !IsNil(o.Prefix) {
+	if o != nil && o.Prefix != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetPrefix gets a reference to the given string and assigns it to the Prefix field.
-func (o *ListObjectsOutput) SetPrefix(v string) {
-	o.Prefix = &v
-}
-
-// GetDelimiter returns the Delimiter field value if set, zero value otherwise.
-func (o *ListObjectsOutput) GetDelimiter() string {
-	if o == nil || IsNil(o.Delimiter) {
-		var ret string
-		return ret
+// GetDelimiter returns the Delimiter field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ListObjectsOutput) GetDelimiter() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Delimiter
+
+	return o.Delimiter
+
 }
 
-// GetDelimiterOk returns a tuple with the Delimiter field value if set, nil otherwise
+// GetDelimiterOk returns a tuple with the Delimiter field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListObjectsOutput) GetDelimiterOk() (*string, bool) {
-	if o == nil || IsNil(o.Delimiter) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Delimiter, true
+}
+
+// SetDelimiter sets field value
+func (o *ListObjectsOutput) SetDelimiter(v string) {
+
+	o.Delimiter = &v
+
 }
 
 // HasDelimiter returns a boolean if a field has been set.
 func (o *ListObjectsOutput) HasDelimiter() bool {
-	if o != nil && !IsNil(o.Delimiter) {
+	if o != nil && o.Delimiter != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetDelimiter gets a reference to the given string and assigns it to the Delimiter field.
-func (o *ListObjectsOutput) SetDelimiter(v string) {
-	o.Delimiter = &v
-}
-
-// GetMaxKeys returns the MaxKeys field value if set, zero value otherwise.
-func (o *ListObjectsOutput) GetMaxKeys() int32 {
-	if o == nil || IsNil(o.MaxKeys) {
-		var ret int32
-		return ret
+// GetMaxKeys returns the MaxKeys field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *ListObjectsOutput) GetMaxKeys() *int32 {
+	if o == nil {
+		return nil
 	}
-	return *o.MaxKeys
+
+	return o.MaxKeys
+
 }
 
-// GetMaxKeysOk returns a tuple with the MaxKeys field value if set, nil otherwise
+// GetMaxKeysOk returns a tuple with the MaxKeys field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListObjectsOutput) GetMaxKeysOk() (*int32, bool) {
-	if o == nil || IsNil(o.MaxKeys) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.MaxKeys, true
+}
+
+// SetMaxKeys sets field value
+func (o *ListObjectsOutput) SetMaxKeys(v int32) {
+
+	o.MaxKeys = &v
+
 }
 
 // HasMaxKeys returns a boolean if a field has been set.
 func (o *ListObjectsOutput) HasMaxKeys() bool {
-	if o != nil && !IsNil(o.MaxKeys) {
+	if o != nil && o.MaxKeys != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetMaxKeys gets a reference to the given int32 and assigns it to the MaxKeys field.
-func (o *ListObjectsOutput) SetMaxKeys(v int32) {
-	o.MaxKeys = &v
-}
-
-// GetCommonPrefixes returns the CommonPrefixes field value if set, zero value otherwise.
-func (o *ListObjectsOutput) GetCommonPrefixes() []CommonPrefix {
-	if o == nil || IsNil(o.CommonPrefixes) {
-		var ret []CommonPrefix
-		return ret
+// GetCommonPrefixes returns the CommonPrefixes field value
+// If the value is explicit nil, the zero value for []CommonPrefix will be returned
+func (o *ListObjectsOutput) GetCommonPrefixes() *[]CommonPrefix {
+	if o == nil {
+		return nil
 	}
+
 	return o.CommonPrefixes
+
 }
 
-// GetCommonPrefixesOk returns a tuple with the CommonPrefixes field value if set, nil otherwise
+// GetCommonPrefixesOk returns a tuple with the CommonPrefixes field value
 // and a boolean to check if the value has been set.
-func (o *ListObjectsOutput) GetCommonPrefixesOk() ([]CommonPrefix, bool) {
-	if o == nil || IsNil(o.CommonPrefixes) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ListObjectsOutput) GetCommonPrefixesOk() (*[]CommonPrefix, bool) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.CommonPrefixes, true
+}
+
+// SetCommonPrefixes sets field value
+func (o *ListObjectsOutput) SetCommonPrefixes(v []CommonPrefix) {
+
+	o.CommonPrefixes = &v
+
 }
 
 // HasCommonPrefixes returns a boolean if a field has been set.
 func (o *ListObjectsOutput) HasCommonPrefixes() bool {
-	if o != nil && !IsNil(o.CommonPrefixes) {
+	if o != nil && o.CommonPrefixes != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetCommonPrefixes gets a reference to the given []CommonPrefix and assigns it to the CommonPrefixes field.
-func (o *ListObjectsOutput) SetCommonPrefixes(v []CommonPrefix) {
-	o.CommonPrefixes = v
-}
-
-// GetEncodingType returns the EncodingType field value if set, zero value otherwise.
-func (o *ListObjectsOutput) GetEncodingType() EncodingType {
-	if o == nil || IsNil(o.EncodingType) {
-		var ret EncodingType
-		return ret
+// GetEncodingType returns the EncodingType field value
+// If the value is explicit nil, the zero value for EncodingType will be returned
+func (o *ListObjectsOutput) GetEncodingType() *EncodingType {
+	if o == nil {
+		return nil
 	}
-	return *o.EncodingType
+
+	return o.EncodingType
+
 }
 
-// GetEncodingTypeOk returns a tuple with the EncodingType field value if set, nil otherwise
+// GetEncodingTypeOk returns a tuple with the EncodingType field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListObjectsOutput) GetEncodingTypeOk() (*EncodingType, bool) {
-	if o == nil || IsNil(o.EncodingType) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.EncodingType, true
+}
+
+// SetEncodingType sets field value
+func (o *ListObjectsOutput) SetEncodingType(v EncodingType) {
+
+	o.EncodingType = &v
+
 }
 
 // HasEncodingType returns a boolean if a field has been set.
 func (o *ListObjectsOutput) HasEncodingType() bool {
-	if o != nil && !IsNil(o.EncodingType) {
+	if o != nil && o.EncodingType != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetEncodingType gets a reference to the given EncodingType and assigns it to the EncodingType field.
-func (o *ListObjectsOutput) SetEncodingType(v EncodingType) {
-	o.EncodingType = &v
-}
-
 func (o ListObjectsOutput) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o ListObjectsOutput) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.IsTruncated) {
+	if o.IsTruncated != nil {
 		toSerialize["IsTruncated"] = o.IsTruncated
 	}
-	if !IsNil(o.Marker) {
+
+	if o.Marker != nil {
 		toSerialize["Marker"] = o.Marker
 	}
-	if !IsNil(o.NextMarker) {
+
+	if o.NextMarker != nil {
 		toSerialize["NextMarker"] = o.NextMarker
 	}
-	if !IsNil(o.Contents) {
+
+	if o.Contents != nil {
 		toSerialize["Contents"] = o.Contents
 	}
-	if !IsNil(o.Name) {
+
+	if o.Name != nil {
 		toSerialize["Name"] = o.Name
 	}
-	if !IsNil(o.Prefix) {
+
+	if o.Prefix != nil {
 		toSerialize["Prefix"] = o.Prefix
 	}
-	if !IsNil(o.Delimiter) {
+
+	if o.Delimiter != nil {
 		toSerialize["Delimiter"] = o.Delimiter
 	}
-	if !IsNil(o.MaxKeys) {
+
+	if o.MaxKeys != nil {
 		toSerialize["MaxKeys"] = o.MaxKeys
 	}
-	if !IsNil(o.CommonPrefixes) {
+
+	if o.CommonPrefixes != nil {
 		toSerialize["CommonPrefixes"] = o.CommonPrefixes
 	}
-	if !IsNil(o.EncodingType) {
+
+	if o.EncodingType != nil {
 		toSerialize["EncodingType"] = o.EncodingType
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableListObjectsOutput struct {
