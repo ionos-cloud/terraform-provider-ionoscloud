@@ -72,8 +72,12 @@ func setShareConfig(d *schema.ResourceData) sdk.Share {
 		for _, host := range hostsRaw {
 			hosts = append(hosts, host.(string))
 		}
-		nfsData := cg["nfs"].(map[string]interface{})
-		squash := nfsData["squash"].(string)
+		nfsRaw := cg["nfs"].([]interface{})
+		var squash string
+		if len(nfsRaw) > 0 {
+			nfsData := nfsRaw[0].(map[string]interface{})
+			squash = nfsData["squash"].(string)
+		}
 
 		clientGroups = append(clientGroups, sdk.ShareClientGroups{
 			Description: &description,
@@ -122,8 +126,10 @@ func flattenClientGroups(clientGroups []sdk.ShareClientGroups) []map[string]inte
 			"description": *cg.Description,
 			"ip_networks": *cg.IpNetworks,
 			"hosts":       *cg.Hosts,
-			"nfs": map[string]interface{}{
-				"squash": *cg.Nfs.Squash,
+			"nfs": []map[string]interface{}{
+				{
+					"squash": *cg.Nfs.Squash,
+				},
 			},
 		}
 		result[i] = flattened
