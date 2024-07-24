@@ -247,12 +247,12 @@ func getWireguardGwConnectionsData(d *schema.ResourceData) []vpnSdk.Connection {
 			for idx := range connectionsItf {
 				connection := vpnSdk.Connection{}
 				if datacenterID, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", idx)); ok {
-					datacenterId := datacenterID.(string)
-					connection.DatacenterId = datacenterId
+					datacenterID := datacenterID.(string)
+					connection.DatacenterId = datacenterID
 				}
 				if lanID, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", idx)); ok {
-					lanId := lanID.(string)
-					connection.LanId = lanId
+					lanID := lanID.(string)
+					connection.LanId = lanID
 				}
 				if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv4_cidr", idx)); ok {
 					cidr := cidr.(string)
@@ -323,6 +323,7 @@ func setWireguardPeerPatchRequest(d *schema.ResourceData) (vpnSdk.WireguardPeerE
 	return request, nil
 }
 
+// SetWireguardGWData sets the wireguard gateway data
 func SetWireguardGWData(d *schema.ResourceData, wireguard vpnSdk.WireguardGatewayRead) error {
 	d.SetId(wireguard.Id)
 
@@ -369,6 +370,7 @@ func SetWireguardGWData(d *schema.ResourceData, wireguard vpnSdk.WireguardGatewa
 
 var resPeerName = "vpnSdk wireguard peer"
 
+// SetWireguardPeerData sets the wireguard peer data
 func SetWireguardPeerData(d *schema.ResourceData, wireguard vpnSdk.WireguardPeerRead) error {
 	d.SetId(wireguard.Id)
 
