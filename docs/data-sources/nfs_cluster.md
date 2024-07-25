@@ -28,6 +28,14 @@ data "ionoscloud_nfs_cluster" "example" {
   name = <partial-name>
   partial_match = true
 }
+
+output "cluster_test_output" {
+    value = format("%s from %s with %sTB",
+        data.ionoscloud_nfs_cluster.example.name,
+        data.ionoscloud_nfs_cluster.example.location,
+        data.ionoscloud_nfs_cluster.example.nfs[0].min_version
+    )
+}
 ```
 
 ## Argument Reference
