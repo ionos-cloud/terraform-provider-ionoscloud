@@ -15,7 +15,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
 	"net/http"
 	"net/url"
@@ -44,7 +43,7 @@ func (r ApiCreateBucketRequest) XAmzBucketObjectLockEnabled(xAmzBucketObjectLock
 	return r
 }
 
-func (r ApiCreateBucketRequest) Execute() (*shared.APIResponse, error) {
+func (r ApiCreateBucketRequest) Execute() (*APIResponse, error) {
 	return r.ApiService.CreateBucketExecute(r)
 }
 
@@ -80,7 +79,7 @@ func (a *BucketsApiService) CreateBucket(ctx context.Context, bucket string) Api
 }
 
 // Execute executes the request
-func (a *BucketsApiService) CreateBucketExecute(r ApiCreateBucketRequest) (*shared.APIResponse, error) {
+func (a *BucketsApiService) CreateBucketExecute(r ApiCreateBucketRequest) (*APIResponse, error) {
 	var (
 		localVarHTTPMethod = http.MethodPut
 		localVarPostBody   interface{}
@@ -89,7 +88,7 @@ func (a *BucketsApiService) CreateBucketExecute(r ApiCreateBucketRequest) (*shar
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BucketsApiService.CreateBucket")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return nil, gerr
 	}
@@ -100,10 +99,10 @@ func (a *BucketsApiService) CreateBucketExecute(r ApiCreateBucketRequest) (*shar
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
 	if r.createBucketConfiguration == nil {
@@ -152,7 +151,7 @@ func (a *BucketsApiService) CreateBucketExecute(r ApiCreateBucketRequest) (*shar
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -172,7 +171,7 @@ func (a *BucketsApiService) CreateBucketExecute(r ApiCreateBucketRequest) (*shar
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -217,7 +216,7 @@ type ApiDeleteBucketRequest struct {
 	bucket     string
 }
 
-func (r ApiDeleteBucketRequest) Execute() (*shared.APIResponse, error) {
+func (r ApiDeleteBucketRequest) Execute() (*APIResponse, error) {
 	return r.ApiService.DeleteBucketExecute(r)
 }
 
@@ -248,7 +247,7 @@ func (a *BucketsApiService) DeleteBucket(ctx context.Context, bucket string) Api
 }
 
 // Execute executes the request
-func (a *BucketsApiService) DeleteBucketExecute(r ApiDeleteBucketRequest) (*shared.APIResponse, error) {
+func (a *BucketsApiService) DeleteBucketExecute(r ApiDeleteBucketRequest) (*APIResponse, error) {
 	var (
 		localVarHTTPMethod = http.MethodDelete
 		localVarPostBody   interface{}
@@ -257,7 +256,7 @@ func (a *BucketsApiService) DeleteBucketExecute(r ApiDeleteBucketRequest) (*shar
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BucketsApiService.DeleteBucket")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return nil, gerr
 	}
@@ -268,10 +267,10 @@ func (a *BucketsApiService) DeleteBucketExecute(r ApiDeleteBucketRequest) (*shar
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
 
@@ -312,7 +311,7 @@ func (a *BucketsApiService) DeleteBucketExecute(r ApiDeleteBucketRequest) (*shar
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -332,7 +331,7 @@ func (a *BucketsApiService) DeleteBucketExecute(r ApiDeleteBucketRequest) (*shar
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -367,7 +366,7 @@ type ApiGetBucketLocationRequest struct {
 	bucket     string
 }
 
-func (r ApiGetBucketLocationRequest) Execute() (*GetBucketLocation200Response, *shared.APIResponse, error) {
+func (r ApiGetBucketLocationRequest) Execute() (*BucketLocation, *APIResponse, error) {
 	return r.ApiService.GetBucketLocationExecute(r)
 }
 
@@ -396,18 +395,18 @@ func (a *BucketsApiService) GetBucketLocation(ctx context.Context, bucket string
 
 // Execute executes the request
 //
-//	@return GetBucketLocation200Response
-func (a *BucketsApiService) GetBucketLocationExecute(r ApiGetBucketLocationRequest) (*GetBucketLocation200Response, *shared.APIResponse, error) {
+//	@return BucketLocation
+func (a *BucketsApiService) GetBucketLocationExecute(r ApiGetBucketLocationRequest) (*BucketLocation, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *GetBucketLocation200Response
+		localVarReturnValue *BucketLocation
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BucketsApiService.GetBucketLocation")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -418,10 +417,10 @@ func (a *BucketsApiService) GetBucketLocationExecute(r ApiGetBucketLocationReque
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
 
@@ -462,7 +461,7 @@ func (a *BucketsApiService) GetBucketLocationExecute(r ApiGetBucketLocationReque
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -482,7 +481,7 @@ func (a *BucketsApiService) GetBucketLocationExecute(r ApiGetBucketLocationReque
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -510,7 +509,7 @@ func (a *BucketsApiService) GetBucketLocationExecute(r ApiGetBucketLocationReque
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -526,7 +525,7 @@ type ApiHeadBucketRequest struct {
 	bucket     string
 }
 
-func (r ApiHeadBucketRequest) Execute() (*shared.APIResponse, error) {
+func (r ApiHeadBucketRequest) Execute() (*APIResponse, error) {
 	return r.ApiService.HeadBucketExecute(r)
 }
 
@@ -562,7 +561,7 @@ func (a *BucketsApiService) HeadBucket(ctx context.Context, bucket string) ApiHe
 }
 
 // Execute executes the request
-func (a *BucketsApiService) HeadBucketExecute(r ApiHeadBucketRequest) (*shared.APIResponse, error) {
+func (a *BucketsApiService) HeadBucketExecute(r ApiHeadBucketRequest) (*APIResponse, error) {
 	var (
 		localVarHTTPMethod = http.MethodHead
 		localVarPostBody   interface{}
@@ -571,7 +570,7 @@ func (a *BucketsApiService) HeadBucketExecute(r ApiHeadBucketRequest) (*shared.A
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BucketsApiService.HeadBucket")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return nil, gerr
 	}
@@ -582,10 +581,10 @@ func (a *BucketsApiService) HeadBucketExecute(r ApiHeadBucketRequest) (*shared.A
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
 
@@ -626,7 +625,7 @@ func (a *BucketsApiService) HeadBucketExecute(r ApiHeadBucketRequest) (*shared.A
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -646,7 +645,7 @@ func (a *BucketsApiService) HeadBucketExecute(r ApiHeadBucketRequest) (*shared.A
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -680,7 +679,7 @@ type ApiListBucketsRequest struct {
 	ApiService *BucketsApiService
 }
 
-func (r ApiListBucketsRequest) Execute() (*ListAllMyBucketsResult, *shared.APIResponse, error) {
+func (r ApiListBucketsRequest) Execute() (*ListAllMyBucketsResult, *APIResponse, error) {
 	return r.ApiService.ListBucketsExecute(r)
 }
 
@@ -705,7 +704,7 @@ func (a *BucketsApiService) ListBuckets(ctx context.Context) ApiListBucketsReque
 // Execute executes the request
 //
 //	@return ListAllMyBucketsResult
-func (a *BucketsApiService) ListBucketsExecute(r ApiListBucketsRequest) (*ListAllMyBucketsResult, *shared.APIResponse, error) {
+func (a *BucketsApiService) ListBucketsExecute(r ApiListBucketsRequest) (*ListAllMyBucketsResult, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -715,7 +714,7 @@ func (a *BucketsApiService) ListBucketsExecute(r ApiListBucketsRequest) (*ListAl
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BucketsApiService.ListBuckets")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -763,7 +762,7 @@ func (a *BucketsApiService) ListBucketsExecute(r ApiListBucketsRequest) (*ListAl
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -783,7 +782,7 @@ func (a *BucketsApiService) ListBucketsExecute(r ApiListBucketsRequest) (*ListAl
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -801,7 +800,7 @@ func (a *BucketsApiService) ListBucketsExecute(r ApiListBucketsRequest) (*ListAl
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())

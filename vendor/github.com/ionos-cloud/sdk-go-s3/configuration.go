@@ -12,17 +12,24 @@
 package ionoscloud
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
 )
 
 const (
-	defaultMaxRetries  = 3
-	defaultWaitTime    = time.Duration(100) * time.Millisecond
-	defaultMaxWaitTime = time.Duration(2000) * time.Millisecond
+	IonosLogLevelEnvVar = "IONOS_LOG_LEVEL"
+	defaultMaxRetries   = 3
+	defaultWaitTime     = time.Duration(100) * time.Millisecond
+	defaultMaxWaitTime  = time.Duration(2000) * time.Millisecond
 )
 
 // contextKeys are used to identify the type of value in the context.
@@ -106,17 +113,21 @@ type Configuration struct {
 	MaxRetries          int           `json:"maxRetries,omitempty"`
 	WaitTime            time.Duration `json:"waitTime,omitempty"`
 	MaxWaitTime         time.Duration `json:"maxWaitTime,omitempty"`
+	LogLevel            LogLevel
+	Logger              Logger
 }
 
 // NewConfiguration returns a new Configuration object
 func NewConfiguration() *Configuration {
 	cfg := &Configuration{
 		DefaultHeader: make(map[string]string),
-		UserAgent:     "ionos-cloud-ionoscloud-ionoscloud/v7.0.0",
+		UserAgent:     "ionos-cloud-ionoscloud/v7.0.0",
 		Debug:         false,
 		MaxRetries:    defaultMaxRetries,
 		MaxWaitTime:   defaultMaxWaitTime,
 		WaitTime:      defaultWaitTime,
+		Logger:        NewDefaultLogger(),
+		LogLevel:      getLogLevelFromEnv(),
 		Servers: ServerConfigurations{
 			{
 				URL:         "https://s3.eu-central-3.ionoscloud.com",
@@ -125,6 +136,14 @@ func NewConfiguration() *Configuration {
 		},
 		OperationServers: map[string]ServerConfigurations{},
 	}
+	return cfg
+}
+
+func NewConfigurationFromEnv() *Configuration {
+	region := "eu-central-3"
+	service := "s3"
+	cfg := NewConfiguration()
+	cfg.MiddlewareWithError = signerMw(region, service, os.Getenv("IONOS_S3_ACCESS_KEY"), os.Getenv("IONOS_S3_SECRET_KEY"))
 	return cfg
 }
 
@@ -240,4 +259,28 @@ func (c *Configuration) ServerURLWithContext(ctx context.Context, endpoint strin
 	}
 
 	return sc.URL(index, variables)
+}
+
+func signerMw(region, service, accessKey, secretKey string) MiddlewareFunctionWithError {
+	signer := awsv4.NewSigner(credentials.NewStaticCredentials(accessKey, secretKey, ""))
+
+	// Define default values for region and service to maintain backward compatibility
+	if region == "" {
+		region = "eu-central-3"
+	}
+	if service == "" {
+		service = "s3"
+	}
+	return func(r *http.Request) error {
+		var reader io.ReadSeeker
+		if r.Body != nil {
+			bodyBytes, err := io.ReadAll(r.Body)
+			if err != nil {
+				return err
+			}
+			reader = bytes.NewReader(bodyBytes)
+		}
+		_, err := signer.Sign(r, reader, service, region, time.Now())
+		return err
+	}
 }

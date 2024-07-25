@@ -25,7 +25,7 @@ func TestAccBucketPolicyDataSource(t *testing.T) {
 				Config: testAccBucketPolicyDataSourceConfig_basic(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "bucket", rName),
-					testAccCheckBucketPolicyData,
+					testAccCheckBucketPolicyData(PolicyJSON),
 				),
 			},
 		},

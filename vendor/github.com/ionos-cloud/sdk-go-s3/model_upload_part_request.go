@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the UploadPartRequest type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &UploadPartRequest{}
-
 // UploadPartRequest struct for UploadPartRequest
 type UploadPartRequest struct {
 	XMLName xml.Name `xml:"UploadPartRequest"`
@@ -45,52 +42,51 @@ func NewUploadPartRequestWithDefaults() *UploadPartRequest {
 	return &this
 }
 
-// GetBody returns the Body field value if set, zero value otherwise.
-func (o *UploadPartRequest) GetBody() string {
-	if o == nil || IsNil(o.Body) {
-		var ret string
-		return ret
+// GetBody returns the Body field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *UploadPartRequest) GetBody() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Body
+
+	return o.Body
+
 }
 
-// GetBodyOk returns a tuple with the Body field value if set, nil otherwise
+// GetBodyOk returns a tuple with the Body field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UploadPartRequest) GetBodyOk() (*string, bool) {
-	if o == nil || IsNil(o.Body) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Body, true
+}
+
+// SetBody sets field value
+func (o *UploadPartRequest) SetBody(v string) {
+
+	o.Body = &v
+
 }
 
 // HasBody returns a boolean if a field has been set.
 func (o *UploadPartRequest) HasBody() bool {
-	if o != nil && !IsNil(o.Body) {
+	if o != nil && o.Body != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetBody gets a reference to the given string and assigns it to the Body field.
-func (o *UploadPartRequest) SetBody(v string) {
-	o.Body = &v
-}
-
 func (o UploadPartRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o UploadPartRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Body) {
+	if o.Body != nil {
 		toSerialize["Body"] = o.Body
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableUploadPartRequest struct {

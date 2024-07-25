@@ -13,7 +13,6 @@ package ionoscloud
 
 import (
 	"encoding/json"
-
 	"fmt"
 )
 

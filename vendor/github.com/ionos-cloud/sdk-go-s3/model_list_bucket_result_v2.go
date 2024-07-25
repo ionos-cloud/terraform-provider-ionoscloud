@@ -17,27 +17,24 @@ import (
 
 import "encoding/xml"
 
-// checks if the ListBucketResultV2 type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &ListBucketResultV2{}
-
 // ListBucketResultV2 A container for the data.
 type ListBucketResultV2 struct {
 	XMLName xml.Name `xml:"ListBucketResult"`
 	// The bucket name.
-	Name string `json:"Name" xml:"Name"`
+	Name *string `json:"Name" xml:"Name"`
 	// Object key prefix that identifies one or more objects to which this rule applies. Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests.
-	Prefix string `json:"Prefix" xml:"Prefix"`
+	Prefix *string `json:"Prefix" xml:"Prefix"`
 	// The maximum number of keys returned in the response. By default the operation returns up to 1000 key names. The response might contain fewer keys but will never contain more.
-	MaxKeys int32 `json:"MaxKeys" xml:"MaxKeys"`
+	MaxKeys *int32 `json:"MaxKeys" xml:"MaxKeys"`
 	// A flag that indicates whether IONOS S3 Object Storage returned all of the results that satisfied the search criteria. If your results were truncated, you can make a follow-up paginated request using the NextKeyMarker and NextVersionIdMarker response parameters as a starting place in another request to return the rest of the results.
-	IsTruncated bool  `json:"IsTruncated" xml:"IsTruncated"`
-	KeyCount    int32 `json:"KeyCount" xml:"KeyCount"`
+	IsTruncated *bool  `json:"IsTruncated" xml:"IsTruncated"`
+	KeyCount    *int32 `json:"KeyCount" xml:"KeyCount"`
 	// Metadata about each object returned.
-	Contents  []Object `json:"Contents" xml:"Contents"`
-	Delimiter *string  `json:"Delimiter,omitempty" xml:"Delimiter"`
+	Contents  *[]Object `json:"Contents" xml:"Contents"`
+	Delimiter *string   `json:"Delimiter,omitempty" xml:"Delimiter"`
 	// All of the keys rolled up into a common prefix count as a single return when calculating the number of returns.
-	CommonPrefixes []CommonPrefix `json:"CommonPrefixes,omitempty" xml:"CommonPrefixes"`
-	EncodingType   *EncodingType  `json:"EncodingType,omitempty" xml:"EncodingType"`
+	CommonPrefixes *[]CommonPrefix `json:"CommonPrefixes,omitempty" xml:"CommonPrefixes"`
+	EncodingType   *EncodingType   `json:"EncodingType,omitempty" xml:"EncodingType"`
 	// If ContinuationToken was sent with the request, it is included in the response.
 	ContinuationToken *string `json:"ContinuationToken,omitempty" xml:"ContinuationToken"`
 	// `NextContinuationToken` is sent when `isTruncated` is true, which means there are more keys in the bucket that can be listed. The next list requests to IONOS S3 Object Storage can be continued with this `NextContinuationToken`. `NextContinuationToken` is obfuscated and is not a real key.
@@ -53,12 +50,12 @@ type ListBucketResultV2 struct {
 func NewListBucketResultV2(name string, prefix string, maxKeys int32, isTruncated bool, keyCount int32, contents []Object) *ListBucketResultV2 {
 	this := ListBucketResultV2{}
 
-	this.Name = name
-	this.Prefix = prefix
-	this.MaxKeys = maxKeys
-	this.IsTruncated = isTruncated
-	this.KeyCount = keyCount
-	this.Contents = contents
+	this.Name = &name
+	this.Prefix = &prefix
+	this.MaxKeys = &maxKeys
+	this.IsTruncated = &isTruncated
+	this.KeyCount = &keyCount
+	this.Contents = &contents
 
 	return &this
 }
@@ -69,393 +66,517 @@ func NewListBucketResultV2(name string, prefix string, maxKeys int32, isTruncate
 func NewListBucketResultV2WithDefaults() *ListBucketResultV2 {
 	this := ListBucketResultV2{}
 	var maxKeys int32 = 1000
-	this.MaxKeys = maxKeys
+	this.MaxKeys = &maxKeys
 	return &this
 }
 
 // GetName returns the Name field value
-func (o *ListBucketResultV2) GetName() string {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ListBucketResultV2) GetName() *string {
 	if o == nil {
-		var ret string
-		return ret
+		return nil
 	}
 
 	return o.Name
+
 }
 
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListBucketResultV2) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Name, true
+
+	return o.Name, true
 }
 
 // SetName sets field value
 func (o *ListBucketResultV2) SetName(v string) {
-	o.Name = v
+
+	o.Name = &v
+
+}
+
+// HasName returns a boolean if a field has been set.
+func (o *ListBucketResultV2) HasName() bool {
+	if o != nil && o.Name != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetPrefix returns the Prefix field value
-func (o *ListBucketResultV2) GetPrefix() string {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ListBucketResultV2) GetPrefix() *string {
 	if o == nil {
-		var ret string
-		return ret
+		return nil
 	}
 
 	return o.Prefix
+
 }
 
 // GetPrefixOk returns a tuple with the Prefix field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListBucketResultV2) GetPrefixOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Prefix, true
+
+	return o.Prefix, true
 }
 
 // SetPrefix sets field value
 func (o *ListBucketResultV2) SetPrefix(v string) {
-	o.Prefix = v
+
+	o.Prefix = &v
+
+}
+
+// HasPrefix returns a boolean if a field has been set.
+func (o *ListBucketResultV2) HasPrefix() bool {
+	if o != nil && o.Prefix != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetMaxKeys returns the MaxKeys field value
-func (o *ListBucketResultV2) GetMaxKeys() int32 {
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *ListBucketResultV2) GetMaxKeys() *int32 {
 	if o == nil {
-		var ret int32
-		return ret
+		return nil
 	}
 
 	return o.MaxKeys
+
 }
 
 // GetMaxKeysOk returns a tuple with the MaxKeys field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListBucketResultV2) GetMaxKeysOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.MaxKeys, true
+
+	return o.MaxKeys, true
 }
 
 // SetMaxKeys sets field value
 func (o *ListBucketResultV2) SetMaxKeys(v int32) {
-	o.MaxKeys = v
+
+	o.MaxKeys = &v
+
+}
+
+// HasMaxKeys returns a boolean if a field has been set.
+func (o *ListBucketResultV2) HasMaxKeys() bool {
+	if o != nil && o.MaxKeys != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetIsTruncated returns the IsTruncated field value
-func (o *ListBucketResultV2) GetIsTruncated() bool {
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *ListBucketResultV2) GetIsTruncated() *bool {
 	if o == nil {
-		var ret bool
-		return ret
+		return nil
 	}
 
 	return o.IsTruncated
+
 }
 
 // GetIsTruncatedOk returns a tuple with the IsTruncated field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListBucketResultV2) GetIsTruncatedOk() (*bool, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.IsTruncated, true
+
+	return o.IsTruncated, true
 }
 
 // SetIsTruncated sets field value
 func (o *ListBucketResultV2) SetIsTruncated(v bool) {
-	o.IsTruncated = v
+
+	o.IsTruncated = &v
+
+}
+
+// HasIsTruncated returns a boolean if a field has been set.
+func (o *ListBucketResultV2) HasIsTruncated() bool {
+	if o != nil && o.IsTruncated != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetKeyCount returns the KeyCount field value
-func (o *ListBucketResultV2) GetKeyCount() int32 {
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *ListBucketResultV2) GetKeyCount() *int32 {
 	if o == nil {
-		var ret int32
-		return ret
+		return nil
 	}
 
 	return o.KeyCount
+
 }
 
 // GetKeyCountOk returns a tuple with the KeyCount field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListBucketResultV2) GetKeyCountOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.KeyCount, true
+
+	return o.KeyCount, true
 }
 
 // SetKeyCount sets field value
 func (o *ListBucketResultV2) SetKeyCount(v int32) {
-	o.KeyCount = v
+
+	o.KeyCount = &v
+
+}
+
+// HasKeyCount returns a boolean if a field has been set.
+func (o *ListBucketResultV2) HasKeyCount() bool {
+	if o != nil && o.KeyCount != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetContents returns the Contents field value
-func (o *ListBucketResultV2) GetContents() []Object {
+// If the value is explicit nil, the zero value for []Object will be returned
+func (o *ListBucketResultV2) GetContents() *[]Object {
 	if o == nil {
-		var ret []Object
-		return ret
+		return nil
 	}
 
 	return o.Contents
+
 }
 
 // GetContentsOk returns a tuple with the Contents field value
 // and a boolean to check if the value has been set.
-func (o *ListBucketResultV2) GetContentsOk() ([]Object, bool) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ListBucketResultV2) GetContentsOk() (*[]Object, bool) {
 	if o == nil {
 		return nil, false
 	}
+
 	return o.Contents, true
 }
 
 // SetContents sets field value
 func (o *ListBucketResultV2) SetContents(v []Object) {
-	o.Contents = v
+
+	o.Contents = &v
+
 }
 
-// GetDelimiter returns the Delimiter field value if set, zero value otherwise.
-func (o *ListBucketResultV2) GetDelimiter() string {
-	if o == nil || IsNil(o.Delimiter) {
-		var ret string
-		return ret
+// HasContents returns a boolean if a field has been set.
+func (o *ListBucketResultV2) HasContents() bool {
+	if o != nil && o.Contents != nil {
+		return true
 	}
-	return *o.Delimiter
+
+	return false
 }
 
-// GetDelimiterOk returns a tuple with the Delimiter field value if set, nil otherwise
+// GetDelimiter returns the Delimiter field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ListBucketResultV2) GetDelimiter() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Delimiter
+
+}
+
+// GetDelimiterOk returns a tuple with the Delimiter field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListBucketResultV2) GetDelimiterOk() (*string, bool) {
-	if o == nil || IsNil(o.Delimiter) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Delimiter, true
+}
+
+// SetDelimiter sets field value
+func (o *ListBucketResultV2) SetDelimiter(v string) {
+
+	o.Delimiter = &v
+
 }
 
 // HasDelimiter returns a boolean if a field has been set.
 func (o *ListBucketResultV2) HasDelimiter() bool {
-	if o != nil && !IsNil(o.Delimiter) {
+	if o != nil && o.Delimiter != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetDelimiter gets a reference to the given string and assigns it to the Delimiter field.
-func (o *ListBucketResultV2) SetDelimiter(v string) {
-	o.Delimiter = &v
-}
-
-// GetCommonPrefixes returns the CommonPrefixes field value if set, zero value otherwise.
-func (o *ListBucketResultV2) GetCommonPrefixes() []CommonPrefix {
-	if o == nil || IsNil(o.CommonPrefixes) {
-		var ret []CommonPrefix
-		return ret
+// GetCommonPrefixes returns the CommonPrefixes field value
+// If the value is explicit nil, the zero value for []CommonPrefix will be returned
+func (o *ListBucketResultV2) GetCommonPrefixes() *[]CommonPrefix {
+	if o == nil {
+		return nil
 	}
+
 	return o.CommonPrefixes
+
 }
 
-// GetCommonPrefixesOk returns a tuple with the CommonPrefixes field value if set, nil otherwise
+// GetCommonPrefixesOk returns a tuple with the CommonPrefixes field value
 // and a boolean to check if the value has been set.
-func (o *ListBucketResultV2) GetCommonPrefixesOk() ([]CommonPrefix, bool) {
-	if o == nil || IsNil(o.CommonPrefixes) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ListBucketResultV2) GetCommonPrefixesOk() (*[]CommonPrefix, bool) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.CommonPrefixes, true
+}
+
+// SetCommonPrefixes sets field value
+func (o *ListBucketResultV2) SetCommonPrefixes(v []CommonPrefix) {
+
+	o.CommonPrefixes = &v
+
 }
 
 // HasCommonPrefixes returns a boolean if a field has been set.
 func (o *ListBucketResultV2) HasCommonPrefixes() bool {
-	if o != nil && !IsNil(o.CommonPrefixes) {
+	if o != nil && o.CommonPrefixes != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetCommonPrefixes gets a reference to the given []CommonPrefix and assigns it to the CommonPrefixes field.
-func (o *ListBucketResultV2) SetCommonPrefixes(v []CommonPrefix) {
-	o.CommonPrefixes = v
-}
-
-// GetEncodingType returns the EncodingType field value if set, zero value otherwise.
-func (o *ListBucketResultV2) GetEncodingType() EncodingType {
-	if o == nil || IsNil(o.EncodingType) {
-		var ret EncodingType
-		return ret
+// GetEncodingType returns the EncodingType field value
+// If the value is explicit nil, the zero value for EncodingType will be returned
+func (o *ListBucketResultV2) GetEncodingType() *EncodingType {
+	if o == nil {
+		return nil
 	}
-	return *o.EncodingType
+
+	return o.EncodingType
+
 }
 
-// GetEncodingTypeOk returns a tuple with the EncodingType field value if set, nil otherwise
+// GetEncodingTypeOk returns a tuple with the EncodingType field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListBucketResultV2) GetEncodingTypeOk() (*EncodingType, bool) {
-	if o == nil || IsNil(o.EncodingType) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.EncodingType, true
+}
+
+// SetEncodingType sets field value
+func (o *ListBucketResultV2) SetEncodingType(v EncodingType) {
+
+	o.EncodingType = &v
+
 }
 
 // HasEncodingType returns a boolean if a field has been set.
 func (o *ListBucketResultV2) HasEncodingType() bool {
-	if o != nil && !IsNil(o.EncodingType) {
+	if o != nil && o.EncodingType != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetEncodingType gets a reference to the given EncodingType and assigns it to the EncodingType field.
-func (o *ListBucketResultV2) SetEncodingType(v EncodingType) {
-	o.EncodingType = &v
-}
-
-// GetContinuationToken returns the ContinuationToken field value if set, zero value otherwise.
-func (o *ListBucketResultV2) GetContinuationToken() string {
-	if o == nil || IsNil(o.ContinuationToken) {
-		var ret string
-		return ret
+// GetContinuationToken returns the ContinuationToken field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ListBucketResultV2) GetContinuationToken() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.ContinuationToken
+
+	return o.ContinuationToken
+
 }
 
-// GetContinuationTokenOk returns a tuple with the ContinuationToken field value if set, nil otherwise
+// GetContinuationTokenOk returns a tuple with the ContinuationToken field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListBucketResultV2) GetContinuationTokenOk() (*string, bool) {
-	if o == nil || IsNil(o.ContinuationToken) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.ContinuationToken, true
+}
+
+// SetContinuationToken sets field value
+func (o *ListBucketResultV2) SetContinuationToken(v string) {
+
+	o.ContinuationToken = &v
+
 }
 
 // HasContinuationToken returns a boolean if a field has been set.
 func (o *ListBucketResultV2) HasContinuationToken() bool {
-	if o != nil && !IsNil(o.ContinuationToken) {
+	if o != nil && o.ContinuationToken != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetContinuationToken gets a reference to the given string and assigns it to the ContinuationToken field.
-func (o *ListBucketResultV2) SetContinuationToken(v string) {
-	o.ContinuationToken = &v
-}
-
-// GetNextContinuationToken returns the NextContinuationToken field value if set, zero value otherwise.
-func (o *ListBucketResultV2) GetNextContinuationToken() string {
-	if o == nil || IsNil(o.NextContinuationToken) {
-		var ret string
-		return ret
+// GetNextContinuationToken returns the NextContinuationToken field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ListBucketResultV2) GetNextContinuationToken() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.NextContinuationToken
+
+	return o.NextContinuationToken
+
 }
 
-// GetNextContinuationTokenOk returns a tuple with the NextContinuationToken field value if set, nil otherwise
+// GetNextContinuationTokenOk returns a tuple with the NextContinuationToken field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListBucketResultV2) GetNextContinuationTokenOk() (*string, bool) {
-	if o == nil || IsNil(o.NextContinuationToken) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.NextContinuationToken, true
+}
+
+// SetNextContinuationToken sets field value
+func (o *ListBucketResultV2) SetNextContinuationToken(v string) {
+
+	o.NextContinuationToken = &v
+
 }
 
 // HasNextContinuationToken returns a boolean if a field has been set.
 func (o *ListBucketResultV2) HasNextContinuationToken() bool {
-	if o != nil && !IsNil(o.NextContinuationToken) {
+	if o != nil && o.NextContinuationToken != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetNextContinuationToken gets a reference to the given string and assigns it to the NextContinuationToken field.
-func (o *ListBucketResultV2) SetNextContinuationToken(v string) {
-	o.NextContinuationToken = &v
-}
-
-// GetStartAfter returns the StartAfter field value if set, zero value otherwise.
-func (o *ListBucketResultV2) GetStartAfter() string {
-	if o == nil || IsNil(o.StartAfter) {
-		var ret string
-		return ret
+// GetStartAfter returns the StartAfter field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ListBucketResultV2) GetStartAfter() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.StartAfter
+
+	return o.StartAfter
+
 }
 
-// GetStartAfterOk returns a tuple with the StartAfter field value if set, nil otherwise
+// GetStartAfterOk returns a tuple with the StartAfter field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListBucketResultV2) GetStartAfterOk() (*string, bool) {
-	if o == nil || IsNil(o.StartAfter) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.StartAfter, true
+}
+
+// SetStartAfter sets field value
+func (o *ListBucketResultV2) SetStartAfter(v string) {
+
+	o.StartAfter = &v
+
 }
 
 // HasStartAfter returns a boolean if a field has been set.
 func (o *ListBucketResultV2) HasStartAfter() bool {
-	if o != nil && !IsNil(o.StartAfter) {
+	if o != nil && o.StartAfter != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetStartAfter gets a reference to the given string and assigns it to the StartAfter field.
-func (o *ListBucketResultV2) SetStartAfter(v string) {
-	o.StartAfter = &v
-}
-
 func (o ListBucketResultV2) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o ListBucketResultV2) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Name) {
+	if o.Name != nil {
 		toSerialize["Name"] = o.Name
 	}
-	if !IsZero(o.Prefix) {
+
+	if o.Prefix != nil {
 		toSerialize["Prefix"] = o.Prefix
 	}
-	if !IsZero(o.MaxKeys) {
+
+	if o.MaxKeys != nil {
 		toSerialize["MaxKeys"] = o.MaxKeys
 	}
-	if !IsZero(o.IsTruncated) {
+
+	if o.IsTruncated != nil {
 		toSerialize["IsTruncated"] = o.IsTruncated
 	}
-	if !IsZero(o.KeyCount) {
+
+	if o.KeyCount != nil {
 		toSerialize["KeyCount"] = o.KeyCount
 	}
-	if !IsZero(o.Contents) {
+
+	if o.Contents != nil {
 		toSerialize["Contents"] = o.Contents
 	}
-	if !IsNil(o.Delimiter) {
+
+	if o.Delimiter != nil {
 		toSerialize["Delimiter"] = o.Delimiter
 	}
-	if !IsNil(o.CommonPrefixes) {
+
+	if o.CommonPrefixes != nil {
 		toSerialize["CommonPrefixes"] = o.CommonPrefixes
 	}
-	if !IsNil(o.EncodingType) {
+
+	if o.EncodingType != nil {
 		toSerialize["EncodingType"] = o.EncodingType
 	}
-	if !IsNil(o.ContinuationToken) {
+
+	if o.ContinuationToken != nil {
 		toSerialize["ContinuationToken"] = o.ContinuationToken
 	}
-	if !IsNil(o.NextContinuationToken) {
+
+	if o.NextContinuationToken != nil {
 		toSerialize["NextContinuationToken"] = o.NextContinuationToken
 	}
-	if !IsNil(o.StartAfter) {
+
+	if o.StartAfter != nil {
 		toSerialize["StartAfter"] = o.StartAfter
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableListBucketResultV2 struct {

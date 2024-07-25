@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the CommonPrefix type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CommonPrefix{}
-
 // CommonPrefix Container for all (if there are any) keys between Prefix and the next occurrence of the string specified by a delimiter. CommonPrefixes lists keys that act like subdirectories in the directory specified by Prefix. For example, if the prefix is `notes/` and the delimiter is a slash (`/“) as in `notes/summer/july“, the common prefix is `notes/summer/“.
 type CommonPrefix struct {
 	XMLName xml.Name `xml:"CommonPrefix"`
@@ -45,52 +42,51 @@ func NewCommonPrefixWithDefaults() *CommonPrefix {
 	return &this
 }
 
-// GetPrefix returns the Prefix field value if set, zero value otherwise.
-func (o *CommonPrefix) GetPrefix() string {
-	if o == nil || IsNil(o.Prefix) {
-		var ret string
-		return ret
+// GetPrefix returns the Prefix field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *CommonPrefix) GetPrefix() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Prefix
+
+	return o.Prefix
+
 }
 
-// GetPrefixOk returns a tuple with the Prefix field value if set, nil otherwise
+// GetPrefixOk returns a tuple with the Prefix field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *CommonPrefix) GetPrefixOk() (*string, bool) {
-	if o == nil || IsNil(o.Prefix) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Prefix, true
+}
+
+// SetPrefix sets field value
+func (o *CommonPrefix) SetPrefix(v string) {
+
+	o.Prefix = &v
+
 }
 
 // HasPrefix returns a boolean if a field has been set.
 func (o *CommonPrefix) HasPrefix() bool {
-	if o != nil && !IsNil(o.Prefix) {
+	if o != nil && o.Prefix != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetPrefix gets a reference to the given string and assigns it to the Prefix field.
-func (o *CommonPrefix) SetPrefix(v string) {
-	o.Prefix = &v
-}
-
 func (o CommonPrefix) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o CommonPrefix) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Prefix) {
+	if o.Prefix != nil {
 		toSerialize["Prefix"] = o.Prefix
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableCommonPrefix struct {

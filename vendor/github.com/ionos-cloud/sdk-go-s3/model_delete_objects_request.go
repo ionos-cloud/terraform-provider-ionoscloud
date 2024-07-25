@@ -17,15 +17,12 @@ import (
 
 import "encoding/xml"
 
-// checks if the DeleteObjectsRequest type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &DeleteObjectsRequest{}
-
 // DeleteObjectsRequest Container for the objects to delete.
 type DeleteObjectsRequest struct {
 	XMLName xml.Name `xml:"Delete"`
 	// The objects to delete.
-	Objects []ObjectIdentifier `json:"Objects,omitempty" xml:"Object"`
-	Quiet   *bool              `json:"Quiet,omitempty" xml:"Quiet"`
+	Objects *[]ObjectIdentifier `json:"Objects,omitempty" xml:"Object"`
+	Quiet   *bool               `json:"Quiet,omitempty" xml:"Quiet"`
 }
 
 // NewDeleteObjectsRequest instantiates a new DeleteObjectsRequest object
@@ -46,87 +43,93 @@ func NewDeleteObjectsRequestWithDefaults() *DeleteObjectsRequest {
 	return &this
 }
 
-// GetObjects returns the Objects field value if set, zero value otherwise.
-func (o *DeleteObjectsRequest) GetObjects() []ObjectIdentifier {
-	if o == nil || IsNil(o.Objects) {
-		var ret []ObjectIdentifier
-		return ret
+// GetObjects returns the Objects field value
+// If the value is explicit nil, the zero value for []ObjectIdentifier will be returned
+func (o *DeleteObjectsRequest) GetObjects() *[]ObjectIdentifier {
+	if o == nil {
+		return nil
 	}
+
 	return o.Objects
+
 }
 
-// GetObjectsOk returns a tuple with the Objects field value if set, nil otherwise
+// GetObjectsOk returns a tuple with the Objects field value
 // and a boolean to check if the value has been set.
-func (o *DeleteObjectsRequest) GetObjectsOk() ([]ObjectIdentifier, bool) {
-	if o == nil || IsNil(o.Objects) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DeleteObjectsRequest) GetObjectsOk() (*[]ObjectIdentifier, bool) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Objects, true
+}
+
+// SetObjects sets field value
+func (o *DeleteObjectsRequest) SetObjects(v []ObjectIdentifier) {
+
+	o.Objects = &v
+
 }
 
 // HasObjects returns a boolean if a field has been set.
 func (o *DeleteObjectsRequest) HasObjects() bool {
-	if o != nil && !IsNil(o.Objects) {
+	if o != nil && o.Objects != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetObjects gets a reference to the given []ObjectIdentifier and assigns it to the Objects field.
-func (o *DeleteObjectsRequest) SetObjects(v []ObjectIdentifier) {
-	o.Objects = v
-}
-
-// GetQuiet returns the Quiet field value if set, zero value otherwise.
-func (o *DeleteObjectsRequest) GetQuiet() bool {
-	if o == nil || IsNil(o.Quiet) {
-		var ret bool
-		return ret
+// GetQuiet returns the Quiet field value
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *DeleteObjectsRequest) GetQuiet() *bool {
+	if o == nil {
+		return nil
 	}
-	return *o.Quiet
+
+	return o.Quiet
+
 }
 
-// GetQuietOk returns a tuple with the Quiet field value if set, nil otherwise
+// GetQuietOk returns a tuple with the Quiet field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DeleteObjectsRequest) GetQuietOk() (*bool, bool) {
-	if o == nil || IsNil(o.Quiet) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Quiet, true
+}
+
+// SetQuiet sets field value
+func (o *DeleteObjectsRequest) SetQuiet(v bool) {
+
+	o.Quiet = &v
+
 }
 
 // HasQuiet returns a boolean if a field has been set.
 func (o *DeleteObjectsRequest) HasQuiet() bool {
-	if o != nil && !IsNil(o.Quiet) {
+	if o != nil && o.Quiet != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetQuiet gets a reference to the given bool and assigns it to the Quiet field.
-func (o *DeleteObjectsRequest) SetQuiet(v bool) {
-	o.Quiet = &v
-}
-
 func (o DeleteObjectsRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o DeleteObjectsRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Objects) {
+	if o.Objects != nil {
 		toSerialize["Objects"] = o.Objects
 	}
-	if !IsNil(o.Quiet) {
+
+	if o.Quiet != nil {
 		toSerialize["Quiet"] = o.Quiet
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableDeleteObjectsRequest struct {

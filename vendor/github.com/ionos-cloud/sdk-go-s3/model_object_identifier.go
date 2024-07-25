@@ -17,14 +17,11 @@ import (
 
 import "encoding/xml"
 
-// checks if the ObjectIdentifier type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &ObjectIdentifier{}
-
 // ObjectIdentifier Object Identifier is unique value to identify objects.
 type ObjectIdentifier struct {
 	XMLName xml.Name `xml:"Object"`
 	// The object key.
-	Key string `json:"Key" xml:"Key"`
+	Key *string `json:"Key" xml:"Key"`
 	// VersionId for the specific version of the object to delete.
 	VersionId *string `json:"VersionId,omitempty" xml:"VersionId"`
 }
@@ -36,7 +33,7 @@ type ObjectIdentifier struct {
 func NewObjectIdentifier(key string) *ObjectIdentifier {
 	this := ObjectIdentifier{}
 
-	this.Key = key
+	this.Key = &key
 
 	return &this
 }
@@ -50,78 +47,92 @@ func NewObjectIdentifierWithDefaults() *ObjectIdentifier {
 }
 
 // GetKey returns the Key field value
-func (o *ObjectIdentifier) GetKey() string {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ObjectIdentifier) GetKey() *string {
 	if o == nil {
-		var ret string
-		return ret
+		return nil
 	}
 
 	return o.Key
+
 }
 
 // GetKeyOk returns a tuple with the Key field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ObjectIdentifier) GetKeyOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Key, true
+
+	return o.Key, true
 }
 
 // SetKey sets field value
 func (o *ObjectIdentifier) SetKey(v string) {
-	o.Key = v
+
+	o.Key = &v
+
 }
 
-// GetVersionId returns the VersionId field value if set, zero value otherwise.
-func (o *ObjectIdentifier) GetVersionId() string {
-	if o == nil || IsNil(o.VersionId) {
-		var ret string
-		return ret
-	}
-	return *o.VersionId
-}
-
-// GetVersionIdOk returns a tuple with the VersionId field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ObjectIdentifier) GetVersionIdOk() (*string, bool) {
-	if o == nil || IsNil(o.VersionId) {
-		return nil, false
-	}
-	return o.VersionId, true
-}
-
-// HasVersionId returns a boolean if a field has been set.
-func (o *ObjectIdentifier) HasVersionId() bool {
-	if o != nil && !IsNil(o.VersionId) {
+// HasKey returns a boolean if a field has been set.
+func (o *ObjectIdentifier) HasKey() bool {
+	if o != nil && o.Key != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetVersionId gets a reference to the given string and assigns it to the VersionId field.
+// GetVersionId returns the VersionId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ObjectIdentifier) GetVersionId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.VersionId
+
+}
+
+// GetVersionIdOk returns a tuple with the VersionId field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ObjectIdentifier) GetVersionIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.VersionId, true
+}
+
+// SetVersionId sets field value
 func (o *ObjectIdentifier) SetVersionId(v string) {
+
 	o.VersionId = &v
+
+}
+
+// HasVersionId returns a boolean if a field has been set.
+func (o *ObjectIdentifier) HasVersionId() bool {
+	if o != nil && o.VersionId != nil {
+		return true
+	}
+
+	return false
 }
 
 func (o ObjectIdentifier) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o ObjectIdentifier) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Key) {
+	if o.Key != nil {
 		toSerialize["Key"] = o.Key
 	}
-	if !IsNil(o.VersionId) {
+
+	if o.VersionId != nil {
 		toSerialize["VersionId"] = o.VersionId
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableObjectIdentifier struct {

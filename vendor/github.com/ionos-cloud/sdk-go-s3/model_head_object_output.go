@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the HeadObjectOutput type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &HeadObjectOutput{}
-
 // HeadObjectOutput struct for HeadObjectOutput
 type HeadObjectOutput struct {
 	XMLName xml.Name `xml:"HeadObjectOutput"`
@@ -45,52 +42,51 @@ func NewHeadObjectOutputWithDefaults() *HeadObjectOutput {
 	return &this
 }
 
-// GetMetadata returns the Metadata field value if set, zero value otherwise.
-func (o *HeadObjectOutput) GetMetadata() map[string]string {
-	if o == nil || IsNil(o.Metadata) {
-		var ret map[string]string
-		return ret
+// GetMetadata returns the Metadata field value
+// If the value is explicit nil, the zero value for map[string]string will be returned
+func (o *HeadObjectOutput) GetMetadata() *map[string]string {
+	if o == nil {
+		return nil
 	}
-	return *o.Metadata
+
+	return o.Metadata
+
 }
 
-// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// GetMetadataOk returns a tuple with the Metadata field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *HeadObjectOutput) GetMetadataOk() (*map[string]string, bool) {
-	if o == nil || IsNil(o.Metadata) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Metadata, true
+}
+
+// SetMetadata sets field value
+func (o *HeadObjectOutput) SetMetadata(v map[string]string) {
+
+	o.Metadata = &v
+
 }
 
 // HasMetadata returns a boolean if a field has been set.
 func (o *HeadObjectOutput) HasMetadata() bool {
-	if o != nil && !IsNil(o.Metadata) {
+	if o != nil && o.Metadata != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetMetadata gets a reference to the given map[string]string and assigns it to the Metadata field.
-func (o *HeadObjectOutput) SetMetadata(v map[string]string) {
-	o.Metadata = &v
-}
-
 func (o HeadObjectOutput) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o HeadObjectOutput) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Metadata) {
+	if o.Metadata != nil {
 		toSerialize["Metadata"] = o.Metadata
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableHeadObjectOutput struct {

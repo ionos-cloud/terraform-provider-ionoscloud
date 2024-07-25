@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the CopyObjectRequest type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CopyObjectRequest{}
-
 // CopyObjectRequest struct for CopyObjectRequest
 type CopyObjectRequest struct {
 	XMLName xml.Name `xml:"CopyObjectRequest"`
@@ -45,52 +42,51 @@ func NewCopyObjectRequestWithDefaults() *CopyObjectRequest {
 	return &this
 }
 
-// GetXAmzMeta returns the XAmzMeta field value if set, zero value otherwise.
-func (o *CopyObjectRequest) GetXAmzMeta() map[string]string {
-	if o == nil || IsNil(o.XAmzMeta) {
-		var ret map[string]string
-		return ret
+// GetXAmzMeta returns the XAmzMeta field value
+// If the value is explicit nil, the zero value for map[string]string will be returned
+func (o *CopyObjectRequest) GetXAmzMeta() *map[string]string {
+	if o == nil {
+		return nil
 	}
-	return *o.XAmzMeta
+
+	return o.XAmzMeta
+
 }
 
-// GetXAmzMetaOk returns a tuple with the XAmzMeta field value if set, nil otherwise
+// GetXAmzMetaOk returns a tuple with the XAmzMeta field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *CopyObjectRequest) GetXAmzMetaOk() (*map[string]string, bool) {
-	if o == nil || IsNil(o.XAmzMeta) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.XAmzMeta, true
+}
+
+// SetXAmzMeta sets field value
+func (o *CopyObjectRequest) SetXAmzMeta(v map[string]string) {
+
+	o.XAmzMeta = &v
+
 }
 
 // HasXAmzMeta returns a boolean if a field has been set.
 func (o *CopyObjectRequest) HasXAmzMeta() bool {
-	if o != nil && !IsNil(o.XAmzMeta) {
+	if o != nil && o.XAmzMeta != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetXAmzMeta gets a reference to the given map[string]string and assigns it to the XAmzMeta field.
-func (o *CopyObjectRequest) SetXAmzMeta(v map[string]string) {
-	o.XAmzMeta = &v
-}
-
 func (o CopyObjectRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o CopyObjectRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.XAmzMeta) {
+	if o.XAmzMeta != nil {
 		toSerialize["x-amz-meta-"] = o.XAmzMeta
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableCopyObjectRequest struct {

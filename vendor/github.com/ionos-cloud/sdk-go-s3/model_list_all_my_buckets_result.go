@@ -17,14 +17,11 @@ import (
 
 import "encoding/xml"
 
-// checks if the ListAllMyBucketsResult type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &ListAllMyBucketsResult{}
-
 // ListAllMyBucketsResult struct for ListAllMyBucketsResult
 type ListAllMyBucketsResult struct {
-	XMLName xml.Name `xml:"ListAllMyBucketsResult"`
-	Owner   *Owner   `json:"Owner,omitempty" xml:"Owner"`
-	Buckets []Bucket `json:"Buckets,omitempty" xml:"Buckets>Bucket"`
+	XMLName xml.Name  `xml:"ListAllMyBucketsResult"`
+	Owner   *Owner    `json:"Owner,omitempty" xml:"Owner"`
+	Buckets *[]Bucket `json:"Buckets,omitempty" xml:"Buckets>Bucket"`
 }
 
 // NewListAllMyBucketsResult instantiates a new ListAllMyBucketsResult object
@@ -45,87 +42,93 @@ func NewListAllMyBucketsResultWithDefaults() *ListAllMyBucketsResult {
 	return &this
 }
 
-// GetOwner returns the Owner field value if set, zero value otherwise.
-func (o *ListAllMyBucketsResult) GetOwner() Owner {
-	if o == nil || IsNil(o.Owner) {
-		var ret Owner
-		return ret
+// GetOwner returns the Owner field value
+// If the value is explicit nil, the zero value for Owner will be returned
+func (o *ListAllMyBucketsResult) GetOwner() *Owner {
+	if o == nil {
+		return nil
 	}
-	return *o.Owner
+
+	return o.Owner
+
 }
 
-// GetOwnerOk returns a tuple with the Owner field value if set, nil otherwise
+// GetOwnerOk returns a tuple with the Owner field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ListAllMyBucketsResult) GetOwnerOk() (*Owner, bool) {
-	if o == nil || IsNil(o.Owner) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Owner, true
+}
+
+// SetOwner sets field value
+func (o *ListAllMyBucketsResult) SetOwner(v Owner) {
+
+	o.Owner = &v
+
 }
 
 // HasOwner returns a boolean if a field has been set.
 func (o *ListAllMyBucketsResult) HasOwner() bool {
-	if o != nil && !IsNil(o.Owner) {
+	if o != nil && o.Owner != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetOwner gets a reference to the given Owner and assigns it to the Owner field.
-func (o *ListAllMyBucketsResult) SetOwner(v Owner) {
-	o.Owner = &v
-}
-
-// GetBuckets returns the Buckets field value if set, zero value otherwise.
-func (o *ListAllMyBucketsResult) GetBuckets() []Bucket {
-	if o == nil || IsNil(o.Buckets) {
-		var ret []Bucket
-		return ret
+// GetBuckets returns the Buckets field value
+// If the value is explicit nil, the zero value for []Bucket will be returned
+func (o *ListAllMyBucketsResult) GetBuckets() *[]Bucket {
+	if o == nil {
+		return nil
 	}
+
 	return o.Buckets
+
 }
 
-// GetBucketsOk returns a tuple with the Buckets field value if set, nil otherwise
+// GetBucketsOk returns a tuple with the Buckets field value
 // and a boolean to check if the value has been set.
-func (o *ListAllMyBucketsResult) GetBucketsOk() ([]Bucket, bool) {
-	if o == nil || IsNil(o.Buckets) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ListAllMyBucketsResult) GetBucketsOk() (*[]Bucket, bool) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Buckets, true
+}
+
+// SetBuckets sets field value
+func (o *ListAllMyBucketsResult) SetBuckets(v []Bucket) {
+
+	o.Buckets = &v
+
 }
 
 // HasBuckets returns a boolean if a field has been set.
 func (o *ListAllMyBucketsResult) HasBuckets() bool {
-	if o != nil && !IsNil(o.Buckets) {
+	if o != nil && o.Buckets != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetBuckets gets a reference to the given []Bucket and assigns it to the Buckets field.
-func (o *ListAllMyBucketsResult) SetBuckets(v []Bucket) {
-	o.Buckets = v
-}
-
 func (o ListAllMyBucketsResult) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o ListAllMyBucketsResult) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Owner) {
+	if o.Owner != nil {
 		toSerialize["Owner"] = o.Owner
 	}
-	if !IsNil(o.Buckets) {
+
+	if o.Buckets != nil {
 		toSerialize["Buckets"] = o.Buckets
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableListAllMyBucketsResult struct {

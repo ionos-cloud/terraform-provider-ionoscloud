@@ -18,6 +18,7 @@ import (
 	"reflect"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 // PtrBool is a helper routine that returns a pointer to given boolean value.
@@ -364,6 +365,10 @@ func reportError(format string, a ...interface{}) error {
 
 type IonosTime struct {
 	time.Time
+}
+
+func Strlen(s string) int {
+	return utf8.RuneCountInString(s)
 }
 
 func (t *IonosTime) UnmarshalJSON(data []byte) error {

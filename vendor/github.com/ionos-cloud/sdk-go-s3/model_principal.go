@@ -17,108 +17,111 @@ import (
 
 import "encoding/xml"
 
-// checks if the GetBucketTaggingOutput type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &GetBucketTaggingOutput{}
-
-// GetBucketTaggingOutput struct for GetBucketTaggingOutput
-type GetBucketTaggingOutput struct {
-	XMLName xml.Name `xml:"GetBucketTaggingOutput"`
-	// Contains the tag set.
-	TagSet []Tag `json:"TagSet" xml:"TagSet>Tag"`
+// Principal struct for Principal
+type Principal struct {
+	XMLName xml.Name  `xml:"Principal"`
+	AWS     *[]string `json:"AWS" xml:"AWS"`
 }
 
-// NewGetBucketTaggingOutput instantiates a new GetBucketTaggingOutput object
+// NewPrincipal instantiates a new Principal object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGetBucketTaggingOutput(tagSet []Tag) *GetBucketTaggingOutput {
-	this := GetBucketTaggingOutput{}
+func NewPrincipal(aWS []string) *Principal {
+	this := Principal{}
 
-	this.TagSet = tagSet
+	this.AWS = &aWS
 
 	return &this
 }
 
-// NewGetBucketTaggingOutputWithDefaults instantiates a new GetBucketTaggingOutput object
+// NewPrincipalWithDefaults instantiates a new Principal object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewGetBucketTaggingOutputWithDefaults() *GetBucketTaggingOutput {
-	this := GetBucketTaggingOutput{}
+func NewPrincipalWithDefaults() *Principal {
+	this := Principal{}
 	return &this
 }
 
-// GetTagSet returns the TagSet field value
-func (o *GetBucketTaggingOutput) GetTagSet() []Tag {
+// GetAWS returns the AWS field value
+// If the value is explicit nil, the zero value for []string will be returned
+func (o *Principal) GetAWS() *[]string {
 	if o == nil {
-		var ret []Tag
-		return ret
+		return nil
 	}
 
-	return o.TagSet
+	return o.AWS
+
 }
 
-// GetTagSetOk returns a tuple with the TagSet field value
+// GetAWSOk returns a tuple with the AWS field value
 // and a boolean to check if the value has been set.
-func (o *GetBucketTaggingOutput) GetTagSetOk() ([]Tag, bool) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Principal) GetAWSOk() (*[]string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.TagSet, true
+
+	return o.AWS, true
 }
 
-// SetTagSet sets field value
-func (o *GetBucketTaggingOutput) SetTagSet(v []Tag) {
-	o.TagSet = v
+// SetAWS sets field value
+func (o *Principal) SetAWS(v []string) {
+
+	o.AWS = &v
+
 }
 
-func (o GetBucketTaggingOutput) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
+// HasAWS returns a boolean if a field has been set.
+func (o *Principal) HasAWS() bool {
+	if o != nil && o.AWS != nil {
+		return true
 	}
+
+	return false
+}
+
+func (o Principal) MarshalJSON() ([]byte, error) {
+	toSerialize := map[string]interface{}{}
+	if o.AWS != nil {
+		toSerialize["AWS"] = o.AWS
+	}
+
 	return json.Marshal(toSerialize)
 }
 
-func (o GetBucketTaggingOutput) ToMap() (map[string]interface{}, error) {
-	toSerialize := map[string]interface{}{}
-	if !IsZero(o.TagSet) {
-		toSerialize["TagSet"] = o.TagSet
-	}
-	return toSerialize, nil
-}
-
-type NullableGetBucketTaggingOutput struct {
-	value *GetBucketTaggingOutput
+type NullablePrincipal struct {
+	value *Principal
 	isSet bool
 }
 
-func (v NullableGetBucketTaggingOutput) Get() *GetBucketTaggingOutput {
+func (v NullablePrincipal) Get() *Principal {
 	return v.value
 }
 
-func (v *NullableGetBucketTaggingOutput) Set(val *GetBucketTaggingOutput) {
+func (v *NullablePrincipal) Set(val *Principal) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableGetBucketTaggingOutput) IsSet() bool {
+func (v NullablePrincipal) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableGetBucketTaggingOutput) Unset() {
+func (v *NullablePrincipal) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableGetBucketTaggingOutput(val *GetBucketTaggingOutput) *NullableGetBucketTaggingOutput {
-	return &NullableGetBucketTaggingOutput{value: val, isSet: true}
+func NewNullablePrincipal(val *Principal) *NullablePrincipal {
+	return &NullablePrincipal{value: val, isSet: true}
 }
 
-func (v NullableGetBucketTaggingOutput) MarshalJSON() ([]byte, error) {
+func (v NullablePrincipal) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableGetBucketTaggingOutput) UnmarshalJSON(src []byte) error {
+func (v *NullablePrincipal) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -4,16 +4,27 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
 func formatXMLError(err error) error {
-	var apiErr shared.GenericOpenAPIError
+	var apiErr s3.GenericOpenAPIError
 	if errors.As(err, &apiErr) {
 		if s3Error, ok := apiErr.Model().(s3.Error); ok {
-			err = fmt.Errorf("code:%s\nmessage: %s\nhost:%s\nrequest:%s", s3Error.GetCode(), s3Error.GetMessage(), s3Error.GetHostId(), s3Error.GetRequestId())
-			return err
+			msg := ""
+			if s3Error.Code != nil {
+				msg += fmt.Sprintf("code:%s\n", *s3Error.Code)
+			}
+			if s3Error.Message != nil {
+				msg += fmt.Sprintf("message:%s\n", *s3Error.Message)
+			}
+			if s3Error.HostId != nil {
+				msg += fmt.Sprintf("host:%s\n", *s3Error.HostId)
+			}
+			if s3Error.RequestId != nil {
+				msg += fmt.Sprintf("request:%s\n", *s3Error.RequestId)
+			}
+			return errors.New(msg)
 		}
 	}
 	return err

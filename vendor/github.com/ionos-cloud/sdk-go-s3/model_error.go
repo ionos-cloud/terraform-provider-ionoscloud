@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the Error type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &Error{}
-
 // Error Container for all error elements.
 type Error struct {
 	XMLName xml.Name `xml:"Error"`
@@ -49,157 +46,177 @@ func NewErrorWithDefaults() *Error {
 	return &this
 }
 
-// GetCode returns the Code field value if set, zero value otherwise.
-func (o *Error) GetCode() string {
-	if o == nil || IsNil(o.Code) {
-		var ret string
-		return ret
+// GetCode returns the Code field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Error) GetCode() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Code
+
+	return o.Code
+
 }
 
-// GetCodeOk returns a tuple with the Code field value if set, nil otherwise
+// GetCodeOk returns a tuple with the Code field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Error) GetCodeOk() (*string, bool) {
-	if o == nil || IsNil(o.Code) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Code, true
+}
+
+// SetCode sets field value
+func (o *Error) SetCode(v string) {
+
+	o.Code = &v
+
 }
 
 // HasCode returns a boolean if a field has been set.
 func (o *Error) HasCode() bool {
-	if o != nil && !IsNil(o.Code) {
+	if o != nil && o.Code != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetCode gets a reference to the given string and assigns it to the Code field.
-func (o *Error) SetCode(v string) {
-	o.Code = &v
-}
-
-// GetMessage returns the Message field value if set, zero value otherwise.
-func (o *Error) GetMessage() string {
-	if o == nil || IsNil(o.Message) {
-		var ret string
-		return ret
+// GetMessage returns the Message field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Error) GetMessage() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Message
+
+	return o.Message
+
 }
 
-// GetMessageOk returns a tuple with the Message field value if set, nil otherwise
+// GetMessageOk returns a tuple with the Message field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Error) GetMessageOk() (*string, bool) {
-	if o == nil || IsNil(o.Message) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Message, true
+}
+
+// SetMessage sets field value
+func (o *Error) SetMessage(v string) {
+
+	o.Message = &v
+
 }
 
 // HasMessage returns a boolean if a field has been set.
 func (o *Error) HasMessage() bool {
-	if o != nil && !IsNil(o.Message) {
+	if o != nil && o.Message != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetMessage gets a reference to the given string and assigns it to the Message field.
-func (o *Error) SetMessage(v string) {
-	o.Message = &v
-}
-
-// GetRequestId returns the RequestId field value if set, zero value otherwise.
-func (o *Error) GetRequestId() string {
-	if o == nil || IsNil(o.RequestId) {
-		var ret string
-		return ret
+// GetRequestId returns the RequestId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Error) GetRequestId() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.RequestId
+
+	return o.RequestId
+
 }
 
-// GetRequestIdOk returns a tuple with the RequestId field value if set, nil otherwise
+// GetRequestIdOk returns a tuple with the RequestId field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Error) GetRequestIdOk() (*string, bool) {
-	if o == nil || IsNil(o.RequestId) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.RequestId, true
+}
+
+// SetRequestId sets field value
+func (o *Error) SetRequestId(v string) {
+
+	o.RequestId = &v
+
 }
 
 // HasRequestId returns a boolean if a field has been set.
 func (o *Error) HasRequestId() bool {
-	if o != nil && !IsNil(o.RequestId) {
+	if o != nil && o.RequestId != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetRequestId gets a reference to the given string and assigns it to the RequestId field.
-func (o *Error) SetRequestId(v string) {
-	o.RequestId = &v
-}
-
-// GetHostId returns the HostId field value if set, zero value otherwise.
-func (o *Error) GetHostId() string {
-	if o == nil || IsNil(o.HostId) {
-		var ret string
-		return ret
+// GetHostId returns the HostId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Error) GetHostId() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.HostId
+
+	return o.HostId
+
 }
 
-// GetHostIdOk returns a tuple with the HostId field value if set, nil otherwise
+// GetHostIdOk returns a tuple with the HostId field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Error) GetHostIdOk() (*string, bool) {
-	if o == nil || IsNil(o.HostId) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.HostId, true
+}
+
+// SetHostId sets field value
+func (o *Error) SetHostId(v string) {
+
+	o.HostId = &v
+
 }
 
 // HasHostId returns a boolean if a field has been set.
 func (o *Error) HasHostId() bool {
-	if o != nil && !IsNil(o.HostId) {
+	if o != nil && o.HostId != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetHostId gets a reference to the given string and assigns it to the HostId field.
-func (o *Error) SetHostId(v string) {
-	o.HostId = &v
-}
-
 func (o Error) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o Error) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Code) {
+	if o.Code != nil {
 		toSerialize["Code"] = o.Code
 	}
-	if !IsNil(o.Message) {
+
+	if o.Message != nil {
 		toSerialize["Message"] = o.Message
 	}
-	if !IsNil(o.RequestId) {
+
+	if o.RequestId != nil {
 		toSerialize["RequestId"] = o.RequestId
 	}
-	if !IsNil(o.HostId) {
+
+	if o.HostId != nil {
 		toSerialize["HostId"] = o.HostId
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableError struct {

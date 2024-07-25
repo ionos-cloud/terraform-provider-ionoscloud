@@ -31,8 +31,6 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
-
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 var (
@@ -43,7 +41,6 @@ var (
 )
 
 // APIClient manages communication with the IONOS S3 Object Storage API for contract-owned buckets API v2.0.2
-// In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration
 	common service // Reuse a single struct instead of allocating one for each service on the heap.
@@ -52,31 +49,11 @@ type APIClient struct {
 
 	BucketsApi *BucketsApiService
 
-	CORSApi *CORSApiService
-
-	EncryptionApi *EncryptionApiService
-
-	LifecycleApi *LifecycleApiService
-
-	ObjectLockApi *ObjectLockApiService
-
 	ObjectsApi *ObjectsApiService
 
 	PolicyApi *PolicyApiService
 
 	PublicAccessBlockApi *PublicAccessBlockApiService
-
-	ReplicationApi *ReplicationApiService
-
-	TaggingApi *TaggingApiService
-
-	UploadsApi *UploadsApiService
-
-	VersioningApi *VersioningApiService
-
-	VersionsApi *VersionsApiService
-
-	WebsiteApi *WebsiteApiService
 }
 
 type service struct {
@@ -96,19 +73,9 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 
 	// API Services
 	c.BucketsApi = (*BucketsApiService)(&c.common)
-	c.CORSApi = (*CORSApiService)(&c.common)
-	c.EncryptionApi = (*EncryptionApiService)(&c.common)
-	c.LifecycleApi = (*LifecycleApiService)(&c.common)
-	c.ObjectLockApi = (*ObjectLockApiService)(&c.common)
 	c.ObjectsApi = (*ObjectsApiService)(&c.common)
 	c.PolicyApi = (*PolicyApiService)(&c.common)
 	c.PublicAccessBlockApi = (*PublicAccessBlockApiService)(&c.common)
-	c.ReplicationApi = (*ReplicationApiService)(&c.common)
-	c.TaggingApi = (*TaggingApiService)(&c.common)
-	c.UploadsApi = (*UploadsApiService)(&c.common)
-	c.VersioningApi = (*VersioningApiService)(&c.common)
-	c.VersionsApi = (*VersionsApiService)(&c.common)
-	c.WebsiteApi = (*WebsiteApiService)(&c.common)
 
 	return c
 }
@@ -297,14 +264,14 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 			}
 		}
 
-		if shared.SdkLogLevel.Satisfies(shared.Trace) {
+		if c.cfg.LogLevel.Satisfies(Trace) {
 			dump, err := httputil.DumpRequestOut(clonedRequest, true)
 			if err == nil {
-				shared.SdkLogger.Printf(" DumpRequestOut : %s\n", string(dump))
+				c.cfg.Logger.Printf(" DumpRequestOut : %s\n", string(dump))
 			} else {
-				shared.SdkLogger.Printf(" DumpRequestOut err: %+v", err)
+				c.cfg.Logger.Printf(" DumpRequestOut err: %+v", err)
 			}
-			shared.SdkLogger.Printf("\n try no: %d\n", retryCount)
+			c.cfg.Logger.Printf("\n try no: %d\n", retryCount)
 		}
 
 		httpRequestStartTime := time.Now()
@@ -315,12 +282,12 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 			return resp, httpRequestTime, err
 		}
 
-		if shared.SdkLogLevel.Satisfies(shared.Trace) {
+		if c.cfg.LogLevel.Satisfies(Trace) {
 			dump, err := httputil.DumpResponse(resp, true)
 			if err == nil {
-				shared.SdkLogger.Printf("\n DumpResponse : %s\n", string(dump))
+				c.cfg.Logger.Printf("\n DumpResponse : %s\n", string(dump))
 			} else {
-				shared.SdkLogger.Printf(" DumpResponse err %+v", err)
+				c.cfg.Logger.Printf(" DumpResponse err %+v", err)
 			}
 		}
 
@@ -351,8 +318,8 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		}
 
 		if retryCount >= c.GetConfig().MaxRetries {
-			if shared.SdkLogLevel.Satisfies(shared.Debug) {
-				shared.SdkLogger.Printf(" Number of maximum retries exceeded (%d retries)\n", c.cfg.MaxRetries)
+			if c.cfg.LogLevel.Satisfies(Debug) {
+				c.cfg.Logger.Printf(" Number of maximum retries exceeded (%d retries)\n", c.cfg.MaxRetries)
 			}
 			break
 		} else {
@@ -367,8 +334,8 @@ func (c *APIClient) backOff(ctx context.Context, t time.Duration) {
 	if t > c.GetConfig().MaxWaitTime {
 		t = c.GetConfig().MaxWaitTime
 	}
-	if shared.SdkLogLevel.Satisfies(shared.Debug) {
-		shared.SdkLogger.Printf(" Sleeping %s before retrying request\n", t.String())
+	if c.cfg.LogLevel.Satisfies(Debug) {
+		c.cfg.Logger.Printf(" Sleeping %s before retrying request\n", t.String())
 	}
 	if t <= 0 {
 		return
@@ -740,9 +707,10 @@ func strlen(s string) int {
 
 // GenericOpenAPIError Provides access to the body, error and model on returned errors.
 type GenericOpenAPIError struct {
-	body  []byte
-	error string
-	model interface{}
+	body       []byte
+	error      string
+	model      interface{}
+	statusCode int
 }
 
 // Error returns non-empty string if there was an error.
@@ -750,14 +718,39 @@ func (e GenericOpenAPIError) Error() string {
 	return e.error
 }
 
+// SetError sets the error string
+func (e *GenericOpenAPIError) SetError(error string) {
+	e.error = error
+}
+
 // Body returns the raw bytes of the response
 func (e GenericOpenAPIError) Body() []byte {
 	return e.body
 }
 
+// SetBody sets the raw body of the error
+func (e *GenericOpenAPIError) SetBody(body []byte) {
+	e.body = body
+}
+
 // Model returns the unpacked model of the error
 func (e GenericOpenAPIError) Model() interface{} {
 	return e.model
+}
+
+// SetModel sets the model of the error
+func (e *GenericOpenAPIError) SetModel(model interface{}) {
+	e.model = model
+}
+
+// StatusCode returns the status code of the error
+func (e GenericOpenAPIError) StatusCode() int {
+	return e.statusCode
+}
+
+// SetStatusCode sets the status code of the error
+func (e *GenericOpenAPIError) SetStatusCode(statusCode int) {
+	e.statusCode = statusCode
 }
 
 // format error message using title and detail when model implements rfc7807

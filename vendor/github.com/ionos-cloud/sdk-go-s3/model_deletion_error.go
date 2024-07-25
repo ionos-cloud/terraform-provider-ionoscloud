@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the DeletionError type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &DeletionError{}
-
 // DeletionError Container for all error elements.
 type DeletionError struct {
 	XMLName xml.Name `xml:"DeletionError"`
@@ -49,157 +46,177 @@ func NewDeletionErrorWithDefaults() *DeletionError {
 	return &this
 }
 
-// GetKey returns the Key field value if set, zero value otherwise.
-func (o *DeletionError) GetKey() string {
-	if o == nil || IsNil(o.Key) {
-		var ret string
-		return ret
+// GetKey returns the Key field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *DeletionError) GetKey() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Key
+
+	return o.Key
+
 }
 
-// GetKeyOk returns a tuple with the Key field value if set, nil otherwise
+// GetKeyOk returns a tuple with the Key field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DeletionError) GetKeyOk() (*string, bool) {
-	if o == nil || IsNil(o.Key) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Key, true
+}
+
+// SetKey sets field value
+func (o *DeletionError) SetKey(v string) {
+
+	o.Key = &v
+
 }
 
 // HasKey returns a boolean if a field has been set.
 func (o *DeletionError) HasKey() bool {
-	if o != nil && !IsNil(o.Key) {
+	if o != nil && o.Key != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetKey gets a reference to the given string and assigns it to the Key field.
-func (o *DeletionError) SetKey(v string) {
-	o.Key = &v
-}
-
-// GetVersionId returns the VersionId field value if set, zero value otherwise.
-func (o *DeletionError) GetVersionId() string {
-	if o == nil || IsNil(o.VersionId) {
-		var ret string
-		return ret
+// GetVersionId returns the VersionId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *DeletionError) GetVersionId() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.VersionId
+
+	return o.VersionId
+
 }
 
-// GetVersionIdOk returns a tuple with the VersionId field value if set, nil otherwise
+// GetVersionIdOk returns a tuple with the VersionId field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DeletionError) GetVersionIdOk() (*string, bool) {
-	if o == nil || IsNil(o.VersionId) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.VersionId, true
+}
+
+// SetVersionId sets field value
+func (o *DeletionError) SetVersionId(v string) {
+
+	o.VersionId = &v
+
 }
 
 // HasVersionId returns a boolean if a field has been set.
 func (o *DeletionError) HasVersionId() bool {
-	if o != nil && !IsNil(o.VersionId) {
+	if o != nil && o.VersionId != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetVersionId gets a reference to the given string and assigns it to the VersionId field.
-func (o *DeletionError) SetVersionId(v string) {
-	o.VersionId = &v
-}
-
-// GetCode returns the Code field value if set, zero value otherwise.
-func (o *DeletionError) GetCode() string {
-	if o == nil || IsNil(o.Code) {
-		var ret string
-		return ret
+// GetCode returns the Code field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *DeletionError) GetCode() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Code
+
+	return o.Code
+
 }
 
-// GetCodeOk returns a tuple with the Code field value if set, nil otherwise
+// GetCodeOk returns a tuple with the Code field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DeletionError) GetCodeOk() (*string, bool) {
-	if o == nil || IsNil(o.Code) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Code, true
+}
+
+// SetCode sets field value
+func (o *DeletionError) SetCode(v string) {
+
+	o.Code = &v
+
 }
 
 // HasCode returns a boolean if a field has been set.
 func (o *DeletionError) HasCode() bool {
-	if o != nil && !IsNil(o.Code) {
+	if o != nil && o.Code != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetCode gets a reference to the given string and assigns it to the Code field.
-func (o *DeletionError) SetCode(v string) {
-	o.Code = &v
-}
-
-// GetMessage returns the Message field value if set, zero value otherwise.
-func (o *DeletionError) GetMessage() string {
-	if o == nil || IsNil(o.Message) {
-		var ret string
-		return ret
+// GetMessage returns the Message field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *DeletionError) GetMessage() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Message
+
+	return o.Message
+
 }
 
-// GetMessageOk returns a tuple with the Message field value if set, nil otherwise
+// GetMessageOk returns a tuple with the Message field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DeletionError) GetMessageOk() (*string, bool) {
-	if o == nil || IsNil(o.Message) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Message, true
+}
+
+// SetMessage sets field value
+func (o *DeletionError) SetMessage(v string) {
+
+	o.Message = &v
+
 }
 
 // HasMessage returns a boolean if a field has been set.
 func (o *DeletionError) HasMessage() bool {
-	if o != nil && !IsNil(o.Message) {
+	if o != nil && o.Message != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetMessage gets a reference to the given string and assigns it to the Message field.
-func (o *DeletionError) SetMessage(v string) {
-	o.Message = &v
-}
-
 func (o DeletionError) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o DeletionError) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Key) {
+	if o.Key != nil {
 		toSerialize["Key"] = o.Key
 	}
-	if !IsNil(o.VersionId) {
+
+	if o.VersionId != nil {
 		toSerialize["VersionId"] = o.VersionId
 	}
-	if !IsNil(o.Code) {
+
+	if o.Code != nil {
 		toSerialize["Code"] = o.Code
 	}
-	if !IsNil(o.Message) {
+
+	if o.Message != nil {
 		toSerialize["Message"] = o.Message
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableDeletionError struct {

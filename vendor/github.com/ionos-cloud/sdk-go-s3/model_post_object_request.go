@@ -17,138 +17,110 @@ import (
 
 import "encoding/xml"
 
-// checks if the Tag type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &Tag{}
-
-// Tag A container of a key value name pair.
-type Tag struct {
-	XMLName xml.Name `xml:"Tag"`
-	// The object key.
-	Key string `json:"Key" xml:"Key"`
-	// Value of the tag.
-	Value string `json:"Value" xml:"Value"`
+// POSTObjectRequest struct for POSTObjectRequest
+type POSTObjectRequest struct {
+	XMLName xml.Name `xml:"POSTObjectRequest"`
+	// Object data.
+	Body *string `json:"Body,omitempty" xml:"Body"`
 }
 
-// NewTag instantiates a new Tag object
+// NewPOSTObjectRequest instantiates a new POSTObjectRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTag(key string, value string) *Tag {
-	this := Tag{}
-
-	this.Key = key
-	this.Value = value
+func NewPOSTObjectRequest() *POSTObjectRequest {
+	this := POSTObjectRequest{}
 
 	return &this
 }
 
-// NewTagWithDefaults instantiates a new Tag object
+// NewPOSTObjectRequestWithDefaults instantiates a new POSTObjectRequest object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewTagWithDefaults() *Tag {
-	this := Tag{}
+func NewPOSTObjectRequestWithDefaults() *POSTObjectRequest {
+	this := POSTObjectRequest{}
 	return &this
 }
 
-// GetKey returns the Key field value
-func (o *Tag) GetKey() string {
+// GetBody returns the Body field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *POSTObjectRequest) GetBody() *string {
 	if o == nil {
-		var ret string
-		return ret
+		return nil
 	}
 
-	return o.Key
+	return o.Body
+
 }
 
-// GetKeyOk returns a tuple with the Key field value
+// GetBodyOk returns a tuple with the Body field value
 // and a boolean to check if the value has been set.
-func (o *Tag) GetKeyOk() (*string, bool) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *POSTObjectRequest) GetBodyOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Key, true
+
+	return o.Body, true
 }
 
-// SetKey sets field value
-func (o *Tag) SetKey(v string) {
-	o.Key = v
+// SetBody sets field value
+func (o *POSTObjectRequest) SetBody(v string) {
+
+	o.Body = &v
+
 }
 
-// GetValue returns the Value field value
-func (o *Tag) GetValue() string {
-	if o == nil {
-		var ret string
-		return ret
+// HasBody returns a boolean if a field has been set.
+func (o *POSTObjectRequest) HasBody() bool {
+	if o != nil && o.Body != nil {
+		return true
 	}
 
-	return o.Value
+	return false
 }
 
-// GetValueOk returns a tuple with the Value field value
-// and a boolean to check if the value has been set.
-func (o *Tag) GetValueOk() (*string, bool) {
-	if o == nil {
-		return nil, false
+func (o POSTObjectRequest) MarshalJSON() ([]byte, error) {
+	toSerialize := map[string]interface{}{}
+	if o.Body != nil {
+		toSerialize["Body"] = o.Body
 	}
-	return &o.Value, true
-}
 
-// SetValue sets field value
-func (o *Tag) SetValue(v string) {
-	o.Value = v
-}
-
-func (o Tag) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
 	return json.Marshal(toSerialize)
 }
 
-func (o Tag) ToMap() (map[string]interface{}, error) {
-	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Key) {
-		toSerialize["Key"] = o.Key
-	}
-	if !IsZero(o.Value) {
-		toSerialize["Value"] = o.Value
-	}
-	return toSerialize, nil
-}
-
-type NullableTag struct {
-	value *Tag
+type NullablePOSTObjectRequest struct {
+	value *POSTObjectRequest
 	isSet bool
 }
 
-func (v NullableTag) Get() *Tag {
+func (v NullablePOSTObjectRequest) Get() *POSTObjectRequest {
 	return v.value
 }
 
-func (v *NullableTag) Set(val *Tag) {
+func (v *NullablePOSTObjectRequest) Set(val *POSTObjectRequest) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableTag) IsSet() bool {
+func (v NullablePOSTObjectRequest) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableTag) Unset() {
+func (v *NullablePOSTObjectRequest) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableTag(val *Tag) *NullableTag {
-	return &NullableTag{value: val, isSet: true}
+func NewNullablePOSTObjectRequest(val *POSTObjectRequest) *NullablePOSTObjectRequest {
+	return &NullablePOSTObjectRequest{value: val, isSet: true}
 }
 
-func (v NullableTag) MarshalJSON() ([]byte, error) {
+func (v NullablePOSTObjectRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableTag) UnmarshalJSON(src []byte) error {
+func (v *NullablePOSTObjectRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

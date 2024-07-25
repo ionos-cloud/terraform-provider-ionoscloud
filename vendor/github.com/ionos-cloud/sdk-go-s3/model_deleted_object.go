@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the DeletedObject type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &DeletedObject{}
-
 // DeletedObject Information about the deleted object.
 type DeletedObject struct {
 	XMLName xml.Name `xml:"Deleted"`
@@ -51,157 +48,177 @@ func NewDeletedObjectWithDefaults() *DeletedObject {
 	return &this
 }
 
-// GetKey returns the Key field value if set, zero value otherwise.
-func (o *DeletedObject) GetKey() string {
-	if o == nil || IsNil(o.Key) {
-		var ret string
-		return ret
+// GetKey returns the Key field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *DeletedObject) GetKey() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Key
+
+	return o.Key
+
 }
 
-// GetKeyOk returns a tuple with the Key field value if set, nil otherwise
+// GetKeyOk returns a tuple with the Key field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DeletedObject) GetKeyOk() (*string, bool) {
-	if o == nil || IsNil(o.Key) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Key, true
+}
+
+// SetKey sets field value
+func (o *DeletedObject) SetKey(v string) {
+
+	o.Key = &v
+
 }
 
 // HasKey returns a boolean if a field has been set.
 func (o *DeletedObject) HasKey() bool {
-	if o != nil && !IsNil(o.Key) {
+	if o != nil && o.Key != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetKey gets a reference to the given string and assigns it to the Key field.
-func (o *DeletedObject) SetKey(v string) {
-	o.Key = &v
-}
-
-// GetVersionId returns the VersionId field value if set, zero value otherwise.
-func (o *DeletedObject) GetVersionId() string {
-	if o == nil || IsNil(o.VersionId) {
-		var ret string
-		return ret
+// GetVersionId returns the VersionId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *DeletedObject) GetVersionId() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.VersionId
+
+	return o.VersionId
+
 }
 
-// GetVersionIdOk returns a tuple with the VersionId field value if set, nil otherwise
+// GetVersionIdOk returns a tuple with the VersionId field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DeletedObject) GetVersionIdOk() (*string, bool) {
-	if o == nil || IsNil(o.VersionId) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.VersionId, true
+}
+
+// SetVersionId sets field value
+func (o *DeletedObject) SetVersionId(v string) {
+
+	o.VersionId = &v
+
 }
 
 // HasVersionId returns a boolean if a field has been set.
 func (o *DeletedObject) HasVersionId() bool {
-	if o != nil && !IsNil(o.VersionId) {
+	if o != nil && o.VersionId != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetVersionId gets a reference to the given string and assigns it to the VersionId field.
-func (o *DeletedObject) SetVersionId(v string) {
-	o.VersionId = &v
-}
-
-// GetDeleteMarker returns the DeleteMarker field value if set, zero value otherwise.
-func (o *DeletedObject) GetDeleteMarker() bool {
-	if o == nil || IsNil(o.DeleteMarker) {
-		var ret bool
-		return ret
+// GetDeleteMarker returns the DeleteMarker field value
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *DeletedObject) GetDeleteMarker() *bool {
+	if o == nil {
+		return nil
 	}
-	return *o.DeleteMarker
+
+	return o.DeleteMarker
+
 }
 
-// GetDeleteMarkerOk returns a tuple with the DeleteMarker field value if set, nil otherwise
+// GetDeleteMarkerOk returns a tuple with the DeleteMarker field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DeletedObject) GetDeleteMarkerOk() (*bool, bool) {
-	if o == nil || IsNil(o.DeleteMarker) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.DeleteMarker, true
+}
+
+// SetDeleteMarker sets field value
+func (o *DeletedObject) SetDeleteMarker(v bool) {
+
+	o.DeleteMarker = &v
+
 }
 
 // HasDeleteMarker returns a boolean if a field has been set.
 func (o *DeletedObject) HasDeleteMarker() bool {
-	if o != nil && !IsNil(o.DeleteMarker) {
+	if o != nil && o.DeleteMarker != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetDeleteMarker gets a reference to the given bool and assigns it to the DeleteMarker field.
-func (o *DeletedObject) SetDeleteMarker(v bool) {
-	o.DeleteMarker = &v
-}
-
-// GetDeleteMarkerVersionId returns the DeleteMarkerVersionId field value if set, zero value otherwise.
-func (o *DeletedObject) GetDeleteMarkerVersionId() string {
-	if o == nil || IsNil(o.DeleteMarkerVersionId) {
-		var ret string
-		return ret
+// GetDeleteMarkerVersionId returns the DeleteMarkerVersionId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *DeletedObject) GetDeleteMarkerVersionId() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.DeleteMarkerVersionId
+
+	return o.DeleteMarkerVersionId
+
 }
 
-// GetDeleteMarkerVersionIdOk returns a tuple with the DeleteMarkerVersionId field value if set, nil otherwise
+// GetDeleteMarkerVersionIdOk returns a tuple with the DeleteMarkerVersionId field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DeletedObject) GetDeleteMarkerVersionIdOk() (*string, bool) {
-	if o == nil || IsNil(o.DeleteMarkerVersionId) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.DeleteMarkerVersionId, true
+}
+
+// SetDeleteMarkerVersionId sets field value
+func (o *DeletedObject) SetDeleteMarkerVersionId(v string) {
+
+	o.DeleteMarkerVersionId = &v
+
 }
 
 // HasDeleteMarkerVersionId returns a boolean if a field has been set.
 func (o *DeletedObject) HasDeleteMarkerVersionId() bool {
-	if o != nil && !IsNil(o.DeleteMarkerVersionId) {
+	if o != nil && o.DeleteMarkerVersionId != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetDeleteMarkerVersionId gets a reference to the given string and assigns it to the DeleteMarkerVersionId field.
-func (o *DeletedObject) SetDeleteMarkerVersionId(v string) {
-	o.DeleteMarkerVersionId = &v
-}
-
 func (o DeletedObject) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o DeletedObject) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Key) {
+	if o.Key != nil {
 		toSerialize["Key"] = o.Key
 	}
-	if !IsNil(o.VersionId) {
+
+	if o.VersionId != nil {
 		toSerialize["VersionId"] = o.VersionId
 	}
-	if !IsNil(o.DeleteMarker) {
+
+	if o.DeleteMarker != nil {
 		toSerialize["DeleteMarker"] = o.DeleteMarker
 	}
-	if !IsNil(o.DeleteMarkerVersionId) {
+
+	if o.DeleteMarkerVersionId != nil {
 		toSerialize["DeleteMarkerVersionId"] = o.DeleteMarkerVersionId
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableDeletedObject struct {

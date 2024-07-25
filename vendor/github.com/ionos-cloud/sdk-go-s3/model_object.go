@@ -13,14 +13,10 @@ package ionoscloud
 
 import (
 	"encoding/json"
-
 	"time"
 )
 
 import "encoding/xml"
-
-// checks if the Object type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &Object{}
 
 // Object An object consists of data and its descriptive metadata.
 type Object struct {
@@ -55,227 +51,268 @@ func NewObjectWithDefaults() *Object {
 	return &this
 }
 
-// GetKey returns the Key field value if set, zero value otherwise.
-func (o *Object) GetKey() string {
-	if o == nil || IsNil(o.Key) {
-		var ret string
-		return ret
+// GetKey returns the Key field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Object) GetKey() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Key
+
+	return o.Key
+
 }
 
-// GetKeyOk returns a tuple with the Key field value if set, nil otherwise
+// GetKeyOk returns a tuple with the Key field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Object) GetKeyOk() (*string, bool) {
-	if o == nil || IsNil(o.Key) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Key, true
+}
+
+// SetKey sets field value
+func (o *Object) SetKey(v string) {
+
+	o.Key = &v
+
 }
 
 // HasKey returns a boolean if a field has been set.
 func (o *Object) HasKey() bool {
-	if o != nil && !IsNil(o.Key) {
+	if o != nil && o.Key != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetKey gets a reference to the given string and assigns it to the Key field.
-func (o *Object) SetKey(v string) {
-	o.Key = &v
-}
-
-// GetLastModified returns the LastModified field value if set, zero value otherwise.
-func (o *Object) GetLastModified() time.Time {
-	if o == nil || IsNil(o.LastModified) {
-		var ret time.Time
-		return ret
+// GetLastModified returns the LastModified field value
+// If the value is explicit nil, the zero value for time.Time will be returned
+func (o *Object) GetLastModified() *time.Time {
+	if o == nil {
+		return nil
 	}
-	return o.LastModified.Time
+
+	if o.LastModified == nil {
+		return nil
+	}
+	return &o.LastModified.Time
+
 }
 
-// GetLastModifiedOk returns a tuple with the LastModified field value if set, nil otherwise
+// GetLastModifiedOk returns a tuple with the LastModified field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Object) GetLastModifiedOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.LastModified) {
+	if o == nil {
+		return nil, false
+	}
+
+	if o.LastModified == nil {
 		return nil, false
 	}
 	return &o.LastModified.Time, true
+
+}
+
+// SetLastModified sets field value
+func (o *Object) SetLastModified(v time.Time) {
+
+	o.LastModified = &IonosTime{v}
+
 }
 
 // HasLastModified returns a boolean if a field has been set.
 func (o *Object) HasLastModified() bool {
-	if o != nil && !IsNil(o.LastModified) {
+	if o != nil && o.LastModified != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetLastModified gets a reference to the given time.Time and assigns it to the LastModified field.
-func (o *Object) SetLastModified(v time.Time) {
-	o.LastModified = &IonosTime{v}
-}
-
-// GetStorageClass returns the StorageClass field value if set, zero value otherwise.
-func (o *Object) GetStorageClass() ObjectStorageClass {
-	if o == nil || IsNil(o.StorageClass) {
-		var ret ObjectStorageClass
-		return ret
+// GetStorageClass returns the StorageClass field value
+// If the value is explicit nil, the zero value for ObjectStorageClass will be returned
+func (o *Object) GetStorageClass() *ObjectStorageClass {
+	if o == nil {
+		return nil
 	}
-	return *o.StorageClass
+
+	return o.StorageClass
+
 }
 
-// GetStorageClassOk returns a tuple with the StorageClass field value if set, nil otherwise
+// GetStorageClassOk returns a tuple with the StorageClass field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Object) GetStorageClassOk() (*ObjectStorageClass, bool) {
-	if o == nil || IsNil(o.StorageClass) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.StorageClass, true
+}
+
+// SetStorageClass sets field value
+func (o *Object) SetStorageClass(v ObjectStorageClass) {
+
+	o.StorageClass = &v
+
 }
 
 // HasStorageClass returns a boolean if a field has been set.
 func (o *Object) HasStorageClass() bool {
-	if o != nil && !IsNil(o.StorageClass) {
+	if o != nil && o.StorageClass != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetStorageClass gets a reference to the given ObjectStorageClass and assigns it to the StorageClass field.
-func (o *Object) SetStorageClass(v ObjectStorageClass) {
-	o.StorageClass = &v
-}
-
-// GetSize returns the Size field value if set, zero value otherwise.
-func (o *Object) GetSize() int32 {
-	if o == nil || IsNil(o.Size) {
-		var ret int32
-		return ret
+// GetSize returns the Size field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *Object) GetSize() *int32 {
+	if o == nil {
+		return nil
 	}
-	return *o.Size
+
+	return o.Size
+
 }
 
-// GetSizeOk returns a tuple with the Size field value if set, nil otherwise
+// GetSizeOk returns a tuple with the Size field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Object) GetSizeOk() (*int32, bool) {
-	if o == nil || IsNil(o.Size) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Size, true
+}
+
+// SetSize sets field value
+func (o *Object) SetSize(v int32) {
+
+	o.Size = &v
+
 }
 
 // HasSize returns a boolean if a field has been set.
 func (o *Object) HasSize() bool {
-	if o != nil && !IsNil(o.Size) {
+	if o != nil && o.Size != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetSize gets a reference to the given int32 and assigns it to the Size field.
-func (o *Object) SetSize(v int32) {
-	o.Size = &v
-}
-
-// GetETag returns the ETag field value if set, zero value otherwise.
-func (o *Object) GetETag() string {
-	if o == nil || IsNil(o.ETag) {
-		var ret string
-		return ret
+// GetETag returns the ETag field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Object) GetETag() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.ETag
+
+	return o.ETag
+
 }
 
-// GetETagOk returns a tuple with the ETag field value if set, nil otherwise
+// GetETagOk returns a tuple with the ETag field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Object) GetETagOk() (*string, bool) {
-	if o == nil || IsNil(o.ETag) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.ETag, true
+}
+
+// SetETag sets field value
+func (o *Object) SetETag(v string) {
+
+	o.ETag = &v
+
 }
 
 // HasETag returns a boolean if a field has been set.
 func (o *Object) HasETag() bool {
-	if o != nil && !IsNil(o.ETag) {
+	if o != nil && o.ETag != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetETag gets a reference to the given string and assigns it to the ETag field.
-func (o *Object) SetETag(v string) {
-	o.ETag = &v
-}
-
-// GetOwner returns the Owner field value if set, zero value otherwise.
-func (o *Object) GetOwner() Owner {
-	if o == nil || IsNil(o.Owner) {
-		var ret Owner
-		return ret
+// GetOwner returns the Owner field value
+// If the value is explicit nil, the zero value for Owner will be returned
+func (o *Object) GetOwner() *Owner {
+	if o == nil {
+		return nil
 	}
-	return *o.Owner
+
+	return o.Owner
+
 }
 
-// GetOwnerOk returns a tuple with the Owner field value if set, nil otherwise
+// GetOwnerOk returns a tuple with the Owner field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Object) GetOwnerOk() (*Owner, bool) {
-	if o == nil || IsNil(o.Owner) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Owner, true
+}
+
+// SetOwner sets field value
+func (o *Object) SetOwner(v Owner) {
+
+	o.Owner = &v
+
 }
 
 // HasOwner returns a boolean if a field has been set.
 func (o *Object) HasOwner() bool {
-	if o != nil && !IsNil(o.Owner) {
+	if o != nil && o.Owner != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetOwner gets a reference to the given Owner and assigns it to the Owner field.
-func (o *Object) SetOwner(v Owner) {
-	o.Owner = &v
-}
-
 func (o Object) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o Object) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Key) {
+	if o.Key != nil {
 		toSerialize["Key"] = o.Key
 	}
-	if !IsNil(o.LastModified) {
+
+	if o.LastModified != nil {
 		toSerialize["LastModified"] = o.LastModified
 	}
-	if !IsNil(o.StorageClass) {
+
+	if o.StorageClass != nil {
 		toSerialize["StorageClass"] = o.StorageClass
 	}
-	if !IsNil(o.Size) {
+
+	if o.Size != nil {
 		toSerialize["Size"] = o.Size
 	}
-	if !IsNil(o.ETag) {
+
+	if o.ETag != nil {
 		toSerialize["ETag"] = o.ETag
 	}
-	if !IsNil(o.Owner) {
+
+	if o.Owner != nil {
 		toSerialize["Owner"] = o.Owner
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableObject struct {

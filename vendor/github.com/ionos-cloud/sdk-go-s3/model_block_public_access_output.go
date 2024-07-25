@@ -17,9 +17,6 @@ import (
 
 import "encoding/xml"
 
-// checks if the BlockPublicAccessOutput type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &BlockPublicAccessOutput{}
-
 // BlockPublicAccessOutput struct for BlockPublicAccessOutput
 type BlockPublicAccessOutput struct {
 	XMLName xml.Name `xml:"BlockPublicAccessBlockConfiguration"`
@@ -51,157 +48,177 @@ func NewBlockPublicAccessOutputWithDefaults() *BlockPublicAccessOutput {
 	return &this
 }
 
-// GetBlockPublicAcls returns the BlockPublicAcls field value if set, zero value otherwise.
-func (o *BlockPublicAccessOutput) GetBlockPublicAcls() bool {
-	if o == nil || IsNil(o.BlockPublicAcls) {
-		var ret bool
-		return ret
+// GetBlockPublicAcls returns the BlockPublicAcls field value
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *BlockPublicAccessOutput) GetBlockPublicAcls() *bool {
+	if o == nil {
+		return nil
 	}
-	return *o.BlockPublicAcls
+
+	return o.BlockPublicAcls
+
 }
 
-// GetBlockPublicAclsOk returns a tuple with the BlockPublicAcls field value if set, nil otherwise
+// GetBlockPublicAclsOk returns a tuple with the BlockPublicAcls field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *BlockPublicAccessOutput) GetBlockPublicAclsOk() (*bool, bool) {
-	if o == nil || IsNil(o.BlockPublicAcls) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.BlockPublicAcls, true
+}
+
+// SetBlockPublicAcls sets field value
+func (o *BlockPublicAccessOutput) SetBlockPublicAcls(v bool) {
+
+	o.BlockPublicAcls = &v
+
 }
 
 // HasBlockPublicAcls returns a boolean if a field has been set.
 func (o *BlockPublicAccessOutput) HasBlockPublicAcls() bool {
-	if o != nil && !IsNil(o.BlockPublicAcls) {
+	if o != nil && o.BlockPublicAcls != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetBlockPublicAcls gets a reference to the given bool and assigns it to the BlockPublicAcls field.
-func (o *BlockPublicAccessOutput) SetBlockPublicAcls(v bool) {
-	o.BlockPublicAcls = &v
-}
-
-// GetIgnorePublicAcls returns the IgnorePublicAcls field value if set, zero value otherwise.
-func (o *BlockPublicAccessOutput) GetIgnorePublicAcls() bool {
-	if o == nil || IsNil(o.IgnorePublicAcls) {
-		var ret bool
-		return ret
+// GetIgnorePublicAcls returns the IgnorePublicAcls field value
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *BlockPublicAccessOutput) GetIgnorePublicAcls() *bool {
+	if o == nil {
+		return nil
 	}
-	return *o.IgnorePublicAcls
+
+	return o.IgnorePublicAcls
+
 }
 
-// GetIgnorePublicAclsOk returns a tuple with the IgnorePublicAcls field value if set, nil otherwise
+// GetIgnorePublicAclsOk returns a tuple with the IgnorePublicAcls field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *BlockPublicAccessOutput) GetIgnorePublicAclsOk() (*bool, bool) {
-	if o == nil || IsNil(o.IgnorePublicAcls) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.IgnorePublicAcls, true
+}
+
+// SetIgnorePublicAcls sets field value
+func (o *BlockPublicAccessOutput) SetIgnorePublicAcls(v bool) {
+
+	o.IgnorePublicAcls = &v
+
 }
 
 // HasIgnorePublicAcls returns a boolean if a field has been set.
 func (o *BlockPublicAccessOutput) HasIgnorePublicAcls() bool {
-	if o != nil && !IsNil(o.IgnorePublicAcls) {
+	if o != nil && o.IgnorePublicAcls != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetIgnorePublicAcls gets a reference to the given bool and assigns it to the IgnorePublicAcls field.
-func (o *BlockPublicAccessOutput) SetIgnorePublicAcls(v bool) {
-	o.IgnorePublicAcls = &v
-}
-
-// GetBlockPublicPolicy returns the BlockPublicPolicy field value if set, zero value otherwise.
-func (o *BlockPublicAccessOutput) GetBlockPublicPolicy() bool {
-	if o == nil || IsNil(o.BlockPublicPolicy) {
-		var ret bool
-		return ret
+// GetBlockPublicPolicy returns the BlockPublicPolicy field value
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *BlockPublicAccessOutput) GetBlockPublicPolicy() *bool {
+	if o == nil {
+		return nil
 	}
-	return *o.BlockPublicPolicy
+
+	return o.BlockPublicPolicy
+
 }
 
-// GetBlockPublicPolicyOk returns a tuple with the BlockPublicPolicy field value if set, nil otherwise
+// GetBlockPublicPolicyOk returns a tuple with the BlockPublicPolicy field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *BlockPublicAccessOutput) GetBlockPublicPolicyOk() (*bool, bool) {
-	if o == nil || IsNil(o.BlockPublicPolicy) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.BlockPublicPolicy, true
+}
+
+// SetBlockPublicPolicy sets field value
+func (o *BlockPublicAccessOutput) SetBlockPublicPolicy(v bool) {
+
+	o.BlockPublicPolicy = &v
+
 }
 
 // HasBlockPublicPolicy returns a boolean if a field has been set.
 func (o *BlockPublicAccessOutput) HasBlockPublicPolicy() bool {
-	if o != nil && !IsNil(o.BlockPublicPolicy) {
+	if o != nil && o.BlockPublicPolicy != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetBlockPublicPolicy gets a reference to the given bool and assigns it to the BlockPublicPolicy field.
-func (o *BlockPublicAccessOutput) SetBlockPublicPolicy(v bool) {
-	o.BlockPublicPolicy = &v
-}
-
-// GetRestrictPublicBuckets returns the RestrictPublicBuckets field value if set, zero value otherwise.
-func (o *BlockPublicAccessOutput) GetRestrictPublicBuckets() bool {
-	if o == nil || IsNil(o.RestrictPublicBuckets) {
-		var ret bool
-		return ret
+// GetRestrictPublicBuckets returns the RestrictPublicBuckets field value
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *BlockPublicAccessOutput) GetRestrictPublicBuckets() *bool {
+	if o == nil {
+		return nil
 	}
-	return *o.RestrictPublicBuckets
+
+	return o.RestrictPublicBuckets
+
 }
 
-// GetRestrictPublicBucketsOk returns a tuple with the RestrictPublicBuckets field value if set, nil otherwise
+// GetRestrictPublicBucketsOk returns a tuple with the RestrictPublicBuckets field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *BlockPublicAccessOutput) GetRestrictPublicBucketsOk() (*bool, bool) {
-	if o == nil || IsNil(o.RestrictPublicBuckets) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.RestrictPublicBuckets, true
+}
+
+// SetRestrictPublicBuckets sets field value
+func (o *BlockPublicAccessOutput) SetRestrictPublicBuckets(v bool) {
+
+	o.RestrictPublicBuckets = &v
+
 }
 
 // HasRestrictPublicBuckets returns a boolean if a field has been set.
 func (o *BlockPublicAccessOutput) HasRestrictPublicBuckets() bool {
-	if o != nil && !IsNil(o.RestrictPublicBuckets) {
+	if o != nil && o.RestrictPublicBuckets != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetRestrictPublicBuckets gets a reference to the given bool and assigns it to the RestrictPublicBuckets field.
-func (o *BlockPublicAccessOutput) SetRestrictPublicBuckets(v bool) {
-	o.RestrictPublicBuckets = &v
-}
-
 func (o BlockPublicAccessOutput) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o BlockPublicAccessOutput) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.BlockPublicAcls) {
+	if o.BlockPublicAcls != nil {
 		toSerialize["BlockPublicAcls"] = o.BlockPublicAcls
 	}
-	if !IsNil(o.IgnorePublicAcls) {
+
+	if o.IgnorePublicAcls != nil {
 		toSerialize["IgnorePublicAcls"] = o.IgnorePublicAcls
 	}
-	if !IsNil(o.BlockPublicPolicy) {
+
+	if o.BlockPublicPolicy != nil {
 		toSerialize["BlockPublicPolicy"] = o.BlockPublicPolicy
 	}
-	if !IsNil(o.RestrictPublicBuckets) {
+
+	if o.RestrictPublicBuckets != nil {
 		toSerialize["RestrictPublicBuckets"] = o.RestrictPublicBuckets
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableBlockPublicAccessOutput struct {

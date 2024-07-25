@@ -15,7 +15,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
 	"net/http"
 	"net/url"
@@ -31,7 +30,7 @@ type ApiDeletePublicAccessBlockRequest struct {
 	bucket     string
 }
 
-func (r ApiDeletePublicAccessBlockRequest) Execute() (*shared.APIResponse, error) {
+func (r ApiDeletePublicAccessBlockRequest) Execute() (*APIResponse, error) {
 	return r.ApiService.DeletePublicAccessBlockExecute(r)
 }
 
@@ -60,7 +59,7 @@ func (a *PublicAccessBlockApiService) DeletePublicAccessBlock(ctx context.Contex
 }
 
 // Execute executes the request
-func (a *PublicAccessBlockApiService) DeletePublicAccessBlockExecute(r ApiDeletePublicAccessBlockRequest) (*shared.APIResponse, error) {
+func (a *PublicAccessBlockApiService) DeletePublicAccessBlockExecute(r ApiDeletePublicAccessBlockRequest) (*APIResponse, error) {
 	var (
 		localVarHTTPMethod = http.MethodDelete
 		localVarPostBody   interface{}
@@ -69,7 +68,7 @@ func (a *PublicAccessBlockApiService) DeletePublicAccessBlockExecute(r ApiDelete
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PublicAccessBlockApiService.DeletePublicAccessBlock")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return nil, gerr
 	}
@@ -80,10 +79,10 @@ func (a *PublicAccessBlockApiService) DeletePublicAccessBlockExecute(r ApiDelete
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
 
@@ -124,7 +123,7 @@ func (a *PublicAccessBlockApiService) DeletePublicAccessBlockExecute(r ApiDelete
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -144,7 +143,7 @@ func (a *PublicAccessBlockApiService) DeletePublicAccessBlockExecute(r ApiDelete
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -179,7 +178,7 @@ type ApiGetPublicAccessBlockRequest struct {
 	bucket     string
 }
 
-func (r ApiGetPublicAccessBlockRequest) Execute() (*BlockPublicAccessOutput, *shared.APIResponse, error) {
+func (r ApiGetPublicAccessBlockRequest) Execute() (*BlockPublicAccessOutput, *APIResponse, error) {
 	return r.ApiService.GetPublicAccessBlockExecute(r)
 }
 
@@ -210,7 +209,7 @@ func (a *PublicAccessBlockApiService) GetPublicAccessBlock(ctx context.Context, 
 // Execute executes the request
 //
 //	@return BlockPublicAccessOutput
-func (a *PublicAccessBlockApiService) GetPublicAccessBlockExecute(r ApiGetPublicAccessBlockRequest) (*BlockPublicAccessOutput, *shared.APIResponse, error) {
+func (a *PublicAccessBlockApiService) GetPublicAccessBlockExecute(r ApiGetPublicAccessBlockRequest) (*BlockPublicAccessOutput, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -220,7 +219,7 @@ func (a *PublicAccessBlockApiService) GetPublicAccessBlockExecute(r ApiGetPublic
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PublicAccessBlockApiService.GetPublicAccessBlock")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -231,10 +230,10 @@ func (a *PublicAccessBlockApiService) GetPublicAccessBlockExecute(r ApiGetPublic
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
 
@@ -275,7 +274,7 @@ func (a *PublicAccessBlockApiService) GetPublicAccessBlockExecute(r ApiGetPublic
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -295,7 +294,7 @@ func (a *PublicAccessBlockApiService) GetPublicAccessBlockExecute(r ApiGetPublic
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -323,7 +322,7 @@ func (a *PublicAccessBlockApiService) GetPublicAccessBlockExecute(r ApiGetPublic
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -351,7 +350,7 @@ func (r ApiPutPublicAccessBlockRequest) ContentMD5(contentMD5 string) ApiPutPubl
 	return r
 }
 
-func (r ApiPutPublicAccessBlockRequest) Execute() (*shared.APIResponse, error) {
+func (r ApiPutPublicAccessBlockRequest) Execute() (*APIResponse, error) {
 	return r.ApiService.PutPublicAccessBlockExecute(r)
 }
 
@@ -385,7 +384,7 @@ func (a *PublicAccessBlockApiService) PutPublicAccessBlock(ctx context.Context, 
 }
 
 // Execute executes the request
-func (a *PublicAccessBlockApiService) PutPublicAccessBlockExecute(r ApiPutPublicAccessBlockRequest) (*shared.APIResponse, error) {
+func (a *PublicAccessBlockApiService) PutPublicAccessBlockExecute(r ApiPutPublicAccessBlockRequest) (*APIResponse, error) {
 	var (
 		localVarHTTPMethod = http.MethodPut
 		localVarPostBody   interface{}
@@ -394,7 +393,7 @@ func (a *PublicAccessBlockApiService) PutPublicAccessBlockExecute(r ApiPutPublic
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PublicAccessBlockApiService.PutPublicAccessBlock")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return nil, gerr
 	}
@@ -405,10 +404,10 @@ func (a *PublicAccessBlockApiService) PutPublicAccessBlockExecute(r ApiPutPublic
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
 	if r.blockPublicAccessPayload == nil {
@@ -457,7 +456,7 @@ func (a *PublicAccessBlockApiService) PutPublicAccessBlockExecute(r ApiPutPublic
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -477,7 +476,7 @@ func (a *PublicAccessBlockApiService) PutPublicAccessBlockExecute(r ApiPutPublic
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))

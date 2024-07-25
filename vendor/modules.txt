@@ -28,7 +28,7 @@ github.com/agext/levenshtein
 # github.com/apparentlymart/go-textseg/v15 v15.0.0
 ## explicit; go 1.16
 github.com/apparentlymart/go-textseg/v15/textseg
-# github.com/aws/aws-sdk-go v1.54.12
+# github.com/aws/aws-sdk-go v1.54.15
 ## explicit; go 1.19
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
@@ -319,8 +319,13 @@ github.com/ionos-cloud/sdk-go-dbaas-postgres
 # github.com/ionos-cloud/sdk-go-dns v1.1.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dns
+<<<<<<< HEAD
 # github.com/ionos-cloud/sdk-go-s3 v1.0.0 => /home/dinga/Work/repos/sdk-resources/s3-go
 ## explicit; go 1.21
+=======
+# github.com/ionos-cloud/sdk-go-s3 v1.0.0 => /home/cbeti/devtools/sdks/generated-sdks/s3-go
+## explicit; go 1.18
+>>>>>>> feat/plugin-framework
 github.com/ionos-cloud/sdk-go-s3
 # github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 ## explicit; go 1.18
@@ -562,9 +567,8 @@ google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/emptypb
 google.golang.org/protobuf/types/known/timestamppb
-# gopkg.in/validator.v2 v2.0.1
-## explicit; go 1.18
-gopkg.in/validator.v2
+# gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
+## explicit; go 1.11
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3

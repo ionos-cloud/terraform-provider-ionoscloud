@@ -17,17 +17,14 @@ import (
 
 import "encoding/xml"
 
-// checks if the BucketPolicy type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &BucketPolicy{}
-
 // BucketPolicy struct for BucketPolicy
 type BucketPolicy struct {
 	XMLName xml.Name `xml:"BucketPolicy"`
 	// Specifies an optional identifier for the policy.
 	Id *string `json:"Id,omitempty" xml:"Id"`
 	// Policy version
-	Version   *string                 `json:"Version,omitempty" xml:"Version"`
-	Statement []BucketPolicyStatement `json:"Statement" xml:"Statement"`
+	Version   *string                  `json:"Version,omitempty" xml:"Version"`
+	Statement *[]BucketPolicyStatement `json:"Statement" xml:"Statement"`
 }
 
 // NewBucketPolicy instantiates a new BucketPolicy object
@@ -37,7 +34,7 @@ type BucketPolicy struct {
 func NewBucketPolicy(statement []BucketPolicyStatement) *BucketPolicy {
 	this := BucketPolicy{}
 
-	this.Statement = statement
+	this.Statement = &statement
 
 	return &this
 }
@@ -50,114 +47,135 @@ func NewBucketPolicyWithDefaults() *BucketPolicy {
 	return &this
 }
 
-// GetId returns the Id field value if set, zero value otherwise.
-func (o *BucketPolicy) GetId() string {
-	if o == nil || IsNil(o.Id) {
-		var ret string
-		return ret
+// GetId returns the Id field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *BucketPolicy) GetId() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Id
+
+	return o.Id
+
 }
 
-// GetIdOk returns a tuple with the Id field value if set, nil otherwise
+// GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *BucketPolicy) GetIdOk() (*string, bool) {
-	if o == nil || IsNil(o.Id) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Id, true
+}
+
+// SetId sets field value
+func (o *BucketPolicy) SetId(v string) {
+
+	o.Id = &v
+
 }
 
 // HasId returns a boolean if a field has been set.
 func (o *BucketPolicy) HasId() bool {
-	if o != nil && !IsNil(o.Id) {
+	if o != nil && o.Id != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetId gets a reference to the given string and assigns it to the Id field.
-func (o *BucketPolicy) SetId(v string) {
-	o.Id = &v
-}
-
-// GetVersion returns the Version field value if set, zero value otherwise.
-func (o *BucketPolicy) GetVersion() string {
-	if o == nil || IsNil(o.Version) {
-		var ret string
-		return ret
+// GetVersion returns the Version field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *BucketPolicy) GetVersion() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.Version
+
+	return o.Version
+
 }
 
-// GetVersionOk returns a tuple with the Version field value if set, nil otherwise
+// GetVersionOk returns a tuple with the Version field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *BucketPolicy) GetVersionOk() (*string, bool) {
-	if o == nil || IsNil(o.Version) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.Version, true
+}
+
+// SetVersion sets field value
+func (o *BucketPolicy) SetVersion(v string) {
+
+	o.Version = &v
+
 }
 
 // HasVersion returns a boolean if a field has been set.
 func (o *BucketPolicy) HasVersion() bool {
-	if o != nil && !IsNil(o.Version) {
+	if o != nil && o.Version != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetVersion gets a reference to the given string and assigns it to the Version field.
-func (o *BucketPolicy) SetVersion(v string) {
-	o.Version = &v
-}
-
 // GetStatement returns the Statement field value
-func (o *BucketPolicy) GetStatement() []BucketPolicyStatement {
+// If the value is explicit nil, the zero value for []BucketPolicyStatement will be returned
+func (o *BucketPolicy) GetStatement() *[]BucketPolicyStatement {
 	if o == nil {
-		var ret []BucketPolicyStatement
-		return ret
+		return nil
 	}
 
 	return o.Statement
+
 }
 
 // GetStatementOk returns a tuple with the Statement field value
 // and a boolean to check if the value has been set.
-func (o *BucketPolicy) GetStatementOk() ([]BucketPolicyStatement, bool) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *BucketPolicy) GetStatementOk() (*[]BucketPolicyStatement, bool) {
 	if o == nil {
 		return nil, false
 	}
+
 	return o.Statement, true
 }
 
 // SetStatement sets field value
 func (o *BucketPolicy) SetStatement(v []BucketPolicyStatement) {
-	o.Statement = v
+
+	o.Statement = &v
+
+}
+
+// HasStatement returns a boolean if a field has been set.
+func (o *BucketPolicy) HasStatement() bool {
+	if o != nil && o.Statement != nil {
+		return true
+	}
+
+	return false
 }
 
 func (o BucketPolicy) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o BucketPolicy) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Id) {
+	if o.Id != nil {
 		toSerialize["Id"] = o.Id
 	}
-	if !IsNil(o.Version) {
+
+	if o.Version != nil {
 		toSerialize["Version"] = o.Version
 	}
-	if !IsZero(o.Statement) {
+
+	if o.Statement != nil {
 		toSerialize["Statement"] = o.Statement
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableBucketPolicy struct {

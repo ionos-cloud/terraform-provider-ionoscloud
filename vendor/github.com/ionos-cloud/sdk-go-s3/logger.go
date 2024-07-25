@@ -12,74 +12,70 @@
 package ionoscloud
 
 import (
-	"encoding/json"
-
-	"fmt"
+	"log"
+	"os"
+	"strings"
 )
 
-// ExpirationStatus If `Enabled`, the rule is currently being applied. If `Disabled`, the rule is not currently being applied.
-type ExpirationStatus string
+type LogLevel uint
 
-// List of ExpirationStatus
+func (l *LogLevel) Get() LogLevel {
+	if l != nil {
+		return *l
+	}
+	return Off
+}
+
+// Satisfies returns true if this LogLevel is at least high enough for v
+func (l *LogLevel) Satisfies(v LogLevel) bool {
+	return l.Get() >= v
+}
+
 const (
-	EXPIRATIONSTATUS_ENABLED  ExpirationStatus = "Enabled"
-	EXPIRATIONSTATUS_DISABLED ExpirationStatus = "Disabled"
+	Off LogLevel = 0x100 * iota
+	Debug
+	// Trace We recommend you only set this field for debugging purposes.
+	// Disable it in your production environments because it can log sensitive data.
+	// It logs the full request and response without encryption, even for an HTTPS call.
+	// Verbose request and response logging can also significantly impact your application's performance.
+	Trace
 )
 
-func (v *ExpirationStatus) UnmarshalJSON(src []byte) error {
-	var value string
-	err := json.Unmarshal(src, &value)
-	if err != nil {
-		return err
+var LogLevelMap = map[string]LogLevel{
+	"off":   Off,
+	"debug": Debug,
+	"trace": Trace,
+}
+
+// getLogLevelFromEnv - gets LogLevel type from env variable IONOS_LOG_LEVEL
+// returns Off if an invalid log level is encountered
+func getLogLevelFromEnv() LogLevel {
+	strLogLevel := "off"
+	if os.Getenv(IonosLogLevelEnvVar) != "" {
+		strLogLevel = os.Getenv(IonosLogLevelEnvVar)
 	}
-	enumTypeValue := ExpirationStatus(value)
-	for _, existing := range []ExpirationStatus{"Enabled", "Disabled"} {
-		if existing == enumTypeValue {
-			*v = enumTypeValue
-			return nil
-		}
+
+	logLevel, ok := LogLevelMap[strings.ToLower(strLogLevel)]
+	if !ok {
+		log.Printf("Cannot set logLevel for value: %s, setting loglevel to Off", strLogLevel)
 	}
-
-	return fmt.Errorf("%+v is not a valid ExpirationStatus", value)
+	return logLevel
 }
 
-// Ptr returns reference to ExpirationStatus value
-func (v ExpirationStatus) Ptr() *ExpirationStatus {
-	return &v
+type Logger interface {
+	Printf(format string, args ...interface{})
 }
 
-type NullableExpirationStatus struct {
-	value *ExpirationStatus
-	isSet bool
+func NewDefaultLogger() Logger {
+	return &defaultLogger{
+		logger: log.New(os.Stderr, "IONOSLOG ", log.LstdFlags),
+	}
 }
 
-func (v NullableExpirationStatus) Get() *ExpirationStatus {
-	return v.value
+type defaultLogger struct {
+	logger *log.Logger
 }
 
-func (v *NullableExpirationStatus) Set(val *ExpirationStatus) {
-	v.value = val
-	v.isSet = true
-}
-
-func (v NullableExpirationStatus) IsSet() bool {
-	return v.isSet
-}
-
-func (v *NullableExpirationStatus) Unset() {
-	v.value = nil
-	v.isSet = false
-}
-
-func NewNullableExpirationStatus(val *ExpirationStatus) *NullableExpirationStatus {
-	return &NullableExpirationStatus{value: val, isSet: true}
-}
-
-func (v NullableExpirationStatus) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.value)
-}
-
-func (v *NullableExpirationStatus) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
+func (l defaultLogger) Printf(format string, args ...interface{}) {
+	l.logger.Printf(format, args...)
 }

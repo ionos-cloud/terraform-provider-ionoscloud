@@ -17,107 +17,110 @@ import (
 
 import "encoding/xml"
 
-// checks if the PutBucketCorsRequest type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &PutBucketCorsRequest{}
-
-// PutBucketCorsRequest struct for PutBucketCorsRequest
-type PutBucketCorsRequest struct {
-	XMLName           xml.Name                              `xml:"PutBucketCorsRequest"`
-	CORSConfiguration PutBucketCorsRequestCORSConfiguration `json:"CORSConfiguration" xml:"CORSConfiguration"`
+// BucketLocation struct for BucketLocation
+type BucketLocation struct {
+	XMLName xml.Name `xml:"LocationConstraint"`
+	// Specifies the Region where the bucket resides.
+	LocationConstraint *string `json:"LocationConstraint,omitempty" xml:",chardata"`
 }
 
-// NewPutBucketCorsRequest instantiates a new PutBucketCorsRequest object
+// NewBucketLocation instantiates a new BucketLocation object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPutBucketCorsRequest(cORSConfiguration PutBucketCorsRequestCORSConfiguration) *PutBucketCorsRequest {
-	this := PutBucketCorsRequest{}
-
-	this.CORSConfiguration = cORSConfiguration
+func NewBucketLocation() *BucketLocation {
+	this := BucketLocation{}
 
 	return &this
 }
 
-// NewPutBucketCorsRequestWithDefaults instantiates a new PutBucketCorsRequest object
+// NewBucketLocationWithDefaults instantiates a new BucketLocation object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewPutBucketCorsRequestWithDefaults() *PutBucketCorsRequest {
-	this := PutBucketCorsRequest{}
+func NewBucketLocationWithDefaults() *BucketLocation {
+	this := BucketLocation{}
 	return &this
 }
 
-// GetCORSConfiguration returns the CORSConfiguration field value
-func (o *PutBucketCorsRequest) GetCORSConfiguration() PutBucketCorsRequestCORSConfiguration {
+// GetLocationConstraint returns the LocationConstraint field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *BucketLocation) GetLocationConstraint() *string {
 	if o == nil {
-		var ret PutBucketCorsRequestCORSConfiguration
-		return ret
+		return nil
 	}
 
-	return o.CORSConfiguration
+	return o.LocationConstraint
+
 }
 
-// GetCORSConfigurationOk returns a tuple with the CORSConfiguration field value
+// GetLocationConstraintOk returns a tuple with the LocationConstraint field value
 // and a boolean to check if the value has been set.
-func (o *PutBucketCorsRequest) GetCORSConfigurationOk() (*PutBucketCorsRequestCORSConfiguration, bool) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *BucketLocation) GetLocationConstraintOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.CORSConfiguration, true
+
+	return o.LocationConstraint, true
 }
 
-// SetCORSConfiguration sets field value
-func (o *PutBucketCorsRequest) SetCORSConfiguration(v PutBucketCorsRequestCORSConfiguration) {
-	o.CORSConfiguration = v
+// SetLocationConstraint sets field value
+func (o *BucketLocation) SetLocationConstraint(v string) {
+
+	o.LocationConstraint = &v
+
 }
 
-func (o PutBucketCorsRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
+// HasLocationConstraint returns a boolean if a field has been set.
+func (o *BucketLocation) HasLocationConstraint() bool {
+	if o != nil && o.LocationConstraint != nil {
+		return true
 	}
+
+	return false
+}
+
+func (o BucketLocation) MarshalJSON() ([]byte, error) {
+	toSerialize := map[string]interface{}{}
+	if o.LocationConstraint != nil {
+		toSerialize["LocationConstraint"] = o.LocationConstraint
+	}
+
 	return json.Marshal(toSerialize)
 }
 
-func (o PutBucketCorsRequest) ToMap() (map[string]interface{}, error) {
-	toSerialize := map[string]interface{}{}
-	if !IsZero(o.CORSConfiguration) {
-		toSerialize["CORSConfiguration"] = o.CORSConfiguration
-	}
-	return toSerialize, nil
-}
-
-type NullablePutBucketCorsRequest struct {
-	value *PutBucketCorsRequest
+type NullableBucketLocation struct {
+	value *BucketLocation
 	isSet bool
 }
 
-func (v NullablePutBucketCorsRequest) Get() *PutBucketCorsRequest {
+func (v NullableBucketLocation) Get() *BucketLocation {
 	return v.value
 }
 
-func (v *NullablePutBucketCorsRequest) Set(val *PutBucketCorsRequest) {
+func (v *NullableBucketLocation) Set(val *BucketLocation) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullablePutBucketCorsRequest) IsSet() bool {
+func (v NullableBucketLocation) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullablePutBucketCorsRequest) Unset() {
+func (v *NullableBucketLocation) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullablePutBucketCorsRequest(val *PutBucketCorsRequest) *NullablePutBucketCorsRequest {
-	return &NullablePutBucketCorsRequest{value: val, isSet: true}
+func NewNullableBucketLocation(val *BucketLocation) *NullableBucketLocation {
+	return &NullableBucketLocation{value: val, isSet: true}
 }
 
-func (v NullablePutBucketCorsRequest) MarshalJSON() ([]byte, error) {
+func (v NullableBucketLocation) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullablePutBucketCorsRequest) UnmarshalJSON(src []byte) error {
+func (v *NullableBucketLocation) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

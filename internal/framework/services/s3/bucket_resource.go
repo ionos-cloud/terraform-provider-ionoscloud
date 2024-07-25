@@ -157,8 +157,11 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		resp.Diagnostics.AddError("Failed to read bucket location", formatXMLError(err).Error())
 		return
 	}
-
-	data.Region = types.StringValue(location.GetLocationConstraint())
+	if location.LocationConstraint == nil {
+		resp.Diagnostics.AddError("Failed to read bucket location", "location is nil.")
+		return
+	}
+	data.Region = types.StringValue(*location.LocationConstraint)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 

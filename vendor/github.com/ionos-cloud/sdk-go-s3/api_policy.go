@@ -15,7 +15,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
 	"net/http"
 	"net/url"
@@ -31,7 +30,7 @@ type ApiDeleteBucketPolicyRequest struct {
 	bucket     string
 }
 
-func (r ApiDeleteBucketPolicyRequest) Execute() (*shared.APIResponse, error) {
+func (r ApiDeleteBucketPolicyRequest) Execute() (*APIResponse, error) {
 	return r.ApiService.DeleteBucketPolicyExecute(r)
 }
 
@@ -61,7 +60,7 @@ func (a *PolicyApiService) DeleteBucketPolicy(ctx context.Context, bucket string
 }
 
 // Execute executes the request
-func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequest) (*shared.APIResponse, error) {
+func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequest) (*APIResponse, error) {
 	var (
 		localVarHTTPMethod = http.MethodDelete
 		localVarPostBody   interface{}
@@ -70,7 +69,7 @@ func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequ
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.DeleteBucketPolicy")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return nil, gerr
 	}
@@ -81,10 +80,10 @@ func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequ
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
 
@@ -125,7 +124,7 @@ func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequ
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -145,7 +144,7 @@ func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequ
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -180,7 +179,7 @@ type ApiGetBucketPolicyRequest struct {
 	bucket     string
 }
 
-func (r ApiGetBucketPolicyRequest) Execute() (*BucketPolicy, *shared.APIResponse, error) {
+func (r ApiGetBucketPolicyRequest) Execute() (*BucketPolicy, *APIResponse, error) {
 	return r.ApiService.GetBucketPolicyExecute(r)
 }
 
@@ -212,7 +211,7 @@ func (a *PolicyApiService) GetBucketPolicy(ctx context.Context, bucket string) A
 // Execute executes the request
 //
 //	@return BucketPolicy
-func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (*BucketPolicy, *shared.APIResponse, error) {
+func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (*BucketPolicy, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -222,7 +221,7 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.GetBucketPolicy")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -233,10 +232,10 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
 
@@ -277,7 +276,7 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -297,7 +296,7 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -325,7 +324,7 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -341,7 +340,7 @@ type ApiGetBucketPolicyStatusRequest struct {
 	bucket     string
 }
 
-func (r ApiGetBucketPolicyStatusRequest) Execute() (*PolicyStatus, *shared.APIResponse, error) {
+func (r ApiGetBucketPolicyStatusRequest) Execute() (*PolicyStatus, *APIResponse, error) {
 	return r.ApiService.GetBucketPolicyStatusExecute(r)
 }
 
@@ -377,7 +376,7 @@ func (a *PolicyApiService) GetBucketPolicyStatus(ctx context.Context, bucket str
 // Execute executes the request
 //
 //	@return PolicyStatus
-func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStatusRequest) (*PolicyStatus, *shared.APIResponse, error) {
+func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStatusRequest) (*PolicyStatus, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -387,7 +386,7 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.GetBucketPolicyStatus")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return localVarReturnValue, nil, gerr
 	}
@@ -398,10 +397,10 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
 
@@ -442,7 +441,7 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -462,7 +461,7 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
@@ -490,7 +489,7 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(err.Error())
@@ -518,7 +517,7 @@ func (r ApiPutBucketPolicyRequest) ContentMD5(contentMD5 string) ApiPutBucketPol
 	return r
 }
 
-func (r ApiPutBucketPolicyRequest) Execute() (*shared.APIResponse, error) {
+func (r ApiPutBucketPolicyRequest) Execute() (*APIResponse, error) {
 	return r.ApiService.PutBucketPolicyExecute(r)
 }
 
@@ -549,7 +548,7 @@ func (a *PolicyApiService) PutBucketPolicy(ctx context.Context, bucket string) A
 }
 
 // Execute executes the request
-func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (*shared.APIResponse, error) {
+func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (*APIResponse, error) {
 	var (
 		localVarHTTPMethod = http.MethodPut
 		localVarPostBody   interface{}
@@ -558,7 +557,7 @@ func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.PutBucketPolicy")
 	if err != nil {
-		gerr := shared.GenericOpenAPIError{}
+		gerr := GenericOpenAPIError{}
 		gerr.SetError(err.Error())
 		return nil, gerr
 	}
@@ -569,10 +568,10 @@ func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if shared.Strlen(r.bucket) < 3 {
+	if Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
-	if shared.Strlen(r.bucket) > 63 {
+	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
 	if r.bucketPolicy == nil {
@@ -621,7 +620,7 @@ func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-	localVarAPIResponse := &shared.APIResponse{
+	localVarAPIResponse := &APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
@@ -641,7 +640,7 @@ func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := shared.GenericOpenAPIError{}
+		newErr := GenericOpenAPIError{}
 		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
 		newErr.SetBody(localVarBody)
 		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))

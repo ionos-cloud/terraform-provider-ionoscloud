@@ -13,14 +13,10 @@ package ionoscloud
 
 import (
 	"encoding/json"
-
 	"time"
 )
 
 import "encoding/xml"
-
-// checks if the CopyObjectResult type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CopyObjectResult{}
 
 // CopyObjectResult Container for all response elements.
 type CopyObjectResult struct {
@@ -49,87 +45,100 @@ func NewCopyObjectResultWithDefaults() *CopyObjectResult {
 	return &this
 }
 
-// GetETag returns the ETag field value if set, zero value otherwise.
-func (o *CopyObjectResult) GetETag() string {
-	if o == nil || IsNil(o.ETag) {
-		var ret string
-		return ret
+// GetETag returns the ETag field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *CopyObjectResult) GetETag() *string {
+	if o == nil {
+		return nil
 	}
-	return *o.ETag
+
+	return o.ETag
+
 }
 
-// GetETagOk returns a tuple with the ETag field value if set, nil otherwise
+// GetETagOk returns a tuple with the ETag field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *CopyObjectResult) GetETagOk() (*string, bool) {
-	if o == nil || IsNil(o.ETag) {
+	if o == nil {
 		return nil, false
 	}
+
 	return o.ETag, true
+}
+
+// SetETag sets field value
+func (o *CopyObjectResult) SetETag(v string) {
+
+	o.ETag = &v
+
 }
 
 // HasETag returns a boolean if a field has been set.
 func (o *CopyObjectResult) HasETag() bool {
-	if o != nil && !IsNil(o.ETag) {
+	if o != nil && o.ETag != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetETag gets a reference to the given string and assigns it to the ETag field.
-func (o *CopyObjectResult) SetETag(v string) {
-	o.ETag = &v
-}
-
-// GetLastModified returns the LastModified field value if set, zero value otherwise.
-func (o *CopyObjectResult) GetLastModified() time.Time {
-	if o == nil || IsNil(o.LastModified) {
-		var ret time.Time
-		return ret
+// GetLastModified returns the LastModified field value
+// If the value is explicit nil, the zero value for time.Time will be returned
+func (o *CopyObjectResult) GetLastModified() *time.Time {
+	if o == nil {
+		return nil
 	}
-	return o.LastModified.Time
+
+	if o.LastModified == nil {
+		return nil
+	}
+	return &o.LastModified.Time
+
 }
 
-// GetLastModifiedOk returns a tuple with the LastModified field value if set, nil otherwise
+// GetLastModifiedOk returns a tuple with the LastModified field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *CopyObjectResult) GetLastModifiedOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.LastModified) {
+	if o == nil {
+		return nil, false
+	}
+
+	if o.LastModified == nil {
 		return nil, false
 	}
 	return &o.LastModified.Time, true
+
+}
+
+// SetLastModified sets field value
+func (o *CopyObjectResult) SetLastModified(v time.Time) {
+
+	o.LastModified = &IonosTime{v}
+
 }
 
 // HasLastModified returns a boolean if a field has been set.
 func (o *CopyObjectResult) HasLastModified() bool {
-	if o != nil && !IsNil(o.LastModified) {
+	if o != nil && o.LastModified != nil {
 		return true
 	}
 
 	return false
 }
 
-// SetLastModified gets a reference to the given time.Time and assigns it to the LastModified field.
-func (o *CopyObjectResult) SetLastModified(v time.Time) {
-	o.LastModified = &IonosTime{v}
-}
-
 func (o CopyObjectResult) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o CopyObjectResult) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.ETag) {
+	if o.ETag != nil {
 		toSerialize["ETag"] = o.ETag
 	}
-	if !IsNil(o.LastModified) {
+
+	if o.LastModified != nil {
 		toSerialize["LastModified"] = o.LastModified
 	}
-	return toSerialize, nil
+
+	return json.Marshal(toSerialize)
 }
 
 type NullableCopyObjectResult struct {

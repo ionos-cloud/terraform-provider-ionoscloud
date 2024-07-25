@@ -17,108 +17,109 @@ import (
 
 import "encoding/xml"
 
-// checks if the ErrorDocument type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &ErrorDocument{}
-
-// ErrorDocument The object key name to use when a 4XX class error occurs. Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests.
-type ErrorDocument struct {
-	XMLName xml.Name `xml:"ErrorDocument"`
-	// The object key.
-	Key string `json:"Key" xml:"Key"`
+// BucketPolicyConditionIpAddress struct for BucketPolicyConditionIpAddress
+type BucketPolicyConditionIpAddress struct {
+	XMLName     xml.Name  `xml:"BucketPolicyConditionIpAddress"`
+	AwsSourceIp *[]string `json:"aws:SourceIp,omitempty" xml:"aws:SourceIp"`
 }
 
-// NewErrorDocument instantiates a new ErrorDocument object
+// NewBucketPolicyConditionIpAddress instantiates a new BucketPolicyConditionIpAddress object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewErrorDocument(key string) *ErrorDocument {
-	this := ErrorDocument{}
-
-	this.Key = key
+func NewBucketPolicyConditionIpAddress() *BucketPolicyConditionIpAddress {
+	this := BucketPolicyConditionIpAddress{}
 
 	return &this
 }
 
-// NewErrorDocumentWithDefaults instantiates a new ErrorDocument object
+// NewBucketPolicyConditionIpAddressWithDefaults instantiates a new BucketPolicyConditionIpAddress object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewErrorDocumentWithDefaults() *ErrorDocument {
-	this := ErrorDocument{}
+func NewBucketPolicyConditionIpAddressWithDefaults() *BucketPolicyConditionIpAddress {
+	this := BucketPolicyConditionIpAddress{}
 	return &this
 }
 
-// GetKey returns the Key field value
-func (o *ErrorDocument) GetKey() string {
+// GetAwsSourceIp returns the AwsSourceIp field value
+// If the value is explicit nil, the zero value for []string will be returned
+func (o *BucketPolicyConditionIpAddress) GetAwsSourceIp() *[]string {
 	if o == nil {
-		var ret string
-		return ret
+		return nil
 	}
 
-	return o.Key
+	return o.AwsSourceIp
+
 }
 
-// GetKeyOk returns a tuple with the Key field value
+// GetAwsSourceIpOk returns a tuple with the AwsSourceIp field value
 // and a boolean to check if the value has been set.
-func (o *ErrorDocument) GetKeyOk() (*string, bool) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *BucketPolicyConditionIpAddress) GetAwsSourceIpOk() (*[]string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Key, true
+
+	return o.AwsSourceIp, true
 }
 
-// SetKey sets field value
-func (o *ErrorDocument) SetKey(v string) {
-	o.Key = v
+// SetAwsSourceIp sets field value
+func (o *BucketPolicyConditionIpAddress) SetAwsSourceIp(v []string) {
+
+	o.AwsSourceIp = &v
+
 }
 
-func (o ErrorDocument) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
+// HasAwsSourceIp returns a boolean if a field has been set.
+func (o *BucketPolicyConditionIpAddress) HasAwsSourceIp() bool {
+	if o != nil && o.AwsSourceIp != nil {
+		return true
 	}
+
+	return false
+}
+
+func (o BucketPolicyConditionIpAddress) MarshalJSON() ([]byte, error) {
+	toSerialize := map[string]interface{}{}
+	if o.AwsSourceIp != nil {
+		toSerialize["aws:SourceIp"] = o.AwsSourceIp
+	}
+
 	return json.Marshal(toSerialize)
 }
 
-func (o ErrorDocument) ToMap() (map[string]interface{}, error) {
-	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Key) {
-		toSerialize["Key"] = o.Key
-	}
-	return toSerialize, nil
-}
-
-type NullableErrorDocument struct {
-	value *ErrorDocument
+type NullableBucketPolicyConditionIpAddress struct {
+	value *BucketPolicyConditionIpAddress
 	isSet bool
 }
 
-func (v NullableErrorDocument) Get() *ErrorDocument {
+func (v NullableBucketPolicyConditionIpAddress) Get() *BucketPolicyConditionIpAddress {
 	return v.value
 }
 
-func (v *NullableErrorDocument) Set(val *ErrorDocument) {
+func (v *NullableBucketPolicyConditionIpAddress) Set(val *BucketPolicyConditionIpAddress) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableErrorDocument) IsSet() bool {
+func (v NullableBucketPolicyConditionIpAddress) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableErrorDocument) Unset() {
+func (v *NullableBucketPolicyConditionIpAddress) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableErrorDocument(val *ErrorDocument) *NullableErrorDocument {
-	return &NullableErrorDocument{value: val, isSet: true}
+func NewNullableBucketPolicyConditionIpAddress(val *BucketPolicyConditionIpAddress) *NullableBucketPolicyConditionIpAddress {
+	return &NullableBucketPolicyConditionIpAddress{value: val, isSet: true}
 }
 
-func (v NullableErrorDocument) MarshalJSON() ([]byte, error) {
+func (v NullableBucketPolicyConditionIpAddress) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableErrorDocument) UnmarshalJSON(src []byte) error {
+func (v *NullableBucketPolicyConditionIpAddress) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
