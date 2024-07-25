@@ -250,7 +250,7 @@ func (r *objectResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	apiResponse, err := uploadObject(ctx, r.client, &data)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to create object", err.Error())
+		resp.Diagnostics.AddError("failed to create object", formatXMLError(err).Error())
 		return
 	}
 
@@ -294,7 +294,7 @@ func (r *objectResource) Read(ctx context.Context, req resource.ReadRequest, res
 			return
 		}
 
-		resp.Diagnostics.AddError("failed to read object", err.Error())
+		resp.Diagnostics.AddError("failed to read object", formatXMLError(err).Error())
 		return
 	}
 
@@ -334,7 +334,7 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if hasObjectContentChanges(plan, state) {
 		_, err := uploadObject(ctx, r.client, &plan)
 		if err != nil {
-			resp.Diagnostics.AddError("failed to update object", err.Error())
+			resp.Diagnostics.AddError("failed to update object", formatXMLError(err).Error())
 			return
 		}
 	}
@@ -346,7 +346,7 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 			return
 		}
 
-		resp.Diagnostics.AddError("failed to read object", err.Error())
+		resp.Diagnostics.AddError("failed to read object", formatXMLError(err).Error())
 		return
 	}
 
@@ -383,7 +383,7 @@ func (r *objectResource) Delete(ctx context.Context, req resource.DeleteRequest,
 			return
 		}
 
-		resp.Diagnostics.AddError("failed to delete object", err.Error())
+		resp.Diagnostics.AddError("failed to delete object", formatXMLError(err).Error())
 		return
 	}
 }

@@ -89,13 +89,13 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 			return
 		}
 
-		resp.Diagnostics.AddError("Failed to read bucket", err.Error())
+		resp.Diagnostics.AddError("Failed to read bucket", formatXMLError(err).Error())
 		return
 	}
 
 	location, _, err := d.client.BucketsApi.GetBucketLocation(ctx, data.Name.ValueString()).Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read bucket location", err.Error())
+		resp.Diagnostics.AddError("Failed to read bucket location", formatXMLError(err).Error())
 		return
 	}
 	if location.LocationConstraint == nil {

@@ -197,7 +197,7 @@ func (d *objectDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 			return
 		}
 
-		resp.Diagnostics.AddError("failed to read object", err.Error())
+		resp.Diagnostics.AddError("failed to read object", formatXMLError(err).Error())
 		return
 	}
 
@@ -205,7 +205,7 @@ func (d *objectDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		var body string
 		body, err = downloadObject(ctx, d.client, data)
 		if err != nil {
-			resp.Diagnostics.AddError("failed to download object", err.Error())
+			resp.Diagnostics.AddError("failed to download object", formatXMLError(err).Error())
 			return
 		}
 
