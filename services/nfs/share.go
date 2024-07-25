@@ -104,6 +104,9 @@ func (c *Client) SetNFSShareData(d *schema.ResourceData, share sdk.ShareRead) er
 	if err := d.Set("name", *share.Properties.Name); err != nil {
 		return err
 	}
+	if err := d.Set("nfs_path", *share.Metadata.NfsPath); err != nil {
+		return err
+	}
 	if err := d.Set("quota", int(*share.Properties.Quota)); err != nil {
 		return err
 	}

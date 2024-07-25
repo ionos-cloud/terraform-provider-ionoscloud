@@ -45,6 +45,11 @@ func resourceNFSShare() *schema.Resource {
 				Description: "The directory being exported",
 				Required:    true,
 			},
+			"nfs_path": {
+				Type:        schema.TypeString,
+				Description: "Path to the NFS export. The NFS path is the path to the directory being exported.",
+				Computed:    true,
+			},
 			"quota": {
 				Type:        schema.TypeInt,
 				Description: "The quota in MiB for the export. The quota can restrict the amount of data that can be stored within the export. The quota can be disabled using `0`.",
