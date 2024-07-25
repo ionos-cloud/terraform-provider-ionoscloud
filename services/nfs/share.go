@@ -7,8 +7,8 @@ import (
 	sdk "github.com/ionos-cloud/sdk-go-nfs"
 )
 
-// GetNFSShareById returns a share given an ID
-func (c *Client) GetNFSShareById(ctx context.Context, clusterID, shareID string, location string) (sdk.ShareRead, *sdk.APIResponse, error) {
+// GetNFSShareByID returns a share given an ID
+func (c *Client) GetNFSShareByID(ctx context.Context, clusterID, shareID string, location string) (sdk.ShareRead, *sdk.APIResponse, error) {
 	share, apiResponse, err := c.Location(location).sdkClient.SharesApi.ClustersSharesFindById(ctx, clusterID, shareID).Execute()
 	apiResponse.LogInfo()
 	return share, apiResponse, err
@@ -66,7 +66,7 @@ func setShareConfig(d *schema.ResourceData) sdk.Share {
 	uid := int32(d.Get("uid").(int))
 
 	clientGroupsRaw := d.Get("client_groups").([]interface{})
-	var clientGroups []sdk.ShareClientGroups
+	clientGroups := make([]sdk.ShareClientGroups, 0, len(clientGroupsRaw))
 	for _, cgRaw := range clientGroupsRaw {
 		cg := cgRaw.(map[string]interface{})
 		description := cg["description"].(string)
