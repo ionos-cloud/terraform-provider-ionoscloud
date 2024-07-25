@@ -80,24 +80,24 @@ func Provider() *schema.Provider {
 				Default:     "",
 				Description: "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller account.",
 			},
-			"access_key": {
+			"s3_access_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_ACCESS_KEY", nil),
-				Description: "Access key for IONOS S3 bucket operations.",
+				Description: "Access key for IONOS S3 operations.",
 			},
-			"secret_key": {
+			"s3_secret_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_SECRET_KEY", nil),
-				Description: "Secret key for IONOS S3 bucket operations.",
+				Description: "Secret key for IONOS S3 operations.",
 			},
-			"region": {
+			"s3_region": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "eu-central-3",
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_REGION", nil),
-				Description: "Region for IONOS S3 bucket operations.",
+				Description: "Region for IONOS S3 operations.",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{

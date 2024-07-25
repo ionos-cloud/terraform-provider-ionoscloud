@@ -22,9 +22,9 @@ type ClientOptions struct {
 	Token          types.String `tfsdk:"token"`
 	Endpoint       types.String `tfsdk:"endpoint"`
 	ContractNumber types.String `tfsdk:"contract_number"`
-	SecretKey      types.String `tfsdk:"secret_key"`
-	AccessKey      types.String `tfsdk:"access_key"`
-	Region         types.String `tfsdk:"region"`
+	S3SecretKey    types.String `tfsdk:"s3_secret_key"`
+	S3AccessKey    types.String `tfsdk:"s3_access_key"`
+	S3Region       types.String `tfsdk:"s3_region"`
 	Retries        types.Int64  `tfsdk:"retries"`
 }
 
@@ -70,17 +70,17 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 				Optional:    true,
 				Description: "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller account.",
 			},
-			"secret_key": schema.StringAttribute{
+			"s3_secret_key": schema.StringAttribute{
 				Optional:    true,
-				Description: "Secret key for IONOS S3 bucket operations.",
+				Description: "Secret key for IONOS S3 operations.",
 			},
-			"access_key": schema.StringAttribute{
+			"s3_access_key": schema.StringAttribute{
 				Optional:    true,
-				Description: "Access key for IONOS S3 bucket operations.",
+				Description: "Access key for IONOS S3 operations.",
 			},
-			"region": schema.StringAttribute{
+			"s3_region": schema.StringAttribute{
 				Optional:    true,
-				Description: "Region for IONOS S3 bucket operations.",
+				Description: "Region for IONOS S3 operations.",
 			},
 		},
 	}
@@ -100,11 +100,11 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		resp.Diagnostics.AddAttributeError(path.Root("token"), "Unknown IONOS token", "token must be set")
 	}
 
-	if clientOpts.SecretKey.IsUnknown() {
+	if clientOpts.S3SecretKey.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(path.Root("secret_key"), "Unknown IONOS secret key", "")
 	}
 
-	if clientOpts.AccessKey.IsUnknown() {
+	if clientOpts.S3AccessKey.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(path.Root("access_key"), "Unknown IONOS access key", "")
 	}
 
@@ -133,20 +133,16 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		password = clientOpts.Password.ValueString()
 	}
 
-	if !clientOpts.AccessKey.IsNull() {
-		accessKey = clientOpts.AccessKey.ValueString()
+	if !clientOpts.S3AccessKey.IsNull() {
+		accessKey = clientOpts.S3AccessKey.ValueString()
 	}
 
-	if !clientOpts.SecretKey.IsNull() {
-		secretKey = clientOpts.SecretKey.ValueString()
+	if !clientOpts.S3SecretKey.IsNull() {
+		secretKey = clientOpts.S3SecretKey.ValueString()
 	}
 
-	if !clientOpts.Region.IsNull() {
-		region = clientOpts.Region.ValueString()
-	}
-
-	if accessKey == "" || secretKey == "" {
-		resp.Diagnostics.AddError("s3 keys missing", "access_key and secret_key must be set")
+	if !clientOpts.S3Region.IsNull() {
+		region = clientOpts.S3Region.ValueString()
 	}
 
 	if token == "" && (username == "" || password == "") {
