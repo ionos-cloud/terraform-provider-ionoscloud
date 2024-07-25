@@ -3,6 +3,7 @@
 package ionoscloud
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -35,8 +36,13 @@ func testAccNFSClusterImportStateId(s *terraform.State) (string, error) {
 		if rs.Type != "ionoscloud_nfs_cluster" {
 			continue
 		}
+		fmt.Println(rs.Type)
 
 		importID = rs.Primary.Attributes["id"]
+	}
+
+	if importID == "" {
+		return "", fmt.Errorf("Could not find nfs cluster")
 	}
 
 	return importID, nil
