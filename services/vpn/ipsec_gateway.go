@@ -93,6 +93,13 @@ func SetIPSecGatewayData(d *schema.ResourceData, gateway vpn.IPSecGatewayRead) e
 	if err := d.Set("name", gateway.Properties.Name); err != nil {
 		return utils.GenerateSetError(ipsecGatewayResourceName, "name", err)
 	}
+
+	if gateway.Properties.Description != nil {
+		if err := d.Set("description", *gateway.Properties.Description); err != nil {
+			return utils.GenerateSetError(ipsecGatewayResourceName, "description", err)
+		}
+	}
+
 	if err := d.Set("version", gateway.Properties.Version); err != nil {
 		return utils.GenerateSetError(ipsecGatewayResourceName, "version", err)
 	}
@@ -135,6 +142,10 @@ func setIPSecGatewayProperties(d *schema.ResourceData) vpn.IPSecGateway {
 
 	properties.Name = d.Get("name").(string)
 	properties.GatewayIP = d.Get("gateway_ip").(string)
+
+	if v, ok := d.GetOk("description"); ok {
+		properties.Description = shared.ToPtr(v.(string))
+	}
 
 	if v, ok := d.GetOk("version"); ok {
 		properties.Version = shared.ToPtr(v.(string))

@@ -12,6 +12,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceVpnIPSecTunnel() *schema.Resource {
@@ -33,10 +34,11 @@ func resourceVpnIPSecTunnel() *schema.Resource {
 				Optional:    true,
 			},
 			"location": {
-				Type:        schema.TypeString,
-				Description: "The location of the IPSec Gateway Tunnel. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
-				Required:    true,
-				ForceNew:    true,
+				Type:             schema.TypeString,
+				Description:      "The location of the IPSec Gateway Tunnel. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
 			},
 			"gateway_id": {
 				Type:        schema.TypeString,

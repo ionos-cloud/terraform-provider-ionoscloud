@@ -180,11 +180,12 @@ func dataSourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, m
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		switch {
+		case results == nil || len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no VPN IPSec Gateway Tunnel found with the specified name = %s", name))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one VPN IPSec Gateway Tunnel found with the specified name = %s", name))
-		} else {
+		default:
 			tunnel = results[0]
 		}
 	}

@@ -51,6 +51,7 @@ The following attributes are returned by the datasource:
 * `location` - The location of the IPSec Gateway. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las,
   us/mci, fr/par
 * `gateway_ip` - Public IP address to be assigned to the gateway.
+* `description` - (Optional)[string] The human-readable description of the IPSec Gateway.
 * `connections` - The network connection for your gateway.
     * `datacenter_id` - The datacenter to connect your VPN Gateway to.
     * `lan_id` - The numeric LAN ID to connect your VPN Gateway to.

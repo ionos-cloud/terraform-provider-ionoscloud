@@ -97,6 +97,12 @@ func SetIPSecTunnelData(d *schema.ResourceData, tunnel vpn.IPSecTunnelRead) erro
 		return utils.GenerateSetError(ipsecTunnelResourceName, "name", err)
 	}
 
+	if tunnel.Properties.Description != nil {
+		if err := d.Set("description", *tunnel.Properties.Description); err != nil {
+			return utils.GenerateSetError(ipsecGatewayResourceName, "description", err)
+		}
+	}
+
 	if err := d.Set("remote_host", tunnel.Properties.RemoteHost); err != nil {
 		return utils.GenerateSetError(ipsecTunnelResourceName, "remote_host", err)
 	}

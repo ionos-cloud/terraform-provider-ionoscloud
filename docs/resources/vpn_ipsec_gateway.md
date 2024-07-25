@@ -21,6 +21,7 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
 	location = <gateway_location>
 	gateway_ip = <gateway_public_ip>
 	version = "IKEv2"
+	description = "This gateway connects site A to VDC X."
 
 	connections {
 		datacenter_id = <gateway_datacenter_id>
@@ -38,6 +39,7 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
   gb/lhr, us/ewr, us/las, us/mci, fr/par
 * `gateway_ip` - (Required)[string] Public IP address to be assigned to the gateway. Note: This must be an IP address in
   the same datacenter as the connections.
+* `description` - (Optional)[string] The human-readable description of the IPSec Gateway.
 * `connections` - (Required)[list] The network connection for your gateway. **Note**: all connections must belong to the
   same datacenter. Minimum items: 1. Maximum items: 10.
     * `datacenter_id` - (Required)[string] The datacenter to connect your VPN Gateway to.

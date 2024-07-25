@@ -23,9 +23,15 @@ func dataSourceVpnIPSecGateway() *schema.Resource {
 				Computed:    true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The human readable name of your IPSec Gateway.",
+				Optional:    true,
+				Computed:    true,
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Description: "The human-readable description of your IPSec Gateway.",
+				Computed:    true,
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -115,11 +121,12 @@ func dataSourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, 
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		switch {
+		case results == nil || len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no VPN IPSec Gateway found with the specified name = %s", name))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one VPN IPSec Gateway found with the specified name = %s", name))
-		} else {
+		default:
 			gateway = results[0]
 		}
 	}
