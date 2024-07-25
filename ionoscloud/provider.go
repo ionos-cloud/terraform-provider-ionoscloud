@@ -170,7 +170,7 @@ func Provider() *schema.Provider {
 			constant.NatGatewayRuleResource:                    dataSourceNatGatewayRule(),
 			constant.NetworkLoadBalancerResource:               dataSourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: dataSourceNetworkLoadBalancerForwardingRule(),
-			// constant.NFSClusterResource:                        nil, // TODO
+			constant.NFSClusterResource:                        dataSourceNFSCluster(),
 			// constant.NFSShareResource:                          nil, // TODO
 			constant.TemplateResource:                   dataSourceTemplate(),
 			constant.BackupUnitResource:                 dataSourceBackupUnit(),

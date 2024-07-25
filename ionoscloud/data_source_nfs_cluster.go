@@ -8,8 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	nfs2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
-
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
@@ -23,21 +21,19 @@ func dataSourceNFSCluster() *schema.Resource {
 			"location": {
 				Type: schema.TypeString,
 				Description: fmt.Sprintf("The location of the Network File Storage Cluster. "+
-					"Available locations: '%s'", strings.Join(nfs2.ValidNFSLocations, ", '")),
+					"Available locations: '%s'", strings.Join(ValidNFSLocations, ", '")),
 				Required:         true,
 				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(nfs2.ValidNFSLocations, false)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(ValidNFSLocations, false)),
 			},
 			"id": {
 				Type:        schema.TypeString,
 				Description: "The ID (UUID) of the NFS Cluster.",
-				Computed:    true,
 				Optional:    true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the NFS Cluster.",
-				Computed:    true,
 				Optional:    true,
 			},
 			"size": {
@@ -112,7 +108,7 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 	var cluster nfs.ClusterRead
 	var err error
 	if idOk {
-		cluster, _, err = client.GetNFSClusterByID(ctx, id, location)
+		cluster, _, err = client.GetNFSClusterById(ctx, id, location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the NFS Cluster with ID: %s, error: %w", idValue, err))
 		}
@@ -129,12 +125,11 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 
-		switch {
-		case len(results) == 0:
+		if results == nil || len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no NFS Cluster found with the specified name: %s", name))
-		case len(results) > 1:
+		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one NFS Cluster found with the specified name: %s", name))
-		default:
+		} else {
 			cluster = results[0]
 		}
 	}
