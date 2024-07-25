@@ -1,5 +1,5 @@
 ---
-subcategory: "VPN Gateway"
+subcategory: "VPN"
 layout: "ionoscloud"
 page_title: "IonosCloud: ionoscloud_vpn_ipsec_tunnel"
 sidebar_current: "docs-resource-vpn-ipsec-tunnel"
