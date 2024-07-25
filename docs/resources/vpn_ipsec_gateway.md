@@ -1,5 +1,5 @@
 ---
-subcategory: "VPN Gateway"
+subcategory: "VPN"
 layout: "ionoscloud"
 page_title: "IonosCloud: ionoscloud_vpn_ipsec_gateway"
 sidebar_current: "docs-resource-vpn-ipsec-gateway"
@@ -9,7 +9,9 @@ description: |-
 
 # ionoscloud_vpn_ipsec_gateway
 
-An IPSec Gateway TODO: Add description
+An IPSec Gateway resource manages the creation, management, and deletion of VPN IPSec Gateways within the IONOS Cloud
+infrastructure. This resource facilitates the creation of VPN IPSec Gateways, enabling secure connections between your
+network resources.
 
 ## Usage example
 

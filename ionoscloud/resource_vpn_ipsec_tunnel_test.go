@@ -1,5 +1,5 @@
-//go:build all || vpn || vpn_ipsec || tunnel
-// +build all vpn vpn_ipsec tunnel
+//go:build all || vpn || vpn_ipsec
+// +build all vpn vpn_ipsec
 
 package ionoscloud
 

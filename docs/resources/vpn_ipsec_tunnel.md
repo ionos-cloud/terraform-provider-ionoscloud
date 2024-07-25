@@ -9,45 +9,47 @@ description: |-
 
 # ionoscloud_vpn_ipsec_tunnel
 
-An IPSec Gateway Tunnel TODO: Add description
+An IPSec Gateway Tunnel resource manages the creation, management, and deletion of VPN IPSec Gateway Tunnels within the
+IONOS Cloud infrastructure. This resource facilitates the creation of VPN IPSec Gateway Tunnels, enabling secure
+connections between your network resources.
 
 ## Usage example
 
 ```hcl
 resource "ionoscloud_vpn_ipsec_tunnel" "example" {
-  location   = <gateway_location>
-  gateway_id = <gateway_id>
-
-  name        = "example-tunnel"
-  remote_host = "vpn.mycompany.com"
-  description = "Allows local subnet X to connect to virtual network Y."
-
-  auth {
-    method  = "PSK"
-    psk_key = "X2wosbaw74M8hQGbK3jCCaEusR6CCFRa"
-  }
-
-  ike {
-    diffie_hellman_group = "16-MODP4096"
-    encryption_algorithm = "AES256"
-    integrity_algorithm  = "SHA256"
-    lifetime             = 86400
-  }
-
-  esp {
-    diffie_hellman_group = "16-MODP4096"
-    encryption_algorithm = "AES256"
-    integrity_algorithm  = "SHA256"
-    lifetime             = 3600
-  }
-
-  cloud_network_cidrs = [
-    "0.0.0.0/0"
-  ]
-
-  peer_network_cidrs = [
-    "1.2.3.4/32"
-  ]
+    location = <gateway_location>
+    gateway_id = <gateway_id>
+    
+    name = "example-tunnel"
+    remote_host = "vpn.mycompany.com"
+    description = "Allows local subnet X to connect to virtual network Y."
+    
+    auth {
+        method = "PSK"
+        psk_key = "X2wosbaw74M8hQGbK3jCCaEusR6CCFRa"
+    }
+    
+    ike {
+        diffie_hellman_group = "16-MODP4096"
+        encryption_algorithm = "AES256"
+        integrity_algorithm = "SHA256"
+        lifetime             = 86400
+    }
+    
+    esp {
+        diffie_hellman_group = "16-MODP4096"
+        encryption_algorithm = "AES256"
+        integrity_algorithm = "SHA256"
+        lifetime             = 3600
+    }
+    
+    cloud_network_cidrs = [
+        "0.0.0.0/0"
+    ]
+    
+    peer_network_cidrs = [
+        "1.2.3.4/32"
+    ]
 }
 ```
 
