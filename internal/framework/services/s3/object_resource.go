@@ -24,7 +24,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 	"github.com/mitchellh/go-homedir"
 )
@@ -389,7 +388,7 @@ func (r *objectResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	}
 }
 
-func uploadObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (*shared.APIResponse, error) {
+func uploadObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (*s3.APIResponse, error) {
 	putReq := client.ObjectsApi.PutObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	err := fillPutObjectRequest(&putReq, data)
 	if err != nil {
@@ -411,7 +410,7 @@ func uploadObject(ctx context.Context, client *s3.APIClient, data *objectResourc
 	return putReq.Body(body).Execute()
 }
 
-func setContentData(data *objectResourceModel, apiResponse *shared.APIResponse) {
+func setContentData(data *objectResourceModel, apiResponse *s3.APIResponse) {
 	contentType := apiResponse.Header.Get("Content-Type")
 	if contentType != "" {
 		data.ContentType = types.StringValue(contentType)
@@ -453,7 +452,7 @@ func setContentData(data *objectResourceModel, apiResponse *shared.APIResponse) 
 	}
 }
 
-func setServerSideEncryptionData(data *objectResourceModel, apiResponse *shared.APIResponse) {
+func setServerSideEncryptionData(data *objectResourceModel, apiResponse *s3.APIResponse) {
 	serverSideEncryption := apiResponse.Header.Get("x-amz-server-side-encryption")
 	if serverSideEncryption != "" {
 		data.ServerSideEncryption = types.StringValue(serverSideEncryption)
@@ -481,7 +480,7 @@ func setServerSideEncryptionData(data *objectResourceModel, apiResponse *shared.
 }
 
 func (r *objectResource) setTagsData(ctx context.Context, data *objectResourceModel) diag.Diagnostics {
-	tagsMap, err := getTags(ctx, r.client, data)
+	tagsMap, err := getTags(ctx, r.client, data.Bucket.ValueString(), data.Key.ValueString())
 	if err != nil {
 		diags := diag.Diagnostics{}
 		diags.AddError("failed to get tags", err.Error())
@@ -499,7 +498,7 @@ func (r *objectResource) setTagsData(ctx context.Context, data *objectResourceMo
 	return nil
 }
 
-func setMetadata(ctx context.Context, data *objectResourceModel, apiResponse *shared.APIResponse) diag.Diagnostics {
+func setMetadata(ctx context.Context, data *objectResourceModel, apiResponse *s3.APIResponse) diag.Diagnostics {
 	metadataMap := getMetadataMapFromHeaders(apiResponse, "X-Amz-Meta-")
 
 	if len(metadataMap) > 0 {
@@ -513,7 +512,7 @@ func setMetadata(ctx context.Context, data *objectResourceModel, apiResponse *sh
 	return nil
 }
 
-func (r *objectResource) setDataModel(ctx context.Context, data *objectResourceModel, apiResponse *shared.APIResponse) diag.Diagnostics {
+func (r *objectResource) setDataModel(ctx context.Context, data *objectResourceModel, apiResponse *s3.APIResponse) diag.Diagnostics {
 	setContentData(data, apiResponse)
 	setServerSideEncryptionData(data, apiResponse)
 
@@ -545,8 +544,8 @@ func (r *objectResource) setDataModel(ctx context.Context, data *objectResourceM
 	return nil
 }
 
-func getTags(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (map[string]string, error) {
-	output, apiResponse, err := client.TaggingApi.GetObjectTagging(ctx, data.Bucket.ValueString(), data.Key.ValueString()).Execute()
+func getTags(ctx context.Context, client *s3.APIClient, bucket, key string) (map[string]string, error) {
+	output, apiResponse, err := client.TaggingApi.GetObjectTagging(ctx, bucket, key).Execute()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return nil, nil
@@ -555,15 +554,21 @@ func getTags(ctx context.Context, client *s3.APIClient, data *objectResourceMode
 		return nil, err
 	}
 
+	if output.TagSet == nil {
+		return nil, nil
+	}
+
 	tagsMap := map[string]string{}
-	for _, tag := range output.TagSet {
-		tagsMap[tag.Key] = tag.Value
+	for _, tag := range *output.TagSet {
+		if tag.Key != nil && tag.Value != nil {
+			tagsMap[*tag.Key] = *tag.Value
+		}
 	}
 
 	return tagsMap, nil
 }
 
-func getMetadataMapFromHeaders(apiResponse *shared.APIResponse, prefix string) map[string]string {
+func getMetadataMapFromHeaders(apiResponse *s3.APIResponse, prefix string) map[string]string {
 	metaHeaders := map[string]string{}
 	for name, values := range apiResponse.Header {
 		if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
@@ -591,7 +596,7 @@ func getContentType(ctx context.Context, data *objectResourceModel, client *s3.A
 	return contentType, nil
 }
 
-func deleteObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (map[string]interface{}, *shared.APIResponse, error) {
+func deleteObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (map[string]interface{}, *s3.APIResponse, error) {
 	req := client.ObjectsApi.DeleteObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.VersionID.IsNull() {
 		req = req.VersionId(data.VersionID.ValueString())
@@ -609,7 +614,7 @@ func deleteObject(ctx context.Context, client *s3.APIClient, data *objectResourc
 }
 
 // FindObject finds the object.
-func FindObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (*s3.HeadObjectOutput, *shared.APIResponse, error) {
+func FindObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (*s3.HeadObjectOutput, *s3.APIResponse, error) {
 	req := client.ObjectsApi.HeadObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.Etag.IsNull() {
 		req = req.IfMatch(data.Etag.ValueString())

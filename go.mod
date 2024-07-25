@@ -35,6 +35,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+	gopkg.in/validator.v2 v2.0.1 // indirect
 )
 
 replace github.com/ionos-cloud/sdk-go-s3 => /home/dinga/Work/repos/sdk-resources/s3-go

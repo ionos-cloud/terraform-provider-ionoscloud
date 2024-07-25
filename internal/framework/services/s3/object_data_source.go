@@ -6,6 +6,7 @@ import (
 	"io"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -13,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
@@ -39,7 +39,6 @@ type objectDataSourceModel struct {
 	ContentLanguage                       types.String `tfsdk:"content_language"`
 	ContentType                           types.String `tfsdk:"content_type"`
 	ContentLength                         types.Int64  `tfsdk:"content_length"`
-	ContentMD5                            types.String `tfsdk:"content_md5"`
 	Expires                               types.String `tfsdk:"expires"`
 	ServerSideEncryption                  types.String `tfsdk:"server_side_encryption"`
 	StorageClass                          types.String `tfsdk:"storage_class"`
@@ -115,9 +114,6 @@ func (d *objectDataSource) Schema(_ context.Context, req datasource.SchemaReques
 				Computed: true,
 			},
 			"content_type": schema.StringAttribute{
-				Computed: true,
-			},
-			"content_md5": schema.StringAttribute{
 				Computed: true,
 			},
 			"expires": schema.StringAttribute{
@@ -267,7 +263,7 @@ func isContentTypeAllowed(contentType string) bool {
 	return false
 }
 
-func findObjectDataSource(ctx context.Context, client *s3.APIClient, data objectDataSourceModel) (*s3.HeadObjectOutput, *shared.APIResponse, error) {
+func findObjectDataSource(ctx context.Context, client *s3.APIClient, data objectDataSourceModel) (*s3.HeadObjectOutput, *s3.APIResponse, error) {
 	req := client.ObjectsApi.HeadObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.Etag.IsNull() {
 		req = req.IfMatch(data.Etag.ValueString())
@@ -288,7 +284,7 @@ func findObjectDataSource(ctx context.Context, client *s3.APIClient, data object
 	return req.Execute()
 }
 
-func setContentDataSource(data *objectDataSourceModel, apiResponse *shared.APIResponse) diag.Diagnostics {
+func setContentDataSource(data *objectDataSourceModel, apiResponse *s3.APIResponse) diag.Diagnostics {
 	contentType := apiResponse.Header.Get("Content-Type")
 	if contentType != "" {
 		data.ContentType = types.StringValue(contentType)
@@ -305,7 +301,7 @@ func setContentDataSource(data *objectDataSourceModel, apiResponse *shared.APIRe
 		data.ContentLength = types.Int64Value(int64(intLength))
 	}
 
-	etag := apiResponse.Header.Get("ETag")
+	etag := strings.Trim(apiResponse.Header.Get("ETag"), "\"")
 	if etag != "" {
 		data.Etag = types.StringValue(etag)
 	}
@@ -330,11 +326,6 @@ func setContentDataSource(data *objectDataSourceModel, apiResponse *shared.APIRe
 		data.ContentLanguage = types.StringValue(contentLanguage)
 	}
 
-	contentMD5 := apiResponse.Header.Get("Content-MD5")
-	if contentMD5 != "" {
-		data.ContentMD5 = types.StringValue(contentMD5)
-	}
-
 	expires := apiResponse.Header.Get("Expires")
 	if expires != "" {
 		data.Expires = types.StringValue(expires)
@@ -343,7 +334,7 @@ func setContentDataSource(data *objectDataSourceModel, apiResponse *shared.APIRe
 	return nil
 }
 
-func setServerSideEncryptionDataSource(data *objectDataSourceModel, apiResponse *shared.APIResponse) {
+func setServerSideEncryptionDataSource(data *objectDataSourceModel, apiResponse *s3.APIResponse) {
 	serverSideEncryption := apiResponse.Header.Get("x-amz-server-side-encryption")
 	if serverSideEncryption != "" {
 		data.ServerSideEncryption = types.StringValue(serverSideEncryption)
@@ -370,7 +361,7 @@ func setServerSideEncryptionDataSource(data *objectDataSourceModel, apiResponse 
 	}
 }
 
-func setObjectLockDataSource(data *objectDataSourceModel, apiResponse *shared.APIResponse) {
+func setObjectLockDataSource(data *objectDataSourceModel, apiResponse *s3.APIResponse) {
 	objectLockMode := apiResponse.Header.Get("x-amz-object-lock-mode")
 	if objectLockMode != "" {
 		data.ObjectLockMode = types.StringValue(objectLockMode)
@@ -388,7 +379,7 @@ func setObjectLockDataSource(data *objectDataSourceModel, apiResponse *shared.AP
 }
 
 func (d *objectDataSource) setTagsData(ctx context.Context, data *objectDataSourceModel) diag.Diagnostics {
-	tagsMap, err := getTagsDataSource(ctx, d.client, data)
+	tagsMap, err := getTags(ctx, d.client, data.Bucket.ValueString(), data.Key.ValueString())
 	if err != nil {
 		diags := diag.Diagnostics{}
 		diags.AddError("failed to get tags", err.Error())
@@ -406,7 +397,7 @@ func (d *objectDataSource) setTagsData(ctx context.Context, data *objectDataSour
 	return nil
 }
 
-func setMetadataDataSource(ctx context.Context, data *objectDataSourceModel, apiResponse *shared.APIResponse) diag.Diagnostics {
+func setMetadataDataSource(ctx context.Context, data *objectDataSourceModel, apiResponse *s3.APIResponse) diag.Diagnostics {
 	metadataMap := getMetadataMapFromHeaders(apiResponse, "X-Amz-Meta-")
 
 	if len(metadataMap) > 0 {
@@ -420,7 +411,7 @@ func setMetadataDataSource(ctx context.Context, data *objectDataSourceModel, api
 	return nil
 }
 
-func (d *objectDataSource) setDataModel(ctx context.Context, data *objectDataSourceModel, apiResponse *shared.APIResponse) diag.Diagnostics {
+func (d *objectDataSource) setDataModel(ctx context.Context, data *objectDataSourceModel, apiResponse *s3.APIResponse) diag.Diagnostics {
 	if diags := setContentDataSource(data, apiResponse); diags.HasError() {
 		return diags
 	}
@@ -452,22 +443,4 @@ func (d *objectDataSource) setDataModel(ctx context.Context, data *objectDataSou
 	}
 
 	return nil
-}
-
-func getTagsDataSource(ctx context.Context, client *s3.APIClient, data *objectDataSourceModel) (map[string]string, error) {
-	output, apiResponse, err := client.TaggingApi.GetObjectTagging(ctx, data.Bucket.ValueString(), data.Key.ValueString()).Execute()
-	if err != nil {
-		if apiResponse.HttpNotFound() {
-			return nil, nil
-		}
-
-		return nil, err
-	}
-
-	tagsMap := map[string]string{}
-	for _, tag := range output.TagSet {
-		tagsMap[tag.Key] = tag.Value
-	}
-
-	return tagsMap, nil
 }
