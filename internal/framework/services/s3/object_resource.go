@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -248,14 +249,7 @@ func (r *objectResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	putReq := r.client.ObjectsApi.PutObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
-	diags := fillPutObjectRequest(&putReq, data)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
-	apiResponse, err := putReq.Execute()
+	apiResponse, err := uploadObject(ctx, r.client, &data)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create object", err.Error())
 		return
@@ -294,7 +288,7 @@ func (r *objectResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	_, apiResponse, err := FindObject(ctx, r.client, data)
+	_, apiResponse, err := FindObject(ctx, r.client, &data)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			resp.State.RemoveResource(ctx)
@@ -339,21 +333,14 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	if hasObjectContentChanges(plan, state) {
-		putReq := r.client.ObjectsApi.PutObject(ctx, state.Bucket.ValueString(), state.Key.ValueString())
-		diags := fillPutObjectRequest(&putReq, plan)
-		if diags.HasError() {
-			resp.Diagnostics.Append(diags...)
-			return
-		}
-
-		_, err := putReq.Execute()
+		_, err := uploadObject(ctx, r.client, &plan)
 		if err != nil {
 			resp.Diagnostics.AddError("failed to update object", err.Error())
 			return
 		}
 	}
 
-	_, apiResponse, err := FindObject(ctx, r.client, plan)
+	_, apiResponse, err := FindObject(ctx, r.client, &plan)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			resp.State.RemoveResource(ctx)
@@ -368,6 +355,7 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 		Key:    state.Key,
 		Bucket: state.Bucket,
 	}
+
 	diags := r.setDataModel(ctx, &newState, apiResponse)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
@@ -390,7 +378,7 @@ func (r *objectResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	_, apiResponse, err := deleteObject(ctx, r.client, data)
+	_, apiResponse, err := deleteObject(ctx, r.client, &data)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return
@@ -399,6 +387,28 @@ func (r *objectResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		resp.Diagnostics.AddError("failed to delete object", err.Error())
 		return
 	}
+}
+
+func uploadObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (*shared.APIResponse, error) {
+	putReq := client.ObjectsApi.PutObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
+	err := fillPutObjectRequest(&putReq, data)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := getBody(data)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		err = body.Close()
+		if err != nil {
+			log.Printf("failed to close body: %s", err.Error())
+		}
+	}()
+
+	return putReq.Body(body).Execute()
 }
 
 func setContentData(data *objectResourceModel, apiResponse *shared.APIResponse) {
@@ -568,7 +578,7 @@ func getMetadataMapFromHeaders(apiResponse *shared.APIResponse, prefix string) m
 }
 
 func getContentType(ctx context.Context, data *objectResourceModel, client *s3.APIClient) (string, error) {
-	_, apiResponse, err := FindObject(ctx, client, *data)
+	_, apiResponse, err := FindObject(ctx, client, data)
 	if err != nil {
 		return "", err
 	}
@@ -581,7 +591,7 @@ func getContentType(ctx context.Context, data *objectResourceModel, client *s3.A
 	return contentType, nil
 }
 
-func deleteObject(ctx context.Context, client *s3.APIClient, data objectResourceModel) (map[string]interface{}, *shared.APIResponse, error) {
+func deleteObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (map[string]interface{}, *shared.APIResponse, error) {
 	req := client.ObjectsApi.DeleteObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.VersionID.IsNull() {
 		req = req.VersionId(data.VersionID.ValueString())
@@ -599,7 +609,7 @@ func deleteObject(ctx context.Context, client *s3.APIClient, data objectResource
 }
 
 // FindObject finds the object.
-func FindObject(ctx context.Context, client *s3.APIClient, data objectResourceModel) (*s3.HeadObjectOutput, *shared.APIResponse, error) {
+func FindObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (*s3.HeadObjectOutput, *shared.APIResponse, error) {
 	req := client.ObjectsApi.HeadObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.Etag.IsNull() {
 		req = req.IfMatch(data.Etag.ValueString())
@@ -620,7 +630,34 @@ func FindObject(ctx context.Context, client *s3.APIClient, data objectResourceMo
 	return req.Execute()
 }
 
-func fillContentData(data *objectResourceModel, req *s3.ApiPutObjectRequest) diag.Diagnostics {
+func getBody(data *objectResourceModel) (*os.File, error) {
+	if !data.Source.IsNull() {
+		filePath, err := homedir.Expand(data.Source.ValueString())
+		if err != nil {
+			return nil, fmt.Errorf("failed to expand source file path: %s", err.Error())
+		}
+
+		file, err := os.Open(filepath.Clean(filePath))
+		if err != nil {
+			return nil, fmt.Errorf("failed to open source file: %s", err.Error())
+		}
+
+		return file, nil
+	}
+
+	if !data.Content.IsNull() {
+		tempFile, err := createTempFile("temp", data.Content.ValueString())
+		if err != nil {
+			return nil, fmt.Errorf("failed to create temp file: %s", err.Error())
+		}
+
+		return tempFile, nil
+	}
+
+	return nil, nil
+}
+
+func fillContentData(data *objectResourceModel, req *s3.ApiPutObjectRequest) error {
 	if !data.CacheControl.IsNull() {
 		*req = req.CacheControl(data.CacheControl.ValueString())
 	}
@@ -644,40 +681,10 @@ func fillContentData(data *objectResourceModel, req *s3.ApiPutObjectRequest) dia
 	if !data.Expires.IsNull() {
 		t, err := time.Parse(time.RFC3339, data.Expires.ValueString())
 		if err != nil {
-			diags := diag.Diagnostics{}
-			diags.AddError("failed to parse expires time", err.Error())
-			return diags
+			return fmt.Errorf("failed to parse expires time: %s", err.Error())
 		}
 
 		*req = req.Expires(t)
-	}
-
-	if !data.Source.IsNull() {
-		filePath, err := homedir.Expand(data.Source.ValueString())
-		if err != nil {
-			diags := diag.Diagnostics{}
-			diags.AddError("failed to expand source path", err.Error())
-			return diags
-		}
-
-		file, err := os.Open(filepath.Clean(filePath))
-		if err != nil {
-			diags := diag.Diagnostics{}
-			diags.AddError("failed to open source file", err.Error())
-			return diags
-		}
-
-		*req = req.Body(file)
-	}
-
-	if !data.Content.IsNull() {
-		tempFile, err := createTempFile("temp", data.Content.ValueString())
-		if err != nil {
-			diags := diag.Diagnostics{}
-			diags.AddError("failed to create temp file for writing content", err.Error())
-			return diags
-		}
-		*req = req.Body(tempFile)
 	}
 
 	return nil
@@ -709,11 +716,10 @@ func fillServerSideEncryptionData(data *objectResourceModel, req *s3.ApiPutObjec
 	}
 }
 
-func fillPutObjectRequest(req *s3.ApiPutObjectRequest, data objectResourceModel) diag.Diagnostics {
-	fillServerSideEncryptionData(&data, req)
-	diags := fillContentData(&data, req)
-	if diags.HasError() {
-		return diags
+func fillPutObjectRequest(req *s3.ApiPutObjectRequest, data *objectResourceModel) error {
+	fillServerSideEncryptionData(data, req)
+	if err := fillContentData(data, req); err != nil {
+		return err
 	}
 
 	if !data.StorageClass.IsNull() {
@@ -731,8 +737,7 @@ func fillPutObjectRequest(req *s3.ApiPutObjectRequest, data objectResourceModel)
 	if !data.Tags.IsNull() {
 		tags, err := buildQueryString(data.Tags)
 		if err != nil {
-			diags.AddError("failed to build tags query string", err.Error())
-			return diags
+			return fmt.Errorf("failed to build tags query string: %s", err.Error())
 		}
 		*req = req.XAmzTagging(tags)
 	}
@@ -740,8 +745,7 @@ func fillPutObjectRequest(req *s3.ApiPutObjectRequest, data objectResourceModel)
 	if !data.Metadata.IsNull() {
 		metadata, err := fromTFMap(data.Metadata)
 		if err != nil {
-			diags.AddError("failed to convert metadata map", err.Error())
-			return diags
+			return fmt.Errorf("failed to convert metadata: %s", err.Error())
 		}
 
 		*req = req.XAmzMeta(metadata)
