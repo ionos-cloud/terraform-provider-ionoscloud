@@ -340,7 +340,7 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	if hasObjectContentChanges(plan, state) {
 		putReq := r.client.ObjectsApi.PutObject(ctx, state.Bucket.ValueString(), state.Key.ValueString())
-		diags := fillPutObjectRequest(&putReq, state)
+		diags := fillPutObjectRequest(&putReq, plan)
 		if diags.HasError() {
 			resp.Diagnostics.Append(diags...)
 			return
@@ -353,7 +353,7 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 		}
 	}
 
-	_, apiResponse, err := FindObject(ctx, r.client, state)
+	_, apiResponse, err := FindObject(ctx, r.client, plan)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			resp.State.RemoveResource(ctx)
@@ -364,13 +364,17 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	diags := r.setDataModel(ctx, &state, apiResponse)
+	newState := objectResourceModel{
+		Key:    state.Key,
+		Bucket: state.Bucket,
+	}
+	diags := r.setDataModel(ctx, &newState, apiResponse)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &newState)...)
 }
 
 // Delete deletes the object.
