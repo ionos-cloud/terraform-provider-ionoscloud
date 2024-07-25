@@ -15,6 +15,8 @@ The `ionoscloud_vpn_wireguard_gateway` data source provides information about a 
 
 ```hcl
 data "ionoscloud_vpn_wireguard_peer" "example" {
+  location = "de/fra"
+  gateway_id = "example-gateway"
   name = "example-peer"
 }
 
@@ -28,6 +30,7 @@ output "vpn_wireguard_peer_public_key" {
 The following arguments are supported:
 
 - `gateway_id` - (Required)[String] The ID of the WireGuard Gateway.
+- `location` - (Required)[String] The location of the WireGuard Gateway.
 - `name` - (Optional)[String] The name of the WireGuard Peer.
 - `id` - (Optional)[String] The ID of the WireGuard Peer.
 

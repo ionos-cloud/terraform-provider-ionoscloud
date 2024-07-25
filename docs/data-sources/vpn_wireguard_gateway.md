@@ -15,6 +15,7 @@ The `ionoscloud_vpn_wireguard_gateway` data source provides information about a 
 
 ```hcl
 data "ionoscloud_vpn_wireguard_gateway" "example" {
+  location = "de/fra"
   name = "example-gateway"
 }
 

@@ -31,6 +31,12 @@ func resourceVpnWireguardPeer() *schema.Resource {
 				Description:      "The ID of the WireguardGateway that the peer will connect to.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the IPSec Peer. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
+				Required:    true,
+				ForceNew:    true,
+			},
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -106,7 +112,8 @@ func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData,
 func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
-	peer, apiResponse, err := client.GetWireguardPeerByID(ctx, gatewayID, d.Id())
+	location := d.Get("location").(string)
+	peer, apiResponse, err := client.GetWireguardPeerByID(ctx, gatewayID, d.Id(), location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			log.Printf("[DEBUG] cannot find peer by gatewayID %s and id %s", gatewayID, d.Id())
@@ -134,7 +141,8 @@ func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData,
 func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(services.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
-	apiResponse, err := client.DeleteWireguardPeer(ctx, gatewayID, d.Id())
+	location := d.Get("location").(string)
+	apiResponse, err := client.DeleteWireguardPeer(ctx, gatewayID, d.Id(), location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return nil
@@ -155,17 +163,21 @@ func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData,
 
 func resourceVpnWireguardPeerImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	client := m.(services.SdkBundle).VPNClient
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid import format: %s, expecting the following format: {gateway_id}/{id}", d.Id())
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("invalid import format: %s, expecting the following format: location:gateway_id:id", d.Id())
 	}
-	gatewayID := parts[0]
-	peerID := parts[1]
-	peer, _, err := client.GetWireguardPeerByID(ctx, gatewayID, peerID)
+	location := parts[0]
+	gatewayID := parts[1]
+	peerID := parts[2]
+	peer, _, err := client.GetWireguardPeerByID(ctx, gatewayID, peerID, location)
 	if err != nil {
 		return nil, err
 	}
 	if err := d.Set("gateway_id", gatewayID); err != nil {
+		return nil, err
+	}
+	if err := d.Set("location", location); err != nil {
 		return nil, err
 	}
 	if err := vpn.SetWireguardPeerData(d, peer); err != nil {

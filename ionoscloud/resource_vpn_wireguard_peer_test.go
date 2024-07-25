@@ -94,7 +94,8 @@ func testWireguardPeerDestroyCheck(s *terraform.State) error {
 		}
 		ID := rs.Primary.ID
 		gatewayID := rs.Primary.Attributes["gateway_id"]
-		_, apiResponse, err := client.GetWireguardPeerByID(ctx, gatewayID, ID)
+		location := rs.Primary.Attributes["location"]
+		_, apiResponse, err := client.GetWireguardPeerByID(ctx, gatewayID, ID, location)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
 				return fmt.Errorf("an error occurred while checking the destruction of wireguard gateway with ID: %s, error: %w", ID, err)
@@ -109,6 +110,7 @@ func testWireguardPeerDestroyCheck(s *terraform.State) error {
 const WireguardPeerConfig = wireguardGatewayConfig + `
 resource` + ` ` + constant.WireGuardPeerResource + ` ` + constant.WireGuardPeerTestResource + `{
   name = "` + constant.WireGuardPeerTestResource + `"
+  location = "de/fra"
   gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
   description = "description"
   allowed_ips = [ "1.2.3.4/32" ]
@@ -121,37 +123,43 @@ resource` + ` ` + constant.WireGuardPeerResource + ` ` + constant.WireGuardPeerT
 
 const WireguardPeerDataSourceMatchById = WireguardPeerConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardPeerResource + ` ` + constant.WireGuardPeerTestResource + ` {
-	  gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
-	  id = ` + constant.WireGuardPeerResource + `.` + constant.WireGuardPeerTestResource + `.id
+  location = "de/fra"
+  gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
+  id = ` + constant.WireGuardPeerResource + `.` + constant.WireGuardPeerTestResource + `.id
 }`
 
 const WireguardPeerDataSourceMatchByName = WireguardPeerConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardPeerResource + ` ` + constant.WireGuardPeerTestResource + ` {
-	  gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
-	  name = ` + constant.WireGuardPeerResource + `.` + constant.WireGuardPeerTestResource + `.name
+  location = "de/fra"
+  gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
+  name = ` + constant.WireGuardPeerResource + `.` + constant.WireGuardPeerTestResource + `.name
 }`
 
 const WireguardPeerDataSourceInvalidBothIDAndName = WireguardPeerConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardPeerResource + ` ` + constant.WireGuardPeerTestResource + ` {
-	  gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
-	  id = ` + constant.WireGuardPeerResource + `.` + constant.WireGuardPeerTestResource + `.id
-	  name = ` + constant.WireGuardPeerResource + `.` + constant.WireGuardPeerTestResource + `.name
+  location = "de/fra"
+  gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
+  id = ` + constant.WireGuardPeerResource + `.` + constant.WireGuardPeerTestResource + `.id
+  name = ` + constant.WireGuardPeerResource + `.` + constant.WireGuardPeerTestResource + `.name
 }`
 
 const WireguardPeerDataSourceInvalidNoIDNoName = WireguardPeerConfig + `	
 ` + constant.DataSource + ` ` + constant.WireGuardPeerResource + ` ` + constant.WireGuardPeerTestResource + ` {
   gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
+  location = "de/fra"
 }`
 
 const WireguardPeerDataSourceWrongNameError = WireguardPeerConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardPeerResource + ` ` + constant.WireGuardPeerTestResource + ` {
-	  gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
-	  name = "wrong-name"
+  gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
+  name = "wrong-name"
+  location = "de/fra"
 }`
 
 const WireguardPeerConfigUpdate = wireguardGatewayConfig + `
 resource` + ` ` + constant.WireGuardPeerResource + ` ` + constant.WireGuardPeerTestResource + `{
   name = "` + constant.WireGuardPeerTestResource + `1"
+  location = "de/fra"
   gateway_id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
   description = "description1"
   allowed_ips = [ "1.2.3.5/32" ]

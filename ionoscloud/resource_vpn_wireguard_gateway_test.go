@@ -102,7 +102,8 @@ func testWireguardGatewayDestroyCheck(s *terraform.State) error {
 			continue
 		}
 		ID := rs.Primary.ID
-		_, apiResponse, err := client.GetWireguardGatewayByID(ctx, ID)
+		location := rs.Primary.Attributes["location"]
+		_, apiResponse, err := client.GetWireguardGatewayByID(ctx, ID, location)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
 				return fmt.Errorf("an error occurred while checking the destruction of wireguard gateway with ID: %s, error: %w", ID, err)
@@ -116,30 +117,35 @@ func testWireguardGatewayDestroyCheck(s *terraform.State) error {
 
 const WireguardGwDataSourceMatchById = wireguardGatewayConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
+  location = "de/fra"
   id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
 }
 `
 
 const WireguardGWDataSourceMatchByName = wireguardGatewayConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
+  location = "de/fra"
   name = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.name
 }
 `
 
 const WireguardGWDataSourceInvalidBothIDAndName = wireguardGatewayConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
-	id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
-	name = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.name
+  location = "de/fra"
+  id = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.id
+  name = ` + constant.WireGuardGatewayResource + `.` + constant.WireGuardGatewayTestResource + `.name
 }
 `
 
 const WireguardGWDataSourceInvalidNoIDNoName = wireguardGatewayConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + ` {
+  location = "de/fra"
 }
 `
 
 const WireguardGWDataSourceWrongNameError = wireguardGatewayConfig + `
 ` + constant.DataSource + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + ` {
+  location = "de/fra"
   name = "nonexistent"
 }
 `
@@ -147,10 +153,10 @@ const WireguardGWDataSourceWrongNameError = wireguardGatewayConfig + `
 const WireguardGWConfigUpdate = `
 resource "ionoscloud_datacenter" "datacenter_example" {
   name = "datacenter_example"
-  location = "es/vit"
+  location = "de/fra"
 }
 resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
-  location = "es/vit"
+  location = "de/fra"
   size = 1
   name = "` + constant.IpBlockTestResource + `"
 }
@@ -167,6 +173,7 @@ resource "ionoscloud_lan" "lan_example2" {
 
 resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
   name = "` + constant.WireGuardGatewayTestResource + `1"
+  location = "de/fra"
   description = "description1"
   gateway_ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
   interface_ipv4_cidr =  "192.168.1.101/24"

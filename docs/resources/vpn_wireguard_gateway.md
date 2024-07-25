@@ -19,10 +19,10 @@ This resource facilitates the creation, management, and deletion of WireGuard VP
 ```hcl
 resource "ionoscloud_datacenter" "datacenter_example" {
   name = "datacenter_example"
-  location = "es/vit"
+  location = "de/fra"
 }
 resource "ionoscloud_ipblock" "ipblock_example" {
-  location = "es/vit"
+  location = "de/fra"
   size = 1
   name = "` + constant.IpBlockTestResource + `"
 }
@@ -33,6 +33,7 @@ resource "ionoscloud_lan" "lan_example" {
 }
 
 resource ionoscloud_vpn_wireguard_gateway "gateway" {
+  location = "de/fra"
   name = "my vpn test gateway"
   description = "description"
   private_key = "private"
@@ -51,6 +52,7 @@ resource ionoscloud_vpn_wireguard_gateway "gateway" {
 
 The following arguments are supported by the `vpn_wireguard_gateway` resource:
 
+- `location` - (Required)[String] The location of the WireGuard Gateway.
 - `name` - (Required)[String] The name of the WireGuard Gateway.
 - `description` - (Optional)[String] A description of the WireGuard Gateway.
 - `endpoint` - (Optional, Block) The endpoint configuration for the WireGuard Gateway. This block supports fields documented below.
@@ -76,5 +78,5 @@ In addition to all arguments above, the following attributes are exported:
 WireGuard Gateways can be imported using their ID:
 
 ```shell
-terraform import ionoscloud_vpn_wireguard_gateway.example_gateway <id>
+terraform import ionoscloud_vpn_wireguard_gateway.example_gateway location:id
 ```

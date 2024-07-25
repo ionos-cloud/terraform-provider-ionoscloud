@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -22,7 +23,7 @@ func resourceVpnWireguardGateway() *schema.Resource {
 		UpdateContext: resourceVpnWireguardGatewayUpdate,
 		DeleteContext: resourceVpnWireguardGatewayDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceVpnWireguardGatewayImport,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -33,6 +34,12 @@ func resourceVpnWireguardGateway() *schema.Resource {
 			"gateway_ip": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the IPSec Gateway. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
+				Required:    true,
+				ForceNew:    true,
 			},
 			"connections": {
 				MinItems: 1,
@@ -124,8 +131,8 @@ func resourceVpnWireguardGatewayCreate(ctx context.Context, d *schema.ResourceDa
 
 func resourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).VPNClient
-
-	wireguard, _, err := client.GetWireguardGatewayByID(ctx, d.Id())
+	location := d.Get("location").(string)
+	wireguard, _, err := client.GetWireguardGatewayByID(ctx, d.Id(), location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -148,8 +155,8 @@ func resourceVpnWireguardGatewayUpdate(ctx context.Context, d *schema.ResourceDa
 
 func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).VPNClient
-
-	apiResponse, err := client.DeleteWireguardGateway(ctx, d.Id())
+	location := d.Get("location").(string)
+	apiResponse, err := client.DeleteWireguardGateway(ctx, d.Id(), location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -170,4 +177,25 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 	d.SetId("")
 
 	return nil
+}
+
+func resourceVpnWireguardGatewayImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	client := m.(services.SdkBundle).VPNClient
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import format: %s, expecting the following format: location:id", d.Id())
+	}
+	location := parts[0]
+	ID := parts[1]
+	gateway, _, err := client.GetWireguardGatewayByID(ctx, ID, location)
+	if err != nil {
+		return nil, err
+	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
+	if err := vpn.SetWireguardGWData(d, gateway); err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
 }

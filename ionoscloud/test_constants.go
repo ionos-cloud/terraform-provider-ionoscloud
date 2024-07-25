@@ -1831,10 +1831,10 @@ const clusterMaintenanceWindowTimeValue = "09:00:00"
 const wireguardGatewayConfig = `
 resource "ionoscloud_datacenter" "datacenter_example" {
   name = "datacenter_example"
-  location = "es/vit"
+  location = "de/fra"
 }
 resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
-  location = "es/vit"
+  location = "de/fra"
   size = 1
   name = "` + constant.IpBlockTestResource + `"
 }
@@ -1846,6 +1846,7 @@ resource "ionoscloud_lan" "lan_example" {
 
 resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
   name = "` + constant.WireGuardGatewayTestResource + `"
+  location = "de/fra"
   description = "description"
   private_key = "private"
 

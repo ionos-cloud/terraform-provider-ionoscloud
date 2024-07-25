@@ -15,6 +15,7 @@ This resource enables the creation, management, and deletion of a WireGuard VPN 
 
 ```hcl
 resource "ionoscloud_vpn_wireguard_peer" "example" {
+  location = "de/fra"
   gateway_id  = "your gateway id here"
   name        = "example-gateway"
   description = "An example WireGuard peer"
@@ -31,6 +32,8 @@ resource "ionoscloud_vpn_wireguard_peer" "example" {
 
 The following arguments are supported:
 
+- `gateway_id` - (Required)[string] The ID of the WireGuard Gateway that the Peer will connect to.
+- `location` - (Required)[string] The location of the WireGuard Gateway.
 - `name` - (Required)[string] The human-readable name of the WireGuard Gateway.
 - `public_key` - (Required)[string] The public key for the WireGuard Gateway.
 - `description` - (Optional)[string] A description of the WireGuard Gateway.
@@ -50,5 +53,5 @@ In addition to all arguments above, the following attributes are exported:
 WireGuard Peers can be imported using the `gateway_id` and `id`, e.g.,
 
 ```shell
-terraform import ionoscloud_vpn_wireguard_peer.example <gateway_id>/<peer_id>
+terraform import ionoscloud_vpn_wireguard_peer.example <gateway_id>:<peer_id>
 ```

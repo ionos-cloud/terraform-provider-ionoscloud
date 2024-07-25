@@ -18,6 +18,11 @@ func dataSourceVpnWireguardGateway() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceVpnWireguardGatewayRead,
 		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the IPSec Gateway Tunnel. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
+				Required:    true,
+			},
 			"id": {
 				Type:             schema.TypeString,
 				Description:      "The ID of the Wireguard gateway",
@@ -90,6 +95,7 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 	client := meta.(services.SdkBundle).VPNClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	location := d.Get("location").(string)
 	id := idValue.(string)
 	name := nameValue.(string)
 
@@ -103,13 +109,13 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 	var wireguardGw vpnSdk.WireguardGatewayRead
 	var err error
 	if idOk {
-		wireguardGw, _, err = client.GetWireguardGatewayByID(ctx, id)
+		wireguardGw, _, err = client.GetWireguardGatewayByID(ctx, id, location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the wireguard gateway with ID: %s, error: %w", id, err))
 		}
 	} else {
 		var results []vpnSdk.WireguardGatewayRead
-		gateways, _, err := client.ListWireguardGateways(ctx)
+		gateways, _, err := client.ListWireguardGateways(ctx, location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching wireguard gateways: %w", err))
 		}
