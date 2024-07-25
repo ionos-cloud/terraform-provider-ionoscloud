@@ -401,6 +401,14 @@ func uploadObject(ctx context.Context, client *s3.APIClient, data *objectResourc
 	}
 
 	defer func() {
+		// Remove temp file if content is provided
+		if !data.Content.IsNull() {
+			err = os.Remove(body.Name())
+			if err != nil {
+				log.Printf("failed to remove temp file: %s", err.Error())
+			}
+		}
+		// Close the file
 		err = body.Close()
 		if err != nil {
 			log.Printf("failed to close body: %s", err.Error())
