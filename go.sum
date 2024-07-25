@@ -108,6 +108,8 @@ github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSAS
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0 h1:YtL3uOZBzc+4r/mjkVOr96eMJnhL2RXDcDL+IbweFcE=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0/go.mod h1:Ci6xo7oPA3TpxtB0as6UISNvlUShCX1gN332MqVYHGY=
+github.com/ionos-cloud/sdk-go-bundle/shared v0.1.0 h1:1psLbSn+i/wK0Samy8XqLxsqEnhTshz3Py1lbp5F/ao=
+github.com/ionos-cloud/sdk-go-bundle/shared v0.1.0/go.mod h1:hDQ5fhujYFaYr1fD8bmmf4rlCKAsqKwczuBS0Z5PNBQ=
 github.com/ionos-cloud/sdk-go-cert-manager v1.0.1 h1:QGnenRREavvU0ZrXvY4hmCMXRyvmKj5jaXsFX9Apfd0=
 github.com/ionos-cloud/sdk-go-cert-manager v1.0.1/go.mod h1:EYDegkY6fUSkx0BL0GpNMpKvp33AId2vTZL44YLPreA=
 github.com/ionos-cloud/sdk-go-container-registry v1.1.0 h1:H92gzx9oj0vvbozbXwn2RLNEw7++1Ns3Kl9PGrh5Waw=
@@ -122,6 +124,8 @@ github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2 h1:AaKbci+kVS6/k43VwJwmXxCJ7
 github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2/go.mod h1:nmJEwuRX65A5/PxwvdFW0XrV+N6WFYnMV1TiIafAwz4=
 github.com/ionos-cloud/sdk-go-dns v1.1.1 h1:Qdf5mXYt9ZeRl4zZQxGrvamFkKm1X9WeARyB9/WYhKg=
 github.com/ionos-cloud/sdk-go-dns v1.1.1/go.mod h1:l9gYdwtUshlBOiIi4nHn3RCX81XlV3VoNvLJrO2VfHg=
+github.com/ionos-cloud/sdk-go-s3 v1.0.0 h1:6WULmI5lbpJXL+0H+itn0wR+X7Z5TIBglc/876D6OS8=
+github.com/ionos-cloud/sdk-go-s3 v1.0.0/go.mod h1:ILmq4f7kpnKucAk/DcE0Hjtaqn8Y471PK79hJgXU7K8=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0 h1:G9E6DeQe/Wu3rvGVgidLE52qwTpTqXaZ3hyinVX4mXA=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0/go.mod h1:Q5d1R6silarsX5jWLPBHd/1PSC5zZNf2ONvXB+fygC0=
 github.com/ionos-cloud/sdk-go/v6 v6.1.11 h1:J/uRN4UWO3wCyGOeDdMKv8LWRzKu6UIkLEaes38Kzh8=

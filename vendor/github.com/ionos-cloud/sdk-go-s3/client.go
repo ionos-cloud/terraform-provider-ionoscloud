@@ -54,6 +54,8 @@ type APIClient struct {
 	PolicyApi *PolicyApiService
 
 	PublicAccessBlockApi *PublicAccessBlockApiService
+
+	TaggingApi *TaggingApiService
 }
 
 type service struct {
@@ -76,6 +78,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ObjectsApi = (*ObjectsApiService)(&c.common)
 	c.PolicyApi = (*PolicyApiService)(&c.common)
 	c.PublicAccessBlockApi = (*PublicAccessBlockApiService)(&c.common)
+	c.TaggingApi = (*TaggingApiService)(&c.common)
 
 	return c
 }

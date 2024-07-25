@@ -36,10 +36,6 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
-replace github.com/ionos-cloud/sdk-go-s3 => /home/cbeti/devtools/sdks/generated-sdks/s3-go
-
-replace github.com/ionos-cloud/sdk-go-bundle/shared => /home/cbeti/devtools/sdks/shared
-
 require (
 	github.com/ProtonMail/go-crypto v1.1.0-alpha.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
