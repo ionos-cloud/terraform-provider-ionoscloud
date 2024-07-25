@@ -14,6 +14,14 @@ func (c *Client) GetNFSShareById(ctx context.Context, clusterID, shareID string,
 	return share, apiResponse, err
 }
 
+// ListNFSShares returns a list of all shares
+func (c *Client) ListNFSShares(ctx context.Context, d *schema.ResourceData) (sdk.ShareReadList, *sdk.APIResponse, error) {
+	shares, apiResponse, err := c.Location(d.Get("location").(string)).sdkClient.SharesApi.
+		ClustersSharesGet(ctx, d.Get("cluster_id").(string)).Execute()
+	apiResponse.LogInfo()
+	return shares, apiResponse, err
+}
+
 // DeleteNFSShare deletes a share given an ID
 func (c *Client) DeleteNFSShare(ctx context.Context, clusterID, shareID string, location string) (*sdk.APIResponse, error) {
 	apiResponse, err := c.Location(location).sdkClient.SharesApi.ClustersSharesDelete(ctx, clusterID, shareID).Execute()
