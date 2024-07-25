@@ -113,6 +113,12 @@ func dataSourceNFSShare() *schema.Resource {
 					},
 				},
 			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using the name filter.",
+				Default:     false,
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -125,6 +131,7 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta in
 	id := idValue.(string)
 	name := nameValue.(string)
 	location := d.Get("location").(string)
+	cluster_id := d.Get("cluster_id").(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
@@ -136,7 +143,7 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta in
 	var share nfs.ShareRead
 	var err error
 	if idOk {
-		share, _, err = client.GetNFSShareById(ctx, id, location)
+		share, _, err = client.GetNFSShareById(ctx, cluster_id, id, location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the NFS Share with ID: %s, error: %w", idValue, err))
 		}
