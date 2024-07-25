@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	nfs "github.com/ionos-cloud/sdk-go-nfs"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -160,11 +161,12 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta in
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		switch {
+		case len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no NFS Share found with the specified name: %s", name))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one NFS Share found with the specified name: %s", name))
-		} else {
+		default:
 			share = results[0]
 		}
 	}
