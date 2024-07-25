@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go-nfs"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -158,8 +159,14 @@ func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	id := parts[1]
 
-	d.Set("location", location)
-	d.Set("id", id)
+	err := d.Set("location", location)
+	if err != nil {
+		return nil, fmt.Errorf("failed setting location %s: %w", location, err)
+	}
+	err = d.Set("id", id)
+	if err != nil {
+		return nil, fmt.Errorf("failed setting id %s: %w", id, err)
+	}
 
 	cluster, err := findCluster(ctx, d, id, location, client)
 	if err != nil {

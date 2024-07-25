@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
@@ -191,9 +192,18 @@ func resourceNFSShareImport(ctx context.Context, d *schema.ResourceData, meta in
 	clusterID := parts[1]
 	shareID := parts[2]
 
-	d.Set("location", location)
-	d.Set("cluster_id", clusterID)
-	d.Set("id", shareID)
+	err := d.Set("location", location)
+	if err != nil {
+		return nil, fmt.Errorf("failed setting location %s: %w", location, err)
+	}
+	err = d.Set("cluster_id", clusterID)
+	if err != nil {
+		return nil, fmt.Errorf("failed setting cluster_id %s: %w", clusterID, err)
+	}
+	err = d.Set("id", shareID)
+	if err != nil {
+		return nil, fmt.Errorf("failed setting id %s: %w", shareID, err)
+	}
 
 	share, _, err := client.GetNFSShareByID(ctx, clusterID, shareID, location)
 	if err != nil {
