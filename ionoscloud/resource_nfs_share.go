@@ -144,7 +144,7 @@ func resourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta inte
 	location := d.Get("location").(string)
 	shareID := d.Id()
 
-	share, _, err := client.GetNFSShareById(ctx, clusterID, shareID, location)
+	share, _, err := client.GetNFSShareByID(ctx, clusterID, shareID, location)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error finding NFS Share: %w", err))
 	}
@@ -195,7 +195,7 @@ func resourceNFSShareImport(ctx context.Context, d *schema.ResourceData, meta in
 	d.Set("cluster_id", clusterID)
 	d.Set("id", shareID)
 
-	share, _, err := client.GetNFSShareById(ctx, clusterID, shareID, location)
+	share, _, err := client.GetNFSShareByID(ctx, clusterID, shareID, location)
 	if err != nil {
 		return nil, fmt.Errorf("error finding NFS Share: %w", err)
 	}

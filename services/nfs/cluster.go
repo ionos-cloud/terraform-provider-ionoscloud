@@ -11,8 +11,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-// GetNFSClusterById returns a cluster given an ID
-func (c *Client) GetNFSClusterById(ctx context.Context, id string, location string) (sdk.ClusterRead, *sdk.APIResponse, error) {
+// GetNFSClusterByID returns a cluster given an ID
+func (c *Client) GetNFSClusterByID(ctx context.Context, id string, location string) (sdk.ClusterRead, *sdk.APIResponse, error) {
 	cluster, apiResponse, err := c.Location(location).sdkClient.ClustersApi.ClustersFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
@@ -106,7 +106,7 @@ func (c *Client) SetNFSClusterData(d *schema.ResourceData, cluster sdk.ClusterRe
 func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	clusterID := d.Id()
 	location := d.Get("location").(string)
-	cluster, _, err := c.GetNFSClusterById(ctx, clusterID, location)
+	cluster, _, err := c.GetNFSClusterByID(ctx, clusterID, location)
 	if err != nil {
 		return false, fmt.Errorf("failed checking if Cluster %s from %s is ready: %w", clusterID, location, err)
 	}
@@ -123,7 +123,7 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	clusterID := d.Id()
 	location := d.Get("location").(string)
-	_, apiResponse, err := c.GetNFSClusterById(ctx, clusterID, location)
+	_, apiResponse, err := c.GetNFSClusterByID(ctx, clusterID, location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return true, nil

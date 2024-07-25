@@ -16,6 +16,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
+// ValidNFSLocations is a list of valid locations for the Network File Storage Cluster.
 var ValidNFSLocations = []string{"de/fra", "de/txl", "qa/de/txl"}
 
 func resourceNFSCluster() *schema.Resource {
@@ -183,7 +184,7 @@ func resourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func findCluster(ctx context.Context, d *schema.ResourceData, id, location string, client *nfs.Client) (ionoscloud.ClusterRead, error) {
-	cluster, resp, err := client.GetNFSClusterById(ctx, id, location)
+	cluster, resp, err := client.GetNFSClusterByID(ctx, id, location)
 	if err != nil {
 		if resp.HttpNotFound() {
 			d.SetId("")

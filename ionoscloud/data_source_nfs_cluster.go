@@ -108,7 +108,7 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 	var cluster nfs.ClusterRead
 	var err error
 	if idOk {
-		cluster, _, err = client.GetNFSClusterById(ctx, id, location)
+		cluster, _, err = client.GetNFSClusterByID(ctx, id, location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the NFS Cluster with ID: %s, error: %w", idValue, err))
 		}
