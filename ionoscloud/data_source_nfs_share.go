@@ -9,8 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	nfs "github.com/ionos-cloud/sdk-go-nfs"
-	nfs2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
-
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -33,15 +31,15 @@ func dataSourceNFSShare() *schema.Resource {
 			"location": {
 				Type: schema.TypeString,
 				Description: fmt.Sprintf("The location of the Network File Storage Cluster. "+
-					"Available locations: '%s'", strings.Join(nfs2.ValidNFSLocations, ", '")),
+					"Available locations: '%s'", strings.Join(ValidNFSLocations, ", '")),
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(nfs2.ValidNFSLocations, false)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(ValidNFSLocations, false)),
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the Network File Storage Share",
 				Optional:    true,
-				Computed:    true,
+				// Computed:    true,
 			},
 			"nfs_path": {
 				Type:        schema.TypeString,
@@ -115,12 +113,6 @@ func dataSourceNFSShare() *schema.Resource {
 					},
 				},
 			},
-			"partial_match": {
-				Type:        schema.TypeBool,
-				Description: "Whether partial matching is allowed or not when using the name filter.",
-				Default:     false,
-				Optional:    true,
-			},
 		},
 	}
 }
@@ -133,7 +125,6 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta in
 	id := idValue.(string)
 	name := nameValue.(string)
 	location := d.Get("location").(string)
-	clusterID := d.Get("cluster_id").(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
@@ -145,7 +136,7 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta in
 	var share nfs.ShareRead
 	var err error
 	if idOk {
-		share, _, err = client.GetNFSShareByID(ctx, clusterID, id, location)
+		share, _, err = client.GetNFSShareById(ctx, id, location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the NFS Share with ID: %s, error: %w", idValue, err))
 		}
@@ -162,12 +153,11 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta in
 			}
 		}
 
-		switch {
-		case len(results) == 0:
+		if results == nil || len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no NFS Share found with the specified name: %s", name))
-		case len(results) > 1:
+		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one NFS Share found with the specified name: %s", name))
-		default:
+		} else {
 			share = results[0]
 		}
 	}
