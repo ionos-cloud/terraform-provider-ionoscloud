@@ -33,8 +33,10 @@ require (
 
 require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/ionos-cloud/sdk-go-kafka v0.0.0-20240716142734-39b495504026 // indirect
+	github.com/ionos-cloud/sdk-go-kafka v0.0.0-20240725140343-5de764b24488 // indirect
 )
+
+replace github.com/ionos-cloud/sdk-go-kafka => /tmp/sdk-go-kafka
 
 require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
