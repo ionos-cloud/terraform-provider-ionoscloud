@@ -53,7 +53,6 @@ type objectResourceModel struct {
 	ContentEncoding                       types.String `tfsdk:"content_encoding"`
 	ContentLanguage                       types.String `tfsdk:"content_language"`
 	ContentType                           types.String `tfsdk:"content_type"`
-	ContentMD5                            types.String `tfsdk:"content_md5"`
 	Expires                               types.String `tfsdk:"expires"`
 	ServerSideEncryption                  types.String `tfsdk:"server_side_encryption"`
 	StorageClass                          types.String `tfsdk:"storage_class"`
@@ -63,9 +62,6 @@ type objectResourceModel struct {
 	ServerSideEncryptionCustomerKeyMD5    types.String `tfsdk:"server_side_encryption_customer_key_md5"`
 	ServerSideEncryptionContext           types.String `tfsdk:"server_side_encryption_context"`
 	RequestPayer                          types.String `tfsdk:"request_payer"`
-	ObjectLockMode                        types.String `tfsdk:"object_lock_mode"`
-	ObjectLockRetainUntilDate             types.String `tfsdk:"object_lock_retain_until_date"`
-	ObjectLockLegalHold                   types.String `tfsdk:"object_lock_legal_hold"`
 	Etag                                  types.String `tfsdk:"etag"`
 	Metadata                              types.Map    `tfsdk:"metadata"`
 	Tags                                  types.Map    `tfsdk:"tags"`
@@ -128,10 +124,6 @@ func (r *objectResource) Schema(_ context.Context, req resource.SchemaRequest, r
 				Optional:    true,
 				Computed:    true,
 			},
-			"content_md5": schema.StringAttribute{
-				Description: "The base64-encoded 128-bit MD5 digest of the object",
-				Optional:    true,
-			},
 			"expires": schema.StringAttribute{
 				Description: "The date and time at which the object is no longer cacheable",
 				Optional:    true,
@@ -175,24 +167,13 @@ func (r *objectResource) Schema(_ context.Context, req resource.SchemaRequest, r
 				Description: "Confirms that the requester knows that they will be charged for the request. Bucket owners need not specify this parameter in their requests.",
 				Optional:    true,
 			},
-			"object_lock_mode": schema.StringAttribute{
-				Description: "Confirms that the requester knows that they will be charged for the request. Bucket owners need not specify this parameter in their requests.",
-				Optional:    true,
-				Validators:  []validator.String{stringvalidator.OneOf("GOVERNANCE", "COMPLIANCE")},
-			},
-			"object_lock_retain_until_date": schema.StringAttribute{
-				Description: " The date and time when you want this object's Object Lock to expire. Must be formatted as a timestamp parameter.",
-				Optional:    true,
-			},
-			"object_lock_legal_hold": schema.StringAttribute{
-				Description: "Specifies whether a legal hold will be applied to this object.",
-				Optional:    true,
-				Validators:  []validator.String{stringvalidator.OneOf("ON", "OFF")},
-			},
 			"etag": schema.StringAttribute{
 				Description: "An entity tag (ETag) is an opaque identifier assigned by a web server to a specific version of a resource found at a URL.",
 				Optional:    true,
 				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"tags": schema.MapAttribute{
 				Description: "The tag-set for the object",
@@ -280,7 +261,11 @@ func (r *objectResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	data.Etag = types.StringValue(apiResponse.Header.Get("ETag"))
+	etag := strings.Trim(apiResponse.Header.Get("ETag"), "\"")
+	if etag != "" {
+		data.Etag = types.StringValue(etag)
+	}
+
 	versionID := apiResponse.Header.Get("VersionId")
 	if versionID != "" {
 		data.VersionID = types.StringValue(versionID)
@@ -363,12 +348,28 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 		_, err := putReq.Execute()
 		if err != nil {
-			resp.Diagnostics.AddError("failed to create object", err.Error())
+			resp.Diagnostics.AddError("failed to update object", err.Error())
 			return
 		}
 	}
 
-	// Nothing to update for now
+	_, apiResponse, err := FindObject(ctx, r.client, state)
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
+		resp.Diagnostics.AddError("failed to read object", err.Error())
+		return
+	}
+
+	diags := r.setDataModel(ctx, &state, apiResponse)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -402,9 +403,14 @@ func setContentData(data *objectResourceModel, apiResponse *shared.APIResponse) 
 		data.ContentType = types.StringValue(contentType)
 	}
 
+	versionID := apiResponse.Header.Get("x-amz-version-id")
+	if versionID != "" {
+		data.VersionID = types.StringValue(versionID)
+	}
+
 	etag := apiResponse.Header.Get("ETag")
 	if etag != "" {
-		data.Etag = types.StringValue(etag)
+		data.Etag = types.StringValue(strings.Trim(etag, "\""))
 	}
 
 	cacheControl := apiResponse.Header.Get("Cache-Control")
@@ -425,11 +431,6 @@ func setContentData(data *objectResourceModel, apiResponse *shared.APIResponse) 
 	contentLanguage := apiResponse.Header.Get("Content-Language")
 	if contentLanguage != "" {
 		data.ContentLanguage = types.StringValue(contentLanguage)
-	}
-
-	contentMD5 := apiResponse.Header.Get("Content-MD5")
-	if contentMD5 != "" {
-		data.ContentMD5 = types.StringValue(contentMD5)
 	}
 
 	expires := apiResponse.Header.Get("Expires")
@@ -462,23 +463,6 @@ func setServerSideEncryptionData(data *objectResourceModel, apiResponse *shared.
 	serverSideEncryptionContext := apiResponse.Header.Get("x-amz-server-side-encryption-context")
 	if serverSideEncryptionContext != "" {
 		data.ServerSideEncryptionContext = types.StringValue(serverSideEncryptionContext)
-	}
-}
-
-func setObjectLockData(data *objectResourceModel, apiResponse *shared.APIResponse) {
-	objectLockMode := apiResponse.Header.Get("x-amz-object-lock-mode")
-	if objectLockMode != "" {
-		data.ObjectLockMode = types.StringValue(objectLockMode)
-	}
-
-	objectLockRetainUntilDate := apiResponse.Header.Get("x-amz-object-lock-retain-until-date")
-	if objectLockRetainUntilDate != "" {
-		data.ObjectLockRetainUntilDate = types.StringValue(objectLockRetainUntilDate)
-	}
-
-	objectLockLegalHold := apiResponse.Header.Get("x-amz-object-lock-legal-hold")
-	if objectLockLegalHold != "" {
-		data.ObjectLockLegalHold = types.StringValue(objectLockLegalHold)
 	}
 }
 
@@ -517,7 +501,6 @@ func setMetadata(ctx context.Context, data *objectResourceModel, apiResponse *sh
 
 func (r *objectResource) setDataModel(ctx context.Context, data *objectResourceModel, apiResponse *shared.APIResponse) diag.Diagnostics {
 	setContentData(data, apiResponse)
-	setObjectLockData(data, apiResponse)
 	setServerSideEncryptionData(data, apiResponse)
 
 	requestPayer := apiResponse.Header.Get("x-amz-request-payer")
@@ -654,10 +637,6 @@ func fillContentData(data *objectResourceModel, req *s3.ApiPutObjectRequest) dia
 		*req = req.ContentType(data.ContentType.ValueString())
 	}
 
-	if !data.ContentMD5.IsNull() {
-		*req = req.ContentMD5(data.ContentMD5.ValueString())
-	}
-
 	if !data.Expires.IsNull() {
 		t, err := time.Parse(time.RFC3339, data.Expires.ValueString())
 		if err != nil {
@@ -726,31 +705,7 @@ func fillServerSideEncryptionData(data *objectResourceModel, req *s3.ApiPutObjec
 	}
 }
 
-func fillObjectLockData(data *objectResourceModel, req *s3.ApiPutObjectRequest) diag.Diagnostics {
-	if !data.ObjectLockMode.IsNull() {
-		*req = req.XAmzObjectLockMode(data.ObjectLockMode.ValueString())
-	}
-
-	if !data.ObjectLockRetainUntilDate.IsNull() {
-		t, err := time.Parse(time.RFC3339, data.ObjectLockRetainUntilDate.ValueString())
-		if err != nil {
-			diags := diag.Diagnostics{}
-			diags.AddError("failed to parse object lock retain until date", err.Error())
-			return diags
-		}
-
-		*req = req.XAmzObjectLockRetainUntilDate(t)
-	}
-
-	if !data.ObjectLockLegalHold.IsNull() {
-		*req = req.XAmzObjectLockLegalHold(data.ObjectLockLegalHold.ValueString())
-	}
-
-	return nil
-}
-
 func fillPutObjectRequest(req *s3.ApiPutObjectRequest, data objectResourceModel) diag.Diagnostics {
-	fillObjectLockData(&data, req)
 	fillServerSideEncryptionData(&data, req)
 	diags := fillContentData(&data, req)
 	if diags.HasError() {
@@ -820,7 +775,6 @@ func hasObjectContentChanges(plan, state objectResourceModel) bool {
 		plan.ContentType.Equal(state.ContentType) &&
 		plan.Content.Equal(state.Content) &&
 		plan.Etag.Equal(state.Etag) &&
-		plan.ContentMD5.Equal(state.ContentMD5) &&
 		plan.Expires.Equal(state.Expires) &&
 		plan.ServerSideEncryption.Equal(state.ServerSideEncryption) &&
 		plan.StorageClass.Equal(state.StorageClass) &&

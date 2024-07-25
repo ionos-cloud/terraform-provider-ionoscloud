@@ -6,13 +6,12 @@ package s3_test
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"io"
 	"os"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 )
@@ -234,30 +233,6 @@ func TestAccObjectResource_ServerSideEncryptionCustomer(t *testing.T) {
 
 }
 
-func TestAccObjectResource_ObjectLock(t *testing.T) {
-	bucket := acctest.GenerateRandomResourceName(bucketPrefix)
-	key := acctest.GenerateRandomResourceName(objectPrefix)
-
-	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
-		PreCheck: func() {
-			acctest.PreCheck(t)
-		},
-		CheckDestroy: testAccCheckObjectDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccObjectConfig_objectLock(bucket, key),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(objectResourceName, "object_lock_mode", "GOVERNANCE"),
-					resource.TestCheckResourceAttr(objectResourceName, "object_lock_retain_until_date", "2022-01-01T00:00:00Z"),
-					resource.TestCheckResourceAttr(objectResourceName, "object_lock_legal_hold_status", "ON"),
-				),
-			},
-		},
-	})
-
-}
-
 func TestAccObjectResource_Tags(t *testing.T) {
 	bucket := acctest.GenerateRandomResourceName(bucketPrefix)
 	key := acctest.GenerateRandomResourceName(objectPrefix)
@@ -433,21 +408,6 @@ resource "ionoscloud_s3_object" "test" {
   server_side_encryption_customer_algorithm = "AES256"
   server_side_encryption_customer_key = "dpHHYOfjTUlcpotfDSNzkyWUWLtcZkoX1dlua5D1pAM="
   server_side_encryption_customer_key_md5 = "bPU7G1zD2MlOi5gqnkRqZg=="
-}
-
-`, key))
-}
-
-// TODO learn how to test this
-func testAccObjectConfig_objectLock(bucketName, key string) string {
-	return utils.ConfigCompose(testAccObjectConfig_base(bucketName), fmt.Sprintf(`
-resource "ionoscloud_s3_object" "test" {
-  bucket = ionoscloud_s3_bucket.test.name
-  key = %[1]q
-  content = "test"
-  object_lock_mode = "GOVERNANCE"
-  object_lock_retain_until_date = "2022-01-01T00:00:00Z"
-  object_lock_legal_hold = "ON"
 }
 
 `, key))
