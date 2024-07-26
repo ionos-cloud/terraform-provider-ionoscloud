@@ -151,9 +151,9 @@ func setIPSecGatewayProperties(d *schema.ResourceData) vpn.IPSecGateway {
 		properties.Version = shared.ToPtr(v.(string))
 	}
 
-	var connections []vpn.Connection
+	connections := make([]vpn.Connection, len(d.Get("connections").([]interface{})))
 	for i := range d.Get("connections").([]interface{}) {
-		connections = append(connections, setConnectionData(d, i))
+		connections[i] = setConnectionData(d, i)
 	}
 
 	properties.Connections = connections

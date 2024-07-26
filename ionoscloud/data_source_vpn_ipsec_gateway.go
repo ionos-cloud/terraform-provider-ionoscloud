@@ -123,7 +123,7 @@ func dataSourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, 
 		}
 
 		switch {
-		case results == nil || len(results) == 0:
+		case len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no VPN IPSec Gateway found with the specified name = %s", name))
 		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one VPN IPSec Gateway found with the specified name = %s", name))
