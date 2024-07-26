@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -132,7 +133,7 @@ func resourceKafkaClusterCreate(ctx context.Context, d *schema.ResourceData, met
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterAvailable)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while Kafka Cluster waiting to be ready: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while Kafka Cluster waiting to be ready: %w", err))
 		return diags
 	}
 
@@ -142,7 +143,7 @@ func resourceKafkaClusterCreate(ctx context.Context, d *schema.ResourceData, met
 func resourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).KafkaClient
 
-	cluster, apiResponse, err := client.GetClusterById(ctx, d.Id(), d.Get("location").(string))
+	cluster, apiResponse, err := client.GetClusterByID(ctx, d.Id(), d.Get("location").(string))
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")

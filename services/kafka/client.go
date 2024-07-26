@@ -6,13 +6,14 @@ import (
 	"os"
 	"runtime"
 
-	kafka "github.com/ionos-cloud/sdk-go-kafka"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	kafka "github.com/ionos-cloud/sdk-go-kafka"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// Client is a wrapper for the Kafka API Client
 type Client struct {
 	sdkClient kafka.APIClient
 }
@@ -29,6 +30,7 @@ var locationToURL = map[string]string{
 	"pre":    "https://pre.kafka.de-fra.ionos.com",
 }
 
+// NewClient returns a new Kafka API client
 func NewClient(username, password, token, url, version, terraformVersion string) *Client {
 	config := kafka.NewConfiguration(username, password, token, url)
 
@@ -40,7 +42,7 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	config.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-kafka/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, kafka.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH,
+		version, kafka.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 
 	return &Client{sdkClient: *kafka.NewAPIClient(config)}

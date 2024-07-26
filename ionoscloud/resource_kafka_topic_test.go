@@ -75,7 +75,7 @@ func testCheckKafkaTopicDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, apiResponse, err := client.GetTopicById(ctx, rs.Primary.Attributes["cluster_id"], rs.Primary.ID, rs.Primary.Attributes["location"])
+		_, apiResponse, err := client.GetTopicByID(ctx, rs.Primary.Attributes["cluster_id"], rs.Primary.ID, rs.Primary.Attributes["location"])
 		apiResponse.LogInfo()
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
@@ -102,7 +102,7 @@ func testAccCheckKafkaTopicExists(n string) resource.TestCheckFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
 
-		foundCluster, _, err := client.GetTopicById(ctx, rs.Primary.Attributes["cluster_id"], rs.Primary.ID, rs.Primary.Attributes["location"])
+		foundCluster, _, err := client.GetTopicByID(ctx, rs.Primary.Attributes["cluster_id"], rs.Primary.ID, rs.Primary.Attributes["location"])
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching Kafka Cluster Topic with ID: %v, error: %w", rs.Primary.ID, err)
 		}

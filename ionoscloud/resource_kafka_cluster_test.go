@@ -75,7 +75,7 @@ func testCheckKafkaClusterDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, apiResponse, err := client.GetClusterById(ctx, rs.Primary.ID, rs.Primary.Attributes["location"])
+		_, apiResponse, err := client.GetClusterByID(ctx, rs.Primary.ID, rs.Primary.Attributes["location"])
 		apiResponse.LogInfo()
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
@@ -102,7 +102,7 @@ func testAccCheckKafkaClusterExists(n string) resource.TestCheckFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
 
-		foundCluster, _, err := client.GetClusterById(ctx, rs.Primary.ID, rs.Primary.Attributes["location"])
+		foundCluster, _, err := client.GetClusterByID(ctx, rs.Primary.ID, rs.Primary.Attributes["location"])
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching Kafka Cluster with ID: %v, error: %w", rs.Primary.ID, err)
 		}

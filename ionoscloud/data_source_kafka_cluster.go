@@ -121,16 +121,16 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 	var cluster kafka.ClusterRead
 	var err error
 	if idOk {
-		cluster, _, err = client.GetClusterById(ctx, id, location)
+		cluster, _, err = client.GetClusterByID(ctx, id, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching the Kafka Cluster with ID: %s, error: %w", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Kafka Cluster with ID: %s, error: %w", id, err))
 		}
 	} else {
 		var results []kafka.ClusterRead
 
 		clusters, _, err := client.ListClusters(ctx, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching Kafka Cluster: %w", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching Kafka Cluster: %w", err))
 		}
 
 		for _, cluster := range *clusters.Items {
@@ -139,11 +139,12 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		switch {
+		case len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no Kafka Clusters found with the specified name: %s", name))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one Kafka Cluster found with the specified name: %s", name))
-		} else {
+		default:
 			cluster = results[0]
 		}
 	}

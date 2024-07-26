@@ -316,7 +316,7 @@ github.com/ionos-cloud/sdk-go-dbaas-postgres
 # github.com/ionos-cloud/sdk-go-dns v1.1.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dns
-# github.com/ionos-cloud/sdk-go-kafka v0.0.0-20240725140343-5de764b24488 => /tmp/sdk-go-kafka
+# github.com/ionos-cloud/sdk-go-kafka v0.0.0-20240725140343-5de764b24488
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-kafka
 # github.com/ionos-cloud/sdk-go-nfs v1.0.0
@@ -570,4 +570,3 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# github.com/ionos-cloud/sdk-go-kafka => /tmp/sdk-go-kafka

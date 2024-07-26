@@ -13,80 +13,87 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// CreateTopic creates a new Kafka Cluster Topic
 func (c *Client) CreateTopic(ctx context.Context, d *schema.ResourceData) (
 	kafka.TopicRead, utils.ApiResponseInfo, error,
 ) {
 	c.changeConfigURL(d.Get("location").(string))
 
 	topic := setTopicPostRequest(d)
-	clusterId := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 
-	topicResponse, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsPost(ctx, clusterId).TopicCreate(*topic).Execute()
+	topicResponse, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsPost(ctx, clusterID).TopicCreate(*topic).Execute()
 	apiResponse.LogInfo()
 
 	return topicResponse, apiResponse, err
 }
 
-func (c *Client) GetTopicById(ctx context.Context, clusterId string, topicId string, location string) (
+// GetTopicByID retrieves a Kafka Cluster Topic by its ID
+func (c *Client) GetTopicByID(ctx context.Context, clusterID string, topicID string, location string) (
 	kafka.TopicRead, utils.ApiResponseInfo, error,
 ) {
 	c.changeConfigURL(location)
 
-	topic, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, clusterId, topicId).Execute()
+	topic, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()
 
 	return topic, apiResponse, err
 }
 
-func (c *Client) ListTopics(ctx context.Context, clusterId string, location string) (
+// ListTopics retrieves a list of Kafka Cluster Topics
+func (c *Client) ListTopics(ctx context.Context, clusterID string, location string) (
 	kafka.TopicReadList, utils.ApiResponseInfo, error,
 ) {
 	c.changeConfigURL(location)
 
-	topics, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsGet(ctx, clusterId).Execute()
+	topics, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 
 	return topics, apiResponse, err
 }
 
-func (c *Client) DeleteTopic(ctx context.Context, clusterId string, topicId string, location string) (utils.ApiResponseInfo, error) {
+// DeleteTopic deletes a Kafka Cluster Topic
+func (c *Client) DeleteTopic(ctx context.Context, clusterID string, topicID string, location string) (utils.ApiResponseInfo, error) {
 	c.changeConfigURL(location)
 
-	apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsDelete(ctx, clusterId, topicId).Execute()
+	apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsDelete(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()
 
 	return apiResponse, err
 }
 
+// IsTopicAvailable checks if a Kafka Cluster Topic is available
 func (c *Client) IsTopicAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	topicId := d.Id()
-	clusterId := d.Get("cluster_id").(string)
+	topicID := d.Id()
+	clusterID := d.Get("cluster_id").(string)
 	location := d.Get("location").(string)
 
-	topic, _, err := c.GetTopicById(ctx, clusterId, topicId, location)
+	topic, _, err := c.GetTopicByID(ctx, clusterID, topicID, location)
 	if err != nil {
 		return false, err
 	}
 	if topic.Metadata == nil || topic.Metadata.State == nil {
-		return false, fmt.Errorf("expected metadata, got empty for Topic with ID: %s", clusterId)
+		return false, fmt.Errorf("expected metadata, got empty for Topic with ID: %s", clusterID)
 	}
 	log.Printf("[DEBUG] Topic status: %s", *topic.Metadata.State)
 	return strings.EqualFold(*topic.Metadata.State, constant.Available), nil
 }
 
+// IsTopicDeleted checks if a Kafka Cluster Topic has been deleted
 func (c *Client) IsTopicDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	clusterId := d.Get("cluster_id").(string)
-	topicId := d.Id()
+	clusterID := d.Get("cluster_id").(string)
+	topicID := d.Id()
 	location := d.Get("location").(string)
 
 	c.changeConfigURL(location)
 
-	_, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, topicId, clusterId).Execute()
+	_, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, topicID, clusterID).Execute()
 	apiResponse.LogInfo()
 
 	return apiResponse.HttpNotFound(), err
 }
 
+// SetKafkaTopicData sets the Kafka Cluster Topic data to the Terraform Resource Data
 func (c *Client) SetKafkaTopicData(d *schema.ResourceData, topic *kafka.TopicRead) error {
 	if topic.Id != nil {
 		d.SetId(*topic.Id)

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -96,7 +97,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsTopicAvailable)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured  while Kafka Cluster Topic waiting to be ready: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred  while Kafka Cluster Topic waiting to be ready: %w", err))
 		return diags
 	}
 
@@ -105,11 +106,11 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).KafkaClient
-	topicId := d.Id()
-	clusterId := d.Get("cluster_id").(string)
+	topicID := d.Id()
+	clusterID := d.Get("cluster_id").(string)
 	location := d.Get("location").(string)
 
-	topic, apiResponse, err := client.GetTopicById(ctx, clusterId, topicId, location)
+	topic, apiResponse, err := client.GetTopicByID(ctx, clusterID, topicID, location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -130,11 +131,11 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).KafkaClient
-	topicId := d.Id()
-	clusterId := d.Get("cluster_id").(string)
+	topicID := d.Id()
+	clusterID := d.Get("cluster_id").(string)
 	location := d.Get("location").(string)
 
-	apiResponse, err := client.DeleteTopic(ctx, clusterId, topicId, location)
+	apiResponse, err := client.DeleteTopic(ctx, clusterID, topicID, location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")

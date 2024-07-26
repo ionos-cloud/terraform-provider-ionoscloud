@@ -76,7 +76,7 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(services.SdkBundle).KafkaClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
-	clusterId := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 	location := d.Get("location").(string)
 
 	id := idValue.(string)
@@ -94,16 +94,16 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 	var topic kafka.TopicRead
 	var err error
 	if idOk {
-		topic, _, err = client.GetTopicById(ctx, clusterId, id, location)
+		topic, _, err = client.GetTopicByID(ctx, clusterID, id, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching the Kafka Cluster Topic with ID: %s, error: %w", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Kafka Cluster Topic with ID: %s, error: %w", id, err))
 		}
 	} else {
 		var results []kafka.TopicRead
 
-		topics, _, err := client.ListTopics(ctx, clusterId, location)
+		topics, _, err := client.ListTopics(ctx, clusterID, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching Kafka Cluster Topics: %w", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching Kafka Cluster Topics: %w", err))
 		}
 
 		for _, t := range *topics.Items {
@@ -112,11 +112,12 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		switch {
+		case len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no Kafka Cluster Topic found with the specified name: %s", name))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one Kafka Cluster Topic found with the specified name: %s", name))
-		} else {
+		default:
 			topic = results[0]
 		}
 	}
