@@ -240,18 +240,17 @@ func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn Re
 	if d.Id() == "" {
 		return fmt.Errorf("resource with id %s not ready, still trying ", d.Id())
 	}
-	err := retry.RetryContext(ctx, DefaultTimeout, func() *retry.RetryError {
+	return retry.RetryContext(ctx, DefaultTimeout, func() *retry.RetryError {
 		isReady, err := fn(ctx, d)
-		if isReady == true {
+		if isReady {
 			return nil
 		}
 		if err != nil {
-			retry.NonRetryableError(err)
+			return retry.NonRetryableError(err)
 		}
 		log.Printf("[DEBUG] resource with id %s not ready, still trying ", d.Id())
 		return retry.RetryableError(fmt.Errorf("resource with id %s not ready, still trying ", d.Id()))
 	})
-	return err
 }
 
 // IsResourceDeletedFunc polls api to see if resource exists based on id
@@ -316,7 +315,7 @@ func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
 // checks if value['1'] of key[`id`] is present inside a slice of maps[string]interface{}
 func IsValueInSliceOfMap[T comparable](sliceOfMaps []interface{}, key string, value T) bool {
 	for _, mmap := range sliceOfMaps {
-		//do not delete if the id in the old rule is present in the new rules to be updated
+		// do not delete if the id in the old rule is present in the new rules to be updated
 		if value == mmap.(map[string]interface{})[key] {
 			return true
 		}
