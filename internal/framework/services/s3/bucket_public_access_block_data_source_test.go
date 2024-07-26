@@ -13,7 +13,7 @@ import (
 
 func TestAccBucketPublicAccessBlockDataSource(t *testing.T) {
 	rName := "tf-acctest-test-bucket-policy"
-	name := "ionoscloud_bucket_access_block.test"
+	name := "ionoscloud_s3_bucket_access_block.test"
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
@@ -37,8 +37,8 @@ func TestAccBucketPublicAccessBlockDataSource(t *testing.T) {
 
 func testAccBucketPublicAccessBlockDataSourceConfig_basic(bucketName string) string {
 	return utils.ConfigCompose(testAccBucketPublicAccessBlockConfig_basic(bucketName), `
-data "ionoscloud_bucket_access_block" "test" {
- bucket = ionoscloud_bucket_access_block.test.bucket
+data "ionoscloud_s3_bucket_access_block" "test" {
+ bucket = ionoscloud_s3_bucket_access_block.test.bucket
 }
 `)
 }

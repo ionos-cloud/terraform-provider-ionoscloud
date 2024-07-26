@@ -28,7 +28,15 @@ You can set the environment variables for HTTP basic authentication:
 export IONOS_USERNAME="username"
 export IONOS_PASSWORD="password"
 ```
+For managing IONOS S3 STORAGE resources you need to set the following environment variables with your credentials
+```bash
+export IONOS_S3_ACCESS_KEY="accesskey"
+export IONOS_S3_SECRET_KEY="secretkey"
+```
 
+
+
+```bash
 Also, you can overwrite the api endpoint: `api.ionos.com` via the following environment variable:
 
 ```bash
@@ -49,6 +57,15 @@ provider "ionoscloud" {
 #  contract_number = "contract_number_here"
 #  optional, does not need to be configured in most cases
 #  endpoint = "custom_cloud_api_url"
+#  s3_access_key     =  <your_access_key>
+#  s3_secret_key     =  <your_secret_key>
+```
+
+For getting your S3 secret key you can use the s3_key data source
+
+```hcl
+data "ionoscloud_s3_key" "example" {
+  id         = <s3_key_id>
 }
 ```
 
@@ -60,6 +77,8 @@ You can either explicitly write them in the .tf file or use var.name as in the e
 export TF_VAR_ionos_token="token"
 #export TF_VAR_ionos_username="username"
 #export TF_VAR_ionos_password="password"
+#export TF_VAR_ionos_s3_access_key="accesskey"
+#export TF_VAR_ionos_s3_secret_key="secretkey"
 ```
 
 

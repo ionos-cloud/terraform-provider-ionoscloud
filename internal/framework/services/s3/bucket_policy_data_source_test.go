@@ -13,7 +13,7 @@ import (
 
 func TestAccBucketPolicyDataSource(t *testing.T) {
 	rName := "tf-acctest-test-bucket-policy"
-	name := "ionoscloud_bucket_policy.test"
+	name := "ionoscloud_s3_bucket_policy.test"
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
@@ -34,8 +34,8 @@ func TestAccBucketPolicyDataSource(t *testing.T) {
 
 func testAccBucketPolicyDataSourceConfig_basic(bucketName string) string {
 	return utils.ConfigCompose(testAccBucketPolicyConfig_basic(bucketName), `
-data "ionoscloud_bucket_policy" "test" {
- bucket = ionoscloud_bucket_policy.test.bucket
+data "ionoscloud_s3_bucket_policy" "test" {
+ bucket = ionoscloud_s3_bucket_policy.test.bucket
 }
 `)
 }

@@ -32,7 +32,7 @@ type bucketPolicyDataSourceModel struct {
 
 // Metadata returns the metadata for the data source.
 func (d *bucketPolicyDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_bucket_policy"
+	resp.TypeName = req.ProviderTypeName + "_s3_bucket_policy"
 }
 
 // Configure configures the data source.

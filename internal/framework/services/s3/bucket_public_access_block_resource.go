@@ -45,7 +45,7 @@ type bucketPublicAccessBlockResourceModel struct {
 
 // Metadata returns the metadata for the bucket resource.
 func (r *bucketPublicAccessBlockResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_bucket_access_block"
+	resp.TypeName = req.ProviderTypeName + "_s3_bucket_access_block"
 }
 
 // Schema returns the schema for the bucket resource.

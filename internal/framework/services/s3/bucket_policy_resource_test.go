@@ -18,7 +18,7 @@ import (
 
 func TestAccBucketPolicyResource(t *testing.T) {
 	rName := "tf-acctest-test-bucket-policy"
-	name := "ionoscloud_bucket_policy.test"
+	name := "ionoscloud_s3_bucket_policy.test"
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
@@ -54,12 +54,12 @@ func TestAccBucketPolicyResource(t *testing.T) {
 
 func testAccBucketPolicyConfig_basic(bucketName string) string {
 	return fmt.Sprintf(`
-resource "ionoscloud_bucket" "test" {
-  bucket = %[1]q
+resource "ionoscloud_s3_bucket" "test" {
+  name = %[1]q
 }
 
-resource "ionoscloud_bucket_policy" "test" {
- bucket = ionoscloud_bucket.test.bucket
+resource "ionoscloud_s3_bucket_policy" "test" {
+ bucket = ionoscloud_s3_bucket.test.name
  policy = %[2]q
 }
 `, bucketName, PolicyJSON)
@@ -67,12 +67,12 @@ resource "ionoscloud_bucket_policy" "test" {
 
 func testAccBucketPolicyConfig_updated(bucketName string) string {
 	return fmt.Sprintf(`
-resource "ionoscloud_bucket" "test" {
-  bucket = %[1]q
+resource "ionoscloud_s3_bucket" "test" {
+  name = %[1]q
 }
 
-resource "ionoscloud_bucket_policy" "test" {
- bucket = ionoscloud_bucket.test.bucket
+resource "ionoscloud_s3_bucket_policy" "test" {
+ bucket = ionoscloud_s3_bucket.test.name
  policy = %[2]q
 }
 `, bucketName, policyJSONUpdated)
@@ -85,7 +85,7 @@ func testAccCheckBucketPolicyDestroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_bucket_policy" {
+		if rs.Type != "ionoscloud_s3_bucket_policy" {
 			continue
 		}
 
@@ -103,7 +103,7 @@ func testAccCheckBucketPolicyDestroy(s *terraform.State) error {
 func testAccCheckBucketPolicyData(policy string) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "ionoscloud_bucket_policy" {
+			if rs.Type != "ionoscloud_s3_bucket_policy" {
 				continue
 			}
 

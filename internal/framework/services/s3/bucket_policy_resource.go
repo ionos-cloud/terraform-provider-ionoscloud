@@ -70,7 +70,7 @@ type bucketPolicyStatementCondition struct {
 
 // Metadata returns the metadata for the bucket policy resource.
 func (r *bucketPolicyResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_bucket_policy" // todo: use constant here maybe
+	resp.TypeName = req.ProviderTypeName + "_s3_bucket_policy" // todo: use constant here maybe
 }
 
 // Schema returns the schema for the bucket policy resource.

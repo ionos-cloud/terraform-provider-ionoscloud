@@ -225,7 +225,7 @@ func TestAccObjectResource_ServerSideEncryptionCustomer(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(objectResourceName, "server_side_encryption_customer_algorithm", "AES256"),
 					resource.TestCheckResourceAttr(objectResourceName, "server_side_encryption_customer_key", "dpHHYOfjTUlcpotfDSNzkyWUWLtcZkoX1dlua5D1pAM="),
-					resource.TestCheckResourceAttr(objectResourceName, "server_side_encryption_customer_key_md5", "bPU7G1zD2MlOi5gqnkRqZg=="),
+					resource.TestCheckResourceAttr(objectResourceName, "server_side_encryption_customer_key_md5", "56029099e69ec4ea644fb2a34d507e16"),
 				),
 			},
 		},
@@ -406,8 +406,8 @@ resource "ionoscloud_s3_object" "test" {
   key = %[1]q
   content = "test"
   server_side_encryption_customer_algorithm = "AES256"
-  server_side_encryption_customer_key = "dpHHYOfjTUlcpotfDSNzkyWUWLtcZkoX1dlua5D1pAM="
-  server_side_encryption_customer_key_md5 = "bPU7G1zD2MlOi5gqnkRqZg=="
+  server_side_encryption_customer_key = "4ZRNYBCCvL0YZeqo3f2+9qDyIfnLdbg5S99R2XWr0aw="
+  server_side_encryption_customer_key_md5 = "ZeDiDFGrdO9ZXpA6TUOo4g=="
 }
 
 `, key))

@@ -48,6 +48,7 @@ func testAccBucketConfig_basic(bucketName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_s3_bucket" "test" {
   name = %[1]q
+  region = "eu-central-3"
 }
 `, bucketName)
 }
