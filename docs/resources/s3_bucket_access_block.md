@@ -14,7 +14,7 @@ Manages **public acccess for Buckets** on IonosCloud.
 ## Example Usage
 
 ```hcl
-resource "ionoscloud_s3_bucket_access_block" "example"{
+resource "ionoscloud_s3_bucket_public_access_block" "example"{
   bucket = ionoscloud_s3_bucket.example.name
   ignore_public_acls = true
   restrict_public_buckets = true
@@ -38,5 +38,5 @@ The following arguments are supported:
 Resource Bucket access block can be imported using the `bucket name`
 
 ```shell
-terraform import ionoscloud_s3_bucket_access_block.example example
+terraform import ionoscloud_s3_bucket_public_access_block.example example
 ```

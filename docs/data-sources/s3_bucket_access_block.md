@@ -16,7 +16,7 @@ When this happens, please refine your search string so that it is specific enoug
 ## Example Usage
 
 ```hcl
-data "ionoscloud_s3_bucket_access_block" "example"{
+data "ionoscloud_s3_bucket_public_access_block" "example"{
   bucket = "example"
 }
 

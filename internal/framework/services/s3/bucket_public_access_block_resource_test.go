@@ -17,7 +17,7 @@ import (
 
 func TestAccBucketPublicAccessBlockResource(t *testing.T) {
 	rName := "acctest-tf-bucket"
-	name := "ionoscloud_s3_bucket_access_block.test"
+	name := "ionoscloud_s3_bucket_public_access_block.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
@@ -64,7 +64,7 @@ func testAccCheckBucketPublicAccessBlockDestroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_s3_bucket_access_block" {
+		if rs.Type != "ionoscloud_s3_bucket_public_access_block" {
 			continue
 		}
 
@@ -85,7 +85,7 @@ resource "ionoscloud_s3_bucket" "test" {
   name = %[1]q
 }
 
-resource "ionoscloud_s3_bucket_access_block" "test"{
+resource "ionoscloud_s3_bucket_public_access_block" "test"{
     bucket = ionoscloud_s3_bucket.test.name
     ignore_public_acls = false
     restrict_public_buckets = false
@@ -101,7 +101,7 @@ resource "ionoscloud_s3_bucket" "test" {
   name = %[1]q
 }
 
-resource "ionoscloud_s3_bucket_access_block" "test"{
+resource "ionoscloud_s3_bucket_public_access_block" "test"{
     bucket = ionoscloud_s3_bucket.test.name
     ignore_public_acls = true
     restrict_public_buckets = true
