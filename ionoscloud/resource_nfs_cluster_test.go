@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	ionoscloud "github.com/ionos-cloud/sdk-go-nfs"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tftest"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
@@ -139,6 +140,21 @@ resource "ionoscloud_nfs_cluster" "example" {
 }
 `
 
+const nfsDataSourceMatchName = `
+data "ionoscloud_nfs_cluster" "data_with_name" {
+  name = "example_updated"
+  location = "de/txl"
+}
+`
+
+const nfsDataSourcePartialMatchName = `
+data "ionoscloud_nfs_cluster" "data_with_name" {
+  name = "example_upd"
+  location = "de/txl"
+  partial_match = true
+}
+`
+
 func TestAccNFSCluster_basic(t *testing.T) {
 	var nfsCluster ionoscloud.ClusterRead
 
@@ -159,26 +175,60 @@ func TestAccNFSCluster_basic(t *testing.T) {
 				Config: testAccCheckNFSClusterConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNFSClusterExists("ionoscloud_nfs_cluster.example", &nfsCluster),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "name", "example"),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "location", "de/txl"),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size", "2"),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "nfs.0.min_version", "4.2"),
-					resource.TestCheckResourceAttrPair("ionoscloud_nfs_cluster.example", "connections.0.datacenter_id", "ionoscloud_datacenter.nfs_dc", "id"),
-					resource.TestCheckResourceAttrPair("ionoscloud_nfs_cluster.example", "connections.0.ip_address", "ionoscloud_server.nfs_server", "nic.0.ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_nfs_cluster.example", "connections.0.lan", "ionoscloud_lan.nfs_lan", "id"),
+					tftest.TestCheckExpectedAttrs("ionoscloud_nfs_cluster.example", map[string]string{
+						"name":                        "example",
+						"location":                    "de/txl",
+						"size":                        "2",
+						"nfs.0.min_version":           "4.2",
+						"connections.0.datacenter_id": "dynamic:ionoscloud_datacenter.nfs_dc.id",
+						"connections.0.ip_address":    "dynamic:ionoscloud_server.nfs_server.nic.0.ips.0",
+						"connections.0.lan":           "dynamic:ionoscloud_lan.nfs_lan.id",
+					}),
 				),
 			},
 			{
 				Config: testAccCheckNFSClusterConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNFSClusterExists("ionoscloud_nfs_cluster.example", &nfsCluster),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "name", "example_updated"),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "location", "de/txl"),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size", "2"),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "nfs.0.min_version", "4.2"),
-					resource.TestCheckResourceAttrPair("ionoscloud_nfs_cluster.example", "connections.0.datacenter_id", "ionoscloud_datacenter.nfs_dc", "id"),
-					resource.TestCheckResourceAttrPair("ionoscloud_nfs_cluster.example", "connections.0.ip_address", "ionoscloud_server.nfs_server", "nic.0.ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_nfs_cluster.example", "connections.0.lan", "ionoscloud_lan.nfs_lan", "id"),
+					tftest.TestCheckExpectedAttrs("ionoscloud_nfs_cluster.example", map[string]string{
+						"name":                        "example_updated",
+						"location":                    "de/txl",
+						"size":                        "2",
+						"nfs.0.min_version":           "4.2",
+						"connections.0.datacenter_id": "dynamic:ionoscloud_datacenter.nfs_dc.id",
+						"connections.0.ip_address":    "dynamic:ionoscloud_server.nfs_server.nic.0.ips.0",
+						"connections.0.lan":           "dynamic:ionoscloud_lan.nfs_lan.id",
+					}),
+				),
+			},
+			{
+				Config: nfsDataSourceMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNFSClusterExists("data.ionoscloud_nfs_cluster.data_with_name", &nfsCluster),
+					tftest.TestCheckExpectedAttrs("data.ionoscloud_nfs_cluster.data_with_name", map[string]string{
+						"name":                        "example_updated",
+						"location":                    "de/txl",
+						"size":                        "2",
+						"nfs.0.min_version":           "4.2",
+						"connections.0.datacenter_id": "dynamic:ionoscloud_datacenter.nfs_dc.id",
+						"connections.0.ip_address":    "dynamic:ionoscloud_server.nfs_server.nic.0.ips.0",
+						"connections.0.lan":           "dynamic:ionoscloud_lan.nfs_lan.id",
+					}),
+				),
+			},
+			{
+				Config: nfsDataSourcePartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNFSClusterExists("data.ionoscloud_nfs_cluster.data_with_name", &nfsCluster),
+					tftest.TestCheckExpectedAttrs("data.ionoscloud_nfs_cluster.data_with_name", map[string]string{
+						"name":                        "example_updated",
+						"location":                    "de/txl",
+						"size":                        "2",
+						"nfs.0.min_version":           "4.2",
+						"connections.0.datacenter_id": "dynamic:ionoscloud_datacenter.nfs_dc.id",
+						"connections.0.ip_address":    "dynamic:ionoscloud_server.nfs_server.nic.0.ips.0",
+						"connections.0.lan":           "dynamic:ionoscloud_lan.nfs_lan.id",
+					}),
 				),
 			},
 		},

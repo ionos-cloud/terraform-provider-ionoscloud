@@ -12,7 +12,13 @@ import (
 
 func TestAccNFSCluster_import(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck: func() { testAccPreCheck(t) },
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {
+				VersionConstraint: "3.4.3",
+				Source:            "hashicorp/random",
+			},
+		},
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckNFSClusterDestroy,
 		Steps: []resource.TestStep{
