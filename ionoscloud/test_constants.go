@@ -1827,11 +1827,3 @@ const clusterCredentialsPasswordAttribute = "password"
 // Values
 const clusterMaintenanceWindowDayOfTheWeekValue = "Sunday"
 const clusterMaintenanceWindowTimeValue = "09:00:00"
-
-const (
-	kafkaClusterTestResource = "kafka_cluster_test"
-	kafkaClusterVersion      = "3.5.1"
-	kafkaClusterSize         = "S"
-	kafkaTestResource        = "test_kafka"
-	kafkaDSTestResource      = "ds_test_kafka"
-)

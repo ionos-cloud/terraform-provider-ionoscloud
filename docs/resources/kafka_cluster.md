@@ -1,5 +1,5 @@
 ---
-subcategory: "Kafka"
+subcategory: "Event Streams for Apache Kafka"
 layout: "ionoscloud"
 page_title: "IonosCloud: ionoscloud_kafka_cluster"
 sidebar_current: "docs-resource-kafka-cluster"
