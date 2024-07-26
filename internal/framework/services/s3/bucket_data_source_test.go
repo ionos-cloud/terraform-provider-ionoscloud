@@ -13,9 +13,9 @@ import (
 )
 
 func TestAccBucketDataSource(t *testing.T) {
-	rName := utils.GenerateRandomResourceName()
+	rName := acctest.GenerateRandomResourceName(bucketPrefix)
 	resource.ParallelTest(t, resource.TestCase{
-		ProtoV5ProviderFactories: acctest.TestAccProtoV5ProviderFactories,
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
 		},
@@ -23,8 +23,8 @@ func TestAccBucketDataSource(t *testing.T) {
 			{
 				Config: testAccBucketDataSourceConfig_basic(rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair("data.ionoscloud_bucket.test", "bucket", "ionoscloud_bucket.test", "bucket"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_bucket.test", "region", "ionoscloud_bucket.test", "region"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_s3_bucket.test", "name", "ionoscloud_s3_bucket.test", "name"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_s3_bucket.test", "region", "ionoscloud_s3_bucket.test", "region"),
 				),
 			},
 		},
@@ -33,8 +33,8 @@ func TestAccBucketDataSource(t *testing.T) {
 
 func testAccBucketDataSourceConfig_basic(bucketName string) string {
 	return utils.ConfigCompose(testAccBucketConfig_basic(bucketName), `
-data "ionoscloud_bucket" "test" {
-	bucket = ionoscloud_bucket.test.bucket
+data "ionoscloud_s3_bucket" "test" {
+	name = ionoscloud_s3_bucket.test.name
 }
 `)
 }

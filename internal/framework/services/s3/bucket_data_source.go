@@ -23,13 +23,13 @@ type bucketDataSource struct {
 }
 
 type bucketDataSourceModel struct {
-	Bucket types.String `tfsdk:"bucket"`
+	Name   types.String `tfsdk:"name"`
 	Region types.String `tfsdk:"region"`
 }
 
 // Metadata returns the metadata for the data source.
 func (d *bucketDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_bucket"
+	resp.TypeName = req.ProviderTypeName + "_s3_bucket"
 }
 
 // Configure configures the data source.
@@ -57,7 +57,7 @@ func (d *bucketDataSource) Configure(ctx context.Context, req datasource.Configu
 func (d *bucketDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"bucket": schema.StringAttribute{
+			"name": schema.StringAttribute{
 				Description: "The name of the bucket",
 				Required:    true,
 			},
@@ -82,20 +82,20 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	apiResponse, err := d.client.BucketsApi.HeadBucket(ctx, data.Bucket.ValueString()).Execute()
+	apiResponse, err := d.client.BucketsApi.HeadBucket(ctx, data.Name.ValueString()).Execute()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			resp.Diagnostics.AddError("Bucket not found", "The specified bucket does not exist")
+			resp.Diagnostics.AddError("Name not found", "The specified bucket does not exist")
 			return
 		}
 
-		resp.Diagnostics.AddError("Failed to read bucket", err.Error())
+		resp.Diagnostics.AddError("Failed to read bucket", formatXMLError(err).Error())
 		return
 	}
 
-	location, _, err := d.client.BucketsApi.GetBucketLocation(ctx, data.Bucket.ValueString()).Execute()
+	location, _, err := d.client.BucketsApi.GetBucketLocation(ctx, data.Name.ValueString()).Execute()
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read bucket location", err.Error())
+		resp.Diagnostics.AddError("Failed to read bucket location", formatXMLError(err).Error())
 		return
 	}
 	if location.LocationConstraint == nil {
