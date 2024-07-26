@@ -31,9 +31,9 @@ func TestAccCertificateManagerProvider(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderLocationAttr, CMProviderLocationVal),
 					resource.TestCheckResourceAttr(constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderServerAttr, CMProviderServerVal),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderExternalAccountBindingAttr+".*", map[string]string{
-						CMProviderEABKeyIDAttr:     CMProviderEABKeyIDVal,
-						CMProviderEABKeySecretAttr: CMProviderEABKeySecretVal,
+						CMProviderEABKeyIDAttr: CMProviderEABKeyIDVal,
 					}),
+					resource.TestCheckResourceAttrSet(constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderExternalAccountBindingAttr+".0."+CMProviderEABKeySecretAttr),
 				),
 			},
 			{
@@ -45,8 +45,7 @@ func TestAccCertificateManagerProvider(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderLocationAttr, CMProviderLocationVal),
 					resource.TestCheckResourceAttr(constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderServerAttr, CMProviderServerVal),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderExternalAccountBindingAttr+".*", map[string]string{
-						CMProviderEABKeyIDAttr:     CMProviderEABKeyIDVal,
-						CMProviderEABKeySecretAttr: CMProviderEABKeySecretVal,
+						CMProviderEABKeyIDAttr: CMProviderEABKeyIDVal,
 					}),
 				),
 			},
@@ -58,8 +57,7 @@ func TestAccCertificateManagerProvider(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderLocationAttr, CMProviderLocationVal),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderServerAttr, CMProviderServerVal),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderExternalAccountBindingAttr+".*", map[string]string{
-						CMProviderEABKeyIDAttr:     CMProviderEABKeyIDVal,
-						CMProviderEABKeySecretAttr: CMProviderEABKeySecretVal,
+						CMProviderEABKeyIDAttr: CMProviderEABKeyIDVal,
 					}),
 				),
 			},
@@ -71,8 +69,7 @@ func TestAccCertificateManagerProvider(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderLocationAttr, CMProviderLocationVal),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderServerAttr, CMProviderServerVal),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.AutoCertificateProviderResource+"."+constant.TestCMProviderName, CMProviderExternalAccountBindingAttr+".*", map[string]string{
-						CMProviderEABKeyIDAttr:     CMProviderEABKeyIDVal,
-						CMProviderEABKeySecretAttr: CMProviderEABKeySecretVal,
+						CMProviderEABKeyIDAttr: CMProviderEABKeyIDVal,
 					}),
 				),
 			},

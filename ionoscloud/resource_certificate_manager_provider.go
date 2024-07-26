@@ -59,6 +59,7 @@ func resourceCertificateManagerProvider() *schema.Resource {
 						"key_secret": {
 							Type:        schema.TypeString,
 							Required:    true,
+							Sensitive:   true,
 							Description: "The secret of the external account binding",
 						},
 					},

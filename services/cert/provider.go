@@ -140,16 +140,6 @@ func SetProviderData(d *schema.ResourceData, provider certmanager.ProviderRead) 
 			return utils.GenerateSetError(resourceName, "server", err)
 		}
 	}
-	if provider.Properties.ExternalAccountBinding != nil {
-		var externalAccountBinding []interface{}
-		externalAccountBindingEntry := map[string]interface{}{}
-		utils.SetPropWithNilCheck(externalAccountBindingEntry, "key_id", *provider.Properties.ExternalAccountBinding.KeyId)
-		utils.SetPropWithNilCheck(externalAccountBindingEntry, "key_secret", *provider.Properties.ExternalAccountBinding.KeySecret)
-		externalAccountBinding = append(externalAccountBinding, externalAccountBindingEntry)
-		if err := d.Set("external_account_binding", externalAccountBinding); err != nil {
-			return utils.GenerateSetError(resourceName, "external_account_binding", err)
-		}
-	}
 	return nil
 }
 

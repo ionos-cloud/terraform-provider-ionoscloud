@@ -9,6 +9,7 @@ import (
 	certSDK "github.com/ionos-cloud/sdk-go-cert-manager"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"strings"
 )
@@ -54,11 +55,6 @@ func dataSourceCertificateManagerProvider() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The key ID of the external account binding",
-						},
-						"key_secret": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The key secret of the external account binding",
 						},
 					},
 				},
@@ -115,6 +111,16 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	if err := certService.SetProviderData(d, provider); err != nil {
 		return diag.FromErr(err)
+	}
+
+	if provider.Properties.ExternalAccountBinding != nil {
+		var externalAccountBinding []interface{}
+		externalAccountBindingEntry := map[string]interface{}{}
+		utils.SetPropWithNilCheck(externalAccountBindingEntry, "key_id", *provider.Properties.ExternalAccountBinding.KeyId)
+		externalAccountBinding = append(externalAccountBinding, externalAccountBindingEntry)
+		if err := d.Set("external_account_binding", externalAccountBinding); err != nil {
+			return diag.FromErr(utils.GenerateSetError("Auto-certificate provider", "external_account_binding", err))
+		}
 	}
 	return nil
 }
