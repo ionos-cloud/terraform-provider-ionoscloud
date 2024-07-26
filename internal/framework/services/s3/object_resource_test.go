@@ -80,6 +80,37 @@ func TestAccObjectResourceBasic(t *testing.T) {
 	})
 }
 
+func TestAccObjectResourceDirectory(t *testing.T) {
+	ctx := context.Background()
+	var body string
+	bucket := acctest.GenerateRandomResourceName(bucketPrefix)
+	key := "dir/" + acctest.GenerateRandomResourceName(objectPrefix)
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		CheckDestroy: testAccCheckObjectDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObjectConfig_basic(bucket, key),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObjectExists(ctx, objectResourceName, &body),
+					testAccCheckObjectBody(&body, "test"),
+					resource.TestCheckResourceAttr(objectResourceName, "bucket", bucket),
+					resource.TestCheckResourceAttr(objectResourceName, "key", key),
+					resource.TestCheckResourceAttr(objectResourceName, "content", "test"),
+					resource.TestCheckResourceAttrSet(objectResourceName, "etag"),
+					resource.TestCheckResourceAttr(objectResourceName, "content_type", "text/plain"),
+					resource.TestCheckResourceAttr(objectResourceName, "storage_class", "STANDARD"),
+					resource.TestCheckResourceAttr(objectResourceName, "force_destroy", "false"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccObjectResource_ContentType(t *testing.T) {
 	bucket := acctest.GenerateRandomResourceName(bucketPrefix)
 	key := acctest.GenerateRandomResourceName(objectPrefix)
@@ -406,8 +437,8 @@ resource "ionoscloud_s3_object" "test" {
   key = %[1]q
   content = "test"
   server_side_encryption_customer_algorithm = "AES256"
-  server_side_encryption_customer_key = "4ZRNYBCCvL0YZeqo3f2+9qDyIfnLdbg5S99R2XWr0aw="
-  server_side_encryption_customer_key_md5 = "ZeDiDFGrdO9ZXpA6TUOo4g=="
+  server_side_encryption_customer_key = "yGhiUJB0QfiHMyMZETVyPOl1NwPOnBQdskcso/BfaCk="
+  server_side_encryption_customer_key_md5 = "rl1t0mcGBsn1jCBB0ngBTQ=="
 }
 
 `, key))

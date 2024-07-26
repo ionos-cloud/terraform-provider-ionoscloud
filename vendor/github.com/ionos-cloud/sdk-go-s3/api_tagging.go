@@ -67,7 +67,7 @@ func (a *TaggingApiService) DeleteBucketTaggingExecute(r ApiDeleteBucketTaggingR
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?tagging"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -202,8 +202,8 @@ func (a *TaggingApiService) DeleteObjectTaggingExecute(r ApiDeleteObjectTaggingR
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}?tagging"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", url.PathEscape(parameterValueToString(r.key, "key")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -343,7 +343,7 @@ func (a *TaggingApiService) GetBucketTaggingExecute(r ApiGetBucketTaggingRequest
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?tagging"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -487,8 +487,8 @@ func (a *TaggingApiService) GetObjectTaggingExecute(r ApiGetObjectTaggingRequest
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}?tagging"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", url.PathEscape(parameterValueToString(r.key, "key")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -637,7 +637,7 @@ func (a *TaggingApiService) PutBucketTaggingExecute(r ApiPutBucketTaggingRequest
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?tagging"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -792,8 +792,8 @@ func (a *TaggingApiService) PutObjectTaggingExecute(r ApiPutObjectTaggingRequest
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}?tagging"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", url.PathEscape(parameterValueToString(r.key, "key")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

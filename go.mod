@@ -22,7 +22,7 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
-	github.com/ionos-cloud/sdk-go-s3 v1.0.0
+	github.com/ionos-cloud/sdk-go-s3 v1.0.1
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 	github.com/ionos-cloud/sdk-go/v6 v6.1.11
 	github.com/mitchellh/go-homedir v1.1.0

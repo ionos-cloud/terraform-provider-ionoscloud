@@ -75,7 +75,7 @@ func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequ
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?policy"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -227,7 +227,7 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?policy"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -392,7 +392,7 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?policyStatus"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -563,7 +563,7 @@ func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?policy"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

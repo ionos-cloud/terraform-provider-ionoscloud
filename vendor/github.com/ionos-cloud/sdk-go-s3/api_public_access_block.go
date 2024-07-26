@@ -74,7 +74,7 @@ func (a *PublicAccessBlockApiService) DeletePublicAccessBlockExecute(r ApiDelete
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?publicAccessBlock"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -225,7 +225,7 @@ func (a *PublicAccessBlockApiService) GetPublicAccessBlockExecute(r ApiGetPublic
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?publicAccessBlock"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -399,7 +399,7 @@ func (a *PublicAccessBlockApiService) PutPublicAccessBlockExecute(r ApiPutPublic
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?publicAccessBlock"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

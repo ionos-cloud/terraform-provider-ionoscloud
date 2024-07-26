@@ -152,7 +152,6 @@ func (r *objectResource) Schema(_ context.Context, req resource.SchemaRequest, r
 			"server_side_encryption_customer_key": schema.StringAttribute{
 				Description: "Specifies the 256-bit, base64-encoded encryption key to use to encrypt and decrypt your data",
 				Optional:    true,
-				Sensitive:   true,
 			},
 			"server_side_encryption_customer_key_md5": schema.StringAttribute{
 				Description: "Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS S3 Object Storage uses this header for a message integrity check  to ensure that the encryption key was transmitted without error",
@@ -190,8 +189,7 @@ func (r *objectResource) Schema(_ context.Context, req resource.SchemaRequest, r
 			},
 			"version_id": schema.StringAttribute{
 				Description: "The version of the object",
-				// TODO this may be also computed, we need to check if it's sent in the response
-				Optional: true,
+				Optional:    true,
 			},
 			"mfa": schema.StringAttribute{
 				Description: "The concatenation of the authentication device's serial number, a space, and the value that is displayed on your authentication device. Required to permanently delete a versioned object if versioning is configured with MFA Delete enabled.",
