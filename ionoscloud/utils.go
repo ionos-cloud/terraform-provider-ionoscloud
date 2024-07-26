@@ -44,7 +44,7 @@ func DiffBasedOnVersion(_, old, new string, _ *schema.ResourceData) bool {
 		}
 
 		if oldMajor == newMajor && oldMinor == newMinor {
-			//this is a downgrade of the patch version that we will ignore
+			// this is a downgrade of the patch version that we will ignore
 			// it may happen either manually, or after a maintenance window
 			if oldPatchInt > newPatchInt {
 				log.Printf("[WARN] Downgrade is not supported on k8s from %d to %d", oldPatchInt, newPatchInt)

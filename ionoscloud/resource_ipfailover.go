@@ -264,7 +264,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	ipFailoverGroups := lan.Properties.IpFailover
 	if lan.Properties != nil && ipFailoverGroups != nil && len(*ipFailoverGroups) > 0 {
 		for _, ipFailoverGroup := range *ipFailoverGroups {
-			// Search for the appropiate IP Failover Group using the provided IP
+			// Search for the appropriate IP Failover Group using the provided IP
 			if *ipFailoverGroup.Ip == ip {
 				// Set all the information only if the IP Failover Group exists
 				// Use the IP in order to generate the resource ID

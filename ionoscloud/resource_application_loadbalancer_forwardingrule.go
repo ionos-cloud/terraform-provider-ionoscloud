@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -609,7 +610,7 @@ func getAlbHttpRulesData(d *schema.ResourceData) (*[]ionoscloud.ApplicationLoadB
 					if conditionVal, conditionOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.condition", httpRuleIndex, conditionIndex)); conditionOk {
 						conditionVal := conditionVal.(string)
 						condition.Condition = &conditionVal
-					} else if strings.ToUpper(typeVal) != "SOURCE_IP" {
+					} else if !strings.EqualFold(typeVal, "SOURCE_IP") {
 						return nil, fmt.Errorf("condition must be provided for application loadbalancer forwarding rule http rule condition")
 					}
 

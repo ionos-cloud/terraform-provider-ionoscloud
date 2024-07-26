@@ -2,6 +2,7 @@ package autoscaling
 
 import (
 	"context"
+
 	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
 )
 

@@ -269,7 +269,7 @@ var MariaDBClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "
 
 // Container Registry Constants
 const (
-	//ContainerRegistryTestResource needs to be with -, do not change
+	// ContainerRegistryTestResource needs to be with -, do not change
 	ContainerRegistryTestResource      = "test-container-registry"
 	ContainerRegistryTokenTestResource = "test-container-registry-token"
 

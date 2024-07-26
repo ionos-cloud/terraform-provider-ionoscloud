@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -235,7 +236,7 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 				return fmt.Errorf("error setting ips %w", err)
 			}
 		}
-		//should not be checked for len, we want to set the empty slice anyway as the field is computed, and it will not be set by backend
+		// should not be checked for len, we want to set the empty slice anyway as the field is computed, and it will not be set by backend
 		// if ipv6_cidr_block is not set on the lan
 		if nic.Properties.Ipv6Ips != nil {
 			if err := d.Set("ipv6_ips", *nic.Properties.Ipv6Ips); err != nil {

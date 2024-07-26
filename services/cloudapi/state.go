@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
@@ -23,7 +24,7 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, location strin
 		Timeout:        d.Timeout(timeoutType),
 		MinTimeout:     5 * time.Second,
 		Delay:          0,    // Don't delay the start
-		NotFoundChecks: 9999, //Setting high number, to support long timeouts
+		NotFoundChecks: 9999, // Setting high number, to support long timeouts
 	}
 
 	return stateConf

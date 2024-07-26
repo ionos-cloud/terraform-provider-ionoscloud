@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -61,7 +62,7 @@ func resourceCertificateManager() *schema.Resource {
 
 func checkCertImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 
-	//we do not want to check in case of resource creation
+	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
 	}
@@ -70,7 +71,7 @@ func checkCertImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ in
 		oldV, newV := diff.GetChange("certificate")
 		old := utils.RemoveNewLines(oldV.(string))
 		newStr := utils.RemoveNewLines(newV.(string))
-		//we get extraneous newlines in the certificate, so we must remove them before checking equality
+		// we get extraneous newlines in the certificate, so we must remove them before checking equality
 		if !strings.EqualFold(old, newStr) {
 			return fmt.Errorf("certificate %s", ImmutableError)
 		}

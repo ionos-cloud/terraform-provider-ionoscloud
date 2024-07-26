@@ -147,7 +147,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			diags := diag.FromErr(err)
 			return diags
 		}
-		//try again in 20 seconds
+		// try again in 20 seconds
 		// todo: get rid of this retry
 		time.Sleep(20 * time.Second)
 		apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
