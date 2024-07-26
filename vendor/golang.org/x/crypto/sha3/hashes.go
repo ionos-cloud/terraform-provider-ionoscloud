@@ -9,6 +9,7 @@ package sha3
 // bytes.
 
 import (
+	"crypto"
 	"hash"
 )
 
@@ -46,9 +47,29 @@ func New384() hash.Hash {
 // Its generic security strength is 512 bits against preimage attacks,
 // and 256 bits against collision attacks.
 func New512() hash.Hash {
-	if h := new512Asm(); h != nil {
-		return h
-	}
+	return new512()
+}
+
+func init() {
+	crypto.RegisterHash(crypto.SHA3_224, New224)
+	crypto.RegisterHash(crypto.SHA3_256, New256)
+	crypto.RegisterHash(crypto.SHA3_384, New384)
+	crypto.RegisterHash(crypto.SHA3_512, New512)
+}
+
+func new224Generic() *state {
+	return &state{rate: 144, outputLen: 28, dsbyte: 0x06}
+}
+
+func new256Generic() *state {
+	return &state{rate: 136, outputLen: 32, dsbyte: 0x06}
+}
+
+func new384Generic() *state {
+	return &state{rate: 104, outputLen: 48, dsbyte: 0x06}
+}
+
+func new512Generic() *state {
 	return &state{rate: 72, outputLen: 64, dsbyte: 0x06}
 }
 

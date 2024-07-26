@@ -68,8 +68,8 @@ Class | Method | HTTP request | Description
 *ClustersApi* | [**ClustersPost**](docs/api/ClustersApi.md#clusterspost) | **Post** /clusters | Create Cluster
 *ClustersApi* | [**ClustersPut**](docs/api/ClustersApi.md#clustersput) | **Put** /clusters/{clusterId} | Ensure Cluster
 *SharesApi* | [**ClustersSharesDelete**](docs/api/SharesApi.md#clusterssharesdelete) | **Delete** /clusters/{clusterId}/shares/{shareId} | Delete Share
-*SharesApi* | [**ClustersSharesFindById**](docs/api/SharesApi.md#clusterssharesfindbyid) | **Get** /clusters/{clusterId}/shares/{shareId} | Retrieves a share
-*SharesApi* | [**ClustersSharesGet**](docs/api/SharesApi.md#clusterssharesget) | **Get** /clusters/{clusterId}/shares | Retrieves all shares
+*SharesApi* | [**ClustersSharesFindById**](docs/api/SharesApi.md#clusterssharesfindbyid) | **Get** /clusters/{clusterId}/shares/{shareId} | Retrieve Share
+*SharesApi* | [**ClustersSharesGet**](docs/api/SharesApi.md#clusterssharesget) | **Get** /clusters/{clusterId}/shares | Retrieve Shares
 *SharesApi* | [**ClustersSharesPost**](docs/api/SharesApi.md#clusterssharespost) | **Post** /clusters/{clusterId}/shares | Create Share
 *SharesApi* | [**ClustersSharesPut**](docs/api/SharesApi.md#clusterssharesput) | **Put** /clusters/{clusterId}/shares/{shareId} | Ensure Share
 
