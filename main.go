@@ -64,30 +64,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//
-
-	// providers := []func() tfprotov5.ProviderServer{
-	// 	providerserver.NewProtocol5(provider.New()), // terraform-plugin-framework provider
-	// 	ionoscloud.Provider().GRPCProvider,          // terraform-plugin-sdk provider
-	// }
-	// ctx := context.Background()
-	// muxServer, err := tf5muxserver.NewMuxServer(ctx, providers...)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	//
-	// var serveOpts []tf5server.ServeOpt
-	// if debugMode {
-	// 	serveOpts = append(serveOpts, tf5server.WithManagedDebug())
-	// }
-	//
-	// err = tf5server.Serve(
-	// 	"registry.terraform.io/ionos-cloud/ionoscloud",
-	// 	muxServer.ProviderServer,
-	// 	serveOpts...,
-	// )
-	//
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 }
