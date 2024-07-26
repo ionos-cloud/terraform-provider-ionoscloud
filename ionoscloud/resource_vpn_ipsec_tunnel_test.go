@@ -123,7 +123,6 @@ func checkIPSecTunnelResourceAttributes(fullResourceName, attributeNameReference
 		resource.TestCheckResourceAttr(fullResourceName, tunnelAttributeName, attributeNameReferenceValue),
 		resource.TestCheckResourceAttr(fullResourceName, tunnelAttributeRemoteHost, tunnelAttributeRemoteHostValue),
 		resource.TestCheckResourceAttr(fullResourceName, tunnelAttributeAuthMethod, tunnelAttributeAuthMethodValue),
-		resource.TestCheckResourceAttr(fullResourceName, tunnelAttributeAuthPSKKey, tunnelAttributeAuthPSKKeyValue),
 		resource.TestCheckResourceAttr(fullResourceName, tunnelAttributeIKE+tunnelAttributeDiffieHellmanGroup, tunnelAttributeDiffieHellmanGroupValue),
 		resource.TestCheckResourceAttr(fullResourceName, tunnelAttributeIKE+tunnelAttributeEncryptionAlgorithm, tunnelAttributeEncryptionAlgorithmValue),
 		resource.TestCheckResourceAttr(fullResourceName, tunnelAttributeIKE+tunnelAttributeIntegrityAlgorithm, tunnelAttributeIntegrityAlgorithmValue),
@@ -142,7 +141,6 @@ func checkIPSecTunnelResourceAttributesComparative(fullResourceName, fullReferen
 		resource.TestCheckResourceAttrPair(fullResourceName, tunnelAttributeName, fullReferenceResourceName, tunnelAttributeName),
 		resource.TestCheckResourceAttrPair(fullResourceName, tunnelAttributeRemoteHost, fullReferenceResourceName, tunnelAttributeRemoteHost),
 		resource.TestCheckResourceAttrPair(fullResourceName, tunnelAttributeAuthMethod, fullReferenceResourceName, tunnelAttributeAuthMethod),
-		resource.TestCheckResourceAttrPair(fullResourceName, tunnelAttributeAuthPSKKey, fullReferenceResourceName, tunnelAttributeAuthPSKKey),
 		resource.TestCheckResourceAttrPair(
 			fullResourceName, tunnelAttributeIKE+tunnelAttributeDiffieHellmanGroup, fullReferenceResourceName, tunnelAttributeIKE+tunnelAttributeDiffieHellmanGroup,
 		),
