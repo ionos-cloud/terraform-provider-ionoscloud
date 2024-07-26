@@ -36,6 +36,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", constant.TargetGroupTestResource),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "algorithm", "ROUND_ROBIN"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol", "HTTP"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol_version", "HTTP1"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.ip", "22.231.2.2"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.port", "8080"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.weight", "1"),
@@ -48,6 +49,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "algorithm", "ROUND_ROBIN"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol", "HTTP"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol_version", "HTTP2"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.ip", "22.231.2.2"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.port", "8080"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.weight", "1"),
@@ -75,6 +77,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 				Config: testAccDataSourceTargetGroupMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "name", resourceNameTargetGroup, "name"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "protocol_version", resourceNameTargetGroup, "protocol_version"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "algorithm", resourceNameTargetGroup, "algorithm"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.ip", resourceNameTargetGroup, "targets.0.ip"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.port", resourceNameTargetGroup, "targets.0.port"),
@@ -168,6 +171,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "algorithm", "RANDOM"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol", "HTTP"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol_version", "HTTP1"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.ip", "22.232.2.3"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.port", "8081"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.weight", "124"),
@@ -259,6 +263,7 @@ resource ` + constant.TargetGroupResource + ` ` + constant.TargetGroupTestResour
  name = "` + constant.TargetGroupTestResource + `"
  algorithm = "ROUND_ROBIN"
  protocol = "HTTP"
+ protocol_version = "HTTP1"
  targets {
    ip = "22.231.2.2"
    port = "8080"
@@ -272,6 +277,7 @@ resource ` + constant.TargetGroupResource + ` ` + constant.TargetGroupTestResour
  name = "` + constant.UpdatedResources + `"
  algorithm = "ROUND_ROBIN"
  protocol = "HTTP"
+ protocol_version = "HTTP2"
  targets {
    ip = "22.231.2.2"
    port = "8080"
@@ -309,6 +315,7 @@ resource ` + constant.TargetGroupResource + ` ` + constant.TargetGroupTestResour
  name = "` + constant.UpdatedResources + `"
  algorithm = "RANDOM"
  protocol = "HTTP"
+ protocol_version = "HTTP1"
  targets {
    ip = "22.232.2.3"
    port = "8081"

@@ -18,6 +18,7 @@ resource "ionoscloud_target_group" "example" {
     name                      = "Target Group Example" 
     algorithm                 = "ROUND_ROBIN"
     protocol                  = "HTTP"
+    protocol_version          = "HTTP1"
     targets {
         ip                    = "22.231.2.2"
         port                  = "8080"
@@ -57,6 +58,7 @@ The following arguments are supported:
 - `name` - (Required)[string] The name of the target group.
 - `algorithm` - (Required)[string] Balancing algorithm.
 - `protocol` - (Required)[string] Balancing protocol.
+- `protocol_version` - (Optional)[string] The forwarding protocol version. Value is ignored when protocol is not 'HTTP'.
 - `targets` - (Required)[list] Array of items in the collection
     - `ip` - (Required)[string] The IP of the balanced target VM.
     - `port` - (Required)[int] The port of the balanced target service; valid range is 1 to 65535.
