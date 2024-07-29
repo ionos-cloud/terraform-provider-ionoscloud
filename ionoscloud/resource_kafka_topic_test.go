@@ -13,8 +13,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestKafkaTopicResource(t *testing.T) {
@@ -23,8 +23,8 @@ func TestKafkaTopicResource(t *testing.T) {
 			PreCheck: func() {
 				testAccPreCheck(t)
 			},
-			ProviderFactories: testAccProviderFactories,
-			CheckDestroy:      testCheckKafkaTopicDestroy,
+			CheckDestroy:             testCheckKafkaTopicDestroy,
+			ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 			Steps: []resource.TestStep{
 				{
 					Config: configKafkaTopicBasic(topicResourceName, topicAttributeNameValue),
