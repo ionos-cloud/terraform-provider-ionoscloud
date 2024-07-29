@@ -18,17 +18,22 @@ type Client struct {
 	sdkClient kafka.APIClient
 }
 
-var locationToURL = map[string]string{
-	"de/fra": "https://kafka.de-fra.ionos.com",
-	"de/txl": "https://kafka.de-txl.ionos.com",
-	"es/vit": "https://kafka.es-vit.ionos.com",
-	"gb/lhr": "https://kafka.gb-lhr.ionos.com",
-	"us/ewr": "https://kafka.us-ewr.ionos.com",
-	"us/las": "https://kafka.us-las.ionos.com",
-	"us/mci": "https://kafka.us-mci.ionos.com",
-	"fr/par": "https://kafka.fr-par.ionos.com",
-	"pre":    "https://pre.kafka.de-fra.ionos.com",
-}
+var (
+	// AvailableLocations is a list of available locations for Kafka
+	AvailableLocations = []string{"de/fra", "de/txl", "es/vit", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par", "pre"}
+
+	locationToURL = map[string]string{
+		"de/fra": "https://kafka.de-fra.ionos.com",
+		"de/txl": "https://kafka.de-txl.ionos.com",
+		"es/vit": "https://kafka.es-vit.ionos.com",
+		"gb/lhr": "https://kafka.gb-lhr.ionos.com",
+		"us/ewr": "https://kafka.us-ewr.ionos.com",
+		"us/las": "https://kafka.us-las.ionos.com",
+		"us/mci": "https://kafka.us-mci.ionos.com",
+		"fr/par": "https://kafka.fr-par.ionos.com",
+		"pre":    "https://pre.kafka.de-fra.ionos.com",
+	}
+)
 
 // NewClient returns a new Kafka API client
 func NewClient(username, password, token, url, version, terraformVersion string) *Client {

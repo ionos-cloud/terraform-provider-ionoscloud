@@ -3,15 +3,16 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	kafka "github.com/ionos-cloud/sdk-go-kafka"
+	kafkaSdk "github.com/ionos-cloud/sdk-go-kafka"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceKafkaCluster() *schema.Resource {
@@ -33,9 +34,10 @@ func dataSourceKafkaCluster() *schema.Resource {
 			},
 			"location": {
 				Type:             schema.TypeString,
-				Description:      "The location of your Kafka Cluster. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
+				Description:      fmt.Sprintf("The location of your Kafka Cluster. Supported locations: %s", strings.Join(kafka.AvailableLocations, ", ")),
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(kafka.AvailableLocations, false)),
 			},
 			"version": {
 				Type:        schema.TypeString,
@@ -118,7 +120,7 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	partialMatch := d.Get("partial_match").(bool)
-	var cluster kafka.ClusterRead
+	var cluster kafkaSdk.ClusterRead
 	var err error
 	if idOk {
 		cluster, _, err = client.GetClusterByID(ctx, id, location)
@@ -126,7 +128,7 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Kafka Cluster with ID: %s, error: %w", id, err))
 		}
 	} else {
-		var results []kafka.ClusterRead
+		var results []kafkaSdk.ClusterRead
 
 		clusters, _, err := client.ListClusters(ctx, location)
 		if err != nil {
