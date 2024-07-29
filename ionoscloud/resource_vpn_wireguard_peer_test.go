@@ -62,11 +62,11 @@ func TestAccWireguardPeer(t *testing.T) {
 			},
 			{
 				Config:      WireguardPeerDataSourceInvalidNoIDNoName,
-				ExpectError: regexp.MustCompile("please provide either the wireguard peer ID or name"),
+				ExpectError: regexp.MustCompile("please provide either the WireGuard Peer ID or name"),
 			},
 			{
 				Config:      WireguardPeerDataSourceWrongNameError,
-				ExpectError: regexp.MustCompile("no vpn wireguard peer found with the specified name"),
+				ExpectError: regexp.MustCompile("no VPN WireGuard Peer found with the specified name"),
 			},
 			{
 				Config: WireguardPeerConfigUpdate,

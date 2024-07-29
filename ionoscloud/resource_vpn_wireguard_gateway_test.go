@@ -67,11 +67,11 @@ func TestAccWireguardGateway(t *testing.T) {
 			},
 			{
 				Config:      WireguardGWDataSourceInvalidNoIDNoName,
-				ExpectError: regexp.MustCompile("please provide either the wireguard gateway ID or name"),
+				ExpectError: regexp.MustCompile("please provide either the WireGuard Gateway ID or name"),
 			},
 			{
 				Config:      WireguardGWDataSourceWrongNameError,
-				ExpectError: regexp.MustCompile("no vpn wireguard gateway found with the specified name"),
+				ExpectError: regexp.MustCompile("no VPN WireGuard Gateway found with the specified name"),
 			},
 			{
 				Config: WireguardGWConfigUpdate,

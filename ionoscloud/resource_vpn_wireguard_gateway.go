@@ -36,10 +36,11 @@ func resourceVpnWireguardGateway() *schema.Resource {
 				Required: true,
 			},
 			"location": {
-				Type:        schema.TypeString,
-				Description: "The location of the IPSec Gateway. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
-				Required:    true,
-				ForceNew:    true,
+				Type:             schema.TypeString,
+				Description:      fmt.Sprintf("The location of the WireGuard Gateway. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.AvailableLocations, false)),
 			},
 			"connections": {
 				MinItems: 1,
@@ -72,7 +73,7 @@ func resourceVpnWireguardGateway() *schema.Resource {
 			"private_key": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "PrivateKey used for WireGuard Serve",
+				Description:      "PrivateKey used for WireGuard Server",
 				Sensitive:        true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
@@ -162,7 +163,7 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting wireguard gateway %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting WireGuard Gateway %s: %w", d.Id(), err))
 		return diags
 	}
 	//todo: for now we need to keep this because otherwise we get an internal server error on the first find after the delete
@@ -170,7 +171,7 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 	time.Sleep(5 * time.Second)
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsWireguardGatewayDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("while waiting for the wireguard gateway to be deleted %s : %w", d.Id(), err))
+		return diag.FromErr(fmt.Errorf("while waiting for the WireGuard Gateway to be deleted %s : %w", d.Id(), err))
 	}
 
 	log.Printf("[INFO] Successfully deleted Wireguard Gateway %s", d.Id())

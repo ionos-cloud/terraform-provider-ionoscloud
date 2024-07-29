@@ -20,7 +20,7 @@ func dataSourceVpnWireguardPeer() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"location": {
 				Type:        schema.TypeString,
-				Description: "The location of the IPSec Gateway Tunnel. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
+				Description: fmt.Sprintf("The location of the WireGuard Peer. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
 				Required:    true,
 			},
 			"id": {
@@ -86,7 +86,7 @@ func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the wireguard peer ID or name"))
+		return diag.FromErr(fmt.Errorf("please provide either the WireGuard Peer ID or name"))
 	}
 
 	var peer vpnSdk.WireguardPeerRead
@@ -94,13 +94,13 @@ func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData,
 	if idOk {
 		peer, _, err = client.GetWireguardPeerByID(ctx, gatewayID, id, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the wireguard peer with ID: %s, error: %w", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the WireGuard Peer with ID: %s, error: %w", id, err))
 		}
 	} else {
 		var results []vpnSdk.WireguardPeerRead
 		peers, _, err := client.ListWireguardPeers(ctx, gatewayID, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching wireguard peers: %w", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching WireGuard Peers: %w", err))
 		}
 		for _, recordItem := range peers.Items {
 			if len(results) == 1 {
@@ -112,9 +112,9 @@ func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData,
 		}
 		switch {
 		case len(results) == 0:
-			return diag.FromErr(fmt.Errorf("no vpn wireguard peer found with the specified name = %s", name))
+			return diag.FromErr(fmt.Errorf("no VPN WireGuard Peer found with the specified name = %s", name))
 		case len(results) > 1:
-			return diag.FromErr(fmt.Errorf("more than one vpn wireguard peer found with the specified name = %s", name))
+			return diag.FromErr(fmt.Errorf("more than one VPN WireGuard Peer found with the specified name = %s", name))
 		default:
 			peer = results[0]
 		}

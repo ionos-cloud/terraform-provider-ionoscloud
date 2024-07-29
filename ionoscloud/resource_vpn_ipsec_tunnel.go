@@ -12,7 +12,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceVpnIPSecTunnel() *schema.Resource {
@@ -35,10 +34,10 @@ func resourceVpnIPSecTunnel() *schema.Resource {
 			},
 			"location": {
 				Type:             schema.TypeString,
-				Description:      "The location of the IPSec Gateway Tunnel. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
+				Description:      fmt.Sprintf("The location of the IPSec Gateway Tunnel. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
 				Required:         true,
 				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.AvailableLocations, false)),
 			},
 			"gateway_id": {
 				Type:        schema.TypeString,
@@ -83,34 +82,23 @@ func resourceVpnIPSecTunnel() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"diffie_hellman_group": {
-							Type:        schema.TypeString,
-							Description: "The Diffie-Hellman Group to use for IPSec Encryption.",
-							Optional:    true,
-							Default:     "16-MODP4096",
-							ValidateDiagFunc: validation.ToDiagFunc(
-								validation.StringInSlice(
-									[]string{"15-MODP3072", "16-MODP4096", "19-ECP256", "20-ECP384", "21-ECP521", "28-ECP256BP", "29-ECP384BP", "30-ECP512BP"}, false,
-								),
-							),
+							Type:             schema.TypeString,
+							Description:      "The Diffie-Hellman Group to use for IPSec Encryption.",
+							Optional:         true,
+							Default:          "16-MODP4096",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.IPSecTunnelDiffieHellmanGroups, false)),
 						},
 						"encryption_algorithm": {
-							Type:        schema.TypeString,
-							Description: "The encryption algorithm to use for IPSec Encryption.",
-							Optional:    true,
-							Default:     "AES256",
-							ValidateDiagFunc: validation.ToDiagFunc(
-								validation.StringInSlice(
-									[]string{
-										"AES128", "AES256", "AES128-CTR", "AES256-CTR", "AES128-GCM-16", "AES256-GCM-16", "AES128-GCM-12", "AES256-GCM-12", "AES128-CCM-12",
-										"AES256-CCM-12",
-									}, false,
-								),
-							),
+							Type:             schema.TypeString,
+							Description:      "The encryption algorithm to use for IPSec Encryption.",
+							Optional:         true,
+							Default:          "AES256",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.IPSecTunnelEncryptionAlgorithms, false)),
 						},
 						"integrity_algorithm": {
 							Type:             schema.TypeString,
 							Description:      "The integrity algorithm to use for IPSec Encryption.",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"SHA256", "SHA384", "SHA512", "AES-XCBC"}, false)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.IPSecTunnelIntegrityAlgorithms, false)),
 							Optional:         true,
 							Default:          "SHA256",
 						},
@@ -131,34 +119,23 @@ func resourceVpnIPSecTunnel() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"diffie_hellman_group": {
-							Type:        schema.TypeString,
-							Description: "The Diffie-Hellman Group to use for IPSec Encryption.",
-							Optional:    true,
-							Default:     "16-MODP4096",
-							ValidateDiagFunc: validation.ToDiagFunc(
-								validation.StringInSlice(
-									[]string{"15-MODP3072", "16-MODP4096", "19-ECP256", "20-ECP384", "21-ECP521", "28-ECP256BP", "29-ECP384BP", "30-ECP512BP"}, false,
-								),
-							),
+							Type:             schema.TypeString,
+							Description:      "The Diffie-Hellman Group to use for IPSec Encryption.",
+							Optional:         true,
+							Default:          "16-MODP4096",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.IPSecTunnelDiffieHellmanGroups, false)),
 						},
 						"encryption_algorithm": {
-							Type:        schema.TypeString,
-							Description: "The encryption algorithm to use for IPSec Encryption.",
-							Optional:    true,
-							Default:     "AES256",
-							ValidateDiagFunc: validation.ToDiagFunc(
-								validation.StringInSlice(
-									[]string{
-										"AES128", "AES256", "AES128-CTR", "AES256-CTR", "AES128-GCM-16", "AES256-GCM-16", "AES128-GCM-12", "AES256-GCM-12", "AES128-CCM-12",
-										"AES256-CCM-12",
-									}, false,
-								),
-							),
+							Type:             schema.TypeString,
+							Description:      "The encryption algorithm to use for IPSec Encryption.",
+							Optional:         true,
+							Default:          "AES256",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.IPSecTunnelEncryptionAlgorithms, false)),
 						},
 						"integrity_algorithm": {
 							Type:             schema.TypeString,
 							Description:      "The integrity algorithm to use for IPSec Encryption.",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"SHA256", "SHA384", "SHA512", "AES-XCBC"}, false)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.IPSecTunnelIntegrityAlgorithms, false)),
 							Optional:         true,
 							Default:          "SHA256",
 						},

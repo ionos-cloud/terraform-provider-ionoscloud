@@ -20,14 +20,15 @@ func dataSourceVpnWireguardGateway() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"location": {
 				Type:        schema.TypeString,
-				Description: "The location of the IPSec Gateway Tunnel. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
+				Description: fmt.Sprintf("The location of the WireGuard Gateway. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
 				Required:    true,
 			},
 			"id": {
 				Type:             schema.TypeString,
-				Description:      "The ID of the Wireguard gateway",
+				Description:      "The ID of the WireGuard Gateway",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				Optional:         true,
+				Computed:         true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -103,7 +104,7 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the wireguard gateway ID or name"))
+		return diag.FromErr(fmt.Errorf("please provide either the WireGuard Gateway ID or name"))
 	}
 
 	var wireguardGw vpnSdk.WireguardGatewayRead
@@ -111,13 +112,13 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 	if idOk {
 		wireguardGw, _, err = client.GetWireguardGatewayByID(ctx, id, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the wireguard gateway with ID: %s, error: %w", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the WireGuard Gateway with ID: %s, error: %w", id, err))
 		}
 	} else {
 		var results []vpnSdk.WireguardGatewayRead
 		gateways, _, err := client.ListWireguardGateways(ctx, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching wireguard gateways: %w", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching WireGuard Gateways: %w", err))
 		}
 		for _, recordItem := range gateways.Items {
 			if len(results) == 1 {
@@ -129,9 +130,9 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 		}
 		switch {
 		case len(results) == 0:
-			return diag.FromErr(fmt.Errorf("no vpn wireguard gateway found with the specified name = %s", name))
+			return diag.FromErr(fmt.Errorf("no VPN WireGuard Gateway found with the specified name = %s", name))
 		case len(results) > 1:
-			return diag.FromErr(fmt.Errorf("more than one vpn wireguard gateway found with the specified name = %s", name))
+			return diag.FromErr(fmt.Errorf("more than one VPN WireGuard Gateway found with the specified name = %s", name))
 		default:
 			wireguardGw = results[0]
 		}

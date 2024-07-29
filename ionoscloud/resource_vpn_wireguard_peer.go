@@ -28,25 +28,26 @@ func resourceVpnWireguardPeer() *schema.Resource {
 			"gateway_id": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "The ID of the WireguardGateway that the peer will connect to.",
+				Description:      "The ID of the WireGuard Peer that the peer will connect to.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"location": {
-				Type:        schema.TypeString,
-				Description: "The location of the IPSec Peer. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
-				Required:    true,
-				ForceNew:    true,
+				Type:             schema.TypeString,
+				Description:      fmt.Sprintf("The location of the WireGuard Peer. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.AvailableLocations, false)),
 			},
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "The human readable name of your WireguardGateway Peer.",
+				Description:  "The human readable name of your WireGuard Gateway Peer.",
 				ValidateFunc: validation.StringLenBetween(1, 255),
 			},
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "Human readable description of the WireguardGateway Peer.",
+				Description:  "Human readable description of the WireGuard Gateway Peer.",
 				ValidateFunc: validation.StringLenBetween(1, 1024),
 			},
 			"endpoint": {
@@ -69,7 +70,7 @@ func resourceVpnWireguardPeer() *schema.Resource {
 						},
 					},
 				},
-				Description: "Endpoint configuration for the WireGuard peer.",
+				Description: "Endpoint configuration for the WireGuard Peer.",
 			},
 			"allowed_ips": {
 				Type:        schema.TypeList,
@@ -100,7 +101,7 @@ func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData,
 	peer, _, err := client.CreateWireguardGatewayPeers(ctx, d, gatewayID)
 	if err != nil {
 		d.SetId("")
-		return diag.FromErr(fmt.Errorf("error creating Wireguard peer: %w", err))
+		return diag.FromErr(fmt.Errorf("error creating WireGuard Peer: %w", err))
 	}
 	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
 		d.SetId("")
@@ -133,7 +134,7 @@ func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData,
 	gatewayID := d.Get("gateway_id").(string)
 	_, _, err := client.UpdateWireguardPeer(ctx, gatewayID, d.Id(), d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error updating Wireguard peer: %w", err))
+		return diag.FromErr(fmt.Errorf("error updating WireGuard Peer: %w", err))
 	}
 	return nil
 }
@@ -147,7 +148,7 @@ func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData,
 		if apiResponse.HttpNotFound() {
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("error deleting Wireguard peer: %w", err))
+		return diag.FromErr(fmt.Errorf("error deleting WireGuard Peer: %w", err))
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsWireguardPeerDeleted)
@@ -155,7 +156,7 @@ func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(fmt.Errorf("deleting %w", err))
 	}
 
-	log.Printf("[INFO] Successfully deleted wireguard perr: %s", d.Id())
+	log.Printf("[INFO] Successfully deleted WireGuard Peer: %s", d.Id())
 
 	d.SetId("")
 	return nil

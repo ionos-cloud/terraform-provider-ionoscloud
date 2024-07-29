@@ -14,6 +14,19 @@ import (
 
 const ipsecTunnelResourceName = "VPN IPSec Tunnel"
 
+var (
+	// IPSecTunnelDiffieHellmanGroups is a list of supported Diffie-Hellman groups
+	IPSecTunnelDiffieHellmanGroups = []string{"15-MODP3072", "16-MODP4096", "19-ECP256", "20-ECP384", "21-ECP521", "28-ECP256BP", "29-ECP384BP", "30-ECP512BP"}
+
+	// IPSecTunnelEncryptionAlgorithms is a list of supported encryption algorithms
+	IPSecTunnelEncryptionAlgorithms = []string{
+		"AES128", "AES256", "AES128-CTR", "AES256-CTR", "AES128-GCM-16", "AES256-GCM-16", "AES128-GCM-12", "AES256-GCM-12", "AES128-CCM-12", "AES256-CCM-12",
+	}
+
+	// IPSecTunnelIntegrityAlgorithms is a list of supported integrity algorithms
+	IPSecTunnelIntegrityAlgorithms = []string{"SHA256", "SHA384", "SHA512", "AES-XCBC"}
+)
+
 // CreateIPSecTunnel creates a new VPN IPSec Tunnel
 func (c *Client) CreateIPSecTunnel(ctx context.Context, d *schema.ResourceData) (vpn.IPSecTunnelRead, *shared.APIResponse, error) {
 	c.changeConfigURL(d.Get("location").(string))

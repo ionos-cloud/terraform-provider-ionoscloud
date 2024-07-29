@@ -36,7 +36,7 @@ func dataSourceVpnIPSecTunnel() *schema.Resource {
 			},
 			"location": {
 				Type:        schema.TypeString,
-				Description: "The location of the IPSec Gateway Tunnel. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
+				Description: fmt.Sprintf("The location of the IPSec Gateway Tunnel. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
 				Required:    true,
 			},
 			"gateway_id": {

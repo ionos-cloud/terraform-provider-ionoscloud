@@ -36,7 +36,7 @@ func dataSourceVpnIPSecGateway() *schema.Resource {
 			},
 			"location": {
 				Type:        schema.TypeString,
-				Description: "The location of the IPSec Gateway. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par",
+				Description: fmt.Sprintf("The location of the IPSec Gateway. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
 				Required:    true,
 			},
 			"gateway_ip": {
