@@ -13,8 +13,8 @@ import (
 
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccS3KeyBasic(t *testing.T) {
@@ -24,8 +24,8 @@ func TestAccS3KeyBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccChecks3KeyDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccChecks3KeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccChecks3KeyConfigBasic,
@@ -44,14 +44,14 @@ func TestAccS3KeyBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "active"),
 				),
 			},
-			//{
+			// {
 			//	Config: testAccChecks3KeyConfigUpdate,
 			//	Check: resource.ComposeTestCheckFunc(
 			//		testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
 			//		resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "secret_key"),
 			//		resource.TestCheckResourceAttr(S3KeyResource+"."+S3KeyTestResource, "active", "true"),
 			//	),
-			//},
+			// },
 		},
 	})
 }

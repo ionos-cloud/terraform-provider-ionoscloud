@@ -8,9 +8,12 @@ import (
 	"os"
 	"runtime"
 
+	s3 "github.com/ionos-cloud/sdk-go-s3"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
@@ -76,6 +79,25 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Default:     "",
 				Description: "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller account.",
+			},
+			"s3_access_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_ACCESS_KEY", nil),
+				Description: "Access key for IONOS S3 operations.",
+			},
+			"s3_secret_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_SECRET_KEY", nil),
+				Description: "Secret key for IONOS S3 operations.",
+			},
+			"s3_region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "eu-central-3",
+				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_REGION", nil),
+				Description: "Region for IONOS S3 operations.",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -265,6 +287,7 @@ const (
 	mariaDBClient
 	mongoClient
 	psqlClient
+	s3Client
 )
 
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
@@ -301,6 +324,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case psqlClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case s3Client:
+		return s3.NewAPIClient(s3.NewConfiguration())
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
