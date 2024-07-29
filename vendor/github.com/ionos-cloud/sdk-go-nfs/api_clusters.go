@@ -414,11 +414,11 @@ func (r ApiClustersGetRequest) Execute() (ClusterReadList, *APIResponse, error) 
 }
 
 /*
- * ClustersGet Retrieve Clusters
- * Retrieve Network File Storage clusters with pagination and optional filters.
+* ClustersGet Retrieve Clusters
+* Retrieve Network File Storage clusters with pagination and optional filters.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @return ApiClustersGetRequest
+* @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+* @return ApiClustersGetRequest
  */
 func (a *ClustersApiService) ClustersGet(ctx _context.Context) ApiClustersGetRequest {
 	return ApiClustersGetRequest{
@@ -603,14 +603,14 @@ func (r ApiClustersPostRequest) Execute() (ClusterRead, *APIResponse, error) {
 }
 
 /*
- * ClustersPost Create Cluster
- * Creates a new Network File Storage cluster.
+  - ClustersPost Create Cluster
+  - Creates a new Network File Storage cluster.
 
 The complete cluster configuration must be provided to create the resource.
 Optional data will be filled with default values or left empty.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @return ApiClustersPostRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @return ApiClustersPostRequest
 */
 func (a *ClustersApiService) ClustersPost(ctx _context.Context) ApiClustersPostRequest {
 	return ApiClustersPostRequest{
@@ -810,14 +810,15 @@ func (r ApiClustersPutRequest) Execute() (ClusterRead, *APIResponse, error) {
 }
 
 /*
- * ClustersPut Ensure Cluster
- * Ensures that the cluster with the provided identifier is created or modified.
+  - ClustersPut Ensure Cluster
+  - Ensures that the cluster with the provided identifier is created or modified.
+
 The complete cluster configuration must be provided to update or create the cluster.
 Any missing data will be filled with default values or left empty, without considering previous values.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param clusterId The ID (UUID) of the Cluster.
- * @return ApiClustersPutRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param clusterId The ID (UUID) of the Cluster.
+  - @return ApiClustersPutRequest
 */
 func (a *ClustersApiService) ClustersPut(ctx _context.Context, clusterId string) ApiClustersPutRequest {
 	return ApiClustersPutRequest{
@@ -934,7 +935,7 @@ func (a *ClustersApiService) ClustersPutExecute(r ApiClustersPutRequest) (Cluste
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 409 {
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -943,7 +944,7 @@ func (a *ClustersApiService) ClustersPutExecute(r ApiClustersPutRequest) (Cluste
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 404 {
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

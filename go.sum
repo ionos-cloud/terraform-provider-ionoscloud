@@ -126,6 +126,10 @@ github.com/ionos-cloud/sdk-go-dns v1.1.1 h1:Qdf5mXYt9ZeRl4zZQxGrvamFkKm1X9WeARyB
 github.com/ionos-cloud/sdk-go-dns v1.1.1/go.mod h1:l9gYdwtUshlBOiIi4nHn3RCX81XlV3VoNvLJrO2VfHg=
 github.com/ionos-cloud/sdk-go-nfs v0.0.0-20240722090320-198959d508ba h1:X2z4F/Jj6T5PR6I3F/JAvZWlTwC8Dh1BorTQM4nmd90=
 github.com/ionos-cloud/sdk-go-nfs v0.0.0-20240722090320-198959d508ba/go.mod h1:ffyMIPVknZ7dpi/+RomWXNNYV7ZjtK8KYSsGjVlbqgA=
+github.com/ionos-cloud/sdk-go-nfs v1.0.0 h1:CyiemTDPg2jAjtTT4JHzvOpjq6lqe7YbXx2iq2gx98s=
+github.com/ionos-cloud/sdk-go-nfs v1.0.0/go.mod h1:ffyMIPVknZ7dpi/+RomWXNNYV7ZjtK8KYSsGjVlbqgA=
+github.com/ionos-cloud/sdk-go-s3 v1.0.0 h1:Wo9R5dyNvdDiifN4viJTaGs6hr+YwEiuaqgY9BUZ8c8=
+github.com/ionos-cloud/sdk-go-s3 v1.0.0/go.mod h1:ILmq4f7kpnKucAk/DcE0Hjtaqn8Y471PK79hJgXU7K8=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0 h1:G9E6DeQe/Wu3rvGVgidLE52qwTpTqXaZ3hyinVX4mXA=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0/go.mod h1:Q5d1R6silarsX5jWLPBHd/1PSC5zZNf2ONvXB+fygC0=
 github.com/ionos-cloud/sdk-go/v6 v6.1.11 h1:J/uRN4UWO3wCyGOeDdMKv8LWRzKu6UIkLEaes38Kzh8=

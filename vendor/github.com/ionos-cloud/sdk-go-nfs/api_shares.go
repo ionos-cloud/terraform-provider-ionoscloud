@@ -218,7 +218,7 @@ func (r ApiClustersSharesFindByIdRequest) Execute() (ShareRead, *APIResponse, er
 }
 
 /*
- * ClustersSharesFindById Retrieves a share
+ * ClustersSharesFindById Retrieve Share
  * Returns the share by ID.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param clusterId The identifier (UUID) of the cluster.
@@ -418,12 +418,12 @@ func (r ApiClustersSharesGetRequest) Execute() (ShareReadList, *APIResponse, err
 }
 
 /*
- * ClustersSharesGet Retrieves all shares
- * Retrieves shares of the cluster with pagination and optional filters.
+* ClustersSharesGet Retrieve Shares
+* Retrieves shares of the cluster with pagination and optional filters.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param clusterId The identifier (UUID) of the cluster.
- * @return ApiClustersSharesGetRequest
+* @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+* @param clusterId The identifier (UUID) of the cluster.
+* @return ApiClustersSharesGetRequest
  */
 func (a *SharesApiService) ClustersSharesGet(ctx _context.Context, clusterId string) ApiClustersSharesGetRequest {
 	return ApiClustersSharesGetRequest{
@@ -608,15 +608,15 @@ func (r ApiClustersSharesPostRequest) Execute() (ShareRead, *APIResponse, error)
 }
 
 /*
- * ClustersSharesPost Create Share
- * Creates a new share.
+  - ClustersSharesPost Create Share
+  - Creates a new share.
 
 The complete share configuration must be provided to create the share.
 Optional data will be filled with default values or left empty.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param clusterId The identifier (UUID) of the cluster.
- * @return ApiClustersSharesPostRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param clusterId The identifier (UUID) of the cluster.
+  - @return ApiClustersSharesPostRequest
 */
 func (a *SharesApiService) ClustersSharesPost(ctx _context.Context, clusterId string) ApiClustersSharesPostRequest {
 	return ApiClustersSharesPostRequest{
@@ -819,15 +819,16 @@ func (r ApiClustersSharesPutRequest) Execute() (ShareRead, *APIResponse, error) 
 }
 
 /*
- * ClustersSharesPut Ensure Share
- * Ensures that the share with the provided ID is created or modified.
+  - ClustersSharesPut Ensure Share
+  - Ensures that the share with the provided ID is created or modified.
+
 The complete share configuration must be provided to update or create the share.
 Any missing data will be filled with default values or left empty, without considering previous values.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param clusterId The identifier (UUID) of the cluster.
- * @param shareId The identifier (UUID) of the share.
- * @return ApiClustersSharesPutRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param clusterId The identifier (UUID) of the cluster.
+  - @param shareId The identifier (UUID) of the share.
+  - @return ApiClustersSharesPutRequest
 */
 func (a *SharesApiService) ClustersSharesPut(ctx _context.Context, clusterId string, shareId string) ApiClustersSharesPutRequest {
 	return ApiClustersSharesPutRequest{
@@ -946,7 +947,7 @@ func (a *SharesApiService) ClustersSharesPutExecute(r ApiClustersSharesPutReques
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 409 {
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -955,7 +956,7 @@ func (a *SharesApiService) ClustersSharesPutExecute(r ApiClustersSharesPutReques
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 404 {
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
