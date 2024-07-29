@@ -5666,8 +5666,6 @@ func file_google_protobuf_descriptor_proto_init() {
 				return &v.sizeCache
 			case 2:
 				return &v.unknownFields
-			case 3:
-				return &v.extensionFields
 			default:
 				return nil
 			}
