@@ -53,3 +53,6 @@ func (c *Client) Location(location string) *Client {
 
 	return c
 }
+
+// ValidNFSLocations is a list of valid locations for the Network File Storage Cluster.
+var ValidNFSLocations = []string{"de/fra", "de/txl"}

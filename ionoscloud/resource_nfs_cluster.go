@@ -17,9 +17,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-// ValidNFSLocations is a list of valid locations for the Network File Storage Cluster.
-var ValidNFSLocations = []string{"de/fra", "de/txl", "qa/de/txl"}
-
 func resourceNFSCluster() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceNFSClusterCreate,
@@ -33,10 +30,10 @@ func resourceNFSCluster() *schema.Resource {
 			"location": {
 				Type: schema.TypeString,
 				Description: fmt.Sprintf("The location of the Network File Storage Cluster. "+
-					"Available locations: '%s'", strings.Join(ValidNFSLocations, ", '")),
+					"Available locations: '%s'", strings.Join(nfs.ValidNFSLocations, ", '")),
 				Required:         true,
 				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(ValidNFSLocations, false)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(nfs.ValidNFSLocations, false)),
 			},
 			"id": {
 				Type:        schema.TypeString,
@@ -154,8 +151,8 @@ func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<replica_set_id>'", d.Id())
 	}
 	location := parts[0]
-	if !slices.Contains(ValidNFSLocations, location) {
-		return nil, fmt.Errorf("invalid import ID: %q, location must be one of '%s'", d.Id(), strings.Join(ValidNFSLocations, ", '"))
+	if !slices.Contains(nfs.ValidNFSLocations, location) {
+		return nil, fmt.Errorf("invalid import ID: %q, location must be one of '%s'", d.Id(), strings.Join(nfs.ValidNFSLocations, ", '"))
 	}
 	id := parts[1]
 
