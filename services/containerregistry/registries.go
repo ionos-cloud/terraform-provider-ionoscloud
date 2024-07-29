@@ -40,15 +40,17 @@ func (c *Client) GetRegistry(ctx context.Context, registryId string) (cr.Registr
 	return registries, apiResponse, err
 }
 
+// IsRegistryDeleted checks whether the container registry is deleted or not
 func (c *Client) IsRegistryDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	registryId := d.Id()
-	_, resp, err := c.GetRegistry(ctx, registryId)
+	ID := d.Id()
+	_, resp, err := c.GetRegistry(ctx, ID)
 	if resp.HttpNotFound() {
 		return true, nil
 	}
 	return false, err
 }
 
+// IsRegistryReady checks whether the container registry is in a ready state or not
 func (c *Client) IsRegistryReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	ID := d.Id()
 	creg, _, err := c.GetRegistry(ctx, ID)
