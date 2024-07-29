@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
@@ -125,6 +126,8 @@ func Provider() *schema.Provider {
 			constant.NatGatewayRuleResource:                    resourceNatGatewayRule(),
 			constant.NetworkLoadBalancerResource:               resourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
+			constant.NFSClusterResource:                        resourceNFSCluster(),
+			constant.NFSShareResource:                          resourceNFSShare(),
 			constant.PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
 			constant.PsqlUserResource:                          resourceDbaasPgSqlUser(),
 			constant.PsqlDatabaseResource:                      resourceDbaasPgSqlDatabase(),
@@ -167,6 +170,8 @@ func Provider() *schema.Provider {
 			constant.NatGatewayRuleResource:                    dataSourceNatGatewayRule(),
 			constant.NetworkLoadBalancerResource:               dataSourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: dataSourceNetworkLoadBalancerForwardingRule(),
+			constant.NFSClusterResource:                        dataSourceNFSCluster(),
+			constant.NFSShareResource:                          dataSourceNFSShare(),
 			constant.TemplateResource:                          dataSourceTemplate(),
 			constant.BackupUnitResource:                        dataSourceBackupUnit(),
 			constant.FirewallResource:                          dataSourceFirewall(),
@@ -270,6 +275,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		LoggingClient:      NewClientByType(clientOpts, loggingClient).(*loggingService.Client),
 		MariaDBClient:      NewClientByType(clientOpts, mariaDBClient).(*mariadb.MariaDBClient),
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
+		NFSClient:          NewClientByType(clientOpts, nfsClient).(*nfsService.Client),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
 	}, nil
 }
@@ -286,6 +292,7 @@ const (
 	loggingClient
 	mariaDBClient
 	mongoClient
+	nfsClient
 	psqlClient
 	s3Client
 )
@@ -322,6 +329,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return mariadb.NewMariaDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case mongoClient:
 		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case nfsClient:
+		return nfsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case psqlClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	case s3Client:
