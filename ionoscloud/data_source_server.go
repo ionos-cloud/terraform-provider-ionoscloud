@@ -475,7 +475,7 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no server found with the specified criteria: name = %s", name.(string)))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one server found with the specified criteria: name = %s", name.(string)))
@@ -487,7 +487,7 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	var token = ionoscloud.Token{}
 
-	if &server != nil && server.Id != nil {
+	if server.Id != nil {
 		token, apiResponse, err = client.ServersApi.DatacentersServersTokenGet(ctx, datacenterId.(string), *server.Id).Execute()
 		logApiRequestTime(apiResponse)
 

@@ -150,7 +150,7 @@ func dataSourceMariaDBClusterRead(ctx context.Context, d *schema.ResourceData, m
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no MariaDB cluster found with the specified display name: %v", name))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one MariaDB cluster found with the specified criteria name: %v", name))

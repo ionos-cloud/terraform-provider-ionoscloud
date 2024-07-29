@@ -1035,7 +1035,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			nicProperties.Dhcp = &dhcp
 			nicProperties.FirewallActive = &fwRule
 			if d.HasChange("nic.0.dhcpv6") {
-				if dhcpv6, ok := d.GetOkExists("nic.0.dhcpv6"); ok {
+				if dhcpv6, ok := d.GetOk("nic.0.dhcpv6"); ok {
 					dhcpv6 := dhcpv6.(bool)
 					nicProperties.Dhcpv6 = &dhcpv6
 				} else {

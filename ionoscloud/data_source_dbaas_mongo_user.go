@@ -101,7 +101,7 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if results == nil || len(results) == 0 {
+	if len(results) == 0 {
 		return diag.FromErr(fmt.Errorf("no DBaaS mongo user found with the specified username = %s and cluster_id = %s", username, clusterId))
 	} else if len(results) > 1 {
 		return diag.FromErr(fmt.Errorf("more than one DBaaS mongo user found with the specified criteria username = %s and cluster_id = %s", username, clusterId))

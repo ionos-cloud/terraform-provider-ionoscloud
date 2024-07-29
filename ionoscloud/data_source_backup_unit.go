@@ -93,7 +93,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no backup unit found with the specified name %s", name))
 		} else {
 			backupUnit = results[0]

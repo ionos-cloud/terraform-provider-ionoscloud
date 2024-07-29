@@ -310,7 +310,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 		}
 		serversIntf = append(serversIntf, serverEntry)
 	}
-	if serversIntf == nil || len(serversIntf) == 0 {
+	if len(serversIntf) == 0 {
 		return diag.FromErr(fmt.Errorf("no servers found for criteria, please check your filter configuration"))
 	}
 	err = d.Set("servers", &serversIntf)

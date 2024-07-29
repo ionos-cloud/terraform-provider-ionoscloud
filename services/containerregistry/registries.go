@@ -438,7 +438,7 @@ func GetRegistryFeatures(d *schema.ResourceData) (*cr.RegistryFeatures, diag.Dia
 	registryFeatures := cr.NewRegistryFeatures()
 	var warnings = diag.Diagnostics{crfWarnings.warnCRVScanningOmitted}
 	registryFeatures.VulnerabilityScanning = cr.NewFeatureVulnerabilityScanning(true)
-	if vulnerabilityScanning, ok := d.GetOkExists("features.0.vulnerability_scanning"); ok { //nolint:staticcheck
+	if vulnerabilityScanning, ok := d.GetOk("features.0.vulnerability_scanning"); ok { //nolint:staticcheck
 		vulnerabilityScanning := vulnerabilityScanning.(bool)
 		registryFeatures.VulnerabilityScanning.Enabled = &vulnerabilityScanning
 		warnings = diag.Diagnostics{crfWarnings.warnCRVScanningOff}

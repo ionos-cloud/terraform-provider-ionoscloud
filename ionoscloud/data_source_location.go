@@ -96,7 +96,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	var location ionoscloud.Location
 
-	if results == nil || len(results) == 0 {
+	if len(results) == 0 {
 		return diag.FromErr(fmt.Errorf("no location found with the specified criteria: name = %s, feature = %s", name.(string), feature.(string)))
 	} else {
 		location = results[0]

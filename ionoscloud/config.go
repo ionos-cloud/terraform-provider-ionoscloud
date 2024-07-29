@@ -29,7 +29,7 @@ func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) 
 
 	client.GetConfig().UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint
 
 	log.Printf("[DEBUG] Terraform client UA set to %s", client.GetConfig().UserAgent)
 

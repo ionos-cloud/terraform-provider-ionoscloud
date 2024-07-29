@@ -30,7 +30,7 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	newConfigRegistry.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigRegistry.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-container-cr/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, cr.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		version, cr.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint
 
 	return &Client{
 		sdkClient: cr.NewAPIClient(newConfigRegistry),

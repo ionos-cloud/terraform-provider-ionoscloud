@@ -113,7 +113,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 				}
 			}
 		}
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no DNS Zone found with the specified name = %s", name))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one DNS Zone found with the specified name = %s", name))

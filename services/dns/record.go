@@ -167,7 +167,7 @@ func setRecordPutRequest(d *schema.ResourceData) *dns.RecordEnsure {
 		request.Properties.Priority = &castedPriority
 	}
 
-	if enabledValue, ok := d.GetOkExists("enabled"); ok {
+	if enabledValue, ok := d.GetOk("enabled"); ok {
 		enabled := enabledValue.(bool)
 		request.Properties.Enabled = &enabled
 	}
@@ -206,7 +206,7 @@ func setRecordCreateRequest(d *schema.ResourceData) *dns.RecordCreate {
 		request.Properties.Priority = &castedPriority
 	}
 
-	if enabledValue, ok := d.GetOkExists("enabled"); ok {
+	if enabledValue, ok := d.GetOk("enabled"); ok {
 		enabled := enabledValue.(bool)
 		request.Properties.Enabled = &enabled
 	}

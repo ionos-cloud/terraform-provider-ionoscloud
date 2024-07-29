@@ -219,7 +219,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	var image ionoscloud.Image
 
-	if results == nil || len(results) == 0 {
+	if len(results) == 0 {
 		return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias))
 	} else if len(results) > 1 {
 		for _, result := range results {

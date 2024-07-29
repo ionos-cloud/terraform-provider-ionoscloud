@@ -127,7 +127,7 @@ func setZoneCreateRequest(d *schema.ResourceData) *dns.ZoneCreate {
 		request.Properties.Description = &description
 	}
 
-	if enabledValue, ok := d.GetOkExists("enabled"); ok {
+	if enabledValue, ok := d.GetOk("enabled"); ok {
 		enabled := enabledValue.(bool)
 		request.Properties.Enabled = &enabled
 	}
@@ -149,7 +149,7 @@ func setZonePutRequest(d *schema.ResourceData) *dns.ZoneEnsure {
 		request.Properties.Description = &description
 	}
 
-	if enabledValue, ok := d.GetOkExists("enabled"); ok {
+	if enabledValue, ok := d.GetOk("enabled"); ok {
 		enabled := enabledValue.(bool)
 		request.Properties.Enabled = &enabled
 	}

@@ -134,7 +134,7 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 	}
 
 	dhcp := d.Get(path + "dhcp").(bool)
-	if dhcpv6, ok := d.GetOkExists(path + "dhcpv6"); ok {
+	if dhcpv6, ok := d.GetOk(path + "dhcpv6"); ok {
 		dhcpv6 := dhcpv6.(bool)
 		nic.Properties.Dhcpv6 = &dhcpv6
 	} else {

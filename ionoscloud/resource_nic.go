@@ -135,11 +135,11 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ inte
 		newFlowLogs := newVal.([]any)
 
 		// "this check is for the scenario in which we have 0 initial flowlogs and we add a new one during a nic update
-		if (oldFLowLogs == nil || len(oldFLowLogs) == 0) && (newFlowLogs != nil || len(newFlowLogs) > 0) {
+		if len(oldFLowLogs) == 0 && len(newFlowLogs) > 0 {
 			return nil
 		}
 		// flowlog deleted from resource
-		if (oldFLowLogs != nil || len(oldFLowLogs) > 0) && (newFlowLogs == nil || len(newFlowLogs) == 0) {
+		if (oldFLowLogs != nil || len(oldFLowLogs) > 0) && (len(newFlowLogs) == 0) {
 			return d.ForceNew("flowlog")
 		}
 		var oldFlowlogMap map[string]any
@@ -192,7 +192,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	// Sometimes there is an error because the nic is not found after it's created.
 	// Probably a read write consistency issue.
-	//We're retrying for 5 minutes. 404 - means we keep on trying.
+	// We're retrying for 5 minutes. 404 - means we keep on trying.
 	var foundNic = &ionoscloud.Nic{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error

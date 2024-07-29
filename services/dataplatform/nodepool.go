@@ -311,7 +311,7 @@ func SetNodePoolsData(d *schema.ResourceData, results []dataplatform.NodePoolRes
 			nodePools = append(nodePools, nodePoolEntry)
 		}
 
-		if nodePools == nil || len(nodePools) == 0 {
+		if len(nodePools) == 0 {
 			return diag.FromErr(fmt.Errorf("no nodepools found for criteria, please check your filter configuration"))
 		}
 

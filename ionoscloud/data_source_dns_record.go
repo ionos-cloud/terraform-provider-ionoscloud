@@ -128,7 +128,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 				}
 			}
 		}
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no DNS Record found with the specified name = %s", recordName))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one DNS Record found with the specified name = %s", recordName))

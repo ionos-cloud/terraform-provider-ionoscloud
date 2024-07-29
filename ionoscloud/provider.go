@@ -274,7 +274,7 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
 			newConfig.UserAgent = fmt.Sprintf(
 				"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint
 			if os.Getenv(constant.IonosDebug) != "" {
 				newConfig.Debug = true
 			}

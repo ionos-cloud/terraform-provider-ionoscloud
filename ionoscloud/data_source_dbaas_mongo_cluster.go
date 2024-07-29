@@ -192,13 +192,13 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 						//	Type:        schema.TypeInt,
 						//	Computed:    true,
 						//	Description: "Number of hours between snapshots.",
-						//},
-						//"point_in_time_window_hours": {
+						// },
+						// "point_in_time_window_hours": {
 						//	Type:        schema.TypeInt,
 						//	Computed:    true,
 						//	Description: "Number of hours in the past for which a point-in-time snapshot can be created.",
-						//},
-						//"backup_retention": {
+						// },
+						// "backup_retention": {
 						//	Type:        schema.TypeList,
 						//	Description: "Backup retention related properties.",
 						//	Elem: &schema.Resource{
@@ -229,7 +229,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 						//			},
 						//		},
 						//	},
-						//},
+						// },
 						"location": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -287,7 +287,7 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no DBaaS mongo cluster found with the specified name = %s", name))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one DBaaS mongo cluster found with the specified criteria name = %s", name))

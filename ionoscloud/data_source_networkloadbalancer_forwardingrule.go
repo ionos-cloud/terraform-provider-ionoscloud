@@ -208,7 +208,7 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no network load balancer forwarding rule found with the specified criteria: name = %s", name.(string)))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one network load balancer forwarding rule found with the specified criteria: name = %s", name.(string)))

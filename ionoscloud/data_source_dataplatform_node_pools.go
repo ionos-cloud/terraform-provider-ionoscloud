@@ -158,7 +158,7 @@ func dataSourceNodePoolsRead(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	if results == nil || len(results) == 0 {
+	if len(results) == 0 {
 		err := fmt.Errorf("no Dataplatform NodePool found under cluster %s", clusterId)
 		if nameOk {
 			err = fmt.Errorf("%w with the specified name = %s", err, name)

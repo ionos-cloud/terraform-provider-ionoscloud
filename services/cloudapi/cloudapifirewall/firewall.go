@@ -127,12 +127,12 @@ func DecodeTo(oldValues, newValues []interface{}) ([]ionoscloud.FirewallruleProp
 // mutates fwProp
 func PropUnsetSetFieldIfNotSetInSchema(fwProp *ionoscloud.FirewallruleProperties, path string, d *schema.ResourceData) {
 	if *fwProp.PortRangeStart == 0 {
-		if _, isSet := d.GetOkExists(path + ".port_range_start"); isSet != true {
+		if _, isSet := d.GetOk(path + ".port_range_start"); isSet != true {
 			fwProp.PortRangeStart = nil
 		}
 	}
 	if *fwProp.PortRangeEnd == 0 {
-		if _, isSet := d.GetOkExists(path + ".port_range_end"); isSet != true {
+		if _, isSet := d.GetOk(path + ".port_range_end"); isSet != true {
 			fwProp.PortRangeEnd = nil
 		}
 	}

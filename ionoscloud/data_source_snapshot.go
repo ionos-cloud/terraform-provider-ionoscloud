@@ -166,7 +166,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 			results = sizeResults
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)))

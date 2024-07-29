@@ -190,7 +190,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
-	if publicVal, publicOk := d.GetOkExists("public"); publicOk {
+	if publicVal, publicOk := d.GetOk("public"); publicOk {
 		publicVal := publicVal.(bool)
 		cluster.Properties.Public = &publicVal
 	}

@@ -175,7 +175,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: name = %s location = %s", name, location))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one datacenter found with the specified criteria: name = %s location = %s", name, location))

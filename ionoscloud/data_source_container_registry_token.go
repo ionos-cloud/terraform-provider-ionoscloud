@@ -137,7 +137,7 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no token found with the specified name = %s", name))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one token found with the specified criteria: name = %s", name))
