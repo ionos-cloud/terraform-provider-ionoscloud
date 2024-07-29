@@ -39,6 +39,7 @@ resource "random_password" "password" {
   special = false
 }
 
+# needed for the NIC - which provides the IP address for the NFS cluster.
 resource "ionoscloud_server" "nfs_server" {
   name              = "Server for NFS"
   datacenter_id     = ionoscloud_datacenter.nfs_dc.id
