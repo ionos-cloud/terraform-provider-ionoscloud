@@ -1,6 +1,7 @@
 ## 6.4.20
 ### Fixes
 - Data source `ionoscloud_mongo_template` should have id `computed` and `optional`
+- Fixes #607. Container registry should wait until the resource is ready before returning the ID. 
 
 ## 6.4.19
 ### Enhancements
