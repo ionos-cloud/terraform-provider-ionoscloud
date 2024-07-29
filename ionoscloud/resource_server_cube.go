@@ -850,13 +850,13 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 		if v, ok := d.GetOk("nic.0.ips"); ok {
 			raw := v.([]interface{})
-			if raw != nil && len(raw) > 0 {
+			if len(raw) > 0 {
 				ips := make([]string, 0)
 				for _, rawIp := range raw {
 					ip := rawIp.(string)
 					ips = append(ips, ip)
 				}
-				if ips != nil && len(ips) > 0 {
+				if len(ips) > 0 {
 					properties.Ips = &ips
 				}
 			}
@@ -923,7 +923,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 					return diags
 				}
 			}
-			if update == false {
+			if !update {
 
 				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, dcId, *server.Id, *nic.Id).Firewallrule(firewall).Execute()
 			} else {

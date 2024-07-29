@@ -132,7 +132,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 				updateLans = true
 			}
 
-			if updateLans == true {
+			if updateLans {
 				log.Printf("[INFO] NatGateway LANs set to %+v", lans)
 				natGateway.Properties.Lans = &lans
 			} else {
@@ -252,7 +252,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				updateLans = true
 			}
 
-			if updateLans == true {
+			if updateLans {
 				log.Printf("[INFO] nat gateway  LANs changed from %+v to %+v", oldLANs, newLANs)
 				request.Properties.Lans = &lans
 			}

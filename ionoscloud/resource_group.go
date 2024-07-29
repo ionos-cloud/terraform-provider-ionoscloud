@@ -144,7 +144,7 @@ func resourceGroup() *schema.Resource {
 		},
 		Timeouts:      &resourceDefaultTimeouts,
 		SchemaVersion: 1,
-		//StateUpgraders: []schema.StateUpgrader{
+		// StateUpgraders: []schema.StateUpgrader{
 		//	{
 		//		Type:    resourceGroup0().CoreConfigSchema().ImpliedType(),
 		//		Upgrade: resourceGroupUpgradeV0,
@@ -165,7 +165,7 @@ func resourceGroup() *schema.Resource {
 //		},
 //		Timeouts: &resourceDefaultTimeouts,
 //	}
-//}
+// }
 //
 // func resourceGroupUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
 //	oldState := state
@@ -178,7 +178,7 @@ func resourceGroup() *schema.Resource {
 //	}
 //
 //	return state, nil
-//}
+// }
 
 func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
@@ -363,7 +363,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		newUsers := utils.DiffSliceOneWay(newUsersList, oldUsersList)
 		deletedUsers := utils.DiffSliceOneWay(oldUsersList, newUsersList)
 
-		if newUsers != nil && len(newUsers) > 0 {
+		if len(newUsers) > 0 {
 			log.Printf("[INFO] New users to add: %+v", newUsers)
 			for _, userID := range newUsers {
 				if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
@@ -372,7 +372,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			}
 		}
 
-		if deletedUsers != nil && len(deletedUsers) > 0 {
+		if len(deletedUsers) > 0 {
 			log.Printf("[INFO] Users to delete: %+v", deletedUsers)
 			for _, userID := range deletedUsers {
 				if err := deleteUserFromGroup(userID, d.Id(), ctx, d, meta); err != nil {

@@ -144,10 +144,10 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ inte
 		}
 		var oldFlowlogMap map[string]any
 		var newFlowLogMap map[string]any
-		if oldFLowLogs != nil && len(oldFLowLogs) > 0 {
+		if len(oldFLowLogs) > 0 {
 			oldFlowlogMap = oldFLowLogs[0].(map[string]any)
 		}
-		if newFlowLogs != nil && len(newFlowLogs) > 0 {
+		if len(newFlowLogs) > 0 {
 			newFlowLogMap = newFlowLogs[0].(map[string]any)
 		}
 		// find the diff between the old and new value of the fields.

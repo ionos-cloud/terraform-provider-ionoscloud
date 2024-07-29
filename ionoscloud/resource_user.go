@@ -147,12 +147,10 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	if groupsVal, groupsOk := d.GetOk("group_ids"); groupsOk {
 		groupsList := groupsVal.(*schema.Set).List()
 		log.Printf("[INFO] Adding group_ids %+v ", groupsList)
-		if groupsList != nil {
-			for _, groupsItem := range groupsList {
-				groupId := groupsItem.(string)
-				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
-					return diag.FromErr(err)
-				}
+		for _, groupsItem := range groupsList {
+			groupId := groupsItem.(string)
+			if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+				return diag.FromErr(err)
 			}
 		}
 	}
@@ -254,7 +252,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		newGroups := utils.DiffSliceOneWay(newGroupsList, oldGroupsList)
 		deletedGroups := utils.DiffSliceOneWay(oldGroupsList, newGroupsList)
 
-		if newGroups != nil && len(newGroups) > 0 {
+		if len(newGroups) > 0 {
 			log.Printf("[INFO] New groups to add: %+v", newGroups)
 			for _, groupId := range newGroups {
 				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
@@ -263,7 +261,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 			}
 		}
 
-		if deletedGroups != nil && len(deletedGroups) > 0 {
+		if len(deletedGroups) > 0 {
 			log.Printf("[INFO] Groups to delete: %+v", deletedGroups)
 			for _, groupId := range deletedGroups {
 				if err := deleteUserFromGroup(d.Id(), groupId, ctx, d, meta); err != nil {

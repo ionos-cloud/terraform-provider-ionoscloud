@@ -52,8 +52,6 @@ func testAccPreCheck(t *testing.T) {
 	if diags.HasError() {
 		t.Fatal(diags[0].Summary)
 	}
-
-	return
 }
 
 func randomProviderVersion343() map[string]resource.ExternalProvider {

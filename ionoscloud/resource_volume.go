@@ -714,7 +714,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				}
 			}
 
-			if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) && isSnapshot == false &&
+			if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) && !isSnapshot &&
 				(img == nil || (img.Properties.Public != nil && *img.Properties.Public)) {
 				return image, imageAlias, fmt.Errorf("volume, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
 			}
@@ -738,7 +738,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				return image, imageAlias, fmt.Errorf("error fetching image/snapshot: %w", err)
 			}
 
-			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
+			if !isSnapshot && img.Properties.Public != nil && *img.Properties.Public {
 
 				if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
 					return image, imageAlias, fmt.Errorf("public image, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
@@ -781,7 +781,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 					}
 
 				} else {
-					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
+					if !isSnapshot && img.Properties.Public != nil && *img.Properties.Public {
 						if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
 							return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided for imageName %s ", imageName)
 						}
@@ -798,7 +798,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 		return image, imageAlias, fmt.Errorf("either 'image_name', 'licence_type', or 'image_alias' must be set")
 	}
 
-	if isSnapshot == true && (volume.ImagePassword != nil || volume.SshKeys != nil && len(*volume.SshKeys) > 0) {
+	if isSnapshot && (volume.ImagePassword != nil || volume.SshKeys != nil && len(*volume.SshKeys) > 0) {
 		return image, imageAlias, fmt.Errorf("passwords/SSH keys are not supported for snapshots")
 	}
 

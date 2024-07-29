@@ -1004,7 +1004,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			if v, ok := d.GetOk("nic.0.ips"); ok {
 				raw := v.([]interface{})
-				if raw != nil && len(raw) > 0 {
+				if len(raw) > 0 {
 					ips := make([]string, 0)
 					for _, rawIp := range raw {
 						if rawIp != nil {
@@ -1012,7 +1012,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 							ips = append(ips, ip)
 						}
 					}
-					if ips != nil && len(ips) > 0 {
+					if len(ips) > 0 {
 						nicProperties.Ips = &ips
 					}
 				}
@@ -1554,7 +1554,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 				if err != nil {
 					return err
 				}
-				if firewallEntry != nil && len(firewallEntry) != 0 {
+				if len(firewallEntry) != 0 {
 					fwRulesEntries = append(fwRulesEntries, firewallEntry)
 				}
 			}
