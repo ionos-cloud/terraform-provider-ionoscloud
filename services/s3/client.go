@@ -31,7 +31,7 @@ func NewClient(id, secret, region string) *s3.APIClient {
 		}
 		_, err := signer.Sign(r, reader, "s3", region, time.Now())
 		if errors.Is(err, credentials.ErrStaticCredentialsEmpty) {
-			return errors.New("S3 credentials are missing. Please set s3_access_key and s3_secret_key provider attributes or environment variables IONOS_S3_ACCESS_KEY and IONOS_S3_SECRET_KEY")
+			return errors.New("s3 credentials are missing. Please set s3_access_key and s3_secret_key provider attributes or environment variables IONOS_S3_ACCESS_KEY and IONOS_S3_SECRET_KEY")
 		}
 		return err
 	}

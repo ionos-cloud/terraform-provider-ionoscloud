@@ -94,7 +94,7 @@ func (a *BucketsApiService) CreateBucketExecute(r ApiCreateBucketRequest) (*APIR
 	}
 
 	localVarPath := localBasePath + "/{Bucket}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -262,7 +262,7 @@ func (a *BucketsApiService) DeleteBucketExecute(r ApiDeleteBucketRequest) (*APIR
 	}
 
 	localVarPath := localBasePath + "/{Bucket}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -412,7 +412,7 @@ func (a *BucketsApiService) GetBucketLocationExecute(r ApiGetBucketLocationReque
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?location"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -576,7 +576,7 @@ func (a *BucketsApiService) HeadBucketExecute(r ApiHeadBucketRequest) (*APIRespo
 	}
 
 	localVarPath := localBasePath + "/{Bucket}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

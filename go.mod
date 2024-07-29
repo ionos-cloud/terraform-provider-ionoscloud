@@ -22,7 +22,6 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
-	github.com/ionos-cloud/sdk-go-s3 v1.0.1
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 	github.com/ionos-cloud/sdk-go/v6 v6.1.11
 	github.com/mitchellh/go-homedir v1.1.0
@@ -32,6 +31,7 @@ require (
 
 require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
+	github.com/ionos-cloud/sdk-go-s3 v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
