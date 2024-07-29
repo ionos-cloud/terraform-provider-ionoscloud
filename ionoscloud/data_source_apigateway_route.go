@@ -143,11 +143,12 @@ func dataSourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, 
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		switch {
+		case len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no API Gateway Route found with the specified name: %s", name))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one API Gateway Route found with the specified name: %s", name))
-		} else {
+		default:
 			route = results[0]
 		}
 	}
