@@ -263,8 +263,8 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (*CopyObje
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}?x-amz-copy-source"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", url.PathEscape(parameterValueToString(r.key, "key")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -506,8 +506,8 @@ func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[s
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", url.PathEscape(parameterValueToString(r.key, "key")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -673,7 +673,7 @@ func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (*De
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?delete"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1025,8 +1025,8 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (*os.File, *
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", url.PathEscape(parameterValueToString(r.key, "key")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1313,8 +1313,8 @@ func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (*HeadObje
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", url.PathEscape(parameterValueToString(r.key, "key")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1556,7 +1556,7 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (*ListOb
 	}
 
 	localVarPath := localBasePath + "/{Bucket}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1791,7 +1791,7 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (*Li
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?list-type=2"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1989,7 +1989,7 @@ func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*AP
 	}
 
 	localVarPath := localBasePath + "/{Bucket}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2279,8 +2279,8 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", url.PathEscape(parameterValueToString(r.key, "key")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2638,8 +2638,8 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*APIRespons
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", url.PathEscape(parameterValueToString(r.key, "key")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
