@@ -26,38 +26,12 @@ func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceD
 	return wireguard, apiResponse, err
 }
 
-// CreateWireguardGatewayPeers creates a new wireguard peer
-func (c *Client) CreateWireguardGatewayPeers(ctx context.Context, d *schema.ResourceData, gatewayID string) (vpnSdk.WireguardPeerRead, utils.ApiResponseInfo, error) {
-	c.changeConfigURL(d.Get("location").(string))
-	request, err := setWireguardPeersPostRequest(d)
-	if err != nil {
-		return vpnSdk.WireguardPeerRead{}, nil, fmt.Errorf("error decoding endpoint: %w", err)
-	}
-	wireguard, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersPost(ctx, gatewayID).WireguardPeerCreate(*request).Execute()
-	apiResponse.LogInfo()
-	return wireguard, apiResponse, err
-}
-
 // IsWireguardAvailable checks if the wireguard is available
 func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	location := d.Get("location").(string)
 	c.changeConfigURL(location)
 	wireguardID := d.Id()
 	wireguard, _, err := c.GetWireguardGatewayByID(ctx, wireguardID, location)
-	if err != nil {
-		return false, err
-	}
-	log.Printf("[DEBUG] wireguard status: %s", wireguard.Metadata.Status)
-	return strings.EqualFold(wireguard.Metadata.Status, constant.Available), nil
-}
-
-// IsWireguardPeerAvailable checks if the wireguard peer is available
-func (c *Client) IsWireguardPeerAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	c.changeConfigURL(d.Get("location").(string))
-	wireguardID := d.Id()
-	gatewayID := d.Get("gateway_id").(string)
-	location := d.Get("location").(string)
-	wireguard, _, err := c.GetWireguardPeerByID(ctx, gatewayID, wireguardID, location)
 	if err != nil {
 		return false, err
 	}
@@ -74,30 +48,10 @@ func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schem
 	return wireguardResponse, apiResponse, err
 }
 
-// UpdateWireguardPeer updates a wireguard peer
-func (c *Client) UpdateWireguardPeer(ctx context.Context, gatewayID, id string, d *schema.ResourceData) (vpnSdk.WireguardPeerRead, utils.ApiResponseInfo, error) {
-	c.changeConfigURL(d.Get("location").(string))
-	request, err := setWireguardPeerPatchRequest(d)
-	if err != nil {
-		return vpnSdk.WireguardPeerRead{}, nil, fmt.Errorf("error decoding endpoint: %w", err)
-	}
-	wireguardResponse, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersPut(ctx, gatewayID, id).WireguardPeerEnsure(request).Execute()
-	apiResponse.LogInfo()
-	return wireguardResponse, apiResponse, err
-}
-
 // DeleteWireguardGateway deletes a wireguard gateway
 func (c *Client) DeleteWireguardGateway(ctx context.Context, id, location string) (utils.ApiResponseInfo, error) {
 	c.changeConfigURL(location)
 	apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysDelete(ctx, id).Execute()
-	apiResponse.LogInfo()
-	return apiResponse, err
-}
-
-// DeleteWireguardPeer deletes a wireguard peer
-func (c *Client) DeleteWireguardPeer(ctx context.Context, gatewayID, id, location string) (utils.ApiResponseInfo, error) {
-	c.changeConfigURL(location)
-	apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersDelete(ctx, gatewayID, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
@@ -110,27 +64,10 @@ func (c *Client) IsWireguardGatewayDeleted(ctx context.Context, d *schema.Resour
 	return apiResponse.HttpNotFound(), err
 }
 
-// IsWireguardPeerDeleted checks if the wireguard peer is deleted
-func (c *Client) IsWireguardPeerDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	c.changeConfigURL(d.Get("location").(string))
-	gatewayID := d.Get("gateway_id").(string)
-	_, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersFindById(ctx, gatewayID, d.Id()).Execute()
-	apiResponse.LogInfo()
-	return apiResponse.HttpNotFound(), err
-}
-
 // GetWireguardGatewayByID returns a wireguard by its ID
 func (c *Client) GetWireguardGatewayByID(ctx context.Context, id, location string) (vpnSdk.WireguardGatewayRead, *shared.APIResponse, error) {
 	c.changeConfigURL(location)
 	wireguard, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysFindById(ctx, id).Execute()
-	apiResponse.LogInfo()
-	return wireguard, apiResponse, err
-}
-
-// GetWireguardPeerByID returns a wireguard by its ID
-func (c *Client) GetWireguardPeerByID(ctx context.Context, gatewayID, id, location string) (vpnSdk.WireguardPeerRead, *shared.APIResponse, error) {
-	c.changeConfigURL(location)
-	wireguard, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersFindById(ctx, gatewayID, id).Execute()
 	apiResponse.LogInfo()
 	return wireguard, apiResponse, err
 }
@@ -143,32 +80,11 @@ func (c *Client) ListWireguardGateways(ctx context.Context, location string) (vp
 	return wireguards, apiResponse, err
 }
 
-// ListWireguardPeers returns a list of all wireguards
-func (c *Client) ListWireguardPeers(ctx context.Context, gatewayID, location string) (vpnSdk.WireguardPeerReadList, *shared.APIResponse, error) {
-	c.changeConfigURL(location)
-	wireguards, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersGet(ctx, gatewayID).Execute()
-	apiResponse.LogInfo()
-	return wireguards, apiResponse, err
-}
-
 // IsWireguardGatewayReady checks if the wireguard gateway is ready
 func (c *Client) IsWireguardGatewayReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	location := d.Get("location").(string)
 	c.changeConfigURL(location)
 	cluster, _, err := c.GetWireguardGatewayByID(ctx, d.Id(), location)
-	if err != nil {
-		return false, err
-	}
-	log.Printf("[DEBUG] wierguard gateway state %s", cluster.Metadata.Status)
-	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
-}
-
-// IsWireguardPeerReady checks if the wireguard peer is ready
-func (c *Client) IsWireguardPeerReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	location := d.Get("location").(string)
-	c.changeConfigURL(location)
-	gatewayID := d.Get("gateway_id").(string)
-	cluster, _, err := c.GetWireguardPeerByID(ctx, gatewayID, d.Id(), location)
 	if err != nil {
 		return false, err
 	}
@@ -205,57 +121,6 @@ func setWireguardGWPostRequest(d *schema.ResourceData) *vpnSdk.WireguardGatewayC
 	request.Properties.Connections = getWireguardGwConnectionsData(d)
 
 	return &request
-}
-
-func setWireguardPeersPostRequest(d *schema.ResourceData) (*vpnSdk.WireguardPeerCreate, error) {
-	request := vpnSdk.WireguardPeerCreate{Properties: vpnSdk.WireguardPeer{}}
-	name := d.Get("name").(string)
-
-	request.Properties.Name = name
-
-	if value, ok := d.GetOk("description"); ok {
-		valueStr := value.(string)
-		request.Properties.Description = &valueStr
-	}
-
-	if _, ok := d.GetOk("endpoint"); ok {
-		request.Properties.Endpoint = getEndpointData(d)
-	}
-	if v, ok := d.GetOk("allowed_ips"); ok {
-		raw := v.([]interface{})
-		ips := make([]string, len(raw))
-		err := utils.DecodeInterfaceToStruct(raw, ips)
-		if err != nil {
-			return nil, err
-		}
-		if len(ips) > 0 {
-			request.Properties.AllowedIPs = ips
-		}
-	}
-	if value, ok := d.GetOk("public_key"); ok {
-		valueStr := value.(string)
-		request.Properties.PublicKey = valueStr
-	}
-
-	return &request, nil
-}
-func getEndpointData(d *schema.ResourceData) *vpnSdk.WireguardEndpoint {
-	endpoint := vpnSdk.NewWireguardEndpointWithDefaults()
-	if endpointValues, ok := d.GetOk("endpoint"); ok {
-		endpointMap := endpointValues.([]any)
-		if endpointMap != nil {
-			if host, ok := d.GetOk("endpoint.0.host"); ok {
-				host := host.(string)
-				endpoint.Host = host
-			}
-			if port, ok := d.GetOk("endpoint.0.port"); ok {
-				port := port.(int)
-				endpoint.Port = shared.ToPtr(int32(port))
-			}
-		}
-	}
-	return endpoint
-
 }
 
 func getWireguardGwConnectionsData(d *schema.ResourceData) []vpnSdk.Connection {
@@ -312,35 +177,6 @@ func setWireguardGatewayPutRequest(d *schema.ResourceData) *vpnSdk.WireguardGate
 	return &request
 }
 
-func setWireguardPeerPatchRequest(d *schema.ResourceData) (vpnSdk.WireguardPeerEnsure, error) {
-	request := vpnSdk.WireguardPeerEnsure{Properties: vpnSdk.WireguardPeer{}}
-
-	request.Id = d.Id()
-	request.Properties.Name = d.Get("name").(string)
-	request.Properties.PublicKey = d.Get("public_key").(string)
-
-	if v, ok := d.GetOk("description"); ok {
-		request.Properties.Description = shared.ToPtr(v.(string))
-	}
-	if _, ok := d.GetOk("endpoint"); ok {
-		request.Properties.Endpoint = getEndpointData(d)
-	}
-
-	if v, ok := d.GetOk("allowed_ips"); ok {
-		raw := v.([]interface{})
-		ips := make([]string, len(raw))
-		err := utils.DecodeInterfaceToStruct(raw, ips)
-		if err != nil {
-			return request, err
-		}
-		if len(ips) > 0 {
-			request.Properties.AllowedIPs = ips
-		}
-	}
-
-	return request, nil
-}
-
 // SetWireguardGWData sets the wireguard gateway data
 func SetWireguardGWData(d *schema.ResourceData, wireguard vpnSdk.WireguardGatewayRead) error {
 	d.SetId(wireguard.Id)
@@ -379,44 +215,6 @@ func SetWireguardGWData(d *schema.ResourceData, wireguard vpnSdk.WireguardGatewa
 	if err := d.Set("listen_port", wireguard.Properties.ListenPort); err != nil {
 		return utils.GenerateSetError(wireguardResourceName, "listenPort", err)
 	}
-	if err := d.Set("status", wireguard.Metadata.Status); err != nil {
-		return utils.GenerateSetError(wireguardResourceName, "status", err)
-	}
-
-	return nil
-}
-
-var resPeerName = "vpnSdk wireguard peer"
-
-// SetWireguardPeerData sets the wireguard peer data
-func SetWireguardPeerData(d *schema.ResourceData, wireguard vpnSdk.WireguardPeerRead) error {
-	d.SetId(wireguard.Id)
-
-	if err := d.Set("name", wireguard.Properties.Name); err != nil {
-		return utils.GenerateSetError(resPeerName, "name", err)
-	}
-	if err := d.Set("description", wireguard.Properties.Description); err != nil {
-		return utils.GenerateSetError(resPeerName, "description", err)
-	}
-	if wireguard.Properties.Endpoint != nil {
-		var endpoiontSlice []any
-		endpointEntry, err := wireguard.Properties.Endpoint.ToMap()
-		if err != nil {
-			return err
-		}
-		endpoiontSlice = append(endpoiontSlice, endpointEntry)
-		if err := d.Set("endpoint", endpoiontSlice); err != nil {
-			return utils.GenerateSetError(resPeerName, "endpoint", err)
-		}
-	}
-
-	if err := d.Set("allowed_ips", wireguard.Properties.AllowedIPs); err != nil {
-		return utils.GenerateSetError(resPeerName, "allowed_ips", err)
-	}
-	if err := d.Set("public_key", wireguard.Properties.PublicKey); err != nil {
-		return utils.GenerateSetError(resPeerName, "public_key", err)
-	}
-
 	if err := d.Set("status", wireguard.Metadata.Status); err != nil {
 		return utils.GenerateSetError(wireguardResourceName, "status", err)
 	}
