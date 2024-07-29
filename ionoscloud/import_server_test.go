@@ -10,16 +10,16 @@ import (
 
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccServerImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerDestroyCheck,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerConfigBasic,
@@ -37,10 +37,10 @@ func TestAccServerImportBasic(t *testing.T) {
 
 func TestAccServerWithLabelsImport(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		ExternalProviders: randomProviderVersion343(),
-		CheckDestroy:      testAccCheckServerDestroyCheck,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		ExternalProviders:        randomProviderVersion343(),
+		CheckDestroy:             testAccCheckServerDestroyCheck,
 
 		Steps: []resource.TestStep{
 			{
@@ -81,7 +81,7 @@ func testAccServerImportStateIdWithNicAndFw(s *terraform.State) (string, error) 
 		}
 
 		importID = fmt.Sprintf("%s/%s", rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["id"])
-		//we might get the primary nic id and the primary firewall id here as import optionals
+		// we might get the primary nic id and the primary firewall id here as import optionals
 		if nicID, ok := rs.Primary.Attributes["primary_nic"]; ok {
 			importID += "/" + nicID
 			if primaryFwID, ok := rs.Primary.Attributes["firewallrule_id"]; ok {

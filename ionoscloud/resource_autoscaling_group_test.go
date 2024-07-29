@@ -6,11 +6,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -26,8 +26,8 @@ func TestAccAutoscalingGroup_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAGConfig_basic(constant.AutoscalingGroupTestResource),
@@ -70,8 +70,8 @@ func TestAccAutoscalingGroup_requiredUpdated(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAGConfig_requiredUpdated(constant.AutoscalingGroupTestResource),
@@ -113,8 +113,8 @@ func TestAccAutoscalingGroup_policyWithOptionals(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAGConfig_policyWithOptionals(constant.AutoscalingGroupTestResource, "PT24H", "PT24H", "RANDOM", "PT24H"),
@@ -157,8 +157,8 @@ func TestAccAutoscalingGroup_replicaNic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAGConfig_replicaNic(constant.AutoscalingGroupTestResource),
@@ -190,7 +190,7 @@ func TestAccAutoscalingGroup_nicWithTargetGroup(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {
 				VersionConstraint: "3.4.3",
@@ -230,8 +230,8 @@ func TestAccAutoscalingGroup_nicWithFlowLog(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAGConfig_nicWithFlowLog(constant.AutoscalingGroupTestResource),
@@ -260,8 +260,8 @@ func TestAccAutoscalingGroup_nicWithTcpFirewall(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAGConfig_nicWithTCPFirewall(constant.AutoscalingGroupTestResource),
@@ -293,8 +293,8 @@ func TestAccAutoscalingGroup_nicWithICMPFirewall(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAGConfig_nicWithICMPFirewall(constant.AutoscalingGroupTestResource),
@@ -326,9 +326,9 @@ func TestAccAutoscalingGroup_replicaWithVolume(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		ExternalProviders: randomProviderVersion343(),
-		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		ExternalProviders:        randomProviderVersion343(),
+		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAGConfig_replicaWithVolume(constant.AutoscalingGroupTestResource),
