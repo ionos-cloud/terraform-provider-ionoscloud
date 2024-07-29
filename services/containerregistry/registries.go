@@ -55,7 +55,7 @@ func (c *Client) IsRegistryReady(ctx context.Context, d *schema.ResourceData) (b
 	ID := d.Id()
 	creg, _, err := c.GetRegistry(ctx, ID)
 	if err != nil {
-		return true, fmt.Errorf("status check failed for container registr creg with ID: %v, error: %w", ID, err)
+		return true, fmt.Errorf("status check failed for container registry creg with ID: %v, error: %w", ID, err)
 	}
 
 	if creg.Metadata == nil || creg.Metadata.State == nil {

@@ -115,12 +115,11 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 		diags := diag.FromErr(fmt.Errorf("an error occurred while creating the registry: %w", err))
 		return diags
 	}
+	d.SetId(*containerRegistryResponse.Id)
 
 	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
 		return diag.FromErr(fmt.Errorf("error waiting for registry to be ready: %w", err))
 	}
-
-	d.SetId(*containerRegistryResponse.Id)
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
 
