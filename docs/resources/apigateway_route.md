@@ -1,7 +1,7 @@
 ---
 subcategory: "ApiGateway"
 layout: "ionoscloud"
-page_title: "IonosCloud: route"
+page_title: "IonosCloud: ionoscloud_apigateway_route"
 sidebar_current: "docs-resource-apigateway-route"
 description: |-
   Creates and manages IonosCloud API Gateway Route objects.
@@ -62,5 +62,5 @@ resource "ionoscloud_apigateway_route" "apigateway_route" {
 ApiGateway route can be imported using the `apigateway route id`:
 
 ```shell
-terraform import ionoscloud_apigateway_route.myroute {apigateway route uuid}
+terraform import ionoscloud_apigateway_route.myroute {apigateway uuid}:{apigateway route uuid}
 ```

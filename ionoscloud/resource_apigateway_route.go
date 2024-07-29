@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceAPIGatewayRoute() *schema.Resource {
@@ -18,7 +21,7 @@ func resourceAPIGatewayRoute() *schema.Resource {
 		UpdateContext: resourceAPIGatewayRouteUpdate,
 		DeleteContext: resourceAPIGatewayRouteDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceAPIGatewayImport,
+			StateContext: resourceAPIGatewayRouteImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -63,7 +66,8 @@ func resourceAPIGatewayRoute() *schema.Resource {
 				Required:    true,
 				MinItems:    1,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}, false)),
 				},
 			},
 			"upstreams": {
@@ -73,10 +77,11 @@ func resourceAPIGatewayRoute() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"scheme": {
-							Type:        schema.TypeString,
-							Description: "The target URL of the upstream.",
-							Optional:    true,
-							Default:     "http",
+							Type:             schema.TypeString,
+							Description:      "The target URL of the upstream.",
+							Optional:         true,
+							Default:          "http",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"http", "https", "grpc", "grpcs"}, false)),
 						},
 						"host": {
 							Type:        schema.TypeString,
@@ -90,10 +95,11 @@ func resourceAPIGatewayRoute() *schema.Resource {
 							Default:     80,
 						},
 						"loadbalancer": {
-							Type:        schema.TypeString,
-							Description: "The load balancer algorithm.",
-							Optional:    true,
-							Default:     "round_robin",
+							Type:             schema.TypeString,
+							Description:      "The load balancer algorithm.",
+							Optional:         true,
+							Default:          "roundrobin",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"roundrobin", "least_connections"}, false)),
 						},
 						"weight": {
 							Type:        schema.TypeInt,
@@ -202,8 +208,18 @@ func resourceAPIGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceAPIGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	diags := resourceApiGatewayRead(ctx, d, meta)
+func resourceAPIGatewayRouteImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("expected ID in the format gateway_id:route_id")
+	}
+
+	if err := d.Set("gateway_id", parts[0]); err != nil {
+		return nil, utils.GenerateSetError(constant.ApiGatewayRouteResource, "gateway_id", err)
+	}
+	d.SetId(parts[1])
+
+	diags := resourceAPIGatewayRouteRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
 		return nil, fmt.Errorf(diags[0].Summary)
 	}
