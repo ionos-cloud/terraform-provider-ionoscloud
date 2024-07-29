@@ -31,11 +31,13 @@ func dataSourceNFSCluster() *schema.Resource {
 			"id": {
 				Type:        schema.TypeString,
 				Description: "The ID (UUID) of the NFS Cluster.",
+				Computed:    true,
 				Optional:    true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the NFS Cluster.",
+				Computed:    true,
 				Optional:    true,
 			},
 			"size": {

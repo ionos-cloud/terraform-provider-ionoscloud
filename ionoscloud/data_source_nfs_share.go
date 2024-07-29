@@ -41,7 +41,7 @@ func dataSourceNFSShare() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The name of the Network File Storage Share",
 				Optional:    true,
-				// Computed:    true,
+				Computed:    true,
 			},
 			"nfs_path": {
 				Type:        schema.TypeString,
