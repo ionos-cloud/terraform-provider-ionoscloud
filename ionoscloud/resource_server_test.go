@@ -1285,7 +1285,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 const testAccCheckServerResolveImageNameNoNic = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name        = "test_server"
-  location    = "de/fra"
+  location    = "us/las"
   description = "Test datacenter done by TF"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
@@ -1316,7 +1316,7 @@ resource ` + constant.RandomPassword + ` "server_image_password" {
 const testAccCheckServerResolveImageName = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name        = "test_server"
-  location    = "de/fra"
+  location    = "us/las"
   description = "Test datacenter done by TF"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
@@ -1352,7 +1352,7 @@ resource ` + constant.RandomPassword + ` "server_image_password" {
 const testAccCheckServerResolveImageName5fwRules = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name        = "test_server"
-  location    = "de/fra"
+  location    = "us/las"
   description = "Test datacenter done by TF"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
@@ -1423,7 +1423,7 @@ resource ` + constant.RandomPassword + ` "server_image_password" {
 const testAccCheckServerResolveImageName5fwRulesUpdate = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name        = "test_server"
-  location    = "de/fra"
+  location    = "us/las"
   description = "Test datacenter done by TF"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
@@ -1494,7 +1494,7 @@ resource ` + constant.RandomPassword + ` "server_image_password" {
 const testAccCheckServerWithSnapshot = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "volume-test"
-	location   = "de/fra"
+	location   = "us/las"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
