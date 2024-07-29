@@ -32,7 +32,7 @@ resource "ionoscloud_dataplatform_node_pool" "example" {
   cluster_id        = ionoscloud_dataplatform_cluster.example.id
   name              = "Dataplatform_Node_Pool_Example"
   node_count        = 1
-  cpu_family        = "INTEL_SKYLAKE"
+  cpu_family        = "INTEL_XEON"
   cores_count       = 1
   ram_size          = 2048
   availability_zone = "AUTO"

@@ -184,7 +184,7 @@ func ResourceAutoscalingGroup() *schema.Resource {
 							Optional:         true,
 							Type:             schema.TypeString,
 							Description:      "The zone where the VMs are created using this configuration.",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AMD_OPTERON", "INTEL_SKYLAKE", "INTEL_XEON"}, true)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"INTEL_XEON", "INTEL_XEON"}, true)),
 						},
 						"ram": {
 							Required:    true,

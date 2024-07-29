@@ -32,7 +32,7 @@ resource "ionoscloud_server" "example" {
   cores                   = 2
   ram                     = 2048
   availability_zone       = "ZONE_1"
-  cpu_family              = "INTEL_SKYLAKE"
+  cpu_family              = "INTEL_XEON"
   image_name              = "debian-10-genericcloud-amd64-20240114-1626"
   image_password          = "password"
   volume {

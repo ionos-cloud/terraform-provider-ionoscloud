@@ -195,7 +195,7 @@ resource "ionoscloud_autoscaling_group"  %[1]q {
   replica_configuration {
     availability_zone = "AUTO"
     cores             = "2"
-    cpu_family        = "INTEL_SKYLAKE"
+    cpu_family        = "INTEL_XEON"
  	ram          = 2048
     nic {
       lan       = ionoscloud_lan.autoscaling_lan_1.id

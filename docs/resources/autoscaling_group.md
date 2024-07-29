@@ -63,7 +63,7 @@ resource "ionoscloud_autoscaling_group" "autoscaling_group_example" {
   replica_configuration {
     availability_zone = "AUTO"
     cores               = "2"
-    cpu_family           = "INTEL_SKYLAKE"
+    cpu_family           = "INTEL_XEON"
     ram                  = 2048
     nic {
       lan   = ionoscloud_lan.lan_example_1.id
@@ -142,7 +142,7 @@ The following arguments are supported:
 - `replica_configuration` - (Required)[List]  
     - `availability_zone` - (Required)[string] The zone where the VMs are created using this configuration. Possible values are: `AUTO`, `ZONE_1`, `ZONE_2`.
     - `cores` - (Required)[int] The total number of cores for the VMs.
-    - `cpu_family` - (Optional)[string] PU family for the VMs created using this configuration. If null, the VM will be created with the default CPU family for the assigned location. Possible values are: `AMD_OPTERON`, `INTEL_SKYLAKE`, `INTEL_XEON`.
+    - `cpu_family` - (Optional)[string] PU family for the VMs created using this configuration. If null, the VM will be created with the default CPU family for the assigned location. Possible values are: `INTEL_XEON`, `INTEL_XEON`.
     - `nics` - (Optional)[set] List of NICs associated with this Replica.
         - `lan` - (Required)[int] Lan ID for this replica Nic.
         - `name` - (Required)[string] Name for this replica NIC.
