@@ -165,6 +165,12 @@ const (
 	NetworkLoadBalancerForwardingRuleDataSourceByName = "test_networkloadbalancer_forwardingrule_name"
 )
 
+// NFS Constants
+const (
+	NFSClusterResource = "ionoscloud_nfs_cluster"
+	NFSShareResource   = "ionoscloud_nfs_share"
+)
+
 // Private Cross Connect Constants
 // The resource name was changed from Private Cross Connect to Cross Connect
 // But the terraform resources names did not change for backwards compatibility reasons
@@ -269,7 +275,7 @@ var MariaDBClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "
 
 // Container Registry Constants
 const (
-	//ContainerRegistryTestResource needs to be with -, do not change
+	// ContainerRegistryTestResource needs to be with -, do not change
 	ContainerRegistryTestResource      = "test-container-registry"
 	ContainerRegistryTokenTestResource = "test-container-registry-token"
 

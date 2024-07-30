@@ -3,12 +3,15 @@ package containerregistry
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -35,6 +38,32 @@ func (c *Client) GetRegistry(ctx context.Context, registryId string) (cr.Registr
 	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesFindById(ctx, registryId).Execute()
 	apiResponse.LogInfo()
 	return registries, apiResponse, err
+}
+
+// IsRegistryDeleted checks whether the container registry is deleted or not
+func (c *Client) IsRegistryDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	ID := d.Id()
+	_, resp, err := c.GetRegistry(ctx, ID)
+	if resp.HttpNotFound() {
+		return true, nil
+	}
+	return false, err
+}
+
+// IsRegistryReady checks whether the container registry is in a ready state or not
+func (c *Client) IsRegistryReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	ID := d.Id()
+	creg, _, err := c.GetRegistry(ctx, ID)
+	if err != nil {
+		return true, fmt.Errorf("status check failed for container registry creg with ID: %v, error: %w", ID, err)
+	}
+
+	if creg.Metadata == nil || creg.Metadata.State == nil {
+		return false, fmt.Errorf("metadata or state is empty for container registry with ID: %v", ID)
+	}
+
+	log.Printf("[INFO] state of the container registry with ID: %v is: %s ", ID, *creg.Metadata.State)
+	return strings.EqualFold(*creg.Metadata.State, "RUNNING"), nil
 }
 
 func (c *Client) PatchRegistry(ctx context.Context, registryId string, registryInput cr.PatchRegistryInput) (cr.RegistryResponse, *cr.APIResponse, error) {
