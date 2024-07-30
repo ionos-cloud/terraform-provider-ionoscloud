@@ -8,6 +8,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
+	github.com/ionos-cloud/sdk-go-cdn v1.0.0
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
 	github.com/ionos-cloud/sdk-go-container-registry v1.1.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.0.3
@@ -16,13 +17,10 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
-	github.com/ionos-cloud/sdk-go-cdn v1.0.0
 	github.com/ionos-cloud/sdk-go/v6 v6.1.11
 	golang.org/x/crypto v0.24.0
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-replace "github.com/ionos-cloud/sdk-go-cdn" v1.0.0 => "/home/radu/work/rubygeneration/sdk-go-cdn"
 
 require github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 

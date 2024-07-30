@@ -1679,7 +1679,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
 }`
 
 const testAccCheckCdnDistributionConfigBasic = `resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + ` {
-	domain         = "example.com"
+	domain         = "ionossdk.terra.example.com"
 	routing_rules {
 		scheme = "http"
 		prefix = "/api"

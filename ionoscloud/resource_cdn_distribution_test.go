@@ -174,7 +174,7 @@ data ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionDataSo
 
 const testAccDataSourceCdnDistributionMultipleResultsError = testAccCheckCdnDistributionConfigBasic + `
 resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + `_multiple_results {
-	domain         = "example.com"
+	domain         = "ionossdk.terra.example.com"
 	routing_rules {
 		scheme = "http"
 		prefix = "/api2"
@@ -213,7 +213,7 @@ EOT
 EOT
 }
 ` + `resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + ` {
-	domain         = "example.example.com"
+	domain         = "ionossdk.example.example.com"
 	certificate_id = ` + constant.CertificateResource + `.` + constant.TestCertName + `.id` + `
 	routing_rules {
 		scheme = "http/https"
