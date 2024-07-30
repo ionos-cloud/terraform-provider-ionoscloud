@@ -63,7 +63,7 @@ resource "ionoscloud_autoscaling_group" "autoscaling_group_example" {
   replica_configuration {
     availability_zone = "AUTO"
     cores               = "2"
-    cpu_family           = "INTEL_XEON"
+    cpu_family           = "INTEL_SKYLAKE"
     ram                  = 2048
     nic {
       lan   = ionoscloud_lan.lan_example_1.id

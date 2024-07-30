@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -32,7 +33,7 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 					testAccCheckDataplatformNodePoolExists(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, &DataplatformNodePool),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "name", constant.DataplatformNodePoolTestResource),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "node_count", "1"),
-					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cores_count", "1"),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "ram_size", "2048"),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "availability_zone", "AUTO"),
@@ -141,7 +142,7 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 					testAccCheckDataplatformNodePoolExists(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, &DataplatformNodePool),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "name", constant.DataplatformNodePoolTestResource),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "node_count", "2"),
-					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cores_count", "1"),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "ram_size", "2048"),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "availability_zone", "AUTO"),
@@ -247,7 +248,7 @@ resource ` + constant.DataplatformNodePoolResource + ` ` + constant.Dataplatform
   cluster_id    	= ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
   name        		= "` + constant.DataplatformNodePoolTestResource + `"
   node_count        = 1
-  cpu_family        = "INTEL_XEON"
+  cpu_family        = "INTEL_SKYLAKE"
   cores_count       = 1
   ram_size          = 2048
   availability_zone = "AUTO"
@@ -289,7 +290,7 @@ resource ` + constant.DataplatformNodePoolResource + ` ` + constant.Dataplatform
   cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
   name        = "` + constant.DataplatformNodePoolTestResource + `"
   node_count        = 2
-  cpu_family        = "INTEL_XEON"
+  cpu_family        = "INTEL_SKYLAKE"
   cores_count       = 1
   ram_size          = 2048
   availability_zone = "AUTO"

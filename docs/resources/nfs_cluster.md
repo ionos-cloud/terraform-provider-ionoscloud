@@ -46,7 +46,7 @@ resource "ionoscloud_server" "nfs_server" {
   cores             = 1
   ram               = 2048
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_XEON"
+  cpu_family        = "INTEL_SKYLAKE"
   image_name        = data.ionoscloud_image.HDD_image.id
   image_password    = random_password.password.result
   volume {

@@ -6,9 +6,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
@@ -50,7 +52,7 @@ func TestAccAutoscalingGroup_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAGName, "policy.0.unit", "PER_HOUR"),
 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.cores", "2"),
-					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.cpu_family", string(autoscaling.CPUFAMILY_INTEL_XEON)),
+					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.cpu_family", string(autoscaling.CPUFAMILY_INTEL_SKYLAKE)),
 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.ram", "2048"),
 				),
 			},
@@ -93,9 +95,10 @@ func TestAccAutoscalingGroup_requiredUpdated(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAGName, "policy.0.unit", "PER_MINUTE"),
 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.cores", "1"),
-					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.cpu_family", string(autoscaling.CPUFAMILY_INTEL_XEON)),
+					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.cpu_family", string(autoscaling.CPUFAMILY_INTEL_SKYLAKE)),
 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.ram", "1024"),
 				),
+			},
 			},
 			{
 				ResourceName:      resourceAGName,
@@ -467,7 +470,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 	replica_configuration {
 		availability_zone = "AUTO"
 		cores             = "2"
-		cpu_family        = "INTEL_XEON"
+		cpu_family        = "INTEL_SKYLAKE"
 	    ram               = 2048
 	}
 }
@@ -501,7 +504,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 	replica_configuration {
 		availability_zone = "AUTO"
 		cores             = "1"
-		cpu_family        = "INTEL_XEON"
+		cpu_family        = "INTEL_SKYLAKE"
 	    ram               = 1024
 	}
 }
@@ -539,7 +542,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 	replica_configuration {
 		availability_zone = "AUTO"
 		cores             = "2"
-		cpu_family        = "INTEL_XEON"
+		cpu_family        = "INTEL_SKYLAKE"
 	    ram               = 2048
 	}
 }
@@ -579,7 +582,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 	replica_configuration {
 		availability_zone = "AUTO"
 		cores             = "2"
-		cpu_family        = "INTEL_XEON"
+		cpu_family        = "INTEL_SKYLAKE"
 	    ram               = 2048
 
 		nic {
@@ -638,7 +641,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 	replica_configuration {
 		availability_zone = "AUTO"
 		cores             = "2"
-		cpu_family        = "INTEL_XEON"
+		cpu_family        = "INTEL_SKYLAKE"
 	    ram               = 2048
 
 		nic {
@@ -692,7 +695,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 	replica_configuration {
 		availability_zone = "AUTO"
 		cores             = "2"
-		cpu_family        = "INTEL_XEON"
+		cpu_family        = "INTEL_SKYLAKE"
 	    ram               = 2048
 
 		nic {
@@ -746,7 +749,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 	replica_configuration {
 		availability_zone = "AUTO"
 		cores             = "2"
-		cpu_family        = "INTEL_XEON"
+		cpu_family        = "INTEL_SKYLAKE"
 	    ram               = 2048
 
 		nic {
@@ -801,7 +804,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 	replica_configuration {
 		availability_zone = "AUTO"
 		cores             = "2"
-		cpu_family        = "INTEL_XEON"
+		cpu_family        = "INTEL_SKYLAKE"
 	    ram               = 2048
 
 		nic {
@@ -850,7 +853,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 	replica_configuration {
 		availability_zone = "AUTO"
 		cores             = "2"
-		cpu_family        = "INTEL_XEON"
+		cpu_family        = "INTEL_SKYLAKE"
 	    ram               = 2048
 
 	 	volume {
@@ -900,7 +903,7 @@ resource  "ionoscloud_autoscaling_group"  %[1]q {
 	replica_configuration {
 		availability_zone = "AUTO"
 		cores             = "2"
-		cpu_family        = "INTEL_XEON"
+		cpu_family        = "INTEL_SKYLAKE"
 	    ram               = 2048
 
 	 	volume {
