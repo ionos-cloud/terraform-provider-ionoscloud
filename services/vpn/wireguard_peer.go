@@ -9,16 +9,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 // CreateWireguardGatewayPeers creates a new wireguard peer
-func (c *Client) CreateWireguardGatewayPeers(ctx context.Context, d *schema.ResourceData, gatewayID string) (ionoscloud.WireguardPeerRead, utils.ApiResponseInfo, error) {
+func (c *Client) CreateWireguardGatewayPeers(ctx context.Context, d *schema.ResourceData, gatewayID string) (vpn.WireguardPeerRead, utils.ApiResponseInfo, error) {
 	c.changeConfigURL(d.Get("location").(string))
 	request, err := setWireguardPeersPostRequest(d)
 	if err != nil {
-		return ionoscloud.WireguardPeerRead{}, nil, fmt.Errorf("error decoding endpoint: %w", err)
+		return vpn.WireguardPeerRead{}, nil, fmt.Errorf("error decoding endpoint: %w", err)
 	}
 	wireguard, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersPost(ctx, gatewayID).WireguardPeerCreate(*request).Execute()
 	apiResponse.LogInfo()
@@ -40,11 +41,11 @@ func (c *Client) IsWireguardPeerAvailable(ctx context.Context, d *schema.Resourc
 }
 
 // UpdateWireguardPeer updates a wireguard peer
-func (c *Client) UpdateWireguardPeer(ctx context.Context, gatewayID, id string, d *schema.ResourceData) (ionoscloud.WireguardPeerRead, utils.ApiResponseInfo, error) {
+func (c *Client) UpdateWireguardPeer(ctx context.Context, gatewayID, id string, d *schema.ResourceData) (vpn.WireguardPeerRead, utils.ApiResponseInfo, error) {
 	c.changeConfigURL(d.Get("location").(string))
 	request, err := setWireguardPeerPatchRequest(d)
 	if err != nil {
-		return ionoscloud.WireguardPeerRead{}, nil, fmt.Errorf("error decoding endpoint: %w", err)
+		return vpn.WireguardPeerRead{}, nil, fmt.Errorf("error decoding endpoint: %w", err)
 	}
 	wireguardResponse, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersPut(ctx, gatewayID, id).WireguardPeerEnsure(request).Execute()
 	apiResponse.LogInfo()
@@ -69,7 +70,7 @@ func (c *Client) IsWireguardPeerDeleted(ctx context.Context, d *schema.ResourceD
 }
 
 // GetWireguardPeerByID returns a wireguard by its ID
-func (c *Client) GetWireguardPeerByID(ctx context.Context, gatewayID, id, location string) (ionoscloud.WireguardPeerRead, *shared.APIResponse, error) {
+func (c *Client) GetWireguardPeerByID(ctx context.Context, gatewayID, id, location string) (vpn.WireguardPeerRead, *shared.APIResponse, error) {
 	c.changeConfigURL(location)
 	wireguard, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersFindById(ctx, gatewayID, id).Execute()
 	apiResponse.LogInfo()
@@ -77,7 +78,7 @@ func (c *Client) GetWireguardPeerByID(ctx context.Context, gatewayID, id, locati
 }
 
 // ListWireguardPeers returns a list of all wireguards
-func (c *Client) ListWireguardPeers(ctx context.Context, gatewayID, location string) (ionoscloud.WireguardPeerReadList, *shared.APIResponse, error) {
+func (c *Client) ListWireguardPeers(ctx context.Context, gatewayID, location string) (vpn.WireguardPeerReadList, *shared.APIResponse, error) {
 	c.changeConfigURL(location)
 	wireguards, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersGet(ctx, gatewayID).Execute()
 	apiResponse.LogInfo()
@@ -97,8 +98,8 @@ func (c *Client) IsWireguardPeerReady(ctx context.Context, d *schema.ResourceDat
 	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
 }
 
-func setWireguardPeersPostRequest(d *schema.ResourceData) (*ionoscloud.WireguardPeerCreate, error) {
-	request := ionoscloud.WireguardPeerCreate{Properties: ionoscloud.WireguardPeer{}}
+func setWireguardPeersPostRequest(d *schema.ResourceData) (*vpn.WireguardPeerCreate, error) {
+	request := vpn.WireguardPeerCreate{Properties: vpn.WireguardPeer{}}
 	name := d.Get("name").(string)
 
 	request.Properties.Name = name
@@ -129,8 +130,8 @@ func setWireguardPeersPostRequest(d *schema.ResourceData) (*ionoscloud.Wireguard
 
 	return &request, nil
 }
-func getEndpointData(d *schema.ResourceData) *ionoscloud.WireguardEndpoint {
-	endpoint := ionoscloud.NewWireguardEndpointWithDefaults()
+func getEndpointData(d *schema.ResourceData) *vpn.WireguardEndpoint {
+	endpoint := vpn.NewWireguardEndpointWithDefaults()
 	if endpointValues, ok := d.GetOk("endpoint"); ok {
 		endpointMap := endpointValues.([]any)
 		if endpointMap != nil {
@@ -148,8 +149,8 @@ func getEndpointData(d *schema.ResourceData) *ionoscloud.WireguardEndpoint {
 
 }
 
-func setWireguardPeerPatchRequest(d *schema.ResourceData) (ionoscloud.WireguardPeerEnsure, error) {
-	request := ionoscloud.WireguardPeerEnsure{Properties: ionoscloud.WireguardPeer{}}
+func setWireguardPeerPatchRequest(d *schema.ResourceData) (vpn.WireguardPeerEnsure, error) {
+	request := vpn.WireguardPeerEnsure{Properties: vpn.WireguardPeer{}}
 
 	request.Id = d.Id()
 	request.Properties.Name = d.Get("name").(string)
@@ -180,7 +181,7 @@ func setWireguardPeerPatchRequest(d *schema.ResourceData) (ionoscloud.WireguardP
 var resPeerName = "vpnSdk wireguard peer"
 
 // SetWireguardPeerData sets the wireguard peer data
-func SetWireguardPeerData(d *schema.ResourceData, wireguard ionoscloud.WireguardPeerRead) error {
+func SetWireguardPeerData(d *schema.ResourceData, wireguard vpn.WireguardPeerRead) error {
 	d.SetId(wireguard.Id)
 
 	if err := d.Set("name", wireguard.Properties.Name); err != nil {

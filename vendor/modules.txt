@@ -244,7 +244,9 @@ github.com/hashicorp/terraform-plugin-mux/tf6muxserver
 # github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
 ## explicit; go 1.21
 github.com/hashicorp/terraform-plugin-sdk/v2/diag
+github.com/hashicorp/terraform-plugin-sdk/v2/helper/id
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging
+github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure
@@ -256,6 +258,7 @@ github.com/hashicorp/terraform-plugin-sdk/v2/internal/helper/hashcode
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/logging
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/plans/objchange
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/plugin/convert
+github.com/hashicorp/terraform-plugin-sdk/v2/internal/plugintest
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/tfdiags
 github.com/hashicorp/terraform-plugin-sdk/v2/meta
 github.com/hashicorp/terraform-plugin-sdk/v2/plugin
@@ -286,14 +289,20 @@ github.com/hashicorp/terraform-svchost
 # github.com/hashicorp/yamux v0.1.1
 ## explicit; go 1.15
 github.com/hashicorp/yamux
+# github.com/huandu/xstrings v1.3.3
+## explicit; go 1.12
+github.com/huandu/xstrings
 # github.com/iancoleman/strcase v0.3.0
 ## explicit; go 1.16
 github.com/iancoleman/strcase
 # github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2
-# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.0
-## explicit; go 1.19
+# github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.0
+## explicit; go 1.21
+github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
+# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
+## explicit; go 1.20
 github.com/ionos-cloud/sdk-go-bundle/shared
 # github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
 ## explicit; go 1.19
