@@ -1,7 +1,7 @@
 /*
  * IONOS Logging REST API
  *
- * Logging as a Service (LaaS) is a service that provides a centralized logging system where users are able to push and aggregate their system or application logs. This service also provides a visualization platform where users are able to observe, search and filter the logs and also create dashboards and alerts for their data points. This service can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an API. The API allows you to create logging pipelines or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * The logging service offers a centralized platform to collect and store logs from various systems and applications. It includes tools to search, filter, visualize, and create alerts based on your log data.  This API provides programmatic control over logging pipelines, enabling you to create new pipelines or modify existing ones. It mirrors the functionality of the DCD visual tool, ensuring a consistent experience regardless of your chosen interface.
  *
  * API version: 0.0.1
  */
@@ -32,6 +32,16 @@ const (
 	defaultMaxRetries     = 3
 	defaultWaitTime       = time.Duration(100) * time.Millisecond
 	defaultMaxWaitTime    = time.Duration(2000) * time.Millisecond
+)
+
+var (
+	IonosServerUrls = []string{
+		"https://logging.de-txl.ionos.com",
+		"https://logging.de-fra.ionos.com",
+		"https://logging.gb-lhr.ionos.com",
+		"https://logging.fr-par.ionos.com",
+		"https://logging.es-vit.ionos.com",
+	}
 )
 
 // contextKeys are used to identify the type of value in the context.
@@ -128,7 +138,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go-logging/v1.0.1",
+		UserAgent:          "ionos-cloud-sdk-go-logging/v1.1.0",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -139,6 +149,22 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		Logger:             NewDefaultLogger(),
 		LogLevel:           getLogLevelFromEnv(),
 		Servers: ServerConfigurations{
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "No description provided",
+			},
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "No description provided",
+			},
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "No description provided",
+			},
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "No description provided",
+			},
 			{
 				URL:         getServerUrl(hostUrl),
 				Description: "No description provided",

@@ -35,7 +35,7 @@ resource "ionoscloud_apigateway" "example" {
 
 * `id` - (Computed)[string] The ID of the API Gateway.
 * `name` - (Required)[string] The name of the API Gateway.
-* `logs` - (Optional)[bool] Enable or disable logging. Defaults to `false`.
+* `logs` - (Optional)[bool] Enable or disable logging. Defaults to `false`. **NOTE**: Central Logging must be enabled through the Logging API to enable this feature.
 * `metrics` - (Optional)[bool] Enable or disable metrics. Defaults to `false`.
 * `custom_domains` - (Optional)[list] Custom domains for the API Gateway, a list that contains elements with the following structure:
     * `name` - (Required)[string] The domain name.
@@ -58,4 +58,3 @@ The resource can be imported using the `gateway_id`, for example:
 ```
 terraform import ionoscloud_apigateway.example {gateway_id}
 ```
-

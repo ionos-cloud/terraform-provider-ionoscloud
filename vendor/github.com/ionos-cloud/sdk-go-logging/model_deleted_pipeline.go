@@ -14,35 +14,35 @@ import (
 	"encoding/json"
 )
 
-// Pipeline pipeline response
-type Pipeline struct {
+// DeletedPipeline pipeline response
+type DeletedPipeline struct {
 	// The unique ID of the resource.
 	Id         *string             `json:"id,omitempty"`
-	Metadata   *Metadata           `json:"metadata,omitempty"`
+	Metadata   *DeletedMetadata    `json:"metadata,omitempty"`
 	Properties *PipelineProperties `json:"properties,omitempty"`
 }
 
-// NewPipeline instantiates a new Pipeline object
+// NewDeletedPipeline instantiates a new DeletedPipeline object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPipeline() *Pipeline {
-	this := Pipeline{}
+func NewDeletedPipeline() *DeletedPipeline {
+	this := DeletedPipeline{}
 
 	return &this
 }
 
-// NewPipelineWithDefaults instantiates a new Pipeline object
+// NewDeletedPipelineWithDefaults instantiates a new DeletedPipeline object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewPipelineWithDefaults() *Pipeline {
-	this := Pipeline{}
+func NewDeletedPipelineWithDefaults() *DeletedPipeline {
+	this := DeletedPipeline{}
 	return &this
 }
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Pipeline) GetId() *string {
+func (o *DeletedPipeline) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -54,7 +54,7 @@ func (o *Pipeline) GetId() *string {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Pipeline) GetIdOk() (*string, bool) {
+func (o *DeletedPipeline) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -63,14 +63,14 @@ func (o *Pipeline) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *Pipeline) SetId(v string) {
+func (o *DeletedPipeline) SetId(v string) {
 
 	o.Id = &v
 
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *Pipeline) HasId() bool {
+func (o *DeletedPipeline) HasId() bool {
 	if o != nil && o.Id != nil {
 		return true
 	}
@@ -79,8 +79,8 @@ func (o *Pipeline) HasId() bool {
 }
 
 // GetMetadata returns the Metadata field value
-// If the value is explicit nil, the zero value for Metadata will be returned
-func (o *Pipeline) GetMetadata() *Metadata {
+// If the value is explicit nil, the zero value for DeletedMetadata will be returned
+func (o *DeletedPipeline) GetMetadata() *DeletedMetadata {
 	if o == nil {
 		return nil
 	}
@@ -92,7 +92,7 @@ func (o *Pipeline) GetMetadata() *Metadata {
 // GetMetadataOk returns a tuple with the Metadata field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Pipeline) GetMetadataOk() (*Metadata, bool) {
+func (o *DeletedPipeline) GetMetadataOk() (*DeletedMetadata, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -101,14 +101,14 @@ func (o *Pipeline) GetMetadataOk() (*Metadata, bool) {
 }
 
 // SetMetadata sets field value
-func (o *Pipeline) SetMetadata(v Metadata) {
+func (o *DeletedPipeline) SetMetadata(v DeletedMetadata) {
 
 	o.Metadata = &v
 
 }
 
 // HasMetadata returns a boolean if a field has been set.
-func (o *Pipeline) HasMetadata() bool {
+func (o *DeletedPipeline) HasMetadata() bool {
 	if o != nil && o.Metadata != nil {
 		return true
 	}
@@ -118,7 +118,7 @@ func (o *Pipeline) HasMetadata() bool {
 
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for PipelineProperties will be returned
-func (o *Pipeline) GetProperties() *PipelineProperties {
+func (o *DeletedPipeline) GetProperties() *PipelineProperties {
 	if o == nil {
 		return nil
 	}
@@ -130,7 +130,7 @@ func (o *Pipeline) GetProperties() *PipelineProperties {
 // GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Pipeline) GetPropertiesOk() (*PipelineProperties, bool) {
+func (o *DeletedPipeline) GetPropertiesOk() (*PipelineProperties, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -139,14 +139,14 @@ func (o *Pipeline) GetPropertiesOk() (*PipelineProperties, bool) {
 }
 
 // SetProperties sets field value
-func (o *Pipeline) SetProperties(v PipelineProperties) {
+func (o *DeletedPipeline) SetProperties(v PipelineProperties) {
 
 	o.Properties = &v
 
 }
 
 // HasProperties returns a boolean if a field has been set.
-func (o *Pipeline) HasProperties() bool {
+func (o *DeletedPipeline) HasProperties() bool {
 	if o != nil && o.Properties != nil {
 		return true
 	}
@@ -154,7 +154,7 @@ func (o *Pipeline) HasProperties() bool {
 	return false
 }
 
-func (o Pipeline) MarshalJSON() ([]byte, error) {
+func (o DeletedPipeline) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
@@ -171,38 +171,38 @@ func (o Pipeline) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullablePipeline struct {
-	value *Pipeline
+type NullableDeletedPipeline struct {
+	value *DeletedPipeline
 	isSet bool
 }
 
-func (v NullablePipeline) Get() *Pipeline {
+func (v NullableDeletedPipeline) Get() *DeletedPipeline {
 	return v.value
 }
 
-func (v *NullablePipeline) Set(val *Pipeline) {
+func (v *NullableDeletedPipeline) Set(val *DeletedPipeline) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullablePipeline) IsSet() bool {
+func (v NullableDeletedPipeline) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullablePipeline) Unset() {
+func (v *NullableDeletedPipeline) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullablePipeline(val *Pipeline) *NullablePipeline {
-	return &NullablePipeline{value: val, isSet: true}
+func NewNullableDeletedPipeline(val *DeletedPipeline) *NullableDeletedPipeline {
+	return &NullableDeletedPipeline{value: val, isSet: true}
 }
 
-func (v NullablePipeline) MarshalJSON() ([]byte, error) {
+func (v NullableDeletedPipeline) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullablePipeline) UnmarshalJSON(src []byte) error {
+func (v *NullableDeletedPipeline) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

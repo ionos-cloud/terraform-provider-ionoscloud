@@ -34,7 +34,7 @@ func resourceApiGateway() *schema.Resource {
 			},
 			"logs": {
 				Type:        schema.TypeBool,
-				Description: "Enable or disable logging.",
+				Description: "Enable or disable logging. NOTE: Central Logging must be enabled through the Logging API to enable this feature.",
 				Optional:    true,
 				Default:     false,
 			},
@@ -75,6 +75,19 @@ func resourceApiGateway() *schema.Resource {
 
 func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
+	logClient := meta.(services.SdkBundle).LoggingClient
+
+	logs, ok := d.GetOk("logs")
+	if ok && logs.(bool) {
+		central, _, err := logClient.GetCentralLogging(ctx)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("error getting Central Logging: %w", err))
+		}
+
+		if central.Properties == nil || central.Properties.Enabled == nil || !*central.Properties.Enabled {
+			return diag.FromErr(fmt.Errorf("cannot create API Gateway with logs enabled, please use Logging API to enable Central Logging"))
+		}
+	}
 
 	response, _, err := client.CreateAPIGateway(ctx, d)
 	if err != nil {

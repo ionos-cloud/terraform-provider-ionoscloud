@@ -1,7 +1,7 @@
 /*
  * IONOS Logging REST API
  *
- * Logging as a Service (LaaS) is a service that provides a centralized logging system where users are able to push and aggregate their system or application logs. This service also provides a visualization platform where users are able to observe, search and filter the logs and also create dashboards and alerts for their data points. This service can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an API. The API allows you to create logging pipelines or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * The logging service offers a centralized platform to collect and store logs from various systems and applications. It includes tools to search, filter, visualize, and create alerts based on your log data.  This API provides programmatic control over logging pipelines, enabling you to create new pipelines or modify existing ones. It mirrors the functionality of the DCD visual tool, ensuring a consistent experience regardless of your chosen interface.
  *
  * API version: 0.0.1
  */
@@ -13,7 +13,7 @@ package ionoscloud
 import (
 	_context "context"
 	"fmt"
-	_ioutil "io/ioutil"
+	"io"
 	_nethttp "net/http"
 	_neturl "net/url"
 	"strings"
@@ -33,7 +33,7 @@ type ApiPipelinesDeleteRequest struct {
 	pipelineId string
 }
 
-func (r ApiPipelinesDeleteRequest) Execute() (Pipeline, *APIResponse, error) {
+func (r ApiPipelinesDeleteRequest) Execute() (DeletedPipeline, *APIResponse, error) {
 	return r.ApiService.PipelinesDeleteExecute(r)
 }
 
@@ -54,16 +54,16 @@ func (a *PipelinesApiService) PipelinesDelete(ctx _context.Context, pipelineId s
 
 /*
  * Execute executes the request
- * @return Pipeline
+ * @return DeletedPipeline
  */
-func (a *PipelinesApiService) PipelinesDeleteExecute(r ApiPipelinesDeleteRequest) (Pipeline, *APIResponse, error) {
+func (a *PipelinesApiService) PipelinesDeleteExecute(r ApiPipelinesDeleteRequest) (DeletedPipeline, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodDelete
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  Pipeline
+		localVarReturnValue  DeletedPipeline
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PipelinesApiService.PipelinesDelete")
@@ -128,7 +128,7 @@ func (a *PipelinesApiService) PipelinesDeleteExecute(r ApiPipelinesDeleteRequest
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -265,7 +265,7 @@ func (a *PipelinesApiService) PipelinesFindByIdExecute(r ApiPipelinesFindByIdReq
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -423,7 +423,7 @@ func (a *PipelinesApiService) PipelinesGetExecute(r ApiPipelinesGetRequest) (Pip
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -560,7 +560,7 @@ func (a *PipelinesApiService) PipelinesKeyPostExecute(r ApiPipelinesKeyPostReque
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -708,7 +708,7 @@ func (a *PipelinesApiService) PipelinesPatchExecute(r ApiPipelinesPatchRequest) 
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -755,7 +755,7 @@ func (r ApiPipelinesPostRequest) Pipeline(pipeline PipelineCreate) ApiPipelinesP
 	return r
 }
 
-func (r ApiPipelinesPostRequest) Execute() (Pipeline, *APIResponse, error) {
+func (r ApiPipelinesPostRequest) Execute() (ProvisioningPipeline, *APIResponse, error) {
 	return r.ApiService.PipelinesPostExecute(r)
 }
 
@@ -774,16 +774,16 @@ func (a *PipelinesApiService) PipelinesPost(ctx _context.Context) ApiPipelinesPo
 
 /*
  * Execute executes the request
- * @return Pipeline
+ * @return ProvisioningPipeline
  */
-func (a *PipelinesApiService) PipelinesPostExecute(r ApiPipelinesPostRequest) (Pipeline, *APIResponse, error) {
+func (a *PipelinesApiService) PipelinesPostExecute(r ApiPipelinesPostRequest) (ProvisioningPipeline, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  Pipeline
+		localVarReturnValue  ProvisioningPipeline
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PipelinesApiService.PipelinesPost")
@@ -852,7 +852,7 @@ func (a *PipelinesApiService) PipelinesPostExecute(r ApiPipelinesPostRequest) (P
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {

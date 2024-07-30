@@ -14,73 +14,33 @@ import (
 	"encoding/json"
 )
 
-// Pipeline pipeline response
-type Pipeline struct {
-	// The unique ID of the resource.
-	Id         *string             `json:"id,omitempty"`
-	Metadata   *Metadata           `json:"metadata,omitempty"`
-	Properties *PipelineProperties `json:"properties,omitempty"`
+// CentralLoggingResponse struct for CentralLoggingResponse
+type CentralLoggingResponse struct {
+	Metadata   *CentralLoggingResponseMetadata   `json:"metadata,omitempty"`
+	Properties *CentralLoggingResponseProperties `json:"properties,omitempty"`
 }
 
-// NewPipeline instantiates a new Pipeline object
+// NewCentralLoggingResponse instantiates a new CentralLoggingResponse object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPipeline() *Pipeline {
-	this := Pipeline{}
+func NewCentralLoggingResponse() *CentralLoggingResponse {
+	this := CentralLoggingResponse{}
 
 	return &this
 }
 
-// NewPipelineWithDefaults instantiates a new Pipeline object
+// NewCentralLoggingResponseWithDefaults instantiates a new CentralLoggingResponse object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewPipelineWithDefaults() *Pipeline {
-	this := Pipeline{}
+func NewCentralLoggingResponseWithDefaults() *CentralLoggingResponse {
+	this := CentralLoggingResponse{}
 	return &this
-}
-
-// GetId returns the Id field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *Pipeline) GetId() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.Id
-
-}
-
-// GetIdOk returns a tuple with the Id field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Pipeline) GetIdOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Id, true
-}
-
-// SetId sets field value
-func (o *Pipeline) SetId(v string) {
-
-	o.Id = &v
-
-}
-
-// HasId returns a boolean if a field has been set.
-func (o *Pipeline) HasId() bool {
-	if o != nil && o.Id != nil {
-		return true
-	}
-
-	return false
 }
 
 // GetMetadata returns the Metadata field value
-// If the value is explicit nil, the zero value for Metadata will be returned
-func (o *Pipeline) GetMetadata() *Metadata {
+// If the value is explicit nil, the zero value for CentralLoggingResponseMetadata will be returned
+func (o *CentralLoggingResponse) GetMetadata() *CentralLoggingResponseMetadata {
 	if o == nil {
 		return nil
 	}
@@ -92,7 +52,7 @@ func (o *Pipeline) GetMetadata() *Metadata {
 // GetMetadataOk returns a tuple with the Metadata field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Pipeline) GetMetadataOk() (*Metadata, bool) {
+func (o *CentralLoggingResponse) GetMetadataOk() (*CentralLoggingResponseMetadata, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -101,14 +61,14 @@ func (o *Pipeline) GetMetadataOk() (*Metadata, bool) {
 }
 
 // SetMetadata sets field value
-func (o *Pipeline) SetMetadata(v Metadata) {
+func (o *CentralLoggingResponse) SetMetadata(v CentralLoggingResponseMetadata) {
 
 	o.Metadata = &v
 
 }
 
 // HasMetadata returns a boolean if a field has been set.
-func (o *Pipeline) HasMetadata() bool {
+func (o *CentralLoggingResponse) HasMetadata() bool {
 	if o != nil && o.Metadata != nil {
 		return true
 	}
@@ -117,8 +77,8 @@ func (o *Pipeline) HasMetadata() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for PipelineProperties will be returned
-func (o *Pipeline) GetProperties() *PipelineProperties {
+// If the value is explicit nil, the zero value for CentralLoggingResponseProperties will be returned
+func (o *CentralLoggingResponse) GetProperties() *CentralLoggingResponseProperties {
 	if o == nil {
 		return nil
 	}
@@ -130,7 +90,7 @@ func (o *Pipeline) GetProperties() *PipelineProperties {
 // GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Pipeline) GetPropertiesOk() (*PipelineProperties, bool) {
+func (o *CentralLoggingResponse) GetPropertiesOk() (*CentralLoggingResponseProperties, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -139,14 +99,14 @@ func (o *Pipeline) GetPropertiesOk() (*PipelineProperties, bool) {
 }
 
 // SetProperties sets field value
-func (o *Pipeline) SetProperties(v PipelineProperties) {
+func (o *CentralLoggingResponse) SetProperties(v CentralLoggingResponseProperties) {
 
 	o.Properties = &v
 
 }
 
 // HasProperties returns a boolean if a field has been set.
-func (o *Pipeline) HasProperties() bool {
+func (o *CentralLoggingResponse) HasProperties() bool {
 	if o != nil && o.Properties != nil {
 		return true
 	}
@@ -154,12 +114,8 @@ func (o *Pipeline) HasProperties() bool {
 	return false
 }
 
-func (o Pipeline) MarshalJSON() ([]byte, error) {
+func (o CentralLoggingResponse) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Id != nil {
-		toSerialize["id"] = o.Id
-	}
-
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
@@ -171,38 +127,38 @@ func (o Pipeline) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullablePipeline struct {
-	value *Pipeline
+type NullableCentralLoggingResponse struct {
+	value *CentralLoggingResponse
 	isSet bool
 }
 
-func (v NullablePipeline) Get() *Pipeline {
+func (v NullableCentralLoggingResponse) Get() *CentralLoggingResponse {
 	return v.value
 }
 
-func (v *NullablePipeline) Set(val *Pipeline) {
+func (v *NullableCentralLoggingResponse) Set(val *CentralLoggingResponse) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullablePipeline) IsSet() bool {
+func (v NullableCentralLoggingResponse) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullablePipeline) Unset() {
+func (v *NullableCentralLoggingResponse) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullablePipeline(val *Pipeline) *NullablePipeline {
-	return &NullablePipeline{value: val, isSet: true}
+func NewNullableCentralLoggingResponse(val *CentralLoggingResponse) *NullableCentralLoggingResponse {
+	return &NullableCentralLoggingResponse{value: val, isSet: true}
 }
 
-func (v NullablePipeline) MarshalJSON() ([]byte, error) {
+func (v NullableCentralLoggingResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullablePipeline) UnmarshalJSON(src []byte) error {
+func (v *NullableCentralLoggingResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

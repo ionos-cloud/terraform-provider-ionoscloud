@@ -15,8 +15,8 @@ import (
 	"time"
 )
 
-// Metadata Metadata of the resource
-type Metadata struct {
+// DeletedMetadata struct for DeletedMetadata
+type DeletedMetadata struct {
 	// The ISO 8601 creation timestamp.
 	CreatedDate       *IonosTime `json:"createdDate,omitempty"`
 	CreatedBy         *string    `json:"createdBy,omitempty"`
@@ -31,27 +31,27 @@ type Metadata struct {
 	State *string `json:"state,omitempty"`
 }
 
-// NewMetadata instantiates a new Metadata object
+// NewDeletedMetadata instantiates a new DeletedMetadata object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMetadata() *Metadata {
-	this := Metadata{}
+func NewDeletedMetadata() *DeletedMetadata {
+	this := DeletedMetadata{}
 
 	return &this
 }
 
-// NewMetadataWithDefaults instantiates a new Metadata object
+// NewDeletedMetadataWithDefaults instantiates a new DeletedMetadata object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewMetadataWithDefaults() *Metadata {
-	this := Metadata{}
+func NewDeletedMetadataWithDefaults() *DeletedMetadata {
+	this := DeletedMetadata{}
 	return &this
 }
 
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
-func (o *Metadata) GetCreatedDate() *time.Time {
+func (o *DeletedMetadata) GetCreatedDate() *time.Time {
 	if o == nil {
 		return nil
 	}
@@ -66,7 +66,7 @@ func (o *Metadata) GetCreatedDate() *time.Time {
 // GetCreatedDateOk returns a tuple with the CreatedDate field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetCreatedDateOk() (*time.Time, bool) {
+func (o *DeletedMetadata) GetCreatedDateOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -79,14 +79,14 @@ func (o *Metadata) GetCreatedDateOk() (*time.Time, bool) {
 }
 
 // SetCreatedDate sets field value
-func (o *Metadata) SetCreatedDate(v time.Time) {
+func (o *DeletedMetadata) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
 
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
-func (o *Metadata) HasCreatedDate() bool {
+func (o *DeletedMetadata) HasCreatedDate() bool {
 	if o != nil && o.CreatedDate != nil {
 		return true
 	}
@@ -96,7 +96,7 @@ func (o *Metadata) HasCreatedDate() bool {
 
 // GetCreatedBy returns the CreatedBy field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Metadata) GetCreatedBy() *string {
+func (o *DeletedMetadata) GetCreatedBy() *string {
 	if o == nil {
 		return nil
 	}
@@ -108,7 +108,7 @@ func (o *Metadata) GetCreatedBy() *string {
 // GetCreatedByOk returns a tuple with the CreatedBy field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetCreatedByOk() (*string, bool) {
+func (o *DeletedMetadata) GetCreatedByOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -117,14 +117,14 @@ func (o *Metadata) GetCreatedByOk() (*string, bool) {
 }
 
 // SetCreatedBy sets field value
-func (o *Metadata) SetCreatedBy(v string) {
+func (o *DeletedMetadata) SetCreatedBy(v string) {
 
 	o.CreatedBy = &v
 
 }
 
 // HasCreatedBy returns a boolean if a field has been set.
-func (o *Metadata) HasCreatedBy() bool {
+func (o *DeletedMetadata) HasCreatedBy() bool {
 	if o != nil && o.CreatedBy != nil {
 		return true
 	}
@@ -134,7 +134,7 @@ func (o *Metadata) HasCreatedBy() bool {
 
 // GetCreatedByUserId returns the CreatedByUserId field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Metadata) GetCreatedByUserId() *string {
+func (o *DeletedMetadata) GetCreatedByUserId() *string {
 	if o == nil {
 		return nil
 	}
@@ -146,7 +146,7 @@ func (o *Metadata) GetCreatedByUserId() *string {
 // GetCreatedByUserIdOk returns a tuple with the CreatedByUserId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetCreatedByUserIdOk() (*string, bool) {
+func (o *DeletedMetadata) GetCreatedByUserIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -155,14 +155,14 @@ func (o *Metadata) GetCreatedByUserIdOk() (*string, bool) {
 }
 
 // SetCreatedByUserId sets field value
-func (o *Metadata) SetCreatedByUserId(v string) {
+func (o *DeletedMetadata) SetCreatedByUserId(v string) {
 
 	o.CreatedByUserId = &v
 
 }
 
 // HasCreatedByUserId returns a boolean if a field has been set.
-func (o *Metadata) HasCreatedByUserId() bool {
+func (o *DeletedMetadata) HasCreatedByUserId() bool {
 	if o != nil && o.CreatedByUserId != nil {
 		return true
 	}
@@ -172,7 +172,7 @@ func (o *Metadata) HasCreatedByUserId() bool {
 
 // GetCreatedByUserUuid returns the CreatedByUserUuid field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Metadata) GetCreatedByUserUuid() *string {
+func (o *DeletedMetadata) GetCreatedByUserUuid() *string {
 	if o == nil {
 		return nil
 	}
@@ -184,7 +184,7 @@ func (o *Metadata) GetCreatedByUserUuid() *string {
 // GetCreatedByUserUuidOk returns a tuple with the CreatedByUserUuid field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetCreatedByUserUuidOk() (*string, bool) {
+func (o *DeletedMetadata) GetCreatedByUserUuidOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -193,14 +193,14 @@ func (o *Metadata) GetCreatedByUserUuidOk() (*string, bool) {
 }
 
 // SetCreatedByUserUuid sets field value
-func (o *Metadata) SetCreatedByUserUuid(v string) {
+func (o *DeletedMetadata) SetCreatedByUserUuid(v string) {
 
 	o.CreatedByUserUuid = &v
 
 }
 
 // HasCreatedByUserUuid returns a boolean if a field has been set.
-func (o *Metadata) HasCreatedByUserUuid() bool {
+func (o *DeletedMetadata) HasCreatedByUserUuid() bool {
 	if o != nil && o.CreatedByUserUuid != nil {
 		return true
 	}
@@ -210,7 +210,7 @@ func (o *Metadata) HasCreatedByUserUuid() bool {
 
 // GetLastModifiedDate returns the LastModifiedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
-func (o *Metadata) GetLastModifiedDate() *time.Time {
+func (o *DeletedMetadata) GetLastModifiedDate() *time.Time {
 	if o == nil {
 		return nil
 	}
@@ -225,7 +225,7 @@ func (o *Metadata) GetLastModifiedDate() *time.Time {
 // GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetLastModifiedDateOk() (*time.Time, bool) {
+func (o *DeletedMetadata) GetLastModifiedDateOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -238,14 +238,14 @@ func (o *Metadata) GetLastModifiedDateOk() (*time.Time, bool) {
 }
 
 // SetLastModifiedDate sets field value
-func (o *Metadata) SetLastModifiedDate(v time.Time) {
+func (o *DeletedMetadata) SetLastModifiedDate(v time.Time) {
 
 	o.LastModifiedDate = &IonosTime{v}
 
 }
 
 // HasLastModifiedDate returns a boolean if a field has been set.
-func (o *Metadata) HasLastModifiedDate() bool {
+func (o *DeletedMetadata) HasLastModifiedDate() bool {
 	if o != nil && o.LastModifiedDate != nil {
 		return true
 	}
@@ -255,7 +255,7 @@ func (o *Metadata) HasLastModifiedDate() bool {
 
 // GetLastModifiedBy returns the LastModifiedBy field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Metadata) GetLastModifiedBy() *string {
+func (o *DeletedMetadata) GetLastModifiedBy() *string {
 	if o == nil {
 		return nil
 	}
@@ -267,7 +267,7 @@ func (o *Metadata) GetLastModifiedBy() *string {
 // GetLastModifiedByOk returns a tuple with the LastModifiedBy field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetLastModifiedByOk() (*string, bool) {
+func (o *DeletedMetadata) GetLastModifiedByOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -276,14 +276,14 @@ func (o *Metadata) GetLastModifiedByOk() (*string, bool) {
 }
 
 // SetLastModifiedBy sets field value
-func (o *Metadata) SetLastModifiedBy(v string) {
+func (o *DeletedMetadata) SetLastModifiedBy(v string) {
 
 	o.LastModifiedBy = &v
 
 }
 
 // HasLastModifiedBy returns a boolean if a field has been set.
-func (o *Metadata) HasLastModifiedBy() bool {
+func (o *DeletedMetadata) HasLastModifiedBy() bool {
 	if o != nil && o.LastModifiedBy != nil {
 		return true
 	}
@@ -293,7 +293,7 @@ func (o *Metadata) HasLastModifiedBy() bool {
 
 // GetLastModifiedByUserId returns the LastModifiedByUserId field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Metadata) GetLastModifiedByUserId() *string {
+func (o *DeletedMetadata) GetLastModifiedByUserId() *string {
 	if o == nil {
 		return nil
 	}
@@ -305,7 +305,7 @@ func (o *Metadata) GetLastModifiedByUserId() *string {
 // GetLastModifiedByUserIdOk returns a tuple with the LastModifiedByUserId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetLastModifiedByUserIdOk() (*string, bool) {
+func (o *DeletedMetadata) GetLastModifiedByUserIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -314,14 +314,14 @@ func (o *Metadata) GetLastModifiedByUserIdOk() (*string, bool) {
 }
 
 // SetLastModifiedByUserId sets field value
-func (o *Metadata) SetLastModifiedByUserId(v string) {
+func (o *DeletedMetadata) SetLastModifiedByUserId(v string) {
 
 	o.LastModifiedByUserId = &v
 
 }
 
 // HasLastModifiedByUserId returns a boolean if a field has been set.
-func (o *Metadata) HasLastModifiedByUserId() bool {
+func (o *DeletedMetadata) HasLastModifiedByUserId() bool {
 	if o != nil && o.LastModifiedByUserId != nil {
 		return true
 	}
@@ -331,7 +331,7 @@ func (o *Metadata) HasLastModifiedByUserId() bool {
 
 // GetLastModifiedByUserUuid returns the LastModifiedByUserUuid field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Metadata) GetLastModifiedByUserUuid() *string {
+func (o *DeletedMetadata) GetLastModifiedByUserUuid() *string {
 	if o == nil {
 		return nil
 	}
@@ -343,7 +343,7 @@ func (o *Metadata) GetLastModifiedByUserUuid() *string {
 // GetLastModifiedByUserUuidOk returns a tuple with the LastModifiedByUserUuid field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetLastModifiedByUserUuidOk() (*string, bool) {
+func (o *DeletedMetadata) GetLastModifiedByUserUuidOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -352,14 +352,14 @@ func (o *Metadata) GetLastModifiedByUserUuidOk() (*string, bool) {
 }
 
 // SetLastModifiedByUserUuid sets field value
-func (o *Metadata) SetLastModifiedByUserUuid(v string) {
+func (o *DeletedMetadata) SetLastModifiedByUserUuid(v string) {
 
 	o.LastModifiedByUserUuid = &v
 
 }
 
 // HasLastModifiedByUserUuid returns a boolean if a field has been set.
-func (o *Metadata) HasLastModifiedByUserUuid() bool {
+func (o *DeletedMetadata) HasLastModifiedByUserUuid() bool {
 	if o != nil && o.LastModifiedByUserUuid != nil {
 		return true
 	}
@@ -369,7 +369,7 @@ func (o *Metadata) HasLastModifiedByUserUuid() bool {
 
 // GetState returns the State field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Metadata) GetState() *string {
+func (o *DeletedMetadata) GetState() *string {
 	if o == nil {
 		return nil
 	}
@@ -381,7 +381,7 @@ func (o *Metadata) GetState() *string {
 // GetStateOk returns a tuple with the State field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetStateOk() (*string, bool) {
+func (o *DeletedMetadata) GetStateOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -390,14 +390,14 @@ func (o *Metadata) GetStateOk() (*string, bool) {
 }
 
 // SetState sets field value
-func (o *Metadata) SetState(v string) {
+func (o *DeletedMetadata) SetState(v string) {
 
 	o.State = &v
 
 }
 
 // HasState returns a boolean if a field has been set.
-func (o *Metadata) HasState() bool {
+func (o *DeletedMetadata) HasState() bool {
 	if o != nil && o.State != nil {
 		return true
 	}
@@ -405,7 +405,7 @@ func (o *Metadata) HasState() bool {
 	return false
 }
 
-func (o Metadata) MarshalJSON() ([]byte, error) {
+func (o DeletedMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
@@ -446,38 +446,38 @@ func (o Metadata) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableMetadata struct {
-	value *Metadata
+type NullableDeletedMetadata struct {
+	value *DeletedMetadata
 	isSet bool
 }
 
-func (v NullableMetadata) Get() *Metadata {
+func (v NullableDeletedMetadata) Get() *DeletedMetadata {
 	return v.value
 }
 
-func (v *NullableMetadata) Set(val *Metadata) {
+func (v *NullableDeletedMetadata) Set(val *DeletedMetadata) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableMetadata) IsSet() bool {
+func (v NullableDeletedMetadata) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableMetadata) Unset() {
+func (v *NullableDeletedMetadata) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableMetadata(val *Metadata) *NullableMetadata {
-	return &NullableMetadata{value: val, isSet: true}
+func NewNullableDeletedMetadata(val *DeletedMetadata) *NullableDeletedMetadata {
+	return &NullableDeletedMetadata{value: val, isSet: true}
 }
 
-func (v NullableMetadata) MarshalJSON() ([]byte, error) {
+func (v NullableDeletedMetadata) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableMetadata) UnmarshalJSON(src []byte) error {
+func (v *NullableDeletedMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -15,7 +15,7 @@ import (
 
 var pipelineResourceName = "Logging Pipeline"
 
-func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.Pipeline, utils.ApiResponseInfo, error) {
+func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.ProvisioningPipeline, utils.ApiResponseInfo, error) {
 	request := setPipelinePostRequest(d)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPost(ctx).Pipeline(*request).Execute()
 	apiResponse.LogInfo()

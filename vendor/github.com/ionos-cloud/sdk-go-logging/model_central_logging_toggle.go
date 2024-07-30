@@ -14,34 +14,32 @@ import (
 	"encoding/json"
 )
 
-// PipelineCreate Request payload with all data needed to create a new logging pipeline
-type PipelineCreate struct {
-	Properties *PipelineCreateProperties `json:"properties"`
+// CentralLoggingToggle Request payload to toggle central logging.
+type CentralLoggingToggle struct {
+	Properties *CentralLoggingToggleProperties `json:"properties,omitempty"`
 }
 
-// NewPipelineCreate instantiates a new PipelineCreate object
+// NewCentralLoggingToggle instantiates a new CentralLoggingToggle object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPipelineCreate(properties PipelineCreateProperties) *PipelineCreate {
-	this := PipelineCreate{}
-
-	this.Properties = &properties
+func NewCentralLoggingToggle() *CentralLoggingToggle {
+	this := CentralLoggingToggle{}
 
 	return &this
 }
 
-// NewPipelineCreateWithDefaults instantiates a new PipelineCreate object
+// NewCentralLoggingToggleWithDefaults instantiates a new CentralLoggingToggle object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewPipelineCreateWithDefaults() *PipelineCreate {
-	this := PipelineCreate{}
+func NewCentralLoggingToggleWithDefaults() *CentralLoggingToggle {
+	this := CentralLoggingToggle{}
 	return &this
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for PipelineCreateProperties will be returned
-func (o *PipelineCreate) GetProperties() *PipelineCreateProperties {
+// If the value is explicit nil, the zero value for CentralLoggingToggleProperties will be returned
+func (o *CentralLoggingToggle) GetProperties() *CentralLoggingToggleProperties {
 	if o == nil {
 		return nil
 	}
@@ -53,7 +51,7 @@ func (o *PipelineCreate) GetProperties() *PipelineCreateProperties {
 // GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *PipelineCreate) GetPropertiesOk() (*PipelineCreateProperties, bool) {
+func (o *CentralLoggingToggle) GetPropertiesOk() (*CentralLoggingToggleProperties, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -62,14 +60,14 @@ func (o *PipelineCreate) GetPropertiesOk() (*PipelineCreateProperties, bool) {
 }
 
 // SetProperties sets field value
-func (o *PipelineCreate) SetProperties(v PipelineCreateProperties) {
+func (o *CentralLoggingToggle) SetProperties(v CentralLoggingToggleProperties) {
 
 	o.Properties = &v
 
 }
 
 // HasProperties returns a boolean if a field has been set.
-func (o *PipelineCreate) HasProperties() bool {
+func (o *CentralLoggingToggle) HasProperties() bool {
 	if o != nil && o.Properties != nil {
 		return true
 	}
@@ -77,7 +75,7 @@ func (o *PipelineCreate) HasProperties() bool {
 	return false
 }
 
-func (o PipelineCreate) MarshalJSON() ([]byte, error) {
+func (o CentralLoggingToggle) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
@@ -86,38 +84,38 @@ func (o PipelineCreate) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullablePipelineCreate struct {
-	value *PipelineCreate
+type NullableCentralLoggingToggle struct {
+	value *CentralLoggingToggle
 	isSet bool
 }
 
-func (v NullablePipelineCreate) Get() *PipelineCreate {
+func (v NullableCentralLoggingToggle) Get() *CentralLoggingToggle {
 	return v.value
 }
 
-func (v *NullablePipelineCreate) Set(val *PipelineCreate) {
+func (v *NullableCentralLoggingToggle) Set(val *CentralLoggingToggle) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullablePipelineCreate) IsSet() bool {
+func (v NullableCentralLoggingToggle) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullablePipelineCreate) Unset() {
+func (v *NullableCentralLoggingToggle) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullablePipelineCreate(val *PipelineCreate) *NullablePipelineCreate {
-	return &NullablePipelineCreate{value: val, isSet: true}
+func NewNullableCentralLoggingToggle(val *CentralLoggingToggle) *NullableCentralLoggingToggle {
+	return &NullableCentralLoggingToggle{value: val, isSet: true}
 }
 
-func (v NullablePipelineCreate) MarshalJSON() ([]byte, error) {
+func (v NullableCentralLoggingToggle) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullablePipelineCreate) UnmarshalJSON(src []byte) error {
+func (v *NullableCentralLoggingToggle) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
