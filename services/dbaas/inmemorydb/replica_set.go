@@ -284,16 +284,16 @@ func (c *InMemoryDBClient) SetSnapshotData(d *schema.ResourceData, snapshot inMe
 	var metadata []interface{}
 	metadataEntry := make(map[string]interface{})
 	if snapshot.Metadata.CreatedDate != nil {
-		metadataEntry["created_date"] = (*snapshot.Metadata.CreatedDate).Time.Format("2006-01-02T15:04:05Z")
+		metadataEntry["created_date"] = (*snapshot.Metadata.CreatedDate).Time.Format(constant.DatetimeZLayout)
 	}
 	if snapshot.Metadata.LastModifiedDate != nil {
-		metadataEntry["last_modified_date"] = (*snapshot.Metadata.LastModifiedDate).Time.Format("2006-01-02T15:04:05Z")
+		metadataEntry["last_modified_date"] = (*snapshot.Metadata.LastModifiedDate).Time.Format(constant.DatetimeZLayout)
 	}
 	if snapshot.Metadata.ReplicasetId != nil {
 		metadataEntry["replica_set_id"] = *snapshot.Metadata.ReplicasetId
 	}
 	if snapshot.Metadata.SnapshotTime != nil {
-		metadataEntry["snapshot_time"] = (*snapshot.Metadata.SnapshotTime).Time.Format("2006-01-02T15:04:05Z")
+		metadataEntry["snapshot_time"] = (*snapshot.Metadata.SnapshotTime).Time.Format(constant.DatetimeZLayout)
 	}
 	if snapshot.Metadata.DatacenterId != nil {
 		metadataEntry["datacenter_id"] = *snapshot.Metadata.DatacenterId

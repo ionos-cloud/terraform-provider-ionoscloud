@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -28,8 +28,8 @@ func TestAccDBaaSInMemoryDBReplicaSetBasic(t *testing.T) {
 				Source:            "hashicorp/random",
 			},
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckDBaaSInMemoryDBReplicaSetDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckDBaaSInMemoryDBReplicaSetDestroyCheck,
 		// The tests contain multiple constants that are reused in other DBaaS tests, especially attributes like 'lan_id', 'datacenter_id' for
 		// which there is no need to create new constants (there is a high probability that these attributes will remain the same in the future).
 		Steps: []resource.TestStep{
@@ -144,7 +144,7 @@ func TestAccDBaaSInMemoryDBReplicaSetBasic(t *testing.T) {
 					testAccCheckDBaaSInMemoryDBReplicaSetExists(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, &replicaSet),
 					resource.TestCheckResourceAttr(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterDisplayNameAttribute, replicaSetDisplayNameUpdateValue),
 					resource.TestCheckResourceAttr(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, replicaSetLocationAttribute, replicaSetLocationValue),
-					resource.TestCheckResourceAttr(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, replicaSetVersionAttribute, replicaSetVersionUpdateValue),
+					resource.TestCheckResourceAttr(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, replicaSetVersionAttribute, replicaSetVersionValue),
 					resource.TestCheckResourceAttr(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, replicaSetReplicasAttribute, replicaSetReplicasUpdateValue),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, replicaSetResourcesAttribute+".*", map[string]string{
 						clusterCoresAttribute: replicaSetCoresValueUpdate,
@@ -343,7 +343,7 @@ resource ` + constant.DBaaSInMemoryDBReplicaSetResource + ` ` + constant.DBaaSRe
 const inMemoryDBReplicaSetConfigUpdate = temporaryConfigSetup + `
 resource ` + constant.DBaaSInMemoryDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestResource + ` {
   ` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"  
-  ` + replicaSetVersionAttribute + ` = "` + replicaSetVersionUpdateValue + `"
+  ` + replicaSetVersionAttribute + ` = "` + replicaSetVersionValue + `"
   ` + clusterDisplayNameAttribute + ` = "` + replicaSetDisplayNameUpdateValue + `"
   ` + replicaSetReplicasAttribute + ` = "` + replicaSetReplicasUpdateValue + `"
   ` + replicaSetPersistenceModeAttribute + ` = "` + replicaSetPersistenceModeUpdateValue + `"
@@ -453,13 +453,12 @@ const (
 	replicaSetLocationValue              = "es/vit"
 	replicaSetLocationUpdateValue        = "de/txl"
 	replicaSetVersionValue               = "7.2"
-	replicaSetVersionUpdateValue         = "7.0"
 	replicaSetDisplayNameValue           = "MyReplicaSet"
 	replicaSetDisplayNameUpdateValue     = "UpdatedReplicaSet"
 	replicaSetReplicasValue              = "4"
 	replicaSetReplicasUpdateValue        = "5"
 	replicaSetPersistenceModeValue       = "RDB"
-	replicaSetPersistenceModeUpdateValue = "RDB_AOF"
+	replicaSetPersistenceModeUpdateValue = "AOF"
 	replicaSetEvictionPolicyValue        = "noeviction"
 	replicaSetEvictionPolicyUpdateValue  = "allkeys-lru"
 	replicaSetCoresValue                 = "1"
