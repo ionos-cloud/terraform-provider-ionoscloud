@@ -99,7 +99,6 @@ func TestAccAutoscalingGroup_requiredUpdated(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.ram", "1024"),
 				),
 			},
-			},
 			{
 				ResourceName:      resourceAGName,
 				ImportState:       true,
