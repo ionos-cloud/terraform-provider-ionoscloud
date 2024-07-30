@@ -81,7 +81,7 @@ func dataSourceApiGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the ApiGateway ID or name"))
+		return diag.FromErr(fmt.Errorf("please provide either the API Gateway ID or name"))
 	}
 
 	var gateway apigateway.GatewayRead
@@ -89,12 +89,12 @@ func dataSourceApiGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 	if idOk {
 		gateway, _, err = client.GetApiGatewayById(ctx, id)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the ApiGateway with ID: %s, error: %w", idValue, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the API Gateway with ID: %s, error: %w", idValue, err))
 		}
 	} else {
 		gateways, _, err := client.ListApiGateways(ctx)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching Gateways: %w", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching API Gateways: %w", err))
 		}
 
 		var results []apigateway.GatewayRead
@@ -105,9 +105,9 @@ func dataSourceApiGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no ApiGateway found with the specified name: %s", name))
+			return diag.FromErr(fmt.Errorf("no API Gateway found with the specified name: %s", name))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one ApiGateway found with the specified name: %s", name))
+			return diag.FromErr(fmt.Errorf("more than one API Gateway found with the specified name: %s", name))
 		} else {
 			gateway = results[0]
 		}

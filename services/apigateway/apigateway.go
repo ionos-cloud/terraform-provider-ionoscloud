@@ -54,11 +54,11 @@ func (c *Client) SetApiGatewayData(d *schema.ResourceData, apiGateway apigateway
 	d.SetId(*apiGateway.Id)
 
 	if apiGateway.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the ApiGateway with ID: %s, but received 'nil' instead", *apiGateway.Id)
+		return fmt.Errorf("expected properties in the response for the API Gateway with ID: %s, but received 'nil' instead", *apiGateway.Id)
 	}
 
 	if apiGateway.Metadata == nil {
-		return fmt.Errorf("expected metadata in the response for the ApiGateway with ID: %s, but received 'nil' instead", *apiGateway.Id)
+		return fmt.Errorf("expected metadata in the response for the API Gateway with ID: %s, but received 'nil' instead", *apiGateway.Id)
 	}
 
 	if apiGateway.Properties.Name != nil {
@@ -91,7 +91,7 @@ func (c *Client) SetApiGatewayData(d *schema.ResourceData, apiGateway apigateway
 		}
 
 		if err := d.Set("custom_domains", customDomains); err != nil {
-			return fmt.Errorf("error setting custom_domains for the ApiGateway with ID %s: %w", *apiGateway.Id, err)
+			return fmt.Errorf("error setting custom_domains for the API Gateway with ID %s: %w", *apiGateway.Id, err)
 		}
 	}
 
@@ -113,7 +113,7 @@ func (c *Client) IsGatewayReady(ctx context.Context, d *schema.ResourceData) (bo
 	}
 
 	if gateway.Metadata == nil || gateway.Metadata.Status == nil {
-		return false, fmt.Errorf("metadata or status is empty for Gateway ID: %v", gatewayID)
+		return false, fmt.Errorf("metadata or status is empty for API Gateway ID: %v", gatewayID)
 	}
 
 	log.Printf("[INFO] state of the gateway with ID %s is: %s ", gatewayID, *gateway.Metadata.Status)
@@ -128,7 +128,7 @@ func (c *Client) IsGatewayDeleted(ctx context.Context, d *schema.ResourceData) (
 		if apiResponse.HttpNotFound() {
 			return true, nil
 		}
-		return false, fmt.Errorf("check failed for Gateway deletion status, ID: %v, error: %w", gatewayID, err)
+		return false, fmt.Errorf("check failed for API Gateway deletion status, ID: %v, error: %w", gatewayID, err)
 	}
 	return false, nil
 }
