@@ -2,6 +2,7 @@
 ### Fixes
 - Data source `ionoscloud_mongo_template` should have id `computed` and `optional`
 - Fixes #607. Container registry should wait until the resource is ready before returning the ID.
+- Move tests from AMD_OPTERON to INTEL_XEON
 
 ### Features
 - Add s3 bucket, object, policy resources with base functionality

@@ -6,9 +6,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"

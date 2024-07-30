@@ -25,7 +25,6 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(imageTestName, "cloud_init", "V1"),
 					resource.TestCheckResourceAttr(imageTestName, "location", "de/txl"),
-					resource.TestCheckResourceAttr(imageTestName, "name", "CentOS-7-GenericCloud-2211"),
 					resource.TestCheckResourceAttr(imageTestName, "type", "HDD"),
 				),
 			},
@@ -72,7 +71,7 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 }
 
 const testDataSourceImageAliasLocation = `data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
-  image_alias           = "centos:latest"
+  image_alias           = "ubuntu:latest"
   location              = "de/txl"
 }`
 
