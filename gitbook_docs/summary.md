@@ -167,3 +167,16 @@
   * Data Sources
     * [Network File Storage Cluster](../docs/data-sources/nfs_cluster.md)
     * [Network File Storage Share](../docs/data-sources/nfs_share.md)
+
+* S3
+  * Resources
+    * [S3 Bucket](../docs/resources/s3_bucket.md)
+    * [S3 Bucket Policy](../docs/resources/s3_bucket_policy.md)
+    * [S3 Object](../docs/resources/s3_object.md)
+    * [S3 Bucket Public Access Block](../docs/resources/s3_bucket_access_block.md)
+  * Data Sources
+    * [S3 Bucket](../docs/data-sources/s3_bucket.md)
+    * [S3 Bucket Policy](../docs/data-sources/s3_bucket_policy.md)
+    * [S3 Object](../docs/data-sources/s3_object.md)
+    * [S3 Bucket Public Access Block](../docs/data-sources/s3_bucket_access_block.md)
+  
