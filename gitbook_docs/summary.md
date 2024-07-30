@@ -159,3 +159,11 @@
     * [Logging Pipeline](../docs/resources/logging_pipeline.md)
   * Data Sources
     * [Logging Pipeline](../docs/data-sources/logging_pipeline.md)
+
+* API Gateway
+  * Resources
+    * [API Gateway](../docs/resources/apigateway.md)
+    * [API Gateway Route](../docs/resources/apigateway_route.md)
+  * Data Sources
+    * [API Gateway](../docs/data-sources/apigateway.md)
+    * [API Gateway Route](../docs/data-sources/apigateway_route.md)
