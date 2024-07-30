@@ -7,17 +7,17 @@ import (
 
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccIpFailoverImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckLanIPFailoverDestroyCheck,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig),

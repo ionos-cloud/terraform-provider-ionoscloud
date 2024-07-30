@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
 
@@ -24,11 +25,13 @@ func dataSourceDbassMongoTemplate() *schema.Resource {
 				Description:      "The unique ID of the template.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				Optional:         true,
+				Computed:         true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the template.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,
@@ -93,6 +96,10 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(fmt.Errorf("no DBaaS Mongo Template found with the specified criteria"))
 	} else if len(templates) > 1 {
 		return diag.FromErr(fmt.Errorf("more than one DBaaS Mongo Template found for the specified search criteria"))
+	}
+
+	if err := d.Set("id", *templates[0].Id); err != nil {
+		return diag.FromErr(err)
 	}
 	if err := dbaasService.SetMongoDBTemplateData(d, templates[0]); err != nil {
 		return diag.FromErr(err)

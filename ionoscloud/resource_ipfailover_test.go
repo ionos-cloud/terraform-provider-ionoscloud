@@ -10,8 +10,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccLanIPFailoverBasic(t *testing.T) {
@@ -29,9 +29,9 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckLanIPFailoverDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLanIPFailoverConfig,
@@ -177,7 +177,7 @@ resource "ionoscloud_server" "webserver" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -200,7 +200,7 @@ resource "ionoscloud_server" "secondwebserver" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -257,7 +257,7 @@ resource "ionoscloud_server" "webserver" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -280,7 +280,7 @@ resource "ionoscloud_server" "secondwebserver" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -337,7 +337,7 @@ resource "ionoscloud_server" "webserver" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -360,7 +360,7 @@ resource "ionoscloud_server" "secondwebserver" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -417,7 +417,7 @@ resource "ionoscloud_server" "webserver" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -439,7 +439,7 @@ resource "ionoscloud_server" "secondwebserver" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {

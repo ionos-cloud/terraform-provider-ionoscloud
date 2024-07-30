@@ -13,8 +13,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -26,9 +26,9 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckDbaasPgSqlClusterDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
@@ -171,8 +171,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				),
 			},
 			{
-				//we need this as a separate test because the psql cluster needs to be deleted first
-				//in order to be able to delete the associated lan after
+				// we need this as a separate test because the psql cluster needs to be deleted first
+				// in order to be able to delete the associated lan after
 				// otherwise we get 'Access Denied: Lan 1 is delete-protected by DBAAS'
 				Config: testAccCheckDbaasPgSqlClusterConfigUpdateRemoveDBaaS,
 			},
@@ -192,9 +192,9 @@ func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckDbaasPgSqlClusterDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFromBackup,

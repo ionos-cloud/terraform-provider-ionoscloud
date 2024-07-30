@@ -8,7 +8,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 const imageTestName = constant.DataSource + "." + constant.ImageResource + "." + constant.ImageTestResource
@@ -18,14 +18,13 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		Steps: []resource.TestStep{
 			{
 				Config: testDataSourceImageAliasLocation,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(imageTestName, "cloud_init", "V1"),
 					resource.TestCheckResourceAttr(imageTestName, "location", "de/txl"),
-					resource.TestCheckResourceAttr(imageTestName, "name", "CentOS-7-GenericCloud-2211"),
 					resource.TestCheckResourceAttr(imageTestName, "type", "HDD"),
 				),
 			},
@@ -72,7 +71,7 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 }
 
 const testDataSourceImageAliasLocation = `data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
-  image_alias           = "centos:latest"
+  image_alias           = "ubuntu:latest"
   location              = "de/txl"
 }`
 

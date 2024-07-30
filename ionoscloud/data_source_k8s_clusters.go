@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/iancoleman/strcase"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
