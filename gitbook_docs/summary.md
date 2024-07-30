@@ -159,3 +159,11 @@
     * [Logging Pipeline](../docs/resources/logging_pipeline.md)
   * Data Sources
     * [Logging Pipeline](../docs/data-sources/logging_pipeline.md)
+
+* Network File Storage
+  * Resources
+    * [Network File Storage Cluster](../docs/resources/nfs_cluster.md)
+    * [Network File Storage Share](../docs/resources/nfs_share.md)
+  * Data Sources
+    * [Network File Storage Cluster](../docs/data-sources/nfs_cluster.md)
+    * [Network File Storage Share](../docs/data-sources/nfs_share.md)
