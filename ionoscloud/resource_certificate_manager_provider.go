@@ -3,15 +3,16 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+	"slices"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"log"
-	"slices"
-	"strings"
 )
 
 func resourceCertificateManagerProvider() *schema.Resource {
@@ -173,8 +174,8 @@ func providerImport(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	location := parts[0]
 	// TODO -- Modify the name of this constant
-	if !slices.Contains(constant.MariaDBClusterLocations, location) {
-		return nil, fmt.Errorf("invalid location: %v, location must be one of: %v", location, constant.MariaDBClusterLocations)
+	if !slices.Contains(constant.Locations, location) {
+		return nil, fmt.Errorf("invalid location: %v, location must be one of: %v", location, constant.Locations)
 	}
 	providerID := parts[1]
 	provider, apiResponse, err := client.GetProvider(ctx, providerID, location)

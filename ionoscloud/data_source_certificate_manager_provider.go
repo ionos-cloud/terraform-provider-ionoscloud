@@ -3,6 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -11,7 +13,6 @@ import (
 	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"strings"
 )
 
 func dataSourceCertificateManagerProvider() *schema.Resource {
@@ -23,7 +24,7 @@ func dataSourceCertificateManagerProvider() *schema.Resource {
 				Required:    true,
 				Description: "The location of the auto-certificate provider",
 				// TODO -- Change the name of this constant.
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
 			},
 			"id": {
 				Type:             schema.TypeString,

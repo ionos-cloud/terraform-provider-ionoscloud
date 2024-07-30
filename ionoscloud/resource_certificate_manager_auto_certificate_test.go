@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	certSDK "github.com/ionos-cloud/sdk-go-cert-manager"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -20,8 +20,8 @@ func TestAccCertificateManagerAutoCertificate(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCMAutoCertificateDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCMAutoCertificateDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: CMAutoCertificateConfig,
@@ -42,7 +42,7 @@ func TestAccCertificateManagerAutoCertificate(t *testing.T) {
 					CMAutoCertificateExistenceCheck(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, &autoCertificate),
 					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMProviderLocationAttr, CMProviderLocationVal),
 					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertCommonNameAttr, CMAutoCertCommonNameVal),
-					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertKeyAlgorithmAttr, CMAutoCertKeyAlgorithmAttr),
+					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertKeyAlgorithmAttr, CMAutoCertKeyAlgorithmVal),
 					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertNameAttr, CMAutoCertNameUpdatedVal),
 					resource.TestCheckResourceAttrSet(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, "provider_id"),
 					resource.TestCheckResourceAttrSet(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, "last_issued_certificate_id"),
@@ -54,8 +54,8 @@ func TestAccCertificateManagerAutoCertificate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMProviderLocationAttr, CMProviderLocationVal),
 					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertCommonNameAttr, CMAutoCertCommonNameVal),
-					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertKeyAlgorithmAttr, CMAutoCertKeyAlgorithmAttr),
-					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertNameAttr, CMAutoCertNameUpdatedVal),
+					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertKeyAlgorithmAttr, CMAutoCertKeyAlgorithmVal),
+					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertNameAttr, CMAutoCertNameVal),
 					resource.TestCheckResourceAttrSet(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, "provider_id"),
 					resource.TestCheckResourceAttrSet(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, "last_issued_certificate_id"),
 				),
@@ -65,8 +65,8 @@ func TestAccCertificateManagerAutoCertificate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMProviderLocationAttr, CMProviderLocationVal),
 					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertCommonNameAttr, CMAutoCertCommonNameVal),
-					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertKeyAlgorithmAttr, CMAutoCertKeyAlgorithmAttr),
-					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertNameAttr, CMAutoCertNameUpdatedVal),
+					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertKeyAlgorithmAttr, CMAutoCertKeyAlgorithmVal),
+					resource.TestCheckResourceAttr(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, CMAutoCertNameAttr, CMAutoCertNameVal),
 					resource.TestCheckResourceAttrSet(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, "provider_id"),
 					resource.TestCheckResourceAttrSet(constant.AutoCertificateResource+"."+constant.TestCMAutoCertificateName, "last_issued_certificate_id"),
 				),
@@ -175,22 +175,22 @@ resource ` + constant.AutoCertificateResource + ` ` + constant.TestCMAutoCertifi
 
 const CMAutoCertificateDSByID = CMAutoCertificateConfig + `
 ` + constant.DataSource + ` ` + constant.AutoCertificateResource + ` ` + constant.TestCMAutoCertificateName + `{
-	id = ` + constant.AutoCertificateResource + `.` + constant.TestCMAutoCertificateName + `.name
+	id = ` + constant.AutoCertificateResource + `.` + constant.TestCMAutoCertificateName + `.id
 	` + CMProviderLocationAttr + ` = "` + CMProviderLocationVal + `"
 }
 `
 
 const CMAutoCertificateDSByName = CMAutoCertificateConfig + `
 ` + constant.DataSource + ` ` + constant.AutoCertificateResource + ` ` + constant.TestCMAutoCertificateName + `{
-	name = ` + constant.AutoCertificateResource + `.` + constant.TestCMAutoCertificateName + `.id
+	name = ` + constant.AutoCertificateResource + `.` + constant.TestCMAutoCertificateName + `.name
 	` + CMProviderLocationAttr + ` = "` + CMProviderLocationVal + `"
 }
 `
 
 const CMAutoCertificateDSInvalidConfBothIDAndName = CMAutoCertificateConfig + `
 ` + constant.DataSource + ` ` + constant.AutoCertificateResource + ` ` + constant.TestCMAutoCertificateName + `{
-	id = ` + constant.AutoCertificateResource + `.` + constant.TestCMAutoCertificateName + `.name
-	name = ` + constant.AutoCertificateResource + `.` + constant.TestCMAutoCertificateName + `.id
+	id = ` + constant.AutoCertificateResource + `.` + constant.TestCMAutoCertificateName + `.id
+	name = ` + constant.AutoCertificateResource + `.` + constant.TestCMAutoCertificateName + `.name
 	` + CMProviderLocationAttr + ` = "` + CMProviderLocationVal + `"
 }
 `

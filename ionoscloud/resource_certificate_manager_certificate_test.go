@@ -67,7 +67,6 @@ wkv+4ThHJ677Dpi/P8F8iOJp
 -----END PRIVATE KEY-----`
 
 func TestAccCertificateResAndDataSource(t *testing.T) {
-
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
