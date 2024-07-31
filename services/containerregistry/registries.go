@@ -125,6 +125,7 @@ func (c *Client) PutToken(ctx context.Context, registryId, tokenId string, token
 
 }
 
+// GetRegistryDataCreate
 func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error) {
 
 	registry := cr.PostRegistryInput{
@@ -160,6 +161,7 @@ func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error
 	return &registry, nil
 }
 
+// GetRegistryDataUpdate
 func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, error) {
 
 	registry := cr.PatchRegistryInput{}
