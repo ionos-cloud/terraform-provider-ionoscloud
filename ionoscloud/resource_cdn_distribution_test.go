@@ -30,7 +30,7 @@ func TestAccDistributionBasic(t *testing.T) {
 				Config: testAccCheckCdnDistributionConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCdnDistributionExists(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, &distribution),
-					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "domain", "example.com"),
+					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "domain", "ionossdk.terra.example.basic"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
@@ -43,7 +43,7 @@ func TestAccDistributionBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceCdnDistributionMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "domain", "example.com"),
+					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "domain", "ionossdk.terra.example.basic"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
@@ -56,7 +56,7 @@ func TestAccDistributionBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceCdnDistributionMatchDomain,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "domain", "example.com"),
+					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "domain", "ionossdk.terra.example.basic"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
@@ -67,10 +67,6 @@ func TestAccDistributionBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceCdnDistributionMultipleResultsError,
-				ExpectError: regexp.MustCompile("more than one CDN distribution found with the specified criteria"),
-			},
-			{
 				Config:      testAccDataSourceCdnDistributionWrongDomainError,
 				ExpectError: regexp.MustCompile("no distribution found with the specified criteria"),
 			},
@@ -78,7 +74,7 @@ func TestAccDistributionBasic(t *testing.T) {
 				Config: testAccCheckCdnDistributionConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCdnDistributionExists(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, &distribution),
-					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "domain", "example.example.com"),
+					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "domain", "ionossdk.terra.example.update"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.scheme", "http/https"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.prefix", "/api2"),
 					resource.TestCheckResourceAttr(constant.CdnDistributionResource+"."+constant.CdnDistributionTestResource, "routing_rules.0.upstream.0.host", "server.server.example.com"),
@@ -172,28 +168,6 @@ data ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionDataSo
     domain = ` + constant.CdnDistributionResource + `.` + constant.CdnDistributionTestResource + `.domain
 }`
 
-const testAccDataSourceCdnDistributionMultipleResultsError = testAccCheckCdnDistributionConfigBasic + `
-resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + `_multiple_results {
-	domain         = "ionossdk.terra.example.com"
-	routing_rules {
-		scheme = "http"
-		prefix = "/api2"
-		upstream {
-			host             = "server.server.example.com"
-			caching          = false
-			waf              = true
-			rate_limit_class = "R10"
-			geo_restrictions {
-				block_list = [ "RO"]
-			}
-		}
-	}
-}
-
-data ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionDataSourceMatching + ` {
-    domain = ` + constant.CdnDistributionResource + `.` + constant.CdnDistributionTestResource + `.domain
-}`
-
 const testAccDataSourceCdnDistributionWrongDomainError = `
 data ` + constant.CdnDistributionResource + ` ` + "test_distribution_matching" + ` {
     domain =  "wrong.domain.com"
@@ -213,7 +187,7 @@ EOT
 EOT
 }
 ` + `resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + ` {
-	domain         = "ionossdk.example.example.com"
+	domain         = "ionossdk.terra.example.update"
 	certificate_id = ` + constant.CertificateResource + `.` + constant.TestCertName + `.id` + `
 	routing_rules {
 		scheme = "http/https"

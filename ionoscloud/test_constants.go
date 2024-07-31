@@ -1679,7 +1679,24 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
 }`
 
 const testAccCheckCdnDistributionConfigBasic = `resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + ` {
-	domain         = "ionossdk.terra.example.com"
+	domain         = "ionossdk.terra.example.basic"
+	routing_rules {
+		scheme = "http"
+		prefix = "/api"
+		upstream {
+			host             = "server.example.com"
+			caching          = true
+			waf              = true
+			rate_limit_class = "R100"
+			geo_restrictions {
+				allow_list = [ "RO"]
+			}
+		}
+	}
+}`
+
+const testAccCheckCdnDistributionConfigBasicImport = `resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + ` {
+	domain         = "ionossdk.terra.example.import"
 	routing_rules {
 		scheme = "http"
 		prefix = "/api"

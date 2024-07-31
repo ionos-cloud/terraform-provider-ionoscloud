@@ -18,9 +18,8 @@ func TestAccCdnDistributionImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckCdnDistributionDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCdnDistributionConfigBasic,
+				Config: testAccCheckCdnDistributionConfigBasicImport,
 			},
-
 			{
 				ResourceName:      constant.CdnDistributionResource + "." + constant.CdnDistributionTestResource,
 				ImportStateIdFunc: testAccCdnDistributionImportStateId,
