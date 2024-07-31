@@ -4,7 +4,6 @@ package ionoscloud
 
 import (
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -25,10 +24,6 @@ func TestAccApiGateway_import(t *testing.T) {
 					ImportStateIdFunc: testAccApiGatewayImportStateId,
 					ImportState:       true,
 					ImportStateVerify: true,
-					Check: func(state *terraform.State) error {
-						time.Sleep(time.Minute * 1)
-						return nil
-					},
 				},
 			},
 		},

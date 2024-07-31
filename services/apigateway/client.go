@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	apigateway "github.com/ionos-cloud/sdk-go-apigateway"
+	apigateway "github.com/ionos-cloud/sdk-go-api-gateway"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )

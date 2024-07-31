@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	ionoscloud "github.com/ionos-cloud/sdk-go-apigateway"
+	ionoscloud "github.com/ionos-cloud/sdk-go-api-gateway"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 

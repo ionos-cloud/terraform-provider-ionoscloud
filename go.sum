@@ -106,8 +106,8 @@ github.com/hashicorp/yamux v0.1.1 h1:yrQxtgseBDrq9Y652vSRDvsKCJKOUD+GzTS4Y0Y8pvE
 github.com/hashicorp/yamux v0.1.1/go.mod h1:CtWFDAQgb7dxtzFs4tWbplKIe2jSi3+5vKbgIO0SLnQ=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
-github.com/ionos-cloud/sdk-go-apigateway v0.0.0-20240618102110-09613e8cad5d h1:5G8Sj3UFVzsvF01SdSsm9HTpQXhlqpM2/Ee1dA0vTB8=
-github.com/ionos-cloud/sdk-go-apigateway v0.0.0-20240618102110-09613e8cad5d/go.mod h1:HMwZB0CUwSxD6eY5YR2WJ4wUN2rAq6FBZWFxydtVV8o=
+github.com/ionos-cloud/sdk-go-api-gateway v1.0.0 h1:T+JzarV1Iw7NjWQfEuv5bESnHoCLOMpPtbcKC4T5Uzk=
+github.com/ionos-cloud/sdk-go-api-gateway v1.0.0/go.mod h1:TkSlamP+qKRT8cgBaZEN8rawanVluOR0dXbXXdmmwTY=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0 h1:Ba5bkt9CPzygXytD7Qwgbeqs7E3UTMtq9revM+nWlyY=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0/go.mod h1:Ci6xo7oPA3TpxtB0as6UISNvlUShCX1gN332MqVYHGY=
 github.com/ionos-cloud/sdk-go-bundle/shared v0.1.0 h1:1psLbSn+i/wK0Samy8XqLxsqEnhTshz3Py1lbp5F/ao=

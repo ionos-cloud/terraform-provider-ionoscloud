@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
 	github.com/hashicorp/terraform-plugin-testing v1.8.0
 	github.com/iancoleman/strcase v0.3.0
-	github.com/ionos-cloud/sdk-go-apigateway v0.0.0-20240618102110-09613e8cad5d
+	github.com/ionos-cloud/sdk-go-api-gateway v1.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.0
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.1

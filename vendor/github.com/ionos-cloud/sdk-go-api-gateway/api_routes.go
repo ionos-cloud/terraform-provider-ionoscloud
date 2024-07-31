@@ -24,38 +24,41 @@ var (
 	_ _context.Context
 )
 
-// APIGatewaysApiService APIGatewaysApi service
-type APIGatewaysApiService service
+// RoutesApiService RoutesApi service
+type RoutesApiService service
 
-type ApiApigatewaysDeleteRequest struct {
+type ApiApigatewaysRoutesDeleteRequest struct {
 	ctx          _context.Context
-	ApiService   *APIGatewaysApiService
+	ApiService   *RoutesApiService
 	apigatewayId string
+	routeId      string
 }
 
-func (r ApiApigatewaysDeleteRequest) Execute() (*APIResponse, error) {
-	return r.ApiService.ApigatewaysDeleteExecute(r)
+func (r ApiApigatewaysRoutesDeleteRequest) Execute() (*APIResponse, error) {
+	return r.ApiService.ApigatewaysRoutesDeleteExecute(r)
 }
 
 /*
- * ApigatewaysDelete Delete Gateway
- * Deletes the specified Gateway.
+ * ApigatewaysRoutesDelete Delete Route
+ * Deletes the specified Route.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param apigatewayId The ID (UUID) of the Gateway.
- * @return ApiApigatewaysDeleteRequest
+ * @param routeId The ID (UUID) of the Route.
+ * @return ApiApigatewaysRoutesDeleteRequest
  */
-func (a *APIGatewaysApiService) ApigatewaysDelete(ctx _context.Context, apigatewayId string) ApiApigatewaysDeleteRequest {
-	return ApiApigatewaysDeleteRequest{
+func (a *RoutesApiService) ApigatewaysRoutesDelete(ctx _context.Context, apigatewayId string, routeId string) ApiApigatewaysRoutesDeleteRequest {
+	return ApiApigatewaysRoutesDeleteRequest{
 		ApiService:   a,
 		ctx:          ctx,
 		apigatewayId: apigatewayId,
+		routeId:      routeId,
 	}
 }
 
 /*
  * Execute executes the request
  */
-func (a *APIGatewaysApiService) ApigatewaysDeleteExecute(r ApiApigatewaysDeleteRequest) (*APIResponse, error) {
+func (a *RoutesApiService) ApigatewaysRoutesDeleteExecute(r ApiApigatewaysRoutesDeleteRequest) (*APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodDelete
 		localVarPostBody     interface{}
@@ -64,13 +67,14 @@ func (a *APIGatewaysApiService) ApigatewaysDeleteExecute(r ApiApigatewaysDeleteR
 		localVarFileBytes    []byte
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "APIGatewaysApiService.ApigatewaysDelete")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RoutesApiService.ApigatewaysRoutesDelete")
 	if err != nil {
 		return nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/gateways/{apigatewayId}"
+	localVarPath := localBasePath + "/gateways/{apigatewayId}/routes/{routeId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"apigatewayId"+"}", _neturl.PathEscape(parameterToString(r.apigatewayId, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"routeId"+"}", _neturl.PathEscape(parameterToString(r.routeId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -105,7 +109,7 @@ func (a *APIGatewaysApiService) ApigatewaysDeleteExecute(r ApiApigatewaysDeleteR
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
 		RequestURL:  localVarPath,
-		Operation:   "ApigatewaysDelete",
+		Operation:   "ApigatewaysRoutesDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -201,52 +205,56 @@ func (a *APIGatewaysApiService) ApigatewaysDeleteExecute(r ApiApigatewaysDeleteR
 	return localVarAPIResponse, nil
 }
 
-type ApiApigatewaysFindByIdRequest struct {
+type ApiApigatewaysRoutesFindByIdRequest struct {
 	ctx          _context.Context
-	ApiService   *APIGatewaysApiService
+	ApiService   *RoutesApiService
 	apigatewayId string
+	routeId      string
 }
 
-func (r ApiApigatewaysFindByIdRequest) Execute() (GatewayRead, *APIResponse, error) {
-	return r.ApiService.ApigatewaysFindByIdExecute(r)
+func (r ApiApigatewaysRoutesFindByIdRequest) Execute() (RouteRead, *APIResponse, error) {
+	return r.ApiService.ApigatewaysRoutesFindByIdExecute(r)
 }
 
 /*
- * ApigatewaysFindById Retrieve Gateway
- * Returns the Gateway by ID.
+ * ApigatewaysRoutesFindById Retrieve Route
+ * Returns the Route by ID.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param apigatewayId The ID (UUID) of the Gateway.
- * @return ApiApigatewaysFindByIdRequest
+ * @param routeId The ID (UUID) of the Route.
+ * @return ApiApigatewaysRoutesFindByIdRequest
  */
-func (a *APIGatewaysApiService) ApigatewaysFindById(ctx _context.Context, apigatewayId string) ApiApigatewaysFindByIdRequest {
-	return ApiApigatewaysFindByIdRequest{
+func (a *RoutesApiService) ApigatewaysRoutesFindById(ctx _context.Context, apigatewayId string, routeId string) ApiApigatewaysRoutesFindByIdRequest {
+	return ApiApigatewaysRoutesFindByIdRequest{
 		ApiService:   a,
 		ctx:          ctx,
 		apigatewayId: apigatewayId,
+		routeId:      routeId,
 	}
 }
 
 /*
  * Execute executes the request
- * @return GatewayRead
+ * @return RouteRead
  */
-func (a *APIGatewaysApiService) ApigatewaysFindByIdExecute(r ApiApigatewaysFindByIdRequest) (GatewayRead, *APIResponse, error) {
+func (a *RoutesApiService) ApigatewaysRoutesFindByIdExecute(r ApiApigatewaysRoutesFindByIdRequest) (RouteRead, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  GatewayRead
+		localVarReturnValue  RouteRead
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "APIGatewaysApiService.ApigatewaysFindById")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RoutesApiService.ApigatewaysRoutesFindById")
 	if err != nil {
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/gateways/{apigatewayId}"
+	localVarPath := localBasePath + "/gateways/{apigatewayId}/routes/{routeId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"apigatewayId"+"}", _neturl.PathEscape(parameterToString(r.apigatewayId, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"routeId"+"}", _neturl.PathEscape(parameterToString(r.routeId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -281,7 +289,7 @@ func (a *APIGatewaysApiService) ApigatewaysFindByIdExecute(r ApiApigatewaysFindB
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
 		RequestURL:  localVarPath,
-		Operation:   "ApigatewaysFindById",
+		Operation:   "ApigatewaysRoutesFindById",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -387,66 +395,71 @@ func (a *APIGatewaysApiService) ApigatewaysFindByIdExecute(r ApiApigatewaysFindB
 	return localVarReturnValue, localVarAPIResponse, nil
 }
 
-type ApiApigatewaysGetRequest struct {
-	ctx        _context.Context
-	ApiService *APIGatewaysApiService
-	offset     *int32
-	limit      *int32
-	orderBy    *string
+type ApiApigatewaysRoutesGetRequest struct {
+	ctx          _context.Context
+	ApiService   *RoutesApiService
+	apigatewayId string
+	offset       *int32
+	limit        *int32
+	orderBy      *string
 }
 
-func (r ApiApigatewaysGetRequest) Offset(offset int32) ApiApigatewaysGetRequest {
+func (r ApiApigatewaysRoutesGetRequest) Offset(offset int32) ApiApigatewaysRoutesGetRequest {
 	r.offset = &offset
 	return r
 }
-func (r ApiApigatewaysGetRequest) Limit(limit int32) ApiApigatewaysGetRequest {
+func (r ApiApigatewaysRoutesGetRequest) Limit(limit int32) ApiApigatewaysRoutesGetRequest {
 	r.limit = &limit
 	return r
 }
-func (r ApiApigatewaysGetRequest) OrderBy(orderBy string) ApiApigatewaysGetRequest {
+func (r ApiApigatewaysRoutesGetRequest) OrderBy(orderBy string) ApiApigatewaysRoutesGetRequest {
 	r.orderBy = &orderBy
 	return r
 }
 
-func (r ApiApigatewaysGetRequest) Execute() (GatewayReadList, *APIResponse, error) {
-	return r.ApiService.ApigatewaysGetExecute(r)
+func (r ApiApigatewaysRoutesGetRequest) Execute() (RouteReadList, *APIResponse, error) {
+	return r.ApiService.ApigatewaysRoutesGetExecute(r)
 }
 
 /*
- * ApigatewaysGet Retrieve all Apigateways
- * This endpoint enables retrieving all Apigateways using
+  - ApigatewaysRoutesGet Retrieve all Routes
+  - This endpoint enables retrieving all Routes using
+
 pagination and optional filters.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @return ApiApigatewaysGetRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param apigatewayId The ID (UUID) of the Gateway.
+  - @return ApiApigatewaysRoutesGetRequest
 */
-func (a *APIGatewaysApiService) ApigatewaysGet(ctx _context.Context) ApiApigatewaysGetRequest {
-	return ApiApigatewaysGetRequest{
-		ApiService: a,
-		ctx:        ctx,
+func (a *RoutesApiService) ApigatewaysRoutesGet(ctx _context.Context, apigatewayId string) ApiApigatewaysRoutesGetRequest {
+	return ApiApigatewaysRoutesGetRequest{
+		ApiService:   a,
+		ctx:          ctx,
+		apigatewayId: apigatewayId,
 	}
 }
 
 /*
  * Execute executes the request
- * @return GatewayReadList
+ * @return RouteReadList
  */
-func (a *APIGatewaysApiService) ApigatewaysGetExecute(r ApiApigatewaysGetRequest) (GatewayReadList, *APIResponse, error) {
+func (a *RoutesApiService) ApigatewaysRoutesGetExecute(r ApiApigatewaysRoutesGetRequest) (RouteReadList, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  GatewayReadList
+		localVarReturnValue  RouteReadList
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "APIGatewaysApiService.ApigatewaysGet")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RoutesApiService.ApigatewaysRoutesGet")
 	if err != nil {
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/gateways"
+	localVarPath := localBasePath + "/gateways/{apigatewayId}/routes"
+	localVarPath = strings.Replace(localVarPath, "{"+"apigatewayId"+"}", _neturl.PathEscape(parameterToString(r.apigatewayId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -490,7 +503,7 @@ func (a *APIGatewaysApiService) ApigatewaysGetExecute(r ApiApigatewaysGetRequest
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
 		RequestURL:  localVarPath,
-		Operation:   "ApigatewaysGet",
+		Operation:   "ApigatewaysRoutesGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -587,64 +600,68 @@ func (a *APIGatewaysApiService) ApigatewaysGetExecute(r ApiApigatewaysGetRequest
 	return localVarReturnValue, localVarAPIResponse, nil
 }
 
-type ApiApigatewaysPostRequest struct {
-	ctx           _context.Context
-	ApiService    *APIGatewaysApiService
-	gatewayCreate *GatewayCreate
+type ApiApigatewaysRoutesPostRequest struct {
+	ctx          _context.Context
+	ApiService   *RoutesApiService
+	apigatewayId string
+	routeCreate  *RouteCreate
 }
 
-func (r ApiApigatewaysPostRequest) GatewayCreate(gatewayCreate GatewayCreate) ApiApigatewaysPostRequest {
-	r.gatewayCreate = &gatewayCreate
+func (r ApiApigatewaysRoutesPostRequest) RouteCreate(routeCreate RouteCreate) ApiApigatewaysRoutesPostRequest {
+	r.routeCreate = &routeCreate
 	return r
 }
 
-func (r ApiApigatewaysPostRequest) Execute() (GatewayRead, *APIResponse, error) {
-	return r.ApiService.ApigatewaysPostExecute(r)
+func (r ApiApigatewaysRoutesPostRequest) Execute() (RouteRead, *APIResponse, error) {
+	return r.ApiService.ApigatewaysRoutesPostExecute(r)
 }
 
 /*
- * ApigatewaysPost Create Gateway
- * Creates a new Gateway.
+  - ApigatewaysRoutesPost Create Route
+  - Creates a new Route.
 
-The full Gateway needs to be provided to create the object.
+The full Route needs to be provided to create the object.
 Optional data will be filled with defaults or left empty.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @return ApiApigatewaysPostRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param apigatewayId The ID (UUID) of the Gateway.
+  - @return ApiApigatewaysRoutesPostRequest
 */
-func (a *APIGatewaysApiService) ApigatewaysPost(ctx _context.Context) ApiApigatewaysPostRequest {
-	return ApiApigatewaysPostRequest{
-		ApiService: a,
-		ctx:        ctx,
+func (a *RoutesApiService) ApigatewaysRoutesPost(ctx _context.Context, apigatewayId string) ApiApigatewaysRoutesPostRequest {
+	return ApiApigatewaysRoutesPostRequest{
+		ApiService:   a,
+		ctx:          ctx,
+		apigatewayId: apigatewayId,
 	}
 }
 
 /*
  * Execute executes the request
- * @return GatewayRead
+ * @return RouteRead
  */
-func (a *APIGatewaysApiService) ApigatewaysPostExecute(r ApiApigatewaysPostRequest) (GatewayRead, *APIResponse, error) {
+func (a *RoutesApiService) ApigatewaysRoutesPostExecute(r ApiApigatewaysRoutesPostRequest) (RouteRead, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  GatewayRead
+		localVarReturnValue  RouteRead
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "APIGatewaysApiService.ApigatewaysPost")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RoutesApiService.ApigatewaysRoutesPost")
 	if err != nil {
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/gateways"
+	localVarPath := localBasePath + "/gateways/{apigatewayId}/routes"
+	localVarPath = strings.Replace(localVarPath, "{"+"apigatewayId"+"}", _neturl.PathEscape(parameterToString(r.apigatewayId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
-	if r.gatewayCreate == nil {
-		return localVarReturnValue, nil, reportError("gatewayCreate is required and must be specified")
+	if r.routeCreate == nil {
+		return localVarReturnValue, nil, reportError("routeCreate is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -665,7 +682,7 @@ func (a *APIGatewaysApiService) ApigatewaysPostExecute(r ApiApigatewaysPostReque
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.gatewayCreate
+	localVarPostBody = r.routeCreate
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -678,7 +695,7 @@ func (a *APIGatewaysApiService) ApigatewaysPostExecute(r ApiApigatewaysPostReque
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
 		RequestURL:  localVarPath,
-		Operation:   "ApigatewaysPost",
+		Operation:   "ApigatewaysRoutesPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -793,69 +810,74 @@ func (a *APIGatewaysApiService) ApigatewaysPostExecute(r ApiApigatewaysPostReque
 	return localVarReturnValue, localVarAPIResponse, nil
 }
 
-type ApiApigatewaysPutRequest struct {
-	ctx           _context.Context
-	ApiService    *APIGatewaysApiService
-	apigatewayId  string
-	gatewayEnsure *GatewayEnsure
+type ApiApigatewaysRoutesPutRequest struct {
+	ctx          _context.Context
+	ApiService   *RoutesApiService
+	apigatewayId string
+	routeId      string
+	routeEnsure  *RouteEnsure
 }
 
-func (r ApiApigatewaysPutRequest) GatewayEnsure(gatewayEnsure GatewayEnsure) ApiApigatewaysPutRequest {
-	r.gatewayEnsure = &gatewayEnsure
+func (r ApiApigatewaysRoutesPutRequest) RouteEnsure(routeEnsure RouteEnsure) ApiApigatewaysRoutesPutRequest {
+	r.routeEnsure = &routeEnsure
 	return r
 }
 
-func (r ApiApigatewaysPutRequest) Execute() (GatewayRead, *APIResponse, error) {
-	return r.ApiService.ApigatewaysPutExecute(r)
+func (r ApiApigatewaysRoutesPutRequest) Execute() (RouteRead, *APIResponse, error) {
+	return r.ApiService.ApigatewaysRoutesPutExecute(r)
 }
 
 /*
- * ApigatewaysPut Ensure Gateway
- * Ensures that the Gateway with the provided ID is created or modified.
-The full Gateway needs to be provided to ensure
-(either update or create) the Gateway. Non present data will
+  - ApigatewaysRoutesPut Ensure Route
+  - Ensures that the Route with the provided ID is created or modified.
+
+The full Route needs to be provided to ensure
+(either update or create) the Route. Non present data will
 only be filled with defaults or left empty, but not take
 previous values into consideration.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param apigatewayId The ID (UUID) of the Gateway.
- * @return ApiApigatewaysPutRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param apigatewayId The ID (UUID) of the Gateway.
+  - @param routeId The ID (UUID) of the Route.
+  - @return ApiApigatewaysRoutesPutRequest
 */
-func (a *APIGatewaysApiService) ApigatewaysPut(ctx _context.Context, apigatewayId string) ApiApigatewaysPutRequest {
-	return ApiApigatewaysPutRequest{
+func (a *RoutesApiService) ApigatewaysRoutesPut(ctx _context.Context, apigatewayId string, routeId string) ApiApigatewaysRoutesPutRequest {
+	return ApiApigatewaysRoutesPutRequest{
 		ApiService:   a,
 		ctx:          ctx,
 		apigatewayId: apigatewayId,
+		routeId:      routeId,
 	}
 }
 
 /*
  * Execute executes the request
- * @return GatewayRead
+ * @return RouteRead
  */
-func (a *APIGatewaysApiService) ApigatewaysPutExecute(r ApiApigatewaysPutRequest) (GatewayRead, *APIResponse, error) {
+func (a *RoutesApiService) ApigatewaysRoutesPutExecute(r ApiApigatewaysRoutesPutRequest) (RouteRead, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  GatewayRead
+		localVarReturnValue  RouteRead
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "APIGatewaysApiService.ApigatewaysPut")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RoutesApiService.ApigatewaysRoutesPut")
 	if err != nil {
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/gateways/{apigatewayId}"
+	localVarPath := localBasePath + "/gateways/{apigatewayId}/routes/{routeId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"apigatewayId"+"}", _neturl.PathEscape(parameterToString(r.apigatewayId, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"routeId"+"}", _neturl.PathEscape(parameterToString(r.routeId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
-	if r.gatewayEnsure == nil {
-		return localVarReturnValue, nil, reportError("gatewayEnsure is required and must be specified")
+	if r.routeEnsure == nil {
+		return localVarReturnValue, nil, reportError("routeEnsure is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -876,7 +898,7 @@ func (a *APIGatewaysApiService) ApigatewaysPutExecute(r ApiApigatewaysPutRequest
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.gatewayEnsure
+	localVarPostBody = r.routeEnsure
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -889,7 +911,7 @@ func (a *APIGatewaysApiService) ApigatewaysPutExecute(r ApiApigatewaysPutRequest
 		Method:      localVarHTTPMethod,
 		RequestTime: httpRequestTime,
 		RequestURL:  localVarPath,
-		Operation:   "ApigatewaysPut",
+		Operation:   "ApigatewaysRoutesPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -936,7 +958,7 @@ func (a *APIGatewaysApiService) ApigatewaysPutExecute(r ApiApigatewaysPutRequest
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 409 {
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -945,7 +967,7 @@ func (a *APIGatewaysApiService) ApigatewaysPutExecute(r ApiApigatewaysPutRequest
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 404 {
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
