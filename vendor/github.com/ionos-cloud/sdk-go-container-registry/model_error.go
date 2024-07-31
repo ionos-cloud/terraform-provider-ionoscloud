@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature ### 1.2.0 - Added registry `apiSubnetAllowList`
  *
- * API version: 1.1.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -15,11 +15,12 @@ import (
 	"encoding/json"
 )
 
-// Error struct for Error
+// Error The Error object is used to represent an error response from the API.
 type Error struct {
 	// The HTTP status code of the operation.
-	HttpStatus *int32           `json:"httpStatus,omitempty"`
-	Messages   *[]ErrorMessages `json:"messages,omitempty"`
+	HttpStatus *int32 `json:"httpStatus,omitempty"`
+	// A list of error messages.
+	Messages *[]ErrorMessages `json:"messages,omitempty"`
 }
 
 // NewError instantiates a new Error object
