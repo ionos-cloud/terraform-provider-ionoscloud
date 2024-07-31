@@ -325,7 +325,7 @@ github.com/ionos-cloud/sdk-go-s3
 # github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-vm-autoscaling
-# github.com/ionos-cloud/sdk-go/v6 v6.1.11
+# github.com/ionos-cloud/sdk-go/v6 v6.1.12-0.20240731133934-1083c0aa9bd2
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jmespath/go-jmespath v0.4.0
