@@ -737,7 +737,7 @@ func (a *CertificateApiService) CertificatesPatchExecute(r ApiCertificatesPatchR
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 409 {
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -746,7 +746,7 @@ func (a *CertificateApiService) CertificatesPatchExecute(r ApiCertificatesPatchR
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 404 {
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

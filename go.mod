@@ -2,8 +2,6 @@ module github.com/ionos-cloud/terraform-provider-ionoscloud/v6
 
 go 1.21
 
-replace github.com/ionos-cloud/sdk-go-cert-manager => ../sdk-generate-test
-
 require (
 	github.com/aws/aws-sdk-go v1.54.15
 	github.com/cenkalti/backoff/v4 v4.3.0
@@ -20,7 +18,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
-	github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
+	github.com/ionos-cloud/sdk-go-cert-manager v1.1.0
 	github.com/ionos-cloud/sdk-go-container-registry v1.2.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.0.3
 	github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1
