@@ -180,3 +180,8 @@
     * [S3 Object](../docs/data-sources/s3_object.md)
     * [S3 Bucket Public Access Block](../docs/data-sources/s3_bucket_access_block.md)
   
+* CDN
+  * Resources
+    * [CDN Distribution](../docs/resources/cdn_distribution.md)
+  * Data Sources
+    * [CDN Distribution](../docs/data-sources/cdn_distribution.md)
