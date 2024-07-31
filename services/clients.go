@@ -26,5 +26,5 @@ type SdkBundle struct {
 	DNSClient          *dns.Client
 	LoggingClient      *logging.Client
 	AutoscalingClient  *autoscaling.Client
-	ApiGatewayClient   *apigateway.Client
+	APIGatewayClient   *apigateway.Client
 }

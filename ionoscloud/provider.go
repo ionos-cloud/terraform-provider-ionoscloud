@@ -148,8 +148,8 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
-			constant.ApiGatewayResource:                        resourceApiGateway(),
-			constant.ApiGatewayRouteResource:                   resourceAPIGatewayRoute(),
+			constant.APIGatewayResource:                        resourceAPIGateway(),
+			constant.APIGatewayRouteResource:                   resourceAPIGatewayRoute(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -211,8 +211,8 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  DataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
-			constant.ApiGatewayResource:                        dataSourceApiGateway(),
-			constant.ApiGatewayRouteResource:                   dataSourceAPIGatewayRoute(),
+			constant.APIGatewayResource:                        dataSourceAPIGateway(),
+			constant.APIGatewayRouteResource:                   dataSourceAPIGatewayRoute(),
 		},
 	}
 
@@ -282,7 +282,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
 		NFSClient:          NewClientByType(clientOpts, nfsClient).(*nfsService.Client),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
-		ApiGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
+		APIGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
 	}, nil
 }
 
@@ -311,7 +311,7 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
 			newConfig.UserAgent = fmt.Sprintf(
 				"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH,
+				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 			)
 			if os.Getenv(constant.IonosDebug) != "" {
 				newConfig.Debug = true

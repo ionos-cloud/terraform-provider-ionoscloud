@@ -412,7 +412,8 @@ const (
 	IPBlockLimit     = 1000
 )
 
+// API Gateway Constants
 const (
-	ApiGatewayResource      = "ionoscloud_apigateway"
-	ApiGatewayRouteResource = "ionoscloud_apigateway_route"
+	APIGatewayResource      = "ionoscloud_apigateway"
+	APIGatewayRouteResource = "ionoscloud_apigateway_route"
 )

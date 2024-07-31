@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -116,7 +117,7 @@ func resourceAPIGatewayRoute() *schema.Resource {
 }
 
 func resourceAPIGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ApiGatewayClient
+	client := meta.(services.SdkBundle).APIGatewayClient
 
 	createdRoute, _, err := client.CreateRoute(ctx, d)
 	if err != nil {
@@ -138,7 +139,7 @@ func resourceAPIGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ApiGatewayClient
+	client := meta.(services.SdkBundle).APIGatewayClient
 
 	routeID := d.Id()
 	gatewayID := d.Get("gateway_id").(string)
@@ -163,7 +164,7 @@ func resourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceAPIGatewayRouteUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ApiGatewayClient
+	client := meta.(services.SdkBundle).APIGatewayClient
 
 	updatedRoute, _, err := client.UpdateRoute(ctx, d)
 	if err != nil {
@@ -185,7 +186,7 @@ func resourceAPIGatewayRouteUpdate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceAPIGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ApiGatewayClient
+	client := meta.(services.SdkBundle).APIGatewayClient
 	gatewayID := d.Get("gateway_id").(string)
 	routeID := d.Id()
 
@@ -215,7 +216,7 @@ func resourceAPIGatewayRouteImport(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if err := d.Set("gateway_id", parts[0]); err != nil {
-		return nil, utils.GenerateSetError(constant.ApiGatewayRouteResource, "gateway_id", err)
+		return nil, utils.GenerateSetError(constant.APIGatewayRouteResource, "gateway_id", err)
 	}
 	d.SetId(parts[1])
 

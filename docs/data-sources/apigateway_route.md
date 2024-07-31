@@ -1,5 +1,5 @@
 ---
-subcategory: "ApiGateway"
+subcategory: "API Gateway"
 layout: "ionoscloud"
 page_title: "IonosCloud: ionoscloud_apigateway_route"
 sidebar_current: "docs-datasource-apigateway-route"
@@ -9,8 +9,8 @@ description: |-
 
 # ionoscloud_apigateway_route
 
-The **API Gateway Route data source** can be used to search for and return an existing ApiGateway route.
-You can provide a string for the name parameter which will be compared with provisioned ApiGateway routes.
+The **API Gateway Route data source** can be used to search for and return an existing API Gateway route.
+You can provide a string for the name parameter which will be compared with provisioned API Gateway routes.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 

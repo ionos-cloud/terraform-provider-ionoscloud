@@ -8,26 +8,27 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	apigateway "github.com/ionos-cloud/sdk-go-api-gateway"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-// GetApiGatewayById returns a gateway given an ID
-func (c *Client) GetApiGatewayById(ctx context.Context, id string) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
+// GetAPIGatewayByID returns a gateway given an ID
+func (c *Client) GetAPIGatewayByID(ctx context.Context, id string) (apigateway.GatewayRead, *apigateway.APIResponse, error) {
 	apiGateway, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiGateway, apiResponse, err
 }
 
-// ListApiGateways returns a list of all gateways
-func (c *Client) ListApiGateways(ctx context.Context) (apigateway.GatewayReadList, *apigateway.APIResponse, error) {
+// ListAPIGateways returns a list of all gateways
+func (c *Client) ListAPIGateways(ctx context.Context) (apigateway.GatewayReadList, *apigateway.APIResponse, error) {
 	apiGateways, apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return apiGateways, apiResponse, err
 }
 
-// DeleteApiGateway deletes a gateway given an ID
-func (c *Client) DeleteApiGateway(ctx context.Context, id string) (*apigateway.APIResponse, error) {
+// DeleteAPIGateway deletes a gateway given an ID
+func (c *Client) DeleteAPIGateway(ctx context.Context, id string) (*apigateway.APIResponse, error) {
 	apiResponse, err := c.sdkClient.APIGatewaysApi.ApigatewaysDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -49,8 +50,8 @@ func (c *Client) CreateAPIGateway(ctx context.Context, d *schema.ResourceData) (
 	return gateway, apiResponse, err
 }
 
-// SetApiGatewayData sets the data of the gateway in the terraform resource
-func (c *Client) SetApiGatewayData(d *schema.ResourceData, apiGateway apigateway.GatewayRead) error {
+// SetAPIGatewayData sets the data of the gateway in the terraform resource
+func (c *Client) SetAPIGatewayData(d *schema.ResourceData, apiGateway apigateway.GatewayRead) error {
 	d.SetId(*apiGateway.Id)
 
 	if apiGateway.Properties == nil {
@@ -107,7 +108,7 @@ func (c *Client) SetApiGatewayData(d *schema.ResourceData, apiGateway apigateway
 // IsGatewayReady checks if the gateway is ready
 func (c *Client) IsGatewayReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	gatewayID := d.Id()
-	gateway, _, err := c.GetApiGatewayById(ctx, gatewayID)
+	gateway, _, err := c.GetAPIGatewayByID(ctx, gatewayID)
 	if err != nil {
 		return true, fmt.Errorf("status check failed for Gateway ID: %v, error: %w", gatewayID, err)
 	}
@@ -123,7 +124,7 @@ func (c *Client) IsGatewayReady(ctx context.Context, d *schema.ResourceData) (bo
 // IsGatewayDeleted checks if the gateway is deleted
 func (c *Client) IsGatewayDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	gatewayID := d.Id()
-	_, apiResponse, err := c.GetApiGatewayById(ctx, gatewayID)
+	_, apiResponse, err := c.GetAPIGatewayByID(ctx, gatewayID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return true, nil

@@ -7,18 +7,19 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-func resourceApiGateway() *schema.Resource {
+func resourceAPIGateway() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceApiGatewayCreate,
-		ReadContext:   resourceApiGatewayRead,
-		UpdateContext: resourceApiGatewayUpdate,
-		DeleteContext: resourceApiGatewayDelete,
+		CreateContext: resourceAPIGatewayCreate,
+		ReadContext:   resourceAPIGatewayRead,
+		UpdateContext: resourceAPIGatewayUpdate,
+		DeleteContext: resourceAPIGatewayDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceApiGatewayImport,
+			StateContext: resourceAPIGatewayImport,
 		},
 		Schema: map[string]*schema.Schema{
 			// computed ID
@@ -73,8 +74,8 @@ func resourceApiGateway() *schema.Resource {
 	}
 }
 
-func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ApiGatewayClient
+func resourceAPIGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).APIGatewayClient
 	logClient := meta.(services.SdkBundle).LoggingClient
 
 	logs, ok := d.GetOk("logs")
@@ -100,11 +101,11 @@ func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("error checking status for API Gateway with ID %v: %w", gatewayID, err))
 	}
 
-	return resourceApiGatewayRead(ctx, d, meta)
+	return resourceAPIGatewayRead(ctx, d, meta)
 }
 
-func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ApiGatewayClient
+func resourceAPIGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).APIGatewayClient
 	logClient := meta.(services.SdkBundle).LoggingClient
 
 	logs, ok := d.GetOk("logs")
@@ -128,13 +129,13 @@ func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("error checking status for API Gateway %w", err))
 	}
 
-	return resourceApiGatewayRead(ctx, d, meta)
+	return resourceAPIGatewayRead(ctx, d, meta)
 }
 
-func resourceApiGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ApiGatewayClient
+func resourceAPIGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).APIGatewayClient
 	gatewayID := d.Id()
-	_, err := client.DeleteApiGateway(ctx, gatewayID)
+	_, err := client.DeleteAPIGateway(ctx, gatewayID)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error deleting API Gateway with ID: %v, error: %w", gatewayID, err))
 	}
@@ -145,18 +146,18 @@ func resourceApiGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceApiGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	_, err := resourceApiGatewayImport(ctx, d, meta)
+func resourceAPIGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	_, err := resourceAPIGatewayImport(ctx, d, meta)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error reading API Gateway with ID: %v, error: %w", d.Id(), err))
 	}
 	return nil
 }
 
-func resourceApiGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).ApiGatewayClient
+func resourceAPIGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(services.SdkBundle).APIGatewayClient
 	gatewayID := d.Id()
-	gateway, resp, err := client.GetApiGatewayById(ctx, gatewayID)
+	gateway, resp, err := client.GetAPIGatewayByID(ctx, gatewayID)
 	if err != nil {
 		if resp.HttpNotFound() {
 			d.SetId("")
@@ -166,7 +167,7 @@ func resourceApiGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	log.Printf("[INFO] Gateway found: %+v", gateway)
 
-	if err := client.SetApiGatewayData(d, gateway); err != nil {
+	if err := client.SetAPIGatewayData(d, gateway); err != nil {
 		return nil, err
 	}
 	return []*schema.ResourceData{d}, nil

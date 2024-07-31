@@ -1,5 +1,5 @@
 ---
-subcategory: "ApiGateway"
+subcategory: "API Gateway"
 layout: "ionoscloud"
 page_title: "IonosCloud: ionoscloud_apigateway_route"
 sidebar_current: "docs-resource-apigateway-route"
@@ -59,7 +59,7 @@ resource "ionoscloud_apigateway_route" "apigateway_route" {
 
 ## Import
 
-ApiGateway route can be imported using the `apigateway route id`:
+API Gateway route can be imported using the `apigateway route id`:
 
 ```shell
 terraform import ionoscloud_apigateway_route.myroute {apigateway uuid}:{apigateway route uuid}

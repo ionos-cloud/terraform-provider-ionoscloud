@@ -67,8 +67,8 @@ func TestAccAPIGatewayRouteDataSourceGetByID(t *testing.T) {
 			CheckDestroy:      testAccCheckAPIGatewayRouteDestroyCheck,
 			Steps: []resource.TestStep{
 				{
-					Config: configAPIGatewayRouteDataSourceGetByID(routeResourceName, routeDataName, constant.ApiGatewayRouteResource+"."+routeResourceName+".id"),
-					Check:  checkAPIGatewayRouteAttributes(constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeNameValue),
+					Config: configAPIGatewayRouteDataSourceGetByID(routeResourceName, routeDataName, constant.APIGatewayRouteResource+"."+routeResourceName+".id"),
+					Check:  checkAPIGatewayRouteAttributes(constant.DataSource+"."+constant.APIGatewayRouteResource+"."+routeDataName, routeAttributeNameValue),
 				},
 				{
 					Config:      configAPIGatewayRouteDataSourceGetByID(routeResourceName, routeDataName, `"00000000-0000-0000-0000-000000000000"`),
@@ -99,8 +99,8 @@ func TestAccAPIGatewayRouteDataSourceGetByName(t *testing.T) {
 			CheckDestroy:      testAccCheckAPIGatewayRouteDestroyCheck,
 			Steps: []resource.TestStep{
 				{
-					Config: configAPIGatewayRouteDataSourceGetByName(routeResourceName, routeDataName, constant.ApiGatewayRouteResource+"."+routeResourceName+".name"),
-					Check:  checkAPIGatewayRouteAttributes(constant.DataSource+"."+constant.ApiGatewayRouteResource+"."+routeDataName, routeAttributeNameValue),
+					Config: configAPIGatewayRouteDataSourceGetByName(routeResourceName, routeDataName, constant.APIGatewayRouteResource+"."+routeResourceName+".name"),
+					Check:  checkAPIGatewayRouteAttributes(constant.DataSource+"."+constant.APIGatewayRouteResource+"."+routeDataName, routeAttributeNameValue),
 				},
 				{
 					Config:      configAPIGatewayRouteDataSourceGetByName(routeResourceName, routeDataName, `"wrongname"`),
@@ -113,7 +113,7 @@ func TestAccAPIGatewayRouteDataSourceGetByName(t *testing.T) {
 
 func testAccCheckAPIGatewayRouteExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).ApiGatewayClient
+		client := testAccProvider.Meta().(services.SdkBundle).APIGatewayClient
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
@@ -138,12 +138,12 @@ func testAccCheckAPIGatewayRouteExists(n string) resource.TestCheckFunc {
 }
 
 func testAccCheckAPIGatewayRouteDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).ApiGatewayClient
+	client := testAccProvider.Meta().(services.SdkBundle).APIGatewayClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	defer cancel()
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != constant.ApiGatewayRouteResource {
+		if rs.Type != constant.APIGatewayRouteResource {
 			continue
 		}
 
@@ -162,8 +162,8 @@ func testAccCheckAPIGatewayRouteDestroyCheck(s *terraform.State) error {
 
 func checkAPIGatewayRouteResource(attributeNameValueReference string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
-		testAccCheckAPIGatewayRouteExists(constant.ApiGatewayRouteResource+"."+routeResourceName),
-		checkAPIGatewayRouteAttributes(constant.ApiGatewayRouteResource+"."+routeResourceName, attributeNameValueReference),
+		testAccCheckAPIGatewayRouteExists(constant.APIGatewayRouteResource+"."+routeResourceName),
+		checkAPIGatewayRouteAttributes(constant.APIGatewayRouteResource+"."+routeResourceName, attributeNameValueReference),
 	)
 }
 

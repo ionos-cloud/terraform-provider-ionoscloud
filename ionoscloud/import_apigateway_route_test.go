@@ -11,7 +11,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-func TestAccApiGatewayRoute_import(t *testing.T) {
+func TestAccAPIGatewayRoute_import(t *testing.T) {
 	resource.Test(
 		t, resource.TestCase{
 			PreCheck:                 func() { testAccPreCheck(t) },
@@ -22,8 +22,8 @@ func TestAccApiGatewayRoute_import(t *testing.T) {
 					Config: configAPIGatewayRouteBasic(routeResourceName, routeAttributeNameValue),
 				},
 				{
-					ResourceName:      constant.ApiGatewayRouteResource + "." + routeResourceName,
-					ImportStateIdFunc: testAccApiGatewayRouteImportStateId,
+					ResourceName:      constant.APIGatewayRouteResource + "." + routeResourceName,
+					ImportStateIdFunc: testAccAPIGatewayRouteImportStateId,
 					ImportState:       true,
 					ImportStateVerify: true,
 				},
@@ -32,11 +32,11 @@ func TestAccApiGatewayRoute_import(t *testing.T) {
 	)
 }
 
-func testAccApiGatewayRouteImportStateId(s *terraform.State) (string, error) {
+func testAccAPIGatewayRouteImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != constant.ApiGatewayRouteResource {
+		if rs.Type != constant.APIGatewayRouteResource {
 			continue
 		}
 

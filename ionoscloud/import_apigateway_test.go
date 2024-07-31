@@ -9,19 +9,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccApiGateway_import(t *testing.T) {
+func TestAccAPIGateway_import(t *testing.T) {
 	resource.Test(
 		t, resource.TestCase{
 			PreCheck:                 func() { testAccPreCheck(t) },
 			ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-			CheckDestroy:             testAccCheckApiGatewayDestroy,
+			CheckDestroy:             testAccCheckAPIGatewayDestroy,
 			Steps: []resource.TestStep{
 				{
-					Config: testAccCheckApiGatewayConfig_basic,
+					Config: testAccCheckAPIGatewayConfig_basic,
 				},
 				{
 					ResourceName:      "ionoscloud_apigateway.example",
-					ImportStateIdFunc: testAccApiGatewayImportStateId,
+					ImportStateIdFunc: testAccAPIGatewayImportStateId,
 					ImportState:       true,
 					ImportStateVerify: true,
 				},
@@ -30,7 +30,7 @@ func TestAccApiGateway_import(t *testing.T) {
 	)
 }
 
-func testAccApiGatewayImportStateId(s *terraform.State) (string, error) {
+func testAccAPIGatewayImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

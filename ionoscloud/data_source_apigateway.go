@@ -7,13 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	apigateway "github.com/ionos-cloud/sdk-go-api-gateway"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-func dataSourceApiGateway() *schema.Resource {
+func dataSourceAPIGateway() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceApiGatewayRead,
+		ReadContext: dataSourceAPIGatewayRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,
@@ -69,8 +70,8 @@ func dataSourceApiGateway() *schema.Resource {
 	}
 }
 
-func dataSourceApiGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ApiGatewayClient
+func dataSourceAPIGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).APIGatewayClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	partialMatch := d.Get("partial_match").(bool)
@@ -87,12 +88,12 @@ func dataSourceApiGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 	var gateway apigateway.GatewayRead
 	var err error
 	if idOk {
-		gateway, _, err = client.GetApiGatewayById(ctx, id)
+		gateway, _, err = client.GetAPIGatewayByID(ctx, id)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the API Gateway with ID: %s, error: %w", idValue, err))
 		}
 	} else {
-		gateways, _, err := client.ListApiGateways(ctx)
+		gateways, _, err := client.ListAPIGateways(ctx)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching API Gateways: %w", err))
 		}
@@ -104,16 +105,17 @@ func dataSourceApiGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		switch {
+		case len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no API Gateway found with the specified name: %s", name))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one API Gateway found with the specified name: %s", name))
-		} else {
+		default:
 			gateway = results[0]
 		}
 	}
 
-	if err = client.SetApiGatewayData(d, gateway); err != nil {
+	if err = client.SetAPIGatewayData(d, gateway); err != nil {
 		return diag.FromErr(err)
 	}
 

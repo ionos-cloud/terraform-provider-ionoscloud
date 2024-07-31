@@ -315,7 +315,7 @@ func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
 // checks if value['1'] of key[`id`] is present inside a slice of maps[string]interface{}
 func IsValueInSliceOfMap[T comparable](sliceOfMaps []interface{}, key string, value T) bool {
 	for _, mmap := range sliceOfMaps {
-		//do not delete if the id in the old rule is present in the new rules to be updated
+		// do not delete if the id in the old rule is present in the new rules to be updated
 		if value == mmap.(map[string]interface{})[key] {
 			return true
 		}
