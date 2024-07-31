@@ -159,3 +159,15 @@
     * [Logging Pipeline](../docs/resources/logging_pipeline.md)
   * Data Sources
     * [Logging Pipeline](../docs/data-sources/logging_pipeline.md)
+
+* VPN
+  * Resources
+    * [VPN IPSEC Gateway](../docs/resources/vpn_ipsec_gateway.md)
+    * [VPN IPSEC Tunnel](../docs/resources/vpn_ipsec_tunnel.md)
+    * [VPN Wireguard Gateway](../docs/resources/vpn_wireguard_gateway.md)
+    * [VPN Wireguard Peer](../docs/resources/vpn_wireguard_peer.md)
+  * Data Sources
+    * [VPN IPSEC Gateway](../docs/data-sources/vpn_ipsec_gateway.md)
+    * [VPN IPSEC Tunnel](../docs/data-sources/vpn_ipsec_tunnel.md)
+    * [VPN Wireguard Gateway](../docs/data-sources/vpn_wireguard_gateway.md)
+    * [VPN Wireguard Peer](../docs/data-sources/vpn_wireguard_peer.md)
