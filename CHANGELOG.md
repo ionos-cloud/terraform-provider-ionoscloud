@@ -1,9 +1,21 @@
+## 6.4.20
+### Fixes
+- Data source `ionoscloud_mongo_template` should have id `computed` and `optional`
+- Fixes #607. Container registry should wait until the resource is ready before returning the ID.
+- Move tests from AMD_OPTERON to INTEL_XEON
+
+### Features
+- Add s3 bucket, object, policy resources with base functionality
+ 
+
 ## 6.4.19
 ### Enhancements
 - Move to `sdk-go-bundle` for logging sdk
 ### Fixes 
 - Fail on k8s cluster and nodepool if creation or deletion entered failed state
-- K8s and dataplatform tests
+- K8s, dataplatform and MariaDB tests
+### Documentation
+- Update documentation for MariaDB cluster
 ## 6.4.18
 ### Features
 - Add tests for Mongo cluster and user

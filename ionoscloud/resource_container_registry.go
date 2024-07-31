@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"time"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 )
 
@@ -121,14 +121,15 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 	containerRegistry.Properties.Features = containerRegistryFeatures
 
 	containerRegistryResponse, _, err := client.CreateRegistry(ctx, *containerRegistry)
-
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while creating the registry: %w", err))
 		return diags
 	}
-
 	d.SetId(*containerRegistryResponse.Id)
 
+	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
+		return diag.FromErr(fmt.Errorf("error waiting for registry to be ready: %w", err))
+	}
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
 
@@ -137,7 +138,6 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 	client := meta.(services.SdkBundle).ContainerClient
 
 	registry, apiResponse, err := client.GetRegistry(ctx, d.Id())
-
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -179,6 +179,10 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
+	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
+		return diag.FromErr(fmt.Errorf("error waiting for registry to be ready: %w", err))
+	}
+
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
 
@@ -198,31 +202,7 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	for {
-		log.Printf("[INFO] Waiting for container registry %s to be deleted...", d.Id())
-
-		registryDeleted, dsErr := registryDeleted(ctx, client, d)
-
-		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of registry %s: %w", d.Id(), dsErr))
-			return diags
-		}
-
-		if registryDeleted {
-			log.Printf("[INFO] Successfully deleted registry: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(constant.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("registry deletion timed out! WARNING: your container registry (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-	}
-
-	return nil
+	return diag.FromErr(utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted))
 }
 
 func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -247,18 +227,4 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func registryDeleted(ctx context.Context, client *crService.Client, d *schema.ResourceData) (bool, error) {
-
-	_, apiResponse, err := client.GetRegistry(ctx, d.Id())
-
-	if err != nil {
-		if apiResponse.HttpNotFound() {
-			log.Printf("[DEBUG] Container registry not found %s", d.Id())
-			return true, nil
-		}
-		return true, fmt.Errorf("error checking registry deletion status: %w", err)
-	}
-	return false, nil
 }

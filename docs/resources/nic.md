@@ -38,7 +38,7 @@ resource "ionoscloud_server" "example" {
   cores                 = 1
   ram                   = 1024
   availability_zone     = "ZONE_1"
-  cpu_family            = "AMD_OPTERON"
+  cpu_family            = "INTEL_XEON"
   image_name            = "Ubuntu-20.04"
   image_password        = random_password.server_image_password.result
   volume {
@@ -94,7 +94,7 @@ resource "ionoscloud_server" "example" {
   cores                 = 1
   ram                   = 1024
   availability_zone     = "ZONE_1"
-  cpu_family            = "AMD_OPTERON"
+  cpu_family            = "INTEL_XEON"
   image_name            = "Ubuntu-20.04"
   image_password        = random_password.server_image_password.result
   volume {
