@@ -41,6 +41,8 @@ resource "ionoscloud_application_loadbalancer" "example" {
   ips                   = [ "10.12.118.224"]
   target_lan            = ionoscloud_lan.example_2.id
   lb_private_ips        = [ "10.13.72.225/24"]
+  central_logging       = true
+  logging_lormat        = "%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
 }
 
 ```
@@ -55,6 +57,8 @@ The following arguments are supported:
 - `ips` - (Optional)[set] Collection of the Application Load Balancer IP addresses. (Inbound and outbound) IPs of the listenerLan are customer-reserved public IPs for the public Load Balancers, and private IPs for the private Load Balancers.
 - `target_lan` - (Required)[int] ID of the balanced private target LAN (outbound).
 - `lb_private_ips` - (Optional)[set] Collection of private IP addresses with the subnet mask of the Application Load Balancer. IPs must contain valid a subnet mask. If no IP is provided, the system will generate an IP with /24 subnet.
+- `central_logging` - (Optional)[bool] Turn logging on and off for this product. Default value is 'false'.
+- `logging_lormat` - (Optional)[string] Specifies the format of the logs.
 - `flowlog` - (Optional)[list] Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination IP addresses, source and destination ports, number of packets, amount of bytes, the start and end time of the recording, and the type of protocol – and log the extent to which your instances are being accessed.
     - `action` - (Required)[string] Specifies the action to be taken when the rule is matched. Possible values: ACCEPTED, REJECTED, ALL. Immutable, forces re-creation.
     - `bucket` - (Required)[string] Specifies the S3 IONOS bucket where the flow log data will be stored. The bucket must exist. Immutable, forces re-creation.
