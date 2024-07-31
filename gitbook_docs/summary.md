@@ -179,7 +179,6 @@
     * [S3 Bucket Policy](../docs/data-sources/s3_bucket_policy.md)
     * [S3 Object](../docs/data-sources/s3_object.md)
     * [S3 Bucket Public Access Block](../docs/data-sources/s3_bucket_access_block.md)
-  
 
 * VPN
   * Resources
