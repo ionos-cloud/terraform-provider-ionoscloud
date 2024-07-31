@@ -235,7 +235,6 @@ resource "ionoscloud_kafka_cluster" "test_kafka_cluster" {
 	connections {
 		datacenter_id = ionoscloud_datacenter.test_datacenter.id
 		lan_id = ionoscloud_lan.test_lan.id
-		cidr = "192.168.1.0/24"
 		broker_addresses = [
 			"192.168.1.1/24",
 			"192.168.1.2/24",

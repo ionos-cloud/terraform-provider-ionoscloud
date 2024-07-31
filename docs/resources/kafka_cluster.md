@@ -24,7 +24,6 @@ resource "ionoscloud_kafka_cluster" "kafka_cluster" {
   connections {
     datacenter_id = <your_datacenter_id>
     lan_id = <your_lan_id>
-    cidr = "192.168.1.100/24"
     broker_addresses = [
       "192.168.1.101/24",
       "192.168.1.102/24",
@@ -41,7 +40,7 @@ resource "ionoscloud_kafka_cluster" "kafka_cluster" {
 * `location` - (Required)[string] The location of the Kafka Cluster. Possible values: `de/fra`, `de/txl`, `es/vit`,
   `gb/lhr`, `us/ewr`, `us/las`, `us/mci`, `fr/par`
 * `version` - (Required)[string] Version of the Kafka Cluster. Possible values: `3.7.0`
-* `size` - (Required)[string] Size of the Kafka Cluster. Possible values: `S`
+* `size` - (Required)[string] Size of the Kafka Cluster. Possible values: `XS`, `S`
 * `connections` - (Required) Connection information of the Kafka Cluster. Minimum items: 1, maximum items: 1.
     * `datacenter_id` - (Required)[string] The datacenter to connect your instance to.
     * `lan_id` - (Required)[string] The numeric LAN ID to connect your instance to.
@@ -49,7 +48,6 @@ resource "ionoscloud_kafka_cluster" "kafka_cluster" {
       10.244.0.0/11
     * `broker_addresses` - (Required)[list] IP addresses and subnet of cluster brokers. **Note** the following
       unavailable IP range: 10.224.0.0/11
-* `bootstrap_address` - (Computed)[string] The bootstrap IP address and port.
 * `broker_addresses` - (Computed)[list] IP address and port of cluster brokers.
 
 ## Import

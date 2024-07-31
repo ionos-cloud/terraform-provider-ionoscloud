@@ -20,7 +20,7 @@ type Client struct {
 
 var (
 	// AvailableLocations is a list of available locations for Kafka
-	AvailableLocations = []string{"de/fra", "de/txl", "es/vit", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par", "pre"}
+	AvailableLocations = []string{"de/fra", "de/txl", "es/vit", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par"}
 
 	locationToURL = map[string]string{
 		"de/fra": "https://kafka.de-fra.ionos.com",
@@ -31,7 +31,6 @@ var (
 		"us/las": "https://kafka.us-las.ionos.com",
 		"us/mci": "https://kafka.us-mci.ionos.com",
 		"fr/par": "https://kafka.fr-par.ionos.com",
-		"pre":    "https://pre.kafka.de-fra.ionos.com",
 	}
 )
 

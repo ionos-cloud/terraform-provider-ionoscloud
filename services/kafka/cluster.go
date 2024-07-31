@@ -84,7 +84,6 @@ func setClusterPostRequest(d *schema.ResourceData) *kafka.ClusterCreate {
 	size := d.Get("size").(string)
 	datacenterID := d.Get("connections.0.datacenter_id").(string)
 	lanID := d.Get("connections.0.lan_id").(string)
-	cidr := d.Get("connections.0.cidr").(string)
 	brokerAddressesRaw := d.Get("connections.0.broker_addresses").([]interface{})
 
 	brokerAddresses := make([]string, 0)
@@ -95,7 +94,6 @@ func setClusterPostRequest(d *schema.ResourceData) *kafka.ClusterCreate {
 	connection := kafka.KafkaClusterConnection{
 		DatacenterId:    &datacenterID,
 		LanId:           &lanID,
-		Cidr:            &cidr,
 		BrokerAddresses: &brokerAddresses,
 	}
 
@@ -141,12 +139,6 @@ func (c *Client) SetKafkaClusterData(d *schema.ResourceData, cluster *kafka.Clus
 		}
 	}
 
-	if cluster.Metadata.BootstrapAddress != nil {
-		if err := d.Set("bootstrap_address", *cluster.Metadata.BootstrapAddress); err != nil {
-			return err
-		}
-	}
-
 	if cluster.Metadata.BrokerAddresses != nil {
 		if err := d.Set("broker_addresses", *cluster.Metadata.BrokerAddresses); err != nil {
 			return err
@@ -161,7 +153,6 @@ func (c *Client) setConnectionProperties(connection kafka.KafkaClusterConnection
 
 	utils.SetPropWithNilCheck(connectionMap, "datacenter_id", connection.DatacenterId)
 	utils.SetPropWithNilCheck(connectionMap, "lan_id", connection.LanId)
-	utils.SetPropWithNilCheck(connectionMap, "cidr", connection.Cidr)
 	utils.SetPropWithNilCheck(connectionMap, "broker_addresses", connection.BrokerAddresses)
 
 	return connectionMap

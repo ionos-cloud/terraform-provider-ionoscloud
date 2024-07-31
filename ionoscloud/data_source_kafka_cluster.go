@@ -65,11 +65,6 @@ func dataSourceKafkaCluster() *schema.Resource {
 							Description: "The numeric LAN ID to connect your Kafka Cluster to.",
 							Computed:    true,
 						},
-						"cidr": {
-							Type:        schema.TypeString,
-							Description: "The IP and subnet for your Kafka Cluster.",
-							Computed:    true,
-						},
 						"broker_addresses": {
 							Type:        schema.TypeList,
 							Description: "The broker addresses of the Kafka Cluster",
@@ -80,11 +75,6 @@ func dataSourceKafkaCluster() *schema.Resource {
 						},
 					},
 				},
-			},
-			"bootstrap_address": {
-				Type:        schema.TypeString,
-				Description: "The bootstrap IP address and port.",
-				Computed:    true,
 			},
 			"broker_addresses": {
 				Type:        schema.TypeList,

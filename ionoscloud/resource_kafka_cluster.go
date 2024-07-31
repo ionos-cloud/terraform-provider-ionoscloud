@@ -52,7 +52,7 @@ func resourceKafkaCluster() *schema.Resource {
 			},
 			"size": {
 				Type:             schema.TypeString,
-				Description:      "The size of your Kafka Cluster. The size of the Kafka Cluster is given in T-shirt sizes. Valid values are: S",
+				Description:      "The size of your Kafka Cluster. The size of the Kafka Cluster is given in T-shirt sizes. Valid values are: XS, S",
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
@@ -79,12 +79,6 @@ func resourceKafkaCluster() *schema.Resource {
 							Required:    true,
 							ForceNew:    true,
 						},
-						"cidr": {
-							Type:        schema.TypeString,
-							Description: "The IP and subnet for your Kafka Cluster.",
-							Required:    true,
-							ForceNew:    true,
-						},
 						"broker_addresses": {
 							Type:        schema.TypeList,
 							Description: "The broker addresses of the Kafka Cluster. Can be empty, but must be present.",
@@ -96,11 +90,6 @@ func resourceKafkaCluster() *schema.Resource {
 						},
 					},
 				},
-			},
-			"bootstrap_address": {
-				Type:        schema.TypeString,
-				Description: "The bootstrap IP address and port.",
-				Computed:    true,
 			},
 			"broker_addresses": {
 				Type:        schema.TypeList,

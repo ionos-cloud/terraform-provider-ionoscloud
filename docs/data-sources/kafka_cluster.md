@@ -55,7 +55,5 @@ The following attributes are returned by the datasource:
 * `connections` - Connection information of the Kafka Cluster. Minimum items: 1, maximum items: 1.
     * `datacenter_id` - The datacenter that your instance is connected to.
     * `lan_id` - The numeric LAN ID your instance is connected to.
-    * `cidr` - The IP and subnet for your instance.
     * `broker_addresses` - IP addresses and subnet of cluster brokers.
-* `bootstrap_address` - The bootstrap IP address and port.
 * `broker_addresses` - IP address and port of cluster brokers.

@@ -148,7 +148,7 @@ func checkKafkaClusterResourceAttributesComparative(fullResourceName, fullRefere
 func configKafkaClusterBasic(resourceName, attributeName string) string {
 	clusterBasicConfig := fmt.Sprintf(
 		templateKafkaClusterConfig, clusterResourceName, clusterAttributeNameValue, clusterAttributeVersionValue, clusterAttributeSizeValue, clusterAttributeLocationValue,
-		clusterAttributeCidrValue, clusterAttributeBrokerAddressesValue,
+		clusterAttributeBrokerAddressesValue,
 	)
 
 	return strings.Join([]string{defaultKafkaClusterBaseConfig, clusterBasicConfig}, "\n")
@@ -190,9 +190,6 @@ const (
 	// TODO: change this to a valid location after prod release
 	clusterAttributeLocationValue = "pre"
 
-	// TODO: remove after next API release
-	clusterAttributeCidrValue = "192.168.1.100/24"
-
 	clusterAttributeBrokerAddresses      = "connections.0.broker_addresses.#"
 	clusterAttributeBrokerAddressesValue = `"192.168.1.101/24", "192.168.1.102/24", "192.168.1.103/24"`
 
@@ -208,7 +205,6 @@ resource "ionoscloud_kafka_cluster" "%v" {
 	connections {
 		datacenter_id = ionoscloud_datacenter.test_datacenter.id
 		lan_id = ionoscloud_lan.test_lan.id
-		cidr = "%v"
 		broker_addresses = [
 			%v
 		]
