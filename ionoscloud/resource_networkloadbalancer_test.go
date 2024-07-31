@@ -55,7 +55,7 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "ips.0", "10.12.118.224"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.0", "10.13.72.225/24"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "central_logging", true),
-					resource.TestCheckResourceAttr(networkLoadBalancerResource, "logging_format", "%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "logging_format", '%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl'),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", constant.LanResource+".nlb_lan_1", "id"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", constant.LanResource+".nlb_lan_2", "id"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.name", "test_flowlog"),
@@ -73,7 +73,7 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", dataSourceNetworkLoadBalancerId, "target_lan"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "lb_private_ips", dataSourceNetworkLoadBalancerId, "lb_private_ips"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "central_logging", true, "central_logging"),
-					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "logging_format", "%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl", "logging_format"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "logging_format", '%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl', "logging_format"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.name", networkLoadBalancerResource, "flowlog.0.name"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.action", networkLoadBalancerResource, "flowlog.0.action"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.direction", networkLoadBalancerResource, "flowlog.0.direction"),
@@ -243,7 +243,7 @@ resource ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBa
   ips           = ["10.12.118.224"]
   lb_private_ips = ["10.13.72.225/24"]
   central_logging   = true
-  logging_format	= "%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
+  logging_format	= '%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl'
   flowlog {
     name = "test_flowlog"
     action = "ALL"

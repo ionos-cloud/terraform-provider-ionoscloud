@@ -63,6 +63,7 @@ func resourceApplicationLoadBalancer() *schema.Resource {
 				Type:        schema.TypeBool,
 				Description: "Turn logging on and off for this product. Default value is 'false'.",
 				Optional:    true,
+				Default:     false,
 			},
 			"logging_format": {
 				Type:        schema.TypeString,
