@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature ### 1.2.0 - Added registry `apiSubnetAllowList`
  *
- * API version: 1.1.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -21,12 +21,14 @@ type RepositoryMetadata struct {
 	// The ISO 8601 creation timestamp.
 	CreatedDate *IonosTime `json:"createdDate,omitempty"`
 	// Unique name of the identity that created the resource.
-	CreatedBy       *string `json:"createdBy,omitempty"`
+	CreatedBy *string `json:"createdBy,omitempty"`
+	// Unique id of the identity that created the resource.
 	CreatedByUserId *string `json:"createdByUserId,omitempty"`
 	// The ISO 8601 modified timestamp.
 	LastModifiedDate *IonosTime `json:"lastModifiedDate,omitempty"`
 	// Unique name of the identity that last modified the resource.
-	LastModifiedBy       *string `json:"lastModifiedBy,omitempty"`
+	LastModifiedBy *string `json:"lastModifiedBy,omitempty"`
+	// Unique id of the identity that last modified the resource.
 	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
 	// Unique name of the resource.
 	ResourceURN   *string    `json:"resourceURN,omitempty"`

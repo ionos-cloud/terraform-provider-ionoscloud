@@ -16,11 +16,12 @@ Manages an **Container Registry** on IonosCloud.
 ```hcl
 resource "ionoscloud_container_registry" "example" {
   garbage_collection_schedule {
-    days    = ["Monday", "Tuesday"]
-    time    = "05:19:00+00:00"
+    days                = ["Monday", "Tuesday"]
+    time                = "05:19:00+00:00"
   }
-  location  = "de/fra"
-  name      = "container-registry-example"
+  location              = "de/fra"
+  name                  = "container-registry-example"
+  api_subnet_allow_list = ["<IP1>", "<IP2>"]
 }
 ```
 
@@ -33,6 +34,7 @@ The following arguments are supported:
     * `time` - (Required)[string]
     * `days` - (Required)[list] Elements of list must have one of the values: `Saturday`, `Sunday`, `Monday`, `Tuesday`,  `Wednesday`,  `Thursday`,  `Friday` 
 * `location` - (Required)[string] Immutable, update forces re-creation of the resource.
+* `api_subnet_allow_list` - (Optional)[list] The subnet CIDRs that are allowed to connect to the registry.  Specify "a.b.c.d/32" for an individual IP address. __Note__: If this list is empty or not set, there are no restrictions.
 * `features` - (Optional)[Map]
     * `vulnerability_scanning` - (Optional)[bool] Enables or disables the Vulnerability Scanning feature for the Container Registry. To disable this feature, set the attribute to false when creating the CR resource.
   

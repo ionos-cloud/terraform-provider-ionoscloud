@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature ### 1.2.0 - Added registry `apiSubnetAllowList`
  *
- * API version: 1.1.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -21,6 +21,8 @@ type PostRegistryProperties struct {
 	Location                  *string           `json:"location"`
 	Name                      *string           `json:"name"`
 	Features                  *RegistryFeatures `json:"features,omitempty"`
+	// The subnet CIDRs that are allowed to connect to the registry.  Specify \"a.b.c.d/32\" for an individual IP address.\\ __Note__: If this list is empty or not set, there are no restrictions.
+	ApiSubnetAllowList *[]string `json:"apiSubnetAllowList,omitempty"`
 }
 
 // NewPostRegistryProperties instantiates a new PostRegistryProperties object
@@ -196,6 +198,44 @@ func (o *PostRegistryProperties) HasFeatures() bool {
 	return false
 }
 
+// GetApiSubnetAllowList returns the ApiSubnetAllowList field value
+// If the value is explicit nil, the zero value for []string will be returned
+func (o *PostRegistryProperties) GetApiSubnetAllowList() *[]string {
+	if o == nil {
+		return nil
+	}
+
+	return o.ApiSubnetAllowList
+
+}
+
+// GetApiSubnetAllowListOk returns a tuple with the ApiSubnetAllowList field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *PostRegistryProperties) GetApiSubnetAllowListOk() (*[]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.ApiSubnetAllowList, true
+}
+
+// SetApiSubnetAllowList sets field value
+func (o *PostRegistryProperties) SetApiSubnetAllowList(v []string) {
+
+	o.ApiSubnetAllowList = &v
+
+}
+
+// HasApiSubnetAllowList returns a boolean if a field has been set.
+func (o *PostRegistryProperties) HasApiSubnetAllowList() bool {
+	if o != nil && o.ApiSubnetAllowList != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o PostRegistryProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["garbageCollectionSchedule"] = o.GarbageCollectionSchedule
@@ -210,6 +250,10 @@ func (o PostRegistryProperties) MarshalJSON() ([]byte, error) {
 
 	if o.Features != nil {
 		toSerialize["features"] = o.Features
+	}
+
+	if o.ApiSubnetAllowList != nil {
+		toSerialize["apiSubnetAllowList"] = o.ApiSubnetAllowList
 	}
 
 	return json.Marshal(toSerialize)
