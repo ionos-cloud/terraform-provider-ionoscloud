@@ -15,7 +15,7 @@ Manages **S3 Buckets policies** on IonosCloud.
 
 ```hcl
 
-resource "ionosclud_s3_bucket_policy" "example" {
+resource "ionoscloud_s3_bucket_policy" "example" {
   bucket = "example"
   policy = jsonencode({
     Version = "2012-10-17"

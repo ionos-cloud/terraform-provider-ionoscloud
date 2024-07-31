@@ -3,11 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"log"
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -37,7 +38,7 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 				Description:      "The cluster location",
 				Optional:         true,
 				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.MariaDBClusterLocations, false)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
 			},
 			"instances": {
 				Type:             schema.TypeInt,
@@ -206,8 +207,8 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<cluster_id>'", d.Id())
 	}
 	location := parts[0]
-	if !slices.Contains(constant.MariaDBClusterLocations, location) {
-		return nil, fmt.Errorf("invalid import ID: %q, location must be one of %v", d.Id(), constant.MariaDBClusterLocations)
+	if !slices.Contains(constant.Locations, location) {
+		return nil, fmt.Errorf("invalid import ID: %q, location must be one of %v", d.Id(), constant.Locations)
 	}
 	clusterID := parts[1]
 
