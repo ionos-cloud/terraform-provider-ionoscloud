@@ -161,7 +161,7 @@ func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error
 	return &registry, nil
 }
 
-// GetRegistryDataUpdate
+// GetRegistryDataUpdate get registry data for update
 func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, error) {
 
 	registry := cr.PatchRegistryInput{}
