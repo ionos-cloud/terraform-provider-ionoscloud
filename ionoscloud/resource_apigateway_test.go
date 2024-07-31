@@ -32,7 +32,7 @@ resource "ionoscloud_apigateway" "example" {
   logs = false
   metrics = false
   custom_domains {
-    name = "example_updated.com"
+    name = "example-updated.com"
     certificate_id = "00000000-0000-0000-0000-000000000000"
   }
 }
@@ -100,6 +100,17 @@ func TestAccApiGateway_basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccCheckApiGatewayConfig_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckApiGatewayExists("ionoscloud_apigateway.example", &apiGateway),
+					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "name", "example_updated"),
+					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "logs", "false"),
+					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "metrics", "false"),
+					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.name", "example-updated.com"),
+					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.certificate_id", "00000000-0000-0000-0000-000000000000"),
+				),
+			},
+			{
 				Config: testAccDataSourceApiGatewayMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "name", "ionoscloud_apigateway.example", "name"),
@@ -137,17 +148,6 @@ func TestAccApiGateway_basic(t *testing.T) {
 				Config:      testAccDataSourceApiGatewayWrongNameError,
 				ExpectError: regexp.MustCompile("no API Gateway found with the specified"),
 			},
-			//{
-			//	Config: testAccCheckApiGatewayConfig_update,
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheckApiGatewayExists("ionoscloud_apigateway.example", &apiGateway),
-			//		resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "name", "example_updated"),
-			//		resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "logs", "false"),
-			//		resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "metrics", "false"),
-			//		resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.name", "example_updated.com"),
-			//		resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.certificate_id", "00000000-0000-0000-0000-000000000000"),
-			//	),
-			//},
 		},
 	})
 }

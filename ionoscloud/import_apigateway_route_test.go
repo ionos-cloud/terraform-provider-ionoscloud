@@ -1,4 +1,4 @@
-//go:build apigateway || all || gateway
+//go:build apigateway || all || route
 
 package ionoscloud
 
