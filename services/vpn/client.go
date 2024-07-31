@@ -20,7 +20,9 @@ type Client struct {
 
 var (
 	// AvailableLocations is a list of supported locations for VPN
-	AvailableLocations = []string{"de/fra", "de/txl", "es/vit", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par"}
+	AvailableLocations = []string{"de/fra", "de/txl"}
+	// todo for now we only support de/fra and de/txl.
+	// AvailableLocations = []string{"de/fra", "de/txl", "es/vit", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par"}
 
 	locationToURL = map[string]string{
 		"de/fra": "https://vpn.de-fra.ionos.com",
@@ -36,16 +38,16 @@ var (
 
 // NewClient returns a new ionoscloud logging client
 func NewClient(username, password, token, url, terraformVersion string) *Client {
-	newConfigLogging := shared.NewConfiguration(username, password, token, url)
-	newConfigLogging.MaxRetries = constant.MaxRetries
-	newConfigLogging.MaxWaitTime = constant.MaxWaitTime
-	newConfigLogging.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
-	newConfigLogging.UserAgent = fmt.Sprintf(
+	newConfig := shared.NewConfiguration(username, password, token, url)
+	newConfig.MaxRetries = constant.MaxRetries
+	newConfig.MaxWaitTime = constant.MaxWaitTime
+	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-vpn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch",
 		vpn.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 
-	return &Client{sdkClient: *vpn.NewAPIClient(newConfigLogging)}
+	return &Client{sdkClient: *vpn.NewAPIClient(newConfig)}
 }
 
 func (c *Client) changeConfigURL(location string) {

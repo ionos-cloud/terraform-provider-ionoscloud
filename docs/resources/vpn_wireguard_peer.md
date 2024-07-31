@@ -33,7 +33,7 @@ resource "ionoscloud_vpn_wireguard_peer" "example" {
 The following arguments are supported:
 
 - `gateway_id` - (Required)[string] The ID of the WireGuard Gateway that the Peer will connect to.
-- `location` - (Required)[string] The location of the WireGuard Gateway.
+- `location` - (Required)[string] The location of the WireGuard Gateway. 
 - `name` - (Required)[string] The human-readable name of the WireGuard Gateway.
 - `public_key` - (Required)[string] The public key for the WireGuard Gateway.
 - `description` - (Optional)[string] A description of the WireGuard Gateway.
