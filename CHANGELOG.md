@@ -1,6 +1,7 @@
 ## 6.5.0
 ### Features
 - Added CDN support: `cdn_distribution` resource and data source
+- added new attribute `api_subnet_allow_list` to `container_registry` resource and data source
 
 
 ## 6.4.20

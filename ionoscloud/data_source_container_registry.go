@@ -36,6 +36,12 @@ func dataSourceContainerRegistry() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"api_subnet_allow_list": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Computed:    true,
+				Description: "The subnet CIDRs that are allowed to connect to the registry. Specify 'a.b.c.d/32' for an individual IP address. __Note__: If this list is empty or not set, there are no restrictions.",
+			},
 			"garbage_collection_schedule": {
 				Type:     schema.TypeList,
 				Computed: true,

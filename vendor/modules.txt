@@ -304,7 +304,7 @@ github.com/ionos-cloud/sdk-go-cdn
 # github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go-cert-manager
-# github.com/ionos-cloud/sdk-go-container-registry v1.1.0
+# github.com/ionos-cloud/sdk-go-container-registry v1.2.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-container-registry
 # github.com/ionos-cloud/sdk-go-dataplatform v1.0.3

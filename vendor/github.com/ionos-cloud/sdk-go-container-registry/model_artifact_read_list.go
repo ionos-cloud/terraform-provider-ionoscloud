@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature ### 1.2.0 - Added registry `apiSubnetAllowList`
  *
- * API version: 1.1.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -21,9 +21,9 @@ type ArtifactReadList struct {
 	Type  *string         `json:"type"`
 	Href  *string         `json:"href"`
 	Items *[]ArtifactRead `json:"items,omitempty"`
-	// The offset specified in the request (if none was specified, the default offset is 0) (not implemented yet).
+	// The offset specified in the request (if none was specified, the default offset is 0).
 	Offset *int32 `json:"offset"`
-	// The limit specified in the request (if none was specified, use the endpoint's default pagination limit) (not implemented yet, always return number of items).
+	// The limit specified in the request (if none was specified, use the endpoint's default pagination limit).
 	Limit *int32 `json:"limit"`
 	Links *Links `json:"_links"`
 }
