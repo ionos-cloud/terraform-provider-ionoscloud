@@ -1,3 +1,8 @@
+## 6.5.0
+### Features
+- Added CDN support: `cdn_distribution` resource and data source
+
+
 ## 6.4.20
 ### Fixes
 - Data source `ionoscloud_mongo_template` should have id `computed` and `optional`
