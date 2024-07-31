@@ -125,7 +125,7 @@ func (c *Client) PutToken(ctx context.Context, registryId, tokenId string, token
 
 }
 
-// GetRegistryDataCreate
+// GetRegistryDataCreate get registry data for create
 func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error) {
 
 	registry := cr.PostRegistryInput{
