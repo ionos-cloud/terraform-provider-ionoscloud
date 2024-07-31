@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
@@ -192,7 +193,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	tempCreateDataCenter := d.Get("create_datacenter").(bool)
-	request.Properties.CreateDataCenter = &tempCreateDataCenter
+	request.Properties.CreateDatacenter = &tempCreateDataCenter
 	tempCreateSnapshot := d.Get("create_snapshot").(bool)
 	request.Properties.CreateSnapshot = &tempCreateSnapshot
 	tempReserveIp := d.Get("reserve_ip").(bool)
@@ -301,7 +302,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	groupReq := ionoscloud.Group{
 		Properties: &ionoscloud.GroupProperties{
-			CreateDataCenter:            &tempCreateDataCenter,
+			CreateDatacenter:            &tempCreateDataCenter,
 			CreateSnapshot:              &tempCreateSnapshot,
 			ReserveIp:                   &tempReserveIp,
 			AccessActivityLog:           &tempAccessActivityLog,
@@ -442,8 +443,8 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			}
 		}
 
-		if group.Properties.CreateDataCenter != nil {
-			err := d.Set("create_datacenter", *group.Properties.CreateDataCenter)
+		if group.Properties.CreateDatacenter != nil {
+			err := d.Set("create_datacenter", *group.Properties.CreateDatacenter)
 			if err != nil {
 				return fmt.Errorf("error while setting create_datacenter property for group %s: %w", d.Id(), err)
 			}
