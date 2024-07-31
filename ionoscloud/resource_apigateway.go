@@ -107,6 +107,19 @@ func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).ApiGatewayClient
+	logClient := meta.(services.SdkBundle).LoggingClient
+
+	logs, ok := d.GetOk("logs")
+	if ok && logs.(bool) {
+		central, _, err := logClient.GetCentralLogging(ctx)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("error getting Central Logging: %w", err))
+		}
+
+		if central.Properties == nil || central.Properties.Enabled == nil || !*central.Properties.Enabled {
+			return diag.FromErr(fmt.Errorf("cannot create API Gateway with logs enabled, please use Logging API to enable Central Logging"))
+		}
+	}
 
 	response, _, err := client.UpdateAPIGateway(ctx, d)
 	if err != nil {
