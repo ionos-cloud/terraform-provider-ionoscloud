@@ -6,7 +6,8 @@ package ionoscloud
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -16,11 +17,11 @@ func TestAccDataSourceAutoscalingGroupServers(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		ExternalProviders: randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		ExternalProviders:        randomProviderVersion343(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAG_ConfigBasic,
+				Config: testAGConfig_basic(constant.AutoscalingGroupTestResource),
 			},
 			{
 				Config: testAccDataSourceAutoscalingGroupServers,
@@ -33,7 +34,7 @@ func TestAccDataSourceAutoscalingGroupServers(t *testing.T) {
 
 }
 
-const testAccDataSourceAutoscalingGroupServers = testAG_ConfigBasic + `
+var testAccDataSourceAutoscalingGroupServers = testAGConfig_basic(constant.AutoscalingGroupTestResource) + `
 data ` + constant.AutoscalingGroupServersResource + ` ` + constant.AutoscalingGroupServersTestDataSource + ` {
   group_id = ` + constant.AutoscalingGroupResource + `.` + constant.AutoscalingGroupTestResource + `.id
 }

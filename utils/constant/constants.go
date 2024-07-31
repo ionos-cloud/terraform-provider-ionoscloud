@@ -165,6 +165,12 @@ const (
 	NetworkLoadBalancerForwardingRuleDataSourceByName = "test_networkloadbalancer_forwardingrule_name"
 )
 
+// NFS Constants
+const (
+	NFSClusterResource = "ionoscloud_nfs_cluster"
+	NFSShareResource   = "ionoscloud_nfs_share"
+)
+
 // Private Cross Connect Constants
 // The resource name was changed from Private Cross Connect to Cross Connect
 // But the terraform resources names did not change for backwards compatibility reasons
@@ -264,12 +270,12 @@ const (
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
 )
 
-// MariaDBClusterLocations slice represents the locations in which MariaDB clusters can be created
-var MariaDBClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
+// Locations slice represents the locations in which services are available.
+var Locations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
 
 // Container Registry Constants
 const (
-	//ContainerRegistryTestResource needs to be with -, do not change
+	// ContainerRegistryTestResource needs to be with -, do not change
 	ContainerRegistryTestResource      = "test-container-registry"
 	ContainerRegistryTokenTestResource = "test-container-registry-token"
 
@@ -297,8 +303,8 @@ const (
 	DataplatformVersionsDataSource           = "ionoscloud_dataplatform_versions"
 	DataplatformNodePoolsTestDataSource      = "test_dataplatform_node_pools"
 	DataplatformVersionsTestDataSource       = "test_dataplatform_versions"
-	// DataPlatformVersion lowest 'available' version is now 23.7
-	DataPlatformVersion             = "23.7"
+	// DataPlatformVersion lowest 'available' version is now 24.3
+	DataPlatformVersion             = "24.3"
 	DataPlatformNameRegexConstraint = "^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"
 	DataPlatformRegexNameError      = "name should match " + DataPlatformNameRegexConstraint
 )

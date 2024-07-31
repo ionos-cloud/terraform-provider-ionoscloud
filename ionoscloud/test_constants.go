@@ -77,7 +77,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   type = "ENTERPRISE"
   volume {
@@ -132,7 +132,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -185,7 +185,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -238,7 +238,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   ssh_key_path = ["` + sshKey + `"]
@@ -292,7 +292,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -337,7 +337,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -374,7 +374,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -429,7 +429,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -497,7 +497,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -565,7 +565,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -626,7 +626,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -1084,7 +1084,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = random_password.image_password.result
   type = "ENTERPRISE"
@@ -1134,7 +1134,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -1169,7 +1169,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -1692,7 +1692,7 @@ resource "random_string" "simple_string" {
 
 // K8s values
 const (
-	K8sVersion                  = "1.26.4"
+	K8sVersion                  = "1.29.5"
 	UpgradedK8sVersion          = "1.26.6"
 	K8sBucket                   = "test_k8s_terraform_v7"
 	K8sPrivateClusterNodeSubnet = "192.168.0.0/16"

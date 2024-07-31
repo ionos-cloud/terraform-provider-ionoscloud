@@ -99,10 +99,8 @@ func resourceApiGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error checking status for API Gateway with ID %v: %w", gatewayID, err))
 	}
-	if err := client.SetApiGatewayData(d, response); err != nil {
-		return diag.FromErr(err)
-	}
-	return nil
+
+	return resourceApiGatewayRead(ctx, d, meta)
 }
 
 func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -121,7 +119,7 @@ func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	response, _, err := client.UpdateAPIGateway(ctx, d)
+	_, _, err := client.UpdateAPIGateway(ctx, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error updating API Gateway: %w", err))
 	}
@@ -129,10 +127,8 @@ func resourceApiGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error checking status for API Gateway %w", err))
 	}
-	if err := client.SetApiGatewayData(d, response); err != nil {
-		return diag.FromErr(err)
-	}
-	return nil
+
+	return resourceApiGatewayRead(ctx, d, meta)
 }
 
 func resourceApiGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

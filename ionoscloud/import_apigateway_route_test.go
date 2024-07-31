@@ -6,28 +6,30 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccApiGatewayRoute_import(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckAPIGatewayRouteDestroyCheck,
-		Steps: []resource.TestStep{
-			{
-				Config: configAPIGatewayRouteBasic(routeResourceName, routeAttributeNameValue),
-			},
-			{
-				ResourceName:      constant.ApiGatewayRouteResource + "." + routeResourceName,
-				ImportStateIdFunc: testAccApiGatewayRouteImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+	resource.Test(
+		t, resource.TestCase{
+			PreCheck:                 func() { testAccPreCheck(t) },
+			ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+			CheckDestroy:             testAccCheckAPIGatewayRouteDestroyCheck,
+			Steps: []resource.TestStep{
+				{
+					Config: configAPIGatewayRouteBasic(routeResourceName, routeAttributeNameValue),
+				},
+				{
+					ResourceName:      constant.ApiGatewayRouteResource + "." + routeResourceName,
+					ImportStateIdFunc: testAccApiGatewayRouteImportStateId,
+					ImportState:       true,
+					ImportStateVerify: true,
+				},
 			},
 		},
-	})
+	)
 }
 
 func testAccApiGatewayRouteImportStateId(s *terraform.State) (string, error) {

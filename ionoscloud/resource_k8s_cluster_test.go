@@ -10,11 +10,12 @@ import (
 	"testing"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccK8sClusterBasic(t *testing.T) {
@@ -24,8 +25,8 @@ func TestAccK8sClusterBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckK8sClusterConfigBasic,
@@ -103,8 +104,8 @@ func TestAccK8sClusterPrivate(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckK8sClusterConfigPrivateCluster,
@@ -150,8 +151,8 @@ func TestAccK8sClusters(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceK8sClusters,
@@ -162,7 +163,7 @@ func TestAccK8sClusters(t *testing.T) {
 					// public cluster
 					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.*", map[string]string{
 						"name":                                 "test_k8s_cluster",
-						"k8s_version":                          "1.26.4",
+						"k8s_version":                          K8sVersion,
 						"public":                               "true",
 						"maintenance_window.0.day_of_the_week": "Sunday",
 						"maintenance_window.0.time":            "09:00:00Z",
@@ -172,7 +173,7 @@ func TestAccK8sClusters(t *testing.T) {
 					// private cluster
 					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.K8sClustersDataSource+"."+constant.K8sClustersDataSourceFilterName, "clusters.*", map[string]string{
 						"name":                                 "test_private_k8s_cluster",
-						"k8s_version":                          "1.26.4",
+						"k8s_version":                          K8sVersion,
 						"public":                               "false",
 						"maintenance_window.0.day_of_the_week": "Sunday",
 						"maintenance_window.0.time":            "09:00:00Z",

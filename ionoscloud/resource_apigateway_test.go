@@ -8,8 +8,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	ionoscloud "github.com/ionos-cloud/sdk-go-apigateway"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -85,8 +85,8 @@ func TestAccApiGateway_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckApiGatewayDestroy,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckApiGatewayDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckApiGatewayConfig_basic,

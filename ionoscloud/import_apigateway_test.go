@@ -4,28 +4,35 @@ package ionoscloud
 
 import (
 	"testing"
+	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccApiGateway_import(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckApiGatewayDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckApiGatewayConfig_basic,
-			},
-			{
-				ResourceName:      "ionoscloud_apigateway.example",
-				ImportStateIdFunc: testAccApiGatewayImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+	resource.Test(
+		t, resource.TestCase{
+			PreCheck:                 func() { testAccPreCheck(t) },
+			ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+			CheckDestroy:             testAccCheckApiGatewayDestroy,
+			Steps: []resource.TestStep{
+				{
+					Config: testAccCheckApiGatewayConfig_basic,
+				},
+				{
+					ResourceName:      "ionoscloud_apigateway.example",
+					ImportStateIdFunc: testAccApiGatewayImportStateId,
+					ImportState:       true,
+					ImportStateVerify: true,
+					Check: func(state *terraform.State) error {
+						time.Sleep(time.Minute * 1)
+						return nil
+					},
+				},
 			},
 		},
-	})
+	)
 }
 
 func testAccApiGatewayImportStateId(s *terraform.State) (string, error) {

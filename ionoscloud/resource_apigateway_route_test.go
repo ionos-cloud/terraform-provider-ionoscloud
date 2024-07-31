@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -31,8 +31,8 @@ func TestAccAPIGatewayRouteBasic(t *testing.T) {
 					VersionConstraint: "0.11.1",
 				},
 			},
-			ProviderFactories: testAccProviderFactories,
-			CheckDestroy:      testAccCheckAPIGatewayRouteDestroyCheck,
+			ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+			CheckDestroy:             testAccCheckAPIGatewayRouteDestroyCheck,
 			Steps: []resource.TestStep{
 				{
 					Config: configAPIGatewayRouteBasic(routeResourceName, routeAttributeNameValue),

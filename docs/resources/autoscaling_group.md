@@ -30,6 +30,12 @@ resource "ionoscloud_lan" "lan_example_2" {
     name             = "lan_example_2"
 }
 
+resource "ionoscloud_target_group" "autoscaling_target_group" {
+  name                      = "Target Group Example"
+  algorithm                 = "ROUND_ROBIN"
+  protocol                  = "HTTP"
+}
+
 resource "ionoscloud_autoscaling_group" "autoscaling_group_example" {
   datacenter_id = ionoscloud_datacenter.datacenter_example.id
   max_replica_count      = 2
@@ -68,6 +74,28 @@ resource "ionoscloud_autoscaling_group" "autoscaling_group_example" {
       lan   = ionoscloud_lan.lan_example_2.id
       name  = "nic_example_2"
       dhcp  = true
+      firewall_active = true
+      firewall_type = "INGRESS"
+      firewall_rule {
+        name = "rule_1"
+        protocol = "TCP"
+        port_range_start = 1
+        port_range_end = 1000
+        type = "INGRESS"
+      }
+
+      flow_log {
+        name="flow_log_1"
+        bucket="test-de-bucket"
+        action="ALL"
+        direction="BIDIRECTIONAL"
+      }
+
+      target_group {
+        target_group_id = ionoscloud_target_group.autoscaling_target_group.id
+        port            = 80
+        weight          = 50
+      }
     }
     volume    {
       image_alias    = "ubuntu:latest"
@@ -114,11 +142,33 @@ The following arguments are supported:
 - `replica_configuration` - (Required)[List]  
     - `availability_zone` - (Required)[string] The zone where the VMs are created using this configuration. Possible values are: `AUTO`, `ZONE_1`, `ZONE_2`.
     - `cores` - (Required)[int] The total number of cores for the VMs.
-    - `cpu_family` - (Optional)[string] PU family for the VMs created using this configuration. If null, the VM will be created with the default CPU family for the assigned location. Possible values are: `AMD_OPTERON`, `INTEL_SKYLAKE`, `INTEL_XEON`.
+    - `cpu_family` - (Optional)[string] PU family for the VMs created using this configuration. If null, the VM will be created with the default CPU family for the assigned location. Possible values are: `INTEL_SKYLAKE`, `INTEL_XEON`.
     - `nics` - (Optional)[set] List of NICs associated with this Replica.
         - `lan` - (Required)[int] Lan ID for this replica Nic.
         - `name` - (Required)[string] Name for this replica NIC.
         - `dhcp` - (Optional)[bool] Dhcp flag for this replica Nic. This is an optional attribute with default value of `true` if not given in the request payload or given as null.
+        - `firewall_active` - (Optional)[bool] Firewall active flag.
+        - `firewall_type` - (Optional)[string] The type of firewall rules that will be allowed on the NIC. Valid values: INGRESS EGRESS BIDIRECTIONAL. If not specified, the default INGRESS value is used.
+        - `firewall_rules` - (Optional)[list] List of firewall rules associated with this NIC.
+            - `protocol` - (Required)[string] The protocol for the rule: TCP, UDP, ICMP, ANY. Property cannot be modified after creation (disallowed in update requests).
+            - `name` - (Optional)[string] The name of the firewall rule.
+            - `source_mac` - (Optional)[string] Only traffic originating from the respective MAC address is allowed. Valid format: aa:bb:cc:dd:ee:ff. Value null allows all source MAC address. Valid format: aa:bb:cc:dd:ee:ff.
+            - `source_ip` -  (Optional)[string] Only traffic originating from the respective IPv4 address is allowed. Value null allows all source IPs.
+            - `target_ip` - (Optional)[string] In case the target NIC has multiple IP addresses, only traffic directed to the respective IP address of the NIC is allowed. Value null allows all target IPs.
+            - `port_range_start` - (Optional)[int] Defines the start range of the allowed port (from 1 to 65534) if protocol TCP or UDP is chosen. Leave portRangeStart and portRangeEnd null to allow all ports.
+            - `port_range_end` - (Optional)[int] Defines the end range of the allowed port (from 1 to 65534) if the protocol TCP or UDP is chosen. Leave portRangeStart and portRangeEnd null to allow all ports.
+            - `icmp_type` - (Optional)[string] Defines the allowed code (from 0 to 254) if protocol ICMP is chosen. Value null allows all codes.
+            - `icmp_code` - (Optional)[int] Defines the allowed code (from 0 to 254) if protocol ICMP is chosen.
+            - `type` - (Optional)[string] The type of firewall rule. If is not specified, it will take the default value INGRESS.
+        - `flow_log` - (Optional)[list] Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination IP addresses, source and destination ports, number of packets, amount of bytes, the start and end time of the recording, and the type of protocol – and log the extent to which your instances are being accessed.
+            - `action` - (Required)[string] Specifies the action to be taken when the rule is matched. Possible values: ACCEPTED, REJECTED, ALL. Immutable, forces re-creation.
+            - `bucket` - (Required)[string] Specifies the S3 IONOS bucket where the flow log data will be stored. The bucket must exist. Immutable, forces re-creation.
+            - `direction` - (Required)[string] Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL. Immutable, forces re-creation.
+            - `name` - (Required)[string] Specifies the name of the flow log.
+        - `target_group` - (Optional)[list] In order to link VM to ALB, target group must be provided
+            - `target_group_id` (Required)[string] The ID of the target group.
+            - `weight` (Optional)[int] The weight of the target group.
+            - `port` (Optional)[int] The port of the target group.
     - `ram` - (Required)[int] The amount of memory for the VMs in MB, e.g. 2048. Size must be specified in multiples of 256 MB with a minimum of 256 MB; however, if you set ramHotPlug to TRUE then you must use a minimum of 1024 MB. If you set the RAM size more than 240GB, then ramHotPlug will be set to FALSE and can not be set to TRUE unless RAM size not set to less than 240GB.
     - `volume` - (Optional)[list] List of volumes associated with this Replica.
         - `image` - (Optional)[string] The image installed on the volume. Only the UUID of the image is presently supported.

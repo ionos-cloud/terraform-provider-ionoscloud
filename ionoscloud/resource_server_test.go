@@ -14,14 +14,15 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 const bootCdromImageId = "aa97f2f4-ca28-11ec-925c-46570854dba1"
 
-//ToDo: add backup unit back in tests when stable
+// ToDo: add backup unit back in tests when stable
 
 func TestAccServerBasic(t *testing.T) {
 	var server ionoscloud.Server
@@ -30,16 +31,16 @@ func TestAccServerBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckServerNoPwdOrSSH,
 				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided`),
 			},
 			{
-				//ssh_key_path now accepts the ssh key directly too
+				// ssh_key_path now accepts the ssh key directly too
 				Config: testAccCheckServerSshDirectly,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ssh_key_path.0", sshKey)),
@@ -60,7 +61,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 				),
 			},
 			{
@@ -70,7 +71,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 				),
 			},
 			{
@@ -81,7 +82,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					utils.TestImageNotNull(constant.ServerResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "type", "ENTERPRISE"),
@@ -107,7 +108,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					utils.TestImageNotNull(constant.ServerResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "type", "ENTERPRISE"),
@@ -247,7 +248,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					utils.TestImageNotNull(constant.ServerResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password_updated", "result"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.UpdatedResources),
@@ -284,9 +285,9 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerConfigNoBootVolume,
@@ -296,7 +297,7 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "type", "ENTERPRISE"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "6"),
@@ -330,8 +331,8 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerConfigBootCdromNoImage,
@@ -341,7 +342,7 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -364,7 +365,7 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -394,7 +395,7 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -421,7 +422,7 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -444,7 +445,7 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -467,9 +468,9 @@ func TestAccServerResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerResolveImageNameNoNic,
@@ -479,7 +480,7 @@ func TestAccServerResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					utils.TestImageNotNull(constant.ServerResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
@@ -495,7 +496,7 @@ func TestAccServerResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					utils.TestImageNotNull(constant.ServerResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
@@ -514,7 +515,7 @@ func TestAccServerResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					utils.TestImageNotNull(constant.ServerResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
@@ -551,7 +552,7 @@ func TestAccServerResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					utils.TestImageNotNull(constant.ServerResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
@@ -592,7 +593,7 @@ func TestAccServerResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					utils.TestImageNotNull(constant.ServerResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
@@ -612,9 +613,9 @@ func TestAccServerWithSnapshotAnd5FwRulesInline(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerWithSnapshot,
@@ -624,7 +625,7 @@ func TestAccServerWithSnapshotAnd5FwRulesInline(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					utils.TestImageNotNull(constant.ServerResource, "boot_image"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
@@ -647,9 +648,9 @@ func TestAccServerCubeServer(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckCubeServerAndServersDataSource,
@@ -684,9 +685,9 @@ func TestAccServerWithICMP(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckServerNoFirewall,
@@ -696,7 +697,7 @@ func TestAccServerWithICMP(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					utils.TestImageNotNull(constant.ServerResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", "system"),
@@ -715,7 +716,7 @@ func TestAccServerWithICMP(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					utils.TestImageNotNull(constant.ServerResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", "system"),
@@ -753,9 +754,9 @@ func TestAccServerWithLabels(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			// Clean server creation using labels in configuration.
 			{
@@ -809,9 +810,9 @@ func TestAccServerBootDeviceSelection(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMultipleBootDevices,
@@ -999,7 +1000,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
   type = "ENTERPRISE"
@@ -1078,7 +1079,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
+  cpu_family = "INTEL_XEON"
   boot_cdrom = "` + bootCdromImageId + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -1133,7 +1134,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
+  cpu_family = "INTEL_XEON"
   boot_cdrom = "` + bootCdromImageId + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -1180,7 +1181,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
+  cpu_family = "INTEL_XEON"
   boot_cdrom = "` + bootCdromImageId + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -1230,7 +1231,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
+  cpu_family = "INTEL_XEON"
   boot_cdrom = "` + bootCdromImageId + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -1267,7 +1268,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
+  cpu_family = "INTEL_XEON"
   boot_cdrom = "` + bootCdromImageId + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -1284,7 +1285,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 const testAccCheckServerResolveImageNameNoNic = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name        = "test_server"
-  location    = "de/fra"
+  location    = "us/las"
   description = "Test datacenter done by TF"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
@@ -1297,7 +1298,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores             = 1
   ram               = 1024
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_SKYLAKE" 
+  cpu_family        = "INTEL_XEON" 
   image_name        = "ubuntu:latest"
   image_password    = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -1315,7 +1316,7 @@ resource ` + constant.RandomPassword + ` "server_image_password" {
 const testAccCheckServerResolveImageName = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name        = "test_server"
-  location    = "de/fra"
+  location    = "us/las"
   description = "Test datacenter done by TF"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
@@ -1328,7 +1329,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores             = 1
   ram               = 1024
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_SKYLAKE" 
+  cpu_family        = "INTEL_XEON" 
   image_name        = "ubuntu:latest"
   image_password    = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -1351,7 +1352,7 @@ resource ` + constant.RandomPassword + ` "server_image_password" {
 const testAccCheckServerResolveImageName5fwRules = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name        = "test_server"
-  location    = "de/fra"
+  location    = "us/las"
   description = "Test datacenter done by TF"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
@@ -1364,7 +1365,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores             = 1
   ram               = 1024
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_SKYLAKE" 
+  cpu_family        = "INTEL_XEON" 
   image_name        = "ubuntu:latest"
   image_password    = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -1422,7 +1423,7 @@ resource ` + constant.RandomPassword + ` "server_image_password" {
 const testAccCheckServerResolveImageName5fwRulesUpdate = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name        = "test_server"
-  location    = "de/fra"
+  location    = "us/las"
   description = "Test datacenter done by TF"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
@@ -1435,7 +1436,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores             = 1
   ram               = 1024
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_SKYLAKE" 
+  cpu_family        = "INTEL_XEON" 
   image_name        = "ubuntu:latest"
   image_password    = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -1493,7 +1494,7 @@ resource ` + constant.RandomPassword + ` "server_image_password" {
 const testAccCheckServerWithSnapshot = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "volume-test"
-	location   = "de/fra"
+	location   = "us/las"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
@@ -1506,7 +1507,7 @@ resource ` + constant.ServerResource + ` "webserver" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
+  cpu_family = "INTEL_XEON"
 	image_name = "ubuntu:latest"
 	image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -1577,7 +1578,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
+  cpu_family = "INTEL_XEON"
   image_name = "terraform_snapshot"
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -1665,7 +1666,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -1701,7 +1702,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -1746,7 +1747,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -1804,7 +1805,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   type = "ENTERPRISE"
   volume {
@@ -1847,7 +1848,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   type = "ENTERPRISE"
   volume {
@@ -1884,7 +1885,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   type = "ENTERPRISE"
   
   volume {
