@@ -12,6 +12,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
@@ -29,6 +30,7 @@ type SdkBundle struct {
 	DNSClient          *dns.Client
 	LoggingClient      *logging.Client
 	AutoscalingClient  *autoscaling.Client
+	KafkaClient        *kafka.Client
 	CDNClient          *cdn.Client
 	APIGatewayClient   *apigateway.Client
 	VPNClient          *vpn.Client

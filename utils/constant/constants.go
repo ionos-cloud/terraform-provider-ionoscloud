@@ -490,6 +490,12 @@ const (
 	IPBlockLimit     = 1000
 )
 
+// Kafka Constants
+const (
+	KafkaClusterResource      = "ionoscloud_kafka_cluster"
+	KafkaClusterTopicResource = "ionoscloud_kafka_cluster_topic"
+)
+
 // API Gateway Constants
 const (
 	APIGatewayResource      = "ionoscloud_apigateway"

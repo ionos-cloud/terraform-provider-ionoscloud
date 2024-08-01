@@ -37,6 +37,8 @@ require (
 
 require github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 
+require github.com/ionos-cloud/sdk-go-kafka v1.0.0
+
 require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect

@@ -214,3 +214,11 @@
     * [VPN IPSEC Tunnel](../docs/data-sources/vpn_ipsec_tunnel.md)
     * [VPN Wireguard Gateway](../docs/data-sources/vpn_wireguard_gateway.md)
     * [VPN Wireguard Peer](../docs/data-sources/vpn_wireguard_peer.md)
+
+* Event Streams for Apache Kafka
+  * Resources
+    * [Kafka Cluster](../docs/resources/kafka_cluster.md)
+    * [Kafka Topic](../docs/resources/kafka_topic.md)
+  * Data Sources
+    * [Kafka Cluster](../docs/data-sources/kafka_cluster.md)
+    * [Kafka Topic](../docs/data-sources/kafka_topic.md)

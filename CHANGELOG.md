@@ -1,32 +1,33 @@
 ## 6.5.0
 ### Features
-- Added CDN support: `cdn_distribution` resource and data source
-- added new attribute `api_subnet_allow_list` to `container_registry` resource and data source
-  - added new attribute `api_subnet_allow_list` to `container_registry` resource and data source
-  - added new attribute `protocol_version` to `target_group` resource and data source
-  - added new attributes `central_logging` and `logging_format` to `networkloadbalancer` resource and data source
-  - added new attributes `central_logging` and `logging_format` to `application_loadbalancer` resource and data source
+- Add support for CDN
+- Add new attribute `api_subnet_allow_list` to `container_registry` resource and data source
+- Add new attribute `api_subnet_allow_list` to `container_registry` resource and data source
+- Add new attribute `protocol_version` to `target_group` resource and data source
+- Add new attributes `central_logging` and `logging_format` to `networkloadbalancer` resource and data source
+- Add new attributes `central_logging` and `logging_format` to `application_loadbalancer` resource and data source
+- Add support for Event Streams for Apache Kafka
+- Add support for Certificate Manager providers and auto-certificates
+- Add support for API Gateway
+- Add support for VPN Gateway
 
-
-## 6.4.20
-### Fixes
-- Data source `ionoscloud_mongo_template` should have id `computed` and `optional`
-- Fixes #607. Container registry should wait until the resource is ready before returning the ID.
-- Move tests from AMD_OPTERON to INTEL_XEON
-
-### Features
-- Add s3 bucket, object, policy resources with base functionality
- 
 
 ## 6.4.19
+### Features
+- Add Network File Storage API Support
+- Add s3 bucket, object, policy resources with base functionality
 ### Enhancements
 - Move to `sdk-go-bundle` for logging sdk
-- Add support for Certificate Manager providers and auto-certificates
 ### Fixes 
+- Fixes #607. Container registry should wait until the resource is ready before returning the ID.
+- Move tests from AMD_OPTERON to INTEL_XEON
+- Data source `ionoscloud_mongo_template` should have id `computed` and `optional`
 - Fail on k8s cluster and nodepool if creation or deletion entered failed state
 - K8s, dataplatform and MariaDB tests
 ### Documentation
 - Update documentation for MariaDB cluster
+
+
 ## 6.4.18
 ### Features
 - Add tests for Mongo cluster and user
@@ -803,4 +804,3 @@ FEATURES:
 
 FEATURES:
 - Terraform-provider-profitbricks rebranding to terraform-provider-ionoscloud
-

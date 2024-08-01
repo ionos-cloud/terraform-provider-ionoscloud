@@ -28,6 +28,7 @@ import (
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
+	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -153,6 +154,8 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
+			constant.KafkaClusterResource:                      resourceKafkaCluster(),
+			constant.KafkaClusterTopicResource:                 resourceKafkaTopic(),
 			constant.CDNDistributionResource:                   resourceCDNDistribution(),
 			constant.APIGatewayResource:                        resourceAPIGateway(),
 			constant.APIGatewayRouteResource:                   resourceAPIGatewayRoute(),
@@ -223,6 +226,8 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  DataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
+			constant.KafkaClusterResource:                      dataSourceKafkaCluster(),
+			constant.KafkaClusterTopicResource:                 dataSourceKafkaTopic(),
 			constant.CDNDistributionResource:                   dataSourceCDNDistribution(),
 			constant.APIGatewayResource:                        dataSourceAPIGateway(),
 			constant.APIGatewayRouteResource:                   dataSourceAPIGatewayRoute(),
@@ -300,6 +305,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
 		NFSClient:          NewClientByType(clientOpts, nfsClient).(*nfsService.Client),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
+		KafkaClient:        NewClientByType(clientOpts, kafkaClient).(*kafkaService.Client),
 		APIGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
 		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
 	}, nil
@@ -321,6 +327,7 @@ const (
 	nfsClient
 	psqlClient
 	s3Client
+	kafkaClient
 	apiGatewayClient
 	vpnClient
 )
@@ -366,6 +373,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	case s3Client:
 		return s3.NewAPIClient(s3.NewConfiguration())
+	case kafkaClient:
+		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	case apiGatewayClient:
 		return apiGatewayService.NewClient(
 			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
