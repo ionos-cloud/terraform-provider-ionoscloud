@@ -116,8 +116,8 @@ github.com/ionos-cloud/sdk-go-dns v1.1.1 h1:Qdf5mXYt9ZeRl4zZQxGrvamFkKm1X9WeARyB
 github.com/ionos-cloud/sdk-go-dns v1.1.1/go.mod h1:l9gYdwtUshlBOiIi4nHn3RCX81XlV3VoNvLJrO2VfHg=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0 h1:G9E6DeQe/Wu3rvGVgidLE52qwTpTqXaZ3hyinVX4mXA=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0/go.mod h1:Q5d1R6silarsX5jWLPBHd/1PSC5zZNf2ONvXB+fygC0=
-github.com/ionos-cloud/sdk-go/v6 v6.1.11 h1:J/uRN4UWO3wCyGOeDdMKv8LWRzKu6UIkLEaes38Kzh8=
-github.com/ionos-cloud/sdk-go/v6 v6.1.11/go.mod h1:EzEgRIDxBELvfoa/uBN0kOQaqovLjUWEB7iW4/Q+t4k=
+github.com/ionos-cloud/sdk-go/v6 v6.2.0 h1:qX7gachC0wJSmFfVRnd+DHmz9AStvVraKcwQ/JokIB4=
+github.com/ionos-cloud/sdk-go/v6 v6.2.0/go.mod h1:EzEgRIDxBELvfoa/uBN0kOQaqovLjUWEB7iW4/Q+t4k=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
 github.com/jhump/protoreflect v1.15.1 h1:HUMERORf3I3ZdX05WaQ6MIpd/NJ434hTp5YiKgfCL6c=
