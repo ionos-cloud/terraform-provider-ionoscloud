@@ -245,6 +245,7 @@ const (
 	DBaaSClusterTestDataSourceById   = "test_dbaas_cluster_id"
 	DBaaSClusterTestResource         = "test_dbaas_cluster"
 	DBaaSClusterTestDataSourceByName = "test_dbaas_cluster_name"
+	DBaaSReplicaSetTestResource      = "test_dbaas_replicaset"
 
 	// PgSql constants
 	PsqlClusterResource          = "ionoscloud_pg_cluster"
@@ -268,6 +269,12 @@ const (
 	DBaasMongoUserResource           = "ionoscloud_mongo_user"
 	DBaaSMongoTemplateResource       = "ionoscloud_mongo_template"
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
+
+	// InMemoryDB constants
+	DBaaSReplicaSetTestDataSourceByID   = "test_dbaas_replicaset_id"
+	DBaaSReplicaSetTestDataSourceByName = "test_dbaas_replicaset_name"
+	DBaaSInMemoryDBReplicaSetResource   = "ionoscloud_inmemorydb_replicaset"
+	DBaaSInMemoryDBSnapshotResource     = "ionoscloud_inmemorydb_snapshot"
 )
 
 // Locations slice represents the locations in which services are available.

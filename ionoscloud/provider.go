@@ -26,6 +26,7 @@ import (
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
@@ -139,6 +140,7 @@ func Provider() *schema.Provider {
 			constant.DBaaSMariaDBClusterResource:               resourceDBaaSMariaDBCluster(),
 			constant.DBaasMongoClusterResource:                 resourceDbaasMongoDBCluster(),
 			constant.DBaasMongoUserResource:                    resourceDbaasMongoUser(),
+			constant.DBaaSInMemoryDBReplicaSetResource:         resourceDBaaSInMemoryDBReplicaSet(),
 			constant.ALBResource:                               resourceApplicationLoadBalancer(),
 			constant.ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			constant.TargetGroupResource:                       resourceTargetGroup(),
@@ -211,6 +213,8 @@ func Provider() *schema.Provider {
 			constant.ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
 			constant.TargetGroupResource:                       dataSourceTargetGroup(),
 			constant.DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
+			constant.DBaaSInMemoryDBReplicaSetResource:         dataSourceDBaaSInMemoryDBReplicaSet(),
+			constant.DBaaSInMemoryDBSnapshotResource:           dataSourceDBaaSInMemoryDBSnapshot(),
 			constant.CertificateResource:                       dataSourceCertificate(),
 			constant.AutoCertificateProviderResource:           dataSourceCertificateManagerProvider(),
 			constant.AutoCertificateResource:                   dataSourceCertificateManagerAutoCertificate(),
@@ -308,6 +312,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		KafkaClient:        NewClientByType(clientOpts, kafkaClient).(*kafkaService.Client),
 		APIGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
 		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
+		InMemoryDBClient:   NewClientByType(clientOpts, inMemoryDBClient).(*inmemorydb.InMemoryDBClient),
 	}, nil
 }
 
@@ -330,6 +335,7 @@ const (
 	kafkaClient
 	apiGatewayClient
 	vpnClient
+	inMemoryDBClient
 )
 
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
@@ -381,6 +387,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		)
 	case vpnClient:
 		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username)
+	case inMemoryDBClient:
+		return inmemorydb.NewInMemoryDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}

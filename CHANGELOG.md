@@ -8,6 +8,7 @@
 - Add new attributes `central_logging` and `logging_format` to `application_loadbalancer` resource and data source
 - Add support for Event Streams for Apache Kafka
 - Add support for Certificate Manager providers and auto-certificates
+- Add support for In-Memory DB
 - Add support for API Gateway
 - Add support for VPN Gateway
 

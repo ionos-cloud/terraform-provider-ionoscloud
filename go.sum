@@ -124,6 +124,8 @@ github.com/ionos-cloud/sdk-go-container-registry v1.2.0 h1:C5r2XleKLbSFw9kmb4N8I
 github.com/ionos-cloud/sdk-go-container-registry v1.2.0/go.mod h1:woBP1+A4N0KXiRj9jG4y/hEXgrVjJv0CUlAvc24mCeo=
 github.com/ionos-cloud/sdk-go-dataplatform v1.0.3 h1:eaZITgPaLHbK4d/nVaImvP19a5yAumI5hprjM/B1qSE=
 github.com/ionos-cloud/sdk-go-dataplatform v1.0.3/go.mod h1:LXJGnUwLLiJhKgApv7TIPGy7WOuGbYIzBPFxGpNfqN0=
+github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1 h1:vd3SCqZ1OI5l7Tzql7NDb5Zlpna8e2SsfEYZRGHOkOo=
+github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1/go.mod h1:JLbyt5wj7+f/njy7pnWD6K+cCfe32p8VrjmKks055+w=
 github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1 h1:EBsHfY/Bt7CcSsP7W7ohVsnhFAtMEcil3Aa/Q5MBq/Y=
 github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1/go.mod h1:627dsH56YGQD7x0g2FGdVsxNtBySvQ3QU0uG+d6/Evk=
 github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1 h1:+tDoZ8IEPxYwJd6fDIpWksNJs9Zzw7Pu5A39jTew058=

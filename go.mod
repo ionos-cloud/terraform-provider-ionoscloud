@@ -22,6 +22,7 @@ require (
 	github.com/ionos-cloud/sdk-go-cert-manager v1.1.0
 	github.com/ionos-cloud/sdk-go-container-registry v1.2.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.0.3
+	github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1
 	github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2

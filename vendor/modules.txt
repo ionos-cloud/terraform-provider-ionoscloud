@@ -316,6 +316,9 @@ github.com/ionos-cloud/sdk-go-container-registry
 # github.com/ionos-cloud/sdk-go-dataplatform v1.0.3
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dataplatform
+# github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1
+## explicit; go 1.18
+github.com/ionos-cloud/sdk-go-dbaas-in-memory-db
 # github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dbaas-mariadb
