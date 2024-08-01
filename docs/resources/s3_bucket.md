@@ -15,7 +15,7 @@ Manages **S3 Buckets** on IonosCloud.
 
 ```hcl
 
-resource "ionosclud_s3_bucket" "example" {
+resource "ionoscloud_s3_bucket" "example" {
   name = "example"
   region = "eu-central-3"
 }

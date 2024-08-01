@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
@@ -12,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 )
 
 type SdkBundle struct {
@@ -27,4 +29,5 @@ type SdkBundle struct {
 	LoggingClient      *logging.Client
 	AutoscalingClient  *autoscaling.Client
 	APIGatewayClient   *apigateway.Client
+	VPNClient          *vpn.Client
 }

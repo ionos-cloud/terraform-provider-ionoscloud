@@ -1750,7 +1750,7 @@ resource ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestResourceNa
 
 // Logging Pipeline constants
 // Attributes
-const pipelineNameAttribute = "name"
+const nameAttribute = "name"
 const pipelineGrafanaAddressAttribute = "grafana_address" // nolint:unused
 const pipelineLogAttribute = "log"
 const pipelineLogSourceAttribute = "source"
@@ -1798,7 +1798,7 @@ const pipelineLogUpdated = pipelineLogAttribute + `{
 // Standard configuration
 const LoggingPipelineConfig = `
 resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestResourceName + ` {
-	` + pipelineNameAttribute + ` = "` + pipelineNameValue + `"
+	` + nameAttribute + ` = "` + pipelineNameValue + `"
 	` + pipelineLog + `
 }
 `
@@ -1827,3 +1827,34 @@ const clusterCredentialsPasswordAttribute = "password"
 // Values
 const clusterMaintenanceWindowDayOfTheWeekValue = "Sunday"
 const clusterMaintenanceWindowTimeValue = "09:00:00"
+
+const wireguardGatewayConfig = `
+resource "ionoscloud_datacenter" "datacenter_example" {
+  name = "datacenter_example"
+  location = "de/fra"
+}
+resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
+  location = "de/fra"
+  size = 1
+  name = "` + constant.IpBlockTestResource + `"
+}
+
+resource "ionoscloud_lan" "lan_example" {
+  name = "lan_example"
+  datacenter_id = ionoscloud_datacenter.datacenter_example.id
+}
+
+resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
+  name = "` + constant.WireGuardGatewayTestResource + `"
+  location = "de/fra"
+  description = "description"
+  private_key = "private"
+
+  gateway_ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
+  interface_ipv4_cidr =  "192.168.1.100/24"
+  connections   {
+    datacenter_id   =  ionoscloud_datacenter.datacenter_example.id
+    lan_id          =  ionoscloud_lan.lan_example.id
+    ipv4_cidr       =  "192.168.1.108/24"
+  }
+}` // nolint:unused

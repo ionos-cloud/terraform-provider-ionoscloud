@@ -15,7 +15,7 @@ Manages **S3 Objects** on IonosCloud.
 
 ```hcl
 
-resource "ionosclud_s3_object" "example" {
+resource "ionoscloud_s3_object" "example" {
   bucket = "example"
   key = "object"
   content = "body"
@@ -37,7 +37,7 @@ resource "ionosclud_s3_object" "example" {
   }
 }
 
-resource "ionosclud_s3_object" "example" {
+resource "ionoscloud_s3_object" "example" {
   bucket = "example"
   key = "object"
   source = "path/to/file"

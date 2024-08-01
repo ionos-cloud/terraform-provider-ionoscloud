@@ -179,7 +179,6 @@
     * [S3 Bucket Policy](../docs/data-sources/s3_bucket_policy.md)
     * [S3 Object](../docs/data-sources/s3_object.md)
     * [S3 Bucket Public Access Block](../docs/data-sources/s3_bucket_access_block.md)
-  
 
 * API Gateway
   * Resources
@@ -188,3 +187,15 @@
   * Data Sources
     * [API Gateway](../docs/data-sources/apigateway.md)
     * [API Gateway Route](../docs/data-sources/apigateway_route.md)
+
+* VPN
+  * Resources
+    * [VPN IPSEC Gateway](../docs/resources/vpn_ipsec_gateway.md)
+    * [VPN IPSEC Tunnel](../docs/resources/vpn_ipsec_tunnel.md)
+    * [VPN Wireguard Gateway](../docs/resources/vpn_wireguard_gateway.md)
+    * [VPN Wireguard Peer](../docs/resources/vpn_wireguard_peer.md)
+  * Data Sources
+    * [VPN IPSEC Gateway](../docs/data-sources/vpn_ipsec_gateway.md)
+    * [VPN IPSEC Tunnel](../docs/data-sources/vpn_ipsec_tunnel.md)
+    * [VPN Wireguard Gateway](../docs/data-sources/vpn_wireguard_gateway.md)
+    * [VPN Wireguard Peer](../docs/data-sources/vpn_wireguard_peer.md)
