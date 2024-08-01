@@ -139,6 +139,15 @@ issues:
         - scopelint
         - unparam
         - unused
+    - path: test_constants.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+        - scopelint
+        - unparam
+        - unused
     
     # Disable 'unused' warning in test utilities file
     - path: test*.go
