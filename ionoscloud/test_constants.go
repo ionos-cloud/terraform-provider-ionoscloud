@@ -1,4 +1,5 @@
 // nolint:unused
+
 package ionoscloud
 
 import (
