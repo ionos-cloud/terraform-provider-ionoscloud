@@ -27,6 +27,7 @@ import (
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -150,6 +151,10 @@ func Provider() *schema.Provider {
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
 			constant.KafkaClusterResource:                      resourceKafkaCluster(),
 			constant.KafkaClusterTopicResource:                 resourceKafkaTopic(),
+			constant.WireGuardGatewayResource:                  resourceVpnWireguardGateway(),
+			constant.WireGuardPeerResource:                     resourceVpnWireguardPeer(),
+			constant.IPSecGatewayResource:                      resourceVpnIPSecGateway(),
+			constant.IPSecTunnelResource:                       resourceVpnIPSecTunnel(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -213,6 +218,10 @@ func Provider() *schema.Provider {
 			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
 			constant.KafkaClusterResource:                      dataSourceKafkaCluster(),
 			constant.KafkaClusterTopicResource:                 dataSourceKafkaTopic(),
+			constant.WireGuardGatewayResource:                  dataSourceVpnWireguardGateway(),
+			constant.WireGuardPeerResource:                     dataSourceVpnWireguardPeer(),
+			constant.IPSecGatewayResource:                      dataSourceVpnIPSecGateway(),
+			constant.IPSecTunnelResource:                       dataSourceVpnIPSecTunnel(),
 		},
 	}
 
@@ -283,6 +292,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		NFSClient:          NewClientByType(clientOpts, nfsClient).(*nfsService.Client),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
 		KafkaClient:        NewClientByType(clientOpts, kafkaClient).(*kafkaService.Client),
+		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
 	}, nil
 }
 
@@ -302,6 +312,7 @@ const (
 	psqlClient
 	s3Client
 	kafkaClient
+	vpnClient
 )
 
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
@@ -345,6 +356,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return s3.NewAPIClient(s3.NewConfiguration())
 	case kafkaClient:
 		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case vpnClient:
+		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}

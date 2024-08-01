@@ -5,10 +5,9 @@ package ionoscloud
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
-	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -114,7 +113,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = random_password.image_password.result
   type = "ENTERPRISE"

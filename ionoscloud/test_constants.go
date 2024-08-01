@@ -77,7 +77,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   type = "ENTERPRISE"
   volume {
@@ -132,7 +132,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -185,7 +185,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -238,7 +238,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   ssh_key_path = ["` + sshKey + `"]
@@ -292,7 +292,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -337,7 +337,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -374,7 +374,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -429,7 +429,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -497,7 +497,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -565,7 +565,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -626,7 +626,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -1084,7 +1084,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = random_password.image_password.result
   type = "ENTERPRISE"
@@ -1134,7 +1134,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -1169,7 +1169,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -1750,7 +1750,7 @@ resource ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestResourceNa
 
 // Logging Pipeline constants
 // Attributes
-const pipelineNameAttribute = "name"
+const nameAttribute = "name"
 const pipelineGrafanaAddressAttribute = "grafana_address" // nolint:unused
 const pipelineLogAttribute = "log"
 const pipelineLogSourceAttribute = "source"
@@ -1798,7 +1798,7 @@ const pipelineLogUpdated = pipelineLogAttribute + `{
 // Standard configuration
 const LoggingPipelineConfig = `
 resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestResourceName + ` {
-	` + pipelineNameAttribute + ` = "` + pipelineNameValue + `"
+	` + nameAttribute + ` = "` + pipelineNameValue + `"
 	` + pipelineLog + `
 }
 `
@@ -1827,3 +1827,34 @@ const clusterCredentialsPasswordAttribute = "password"
 // Values
 const clusterMaintenanceWindowDayOfTheWeekValue = "Sunday"
 const clusterMaintenanceWindowTimeValue = "09:00:00"
+
+const wireguardGatewayConfig = `
+resource "ionoscloud_datacenter" "datacenter_example" {
+  name = "datacenter_example"
+  location = "de/fra"
+}
+resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
+  location = "de/fra"
+  size = 1
+  name = "` + constant.IpBlockTestResource + `"
+}
+
+resource "ionoscloud_lan" "lan_example" {
+  name = "lan_example"
+  datacenter_id = ionoscloud_datacenter.datacenter_example.id
+}
+
+resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
+  name = "` + constant.WireGuardGatewayTestResource + `"
+  location = "de/fra"
+  description = "description"
+  private_key = "private"
+
+  gateway_ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
+  interface_ipv4_cidr =  "192.168.1.100/24"
+  connections   {
+    datacenter_id   =  ionoscloud_datacenter.datacenter_example.id
+    lan_id          =  ionoscloud_lan.lan_example.id
+    ipv4_cidr       =  "192.168.1.108/24"
+  }
+}` // nolint:unused

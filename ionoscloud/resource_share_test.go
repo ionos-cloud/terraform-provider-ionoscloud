@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -160,7 +161,6 @@ resource "ionoscloud_share" "share" {
   resource_id = "${ionoscloud_datacenter.foobar.id}"
   edit_privilege = false
   share_privilege = false
-  licence_type = LiNUX
 }
 `
 

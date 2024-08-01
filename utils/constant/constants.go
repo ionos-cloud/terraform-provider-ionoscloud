@@ -270,8 +270,8 @@ const (
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
 )
 
-// MariaDBClusterLocations slice represents the locations in which MariaDB clusters can be created
-var MariaDBClusterLocations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
+// Locations slice represents the locations in which services are available.
+var Locations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
 
 // Container Registry Constants
 const (
@@ -400,6 +400,21 @@ const (
 const (
 	ServerBootDeviceSelectionResource     = "ionoscloud_server_boot_device_selection"
 	TestServerBootDeviceSelectionResource = "boot_device_selection_example"
+)
+
+const (
+	// WireGuardGatewayResource is the full name of the WireGuardGatewayResource
+	WireGuardGatewayResource = "ionoscloud_vpn_wireguard_gateway"
+	// WireGuardPeerResource is the full name of the WireGuardGatewayResource
+	WireGuardPeerResource = "ionoscloud_vpn_wireguard_peer"
+	// WireGuardGatewayTestResource is the name used for testing
+	WireGuardGatewayTestResource = "test_wireguard_gateway"
+	// WireGuardPeerTestResource is the name used for testing
+	WireGuardPeerTestResource = "test_wireguard_peer"
+	// IPSecGatewayResource is the full name of the IPSecGatewayResource
+	IPSecGatewayResource = "ionoscloud_vpn_ipsec_gateway"
+	// IPSecTunnelResource is the full name of the IPSecTunnelResource
+	IPSecTunnelResource = "ionoscloud_vpn_ipsec_tunnel"
 )
 
 var ForwardingRuleAlgorithms = []string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}
