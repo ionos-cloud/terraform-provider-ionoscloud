@@ -629,7 +629,7 @@ func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schem
 	if resource.Metadata == nil || resource.Metadata.State == nil {
 		return false, fmt.Errorf("error while checking k8s cluster status: state is nil")
 	}
-	if isStateFailed(*resource.Metadata.State) {
+	if utils.IsStateFailed(*resource.Metadata.State) {
 		return false, fmt.Errorf("error while checking if k8s cluster is ready %s, state %s", *resource.Id, *resource.Metadata.State)
 	}
 	return *resource.Metadata.State == "ACTIVE", nil
@@ -647,14 +647,10 @@ func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sch
 		return true, fmt.Errorf("error checking k8s cluster deletion status: %w", err)
 	}
 	if cluster.Metadata != nil && cluster.Metadata.State != nil {
-		if isStateFailed(*cluster.Metadata.State) {
+		if utils.IsStateFailed(*cluster.Metadata.State) {
 			return false, fmt.Errorf("error while checking if k8s cluster is deleted properly, cluster ID: %s, state: %s", *cluster.Id, *cluster.Metadata.State)
 		}
 	}
 
 	return false, nil
-}
-
-func isStateFailed(state string) bool {
-	return state == ionoscloud.Failed || state == ionoscloud.FailedSuspended || state == ionoscloud.FailedUpdating || state == ionoscloud.FailedDestroying
 }

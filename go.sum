@@ -118,8 +118,8 @@ github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1 h1:NWobgIhmUJKG6ohFXefMj+KmpE
 github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1/go.mod h1:cLIl4zmB1yMdPSNgTzaRmXeuusEAY1O3Lp/iXSc/R6E=
 github.com/ionos-cloud/sdk-go-cdn v1.0.0 h1:liB1XIm2kt8K3Mtxvx4nRhlyqnpK9ayPUlMBdpg6SpM=
 github.com/ionos-cloud/sdk-go-cdn v1.0.0/go.mod h1:Uu/FqoGXfy5TRHXeruS3H6rGtONwcpDBzIxl9s8eSuw=
-github.com/ionos-cloud/sdk-go-cert-manager v1.0.1 h1:QGnenRREavvU0ZrXvY4hmCMXRyvmKj5jaXsFX9Apfd0=
-github.com/ionos-cloud/sdk-go-cert-manager v1.0.1/go.mod h1:EYDegkY6fUSkx0BL0GpNMpKvp33AId2vTZL44YLPreA=
+github.com/ionos-cloud/sdk-go-cert-manager v1.1.0 h1:6lM1RoBc6Epw3g7B6CKWoKGsUDP+IPoA4m8+gtYrbOY=
+github.com/ionos-cloud/sdk-go-cert-manager v1.1.0/go.mod h1:gf7rfOdClT/kKK58RDmy/tAQ8z6hqRRzs8zmTL/tWLM=
 github.com/ionos-cloud/sdk-go-container-registry v1.2.0 h1:C5r2XleKLbSFw9kmb4N8ImqJ/HtLus3yh/R5BHy/6sg=
 github.com/ionos-cloud/sdk-go-container-registry v1.2.0/go.mod h1:woBP1+A4N0KXiRj9jG4y/hEXgrVjJv0CUlAvc24mCeo=
 github.com/ionos-cloud/sdk-go-dataplatform v1.0.3 h1:eaZITgPaLHbK4d/nVaImvP19a5yAumI5hprjM/B1qSE=
@@ -138,8 +138,8 @@ github.com/ionos-cloud/sdk-go-s3 v1.0.0 h1:Wo9R5dyNvdDiifN4viJTaGs6hr+YwEiuaqgY9
 github.com/ionos-cloud/sdk-go-s3 v1.0.0/go.mod h1:ILmq4f7kpnKucAk/DcE0Hjtaqn8Y471PK79hJgXU7K8=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0 h1:G9E6DeQe/Wu3rvGVgidLE52qwTpTqXaZ3hyinVX4mXA=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0/go.mod h1:Q5d1R6silarsX5jWLPBHd/1PSC5zZNf2ONvXB+fygC0=
-github.com/ionos-cloud/sdk-go/v6 v6.1.11 h1:J/uRN4UWO3wCyGOeDdMKv8LWRzKu6UIkLEaes38Kzh8=
-github.com/ionos-cloud/sdk-go/v6 v6.1.11/go.mod h1:EzEgRIDxBELvfoa/uBN0kOQaqovLjUWEB7iW4/Q+t4k=
+github.com/ionos-cloud/sdk-go/v6 v6.2.0 h1:qX7gachC0wJSmFfVRnd+DHmz9AStvVraKcwQ/JokIB4=
+github.com/ionos-cloud/sdk-go/v6 v6.2.0/go.mod h1:EzEgRIDxBELvfoa/uBN0kOQaqovLjUWEB7iW4/Q+t4k=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
 github.com/jhump/protoreflect v1.15.1 h1:HUMERORf3I3ZdX05WaQ6MIpd/NJ434hTp5YiKgfCL6c=

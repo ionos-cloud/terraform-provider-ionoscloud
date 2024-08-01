@@ -145,6 +145,15 @@
     * [Data Platform Node Pools](../docs/data-sources/dataplatform_node_pools.md)
     * [Data Platform Versions](../docs/data-sources/dataplatform_versions.md)
 
+* Certificate Manager
+  * Resources
+    * [Certificate](../docs/resources/certificate_manager_certificate.md)
+    * [Provider](../docs/resources/certificate_manager_provider.md)
+    * [Auto-certificate](../docs/resources/certificate_manager_auto_certificate.md)
+  * Data Sources
+    * [Certificate](../docs/data-sources/certificate_manager_certificate.md)
+    * [Provider](../docs/data-sources/certificate_manager_provider.md)
+    * [Auto-certificate](../docs/data-sources/certificate_manager_auto_certificate.md)
 
 * Cloud DNS
   * Resources

@@ -307,8 +307,8 @@ github.com/ionos-cloud/sdk-go-bundle/shared
 # github.com/ionos-cloud/sdk-go-cdn v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-cdn
-# github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
-## explicit; go 1.19
+# github.com/ionos-cloud/sdk-go-cert-manager v1.1.0
+## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-cert-manager
 # github.com/ionos-cloud/sdk-go-container-registry v1.2.0
 ## explicit; go 1.18
@@ -337,7 +337,7 @@ github.com/ionos-cloud/sdk-go-s3
 # github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-vm-autoscaling
-# github.com/ionos-cloud/sdk-go/v6 v6.1.11
+# github.com/ionos-cloud/sdk-go/v6 v6.2.0
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jmespath/go-jmespath v0.4.0

@@ -59,6 +59,17 @@ func resourceApplicationLoadBalancer() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"central_logging": {
+				Type:        schema.TypeBool,
+				Description: "Turn logging on and off for this product. Default value is 'false'.",
+				Optional:    true,
+				Default:     false,
+			},
+			"logging_format": {
+				Type:        schema.TypeString,
+				Description: "Specifies the format of the logs.",
+				Optional:    true,
+			},
 			"datacenter_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -100,6 +111,16 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 	} else {
 		diags := diag.FromErr(fmt.Errorf("listener_lan must be provided for application loadbalancer"))
 		return diags
+	}
+
+	if centralLogging, centralLoggingOk := d.GetOk("central_logging"); centralLoggingOk {
+		centralLogging := centralLogging.(bool)
+		applicationLoadBalancer.Properties.CentralLogging = &centralLogging
+	}
+
+	if loggingFormat, loggingFormatOk := d.GetOk("logging_format"); loggingFormatOk {
+		loggingFormat := loggingFormat.(string)
+		applicationLoadBalancer.Properties.LoggingFormat = &loggingFormat
 	}
 
 	if ipsVal, ipsOk := d.GetOk("ips"); ipsOk {
@@ -248,6 +269,18 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 			}
 		}
 		request.Properties.Ips = &ips
+	}
+
+	if d.HasChange("central_logging") {
+		_, v := d.GetChange("central_logging")
+		vBool := v.(bool)
+		request.Properties.CentralLogging = &vBool
+	}
+
+	if d.HasChange("loggingFormat") {
+		_, v := d.GetChange("loggingFormat")
+		vStr := v.(string)
+		request.Properties.LoggingFormat = &vStr
 	}
 
 	if d.HasChange("target_lan") {
@@ -415,6 +448,20 @@ func setApplicationLoadBalancerData(d *schema.ResourceData, applicationLoadBalan
 			err := d.Set("lb_private_ips", *applicationLoadBalancer.Properties.LbPrivateIps)
 			if err != nil {
 				return fmt.Errorf("error while setting lb_private_ips property for application loadbalancer %s: %w", d.Id(), err)
+			}
+		}
+
+		if applicationLoadBalancer.Properties.CentralLogging != nil {
+			err := d.Set("central_logging", *applicationLoadBalancer.Properties.CentralLogging)
+			if err != nil {
+				return fmt.Errorf("error while setting central_logging property for network load balancer %s: %w", d.Id(), err)
+			}
+		}
+
+		if applicationLoadBalancer.Properties.LoggingFormat != nil {
+			err := d.Set("logging_format", *applicationLoadBalancer.Properties.LoggingFormat)
+			if err != nil {
+				return fmt.Errorf("error while setting logging_format property for network load balancer %s: %w", d.Id(), err)
 			}
 		}
 	}

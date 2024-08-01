@@ -362,9 +362,7 @@ const (
 const ServersDataSource = "ionoscloud_servers"
 
 const (
-	CertificateResource = "ionoscloud_certificate"
-	TestCertName        = "certTest"
-	TestCertificate     = `-----BEGIN CERTIFICATE-----
+	TestCertificate = `-----BEGIN CERTIFICATE-----
 MIIDazCCAlOgAwIBAgIUOH1cikhurIjCjm5Zxt7sfJmhIVAwDQYJKoZIhvcNAQEL
 BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
 GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yMjA2MDkxMjM0MzVaFw0zMjA2
@@ -413,6 +411,12 @@ N20fcwpG3aiTESteYpnXCNFW8XrMnoBWL6bK6st4eBSUbvOfjTJrSVC/KBLR6awV
 i+U582LTWq8y6WA8tdqfeZO+TUl+8DBk6k6aDbA8a3+X/D+sTsRfSavEVyEeV7EO
 wkv+4ThHJ677Dpi/P8F8iOJp
 -----END PRIVATE KEY-----`
+	CertificateResource             = "ionoscloud_certificate" //nolint:golint
+	AutoCertificateProviderResource = "ionoscloud_auto_certificate_provider"
+	AutoCertificateResource         = "ionoscloud_auto_certificate"
+	TestCertName                    = "certTest"
+	TestCMProviderName              = "CMProviderTest"
+	TestCMAutoCertificateName       = "CMAutoCertificateTest"
 )
 
 // Server type constants

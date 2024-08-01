@@ -85,8 +85,8 @@ func resourceLan() *schema.Resource {
 func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 	public := d.Get("public").(bool)
-	request := ionoscloud.LanPost{
-		Properties: &ionoscloud.LanPropertiesPost{
+	request := ionoscloud.Lan{
+		Properties: &ionoscloud.LanProperties{
 			Public: &public,
 		},
 	}
