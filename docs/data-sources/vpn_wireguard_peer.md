@@ -38,6 +38,8 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
+- `id` - The unique ID of the WireGuard Peer.
+- `name` - The name of the WireGuard Peer.
 - `description` - The description of the WireGuard Peer.
 - `public_key` - WireGuard public key of the connecting peer.
 - `status` - The current status of the WireGuard Peer.

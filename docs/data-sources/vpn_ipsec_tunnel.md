@@ -50,6 +50,7 @@ data "ionoscloud_vpn_ipsec_gateway" "example" {
 
 The following attributes are returned by the datasource:
 
+* `id` - The unique ID of the IPSec Gateway Tunnel.
 * `name` - The name of the IPSec Gateway Tunnel.
 * `description` - The human-readable description of your IPSec Gateway Tunnel.
 * `remote_host` - The remote peer host fully qualified domain name or public IPV4 IP to connect to.

@@ -47,9 +47,8 @@ data "ionoscloud_vpn_ipsec_gateway" "example" {
 
 The following attributes are returned by the datasource:
 
+* `id` - The unique ID of the IPSec Gateway.
 * `name` - The name of the IPSec Gateway.
-* `location` - The location of the IPSec Gateway. Supported locations: de/fra, de/txl, es/vit, gb/lhr, us/ewr, us/las,
-  us/mci, fr/par
 * `gateway_ip` - Public IP address to be assigned to the gateway.
 * `description` - (Optional)[string] The human-readable description of the IPSec Gateway.
 * `connections` - The network connection for your gateway.
