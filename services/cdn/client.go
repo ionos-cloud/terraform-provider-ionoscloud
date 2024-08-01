@@ -16,10 +16,12 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// CdnClient client for the cdn sdk
 type CdnClient struct {
 	SdkClient *cdn.APIClient
 }
 
+// NewCdnClient creates a new CdnClient
 func NewCdnClient(username, password, token, url, version, terraformVersion string) *CdnClient {
 	newConfigCdn := cdn.NewConfiguration(username, password, token, url)
 
@@ -39,6 +41,7 @@ func NewCdnClient(username, password, token, url, version, terraformVersion stri
 	}
 }
 
+// IsDistributionReady check if a distribution state is AVAILABLE
 func (c *CdnClient) IsDistributionReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	distributionID := d.Id()
 	distribution, _, err := c.SdkClient.DistributionsApi.DistributionsFindById(ctx, distributionID).Execute()

@@ -232,16 +232,16 @@ func resourceCdnDistributionDelete(ctx context.Context, d *schema.ResourceData, 
 func resourceCdnDistributionImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := *meta.(services.SdkBundle).CdnClient
 
-	distributionId := d.Id()
+	distributionID := d.Id()
 
-	distribution, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsFindById(ctx, distributionId).Execute()
+	distribution, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsFindById(ctx, distributionID).Execute()
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("registry does not exist %q", distributionId)
+			return nil, fmt.Errorf("registry does not exist %q", distributionID)
 		}
-		return nil, fmt.Errorf("an error occurred while trying to fetch the import of CDN distribution %q, error:%w", distributionId, err)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of CDN distribution %q, error:%w", distributionID, err)
 	}
 
 	log.Printf("[INFO] CDN distribution found: %+v", distribution)

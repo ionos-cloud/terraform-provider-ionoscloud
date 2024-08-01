@@ -9,6 +9,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
+// SetDistributionData sets distribution data from a distribution sdk object
 func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) error {
 	resourceName := "distribution"
 
@@ -90,6 +91,7 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) 
 	return nil
 }
 
+// GetRoutingRulesData gets distribution routing rules data from terraform
 func GetRoutingRulesData(d *schema.ResourceData) (*[]cdn.RoutingRule, error) {
 	var routingRules []cdn.RoutingRule
 
@@ -124,7 +126,7 @@ func GetRoutingRulesData(d *schema.ResourceData) (*[]cdn.RoutingRule, error) {
 				routingRule.Upstream.Waf = &waf
 			}
 
-			if _, geo_restrictionsOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions", routingRuleIndex)); geo_restrictionsOk {
+			if _, geoRestrictionsOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions", routingRuleIndex)); geoRestrictionsOk {
 				routingRule.Upstream.GeoRestrictions = &cdn.UpstreamGeoRestrictions{}
 				if allowList, allowListOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions.0.allow_list", routingRuleIndex)); allowListOk {
 					raw := allowList.([]interface{})
