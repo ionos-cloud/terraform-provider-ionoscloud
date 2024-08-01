@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -183,18 +184,17 @@ func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no InMemoryDB replica set found with the specified display name: %v", displayName))
-		} else if len(results) > 1 {
+		}
+		if len(results) > 1 {
 			var ids []string
 			for _, r := range results {
 				ids = append(ids, *r.Id)
 			}
 			return diag.FromErr(fmt.Errorf("more than one InMemoryDB replica set found with the specified criteria name '%v': (%v)", displayName, strings.Join(ids, ", ")))
-		} else {
-			replica = results[0]
 		}
-
+		replica = results[0]
 	}
 
 	if err := client.SetReplicaSetData(d, replica); err != nil {

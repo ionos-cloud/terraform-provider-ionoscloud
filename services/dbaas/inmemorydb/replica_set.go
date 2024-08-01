@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -42,6 +43,7 @@ func (c *InMemoryDBClient) CreateReplicaSet(ctx context.Context, replicaSet inMe
 	return replicaSetResponse, apiResponse, err
 }
 
+//nolint:golint
 func (c *InMemoryDBClient) IsReplicaSetReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	replicaSetID := d.Id()
 	location := d.Get("location").(string)
@@ -53,9 +55,10 @@ func (c *InMemoryDBClient) IsReplicaSetReady(ctx context.Context, d *schema.Reso
 		return false, fmt.Errorf("metadata or state is empty for InMemoryDB replica set with ID: %v", replicaSetID)
 	}
 	log.Printf("[INFO] state of the InMemoryDB replica set with ID: %v is: %v", replicaSetID, *replicaSet.Metadata.State)
-	return strings.EqualFold(string(*replicaSet.Metadata.State), constant.Available), nil
+	return strings.EqualFold(*replicaSet.Metadata.State, constant.Available), nil
 }
 
+//nolint:golint
 func (c *InMemoryDBClient) DeleteReplicaSet(ctx context.Context, replicaSetID, location string) (*inMemoryDB.APIResponse, error) {
 	c.modifyConfigURL(location)
 	apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsDelete(ctx, replicaSetID).Execute()
@@ -63,6 +66,7 @@ func (c *InMemoryDBClient) DeleteReplicaSet(ctx context.Context, replicaSetID, l
 	return apiResponse, err
 }
 
+//nolint:golint
 func (c *InMemoryDBClient) UpdateReplicaSet(ctx context.Context, replicaSetID, location string, replicaSet inMemoryDB.ReplicaSetEnsure) (inMemoryDB.ReplicaSetRead, *inMemoryDB.APIResponse, error) {
 	c.modifyConfigURL(location)
 	replicaSetResponse, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsPut(ctx, replicaSetID).ReplicaSetEnsure(replicaSet).Execute()
@@ -70,6 +74,7 @@ func (c *InMemoryDBClient) UpdateReplicaSet(ctx context.Context, replicaSetID, l
 	return replicaSetResponse, apiResponse, err
 }
 
+//nolint:golint
 func (c *InMemoryDBClient) IsReplicaSetDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	replicaSetID := d.Id()
 	_, apiResponse, err := c.GetReplicaSet(ctx, replicaSetID, d.Get("location").(string))
@@ -82,6 +87,7 @@ func (c *InMemoryDBClient) IsReplicaSetDeleted(ctx context.Context, d *schema.Re
 	return false, nil
 }
 
+//nolint:golint
 func (c *InMemoryDBClient) GetReplicaSet(ctx context.Context, replicaSetID, location string) (inMemoryDB.ReplicaSetRead, *inMemoryDB.APIResponse, error) {
 	c.modifyConfigURL(location)
 	replicaSet, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsFindById(ctx, replicaSetID).Execute()
@@ -89,6 +95,7 @@ func (c *InMemoryDBClient) GetReplicaSet(ctx context.Context, replicaSetID, loca
 	return replicaSet, apiResponse, err
 }
 
+//nolint:golint
 func (c *InMemoryDBClient) GetSnapshot(ctx context.Context, snapshotID, location string) (inMemoryDB.SnapshotRead, *inMemoryDB.APIResponse, error) {
 	c.modifyConfigURL(location)
 	snapshot, apiResponse, err := c.sdkClient.SnapshotApi.SnapshotsFindById(ctx, snapshotID).Execute()
@@ -96,6 +103,7 @@ func (c *InMemoryDBClient) GetSnapshot(ctx context.Context, snapshotID, location
 	return snapshot, apiResponse, err
 }
 
+//nolint:golint
 func (c *InMemoryDBClient) ListReplicaSets(ctx context.Context, filterName, location string) (inMemoryDB.ReplicaSetReadList, *inMemoryDB.APIResponse, error) {
 	c.modifyConfigURL(location)
 	request := c.sdkClient.ReplicaSetApi.ReplicasetsGet(ctx)
@@ -137,9 +145,9 @@ func GetReplicaSetDataProperties(d *schema.ResourceData) *inMemoryDB.ReplicaSet 
 		replicaSet.EvictionPolicy = &evictionPolicy
 	}
 
-	if initialSnapshotId, ok := d.GetOk("initial_snapshot_id"); ok {
-		initialSnapshotId := initialSnapshotId.(string)
-		replicaSet.InitialSnapshotId = &initialSnapshotId
+	if initialSnapshotID, ok := d.GetOk("initial_snapshot_id"); ok {
+		initialSnapshotID := initialSnapshotID.(string)
+		replicaSet.InitialSnapshotId = &initialSnapshotID
 	}
 
 	if _, ok := d.GetOk("resources"); ok {
@@ -179,6 +187,7 @@ func GetReplicaSetDataUpdate(d *schema.ResourceData) inMemoryDB.ReplicaSetEnsure
 	}
 }
 
+//nolint:all
 func (c *InMemoryDBClient) SetReplicaSetData(d *schema.ResourceData, replicaSet inMemoryDB.ReplicaSetRead) error {
 	resourceName := "InMemoryDB replica set"
 	if replicaSet.Id != nil {
@@ -273,6 +282,7 @@ func (c *InMemoryDBClient) SetReplicaSetData(d *schema.ResourceData, replicaSet 
 	return nil
 }
 
+//nolint:golint
 func (c *InMemoryDBClient) SetSnapshotData(d *schema.ResourceData, snapshot inMemoryDB.SnapshotRead) error {
 	if snapshot.Id == nil {
 		return fmt.Errorf("expected a valid ID for InMemoryDB snapshot, but got 'nil' instead")
@@ -284,16 +294,16 @@ func (c *InMemoryDBClient) SetSnapshotData(d *schema.ResourceData, snapshot inMe
 	var metadata []interface{}
 	metadataEntry := make(map[string]interface{})
 	if snapshot.Metadata.CreatedDate != nil {
-		metadataEntry["created_date"] = (*snapshot.Metadata.CreatedDate).Time.Format(constant.DatetimeZLayout)
+		metadataEntry["created_date"] = (snapshot.Metadata.CreatedDate).Time.Format(constant.DatetimeZLayout)
 	}
 	if snapshot.Metadata.LastModifiedDate != nil {
-		metadataEntry["last_modified_date"] = (*snapshot.Metadata.LastModifiedDate).Time.Format(constant.DatetimeZLayout)
+		metadataEntry["last_modified_date"] = (snapshot.Metadata.LastModifiedDate).Time.Format(constant.DatetimeZLayout)
 	}
 	if snapshot.Metadata.ReplicasetId != nil {
 		metadataEntry["replica_set_id"] = *snapshot.Metadata.ReplicasetId
 	}
 	if snapshot.Metadata.SnapshotTime != nil {
-		metadataEntry["snapshot_time"] = (*snapshot.Metadata.SnapshotTime).Time.Format(constant.DatetimeZLayout)
+		metadataEntry["snapshot_time"] = (snapshot.Metadata.SnapshotTime).Time.Format(constant.DatetimeZLayout)
 	}
 	if snapshot.Metadata.DatacenterId != nil {
 		metadataEntry["datacenter_id"] = *snapshot.Metadata.DatacenterId

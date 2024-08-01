@@ -13,12 +13,12 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-//nolint:docs
+//nolint:golint
 type InMemoryDBClient struct {
 	sdkClient *inMemoryDB.APIClient
 }
 
-//nolint:docs
+//nolint:golint
 func NewInMemoryDBClient(username, password, token, url, version, terraformVersion string) *InMemoryDBClient {
 	newConfigDbaas := inMemoryDB.NewConfiguration(username, password, token, url)
 
@@ -31,7 +31,7 @@ func NewInMemoryDBClient(username, password, token, url, version, terraformVersi
 	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigDbaas.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-in-memory-db/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, inMemoryDB.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		version, inMemoryDB.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	return &InMemoryDBClient{
 		sdkClient: inMemoryDB.NewAPIClient(newConfigDbaas),
