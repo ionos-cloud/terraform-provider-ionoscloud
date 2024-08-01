@@ -312,7 +312,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		KafkaClient:        NewClientByType(clientOpts, kafkaClient).(*kafkaService.Client),
 		APIGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
 		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
-		InMemoryDBClient:   NewClientByType(clientOpts, redisDBClient).(*inmemorydb.InMemoryDBClient),
+		InMemoryDBClient:   NewClientByType(clientOpts, inMemoryDBClient).(*inmemorydb.InMemoryDBClient),
 	}, nil
 }
 
@@ -330,12 +330,12 @@ const (
 	mariaDBClient
 	mongoClient
 	nfsClient
-	redisDBClient
 	psqlClient
 	s3Client
 	kafkaClient
 	apiGatewayClient
 	vpnClient
+	inMemoryDBClient
 )
 
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
@@ -387,7 +387,7 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		)
 	case vpnClient:
 		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username)
-	case redisDBClient:
+	case inMemoryDBClient:
 		return inmemorydb.NewInMemoryDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)

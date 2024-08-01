@@ -117,9 +117,9 @@ func GetReplicaSetDataProperties(d *schema.ResourceData) *inMemoryDB.ReplicaSet 
 		replicaSet.DisplayName = &displayName
 	}
 
-	if redisVersion, ok := d.GetOk("version"); ok {
-		redisVersion := redisVersion.(string)
-		replicaSet.Version = &redisVersion
+	if inMemoryDBVersion, ok := d.GetOk("version"); ok {
+		inMemoryDBVersion := inMemoryDBVersion.(string)
+		replicaSet.Version = &inMemoryDBVersion
 	}
 
 	if replicas, ok := d.GetOk("replicas"); ok {
