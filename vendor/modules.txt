@@ -304,6 +304,9 @@ github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
 # github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
 ## explicit; go 1.20
 github.com/ionos-cloud/sdk-go-bundle/shared
+# github.com/ionos-cloud/sdk-go-cdn v1.0.0
+## explicit; go 1.18
+github.com/ionos-cloud/sdk-go-cdn
 # github.com/ionos-cloud/sdk-go-cert-manager v1.1.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-cert-manager
