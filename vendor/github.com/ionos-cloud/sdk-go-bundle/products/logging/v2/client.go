@@ -1,7 +1,7 @@
 /*
  * IONOS Logging REST API
  *
- * Logging as a Service (LaaS) is a service that provides a centralized logging system where users are able to push and aggregate their system or application logs. This service also provides a visualization platform where users are able to observe, search and filter the logs and also create dashboards and alerts for their data points. This service can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an API. The API allows you to create logging pipelines or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * The logging service offers a centralized platform to collect and store logs from various systems and applications. It includes tools to search, filter, visualize, and create alerts based on your log data.  This API provides programmatic control over logging pipelines, enabling you to create new pipelines or modify existing ones. It mirrors the functionality of the DCD visual tool, ensuring a consistent experience regardless of your chosen interface.
  *
  * API version: 0.0.1
  */
@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "products/logging/v2.0.0"
+	Version = "products/logging/v2.1.0"
 )
 
 // APIClient manages communication with the IONOS Logging REST API API v0.0.1
@@ -62,6 +62,8 @@ type APIClient struct {
 	common service // Reuse a single struct instead of allocating one for each service on the heap.
 
 	// API Services
+
+	CentralApi *CentralApiService
 
 	PipelinesApi *PipelinesApiService
 }
@@ -83,6 +85,22 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 				URL:         "https://logging.de-txl.ionos.com",
 				Description: "No description provided",
 			},
+			{
+				URL:         "https://logging.de-fra.ionos.com",
+				Description: "No description provided",
+			},
+			{
+				URL:         "https://logging.gb-lhr.ionos.com",
+				Description: "No description provided",
+			},
+			{
+				URL:         "https://logging.fr-par.ionos.com",
+				Description: "No description provided",
+			},
+			{
+				URL:         "https://logging.es-vit.ionos.com",
+				Description: "No description provided",
+			},
 		}
 	}
 	//enable certificate pinning if the env variable is set
@@ -98,6 +116,7 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 	c.common.client = c
 
 	// API Services
+	c.CentralApi = (*CentralApiService)(&c.common)
 	c.PipelinesApi = (*PipelinesApiService)(&c.common)
 
 	return c

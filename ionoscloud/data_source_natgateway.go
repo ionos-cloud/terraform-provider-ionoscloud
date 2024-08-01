@@ -83,7 +83,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the lan id or name"))
+		return diag.FromErr(errors.New("please provide either the nat gateway id or name"))
 	}
 	var natGateway ionoscloud.NatGateway
 	var err error

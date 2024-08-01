@@ -1,7 +1,7 @@
 /*
  * IONOS Logging REST API
  *
- * Logging as a Service (LaaS) is a service that provides a centralized logging system where users are able to push and aggregate their system or application logs. This service also provides a visualization platform where users are able to observe, search and filter the logs and also create dashboards and alerts for their data points. This service can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an API. The API allows you to create logging pipelines or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * The logging service offers a centralized platform to collect and store logs from various systems and applications. It includes tools to search, filter, visualize, and create alerts based on your log data.  This API provides programmatic control over logging pipelines, enabling you to create new pipelines or modify existing ones. It mirrors the functionality of the DCD visual tool, ensuring a consistent experience regardless of your chosen interface.
  *
  * API version: 0.0.1
  */
@@ -22,7 +22,7 @@ type PipelinePatchProperties struct {
 	// The friendly name of your pipeline.
 	Name *string `json:"name,omitempty"`
 	// The information of the log pipelines
-	Logs []Processor `json:"logs,omitempty"`
+	Logs []PipelineCreatePropertiesLogs `json:"logs,omitempty"`
 }
 
 // NewPipelinePatchProperties instantiates a new PipelinePatchProperties object
@@ -76,9 +76,9 @@ func (o *PipelinePatchProperties) SetName(v string) {
 }
 
 // GetLogs returns the Logs field value if set, zero value otherwise.
-func (o *PipelinePatchProperties) GetLogs() []Processor {
+func (o *PipelinePatchProperties) GetLogs() []PipelineCreatePropertiesLogs {
 	if o == nil || IsNil(o.Logs) {
-		var ret []Processor
+		var ret []PipelineCreatePropertiesLogs
 		return ret
 	}
 	return o.Logs
@@ -86,7 +86,7 @@ func (o *PipelinePatchProperties) GetLogs() []Processor {
 
 // GetLogsOk returns a tuple with the Logs field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PipelinePatchProperties) GetLogsOk() ([]Processor, bool) {
+func (o *PipelinePatchProperties) GetLogsOk() ([]PipelineCreatePropertiesLogs, bool) {
 	if o == nil || IsNil(o.Logs) {
 		return nil, false
 	}
@@ -102,8 +102,8 @@ func (o *PipelinePatchProperties) HasLogs() bool {
 	return false
 }
 
-// SetLogs gets a reference to the given []Processor and assigns it to the Logs field.
-func (o *PipelinePatchProperties) SetLogs(v []Processor) {
+// SetLogs gets a reference to the given []PipelineCreatePropertiesLogs and assigns it to the Logs field.
+func (o *PipelinePatchProperties) SetLogs(v []PipelineCreatePropertiesLogs) {
 	o.Logs = v
 }
 

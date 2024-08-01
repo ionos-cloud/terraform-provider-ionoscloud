@@ -19,6 +19,7 @@ import (
 	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
@@ -28,6 +29,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -150,6 +152,12 @@ func Provider() *schema.Provider {
 			constant.AutoscalingGroupResource:                  ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
 			constant.CdnDistributionResource:                   resourceCdnDistribution(),
+			constant.APIGatewayResource:                        resourceAPIGateway(),
+			constant.APIGatewayRouteResource:                   resourceAPIGatewayRoute(),
+			constant.WireGuardGatewayResource:                  resourceVpnWireguardGateway(),
+			constant.WireGuardPeerResource:                     resourceVpnWireguardPeer(),
+			constant.IPSecGatewayResource:                      resourceVpnIPSecGateway(),
+			constant.IPSecTunnelResource:                       resourceVpnIPSecTunnel(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -212,6 +220,12 @@ func Provider() *schema.Provider {
 			constant.AutoscalingGroupResource:                  DataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
 			constant.CdnDistributionResource:                   dataSourceCdnDistribution(),
+			constant.APIGatewayResource:                        dataSourceAPIGateway(),
+			constant.APIGatewayRouteResource:                   dataSourceAPIGatewayRoute(),
+			constant.WireGuardGatewayResource:                  dataSourceVpnWireguardGateway(),
+			constant.WireGuardPeerResource:                     dataSourceVpnWireguardPeer(),
+			constant.IPSecGatewayResource:                      dataSourceVpnIPSecGateway(),
+			constant.IPSecTunnelResource:                       dataSourceVpnIPSecTunnel(),
 		},
 	}
 
@@ -282,6 +296,8 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
 		NFSClient:          NewClientByType(clientOpts, nfsClient).(*nfsService.Client),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
+		APIGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
+		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
 	}, nil
 }
 
@@ -301,6 +317,8 @@ const (
 	nfsClient
 	psqlClient
 	s3Client
+	apiGatewayClient
+	vpnClient
 )
 
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
@@ -310,7 +328,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
 			newConfig.UserAgent = fmt.Sprintf(
 				"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+			)
 			if os.Getenv(constant.IonosDebug) != "" {
 				newConfig.Debug = true
 			}
@@ -343,6 +362,12 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	case s3Client:
 		return s3.NewAPIClient(s3.NewConfiguration())
+	case apiGatewayClient:
+		return apiGatewayService.NewClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
+	case vpnClient:
+		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}

@@ -460,6 +460,21 @@ const (
 	TestServerBootDeviceSelectionResource = "boot_device_selection_example"
 )
 
+const (
+	// WireGuardGatewayResource is the full name of the WireGuardGatewayResource
+	WireGuardGatewayResource = "ionoscloud_vpn_wireguard_gateway"
+	// WireGuardPeerResource is the full name of the WireGuardGatewayResource
+	WireGuardPeerResource = "ionoscloud_vpn_wireguard_peer"
+	// WireGuardGatewayTestResource is the name used for testing
+	WireGuardGatewayTestResource = "test_wireguard_gateway"
+	// WireGuardPeerTestResource is the name used for testing
+	WireGuardPeerTestResource = "test_wireguard_peer"
+	// IPSecGatewayResource is the full name of the IPSecGatewayResource
+	IPSecGatewayResource = "ionoscloud_vpn_ipsec_gateway"
+	// IPSecTunnelResource is the full name of the IPSecTunnelResource
+	IPSecTunnelResource = "ionoscloud_vpn_ipsec_tunnel"
+)
+
 var ForwardingRuleAlgorithms = []string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}
 var LBTargetProxyProtocolVersions = []string{"none", "v1", "v2", "v2ssl"}
 
@@ -468,4 +483,10 @@ var LBTargetProxyProtocolVersions = []string{"none", "v1", "v2", "v2ssl"}
 const (
 	TargetGroupLimit = 200
 	IPBlockLimit     = 1000
+)
+
+// API Gateway Constants
+const (
+	APIGatewayResource      = "ionoscloud_apigateway"
+	APIGatewayRouteResource = "ionoscloud_apigateway_route"
 )
