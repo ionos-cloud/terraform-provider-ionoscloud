@@ -409,6 +409,7 @@ func NameMatches(name, value string, partialMatch bool) bool {
 	return strings.EqualFold(name, value)
 }
 
+// IsStateFailed checks if the provided state represents a failed state.
 func IsStateFailed(state string) bool {
 	return state == ionoscloud.Failed || state == ionoscloud.FailedSuspended || state == ionoscloud.FailedUpdating || state == ionoscloud.FailedDestroying
 }

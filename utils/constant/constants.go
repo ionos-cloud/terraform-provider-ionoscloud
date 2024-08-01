@@ -353,7 +353,7 @@ const (
 const ServersDataSource = "ionoscloud_servers"
 
 const (
-	CertificateResource             = "ionoscloud_certificate"
+	CertificateResource             = "ionoscloud_certificate" //nolint:golint
 	AutoCertificateProviderResource = "ionoscloud_auto_certificate_provider"
 	AutoCertificateResource         = "ionoscloud_auto_certificate"
 	TestCertName                    = "certTest"

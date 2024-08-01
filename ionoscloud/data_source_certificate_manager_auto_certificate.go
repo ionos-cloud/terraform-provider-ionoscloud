@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	certSDK "github.com/ionos-cloud/sdk-go-cert-manager"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -19,10 +20,9 @@ func dataSourceCertificateManagerAutoCertificate() *schema.Resource {
 		ReadContext: dataSourceAutoCertificateRead,
 		Schema: map[string]*schema.Schema{
 			"location": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The location of the auto-certificate",
-				// TODO -- Change the name of this constant.
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "The location of the auto-certificate",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
 			},
 			"id": {
@@ -105,13 +105,12 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no auto-certificate found with the specified name: %v", name))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one auto-certificate found with the specified name: %v", name))
-		} else {
-			autoCertificate = results[0]
 		}
+		autoCertificate = results[0]
 	}
 
 	if err := certService.SetAutoCertificateData(d, autoCertificate); err != nil {
