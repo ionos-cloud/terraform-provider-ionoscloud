@@ -16,7 +16,7 @@ import (
 
 var pipelineResourceName = "Logging Pipeline"
 
-func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.Pipeline, utils.ApiResponseInfo, error) {
+func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.ProvisioningPipeline, utils.ApiResponseInfo, error) {
 	request := setPipelinePostRequest(d)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPost(ctx).Pipeline(*request).Execute()
 	apiResponse.LogInfo()
@@ -77,7 +77,7 @@ func setPipelinePostRequest(d *schema.ResourceData) *logging.PipelineCreate {
 		request.Properties.Name = name
 	}
 
-	var logs []logging.Processor
+	var logs []logging.PipelineCreatePropertiesLogs
 	if logsValue, ok := d.GetOk("log"); ok {
 		for _, logData := range logsValue.([]interface{}) {
 			if logElem, ok := logData.(map[string]interface{}); ok {
@@ -85,7 +85,7 @@ func setPipelinePostRequest(d *schema.ResourceData) *logging.PipelineCreate {
 				logSource := logElem["source"].(string)
 				logTag := logElem["tag"].(string)
 				logProtocol := logElem["protocol"].(string)
-				newLog := *logging.NewProcessor()
+				newLog := *logging.NewPipelineCreatePropertiesLogs()
 				newLog.Source = &logSource
 				newLog.Tag = &logTag
 				newLog.Protocol = &logProtocol
@@ -121,7 +121,7 @@ func setPipelinePatchRequest(d *schema.ResourceData) *logging.PipelinePatch {
 		request.Properties.Name = &name
 	}
 
-	var logs []logging.Processor
+	var logs []logging.PipelineCreatePropertiesLogs
 	if logsValue, ok := d.GetOk("log"); ok {
 		for _, logData := range logsValue.([]interface{}) {
 			if logElem, ok := logData.(map[string]interface{}); ok {
@@ -129,7 +129,7 @@ func setPipelinePatchRequest(d *schema.ResourceData) *logging.PipelinePatch {
 				logSource := logElem["source"].(string)
 				logTag := logElem["tag"].(string)
 				logProtocol := logElem["protocol"].(string)
-				newLog := *logging.NewProcessor()
+				newLog := *logging.NewPipelineCreatePropertiesLogs()
 				newLog.Source = &logSource
 				newLog.Tag = &logTag
 				newLog.Protocol = &logProtocol

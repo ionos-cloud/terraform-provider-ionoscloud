@@ -13,11 +13,12 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// Client is a wrapper for the Logging SDK client
 type Client struct {
 	sdkClient logging.APIClient
 }
 
-// NewClient returns a new ionoscloud logging client
+// NewClient returns a new Logging client
 func NewClient(username, password, token, url, terraformVersion string) *Client {
 	newConfigLogging := shared.NewConfiguration(username, password, token, url)
 

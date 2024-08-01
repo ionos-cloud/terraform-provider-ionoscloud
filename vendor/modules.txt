@@ -295,7 +295,10 @@ github.com/huandu/xstrings
 # github.com/iancoleman/strcase v0.3.0
 ## explicit; go 1.16
 github.com/iancoleman/strcase
-# github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0
+# github.com/ionos-cloud/sdk-go-api-gateway v1.0.0
+## explicit; go 1.18
+github.com/ionos-cloud/sdk-go-api-gateway
+# github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.0
