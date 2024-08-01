@@ -13,10 +13,10 @@ on:
         type: string
         default: "compute"
       tf-log:
-        description: "terraform logs, accepted values: off, trace, debug, info, warn or error"
+        description: "terraform logs, accepted values: OFF, TRACE, DEBUG, INFO, WARN or ERROR"
         required: false
         type: string
-        default: "error"
+        default: "ERROR"
       fail-fast:
         description: "toggles the '-failfast' flag for the go test command"
         required: false
@@ -48,10 +48,10 @@ jobs:
           go-version-file: 'go.mod'
       - name: Run tests for ${{ github.event.inputs.test-tags }}
         if: ${{ github.event.inputs.test-tags != '' && github.events.inputs.failfast == true }}
-        run: go test ./... -v -failfast -timeout 240m -tags ${{ github.event.inputs.test-tags }}
+        run: go test ./ionoscloud -v -failfast -timeout 240m -tags ${{ github.event.inputs.test-tags }}
       - name: Run tests for ${{ github.event.inputs.test-tags }} no failfast
         if: ${{ github.event.inputs.test-tags != '' && github.events.inputs.failfast == false }}
-        run: go test ./... -v -timeout 6h -tags ${{ github.event.inputs.test-tags }}
+        run: go test ./ionoscloud -v -timeout 6h -tags ${{ github.event.inputs.test-tags }}
       - name: Run tests without tags
         if: ${{ github.event.inputs.test-tags == ''}}
-        run: go test ./... -v -failfast -timeout 180m
+        run: go test ./ionoscloud -v -failfast -timeout 180m
