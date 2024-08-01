@@ -1,5 +1,3 @@
-//nolint:unused
-
 package ionoscloud
 
 import (
@@ -352,7 +350,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
 }
-` + ServerImagePassword //nolint:unused
+` + ServerImagePassword
 
 // Solves  #372 crash when ips field in nic resource is a list with an empty string
 const testAccCheckServerConfigEmptyNicIps = `
@@ -1712,7 +1710,7 @@ const testAccCheckCdnDistributionConfigBasicImport = `resource ` + constant.CdnD
 			}
 		}
 	}
-}` //nolint unused
+}`
 
 const resourceRandomUUID = `
 resource "random_uuid" "uuid" {
@@ -1787,7 +1785,7 @@ resource ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestResourceNa
 // Logging Pipeline constants
 // Attributes
 const pipelineNameAttribute = "name"
-const pipelineGrafanaAddressAttribute = "grafana_address" // nolint:unused
+const pipelineGrafanaAddressAttribute = "grafana_address"
 const pipelineLogAttribute = "log"
 const pipelineLogSourceAttribute = "source"
 const pipelineLogTagAttribute = "tag"
@@ -1845,7 +1843,7 @@ resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTe
 const clusterIdAttribute = "cluster_id"
 const clusterInstancesAttribute = "instances"
 const clusterCoresAttribute = "cores"
-const clusterLocationAttribute = "location" // nolint:unused
+const clusterLocationAttribute = "location"
 const clusterRamAttribute = "ram"
 const clusterStorageSizeAttribute = "storage_size"
 const clusterConnectionsAttribute = "connections"
