@@ -108,8 +108,10 @@ github.com/huandu/xstrings v1.3.3 h1:/Gcsuc1x8JVbJ9/rlye4xZnVAbEkGauT8lbebqcQws4
 github.com/huandu/xstrings v1.3.3/go.mod h1:y5/lhBue+AyNmUVz9RLU9xbLR0o4KIIExikq4ovT0aE=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
-github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0 h1:YtL3uOZBzc+4r/mjkVOr96eMJnhL2RXDcDL+IbweFcE=
-github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0/go.mod h1:Ci6xo7oPA3TpxtB0as6UISNvlUShCX1gN332MqVYHGY=
+github.com/ionos-cloud/sdk-go-api-gateway v1.0.0 h1:T+JzarV1Iw7NjWQfEuv5bESnHoCLOMpPtbcKC4T5Uzk=
+github.com/ionos-cloud/sdk-go-api-gateway v1.0.0/go.mod h1:TkSlamP+qKRT8cgBaZEN8rawanVluOR0dXbXXdmmwTY=
+github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0 h1:Ba5bkt9CPzygXytD7Qwgbeqs7E3UTMtq9revM+nWlyY=
+github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0/go.mod h1:Ci6xo7oPA3TpxtB0as6UISNvlUShCX1gN332MqVYHGY=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.0 h1:TFEzZgjaw8T7u8e/P1MIMeHXP3EWteXWrdIJJfVZIFY=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.0/go.mod h1:YIXeMi0UPqXuGR1il6XRYyBCnzrN2Ech6tPsVuAOEL4=
 github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1 h1:NWobgIhmUJKG6ohFXefMj+KmpEEvLYEDUgGzpns6HQE=

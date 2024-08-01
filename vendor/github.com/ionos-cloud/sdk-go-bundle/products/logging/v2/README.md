@@ -1,8 +1,8 @@
 # Go API client for logging
 
-Logging as a Service (LaaS) is a service that provides a centralized logging system where users are able to push and aggregate their system or application logs. This service also provides a visualization platform where users are able to observe, search and filter the logs and also create dashboards and alerts for their data points.
-This service can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an API.
-The API allows you to create logging pipelines or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+The logging service offers a centralized platform to collect and store logs from various systems and applications. It includes tools to search, filter, visualize, and create alerts based on your log data.
+
+This API provides programmatic control over logging pipelines, enabling you to create new pipelines or modify existing ones. It mirrors the functionality of the DCD visual tool, ensuring a consistent experience regardless of your chosen interface.
 
 ## Overview
 The IONOS Cloud SDK for GO provides you with access to the IONOS Cloud API. The client library supports both simple and complex requests.
@@ -198,6 +198,8 @@ All URIs are relative to *https://logging.de-txl.ionos.com*
 
 Class | Method | HTTP request | Description
 ------------- | ------------- | ------------- | -------------
+CentralApi | [**CentralLoggingGet**](docs/api/CentralApi.md#centralloggingget) | **Get** /central | Gets the central logging properties.
+CentralApi | [**CentralLoggingToggle**](docs/api/CentralApi.md#centralloggingtoggle) | **Put** /central | Toggles the central logging.
 PipelinesApi | [**PipelinesDelete**](docs/api/PipelinesApi.md#pipelinesdelete) | **Delete** /pipelines/{pipelineId} | Delete a pipeline
 PipelinesApi | [**PipelinesFindById**](docs/api/PipelinesApi.md#pipelinesfindbyid) | **Get** /pipelines/{pipelineId} | Fetch a pipeline
 PipelinesApi | [**PipelinesGet**](docs/api/PipelinesApi.md#pipelinesget) | **Get** /pipelines | List pipelines
@@ -213,14 +215,22 @@ All URIs are relative to *https://logging.de-txl.ionos.com*
 <details >
 <summary title="Click to toggle">API models list</summary>
 
+ - [CentralLoggingResponse](docs/models/CentralLoggingResponse)
+ - [CentralLoggingResponseMetadata](docs/models/CentralLoggingResponseMetadata)
+ - [CentralLoggingResponseProperties](docs/models/CentralLoggingResponseProperties)
+ - [CentralLoggingToggle](docs/models/CentralLoggingToggle)
+ - [CentralLoggingToggleProperties](docs/models/CentralLoggingToggleProperties)
+ - [DeletedMetadata](docs/models/DeletedMetadata)
+ - [DeletedMetadataAllOf](docs/models/DeletedMetadataAllOf)
+ - [DeletedPipeline](docs/models/DeletedPipeline)
  - [Destination](docs/models/Destination)
  - [ErrorMessage](docs/models/ErrorMessage)
  - [ErrorResponse](docs/models/ErrorResponse)
- - [InlineResponse200](docs/models/InlineResponse200)
  - [Metadata](docs/models/Metadata)
  - [Pipeline](docs/models/Pipeline)
  - [PipelineCreate](docs/models/PipelineCreate)
  - [PipelineCreateProperties](docs/models/PipelineCreateProperties)
+ - [PipelineCreatePropertiesLogs](docs/models/PipelineCreatePropertiesLogs)
  - [PipelineListResponse](docs/models/PipelineListResponse)
  - [PipelinePatch](docs/models/PipelinePatch)
  - [PipelinePatchProperties](docs/models/PipelinePatchProperties)
@@ -228,7 +238,11 @@ All URIs are relative to *https://logging.de-txl.ionos.com*
  - [PipelineResponse](docs/models/PipelineResponse)
  - [PipelineResponseAllOf](docs/models/PipelineResponseAllOf)
  - [PipelineResponseAllOf1](docs/models/PipelineResponseAllOf1)
+ - [PipelinesKeyPost200Response](docs/models/PipelinesKeyPost200Response)
  - [Processor](docs/models/Processor)
+ - [ProvisioningMetadata](docs/models/ProvisioningMetadata)
+ - [ProvisioningMetadataAllOf](docs/models/ProvisioningMetadataAllOf)
+ - [ProvisioningPipeline](docs/models/ProvisioningPipeline)
 
 
 [[Back to API list]](#documentation-for-api-endpoints) [[Back to Model list]](#documentation-for-models)

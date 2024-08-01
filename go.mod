@@ -14,7 +14,8 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.8.0
 	github.com/huandu/xstrings v1.3.3
 	github.com/iancoleman/strcase v0.3.0
-	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.0.0
+	github.com/ionos-cloud/sdk-go-api-gateway v1.0.0
+	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.1

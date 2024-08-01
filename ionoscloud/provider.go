@@ -18,6 +18,7 @@ import (
 	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
@@ -151,6 +152,8 @@ func Provider() *schema.Provider {
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
 			constant.KafkaClusterResource:                      resourceKafkaCluster(),
 			constant.KafkaClusterTopicResource:                 resourceKafkaTopic(),
+			constant.APIGatewayResource:                        resourceAPIGateway(),
+			constant.APIGatewayRouteResource:                   resourceAPIGatewayRoute(),
 			constant.WireGuardGatewayResource:                  resourceVpnWireguardGateway(),
 			constant.WireGuardPeerResource:                     resourceVpnWireguardPeer(),
 			constant.IPSecGatewayResource:                      resourceVpnIPSecGateway(),
@@ -218,6 +221,8 @@ func Provider() *schema.Provider {
 			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
 			constant.KafkaClusterResource:                      dataSourceKafkaCluster(),
 			constant.KafkaClusterTopicResource:                 dataSourceKafkaTopic(),
+			constant.APIGatewayResource:                        dataSourceAPIGateway(),
+			constant.APIGatewayRouteResource:                   dataSourceAPIGatewayRoute(),
 			constant.WireGuardGatewayResource:                  dataSourceVpnWireguardGateway(),
 			constant.WireGuardPeerResource:                     dataSourceVpnWireguardPeer(),
 			constant.IPSecGatewayResource:                      dataSourceVpnIPSecGateway(),
@@ -292,6 +297,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		NFSClient:          NewClientByType(clientOpts, nfsClient).(*nfsService.Client),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
 		KafkaClient:        NewClientByType(clientOpts, kafkaClient).(*kafkaService.Client),
+		APIGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
 		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
 	}, nil
 }
@@ -312,6 +318,7 @@ const (
 	psqlClient
 	s3Client
 	kafkaClient
+	apiGatewayClient
 	vpnClient
 )
 
@@ -356,6 +363,10 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return s3.NewAPIClient(s3.NewConfiguration())
 	case kafkaClient:
 		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case apiGatewayClient:
+		return apiGatewayService.NewClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
 	case vpnClient:
 		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username)
 	default:
