@@ -103,7 +103,8 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no auto-certificate provider found with the specified name: %v", name))
-		} else if len(results) > 1 {
+		}
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one auto-certificate provider found with the specified name: %v", name))
 		}
 		provider = results[0]

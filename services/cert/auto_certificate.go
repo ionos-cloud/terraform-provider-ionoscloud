@@ -83,7 +83,7 @@ func (c *Client) IsAutoCertificateDeleted(ctx context.Context, d *schema.Resourc
 		}
 		return false, fmt.Errorf("error while checking deletion status for auto-certificate with ID: %v, error: %w", d.Id(), err)
 	}
-	if utils.IsStateFailed(*autoCertificate.Metadata.State) {
+	if autoCertificate.Metadata != nil && autoCertificate.Metadata.State != nil && utils.IsStateFailed(*autoCertificate.Metadata.State) {
 		return false, fmt.Errorf("error while checking if auto-certificate is deleted properly, auto-certificate ID: %v, state: %v", autoCertificateID, *autoCertificate.Metadata.State)
 	}
 	return false, nil
@@ -166,9 +166,7 @@ func SetAutoCertificateData(d *schema.ResourceData, autoCertificate certmanager.
 	}
 	if autoCertificate.Properties.SubjectAlternativeNames != nil {
 		subjectAlternativeNames := []string{}
-		for _, subjectAlternativeName := range *autoCertificate.Properties.SubjectAlternativeNames {
-			subjectAlternativeNames = append(subjectAlternativeNames, subjectAlternativeName)
-		}
+		subjectAlternativeNames = append(subjectAlternativeNames, *autoCertificate.Properties.SubjectAlternativeNames...)
 		if err := d.Set("subject_alternative_names", subjectAlternativeNames); err != nil {
 			return utils.GenerateSetError(resourceName, "subject_alternative_names", err)
 		}

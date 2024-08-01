@@ -34,11 +34,13 @@ func resourceCertificateManagerProvider() *schema.Resource {
 			"email": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The email address of the certificate requester",
 			},
 			"server": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The URL of the certificate provider",
 			},
 			"location": {
@@ -51,16 +53,19 @@ func resourceCertificateManagerProvider() *schema.Resource {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key_id": {
 							Type:        schema.TypeString,
 							Required:    true,
+							ForceNew:    true,
 							Description: "The key ID of the external account binding",
 						},
 						"key_secret": {
 							Type:        schema.TypeString,
 							Required:    true,
+							ForceNew:    true,
 							Sensitive:   true,
 							Description: "The secret of the external account binding",
 						},
@@ -68,24 +73,8 @@ func resourceCertificateManagerProvider() *schema.Resource {
 				},
 			},
 		},
-		CustomizeDiff: checkProviderImmutableFields,
-		Timeouts:      &resourceDefaultTimeouts,
+		Timeouts: &resourceDefaultTimeouts,
 	}
-}
-
-func checkProviderImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	// Skip the checks if the resource is being created
-	if diff.Id() == "" {
-		return nil
-	}
-	// These fields are immutable
-	immutableFields := []string{"email", "server", "external_account_binding"}
-	for _, field := range immutableFields {
-		if diff.HasChange(field) {
-			return fmt.Errorf("%s %s", field, ImmutableError)
-		}
-	}
-	return nil
 }
 
 func providerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -174,7 +163,6 @@ func providerImport(ctx context.Context, d *schema.ResourceData, meta interface{
 		return nil, fmt.Errorf("invalid import ID: %v, expected ID in the format: '<location>:<provider_id>'", d.Id())
 	}
 	location := parts[0]
-	// TODO -- Modify the name of this constant
 	if !slices.Contains(constant.Locations, location) {
 		return nil, fmt.Errorf("invalid location: %v, location must be one of: %v", location, constant.Locations)
 	}

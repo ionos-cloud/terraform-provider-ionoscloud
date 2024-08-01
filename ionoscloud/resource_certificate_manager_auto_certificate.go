@@ -41,11 +41,13 @@ func resourceCertificateManagerAutoCertificate() *schema.Resource {
 			"common_name": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The common name (DNS) of the certificate to issue. The common name needs to be part of a zone in IONOS Cloud DNS",
 			},
 			"key_algorithm": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The key algorithm used to generate the certificate",
 			},
 			"name": {
@@ -56,6 +58,7 @@ func resourceCertificateManagerAutoCertificate() *schema.Resource {
 			"subject_alternative_names": {
 				Type:     schema.TypeList,
 				Optional: true,
+				ForceNew: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -67,24 +70,8 @@ func resourceCertificateManagerAutoCertificate() *schema.Resource {
 				Description: "The ID of the last certificate that was issued",
 			},
 		},
-		CustomizeDiff: checkAutoCertificateImmutableFields,
-		Timeouts:      &resourceDefaultTimeouts,
+		Timeouts: &resourceDefaultTimeouts,
 	}
-}
-
-func checkAutoCertificateImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	// Skip the checks if the resource is being created
-	if diff.Id() == "" {
-		return nil
-	}
-	// These fields are immutable
-	immutableFields := []string{"common_name", "key_algorithm", "subject_alternative_names"}
-	for _, field := range immutableFields {
-		if diff.HasChange(field) {
-			return fmt.Errorf("%s %s", field, ImmutableError)
-		}
-	}
-	return nil
 }
 
 func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

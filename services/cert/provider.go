@@ -95,10 +95,8 @@ func (c *Client) IsProviderDeleted(ctx context.Context, d *schema.ResourceData) 
 		}
 		return false, fmt.Errorf("error while checking deletion status for certificate manager provider with ID: %v, error: %w", d.Id(), err)
 	}
-	if provider.Metadata != nil && provider.Metadata.State != nil {
-		if utils.IsStateFailed(*provider.Metadata.State) {
-			return false, fmt.Errorf("error while checking if auto-certificate provider is deleted properly, provider ID: %v, state: %v", *provider.Id, *provider.Metadata.State)
-		}
+	if provider.Metadata != nil && provider.Metadata.State != nil && utils.IsStateFailed(*provider.Metadata.State) {
+		return false, fmt.Errorf("error while checking if auto-certificate provider is deleted properly, provider ID: %v, state: %v", *provider.Id, *provider.Metadata.State)
 	}
 	return false, nil
 }

@@ -107,7 +107,8 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 
 		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no auto-certificate found with the specified name: %v", name))
-		} else if len(results) > 1 {
+		}
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one auto-certificate found with the specified name: %v", name))
 		}
 		autoCertificate = results[0]
