@@ -133,10 +133,10 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 		distribution.Properties.CertificateId = &attrStr
 	}
 
-	if routingRules, err := cdnService.GetRoutingRulesData(d); err != nil {
-		return diag.FromErr(err)
-	} else {
+	if routingRules, err := cdnService.GetRoutingRulesData(d); err == nil {
 		distribution.Properties.RoutingRules = routingRules
+	} else {
+		return diag.FromErr(err)
 	}
 
 	createdDistribution, _, err := client.SdkClient.DistributionsApi.DistributionsPost(ctx).DistributionCreate(distribution).Execute()
@@ -195,10 +195,10 @@ func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 		request.Properties.CertificateId = &attrStr
 	}
 
-	if routingRules, err := cdnService.GetRoutingRulesData(d); err != nil {
-		return diag.FromErr(err)
-	} else {
+	if routingRules, err := cdnService.GetRoutingRulesData(d); err == nil {
 		request.Properties.RoutingRules = routingRules
+	} else {
+		return diag.FromErr(err)
 	}
 
 	_, _, err := client.SdkClient.DistributionsApi.DistributionsPut(ctx, d.Id()).DistributionUpdate(request).Execute()
