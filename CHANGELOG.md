@@ -16,6 +16,7 @@
 ## 6.4.19
 ### Enhancements
 - Move to `sdk-go-bundle` for logging sdk
+- Add support for Certificate Manager providers and auto-certificates
 ### Fixes 
 - Fail on k8s cluster and nodepool if creation or deletion entered failed state
 - K8s, dataplatform and MariaDB tests
@@ -353,9 +354,9 @@ Please contact your sales representative or support for more information.
 
 - New Product: **Certificate Manager**:
   - `Resources`:
-    - [ionoscloud_certificate](docs/resources/certificate.md)
+    - [ionoscloud_certificate](docs/resources/certificate_manager_certificate.md)
   - `Data Sources`:
-    - [ionoscloud_certificate](docs/data-sources/certificate.md)
+    - [ionoscloud_certificate](docs/data-sources/certificate_manager_certificate.md)
 
 
 ### Enhancement:
