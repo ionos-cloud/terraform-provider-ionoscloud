@@ -12,15 +12,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	cdn "github.com/ionos-cloud/sdk-go-cdn"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-type CdnClient struct {
+type Client struct {
 	SdkClient *cdn.APIClient
 }
 
-func NewCdnClient(username, password, token, url, version, terraformVersion string) *CdnClient {
+func NewCdnClient(username, password, token, url, version, terraformVersion string) *Client {
 	newConfigCdn := cdn.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(constant.IonosDebug) != "" {
@@ -32,14 +33,14 @@ func NewCdnClient(username, password, token, url, version, terraformVersion stri
 	newConfigCdn.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigCdn.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-cdn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, cdn.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		version, cdn.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
-	return &CdnClient{
+	return &Client{
 		SdkClient: cdn.NewAPIClient(newConfigCdn),
 	}
 }
 
-func (c *CdnClient) IsDistributionReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+func (c *Client) IsDistributionReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	distributionID := d.Id()
 	distribution, _, err := c.SdkClient.DistributionsApi.DistributionsFindById(ctx, distributionID).Execute()
 	if err != nil {
@@ -50,6 +51,6 @@ func (c *CdnClient) IsDistributionReady(ctx context.Context, d *schema.ResourceD
 		return false, fmt.Errorf("distribution metadata or state is empty for MariaDB distribution with ID: %v", distributionID)
 	}
 
-	log.Printf("[INFO] state of the MariaDB distribution with ID: %v is: %s ", distributionID, string(*distribution.Metadata.State))
-	return strings.EqualFold(string(*distribution.Metadata.State), constant.Available), nil
+	log.Printf("[INFO] state of the MariaDB distribution with ID: %v is: %s ", distributionID, *distribution.Metadata.State)
+	return strings.EqualFold(*distribution.Metadata.State, constant.Available), nil
 }

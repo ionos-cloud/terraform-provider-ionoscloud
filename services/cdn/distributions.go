@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	cdn "github.com/ionos-cloud/sdk-go-cdn"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -91,10 +92,9 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) 
 }
 
 func GetRoutingRulesData(d *schema.ResourceData) (*[]cdn.RoutingRule, error) {
-	var routingRules []cdn.RoutingRule
 
 	routingRulesVal := d.Get("routing_rules").([]interface{})
-
+	routingRules := make([]cdn.RoutingRule, 0)
 	for routingRuleIndex := range routingRulesVal {
 
 		routingRule := cdn.RoutingRule{}
@@ -115,16 +115,16 @@ func GetRoutingRulesData(d *schema.ResourceData) (*[]cdn.RoutingRule, error) {
 				host := host.(string)
 				routingRule.Upstream.Host = &host
 			}
-			if caching, cachingOk := d.GetOkExists(fmt.Sprintf("routing_rules.%d.upstream.0.caching", routingRuleIndex)); cachingOk {
+			if caching, cachingOk := d.GetOkExists(fmt.Sprintf("routing_rules.%d.upstream.0.caching", routingRuleIndex)); cachingOk { //nolint:staticcheck
 				caching := caching.(bool)
 				routingRule.Upstream.Caching = &caching
 			}
-			if waf, wafOk := d.GetOkExists(fmt.Sprintf("routing_rules.%d.upstream.0.waf", routingRuleIndex)); wafOk {
+			if waf, wafOk := d.GetOkExists(fmt.Sprintf("routing_rules.%d.upstream.0.waf", routingRuleIndex)); wafOk { //nolint:staticcheck
 				waf := waf.(bool)
 				routingRule.Upstream.Waf = &waf
 			}
 
-			if _, geo_restrictionsOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions", routingRuleIndex)); geo_restrictionsOk {
+			if _, geoRestrictionsOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions", routingRuleIndex)); geoRestrictionsOk {
 				routingRule.Upstream.GeoRestrictions = &cdn.UpstreamGeoRestrictions{}
 				if allowList, allowListOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions.0.allow_list", routingRuleIndex)); allowListOk {
 					raw := allowList.([]interface{})

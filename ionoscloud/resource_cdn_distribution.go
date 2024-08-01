@@ -6,6 +6,7 @@ import (
 	"log"
 
 	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-cdn"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"

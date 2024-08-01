@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cdn "github.com/ionos-cloud/sdk-go-cdn"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 )
@@ -171,11 +172,12 @@ func dataSourceCdnDistributionRead(ctx context.Context, d *schema.ResourceData, 
 			}
 		}
 
-		if len(results) == 0 {
+		switch {
+		case len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no CDN distribution found with the specified criteria: domain = %s", domain))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one CDN distribution found with the specified criteria: domain = %s", domain))
-		} else {
+		default:
 			distribution = results[0]
 		}
 	}
