@@ -20,11 +20,13 @@ func dataSourceAPIGateway() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The ID (UUID) of the API Gateway.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the API Gateway.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"logs": {
 				Type:        schema.TypeBool,
