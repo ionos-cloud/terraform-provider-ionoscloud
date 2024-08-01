@@ -41,6 +41,12 @@ func resourceTargetGroup() *schema.Resource {
 				Description:      "Balancing protocol.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HTTP"}, true)),
 			},
+			"protocol_version": {
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "The forwarding protocol version. Value is ignored when protocol is not 'HTTP'.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HTTP1", "HTTP2"}, true)),
+			},
 			"targets": {
 				Type:        schema.TypeList,
 				Description: "Array of items in the collection.",
@@ -185,6 +191,11 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 		targetGroup.Properties.Protocol = &protocol
 	}
 
+	if protocolVersion, protocolVersionOk := d.GetOk("protocol_version"); protocolVersionOk {
+		protocolVersion := protocolVersion.(string)
+		targetGroup.Properties.ProtocolVersion = &protocolVersion
+	}
+
 	targetGroup.Properties.Targets = getTargetGroupTargetData(d)
 
 	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
@@ -256,6 +267,11 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
 		protocol := protocol.(string)
 		targetGroup.Properties.Protocol = &protocol
+	}
+
+	if protocolVersion, protocolVersionOk := d.GetOk("protocol_version"); protocolVersionOk {
+		protocolVersion := protocolVersion.(string)
+		targetGroup.Properties.ProtocolVersion = &protocolVersion
 	}
 
 	targetGroup.Properties.Targets = getTargetGroupTargetData(d)
@@ -353,6 +369,13 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 			err := d.Set("protocol", *targetGroup.Properties.Protocol)
 			if err != nil {
 				return fmt.Errorf("error while setting protocol property for target group %s: %w", d.Id(), err)
+			}
+		}
+
+		if targetGroup.Properties.ProtocolVersion != nil {
+			err := d.Set("protocol_version", *targetGroup.Properties.ProtocolVersion)
+			if err != nil {
+				return fmt.Errorf("error while setting protocol_version property for target group %s: %w", d.Id(), err)
 			}
 		}
 

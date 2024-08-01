@@ -1,6 +1,9 @@
 ## 6.5.0
 ### Features
   - added new attribute `api_subnet_allow_list` to `container_registry` resource and data source
+  - added new attribute `protocol_version` to `target_group` resource and data source
+  - added new attributes `central_logging` and `logging_format` to `networkloadbalancer` resource and data source
+  - added new attributes `central_logging` and `logging_format` to `application_loadbalancer` resource and data source
 
 
 ## 6.4.20

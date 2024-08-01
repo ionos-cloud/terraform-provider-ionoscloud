@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
+ *  IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0
  */
@@ -170,7 +170,7 @@ func (a *VolumesApiService) DatacentersVolumesCreateSnapshotPostExecute(r ApiDat
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Token Authentication"]; ok {
+			if apiKey, ok := auth["TokenAuthentication"]; ok {
 				var key string
 				if apiKey.Prefix != "" {
 					key = apiKey.Prefix + " " + apiKey.Key
@@ -345,7 +345,7 @@ func (a *VolumesApiService) DatacentersVolumesDeleteExecute(r ApiDatacentersVolu
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Token Authentication"]; ok {
+			if apiKey, ok := auth["TokenAuthentication"]; ok {
 				var key string
 				if apiKey.Prefix != "" {
 					key = apiKey.Prefix + " " + apiKey.Key
@@ -512,7 +512,7 @@ func (a *VolumesApiService) DatacentersVolumesFindByIdExecute(r ApiDatacentersVo
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Token Authentication"]; ok {
+			if apiKey, ok := auth["TokenAuthentication"]; ok {
 				var key string
 				if apiKey.Prefix != "" {
 					key = apiKey.Prefix + " " + apiKey.Key
@@ -747,7 +747,7 @@ func (a *VolumesApiService) DatacentersVolumesGetExecute(r ApiDatacentersVolumes
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Token Authentication"]; ok {
+			if apiKey, ok := auth["TokenAuthentication"]; ok {
 				var key string
 				if apiKey.Prefix != "" {
 					key = apiKey.Prefix + " " + apiKey.Key
@@ -934,7 +934,7 @@ func (a *VolumesApiService) DatacentersVolumesPatchExecute(r ApiDatacentersVolum
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Token Authentication"]; ok {
+			if apiKey, ok := auth["TokenAuthentication"]; ok {
 				var key string
 				if apiKey.Prefix != "" {
 					key = apiKey.Prefix + " " + apiKey.Key
@@ -1117,7 +1117,7 @@ func (a *VolumesApiService) DatacentersVolumesPostExecute(r ApiDatacentersVolume
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Token Authentication"]; ok {
+			if apiKey, ok := auth["TokenAuthentication"]; ok {
 				var key string
 				if apiKey.Prefix != "" {
 					key = apiKey.Prefix + " " + apiKey.Key
@@ -1304,7 +1304,7 @@ func (a *VolumesApiService) DatacentersVolumesPutExecute(r ApiDatacentersVolumes
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Token Authentication"]; ok {
+			if apiKey, ok := auth["TokenAuthentication"]; ok {
 				var key string
 				if apiKey.Prefix != "" {
 					key = apiKey.Prefix + " " + apiKey.Key
@@ -1487,7 +1487,7 @@ func (a *VolumesApiService) DatacentersVolumesRestoreSnapshotPostExecute(r ApiDa
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Token Authentication"]; ok {
+			if apiKey, ok := auth["TokenAuthentication"]; ok {
 				var key string
 				if apiKey.Prefix != "" {
 					key = apiKey.Prefix + " " + apiKey.Key

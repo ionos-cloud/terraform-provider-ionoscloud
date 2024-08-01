@@ -55,6 +55,7 @@ The following attributes are returned by the datasource:
 - `name` - The name of that Target Group.
 - `algorithm` - Balancing algorithm.
 - `protocol` - Balancing protocol.
+- `protocol_version` - The forwarding protocol version. Value is ignored when protocol is not 'HTTP'.
 - `targets` - Array of items in the collection
   - `ip` - The IP of the balanced target VM.
   - `port` - The port of the balanced target service; valid range is 1 to 65535.

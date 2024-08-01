@@ -44,6 +44,11 @@ func dataSourceTargetGroup() *schema.Resource {
 				Computed:    true,
 				Description: "Balancing protocol.",
 			},
+			"protocol_version": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The forwarding protocol version. Value is ignored when protocol is not 'HTTP'.",
+			},
 			"targets": {
 				Type:        schema.TypeList,
 				Description: "Array of items in the collection",
