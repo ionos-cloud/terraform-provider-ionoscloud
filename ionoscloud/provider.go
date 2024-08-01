@@ -26,6 +26,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -147,6 +148,10 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
+			constant.WireGuardGatewayResource:                  resourceVpnWireguardGateway(),
+			constant.WireGuardPeerResource:                     resourceVpnWireguardPeer(),
+			constant.IPSecGatewayResource:                      resourceVpnIPSecGateway(),
+			constant.IPSecTunnelResource:                       resourceVpnIPSecTunnel(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -208,6 +213,10 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  DataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
+			constant.WireGuardGatewayResource:                  dataSourceVpnWireguardGateway(),
+			constant.WireGuardPeerResource:                     dataSourceVpnWireguardPeer(),
+			constant.IPSecGatewayResource:                      dataSourceVpnIPSecGateway(),
+			constant.IPSecTunnelResource:                       dataSourceVpnIPSecTunnel(),
 		},
 	}
 
@@ -277,6 +286,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
 		NFSClient:          NewClientByType(clientOpts, nfsClient).(*nfsService.Client),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
+		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
 	}, nil
 }
 
@@ -295,6 +305,7 @@ const (
 	nfsClient
 	psqlClient
 	s3Client
+	vpnClient
 )
 
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
@@ -304,7 +315,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
 			newConfig.UserAgent = fmt.Sprintf(
 				"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+			)
 			if os.Getenv(constant.IonosDebug) != "" {
 				newConfig.Debug = true
 			}
@@ -335,6 +347,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	case s3Client:
 		return s3.NewAPIClient(s3.NewConfiguration())
+	case vpnClient:
+		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
