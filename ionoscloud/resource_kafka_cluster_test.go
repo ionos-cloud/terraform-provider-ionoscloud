@@ -186,7 +186,7 @@ const (
 	clusterAttributeSize      = "size"
 	clusterAttributeSizeValue = "S"
 
-	clusterAttributeLocation = "location"
+	clusterAttributeLocation      = "location"
 	clusterAttributeLocationValue = "de/fra"
 
 	clusterAttributeBrokerAddresses      = "connections.0.broker_addresses.#"
