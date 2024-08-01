@@ -13,10 +13,10 @@ on:
         type: string
         default: "compute"
       tf-log:
-        description: "terraform logs, accepted values: off, trace, debug, info, warn or error"
+        description: "terraform logs, accepted values: OFF, TRACE, DEBUG, INFO, WARN or ERROR"
         required: false
         type: string
-        default: "error"
+        default: "ERROR"
       fail-fast:
         description: "toggles the '-failfast' flag for the go test command"
         required: false
