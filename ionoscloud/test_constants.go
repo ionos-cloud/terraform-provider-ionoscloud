@@ -1693,7 +1693,7 @@ const testAccCheckCdnDistributionConfigBasic = `resource ` + constant.CdnDistrib
 			}
 		}
 	}
-}`
+}` //nolint unused
 
 const testAccCheckCdnDistributionConfigBasicImport = `resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + ` {
 	domain         = "ionossdk.terra.example.import"
@@ -1710,7 +1710,7 @@ const testAccCheckCdnDistributionConfigBasicImport = `resource ` + constant.CdnD
 			}
 		}
 	}
-}`
+}` //nolint unused
 
 const resourceRandomUUID = `
 resource "random_uuid" "uuid" {

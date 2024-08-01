@@ -17,10 +17,12 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// Client is a struct that defines the CDN client
 type Client struct {
 	SdkClient *cdn.APIClient
 }
 
+// NewCdnClient returns a new CDN client
 func NewCdnClient(username, password, token, url, version, terraformVersion string) *Client {
 	newConfigCdn := cdn.NewConfiguration(username, password, token, url)
 
@@ -40,6 +42,7 @@ func NewCdnClient(username, password, token, url, version, terraformVersion stri
 	}
 }
 
+// IsDistributionReady checks if the distribution is ready
 func (c *Client) IsDistributionReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	distributionID := d.Id()
 	distribution, _, err := c.SdkClient.DistributionsApi.DistributionsFindById(ctx, distributionID).Execute()
