@@ -37,7 +37,7 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 					testAccCheckApplicationLoadBalancerExists(resourceNameAlb, &applicationLoadBalancer),
 					resource.TestCheckResourceAttr(resourceNameAlb, "name", constant.ALBTestResource),
 					resource.TestCheckResourceAttr(resourceNameAlb, "central_logging", true),
-					resource.TestCheckResourceAttr(resourceNameAlb, "logging_format", '%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl'),
+					resource.TestCheckResourceAttr(resourceNameAlb, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", constant.LanResource+".alb_lan_1", "id"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", constant.LanResource+".alb_lan_2", "id"),
 					utils.TestValueInSlice(constant.ALBResource, "ips.#", "10.12.118.224"),
@@ -53,7 +53,7 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "name", dataSourceNameAlbById, "name"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "central_logging", true, "central_logging"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "logging_format", '%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl', "logging_format"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`, "logging_format"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", dataSourceNameAlbById, "listener_lan"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", dataSourceNameAlbById, "target_lan"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "ips.0", dataSourceNameAlbById, "ips.0"),
@@ -99,7 +99,7 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", constant.LanResource+".alb_lan_3", "id"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", constant.LanResource+".alb_lan_4", "id"),
 					resource.TestCheckResourceAttr(resourceNameAlb, "central_logging", false),
-					resource.TestCheckResourceAttr(resourceNameAlb, "logging_format", "%{+Q}o %{-Q}ci - - [%trg]"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`),
 					utils.TestValueInSlice(constant.ALBResource, "ips.#", "10.12.118.224"),
 					utils.TestValueInSlice(constant.ALBResource, "ips.#", "10.12.119.224"),
 					utils.TestValueInSlice(constant.ALBResource, "lb_private_ips.#", "10.13.72.225/24"),
@@ -264,7 +264,7 @@ resource ` + constant.ALBResource + ` ` + constant.ALBTestResource + ` {
     bucket = "` + constant.FlowlogBucketUpdated + `"
   }
   central_logging   = false
-  logging_format	= "%{+Q}o %{-Q}ci - - [%trg]"
+  logging_format	= '%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl'
 }`
 
 const testAccDataSourceApplicationLoadBalancerMatchId = testAccCheckApplicationLoadBalancerConfigBasic + `
