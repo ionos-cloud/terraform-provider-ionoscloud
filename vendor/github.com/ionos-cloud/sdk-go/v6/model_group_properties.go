@@ -19,7 +19,7 @@ type GroupProperties struct {
 	// The name of the resource.
 	Name *string `json:"name,omitempty"`
 	// Create data center privilege.
-	CreateDatacenter *bool `json:"createDatacenter,omitempty"`
+	CreateDataCenter *bool `json:"createDataCenter,omitempty"`
 	// Create snapshot privilege.
 	CreateSnapshot *bool `json:"createSnapshot,omitempty"`
 	// Reserve IP block privilege.
@@ -108,38 +108,38 @@ func (o *GroupProperties) HasName() bool {
 	return false
 }
 
-// GetCreateDatacenter returns the CreateDatacenter field value
+// GetCreateDataCenter returns the CreateDataCenter field value
 // If the value is explicit nil, nil is returned
-func (o *GroupProperties) GetCreateDatacenter() *bool {
+func (o *GroupProperties) GetCreateDataCenter() *bool {
 	if o == nil {
 		return nil
 	}
 
-	return o.CreateDatacenter
+	return o.CreateDataCenter
 
 }
 
-// GetCreateDatacenterOk returns a tuple with the CreateDatacenter field value
+// GetCreateDataCenterOk returns a tuple with the CreateDataCenter field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GroupProperties) GetCreateDatacenterOk() (*bool, bool) {
+func (o *GroupProperties) GetCreateDataCenterOk() (*bool, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.CreateDatacenter, true
+	return o.CreateDataCenter, true
 }
 
-// SetCreateDatacenter sets field value
-func (o *GroupProperties) SetCreateDatacenter(v bool) {
+// SetCreateDataCenter sets field value
+func (o *GroupProperties) SetCreateDataCenter(v bool) {
 
-	o.CreateDatacenter = &v
+	o.CreateDataCenter = &v
 
 }
 
-// HasCreateDatacenter returns a boolean if a field has been set.
-func (o *GroupProperties) HasCreateDatacenter() bool {
-	if o != nil && o.CreateDatacenter != nil {
+// HasCreateDataCenter returns a boolean if a field has been set.
+func (o *GroupProperties) HasCreateDataCenter() bool {
+	if o != nil && o.CreateDataCenter != nil {
 		return true
 	}
 
@@ -722,8 +722,8 @@ func (o GroupProperties) MarshalJSON() ([]byte, error) {
 		toSerialize["name"] = o.Name
 	}
 
-	if o.CreateDatacenter != nil {
-		toSerialize["createDatacenter"] = o.CreateDatacenter
+	if o.CreateDataCenter != nil {
+		toSerialize["createDataCenter"] = o.CreateDataCenter
 	}
 
 	if o.CreateSnapshot != nil {

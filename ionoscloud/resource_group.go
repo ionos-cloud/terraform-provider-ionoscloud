@@ -193,7 +193,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	tempCreateDataCenter := d.Get("create_datacenter").(bool)
-	request.Properties.CreateDatacenter = &tempCreateDataCenter
+	request.Properties.CreateDataCenter = &tempCreateDataCenter
 	tempCreateSnapshot := d.Get("create_snapshot").(bool)
 	request.Properties.CreateSnapshot = &tempCreateSnapshot
 	tempReserveIp := d.Get("reserve_ip").(bool)
@@ -302,7 +302,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	groupReq := ionoscloud.Group{
 		Properties: &ionoscloud.GroupProperties{
-			CreateDatacenter:            &tempCreateDataCenter,
+			CreateDataCenter:            &tempCreateDataCenter,
 			CreateSnapshot:              &tempCreateSnapshot,
 			ReserveIp:                   &tempReserveIp,
 			AccessActivityLog:           &tempAccessActivityLog,
@@ -443,8 +443,8 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			}
 		}
 
-		if group.Properties.CreateDatacenter != nil {
-			err := d.Set("create_datacenter", *group.Properties.CreateDatacenter)
+		if group.Properties.CreateDataCenter != nil {
+			err := d.Set("create_datacenter", *group.Properties.CreateDataCenter)
 			if err != nil {
 				return fmt.Errorf("error while setting create_datacenter property for group %s: %w", d.Id(), err)
 			}

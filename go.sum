@@ -134,6 +134,8 @@ github.com/ionos-cloud/sdk-go/v6 v6.1.11 h1:J/uRN4UWO3wCyGOeDdMKv8LWRzKu6UIkLEae
 github.com/ionos-cloud/sdk-go/v6 v6.1.11/go.mod h1:EzEgRIDxBELvfoa/uBN0kOQaqovLjUWEB7iW4/Q+t4k=
 github.com/ionos-cloud/sdk-go/v6 v6.1.12-0.20240731133934-1083c0aa9bd2 h1:Pcoe/vay/8ucHeOujaD3mZJ1M2IZJjooltWICiPqyrk=
 github.com/ionos-cloud/sdk-go/v6 v6.1.12-0.20240731133934-1083c0aa9bd2/go.mod h1:EzEgRIDxBELvfoa/uBN0kOQaqovLjUWEB7iW4/Q+t4k=
+github.com/ionos-cloud/sdk-go/v6 v6.2.0-beta.1 h1:SPJJ0o/VaM2WlcVomGIwh8It4Qsh95uDEefJyIziTjs=
+github.com/ionos-cloud/sdk-go/v6 v6.2.0-beta.1/go.mod h1:EzEgRIDxBELvfoa/uBN0kOQaqovLjUWEB7iW4/Q+t4k=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
 github.com/jhump/protoreflect v1.15.1 h1:HUMERORf3I3ZdX05WaQ6MIpd/NJ434hTp5YiKgfCL6c=
