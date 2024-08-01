@@ -361,6 +361,7 @@ const (
 
 const ServersDataSource = "ionoscloud_servers"
 
+// Certificate constants
 const (
 	TestCertificate = `-----BEGIN CERTIFICATE-----
 MIIDazCCAlOgAwIBAgIUOH1cikhurIjCjm5Zxt7sfJmhIVAwDQYJKoZIhvcNAQEL
