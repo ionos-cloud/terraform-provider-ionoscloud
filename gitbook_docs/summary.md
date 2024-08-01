@@ -145,6 +145,15 @@
     * [Data Platform Node Pools](../docs/data-sources/dataplatform_node_pools.md)
     * [Data Platform Versions](../docs/data-sources/dataplatform_versions.md)
 
+* Certificate Manager
+  * Resources
+    * [Certificate](../docs/resources/certificate_manager_certificate.md)
+    * [Provider](../docs/resources/certificate_manager_provider.md)
+    * [Auto-certificate](../docs/resources/certificate_manager_auto_certificate.md)
+  * Data Sources
+    * [Certificate](../docs/data-sources/certificate_manager_certificate.md)
+    * [Provider](../docs/data-sources/certificate_manager_provider.md)
+    * [Auto-certificate](../docs/data-sources/certificate_manager_auto_certificate.md)
 
 * Cloud DNS
   * Resources
@@ -179,6 +188,12 @@
     * [S3 Bucket Policy](../docs/data-sources/s3_bucket_policy.md)
     * [S3 Object](../docs/data-sources/s3_object.md)
     * [S3 Bucket Public Access Block](../docs/data-sources/s3_bucket_access_block.md)
+  
+* CDN
+  * Resources
+    * [CDN Distribution](../docs/resources/cdn_distribution.md)
+  * Data Sources
+    * [CDN Distribution](../docs/data-sources/cdn_distribution.md)
 
 * API Gateway
   * Resources

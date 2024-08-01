@@ -15,11 +15,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
+	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
@@ -141,6 +143,8 @@ func Provider() *schema.Provider {
 			constant.ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			constant.TargetGroupResource:                       resourceTargetGroup(),
 			constant.CertificateResource:                       resourceCertificateManager(),
+			constant.AutoCertificateProviderResource:           resourceCertificateManagerProvider(),
+			constant.AutoCertificateResource:                   resourceCertificateManagerAutoCertificate(),
 			constant.ContainerRegistryResource:                 resourceContainerRegistry(),
 			constant.ContainerRegistryTokenResource:            resourceContainerRegistryToken(),
 			constant.DataplatformClusterResource:               resourceDataplatformCluster(),
@@ -152,6 +156,7 @@ func Provider() *schema.Provider {
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
 			constant.KafkaClusterResource:                      resourceKafkaCluster(),
 			constant.KafkaClusterTopicResource:                 resourceKafkaTopic(),
+			constant.CDNDistributionResource:                   resourceCDNDistribution(),
 			constant.APIGatewayResource:                        resourceAPIGateway(),
 			constant.APIGatewayRouteResource:                   resourceAPIGatewayRoute(),
 			constant.WireGuardGatewayResource:                  resourceVpnWireguardGateway(),
@@ -207,6 +212,8 @@ func Provider() *schema.Provider {
 			constant.TargetGroupResource:                       dataSourceTargetGroup(),
 			constant.DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
 			constant.CertificateResource:                       dataSourceCertificate(),
+			constant.AutoCertificateProviderResource:           dataSourceCertificateManagerProvider(),
+			constant.AutoCertificateResource:                   dataSourceCertificateManagerAutoCertificate(),
 			constant.ContainerRegistryResource:                 dataSourceContainerRegistry(),
 			constant.ContainerRegistryTokenResource:            dataSourceContainerRegistryToken(),
 			constant.ContainerRegistryLocationsResource:        dataSourceContainerRegistryLocations(),
@@ -221,6 +228,7 @@ func Provider() *schema.Provider {
 			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
 			constant.KafkaClusterResource:                      dataSourceKafkaCluster(),
 			constant.KafkaClusterTopicResource:                 dataSourceKafkaTopic(),
+			constant.CDNDistributionResource:                   dataSourceCDNDistribution(),
 			constant.APIGatewayResource:                        dataSourceAPIGateway(),
 			constant.APIGatewayRouteResource:                   dataSourceAPIGatewayRoute(),
 			constant.WireGuardGatewayResource:                  dataSourceVpnWireguardGateway(),
@@ -285,6 +293,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.TerraformVersion = terraformVersion
 
 	return services.SdkBundle{
+		CDNClient:          NewClientByType(clientOpts, cdnClient).(*cdnService.Client),
 		AutoscalingClient:  NewClientByType(clientOpts, autoscalingClient).(*autoscalingService.Client),
 		CertManagerClient:  NewClientByType(clientOpts, certManagerClient).(*cert.Client),
 		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
@@ -306,6 +315,7 @@ type clientType int
 
 const (
 	ionosClient clientType = iota
+	cdnClient
 	autoscalingClient
 	certManagerClient
 	containerRegistryClient
@@ -339,6 +349,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 			return ionoscloud.NewAPIClient(newConfig)
 		}
+	case cdnClient:
+		return cdnService.NewCDNClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case autoscalingClient:
 		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case certManagerClient:

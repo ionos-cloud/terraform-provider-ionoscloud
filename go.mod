@@ -18,7 +18,8 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
-	github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
+	github.com/ionos-cloud/sdk-go-cdn v1.0.0
+	github.com/ionos-cloud/sdk-go-cert-manager v1.1.0
 	github.com/ionos-cloud/sdk-go-container-registry v1.2.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.0.3
 	github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1
@@ -28,7 +29,7 @@ require (
 	github.com/ionos-cloud/sdk-go-nfs v1.0.0
 	github.com/ionos-cloud/sdk-go-s3 v1.0.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
-	github.com/ionos-cloud/sdk-go/v6 v6.1.11
+	github.com/ionos-cloud/sdk-go/v6 v6.2.0
 	github.com/mitchellh/go-homedir v1.1.0
 	golang.org/x/crypto v0.25.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -36,11 +37,7 @@ require (
 
 require github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 
-require (
-	github.com/ionos-cloud/sdk-go-kafka v0.0.0-20240725140343-5de764b24488
-)
-
-replace github.com/ionos-cloud/sdk-go-kafka => /tmp/sdk-go-kafka
+require github.com/ionos-cloud/sdk-go-kafka v1.0.0
 
 require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect

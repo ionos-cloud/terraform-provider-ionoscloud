@@ -350,7 +350,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
 }
-` + ServerImagePassword //nolint:unused
+` + ServerImagePassword
 
 // Solves  #372 crash when ips field in nic resource is a list with an empty string
 const testAccCheckServerConfigEmptyNicIps = `
@@ -1678,6 +1678,40 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   }
 }`
 
+const testAccCheckCDNDistributionConfigBasic = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
+	domain         = "ionossdk.terra.example.basic"
+	routing_rules {
+		scheme = "http"
+		prefix = "/api"
+		upstream {
+			host             = "server.example.com"
+			caching          = true
+			waf              = true
+			rate_limit_class = "R100"
+			geo_restrictions {
+				allow_list = [ "RO"]
+			}
+		}
+	}
+}`
+
+const testAccCheckCDNDistributionConfigBasicImport = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
+	domain         = "ionossdk.terra.example.import"
+	routing_rules {
+		scheme = "http"
+		prefix = "/api"
+		upstream {
+			host             = "server.example.com"
+			caching          = true
+			waf              = true
+			rate_limit_class = "R100"
+			geo_restrictions {
+				allow_list = [ "RO"]
+			}
+		}
+	}
+}`
+
 const resourceRandomUUID = `
 resource "random_uuid" "uuid" {
 }
@@ -1809,7 +1843,7 @@ resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTe
 const clusterIdAttribute = "cluster_id"
 const clusterInstancesAttribute = "instances"
 const clusterCoresAttribute = "cores"
-const clusterLocationAttribute = "location" // nolint:unused
+const clusterLocationAttribute = "location"
 const clusterRamAttribute = "ram"
 const clusterStorageSizeAttribute = "storage_size"
 const clusterConnectionsAttribute = "connections"

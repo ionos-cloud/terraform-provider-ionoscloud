@@ -244,9 +244,7 @@ github.com/hashicorp/terraform-plugin-mux/tf6muxserver
 # github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
 ## explicit; go 1.21
 github.com/hashicorp/terraform-plugin-sdk/v2/diag
-github.com/hashicorp/terraform-plugin-sdk/v2/helper/id
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging
-github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure
@@ -258,7 +256,6 @@ github.com/hashicorp/terraform-plugin-sdk/v2/internal/helper/hashcode
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/logging
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/plans/objchange
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/plugin/convert
-github.com/hashicorp/terraform-plugin-sdk/v2/internal/plugintest
 github.com/hashicorp/terraform-plugin-sdk/v2/internal/tfdiags
 github.com/hashicorp/terraform-plugin-sdk/v2/meta
 github.com/hashicorp/terraform-plugin-sdk/v2/plugin
@@ -307,8 +304,11 @@ github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
 # github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
 ## explicit; go 1.20
 github.com/ionos-cloud/sdk-go-bundle/shared
-# github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
-## explicit; go 1.19
+# github.com/ionos-cloud/sdk-go-cdn v1.0.0
+## explicit; go 1.18
+github.com/ionos-cloud/sdk-go-cdn
+# github.com/ionos-cloud/sdk-go-cert-manager v1.1.0
+## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-cert-manager
 # github.com/ionos-cloud/sdk-go-container-registry v1.2.0
 ## explicit; go 1.18
@@ -328,7 +328,7 @@ github.com/ionos-cloud/sdk-go-dbaas-postgres
 # github.com/ionos-cloud/sdk-go-dns v1.1.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dns
-# github.com/ionos-cloud/sdk-go-kafka v0.0.0-20240725140343-5de764b24488 => /tmp/sdk-go-kafka
+# github.com/ionos-cloud/sdk-go-kafka v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-kafka
 # github.com/ionos-cloud/sdk-go-nfs v1.0.0
@@ -340,7 +340,7 @@ github.com/ionos-cloud/sdk-go-s3
 # github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-vm-autoscaling
-# github.com/ionos-cloud/sdk-go/v6 v6.1.11
+# github.com/ionos-cloud/sdk-go/v6 v6.2.0
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jmespath/go-jmespath v0.4.0
@@ -582,4 +582,3 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# github.com/ionos-cloud/sdk-go-kafka => /tmp/sdk-go-kafka

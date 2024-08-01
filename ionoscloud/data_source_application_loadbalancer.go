@@ -60,6 +60,16 @@ func dataSourceApplicationLoadBalancer() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"central_logging": {
+				Type:        schema.TypeBool,
+				Description: "Turn logging on and off for this product. Default value is 'false'.",
+				Computed:    true,
+			},
+			"logging_format": {
+				Type:        schema.TypeString,
+				Description: "Specifies the format of the logs.",
+				Computed:    true,
+			},
 			"datacenter_id": {
 				Type:     schema.TypeString,
 				Required: true,

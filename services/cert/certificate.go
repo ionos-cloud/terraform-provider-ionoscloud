@@ -11,36 +11,42 @@ import (
 	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
 )
 
-func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
-	cert, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesGetById(ctx, certId).Execute()
+//nolint:golint
+func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager.CertificateRead, *certmanager.APIResponse, error) {
+	cert, apiResponse, err := c.sdkClient.CertificateApi.CertificatesFindById(ctx, certId).Execute()
 	apiResponse.LogInfo()
 	return cert, apiResponse, err
 }
 
-func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateCollectionDto, *certmanager.APIResponse, error) {
-	certs, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesGet(ctx).Execute()
+//nolint:golint
+func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateReadList, *certmanager.APIResponse, error) {
+	certs, apiResponse, err := c.sdkClient.CertificateApi.CertificatesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return certs, apiResponse, err
 }
 
-func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.CertificatePostDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
-	certResponse, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesPost(ctx).CertificatePostDto(certPostDto).Execute()
+//nolint:golint
+func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.CertificateCreate) (certmanager.CertificateRead, *certmanager.APIResponse, error) {
+	certResponse, apiResponse, err := c.sdkClient.CertificateApi.CertificatesPost(ctx).CertificateCreate(certPostDto).Execute()
 	apiResponse.LogInfo()
 	return certResponse, apiResponse, err
 }
 
-func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch certmanager.CertificatePatchDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
-	certResponse, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesPatch(ctx, certId).CertificatePatchDto(certPatch).Execute()
+//nolint:golint
+func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch certmanager.CertificatePatch) (certmanager.CertificateRead, *certmanager.APIResponse, error) {
+	certResponse, apiResponse, err := c.sdkClient.CertificateApi.CertificatesPatch(ctx, certId).CertificatePatch(certPatch).Execute()
 	apiResponse.LogInfo()
 	return certResponse, apiResponse, err
 }
 
+//nolint:golint
 func (c *Client) DeleteCertificate(ctx context.Context, certId string) (*certmanager.APIResponse, error) {
-	apiResponse, err := c.sdkClient.CertificatesApi.CertificatesDelete(ctx, certId).Execute()
+	apiResponse, err := c.sdkClient.CertificateApi.CertificatesDelete(ctx, certId).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
+//nolint:golint
 func (c *Client) IsCertReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	cert, _, err := c.GetCertificate(ctx, d.Id())
 	if err != nil {
@@ -52,6 +58,7 @@ func (c *Client) IsCertReady(ctx context.Context, d *schema.ResourceData) (bool,
 	return strings.EqualFold(*cert.Metadata.State, constant.Available), nil
 }
 
+//nolint:golint
 func (c *Client) IsCertDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := c.GetCertificate(ctx, d.Id())
 	if err != nil {
@@ -63,7 +70,8 @@ func (c *Client) IsCertDeleted(ctx context.Context, d *schema.ResourceData) (boo
 	return false, nil
 }
 
-func SetCertificateData(d *schema.ResourceData, cert *certmanager.CertificateDto) error {
+//nolint:golint
+func SetCertificateData(d *schema.ResourceData, cert *certmanager.CertificateRead) error {
 	if cert.Id != nil {
 		d.SetId(*cert.Id)
 	}
@@ -91,10 +99,11 @@ func SetCertificateData(d *schema.ResourceData, cert *certmanager.CertificateDto
 	return nil
 }
 
-func GetCertPostDto(d *schema.ResourceData) (*certmanager.CertificatePostDto, error) {
+//nolint:golint
+func GetCertPostDto(d *schema.ResourceData) (*certmanager.CertificateCreate, error) {
 
-	certificatePostDto := certmanager.CertificatePostDto{
-		Properties: &certmanager.CertificatePostPropertiesDto{},
+	certificatePostDto := certmanager.CertificateCreate{
+		Properties: &certmanager.Certificate{},
 	}
 
 	if name, nameOk := d.GetOk("name"); nameOk {
@@ -128,9 +137,10 @@ func GetCertPostDto(d *schema.ResourceData) (*certmanager.CertificatePostDto, er
 	return &certificatePostDto, nil
 }
 
-func GetCertPatchDto(d *schema.ResourceData) *certmanager.CertificatePatchDto {
-	certificatePatchDto := certmanager.CertificatePatchDto{
-		Properties: &certmanager.CertificatePatchPropertiesDto{},
+//nolint:golint
+func GetCertPatchDto(d *schema.ResourceData) *certmanager.CertificatePatch {
+	certificatePatchDto := certmanager.CertificatePatch{
+		Properties: &certmanager.PatchName{},
 	}
 
 	if d.HasChange("name") {

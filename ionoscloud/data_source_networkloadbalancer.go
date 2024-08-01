@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
+	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 )
 
 func dataSourceNetworkLoadBalancer() *schema.Resource {
@@ -54,6 +54,16 @@ func dataSourceNetworkLoadBalancer() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			"central_logging": {
+				Type:        schema.TypeBool,
+				Description: "Turn logging on and off for this product. Default value is 'false'.",
+				Computed:    true,
+			},
+			"logging_format": {
+				Type:        schema.TypeString,
+				Description: "Specifies the format of the logs.",
+				Computed:    true,
 			},
 			"datacenter_id": {
 				Type:     schema.TypeString,
