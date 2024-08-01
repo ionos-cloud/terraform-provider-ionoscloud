@@ -1,3 +1,4 @@
+// nolint:unused
 package ionoscloud
 
 import (
@@ -1693,7 +1694,7 @@ const testAccCheckCdnDistributionConfigBasic = `resource ` + constant.CdnDistrib
 			}
 		}
 	}
-}` //nolint unused
+}`
 
 const testAccCheckCdnDistributionConfigBasicImport = `resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + ` {
 	domain         = "ionossdk.terra.example.import"
