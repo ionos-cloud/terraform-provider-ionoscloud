@@ -42,7 +42,7 @@ resource "ionoscloud_application_loadbalancer" "example" {
   target_lan            = ionoscloud_lan.example_2.id
   lb_private_ips        = [ "10.13.72.225/24"]
   central_logging       = true
-  logging_lormat        = "%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
+  logging_format        = "%%{+Q}o %%{-Q}ci - - [%trg] %r %ST %B \"\" \"\" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
 }
 
 ```

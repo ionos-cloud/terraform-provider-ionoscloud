@@ -41,7 +41,7 @@ resource "ionoscloud_networkloadbalancer" "example" {
   ips                     = ["10.12.118.224"]
   lb_private_ips          = ["10.13.72.225/24"]
   central_logging         = true
-  logging_lormat          = "%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
+  logging_format          = "%%{+Q}o %%{-Q}ci - - [%trg] %r %ST %B \"\" \"\" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
 }
 ```
 

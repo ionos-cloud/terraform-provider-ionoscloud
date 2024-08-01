@@ -189,7 +189,7 @@ resource ` + constant.DatacenterResource + ` "alb_datacenter" {
   location          = "de/txl"
   description       = "datacenter for hosting "
   central_logging   = true
-  logging_format	= '%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl'
+  logging_format	= "%%{+Q}o %%{-Q}ci - - [%trg] %r %ST %B \"\" \"\" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
 }
 
 resource ` + constant.LanResource + ` "alb_lan_1" {
@@ -264,7 +264,7 @@ resource ` + constant.ALBResource + ` ` + constant.ALBTestResource + ` {
     bucket = "` + constant.FlowlogBucketUpdated + `"
   }
   central_logging   = false
-  logging_format	= '%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl'
+  logging_format	= "%%{+Q}o %%{-Q}ci - - [%trg] %r %ST %B \"\" \"\" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
 }`
 
 const testAccDataSourceApplicationLoadBalancerMatchId = testAccCheckApplicationLoadBalancerConfigBasic + `
