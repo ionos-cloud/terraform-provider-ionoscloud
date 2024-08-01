@@ -15,9 +15,9 @@ import (
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 )
 
-func dataSourceCdnDistribution() *schema.Resource {
+func dataSourceCDNDistribution() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceCdnDistributionRead,
+		ReadContext: dataSourceCDNDistributionRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -113,8 +113,8 @@ func dataSourceCdnDistribution() *schema.Resource {
 	}
 }
 
-func dataSourceCdnDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CdnClient
+func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).CDNClient
 
 	idValue, idOk := d.GetOk("id")
 	domainValue, domainOk := d.GetOk("domain")

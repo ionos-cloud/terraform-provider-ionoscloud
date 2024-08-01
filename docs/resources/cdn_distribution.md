@@ -1,5 +1,5 @@
 ---
-subcategory: "Cdn"
+subcategory: "CDN"
 layout: "ionoscloud"
 page_title: "IonosCloud: cdn_distribution"
 sidebar_current: "docs-resource-cdn-distribution"

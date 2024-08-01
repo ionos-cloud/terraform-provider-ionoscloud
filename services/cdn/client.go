@@ -22,23 +22,23 @@ type Client struct {
 	SdkClient *cdn.APIClient
 }
 
-// NewCdnClient returns a new CDN client
-func NewCdnClient(username, password, token, url, version, terraformVersion string) *Client {
-	newConfigCdn := cdn.NewConfiguration(username, password, token, url)
+// NewCDNClient returns a new CDN client
+func NewCDNClient(username, password, token, url, version, terraformVersion string) *Client {
+	newConfigCDN := cdn.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(constant.IonosDebug) != "" {
-		newConfigCdn.Debug = true
+		newConfigCDN.Debug = true
 	}
-	newConfigCdn.MaxRetries = constant.MaxRetries
-	newConfigCdn.MaxWaitTime = constant.MaxWaitTime
+	newConfigCDN.MaxRetries = constant.MaxRetries
+	newConfigCDN.MaxWaitTime = constant.MaxWaitTime
 
-	newConfigCdn.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
-	newConfigCdn.UserAgent = fmt.Sprintf(
+	newConfigCDN.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newConfigCDN.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-cdn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, cdn.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	return &Client{
-		SdkClient: cdn.NewAPIClient(newConfigCdn),
+		SdkClient: cdn.NewAPIClient(newConfigCDN),
 	}
 }
 

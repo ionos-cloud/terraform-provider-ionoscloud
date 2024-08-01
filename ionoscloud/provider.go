@@ -151,7 +151,7 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
-			constant.CdnDistributionResource:                   resourceCdnDistribution(),
+			constant.CDNDistributionResource:                   resourceCDNDistribution(),
 			constant.APIGatewayResource:                        resourceAPIGateway(),
 			constant.APIGatewayRouteResource:                   resourceAPIGatewayRoute(),
 			constant.WireGuardGatewayResource:                  resourceVpnWireguardGateway(),
@@ -219,7 +219,7 @@ func Provider() *schema.Provider {
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  DataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
-			constant.CdnDistributionResource:                   dataSourceCdnDistribution(),
+			constant.CDNDistributionResource:                   dataSourceCDNDistribution(),
 			constant.APIGatewayResource:                        dataSourceAPIGateway(),
 			constant.APIGatewayRouteResource:                   dataSourceAPIGatewayRoute(),
 			constant.WireGuardGatewayResource:                  dataSourceVpnWireguardGateway(),
@@ -284,7 +284,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.TerraformVersion = terraformVersion
 
 	return services.SdkBundle{
-		CdnClient:          NewClientByType(clientOpts, cdnClient).(*cdnService.Client),
+		CDNClient:          NewClientByType(clientOpts, cdnClient).(*cdnService.Client),
 		AutoscalingClient:  NewClientByType(clientOpts, autoscalingClient).(*autoscalingService.Client),
 		CertManagerClient:  NewClientByType(clientOpts, certManagerClient).(*cert.Client),
 		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
@@ -339,7 +339,7 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			return ionoscloud.NewAPIClient(newConfig)
 		}
 	case cdnClient:
-		return cdnService.NewCdnClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return cdnService.NewCDNClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case autoscalingClient:
 		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case certManagerClient:

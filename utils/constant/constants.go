@@ -328,11 +328,11 @@ const (
 
 // CDN Constants
 const (
-	CdnDistributionResource           = "ionoscloud_cdn_distribution"
-	CdnDistributionTestResource       = "test_cdn_distribution"
-	CdnDistributionDataSourceByID     = "test_cdn_distribution_id"
-	CdnDistributionDataSourceByDomain = "test_cdn_distribution_domain"
-	CdnDistributionDataSourceMatching = "test_cdn_distribution_matching"
+	CDNDistributionResource           = "ionoscloud_cdn_distribution"
+	CDNDistributionTestResource       = "test_cdn_distribution"
+	CDNDistributionDataSourceByID     = "test_cdn_distribution_id"
+	CDNDistributionDataSourceByDomain = "test_cdn_distribution_domain"
+	CDNDistributionDataSourceMatching = "test_cdn_distribution_matching"
 )
 
 const (

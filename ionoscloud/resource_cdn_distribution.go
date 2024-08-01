@@ -16,14 +16,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceCdnDistribution() *schema.Resource {
+func resourceCDNDistribution() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceCdnDistributionCreate,
-		ReadContext:   resourceCdnDistributionRead,
-		UpdateContext: resourceCdnDistributionUpdate,
-		DeleteContext: resourceCdnDistributionDelete,
+		CreateContext: resourceCDNDistributionCreate,
+		ReadContext:   resourceCDNDistributionRead,
+		UpdateContext: resourceCDNDistributionUpdate,
+		DeleteContext: resourceCDNDistributionDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceCdnDistributionImport,
+			StateContext: resourceCDNDistributionImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"domain": {
@@ -116,9 +116,9 @@ func resourceCdnDistribution() *schema.Resource {
 	}
 }
 
-func resourceCdnDistributionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(services.SdkBundle).CdnClient
+	client := meta.(services.SdkBundle).CDNClient
 
 	distributionDomain := d.Get("domain").(string)
 
@@ -152,11 +152,11 @@ func resourceCdnDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 
 	log.Printf("[INFO] CDN Distribution Id: %s", d.Id())
 
-	return resourceCdnDistributionRead(ctx, d, meta)
+	return resourceCDNDistributionRead(ctx, d, meta)
 }
 
-func resourceCdnDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CdnClient
+func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).CDNClient
 
 	distribution, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsFindById(ctx, d.Id()).Execute()
 
@@ -178,8 +178,8 @@ func resourceCdnDistributionRead(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceCdnDistributionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CdnClient
+func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).CDNClient
 
 	distributionDomain := d.Get("domain").(string)
 
@@ -213,11 +213,11 @@ func resourceCdnDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(fmt.Errorf("error occurred while checking the status for the CDN Distribution with ID: %v, error: %w", d.Id(), err))
 	}
 
-	return resourceCdnDistributionRead(ctx, d, meta)
+	return resourceCDNDistributionRead(ctx, d, meta)
 }
 
-func resourceCdnDistributionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CdnClient
+func resourceCDNDistributionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).CDNClient
 
 	_, err := client.SdkClient.DistributionsApi.DistributionsDelete(ctx, d.Id()).Execute()
 
@@ -230,8 +230,8 @@ func resourceCdnDistributionDelete(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceCdnDistributionImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := *meta.(services.SdkBundle).CdnClient
+func resourceCDNDistributionImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := *meta.(services.SdkBundle).CDNClient
 
 	distributionID := d.Id()
 

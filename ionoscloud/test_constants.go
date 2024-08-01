@@ -1678,7 +1678,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   }
 }`
 
-const testAccCheckCdnDistributionConfigBasic = `resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + ` {
+const testAccCheckCDNDistributionConfigBasic = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
 	domain         = "ionossdk.terra.example.basic"
 	routing_rules {
 		scheme = "http"
@@ -1695,7 +1695,7 @@ const testAccCheckCdnDistributionConfigBasic = `resource ` + constant.CdnDistrib
 	}
 }`
 
-const testAccCheckCdnDistributionConfigBasicImport = `resource ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionTestResource + ` {
+const testAccCheckCDNDistributionConfigBasicImport = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
 	domain         = "ionossdk.terra.example.import"
 	routing_rules {
 		scheme = "http"
