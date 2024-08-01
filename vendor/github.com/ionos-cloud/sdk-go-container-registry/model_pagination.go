@@ -1,9 +1,9 @@
 /*
  * Container Registry service
  *
- * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature
+ * ## Overview Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their managed Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls. ## Changelog ### 1.1.0  - Added new endpoints for Repositories  - Added new endpoints for Artifacts  - Added new endpoints for Vulnerabilities  - Added registry vulnerabilityScanning feature ### 1.2.0 - Added registry `apiSubnetAllowList`
  *
- * API version: 1.1.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -15,21 +15,25 @@ import (
 	"encoding/json"
 )
 
-// Pagination struct for Pagination
+// Pagination Pagination information. The offset and limit parameters are used to navigate the list of elements. The _links object contains URLs to navigate the different pages.
 type Pagination struct {
-	// The offset specified in the request (if none was specified, the default offset is 0) (not implemented yet).
-	Offset *int32 `json:"offset,omitempty"`
-	// The limit specified in the request (if none was specified, use the endpoint's default pagination limit) (not implemented yet, always return number of items).
-	Limit *int32 `json:"limit,omitempty"`
-	Links *Links `json:"_links,omitempty"`
+	// The offset specified in the request (if none was specified, the default offset is 0).
+	Offset *int32 `json:"offset"`
+	// The limit specified in the request (if none was specified, use the endpoint's default pagination limit).
+	Limit *int32 `json:"limit"`
+	Links *Links `json:"_links"`
 }
 
 // NewPagination instantiates a new Pagination object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPagination() *Pagination {
+func NewPagination(offset int32, limit int32, links Links) *Pagination {
 	this := Pagination{}
+
+	this.Offset = &offset
+	this.Limit = &limit
+	this.Links = &links
 
 	return &this
 }

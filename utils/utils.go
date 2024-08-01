@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/iancoleman/strcase"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/crypto/ssh"
@@ -238,7 +238,7 @@ type ResourceReadyFunc func(ctx context.Context, d *schema.ResourceData) (bool, 
 // WaitForResourceToBeReady - keeps retrying until resource is ready(true is returned), or until err is thrown, or ctx is cancelled
 func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn ResourceReadyFunc) error {
 	if d.Id() == "" {
-		return fmt.Errorf("resource with id %s not ready, still trying ", d.Id())
+		return fmt.Errorf("id not present for resource")
 	}
 	return retry.RetryContext(ctx, DefaultTimeout, func() *retry.RetryError {
 		isReady, err := fn(ctx, d)
@@ -397,4 +397,12 @@ func ConfigCompose(config ...string) string {
 	}
 
 	return str.String()
+}
+
+// NameMatches checks if the name matches the value, with partialMatch set to true, it will check if the value is a substring of the name
+func NameMatches(name, value string, partialMatch bool) bool {
+	if partialMatch {
+		return strings.Contains(name, value)
+	}
+	return strings.EqualFold(name, value)
 }

@@ -8,8 +8,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -21,9 +22,9 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckServersDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckServersDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheck2ServersByNameAndCores,
@@ -151,7 +152,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -183,7 +184,7 @@ resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
   cores = ` + noCoresTest + `
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
@@ -424,5 +425,5 @@ data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` 
   }
 } `
 
-const cpuFamilyTest = "AMD_OPTERON"
+const cpuFamilyTest = "INTEL_XEON"
 const noCoresTest = "1"

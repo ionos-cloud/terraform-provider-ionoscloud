@@ -9,7 +9,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -22,7 +22,7 @@ func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {
 				VersionConstraint: "3.4.3",
@@ -68,10 +68,10 @@ func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "replica_configuration.0.nic.0.dhcp", resourceAGName, "replica_configuration.0.nic.0.dhcp"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "replica_configuration.0.nic.0.firewall_active", resourceAGName, "replica_configuration.0.nic.0.firewall_active"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "replica_configuration.0.nic.0.firewall_type", resourceAGName, "replica_configuration.0.nic.0.firewall_type"),
-					//resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.name", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.name"),
-					//resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.bucket", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.bucket"),
-					//resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.action", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.action"),
-					//resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.direction", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.direction"),
+					// resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.name", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.name"),
+					// resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.bucket", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.bucket"),
+					// resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.action", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.action"),
+					// resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.direction", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.direction"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "replica_configuration.0.nic.0.firewall_rule.0.name", resourceAGName, "replica_configuration.0.nic.0.firewall_rule.0.name"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "replica_configuration.0.nic.0.firewall_rule.0.protocol", resourceAGName, "replica_configuration.0.nic.0.firewall_rule.0.protocol"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "replica_configuration.0.nic.0.firewall_rule.0.port_range_start", resourceAGName, "replica_configuration.0.nic.0.firewall_rule.0.port_range_start"),
@@ -119,10 +119,10 @@ func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.dhcp", resourceAGName, "replica_configuration.0.nic.0.dhcp"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.firewall_active", resourceAGName, "replica_configuration.0.nic.0.firewall_active"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.firewall_type", resourceAGName, "replica_configuration.0.nic.0.firewall_type"),
-					//resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.name", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.name"),
-					//resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.bucket", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.bucket"),
-					//resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.action", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.action"),
-					//resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.direction", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.direction"),
+					// resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.name", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.name"),
+					// resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.bucket", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.bucket"),
+					// resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.action", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.action"),
+					// resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.flow_log.0.direction", resourceAGName, "replica_configuration.0.nic.0.flow_log.0.direction"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.firewall_rule.0.name", resourceAGName, "replica_configuration.0.nic.0.firewall_rule.0.name"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.firewall_rule.0.protocol", resourceAGName, "replica_configuration.0.nic.0.firewall_rule.0.protocol"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.nic.0.firewall_rule.0.port_range_start", resourceAGName, "replica_configuration.0.nic.0.firewall_rule.0.port_range_start"),
