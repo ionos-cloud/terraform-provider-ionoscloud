@@ -10,6 +10,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
+// SetDistributionData sets distribution data from a distribution sdk object
 func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) error {
 	resourceName := "distribution"
 
@@ -91,6 +92,7 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) 
 	return nil
 }
 
+// GetRoutingRulesData gets distribution routing rules data from terraform
 func GetRoutingRulesData(d *schema.ResourceData) (*[]cdn.RoutingRule, error) {
 
 	routingRulesVal := d.Get("routing_rules").([]interface{})

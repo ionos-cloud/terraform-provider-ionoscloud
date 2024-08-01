@@ -326,10 +326,11 @@ const (
 	SourceShareName       = "share"
 )
 
+// CDN Constants
 const (
 	CdnDistributionResource           = "ionoscloud_cdn_distribution"
 	CdnDistributionTestResource       = "test_cdn_distribution"
-	CdnDistributionDataSourceById     = "test_cdn_distribution_id"
+	CdnDistributionDataSourceByID     = "test_cdn_distribution_id"
 	CdnDistributionDataSourceByDomain = "test_cdn_distribution_domain"
 	CdnDistributionDataSourceMatching = "test_cdn_distribution_matching"
 )

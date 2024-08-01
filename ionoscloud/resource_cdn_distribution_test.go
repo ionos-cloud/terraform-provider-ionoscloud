@@ -159,7 +159,7 @@ func testAccCheckCdnDistributionExists(n string, distribution *ionoscloud_cdn.Di
 }
 
 const testAccDataSourceCdnDistributionMatchId = testAccCheckCdnDistributionConfigBasic + `
-data ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionDataSourceById + ` {
+data ` + constant.CdnDistributionResource + ` ` + constant.CdnDistributionDataSourceByID + ` {
   id			= ` + constant.CdnDistributionResource + `.` + constant.CdnDistributionTestResource + `.id
 }`
 
