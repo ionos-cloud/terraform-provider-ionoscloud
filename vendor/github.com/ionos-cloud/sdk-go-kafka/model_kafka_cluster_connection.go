@@ -3,7 +3,7 @@
  *
  * An managed Apache Kafka cluster is designed to be highly fault-tolerant and scalable, allowing large volumes of data to be ingested, stored, and processed in real-time. By distributing data across multiple brokers, Kafka achieves high throughput and low latency, making it suitable for applications requiring real-time data processing and analytics.
  *
- * API version: 1.4.0
+ * API version: 1.7.1
  * Contact: support@cloud.ionos.com
  */
 
@@ -15,28 +15,26 @@ import (
 	"encoding/json"
 )
 
-// KafkaClusterConnection Connection information of the Kafka cluster. The connection cidr defines the bootstrap broker virtual address of the Kafka cluster including the network of all of the broker nodes.
+// KafkaClusterConnection Connection information of the Kafka cluster.
 type KafkaClusterConnection struct {
 	// The datacenter to connect your instance to.
 	DatacenterId *string `json:"datacenterId"`
 	// The numeric LAN ID to connect your instance to.
 	LanId *string `json:"lanId"`
-	// The IP and subnet for your instance. Note the following unavailable IP range: 10.244.0.0/11
-	Cidr *string `json:"cidr"`
 	// IP addresses and subnet of cluster brokers. Note the following unavailable IP range: 10.224.0.0/11
-	BrokerAddresses *[]string `json:"brokerAddresses,omitempty"`
+	BrokerAddresses *[]string `json:"brokerAddresses"`
 }
 
 // NewKafkaClusterConnection instantiates a new KafkaClusterConnection object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewKafkaClusterConnection(datacenterId string, lanId string, cidr string) *KafkaClusterConnection {
+func NewKafkaClusterConnection(datacenterId string, lanId string, brokerAddresses []string) *KafkaClusterConnection {
 	this := KafkaClusterConnection{}
 
 	this.DatacenterId = &datacenterId
 	this.LanId = &lanId
-	this.Cidr = &cidr
+	this.BrokerAddresses = &brokerAddresses
 
 	return &this
 }
@@ -125,44 +123,6 @@ func (o *KafkaClusterConnection) HasLanId() bool {
 	return false
 }
 
-// GetCidr returns the Cidr field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *KafkaClusterConnection) GetCidr() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.Cidr
-
-}
-
-// GetCidrOk returns a tuple with the Cidr field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *KafkaClusterConnection) GetCidrOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Cidr, true
-}
-
-// SetCidr sets field value
-func (o *KafkaClusterConnection) SetCidr(v string) {
-
-	o.Cidr = &v
-
-}
-
-// HasCidr returns a boolean if a field has been set.
-func (o *KafkaClusterConnection) HasCidr() bool {
-	if o != nil && o.Cidr != nil {
-		return true
-	}
-
-	return false
-}
-
 // GetBrokerAddresses returns the BrokerAddresses field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *KafkaClusterConnection) GetBrokerAddresses() *[]string {
@@ -209,10 +169,6 @@ func (o KafkaClusterConnection) MarshalJSON() ([]byte, error) {
 
 	if o.LanId != nil {
 		toSerialize["lanId"] = o.LanId
-	}
-
-	if o.Cidr != nil {
-		toSerialize["cidr"] = o.Cidr
 	}
 
 	if o.BrokerAddresses != nil {

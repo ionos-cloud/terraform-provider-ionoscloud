@@ -187,8 +187,7 @@ const (
 	clusterAttributeSizeValue = "S"
 
 	clusterAttributeLocation = "location"
-	// TODO: change this to a valid location after prod release
-	clusterAttributeLocationValue = "pre"
+	clusterAttributeLocationValue = "de/fra"
 
 	clusterAttributeBrokerAddresses      = "connections.0.broker_addresses.#"
 	clusterAttributeBrokerAddressesValue = `"192.168.1.101/24", "192.168.1.102/24", "192.168.1.103/24"`

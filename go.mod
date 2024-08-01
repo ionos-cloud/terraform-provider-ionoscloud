@@ -36,6 +36,8 @@ require (
 	github.com/ionos-cloud/sdk-go-kafka v0.0.0-20240725140343-5de764b24488
 )
 
+replace github.com/ionos-cloud/sdk-go-kafka => /tmp/sdk-go-kafka
+
 require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect

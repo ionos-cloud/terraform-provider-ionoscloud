@@ -3,7 +3,7 @@
  *
  * An managed Apache Kafka cluster is designed to be highly fault-tolerant and scalable, allowing large volumes of data to be ingested, stored, and processed in real-time. By distributing data across multiple brokers, Kafka achieves high throughput and low latency, making it suitable for applications requiring real-time data processing and analytics.
  *
- * API version: 1.4.0
+ * API version: 1.7.1
  * Contact: support@cloud.ionos.com
  */
 
@@ -32,12 +32,10 @@ type ClusterMetadata struct {
 	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
 	// Unique name of the resource.
 	ResourceURN *string `json:"resourceURN,omitempty"`
-	// State of the resource. Resource states: `AVAILABLE`: There are no pending modification requests for this item. `BUSY`: There is at least one modification request pending and all following requests will be queued. `DEPLOYING`: The resource is being created. `FAILED`: The creation of the resource failed. `UPDATING`: The resource is being updated. `FAILED_UPDATING`: An update to the resource was not successful.
+	// State of the resource. Resource states: `AVAILABLE`: There are no pending modification requests for this item. `BUSY`: There is at least one modification request pending and all following requests will be queued. `DEPLOYING`: The resource is being created. `FAILED`: The creation of the resource failed. `UPDATING`: The resource is being updated. `FAILED_UPDATING`: An update to the resource was not successful. `DESTROYING`: A delete command was issued, and the resource is being deleted.
 	State *string `json:"state"`
 	// A human readable message describing the current state. In case of an error, the message will contain a detailed error message.
 	Message *string `json:"message,omitempty"`
-	// the bootstrap IP address and port.
-	BootstrapAddress *string `json:"bootstrapAddress,omitempty"`
 	// IP addresses and ports of cluster brokers.
 	BrokerAddresses *[]string `json:"brokerAddresses,omitempty"`
 }
@@ -418,44 +416,6 @@ func (o *ClusterMetadata) HasMessage() bool {
 	return false
 }
 
-// GetBootstrapAddress returns the BootstrapAddress field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *ClusterMetadata) GetBootstrapAddress() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.BootstrapAddress
-
-}
-
-// GetBootstrapAddressOk returns a tuple with the BootstrapAddress field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterMetadata) GetBootstrapAddressOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.BootstrapAddress, true
-}
-
-// SetBootstrapAddress sets field value
-func (o *ClusterMetadata) SetBootstrapAddress(v string) {
-
-	o.BootstrapAddress = &v
-
-}
-
-// HasBootstrapAddress returns a boolean if a field has been set.
-func (o *ClusterMetadata) HasBootstrapAddress() bool {
-	if o != nil && o.BootstrapAddress != nil {
-		return true
-	}
-
-	return false
-}
-
 // GetBrokerAddresses returns the BrokerAddresses field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *ClusterMetadata) GetBrokerAddresses() *[]string {
@@ -530,10 +490,6 @@ func (o ClusterMetadata) MarshalJSON() ([]byte, error) {
 
 	if o.Message != nil {
 		toSerialize["message"] = o.Message
-	}
-
-	if o.BootstrapAddress != nil {
-		toSerialize["bootstrapAddress"] = o.BootstrapAddress
 	}
 
 	if o.BrokerAddresses != nil {

@@ -231,7 +231,7 @@ resource "ionoscloud_kafka_cluster" "test_kafka_cluster" {
 	name = "test_kafka_cluster"
 	version = "3.7.0"
 	size = "S"
-	location = "pre"
+	location = ionoscloud_datacenter.test_datacenter.location
 	connections {
 		datacenter_id = ionoscloud_datacenter.test_datacenter.id
 		lan_id = ionoscloud_lan.test_lan.id

@@ -3,7 +3,7 @@
  *
  * An managed Apache Kafka cluster is designed to be highly fault-tolerant and scalable, allowing large volumes of data to be ingested, stored, and processed in real-time. By distributing data across multiple brokers, Kafka achieves high throughput and low latency, making it suitable for applications requiring real-time data processing and analytics.
  *
- * API version: 1.4.0
+ * API version: 1.7.1
  * Contact: support@cloud.ionos.com
  */
 
@@ -17,8 +17,6 @@ import (
 
 // ClusterMetadataAllOf struct for ClusterMetadataAllOf
 type ClusterMetadataAllOf struct {
-	// the bootstrap IP address and port.
-	BootstrapAddress *string `json:"bootstrapAddress,omitempty"`
 	// IP addresses and ports of cluster brokers.
 	BrokerAddresses *[]string `json:"brokerAddresses,omitempty"`
 }
@@ -39,44 +37,6 @@ func NewClusterMetadataAllOf() *ClusterMetadataAllOf {
 func NewClusterMetadataAllOfWithDefaults() *ClusterMetadataAllOf {
 	this := ClusterMetadataAllOf{}
 	return &this
-}
-
-// GetBootstrapAddress returns the BootstrapAddress field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *ClusterMetadataAllOf) GetBootstrapAddress() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.BootstrapAddress
-
-}
-
-// GetBootstrapAddressOk returns a tuple with the BootstrapAddress field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterMetadataAllOf) GetBootstrapAddressOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.BootstrapAddress, true
-}
-
-// SetBootstrapAddress sets field value
-func (o *ClusterMetadataAllOf) SetBootstrapAddress(v string) {
-
-	o.BootstrapAddress = &v
-
-}
-
-// HasBootstrapAddress returns a boolean if a field has been set.
-func (o *ClusterMetadataAllOf) HasBootstrapAddress() bool {
-	if o != nil && o.BootstrapAddress != nil {
-		return true
-	}
-
-	return false
 }
 
 // GetBrokerAddresses returns the BrokerAddresses field value
@@ -119,10 +79,6 @@ func (o *ClusterMetadataAllOf) HasBrokerAddresses() bool {
 
 func (o ClusterMetadataAllOf) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.BootstrapAddress != nil {
-		toSerialize["bootstrapAddress"] = o.BootstrapAddress
-	}
-
 	if o.BrokerAddresses != nil {
 		toSerialize["brokerAddresses"] = o.BrokerAddresses
 	}

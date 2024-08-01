@@ -3,7 +3,7 @@
  *
  * An managed Apache Kafka cluster is designed to be highly fault-tolerant and scalable, allowing large volumes of data to be ingested, stored, and processed in real-time. By distributing data across multiple brokers, Kafka achieves high throughput and low latency, making it suitable for applications requiring real-time data processing and analytics.
  *
- * API version: 1.4.0
+ * API version: 1.7.1
  * Contact: support@cloud.ionos.com
  */
 

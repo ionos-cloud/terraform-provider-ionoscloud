@@ -3,7 +3,7 @@
  *
  * An managed Apache Kafka cluster is designed to be highly fault-tolerant and scalable, allowing large volumes of data to be ingested, stored, and processed in real-time. By distributing data across multiple brokers, Kafka achieves high throughput and low latency, making it suitable for applications requiring real-time data processing and analytics.
  *
- * API version: 1.4.0
+ * API version: 1.7.1
  * Contact: support@cloud.ionos.com
  */
 
@@ -32,7 +32,7 @@ type UserAccessMetadata struct {
 	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
 	// Unique name of the resource.
 	ResourceURN *string `json:"resourceURN,omitempty"`
-	// State of the resource. Resource states: `AVAILABLE`: There are no pending modification requests for this item. `BUSY`: There is at least one modification request pending and all following requests will be queued. `DEPLOYING`: The resource is being created. `FAILED`: The creation of the resource failed. `UPDATING`: The resource is being updated. `FAILED_UPDATING`: An update to the resource was not successful.
+	// State of the resource. Resource states: `AVAILABLE`: There are no pending modification requests for this item. `BUSY`: There is at least one modification request pending and all following requests will be queued. `DEPLOYING`: The resource is being created. `FAILED`: The creation of the resource failed. `UPDATING`: The resource is being updated. `FAILED_UPDATING`: An update to the resource was not successful. `DESTROYING`: A delete command was issued, and the resource is being deleted.
 	State *string `json:"state"`
 	// A human readable message describing the current state. In case of an error, the message will contain a detailed error message.
 	Message *string `json:"message,omitempty"`
