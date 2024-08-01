@@ -116,6 +116,13 @@
     * [DBaaS MongoDB Cluster](../docs/data-sources/dbaas_mariadb_cluster.md)
     * [DBaaS MongoDB Backups](../docs/data-sources/dbaas_mariadb_backups.md)
 
+* Database as a Service - InMemory-DB
+  * Resources
+    * [DBaaS InMemoryDB ReplicaSet](../docs/resources/dbaas_inmemorydb_replica_set.md)
+  * Data sources
+    * [DBaaS InMemoryDB ReplicaSet](../docs/data-sources/dbaas_inmemorydb_replica_set.md)
+    * [DBaaS InMemoryDB Snapshot](../docs/data-sources/dbaas_inmemorydb_snapshot.md)
+
 * Application Load Balancer
   * Resources
     * [Application Load Balancer](../docs/resources/application_loadbalancer.md)

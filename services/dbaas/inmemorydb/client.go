@@ -8,14 +8,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+//nolint:docs
 type InMemoryDBClient struct {
 	sdkClient *inMemoryDB.APIClient
 }
 
+//nolint:docs
 func NewInMemoryDBClient(username, password, token, url, version, terraformVersion string) *InMemoryDBClient {
 	newConfigDbaas := inMemoryDB.NewConfiguration(username, password, token, url)
 
