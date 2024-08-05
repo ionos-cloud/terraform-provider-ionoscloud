@@ -1,3 +1,7 @@
+## 6.5.1
+### Fixes
+- Minor fixes to documentation for api gateway and api gateway route resources
+
 ## 6.5.0
 ### Features
 - Add support for CDN
