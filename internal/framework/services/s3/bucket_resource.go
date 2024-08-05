@@ -103,7 +103,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 		LocationConstraint: data.Region.ValueStringPointer(),
 	}
 
-	_, err := r.client.BucketsApi.CreateBucket(ctx, data.Name.ValueString()).CreateBucketConfiguration(createBucketConfig).Execute()
+	_, err := r.client.BucketsApi.CreateBucket(ctx, data.Name.ValueString()).CreateBucketConfiguration(createBucketConfig).XAmzBucketObjectLockEnabled(true).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create bucket", formatXMLError(err).Error())
 		return

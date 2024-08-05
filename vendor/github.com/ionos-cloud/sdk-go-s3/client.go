@@ -49,13 +49,31 @@ type APIClient struct {
 
 	BucketsApi *BucketsApiService
 
+	CORSApi *CORSApiService
+
+	EncryptionApi *EncryptionApiService
+
+	LifecycleApi *LifecycleApiService
+
+	ObjectLockApi *ObjectLockApiService
+
 	ObjectsApi *ObjectsApiService
 
 	PolicyApi *PolicyApiService
 
 	PublicAccessBlockApi *PublicAccessBlockApiService
 
+	ReplicationApi *ReplicationApiService
+
 	TaggingApi *TaggingApiService
+
+	UploadsApi *UploadsApiService
+
+	VersioningApi *VersioningApiService
+
+	VersionsApi *VersionsApiService
+
+	WebsiteApi *WebsiteApiService
 }
 
 type service struct {
@@ -75,10 +93,19 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 
 	// API Services
 	c.BucketsApi = (*BucketsApiService)(&c.common)
+	c.CORSApi = (*CORSApiService)(&c.common)
+	c.EncryptionApi = (*EncryptionApiService)(&c.common)
+	c.LifecycleApi = (*LifecycleApiService)(&c.common)
+	c.ObjectLockApi = (*ObjectLockApiService)(&c.common)
 	c.ObjectsApi = (*ObjectsApiService)(&c.common)
 	c.PolicyApi = (*PolicyApiService)(&c.common)
 	c.PublicAccessBlockApi = (*PublicAccessBlockApiService)(&c.common)
+	c.ReplicationApi = (*ReplicationApiService)(&c.common)
 	c.TaggingApi = (*TaggingApiService)(&c.common)
+	c.UploadsApi = (*UploadsApiService)(&c.common)
+	c.VersioningApi = (*VersioningApiService)(&c.common)
+	c.VersionsApi = (*VersionsApiService)(&c.common)
+	c.WebsiteApi = (*WebsiteApiService)(&c.common)
 
 	return c
 }

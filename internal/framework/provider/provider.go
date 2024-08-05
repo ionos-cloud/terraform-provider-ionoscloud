@@ -165,6 +165,8 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		s3.NewBucketPolicyResource,
 		s3.NewObjectResource,
 		s3.NewBucketPublicAccessBlockResource,
+		s3.NewBucketVersioningResource,
+		s3.NewObjectLockConfigurationResource,
 	}
 }
 

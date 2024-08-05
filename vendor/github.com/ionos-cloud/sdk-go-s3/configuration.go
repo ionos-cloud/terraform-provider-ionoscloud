@@ -121,7 +121,7 @@ type Configuration struct {
 func NewConfiguration() *Configuration {
 	cfg := &Configuration{
 		DefaultHeader: make(map[string]string),
-		UserAgent:     "ionos-cloud-sdk-go-s3/v1.0.0",
+		UserAgent:     "ionos-cloud-ionoscloud/v7.0.0",
 		Debug:         false,
 		MaxRetries:    defaultMaxRetries,
 		MaxWaitTime:   defaultMaxWaitTime,
