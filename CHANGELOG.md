@@ -1,3 +1,6 @@
+## 6.5.1
+### Documentation
+- Update documentation for S3 bucket resource
 ## 6.5.0
 ### Features
 - Add support for CDN
