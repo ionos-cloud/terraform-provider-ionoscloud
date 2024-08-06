@@ -1,6 +1,6 @@
 ## 6.5.1
 ### Fixes
-- Fixes #632 S3 Bucket Policy Creation with Principal Fails
+- Fixes #632 update docs with `Principal` definition for `s3_bucket_policy`
 
 ## 6.5.0
 ### Features

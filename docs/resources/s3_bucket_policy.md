@@ -39,9 +39,9 @@ resource "ionoscloud_s3_bucket_policy" "example" {
             ]
           }
         }
-        Principal = {
-          AWS = "arn:aws:iam:::user/31000000:9acd8251-2857-410e-b1fd-ca86462bdcec"
-        }
+        Principal = [
+          "arn:aws:iam:::user/31000000:9acd8251-2857-410e-b1fd-ca86462bdcec"
+        ]
       }
     ]
   })
