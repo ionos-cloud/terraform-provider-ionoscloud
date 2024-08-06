@@ -1,6 +1,9 @@
 ## 6.5.1
 ### Documentation
 - Update documentation for S3 bucket resource
+- Fix error message for `ionoscloud_s3_bucket_policy` data source when bucket or policy does not exist.
+- Fix error message for `ionoscloud_s3_bucket_public_access_block` data source when bucket or public access block does not exist.
+
 ## 6.5.0
 ### Features
 - Add support for CDN
