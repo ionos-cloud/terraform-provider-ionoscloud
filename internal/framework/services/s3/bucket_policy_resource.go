@@ -170,13 +170,14 @@ func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	policy, err := GetBucketPolicy(ctx, r.client, data.Bucket.ValueString())
+	bucket := data.Bucket.ValueString()
+	policy, err := GetBucketPolicy(ctx, r.client, bucket)
 	if err != nil {
 		if errors.Is(err, ErrBucketPolicyNotFound) {
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to retrieve bucket policy", err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("Failed to retrieve policy for bucket: %s", bucket), err.Error())
 		return
 	}
 
