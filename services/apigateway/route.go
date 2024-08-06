@@ -143,12 +143,6 @@ func (c *Client) SetAPIGatewayRouteData(d *schema.ResourceData, route apigateway
 		}
 	}
 
-	if route.Metadata.PublicEndpoint != nil {
-		if err := d.Set("public_endpoint", *route.Metadata.PublicEndpoint); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
