@@ -92,11 +92,6 @@ func dataSourceAPIGatewayRoute() *schema.Resource {
 					},
 				},
 			},
-			"public_endpoint": {
-				Type:        schema.TypeString,
-				Description: "The public endpoint of the API Gateway.",
-				Computed:    true,
-			},
 			"partial_match": {
 				Type:        schema.TypeBool,
 				Description: "Whether partial matching is allowed or not when using the name filter.",
