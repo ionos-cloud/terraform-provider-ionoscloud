@@ -44,8 +44,6 @@ resource "ionoscloud_kafka_cluster" "kafka_cluster" {
 * `connections` - (Required) Connection information of the Kafka Cluster. Minimum items: 1, maximum items: 1.
     * `datacenter_id` - (Required)[string] The datacenter to connect your instance to.
     * `lan_id` - (Required)[string] The numeric LAN ID to connect your instance to.
-    * `cidr` - (Required)[string] The IP and subnet for your instance. **Note** the following unavailable IP range:
-      10.244.0.0/11
     * `broker_addresses` - (Required)[list] IP addresses and subnet of cluster brokers. **Note** the following
       unavailable IP range: 10.224.0.0/11
 * `broker_addresses` - (Computed)[list] IP address and port of cluster brokers.
