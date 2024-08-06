@@ -1,3 +1,9 @@
+## 6.5.1
+### Fixes
+- Minor fixes to documentation for api gateway and api gateway route resources.
+- Pass timeouts to `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
+- Add configurable timeouts to s3 buckets. Default stays 60 minutes.
+
 ## 6.5.0
 ### Features
 - Add support for CDN
