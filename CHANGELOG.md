@@ -1,3 +1,7 @@
+## 6.5.1
+### Fixes
+- Fixes #632 S3 Bucket Policy Creation with Principal Fails
+
 ## 6.5.0
 ### Features
 - Add support for CDN

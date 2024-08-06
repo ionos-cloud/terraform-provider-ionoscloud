@@ -57,10 +57,12 @@ type bucketPolicyStatement struct {
 	Effect    string                          `json:"Effect"`
 	Action    []string                        `json:"Action"`
 	Resources []string                        `json:"Resource"`
-	Principal []string                        `json:"Principal"`
+	Principal *Principal                      `json:"Principal"`
 	Condition *bucketPolicyStatementCondition `json:"Condition,omitempty"`
 }
-
+type Principal struct {
+	AWS []string `json:"AWS,omitempty"`
+}
 type bucketPolicyStatementCondition struct {
 	IPs             []string `json:"IpAddress,omitempty"`
 	ExcludedIPs     []string `json:"NotIpAddress,omitempty"`
@@ -287,7 +289,7 @@ func putBucketPolicyInput(policyModel *bucketPolicyModel) (s3.BucketPolicy, diag
 	for _, statementData := range policyData.Statement {
 		statementInput := s3.NewBucketPolicyStatement(statementData.Action, statementData.Effect, statementData.Resources)
 		statementInput.Sid = statementData.SID
-		statementInput.Principal = s3.NewPrincipal(statementData.Principal)
+		statementInput.Principal = s3.NewPrincipal(statementData.Principal.AWS)
 
 		if statementData.Condition != nil {
 			statementInput.Condition = s3.NewBucketPolicyCondition()
@@ -347,7 +349,8 @@ func setBucketPolicyData(policyResponse *s3.BucketPolicy, data *bucketPolicyMode
 				Resources: *statementResponse.Resource,
 			}
 			if statementResponse.Principal != nil && statementResponse.Principal.AWS != nil {
-				statementData.Principal = *statementResponse.Principal.AWS
+				statementData.Principal = &Principal{}
+				statementData.Principal.AWS = *statementResponse.Principal.AWS
 			}
 			if statementResponse.Condition != nil {
 				conditionData := bucketPolicyStatementCondition{}
