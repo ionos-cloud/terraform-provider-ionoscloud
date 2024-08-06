@@ -24,19 +24,16 @@ func dataSourceKafkaCluster() *schema.Resource {
 				Description:      "The ID of the Kafka Cluster",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				Optional:         true,
-				Computed:         true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the Kafka Cluster",
-				Computed:    true,
 				Optional:    true,
 			},
 			"location": {
 				Type:             schema.TypeString,
 				Description:      fmt.Sprintf("The location of your Kafka Cluster. Supported locations: %s", strings.Join(kafka.AvailableLocations, ", ")),
 				Required:         true,
-				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(kafka.AvailableLocations, false)),
 			},
 			"version": {
