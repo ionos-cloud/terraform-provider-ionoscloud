@@ -18,6 +18,12 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+var (
+	persistenceModes = []string{"None", "AOF", "RDB", "RDB_AOF"}
+	evictionPolicies = []string{"allkeys-lru", "allkeys-lfu", "allkeys-random",
+		"volatile-lru", "volatile-lfu", "volatile-random", "volatile-ttl", "noeviction"}
+)
+
 func resourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: replicaSetCreate,
@@ -76,14 +82,16 @@ func resourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 				},
 			},
 			"persistence_mode": {
-				Type:        schema.TypeString,
-				Description: "Specifies How and If data is persisted.",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "Specifies How and If data is persisted.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(persistenceModes, true)),
 			},
 			"eviction_policy": {
-				Type:        schema.TypeString,
-				Description: "The eviction policy for the replica set.",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "The eviction policy for the replica set.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(evictionPolicies, true)),
 			},
 			"connections": {
 				Type:        schema.TypeList,
