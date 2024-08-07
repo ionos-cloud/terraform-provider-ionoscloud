@@ -29,8 +29,10 @@ func resourceNFSCluster() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"location": {
 				Type: schema.TypeString,
-				Description: fmt.Sprintf("The location of the Network File Storage Cluster. "+
-					"Available locations: '%s'", strings.Join(nfs.ValidNFSLocations, ", '")),
+				Description: fmt.Sprintf(
+					"The location of the Network File Storage Cluster. "+
+						"Available locations: '%s'", strings.Join(nfs.ValidNFSLocations, ", '"),
+				),
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(nfs.ValidNFSLocations, false)),
@@ -77,9 +79,10 @@ func resourceNFSCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"min_version": {
-							Description: "The minimum Network File Storage version",
-							Type:        schema.TypeString,
-							Optional:    true,
+							Description:      "The minimum Network File Storage version",
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"4.2"}, false)),
 						},
 					},
 				},
