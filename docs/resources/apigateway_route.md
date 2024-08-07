@@ -30,7 +30,7 @@ resource "ionoscloud_apigateway_route" "apigateway_route" {
   websocket = false
   upstreams {
     scheme       = "http"
-    loadbalancer = "round-robin"
+    loadbalancer = "roundrobin"
     host         = "example.com"
     port         = 80
     weight       = 100
@@ -54,7 +54,7 @@ resource "ionoscloud_apigateway_route" "apigateway_route" {
     * `scheme` - (Optional)[string] The target URL of the upstream. Default value: `http`.
     * `host` -  (Required)[string] The host of the upstream.
     * `port` -  (Optional)[int] The port of the upstream. Default value: `80`.
-    * `loadbalancer` - (Optional)[string] The load balancer algorithm. Default value: `round-robin`.
+    * `loadbalancer` - (Optional)[string] The load balancer algorithm. Default value: `roundrobin`.
     * `weight` - (Optional)[int] Weight with which to split traffic to the upstream. Default value: `100`.
 
 ## Import
