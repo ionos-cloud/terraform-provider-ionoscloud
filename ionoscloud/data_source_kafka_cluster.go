@@ -29,8 +29,8 @@ func dataSourceKafkaCluster() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the Kafka Cluster",
-				Optional:    true,
 				Computed:    true,
+				Optional:    true,
 			},
 			"location": {
 				Type:             schema.TypeString,
