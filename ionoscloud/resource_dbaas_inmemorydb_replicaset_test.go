@@ -454,7 +454,7 @@ const (
 	replicaSetLocationValue              = "es/vit"
 	replicaSetLocationUpdateValue        = "de/txl"
 	replicaSetVersionValue               = "7.2"
-	replicaSetDisplayNameValue           = "MyReplicaSet"
+	replicaSetDisplayNameValue           = "TerraformTestReplicaSet"
 	replicaSetDisplayNameUpdateValue     = "UpdatedReplicaSet"
 	replicaSetReplicasValue              = "4"
 	replicaSetReplicasUpdateValue        = "5"

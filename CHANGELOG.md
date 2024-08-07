@@ -5,6 +5,7 @@
 - Fix error message for `ionoscloud_s3_bucket_policy` data source when bucket or policy does not exist.
 - Fix error message for `ionoscloud_s3_bucket_public_access_block` data source when bucket or public access block does not exist.
 - Add validation for `persistence_mode` and `eviction_policy` fields of `ionoscloud_inmemorydb_replicaset`
+- Add `ForceNew: true` for some attributes in `ionoscloud_inmemorydb_replicaset` resource
 - Fixes #632 update docs with `Principal` example for `s3_bucket_policy`
 
 ## 6.5.0
