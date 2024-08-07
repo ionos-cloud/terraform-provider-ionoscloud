@@ -3,10 +3,7 @@
 - Update documentation for S3 bucket resource
 - Fix error message for `ionoscloud_s3_bucket_policy` data source when bucket or policy does not exist.
 - Fix error message for `ionoscloud_s3_bucket_public_access_block` data source when bucket or public access block does not exist.
-
-## 6.5.1
-### Fixes
-- Fixes #632 update docs with `Principal` definition for `s3_bucket_policy`
+- Fixes #632 update docs with `Principal` example for `s3_bucket_policy`
 
 ## 6.5.0
 ### Features
