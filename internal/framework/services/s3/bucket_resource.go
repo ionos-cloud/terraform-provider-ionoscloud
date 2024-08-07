@@ -3,12 +3,13 @@ package s3
 import (
 	"context"
 	"fmt"
-
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -35,8 +36,10 @@ type bucketResource struct {
 }
 
 type bucketResourceModel struct {
-	Name   types.String `tfsdk:"name"`
-	Region types.String `tfsdk:"region"`
+	Name              types.String `tfsdk:"name"`
+	Region            types.String `tfsdk:"region"`
+	ObjectLockEnabled types.Bool   `tfsdk:"object_lock_enabled"`
+	ForceDestroy      types.Bool   `tfsdk:"force_destroy"`
 }
 
 // Metadata returns the metadata for the bucket resource.
@@ -49,7 +52,7 @@ func (r *bucketResource) Schema(_ context.Context, req resource.SchemaRequest, r
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Description: "The name of the bucket",
+				Description: "The name of the bucket. It must start and end with a letter or number and contain only lowercase alphanumeric characters, hyphens, periods and underscores.",
 				Required:    true,
 				Validators:  []validator.String{stringvalidator.LengthBetween(3, 63)},
 				PlanModifiers: []planmodifier.String{
@@ -61,6 +64,21 @@ func (r *bucketResource) Schema(_ context.Context, req resource.SchemaRequest, r
 				Optional:    true,
 				Computed:    true,
 				Default:     stringdefault.StaticString("eu-central-3"),
+			},
+			"object_lock_enabled": schema.BoolAttribute{
+				Description: "Whether object lock is enabled for the bucket",
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplace(),
+				},
+			},
+			"force_destroy": schema.BoolAttribute{
+				Description: "Whether all objects should be deleted from the bucket so that the bucket can be destroyed",
+				Computed:    true,
+				Optional:    true,
+				Default:     booldefault.StaticBool(false),
 			},
 		},
 	}
@@ -103,7 +121,11 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 		LocationConstraint: data.Region.ValueStringPointer(),
 	}
 
-	_, err := r.client.BucketsApi.CreateBucket(ctx, data.Name.ValueString()).CreateBucketConfiguration(createBucketConfig).XAmzBucketObjectLockEnabled(true).Execute()
+	createReq := r.client.BucketsApi.CreateBucket(ctx, data.Name.ValueString()).CreateBucketConfiguration(createBucketConfig)
+	if !data.ObjectLockEnabled.IsNull() {
+		createReq = createReq.XAmzBucketObjectLockEnabled(data.ObjectLockEnabled.ValueBool())
+	}
+	_, err := createReq.Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create bucket", formatXMLError(err).Error())
 		return
@@ -157,11 +179,21 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		resp.Diagnostics.AddError("Failed to read bucket location", formatXMLError(err).Error())
 		return
 	}
-	if location.LocationConstraint == nil {
-		resp.Diagnostics.AddError("Failed to read bucket location", "location is nil.")
-		return
+
+	objLockConfig, apiResponse, err := r.client.ObjectLockApi.GetObjectLockConfiguration(ctx, data.Name.ValueString()).Execute()
+	if err != nil {
+		if !apiResponse.HttpNotFound() {
+			resp.Diagnostics.AddError("Failed to read object lock configuration", formatXMLError(err).Error())
+			return
+		}
+		data.ObjectLockEnabled = types.BoolValue(false)
 	}
-	data.Region = types.StringValue(*location.LocationConstraint)
+
+	if objLockConfig != nil && objLockConfig.ObjectLockEnabled != nil {
+		data.ObjectLockEnabled = types.BoolValue(*objLockConfig.ObjectLockEnabled == "Enabled")
+	}
+
+	data.Region = types.StringPointerValue(location.GetLocationConstraint())
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 

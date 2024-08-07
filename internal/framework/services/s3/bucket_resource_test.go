@@ -16,7 +16,7 @@ import (
 )
 
 func TestAccBucketResource(t *testing.T) {
-	rName := "acctest-tf-bucket"
+	rName := acctest.GenerateRandomResourceName(bucketPrefix)
 	name := "ionoscloud_s3_bucket.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -31,6 +31,7 @@ func TestAccBucketResource(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "name", rName),
 					resource.TestCheckResourceAttr(name, "region", "eu-central-3"),
+					resource.TestCheckResourceAttr(name, "object_lock_enabled", "false"),
 				),
 			},
 			{
@@ -38,7 +39,31 @@ func TestAccBucketResource(t *testing.T) {
 				ImportStateId:                        rName,
 				ImportState:                          true,
 				ImportStateVerifyIdentifierAttribute: "name",
+				ImportStateVerifyIgnore:              []string{"force_destroy"},
 				ImportStateVerify:                    true,
+			},
+		},
+	})
+}
+
+func TestAccBucketResource_ObjectLockEnabled(t *testing.T) {
+	rName := acctest.GenerateRandomResourceName(bucketPrefix)
+	name := "ionoscloud_s3_bucket.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		CheckDestroy: testAccCheckBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBucketConfig_objectLockEnabled(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(name, "name", rName),
+					resource.TestCheckResourceAttr(name, "region", "eu-central-3"),
+					resource.TestCheckResourceAttr(name, "object_lock_enabled", "true"),
+				),
 			},
 		},
 	})
@@ -48,7 +73,15 @@ func testAccBucketConfig_basic(bucketName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_s3_bucket" "test" {
   name = %[1]q
-  region = "eu-central-3"
+}
+`, bucketName)
+}
+
+func testAccBucketConfig_objectLockEnabled(bucketName string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_s3_bucket" "test" {
+  name = %[1]q
+  object_lock_enabled = true
 }
 `, bucketName)
 }

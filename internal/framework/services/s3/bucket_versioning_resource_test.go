@@ -16,7 +16,7 @@ import (
 )
 
 func TestAccBucketVersioningResource(t *testing.T) {
-	bucketName := "acctest-tf-bucket-versioning"
+	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
 	name := "ionoscloud_s3_bucket_versioning.test"
 
 	resource.ParallelTest(t, resource.TestCase{
