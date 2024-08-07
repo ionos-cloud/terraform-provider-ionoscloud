@@ -320,7 +320,7 @@ resource "ionoscloud_nfs_cluster" "example" {
 }
 `
 
-const testAccCheckNFSClusterConfig_update = `
+const testAccCheckNFSClusterConfig_update = testAccCheckNFSClusterConfig_basic + `
 resource "ionoscloud_nfs_cluster" "example" {
   name = "example_updated"
   location = "de/txl"
