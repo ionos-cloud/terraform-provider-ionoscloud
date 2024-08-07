@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	kafka "github.com/ionos-cloud/sdk-go-kafka"
@@ -65,7 +64,6 @@ func (c *Client) DeleteTopic(ctx context.Context, clusterID string, topicID stri
 
 // IsTopicAvailable checks if a Kafka Cluster Topic is available
 func (c *Client) IsTopicAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	time.Sleep(10 * time.Second)
 	topicID := d.Id()
 	clusterID := d.Get("cluster_id").(string)
 	location := d.Get("location").(string)

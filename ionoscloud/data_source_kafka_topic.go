@@ -24,16 +24,19 @@ func dataSourceKafkaTopic() *schema.Resource {
 				Description:      "The ID of the Kafka Cluster",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				Optional:         true,
+				Computed:         true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of your Kafka Cluster Topic. Must be 63 characters or less and must begin and end with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"location": {
 				Type:             schema.TypeString,
 				Description:      fmt.Sprintf("The location of your Kafka Cluster Topic. Supported locations: %s", strings.Join(kafka.AvailableLocations, ", ")),
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(kafka.AvailableLocations, false)),
 			},
 			"cluster_id": {
