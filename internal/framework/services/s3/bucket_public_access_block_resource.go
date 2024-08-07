@@ -138,13 +138,14 @@ func (r *bucketPublicAccessBlockResource) Read(ctx context.Context, req resource
 		return
 	}
 
-	response, err := GetBucketPublicAccessBlock(ctx, r.client, data.Bucket.ValueString())
+	bucket := data.Bucket.ValueString()
+	response, err := GetBucketPublicAccessBlock(ctx, r.client, bucket)
 	if err != nil {
 		if errors.Is(err, ErrBucketPublicAccessBlockNotFound) {
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to retrieve bucket public access block", err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("Failed to retrieve public access block for bucket: %s", bucket), err.Error())
 		return
 	}
 	data.IgnorePublicACLS = types.BoolPointerValue(response.IgnorePublicAcls)

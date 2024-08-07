@@ -1,8 +1,13 @@
 ## 6.5.1
 ### Fixes
-- Minor fixes to documentation for api gateway and api gateway route resources.
 - Pass timeouts to `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
 - Add configurable timeouts to s3 buckets. Default stays 60 minutes.
+
+### Documentation
+- Update documentation for S3 bucket resource
+- Fix error message for `ionoscloud_s3_bucket_policy` data source when bucket or policy does not exist.
+- Fix error message for `ionoscloud_s3_bucket_public_access_block` data source when bucket or public access block does not exist.
+- Minor fixes to documentation for api gateway and api gateway route resources.
 
 ## 6.5.0
 ### Features
