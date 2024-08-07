@@ -49,7 +49,7 @@ func (r *bucketResource) Schema(_ context.Context, req resource.SchemaRequest, r
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Description: "The name of the bucket",
+				Description: "The name of the bucket. It must start and end with a letter or number and contain only lowercase alphanumeric characters, hyphens, periods and underscores.",
 				Required:    true,
 				Validators:  []validator.String{stringvalidator.LengthBetween(3, 63)},
 				PlanModifiers: []planmodifier.String{
