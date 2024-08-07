@@ -1,8 +1,8 @@
 ---
 subcategory: "VPN"
 layout: "ionoscloud"
-page_title: "IonosCloud: server"
-sidebar_current: "docs-resource-server"
+page_title: "IonosCloud: vpn_wireguard_gateway"
+sidebar_current: "docs-resource-vpn-wireguard-gateway"
 description: |-
   Creates and manages IonosCloud VPN Wireguard Gateway objects.
 ---
@@ -24,7 +24,7 @@ resource "ionoscloud_datacenter" "datacenter_example" {
 resource "ionoscloud_ipblock" "ipblock_example" {
   location = "de/fra"
   size = 1
-  name = "` + constant.IpBlockTestResource + `"
+  name = "ipblock_example"
 }
 
 resource "ionoscloud_lan" "lan_example" {
@@ -34,7 +34,7 @@ resource "ionoscloud_lan" "lan_example" {
 
 resource ionoscloud_vpn_wireguard_gateway "gateway" {
   location = "de/fra"
-  name = "my vpn test gateway"
+  name = "gateway_example"
   description = "description"
   private_key = "private"
 

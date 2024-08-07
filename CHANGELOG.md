@@ -4,6 +4,10 @@
 - Fix error message for `ionoscloud_s3_bucket_policy` data source when bucket or policy does not exist.
 - Fix error message for `ionoscloud_s3_bucket_public_access_block` data source when bucket or public access block does not exist.
 - Fixes #632 update docs with `Principal` example for `s3_bucket_policy`
+- Update examples for vpn gateway resources
+
+### Fixes
+- Fix for vpn wireguard peer when there is no endpoint set
 
 ## 6.5.0
 ### Features

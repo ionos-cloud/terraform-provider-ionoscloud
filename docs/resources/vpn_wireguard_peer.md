@@ -1,7 +1,7 @@
 ---
 subcategory: "VPN"
 layout: "ionoscloud"
-page_title: "IonosCloud: vpn_wireguard_gateway - Data Source"
+page_title: "IonosCloud: vpn_wireguard_gateway_peer"
 sidebar_current: "docs-ionoscloud-vpn-wireguard-peer"
 description: |-
   Provides information about a specific IonosCloud VPN WireGuard Peer.
