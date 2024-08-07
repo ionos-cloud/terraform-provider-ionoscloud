@@ -7,6 +7,7 @@
 - Update documentation for S3 bucket resource
 - Fix error message for `ionoscloud_s3_bucket_policy` data source when bucket or policy does not exist.
 - Fix error message for `ionoscloud_s3_bucket_public_access_block` data source when bucket or public access block does not exist.
+- Fixes #632 update docs with `Principal` example for `s3_bucket_policy`
 - Minor fixes to documentation for api gateway and api gateway route resources.
 
 ## 6.5.0

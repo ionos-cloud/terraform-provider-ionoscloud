@@ -16,7 +16,7 @@ Manages **S3 Buckets policies** on IonosCloud.
 ```hcl
 
 resource "ionoscloud_s3_bucket_policy" "example" {
-  bucket = "example"
+  bucket = "your_bucket_name_here"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -33,15 +33,13 @@ resource "ionoscloud_s3_bucket_policy" "example" {
           "arn:aws:s3:::example/*"
         ]
         Condition = {
-          IpAddress = {
-            "aws:SourceIp" = [
-              "123.123.123.123/32"
-            ]
-          }
+          IpAddress = [
+            "123.123.123.123/32"
+          ]
         }
-        Principal = {
-          AWS = "arn:aws:iam:::user/31000000:9acd8251-2857-410e-b1fd-ca86462bdcec"
-        }
+        Principal = [
+          "arn:aws:iam:::user/31000000:9acd8251-2857-410e-b1fd-ca86462bdcec"
+        ]
       }
     ]
   })
