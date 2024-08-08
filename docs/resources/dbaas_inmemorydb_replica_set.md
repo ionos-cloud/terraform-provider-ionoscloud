@@ -107,7 +107,7 @@ resource "ionoscloud_inmemorydb_replicaset" "example" {
   * `datacenter_id` - (Required)[string] The datacenter to connect your instance to.
   * `lan_id` - (Required)[string] The numeric LAN ID to connect your instance to.
   * `cidr` - (Required)[string] The IP and subnet for your instance. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24.
-* `credentials` - (Required)[object] Credentials for the InMemoryDB replicaset, only one type of password can be used since they are mutually exclusive. Updates to the value of the field force the replica set to be re-created.
+* `credentials` - (Required)[object] Credentials for the InMemoryDB replicaset, only one type of password can be used since they are mutually exclusive. These values are used to create the initial InMemoryDB user, updating any of these will force recreation of the replica set resource.
   * `username` - (Required)[string] The username for the initial InMemoryDB user. Some system usernames are restricted (e.g. 'admin', 'standby').
   * `plain_text_password` - (Optional)[string] The password for a InMemoryDB user, this is a field that is marked as `Sensitive`.
   * `hashed_password` - (Optional)[object] The hashed password for a InMemoryDB user.
