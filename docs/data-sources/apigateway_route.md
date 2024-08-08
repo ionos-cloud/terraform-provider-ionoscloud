@@ -59,4 +59,3 @@ The following attributes are returned by the datasource:
     * `host` - The host of the upstream.
     * `port` - The port of the upstream.
     * `weight` - Weight with which to split traffic to the upstream.
-* `public_endpoint` - The public endpoint of the API Gateway.
