@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	"fmt"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -15,6 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	tfs3 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
 
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 
@@ -133,7 +136,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	// Wait for bucket creation
 	err = backoff.Retry(func() error {
-		return bucketExists(ctx, r.client, data.Name.ValueString())
+		return BucketExists(ctx, r.client, data.Name.ValueString())
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(utils.DefaultTimeout)))
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create bucket", fmt.Sprintf("error verifying bucket creation: %s", err))
@@ -232,11 +235,22 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	}
 
 	apiResponse, err := r.client.BucketsApi.DeleteBucket(ctx, data.Name.ValueString()).Execute()
-	if err != nil {
-		if apiResponse.HttpNotFound() {
+	if apiResponse.HttpNotFound() {
+		return
+	}
+
+	if isBucketNotEmptyError(err) && data.ForceDestroy.ValueBool() {
+		_, err := tfs3.EmptyBucket(ctx, r.client, data.Name.ValueString(), data.ObjectLockEnabled.ValueBool())
+		if err != nil {
+			resp.Diagnostics.AddError("failed to empty bucket", err.Error())
 			return
 		}
 
+		r.Delete(ctx, req, resp)
+		return
+	}
+
+	if err != nil {
 		resp.Diagnostics.AddError("failed to delete bucket", formatXMLError(err).Error())
 		return
 	}
@@ -265,7 +279,8 @@ func IsBucketDeleted(ctx context.Context, client *s3.APIClient, bucket string) e
 	return fmt.Errorf("bucket still exists")
 }
 
-func bucketExists(ctx context.Context, client *s3.APIClient, bucket string) error {
+// BucketExists checks if the bucket exists.
+func BucketExists(ctx context.Context, client *s3.APIClient, bucket string) error {
 	apiResponse, err := client.BucketsApi.HeadBucket(ctx, bucket).Execute()
 	if err != nil {
 		if apiResponse.HttpNotFound() {

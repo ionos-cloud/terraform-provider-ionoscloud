@@ -2,10 +2,11 @@ package s3
 
 import (
 	"context"
-	"crypto/md5"
+	"crypto/md5" // nolint:gosec
 	"encoding/hex"
 	"encoding/xml"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -33,27 +34,30 @@ type objectLockConfiguration struct {
 type objectLockConfigurationModel struct {
 	Bucket            types.String `tfsdk:"bucket"`
 	ObjectLockEnabled types.String `tfsdk:"object_lock_enabled"`
-	Rule              *Rule        `tfsdk:"rule"`
+	Rule              *rule        `tfsdk:"rule"`
 }
 
-type Rule struct {
-	DefaultRetention *DefaultRetention `tfsdk:"default_retention"`
+type rule struct {
+	DefaultRetention *defaultRetention `tfsdk:"default_retention"`
 }
 
-type DefaultRetention struct {
+type defaultRetention struct {
 	Mode  types.String `tfsdk:"mode"`
 	Days  types.Int64  `tfsdk:"days"`
 	Years types.Int64  `tfsdk:"years"`
 }
 
+// NewObjectLockConfigurationResource creates a new resource for the bucket object lock configuration resource.
 func NewObjectLockConfigurationResource() resource.Resource {
 	return &objectLockConfiguration{}
 }
 
+// Metadata returns the metadata for the bucket object lock configuration resource.
 func (r *objectLockConfiguration) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_s3_bucket_object_lock_configuration"
 }
 
+// Schema returns the schema for the bucket object lock configuration resource.
 func (r *objectLockConfiguration) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -100,7 +104,8 @@ func (r *objectLockConfiguration) Schema(ctx context.Context, req resource.Schem
 	}
 }
 
-func (r *objectLockConfiguration) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+// ConfigValidators returns the config validators for the bucket object lock configuration resource.
+func (r *objectLockConfiguration) ConfigValidators(_ context.Context) []resource.ConfigValidator {
 	return []resource.ConfigValidator{
 		resourcevalidator.Conflicting(
 			path.MatchRoot("rule").AtName("default_retention").AtName("days"),
@@ -109,6 +114,7 @@ func (r *objectLockConfiguration) ConfigValidators(ctx context.Context) []resour
 	}
 }
 
+// Configure configures the bucket object lock configuration resource.
 func (r *objectLockConfiguration) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -127,6 +133,7 @@ func (r *objectLockConfiguration) Configure(_ context.Context, req resource.Conf
 	r.client = client
 }
 
+// Create creates the bucket object lock configuration resource.
 func (r *objectLockConfiguration) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError("API client not configured", "The provider client is not configured")
@@ -154,6 +161,7 @@ func (r *objectLockConfiguration) Create(ctx context.Context, req resource.Creat
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
+// Read reads the bucket object lock configuration resource.
 func (r *objectLockConfiguration) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError("API client not configured", "The provider client is not configured")
@@ -180,10 +188,12 @@ func (r *objectLockConfiguration) Read(ctx context.Context, req resource.ReadReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
+// ImportState imports the state for the bucket object lock configuration resource.
 func (r *objectLockConfiguration) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("bucket"), req, resp)
 }
 
+// Update updates the bucket object lock configuration resource.
 func (r *objectLockConfiguration) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError("API client not configured", "The provider client is not configured")
@@ -223,6 +233,7 @@ func (r *objectLockConfiguration) Update(ctx context.Context, req resource.Updat
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
+// Delete deletes the bucket object lock configuration resource.
 func (r *objectLockConfiguration) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError("API client not configured", "The provider client is not configured")
@@ -244,8 +255,8 @@ func buildObjectLockConfigurationModelFromAPIResponse(output *s3.GetObjectLockCo
 		ObjectLockEnabled: types.StringPointerValue(output.ObjectLockEnabled),
 	}
 	if output.Rule != nil {
-		built.Rule = &Rule{
-			DefaultRetention: &DefaultRetention{
+		built.Rule = &rule{
+			DefaultRetention: &defaultRetention{
 				Mode:  types.StringPointerValue(output.Rule.DefaultRetention.Mode),
 				Days:  types.Int64PointerValue(toInt64(output.Rule.DefaultRetention.Days)),
 				Years: types.Int64PointerValue(toInt64(output.Rule.DefaultRetention.Years)),
@@ -278,7 +289,7 @@ func generateMD5Sum(data interface{}) (string, error) {
 	}
 
 	// Create an MD5 hasher
-	hasher := md5.New()
+	hasher := md5.New() // nolint:gosec
 
 	// Write the JSON bytes to the hasher
 	_, err = hasher.Write(jsonBytes)

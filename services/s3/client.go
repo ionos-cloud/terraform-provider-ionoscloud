@@ -13,6 +13,7 @@ import (
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
+// NewClient creates a new S3 client with the given credentials and region.
 func NewClient(id, secret, region string) *s3.APIClient {
 	cfg := s3.NewConfiguration()
 	signer := awsv4.NewSigner(credentials.NewStaticCredentials(id, secret, ""))

@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -27,29 +28,32 @@ type bucketVersioningResource struct {
 
 type bucketVersioningResourceModel struct {
 	Bucket                  types.String             `tfsdk:"bucket"`
-	VersioningConfiguration *VersioningConfiguration `tfsdk:"versioning_configuration"`
+	VersioningConfiguration *versioningConfiguration `tfsdk:"versioning_configuration"`
 }
 
-type VersioningConfiguration struct {
+type versioningConfiguration struct {
 	Status    types.String `tfsdk:"status"`
 	MfaDelete types.String `tfsdk:"mfa_delete"`
 }
 
-func (v VersioningConfiguration) AttributeTypes() map[string]attr.Type {
+func (v versioningConfiguration) AttributeTypes() map[string]attr.Type {
 	return map[string]attr.Type{
 		"status":     types.StringType,
 		"mfa_delete": types.StringType,
 	}
 }
 
+// NewBucketVersioningResource creates a new resource for the bucket versioning resource.
 func NewBucketVersioningResource() resource.Resource {
 	return &bucketVersioningResource{}
 }
 
+// Metadata returns the metadata for the bucket versioning resource.
 func (r *bucketVersioningResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_s3_bucket_versioning"
 }
 
+// Schema returns the schema for the bucket versioning resource.
 func (r *bucketVersioningResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -83,6 +87,7 @@ func (r *bucketVersioningResource) Schema(ctx context.Context, req resource.Sche
 	}
 }
 
+// Configure configures the bucket versioning resource.
 func (r *bucketVersioningResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -101,6 +106,7 @@ func (r *bucketVersioningResource) Configure(_ context.Context, req resource.Con
 	r.client = client
 }
 
+// Create creates the bucket versioning resource.
 func (r *bucketVersioningResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
@@ -122,6 +128,7 @@ func (r *bucketVersioningResource) Create(ctx context.Context, req resource.Crea
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
+// Read reads the bucket versioning resource.
 func (r *bucketVersioningResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
@@ -148,10 +155,12 @@ func (r *bucketVersioningResource) Read(ctx context.Context, req resource.ReadRe
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
+// ImportState imports the state for the bucket versioning resource.
 func (r *bucketVersioningResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("bucket"), req, resp)
 }
 
+// Update updates the bucket versioning resource.
 func (r *bucketVersioningResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
@@ -185,6 +194,7 @@ func (r *bucketVersioningResource) Update(ctx context.Context, req resource.Upda
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
+// Delete deletes the bucket versioning resource.
 func (r *bucketVersioningResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
@@ -197,7 +207,7 @@ func (r *bucketVersioningResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	// Removing S3 bucket versioning for un-versioned bucket from state"
+	// Removing S3 bucket versioning for un-versioned bucket from state
 	if data.VersioningConfiguration.Status.ValueString() == string(s3.BUCKETVERSIONINGSTATUS_SUSPENDED) {
 		return
 	}
@@ -206,6 +216,10 @@ func (r *bucketVersioningResource) Delete(ctx context.Context, req resource.Dele
 		PutBucketVersioningRequest(s3.PutBucketVersioningRequest{
 			Status: s3.BUCKETVERSIONINGSTATUS_SUSPENDED.Ptr(),
 		}).Execute()
+	if isInvalidStateBucketWithObjectLock(err) {
+		return
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create bucket versioning", err.Error())
 		return
@@ -213,7 +227,7 @@ func (r *bucketVersioningResource) Delete(ctx context.Context, req resource.Dele
 }
 
 func buildModelFromAPIResponse(output *s3.GetBucketVersioningOutput, data *bucketVersioningResourceModel) *bucketVersioningResourceModel {
-	var versioningConfiguration VersioningConfiguration
+	var versioningConfiguration versioningConfiguration
 	if output.Status != nil {
 		versioningConfiguration.Status = types.StringValue(string(*output.Status))
 	}

@@ -2,7 +2,10 @@ package s3
 
 import (
 	"context"
+	"crypto/md5" // nolint:gosec
+	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
 	"net/url"
 	"os"
@@ -26,6 +29,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 	"github.com/mitchellh/go-homedir"
+
+	tfs3 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
 )
 
 var (
@@ -62,6 +67,9 @@ type objectResourceModel struct {
 	ServerSideEncryptionCustomerKeyMD5    types.String `tfsdk:"server_side_encryption_customer_key_md5"`
 	ServerSideEncryptionContext           types.String `tfsdk:"server_side_encryption_context"`
 	RequestPayer                          types.String `tfsdk:"request_payer"`
+	ObjectLockMode                        types.String `tfsdk:"object_lock_mode"`
+	ObjectLockRetainUntilDate             types.String `tfsdk:"object_lock_retain_until_date"`
+	ObjectLockLegalHold                   types.String `tfsdk:"object_lock_legal_hold"`
 	Etag                                  types.String `tfsdk:"etag"`
 	Metadata                              types.Map    `tfsdk:"metadata"`
 	Tags                                  types.Map    `tfsdk:"tags"`
@@ -166,13 +174,23 @@ func (r *objectResource) Schema(_ context.Context, req resource.SchemaRequest, r
 				Description: "Confirms that the requester knows that they will be charged for the request. Bucket owners need not specify this parameter in their requests.",
 				Optional:    true,
 			},
+			"object_lock_mode": schema.StringAttribute{
+				Description: "Confirms that the requester knows that they will be charged for the request. Bucket owners need not specify this parameter in their requests.",
+				Optional:    true,
+				Validators:  []validator.String{stringvalidator.OneOf("GOVERNANCE", "COMPLIANCE")},
+			},
+			"object_lock_retain_until_date": schema.StringAttribute{
+				Description: " The date and time when you want this object's Object Lock to expire. Must be formatted as a timestamp parameter.",
+				Optional:    true,
+			},
+			"object_lock_legal_hold": schema.StringAttribute{
+				Description: "Specifies whether a legal hold will be applied to this object.",
+				Optional:    true,
+				Validators:  []validator.String{stringvalidator.OneOf("ON", "OFF")},
+			},
 			"etag": schema.StringAttribute{
 				Description: "An entity tag (ETag) is an opaque identifier assigned by a web server to a specific version of a resource found at a URL.",
-				Optional:    true,
 				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"tags": schema.MapAttribute{
 				Description: "The tag-set for the object",
@@ -189,7 +207,7 @@ func (r *objectResource) Schema(_ context.Context, req resource.SchemaRequest, r
 			},
 			"version_id": schema.StringAttribute{
 				Description: "The version of the object",
-				Optional:    true,
+				Computed:    true,
 			},
 			"mfa": schema.StringAttribute{
 				Description: "The concatenation of the authentication device's serial number, a space, and the value that is displayed on your authentication device. Required to permanently delete a versioned object if versioning is configured with MFA Delete enabled.",
@@ -240,36 +258,56 @@ func (r *objectResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	var data objectResourceModel
+	var data *objectResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	apiResponse, err := uploadObject(ctx, r.client, &data)
+	apiResponse, err := uploadObject(ctx, r.client, data)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create object", formatXMLError(err).Error())
 		return
 	}
 
-	etag := strings.Trim(apiResponse.Header.Get("ETag"), "\"")
-	if etag != "" {
-		data.Etag = types.StringValue(etag)
-	}
-
-	versionID := apiResponse.Header.Get("VersionId")
-	if versionID != "" {
-		data.VersionID = types.StringValue(versionID)
-	}
-
-	contentType, err := getContentType(ctx, &data, r.client)
-	if err != nil {
-		resp.Diagnostics.AddError("failed to get content type", err.Error())
+	if err = setComputedAttributes(ctx, data, apiResponse, r.client); err != nil {
+		resp.Diagnostics.AddError("failed to set computed attributes", err.Error())
 		return
 	}
-	data.ContentType = types.StringValue(contentType)
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func setComputedAttributes(ctx context.Context, data *objectResourceModel, apiResponse *s3.APIResponse, client *s3.APIClient) error {
+	contentType := apiResponse.Header.Get("Content-Type")
+	if contentType != "" {
+		data.ContentType = types.StringValue(contentType)
+	}
+
+	data.VersionID = types.StringValue(apiResponse.Header.Get("x-amz-version-id"))
+
+	etag := apiResponse.Header.Get("ETag")
+	if etag != "" {
+		data.Etag = types.StringValue(strings.Trim(etag, "\""))
+	}
+
+	return setContentType(ctx, data, client)
+}
+
+func (r *objectResource) refreshData(ctx context.Context, data *objectResourceModel) diag.Diagnostics {
+	diags := diag.Diagnostics{}
+	_, apiResponse, err := findObject(ctx, r.client, data)
+	if err != nil {
+		diags.AddError("failed to read object", formatXMLError(err).Error())
+		return diags
+	}
+
+	diags = r.setDataModel(ctx, data, apiResponse)
+	if diags.HasError() {
+		diags.Append(diags...)
+		return diags
+	}
+
+	return nil
 }
 
 // Read reads the object.
@@ -279,13 +317,13 @@ func (r *objectResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	var data objectResourceModel
+	var data *objectResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, apiResponse, err := FindObject(ctx, r.client, &data)
+	_, apiResponse, err := findObject(ctx, r.client, data)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			resp.State.RemoveResource(ctx)
@@ -296,7 +334,7 @@ func (r *objectResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	diags := r.setDataModel(ctx, &data, apiResponse)
+	diags := r.setDataModel(ctx, data, apiResponse)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -320,7 +358,7 @@ func (r *objectResource) ImportState(ctx context.Context, req resource.ImportSta
 
 // Update updates the object.
 func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state objectResourceModel
+	var plan, state *objectResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -330,36 +368,101 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	if hasObjectContentChanges(plan, state) {
-		_, err := uploadObject(ctx, r.client, &plan)
+		apiResponse, err := uploadObject(ctx, r.client, plan)
 		if err != nil {
 			resp.Diagnostics.AddError("failed to update object", formatXMLError(err).Error())
 			return
 		}
-	}
 
-	_, apiResponse, err := FindObject(ctx, r.client, &plan)
-	if err != nil {
-		if apiResponse.HttpNotFound() {
-			resp.State.RemoveResource(ctx)
+		if err = setComputedAttributes(ctx, plan, apiResponse, r.client); err != nil {
+			resp.Diagnostics.AddError("failed to set computed attributes", err.Error())
 			return
 		}
 
-		resp.Diagnostics.AddError("failed to read object", formatXMLError(err).Error())
-		return
+	} else {
+		if !plan.ObjectLockLegalHold.Equal(state.ObjectLockLegalHold) {
+			_, err := r.client.ObjectLockApi.PutObjectLegalHold(ctx, state.Bucket.ValueString(), state.Key.ValueString()).
+				ObjectLegalHoldConfiguration(s3.ObjectLegalHoldConfiguration{Status: plan.ObjectLockLegalHold.ValueStringPointer()}).
+				Execute()
+			if err != nil {
+				resp.Diagnostics.AddError("failed to update object lock legal hold", formatXMLError(err).Error())
+				return
+			}
+		}
+
+		if !plan.ObjectLockMode.Equal(state.ObjectLockMode) || !plan.ObjectLockRetainUntilDate.Equal(state.ObjectLockRetainUntilDate) {
+			if _, err := putRetention(ctx, r.client, plan, state); err != nil {
+				resp.Diagnostics.AddError("failed to update object lock retention", formatXMLError(err).Error())
+				return
+			}
+		}
 	}
 
-	newState := objectResourceModel{
-		Key:    state.Key,
-		Bucket: state.Bucket,
-	}
-
-	diags := r.setDataModel(ctx, &newState, apiResponse)
+	setStateForUnknown(plan, state)
+	diags := r.refreshData(ctx, plan)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &newState)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+}
+
+func setStateForUnknown(plan, state *objectResourceModel) {
+	if plan.VersionID.IsUnknown() {
+		plan.VersionID = state.VersionID
+	}
+
+	if plan.Etag.IsUnknown() {
+		plan.Etag = state.Etag
+	}
+}
+
+func getRetentionDate(d types.String) (string, error) {
+	if d.IsNull() {
+		return time.Time{}.UTC().Format(time.RFC3339), nil
+	}
+
+	t, err := time.Parse(time.RFC3339, d.ValueString())
+	if err != nil {
+		return "", err
+	}
+
+	return t.UTC().Format(time.RFC3339), nil
+}
+
+func putRetention(ctx context.Context, client *s3.APIClient, plan, state *objectResourceModel) (*s3.APIResponse, error) {
+	retentionDate, err := getRetentionDate(plan.ObjectLockRetainUntilDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse object lock retain until date: %w", err)
+	}
+
+	baseReq := client.ObjectLockApi.PutObjectRetention(ctx, state.Bucket.ValueString(), state.Key.ValueString()).
+		PutObjectRetentionRequest(s3.PutObjectRetentionRequest{
+			Mode:            plan.ObjectLockMode.ValueStringPointer(),
+			RetainUntilDate: &retentionDate,
+		})
+
+	if plan.ObjectLockRetainUntilDate != state.ObjectLockRetainUntilDate {
+		oldDate := expandObjectDate(state.ObjectLockRetainUntilDate.ValueString())
+		newDate := expandObjectDate(plan.ObjectLockRetainUntilDate.ValueString())
+
+		if plan.ObjectLockRetainUntilDate.IsNull() ||
+			(!state.ObjectLockRetainUntilDate.IsNull() && newDate.Time.Before(oldDate.Time)) {
+			baseReq = baseReq.XAmzBypassGovernanceRetention(true)
+		}
+	}
+
+	return baseReq.Execute()
+}
+
+func expandObjectDate(v string) *s3.IonosTime {
+	t, err := time.Parse(time.RFC3339, v)
+	if err != nil {
+		return &s3.IonosTime{Time: time.Time{}.UTC()}
+	}
+
+	return &s3.IonosTime{Time: t.UTC()}
 }
 
 // Delete deletes the object.
@@ -375,14 +478,26 @@ func (r *objectResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	_, apiResponse, err := deleteObject(ctx, r.client, &data)
-	if err != nil {
-		if apiResponse.HttpNotFound() {
+	if !data.VersionID.IsNull() {
+		if _, err := tfs3.DeleteAllObjectVersions(ctx, r.client, &tfs3.DeleteRequest{
+			Bucket:       data.Bucket.ValueString(),
+			Key:          data.Key.ValueString(),
+			ForceDestroy: data.ForceDestroy.ValueBool(),
+			VersionID:    data.VersionID.ValueString(),
+		}); err != nil {
+			resp.Diagnostics.AddError("failed to delete object versions", formatXMLError(err).Error())
 			return
 		}
+	} else {
+		_, apiResponse, err := deleteObject(ctx, r.client, &data)
+		if err != nil {
+			if apiResponse.HttpNotFound() {
+				return
+			}
 
-		resp.Diagnostics.AddError("failed to delete object", formatXMLError(err).Error())
-		return
+			resp.Diagnostics.AddError("failed to delete object", formatXMLError(err).Error())
+			return
+		}
 	}
 }
 
@@ -396,6 +511,12 @@ func uploadObject(ctx context.Context, client *s3.APIClient, data *objectResourc
 	body, err := getBody(data)
 	if err != nil {
 		return nil, err
+	}
+
+	if needsMD5Header(data) {
+		if err = addMD5Header(&putReq, body); err != nil {
+			return nil, fmt.Errorf("failed to add MD5 header: %w", err)
+		}
 	}
 
 	defer func() {
@@ -422,10 +543,7 @@ func setContentData(data *objectResourceModel, apiResponse *s3.APIResponse) {
 		data.ContentType = types.StringValue(contentType)
 	}
 
-	versionID := apiResponse.Header.Get("x-amz-version-id")
-	if versionID != "" {
-		data.VersionID = types.StringValue(versionID)
-	}
+	data.VersionID = types.StringValue(apiResponse.Header.Get("x-amz-version-id"))
 
 	etag := apiResponse.Header.Get("ETag")
 	if etag != "" {
@@ -485,6 +603,30 @@ func setServerSideEncryptionData(data *objectResourceModel, apiResponse *s3.APIR
 	}
 }
 
+func setObjectLockData(data *objectResourceModel, apiResponse *s3.APIResponse) error {
+	objectLockMode := apiResponse.Header.Get("x-amz-object-lock-mode")
+	if objectLockMode != "" {
+		data.ObjectLockMode = types.StringValue(objectLockMode)
+	}
+
+	objectLockRetainUntilDate := apiResponse.Header.Get("x-amz-object-lock-retain-until-date")
+	if objectLockRetainUntilDate != "" {
+		parsedTime, err := time.Parse(time.RFC3339, objectLockRetainUntilDate)
+		if err != nil {
+			return fmt.Errorf("failed to parse object lock retain until date: %w", err)
+		}
+
+		data.ObjectLockRetainUntilDate = types.StringValue(parsedTime.Format(time.RFC3339))
+	}
+
+	objectLockLegalHold := apiResponse.Header.Get("x-amz-object-lock-legal-hold")
+	if objectLockLegalHold != "" {
+		data.ObjectLockLegalHold = types.StringValue(objectLockLegalHold)
+	}
+
+	return nil
+}
+
 func (r *objectResource) setTagsData(ctx context.Context, data *objectResourceModel) diag.Diagnostics {
 	tagsMap, err := getTags(ctx, r.client, data.Bucket.ValueString(), data.Key.ValueString())
 	if err != nil {
@@ -517,10 +659,22 @@ func setMetadata(ctx context.Context, data *objectResourceModel, apiResponse *s3
 
 	return nil
 }
+func getMD5Hash(text string) string {
+	hasher := md5.New() // nolint:gosec
+	hasher.Write([]byte(text))
+	result := hasher.Sum(nil)
+	return base64.StdEncoding.EncodeToString(result)
+}
 
 func (r *objectResource) setDataModel(ctx context.Context, data *objectResourceModel, apiResponse *s3.APIResponse) diag.Diagnostics {
+	diags := diag.Diagnostics{}
 	setContentData(data, apiResponse)
 	setServerSideEncryptionData(data, apiResponse)
+
+	if err := setObjectLockData(data, apiResponse); err != nil {
+		diags.AddError("failed to set object lock data", err.Error())
+		return diags
+	}
 
 	requestPayer := apiResponse.Header.Get("x-amz-request-payer")
 	if requestPayer != "" {
@@ -537,13 +691,11 @@ func (r *objectResource) setDataModel(ctx context.Context, data *objectResourceM
 		data.WebsiteRedirect = types.StringValue(websiteRedirect)
 	}
 
-	diags := setMetadata(ctx, data, apiResponse)
-	if diags.HasError() {
+	if diags = setMetadata(ctx, data, apiResponse); diags.HasError() {
 		return diags
 	}
 
-	diags = r.setTagsData(ctx, data)
-	if diags.HasError() {
+	if diags = r.setTagsData(ctx, data); diags.HasError() {
 		return diags
 	}
 
@@ -588,10 +740,10 @@ func getMetadataMapFromHeaders(apiResponse *s3.APIResponse, prefix string) map[s
 	return metaHeaders
 }
 
-func getContentType(ctx context.Context, data *objectResourceModel, client *s3.APIClient) (string, error) {
-	_, apiResponse, err := FindObject(ctx, client, data)
+func setContentType(ctx context.Context, data *objectResourceModel, client *s3.APIClient) error {
+	_, apiResponse, err := findObject(ctx, client, data)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	contentType := apiResponse.Header.Get("Content-Type")
@@ -599,7 +751,7 @@ func getContentType(ctx context.Context, data *objectResourceModel, client *s3.A
 		data.ContentType = types.StringValue(contentType)
 	}
 
-	return contentType, nil
+	return nil
 }
 
 func deleteObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (map[string]interface{}, *s3.APIResponse, error) {
@@ -619,11 +771,14 @@ func deleteObject(ctx context.Context, client *s3.APIClient, data *objectResourc
 	return req.Execute()
 }
 
-// FindObject finds the object.
-func FindObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (*s3.HeadObjectOutput, *s3.APIResponse, error) {
+func findObject(ctx context.Context, client *s3.APIClient, data *objectResourceModel) (*s3.HeadObjectOutput, *s3.APIResponse, error) {
 	req := client.ObjectsApi.HeadObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.Etag.IsNull() {
 		req = req.IfMatch(data.Etag.ValueString())
+	}
+
+	if !data.VersionID.IsNull() {
+		req = req.VersionId(data.VersionID.ValueString())
 	}
 
 	if !data.ServerSideEncryptionCustomerAlgorithm.IsNull() {
@@ -727,9 +882,34 @@ func fillServerSideEncryptionData(data *objectResourceModel, req *s3.ApiPutObjec
 	}
 }
 
+func fillObjectLockData(data *objectResourceModel, req *s3.ApiPutObjectRequest) error {
+	if !data.ObjectLockMode.IsNull() {
+		*req = req.XAmzObjectLockMode(data.ObjectLockMode.ValueString())
+	}
+
+	if !data.ObjectLockRetainUntilDate.IsNull() {
+		t, err := time.Parse(time.RFC3339, data.ObjectLockRetainUntilDate.ValueString())
+		if err != nil {
+			return fmt.Errorf("can't parse object_lock_retain_until_date: %w", err)
+		}
+
+		*req = req.XAmzObjectLockRetainUntilDate(t)
+	}
+
+	if !data.ObjectLockLegalHold.IsNull() {
+		*req = req.XAmzObjectLockLegalHold(data.ObjectLockLegalHold.ValueString())
+	}
+
+	return nil
+}
+
 func fillPutObjectRequest(req *s3.ApiPutObjectRequest, data *objectResourceModel) error {
 	fillServerSideEncryptionData(data, req)
 	if err := fillContentData(data, req); err != nil {
+		return err
+	}
+
+	if err := fillObjectLockData(data, req); err != nil {
 		return err
 	}
 
@@ -765,6 +945,27 @@ func fillPutObjectRequest(req *s3.ApiPutObjectRequest, data *objectResourceModel
 	return nil
 }
 
+func needsMD5Header(data *objectResourceModel) bool {
+	return !data.ObjectLockMode.IsNull() || !data.ObjectLockRetainUntilDate.IsNull() || !data.ObjectLockLegalHold.IsNull()
+}
+
+func addMD5Header(req *s3.ApiPutObjectRequest, file io.ReadSeeker) error {
+	body, err := io.ReadAll(file)
+	if err != nil {
+		return fmt.Errorf("failed to read file content: %w", err)
+	}
+
+	// Reset the file pointer to the beginning of the file
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		return fmt.Errorf("failed to reset file pointer: %w", err)
+	}
+
+	md5Hash := getMD5Hash(string(body))
+	*req = req.ContentMD5(md5Hash)
+	return nil
+}
+
 func createTempFile(fileName, content string) (*os.File, error) {
 	file, err := os.CreateTemp("", fileName)
 	if err != nil {
@@ -785,7 +986,7 @@ func createTempFile(fileName, content string) (*os.File, error) {
 }
 
 // hasObjectContentChanges returns true if the plan has changes to the object content.
-func hasObjectContentChanges(plan, state objectResourceModel) bool {
+func hasObjectContentChanges(plan, state *objectResourceModel) bool {
 	needsChange := !(plan.Source.Equal(state.Source) &&
 		plan.CacheControl.Equal(state.CacheControl) &&
 		plan.ContentDisposition.Equal(state.ContentDisposition) &&
@@ -793,7 +994,6 @@ func hasObjectContentChanges(plan, state objectResourceModel) bool {
 		plan.ContentLanguage.Equal(state.ContentLanguage) &&
 		plan.ContentType.Equal(state.ContentType) &&
 		plan.Content.Equal(state.Content) &&
-		plan.Etag.Equal(state.Etag) &&
 		plan.Expires.Equal(state.Expires) &&
 		plan.ServerSideEncryption.Equal(state.ServerSideEncryption) &&
 		plan.StorageClass.Equal(state.StorageClass) &&
