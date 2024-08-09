@@ -27,7 +27,7 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	newAutoscalingConfig.MaxWaitTime = constant.MaxWaitTime
 	newAutoscalingConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newAutoscalingConfig.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-logging/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		"terraform-provider/%s_ionos-cloud-sdk-go-vm-autoscaling/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, autoscaling.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	return &Client{sdkClient: autoscaling.NewAPIClient(newAutoscalingConfig)}
