@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
@@ -319,7 +320,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 					}
 					err := fw.CreateOrPatchForALB(ctx, dcId, d.Id(), firstFlowLogId, flowLog)
 					if err != nil {
-						//if we have a create that failed, we do not want to save in state
+						// if we have a create that failed, we do not want to save in state
 						// saving in state would mean a diff that would force a re-create
 						if firstFlowLogId == "" {
 							_ = d.Set("flowlog", nil)

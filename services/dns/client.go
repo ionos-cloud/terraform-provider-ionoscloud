@@ -2,13 +2,15 @@ package dns
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"net/http"
 	"os"
 	"runtime"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	dns "github.com/ionos-cloud/sdk-go-dns"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 

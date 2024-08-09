@@ -25,7 +25,7 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, location strin
 		Timeout:        d.Timeout(timeoutType),
 		MinTimeout:     5 * time.Second,
 		Delay:          0,    // Don't delay the start
-		NotFoundChecks: 9999, //Setting high number, to support long timeouts
+		NotFoundChecks: 9999, // Setting high number, to support long timeouts
 	}
 
 	return stateConf
