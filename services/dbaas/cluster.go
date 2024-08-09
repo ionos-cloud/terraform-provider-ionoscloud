@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -270,7 +271,7 @@ func SetMongoClusterCreateProperties(d *schema.ResourceData) (*mongo.CreateClust
 		mongoCluster.Properties.MaintenanceWindow = GetMongoClusterMaintenanceWindowData(d)
 	}
 
-	//enterprise settings below
+	// enterprise settings below
 	if clusterType, ok := d.GetOk("type"); ok {
 		clusterType := clusterType.(string)
 		mongoCluster.Properties.Type = &clusterType
@@ -313,7 +314,7 @@ func SetMongoClusterCreateProperties(d *schema.ResourceData) (*mongo.CreateClust
 		mongoCluster.Properties.Edition = &edition
 	}
 	// to be added when there is api support
-	//if _, ok := d.GetOk("from_backup"); ok {
+	// if _, ok := d.GetOk("from_backup"); ok {
 	//	var fromBackup *mongo.CreateRestoreRequest
 	//	fromBackup, err := GetMongoClusterFromBackupData(d)
 	//	if err != nil {
@@ -367,7 +368,7 @@ func SetMongoClusterPatchProperties(d *schema.ResourceData) *mongo.PatchClusterR
 		}
 	}
 
-	//enterprise settings below
+	// enterprise settings below
 	if d.HasChange("type") {
 		_, val := d.GetChange("type")
 		clusterStr := val.(string)
@@ -404,7 +405,7 @@ func SetMongoClusterPatchProperties(d *schema.ResourceData) *mongo.PatchClusterR
 		patchRequest.Properties.Cores = &cores
 	}
 
-	//must always be sent for enterprise, will be taken from template_id if playground or business
+	// must always be sent for enterprise, will be taken from template_id if playground or business
 	_, val := d.GetChange("edition")
 	if val.(string) == "enterprise" {
 		edition := val.(string)
@@ -533,7 +534,7 @@ func GetMongoClusterConnectionsData(d *schema.ResourceData) (*[]mongo.Connection
 					connection.CidrList = &list
 				}
 
-				//if val, ok := d.GetOk(fmt.Sprintf("connections.%d.whitelist", vdcIndex)); ok {
+				// if val, ok := d.GetOk(fmt.Sprintf("connections.%d.whitelist", vdcIndex)); ok {
 				//	whitelist := val.([]interface{})
 				//	if len(whitelist) > 0 {
 				//
@@ -675,7 +676,7 @@ func GetMongoClusterFromBackupData(d *schema.ResourceData) (*mongo.CreateRestore
 func GetMongoClusterBackupData(d *schema.ResourceData) *mongo.BackupProperties {
 	var backup mongo.BackupProperties
 	// to be added when backend supports the fields
-	//if val, ok := d.GetOk("backup.0.snapshot_interval_hours"); ok {
+	// if val, ok := d.GetOk("backup.0.snapshot_interval_hours"); ok {
 	//	interval := int32(val.(int))
 	//	backup.SnapshotIntervalHours = &interval
 	//}
@@ -689,7 +690,7 @@ func GetMongoClusterBackupData(d *schema.ResourceData) *mongo.BackupProperties {
 		location := val.(string)
 		backup.Location = &location
 	}
-	//to be added at a later date
+	// to be added at a later date
 	//if _, ok := d.GetOk("backup.0.backup_retention"); ok {
 	//	retention := GetMongoClusterBackupRetentionData(d)
 	//	backup.BackupRetention = retention
@@ -699,7 +700,7 @@ func GetMongoClusterBackupData(d *schema.ResourceData) *mongo.BackupProperties {
 }
 
 // GetMongoClusterBackupRetentionData will be when we have support in backend
-//func GetMongoClusterBackupRetentionData(d *schema.ResourceData) *mongo.BackupRetentionProperties {
+// func GetMongoClusterBackupRetentionData(d *schema.ResourceData) *mongo.BackupRetentionProperties {
 //	var backup mongo.BackupRetentionProperties
 //	path := "backup.0.backup_retention.0."
 //	if val, ok := d.GetOk(path + "snapshot_retention_days"); ok {
@@ -887,7 +888,7 @@ func SetMongoDBClusterData(d *schema.ResourceData, cluster mongo.ClusterResponse
 			}
 		}
 
-		//enterprise edition below
+		// enterprise edition below
 		if cluster.Properties.Type != nil {
 			if err := d.Set("type", *cluster.Properties.Type); err != nil {
 				return utils.GenerateSetError(resourceName, "type", err)
@@ -969,7 +970,7 @@ func SetMongoConnectionProperties(vdcConnection mongo.Connection) map[string]int
 	utils.SetPropWithNilCheck(connection, "datacenter_id", vdcConnection.DatacenterId)
 	utils.SetPropWithNilCheck(connection, "lan_id", vdcConnection.LanId)
 	utils.SetPropWithNilCheck(connection, "cidr_list", vdcConnection.CidrList)
-	//to ba added when there is backend support
+	// to ba added when there is backend support
 	//if vdcConnection.Whitelist != nil {
 	//	utils.SetPropWithNilCheck(connection, "whitelist", vdcConnection.Whitelist)
 	//}
@@ -1043,7 +1044,7 @@ func MongoClusterCheckRequiredFieldsSet(d *schema.ResourceData) error {
 
 	clusterType := d.Get("edition").(string)
 	requiredNotSet := "%s argument must be set for %s edition of mongo cluster"
-	//if clusterTYpe != "" {
+	// if clusterTYpe != "" {
 	//	server.Properties.Type = &serverType
 	//}
 	switch strings.ToLower(clusterType) {
@@ -1069,7 +1070,7 @@ func MongoClusterCheckRequiredFieldsSet(d *schema.ResourceData) error {
 			return fmt.Errorf("%s argument must NOT be set for %s edition of mongo cluster", "template_id", clusterType)
 		}
 
-	default: //playground or business
+	default: // playground or business
 		if _, ok := d.GetOk("template_id"); !ok {
 			return fmt.Errorf(requiredNotSet, "template_id", clusterType)
 		}

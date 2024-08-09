@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -161,7 +162,7 @@ func resourceVolume() *schema.Resource {
 
 func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 
-	//we do not want to check in case of resource creation
+	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
 	}
@@ -720,7 +721,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 		} else {
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageName).Execute()
 			logApiRequestTime(apiResponse)
-			//here we search for snapshot if we do not find img based on imageName
+			// here we search for snapshot if we do not find img based on imageName
 			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 
 				snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageName).Execute()
@@ -763,7 +764,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					//we want to search for snapshot again, but we check for
+					// we want to search for snapshot again, but we check for
 					//image != "" to be sure we didn't find it when we searched above for it
 					if (apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404) && (image != "") {
 						snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageName).Execute()
@@ -856,7 +857,7 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 				alias = i
 			}
 
-			if alias != "" && strings.ToLower(alias) == strings.ToLower(imageAlias) {
+			if alias != "" && strings.EqualFold(alias, imageAlias) {
 				return i
 			}
 		}

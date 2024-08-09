@@ -2,13 +2,15 @@ package mariadb
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"net/http"
 	"os"
 	"runtime"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 type MariaDBClient struct {

@@ -193,7 +193,7 @@ func resourceK8sNodePool() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			//"gateway_ip": {
+			// "gateway_ip": {
 			//	Type:        schema.TypeString,
 			//	Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
 			//	ForceNew:    true,
@@ -231,11 +231,11 @@ func resourceK8sNodePool() *schema.Resource {
 func checkNodePoolImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 
 	allowReplace := diff.Get("allow_replace").(bool)
-	//allows the immutable fields to be updated
+	// allows the immutable fields to be updated
 	if allowReplace {
 		return nil
 	}
-	//we do not want to check in case of resource creation
+	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
 	}
@@ -483,7 +483,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		k8sNodepool.Properties.PublicIps = &requestPublicIps
 	}
 
-	//if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
+	// if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
 	//	gatewayIp := gatewayIp.(string)
 	//	k8sNodepool.Properties.GatewayIp = &gatewayIp
 	//}
@@ -953,7 +953,7 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 
 		}
 
-		//if nodePool.Properties.GatewayIp != nil {
+		// if nodePool.Properties.GatewayIp != nil {
 		//	if err := d.Set("gateway_ip", *nodePool.Properties.GatewayIp); err != nil {
 		//		return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %w", d.Id(), err)
 		//	}
