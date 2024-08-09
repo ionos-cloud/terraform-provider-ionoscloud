@@ -62,6 +62,12 @@ resource "ionoscloud_server" "nfs_server" {
   }
 }
 
+locals {
+  nfs_server_cidr = format("%s/24", ionoscloud_server.nfs_server.nic[0].ips[0])
+  nfs_cluster_ip = cidrhost(local.nfs_server_cidr, 10)
+  nfs_cluster_cidr = format("%s/24", local.nfs_cluster_ip)
+}
+
 resource "ionoscloud_nfs_cluster" "example" {
   name = "test"
   location = "de/txl"
@@ -73,7 +79,7 @@ resource "ionoscloud_nfs_cluster" "example" {
   
   connections {
     datacenter_id = ionoscloud_datacenter.nfs_dc.id
-    ip_address    = format("%s/24", ionoscloud_server.nfs_server.nic[0].ips[0])
+    ip_address    = local.nfs_cluster_cidr
     lan           = ionoscloud_lan.nfs_lan.id
   }
 }
@@ -89,8 +95,8 @@ The following arguments are supported:
   - `de/txl` - Berlin
 - `size` - (Required) The size of the Network File Storage cluster in TiB. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees. Default is `2`. The minimum value is `2` and the maximum value is `42`.
 - `nfs` - (Optional) The NFS configuration for the Network File Storage cluster. Each NFS configuration supports the following:
-    - `min_version` - (Optional) The minimum supported version of the NFS cluster. Default is `4.2`
-- `connections` - (Required) A list of connections for the Network File Storage cluster. You can specify only one connection. Each connection supports the following:
+    - `min_version` - (Optional) The minimum supported version of the NFS cluster. Supported values: `4.2`. Default is `4.2`.
+- `connections` - (Required) A list of connections for the Network File Storage cluster. You can specify only one connection. Connections are **immutable**. Each connection supports the following:
     - `datacenter_id` - (Required) The ID of the datacenter where the Network File Storage cluster is located.
     - `ip_address` - (Required) The IP address and prefix of the Network File Storage cluster. The IP address can be either IPv4 or IPv6. The IP address has to be given with CIDR notation. 
     - `lan` - (Required) The Private LAN to which the Network File Storage cluster must be connected.
