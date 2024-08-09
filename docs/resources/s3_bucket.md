@@ -18,6 +18,10 @@ Manages **S3 Buckets** on IonosCloud.
 resource "ionoscloud_s3_bucket" "example" {
   name = "example"
   region = "eu-central-3"
+  timeouts {
+    create = "10m"
+    delete = "10m"
+  }
 }
 
 ```
@@ -27,7 +31,7 @@ resource "ionoscloud_s3_bucket" "example" {
 The following arguments are supported:
 
 - `name` - (Required)[string] The bucket name. [ 3 .. 63 ] characters
-- `region` - (Optional)[string] Specifies the Region where the bucket will be created. Please refer to the list of available regions.
+- `region` - (Optional)[string] Specifies the Region where the bucket will be created. Please refer to the list of available regions. Defaults to "eu-central-3".
 
 ⚠️ **Note:** The name must be unique across all IONOS accounts in all S3 regions. The name should adhere to the following [restrictions](https://docs.ionos.com/cloud/storage-and-backup/s3-object-storage/concepts/buckets#naming-conventions).
 
