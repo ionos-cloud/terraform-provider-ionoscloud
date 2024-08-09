@@ -255,14 +255,13 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while fetching servers: %w", err))
 	}
-	serverEntry := make(map[string]interface{})
 	var serversIntf []interface{}
 
 	if d.Id() == "" {
 		d.SetId(datacenterId.(string))
 	}
 	for _, server := range *servers.Items {
-		serverEntry = SetServerProperties(server)
+		serverEntry := SetServerProperties(server)
 		utils.SetPropWithNilCheck(serverEntry, "id", server.Id)
 		// todo: Add token?
 		if server.Entities != nil {
@@ -284,14 +283,14 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 			}
 			if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil {
 				volumes := setVolumePropertiesToSlice(*server.Entities.Volumes.Items)
-				if volumes != nil && len(volumes) > 0 {
+				if len(volumes) > 0 {
 					serverEntry["volumes"] = volumes
 				}
 			}
 			if server.Entities.Cdroms != nil {
 				if server.Entities.Cdroms.Items != nil && len(*server.Entities.Cdroms.Items) > 0 {
 					cdroms := setServerCDRoms(server.Entities.Cdroms.Items)
-					if cdroms != nil && len(cdroms) > 0 {
+					if len(cdroms) > 0 {
 						serverEntry["cdroms"] = cdroms
 					}
 				}
@@ -325,7 +324,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 // setVolumePropertiesToSlice returns a slice of volumes
 func setVolumePropertiesToSlice(volumesList []ionoscloud.Volume) []interface{} {
 	var volumes []interface{}
-	if volumesList != nil && len(volumesList) > 0 {
+	if len(volumesList) > 0 {
 		for _, volume := range volumesList {
 			volumeItemMap := SetVolumeProperties(volume)
 			utils.SetPropWithNilCheck(volumeItemMap, "id", volume.Id)

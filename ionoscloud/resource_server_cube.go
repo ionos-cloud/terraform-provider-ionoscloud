@@ -465,12 +465,9 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
 	log.Printf("[DEBUG] primaryNic dhcp %t", *primaryNic.Properties.Dhcp)
 
-	firewall := ionoscloud.FirewallRule{
-		Properties: &ionoscloud.FirewallruleProperties{},
-	}
 	if _, ok := d.GetOk("nic.0.firewall"); ok {
 		var diags diag.Diagnostics
-		firewall, diags = getFirewallData(d, "nic.0.firewall.0.", false)
+		firewall, diags := getFirewallData(d, "nic.0.firewall.0.", false)
 		if diags != nil {
 			return diags
 		}
@@ -850,13 +847,13 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 		if v, ok := d.GetOk("nic.0.ips"); ok {
 			raw := v.([]interface{})
-			if raw != nil && len(raw) > 0 {
+			if len(raw) > 0 {
 				ips := make([]string, 0)
 				for _, rawIp := range raw {
 					ip := rawIp.(string)
 					ips = append(ips, ip)
 				}
-				if ips != nil && len(ips) > 0 {
+				if len(ips) > 0 {
 					properties.Ips = &ips
 				}
 			}
@@ -1099,6 +1096,8 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
 		nic, apiResponse, err := ns.Get(ctx, datacenterId, serverId, primaryNic, 0)
+		logApiRequestTime(apiResponse)
+
 		if err != nil {
 			return nil, err
 		}

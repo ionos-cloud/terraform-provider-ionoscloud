@@ -360,7 +360,7 @@ func GetScopes(d *schema.ResourceData) *[]cr.Scope {
 				if actions, ok := scopeContent["actions"]; ok {
 					actions := actions.([]interface{})
 					var actionsToAdd []string
-					if actions != nil && len(actions) > 0 {
+					if len(actions) > 0 {
 						for _, action := range actions {
 							actionsToAdd = append(actionsToAdd, action.(string))
 						}

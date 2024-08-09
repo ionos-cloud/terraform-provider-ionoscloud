@@ -172,7 +172,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 						registriesByName = append(registriesByName, registryItem)
 					}
 				}
-				if registriesByName != nil && len(registriesByName) > 0 {
+				if len(registriesByName) > 0 {
 					results = registriesByName
 				} else {
 					return diag.FromErr(fmt.Errorf("no registry found with the specified criteria: name = %v", name))
@@ -187,7 +187,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 					registriesByLocation = append(registriesByLocation, registryItem)
 				}
 			}
-			if registriesByLocation != nil && len(registriesByLocation) > 0 {
+			if len(registriesByLocation) > 0 {
 				results = registriesByLocation
 			} else {
 				return diag.FromErr(fmt.Errorf("no registry found with the specified criteria: location = %v", location))

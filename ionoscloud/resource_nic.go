@@ -144,10 +144,10 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ inte
 		}
 		var oldFlowlogMap map[string]any
 		var newFlowLogMap map[string]any
-		if oldFLowLogs != nil && len(oldFLowLogs) > 0 {
+		if len(oldFLowLogs) > 0 {
 			oldFlowlogMap = oldFLowLogs[0].(map[string]any)
 		}
-		if newFlowLogs != nil && len(newFlowLogs) > 0 {
+		if len(newFlowLogs) > 0 {
 			newFlowLogMap = newFlowLogs[0].(map[string]any)
 		}
 		// find the diff between the old and new value of the fields.
@@ -191,8 +191,8 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	// Sometimes there is an error because the nic is not found after it's created.
-	//Probably a read write consistency issue.
-	//We're retrying for 5 minutes. 404 - means we keep on trying.
+	// Probably a read write consistency issue.
+	// We're retrying for 5 minutes. 404 - means we keep on trying.
 	var foundNic = &ionoscloud.Nic{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error

@@ -212,7 +212,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if apiSubnet, apiSubnetOk := d.GetOk("api_subnet_allow_list"); apiSubnetOk {
 		apiSubnet := apiSubnet.([]interface{})
-		if apiSubnet != nil && len(apiSubnet) > 0 {
+		if len(apiSubnet) > 0 {
 			apiSubnets := make([]string, 0)
 			for _, value := range apiSubnet {
 				valueS := value.(string)
@@ -226,7 +226,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if s3Bucket, s3BucketOk := d.GetOk("s3_buckets"); s3BucketOk {
 		s3BucketValues := s3Bucket.([]interface{})
-		if s3BucketValues != nil && len(s3BucketValues) > 0 {
+		if len(s3BucketValues) > 0 {
 			var s3Buckets []ionoscloud.S3Bucket
 			for index := range s3BucketValues {
 				var s3Bucket ionoscloud.S3Bucket
@@ -388,7 +388,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		_, newApiSubnet := d.GetChange("api_subnet_allow_list")
 		apiSubnet := newApiSubnet.([]interface{})
 		apiSubnets := make([]string, 0)
-		if apiSubnet != nil && len(apiSubnet) > 0 {
+		if len(apiSubnet) > 0 {
 			for _, value := range apiSubnet {
 				valueS := value.(string)
 				apiSubnets = append(apiSubnets, valueS)
@@ -401,7 +401,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		_, newS3Buckets := d.GetChange("s3_buckets")
 		s3BucketValues := newS3Buckets.([]interface{})
 		s3Buckets := make([]ionoscloud.S3Bucket, 0)
-		if s3BucketValues != nil && len(s3BucketValues) > 0 {
+		if len(s3BucketValues) > 0 {
 			for index := range s3BucketValues {
 				var s3Bucket ionoscloud.S3Bucket
 				addBucket := false

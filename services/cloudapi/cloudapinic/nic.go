@@ -152,7 +152,7 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 
 	if v, ok := d.GetOk(path + "ips"); ok {
 		raw := v.([]interface{})
-		if raw != nil && len(raw) > 0 {
+		if len(raw) > 0 {
 			ips := make([]string, 0)
 			for _, rawIp := range raw {
 				if rawIp != nil {
@@ -160,7 +160,7 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 					ips = append(ips, ip)
 				}
 			}
-			if ips != nil && len(ips) > 0 {
+			if len(ips) > 0 {
 				nic.Properties.Ips = &ips
 			}
 		}
@@ -278,7 +278,6 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 	if nic.Entities != nil && nic.Entities.Flowlogs != nil && nic.Entities.Flowlogs.Items != nil && len(*nic.Entities.Flowlogs.Items) > 0 {
 		var flowlogs []map[string]any
 		for _, flowLog := range *nic.Entities.Flowlogs.Items {
-			result := map[string]any{}
 			result, err := utils.DecodeStructToMap(flowLog.Properties)
 			if err != nil {
 				return err

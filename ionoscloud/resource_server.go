@@ -968,7 +968,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(fmt.Errorf("error deleting nic (%w)", err))
 				return diags
 			}
-			err = d.Set("nic", nil)
+			if err := d.Set("nic", nil); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
 			if err := d.Set("primary_nic", ""); err != nil {
 				diags := diag.FromErr(err)
 				return diags
@@ -1004,7 +1007,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			if v, ok := d.GetOk("nic.0.ips"); ok {
 				raw := v.([]interface{})
-				if raw != nil && len(raw) > 0 {
+				if len(raw) > 0 {
 					ips := make([]string, 0)
 					for _, rawIp := range raw {
 						if rawIp != nil {
@@ -1012,7 +1015,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 							ips = append(ips, ip)
 						}
 					}
-					if ips != nil && len(ips) > 0 {
+					if len(ips) > 0 {
 						nicProperties.Ips = &ips
 					}
 				}
