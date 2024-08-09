@@ -916,7 +916,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 			if err != nil {
 				if !httpNotFound(apiResponse) {
-					diags := diag.FromErr(fmt.Errorf("error occurred at checking existence of firewall %s %s", firewallId, err))
+					diags := diag.FromErr(fmt.Errorf("error occurred at checking existence of firewall %s %w", firewallId, err))
 					return diags
 				} else if httpNotFound(apiResponse) {
 					diags := diag.FromErr(fmt.Errorf("firewall does not exist %s", firewallId))
