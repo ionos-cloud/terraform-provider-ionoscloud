@@ -147,12 +147,10 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	if groupsVal, groupsOk := d.GetOk("group_ids"); groupsOk {
 		groupsList := groupsVal.(*schema.Set).List()
 		log.Printf("[INFO] Adding group_ids %+v ", groupsList)
-		if groupsList != nil {
-			for _, groupsItem := range groupsList {
-				groupId := groupsItem.(string)
-				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
-					return diag.FromErr(err)
-				}
+		for _, groupsItem := range groupsList {
+			groupId := groupsItem.(string)
+			if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+				return diag.FromErr(err)
 			}
 		}
 	}

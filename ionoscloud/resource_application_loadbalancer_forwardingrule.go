@@ -323,10 +323,8 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 		_, v := d.GetChange("server_certificates")
 		certificatesValues := v.(*schema.Set).List()
 		serverCertificates := make([]string, 0)
-		if certificatesValues != nil {
-			for _, value := range certificatesValues {
-				serverCertificates = append(serverCertificates, value.(string))
-			}
+		for _, value := range certificatesValues {
+			serverCertificates = append(serverCertificates, value.(string))
 		}
 		request.Properties.ServerCertificates = &serverCertificates
 	}

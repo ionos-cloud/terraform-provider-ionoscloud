@@ -85,17 +85,15 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 	if rolesValue, ok := d.GetOk("roles"); ok {
 		roles := make([]mongo.UserRoles, 0)
 		rolesValue := rolesValue.([]interface{})
-		if rolesValue != nil {
-			for _, role := range rolesValue {
-				roleVal := role.(map[string]interface{})
-				roleStr := roleVal["role"].(string)
-				roleDb := roleVal["database"].(string)
-				mongoRole := mongo.UserRoles{
-					Role:     &roleStr,
-					Database: &roleDb,
-				}
-				roles = append(roles, mongoRole)
+		for _, role := range rolesValue {
+			roleVal := role.(map[string]interface{})
+			roleStr := roleVal["role"].(string)
+			roleDb := roleVal["database"].(string)
+			mongoRole := mongo.UserRoles{
+				Role:     &roleStr,
+				Database: &roleDb,
 			}
+			roles = append(roles, mongoRole)
 		}
 		request.Properties.Roles = &roles
 	}
@@ -141,17 +139,15 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 		_, rolesIntf := d.GetChange("roles")
 		roles := make([]mongo.UserRoles, 0)
 		rolesValue := rolesIntf.([]interface{})
-		if rolesValue != nil {
-			for _, role := range rolesValue {
-				roleVal := role.(map[string]interface{})
-				roleStr := roleVal["role"].(string)
-				roleDb := roleVal["database"].(string)
-				mongoRole := mongo.UserRoles{
-					Role:     &roleStr,
-					Database: &roleDb,
-				}
-				roles = append(roles, mongoRole)
+		for _, role := range rolesValue {
+			roleVal := role.(map[string]interface{})
+			roleStr := roleVal["role"].(string)
+			roleDb := roleVal["database"].(string)
+			mongoRole := mongo.UserRoles{
+				Role:     &roleStr,
+				Database: &roleDb,
 			}
+			roles = append(roles, mongoRole)
 		}
 		request.Properties.Roles = &roles
 	}

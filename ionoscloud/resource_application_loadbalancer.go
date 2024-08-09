@@ -264,10 +264,8 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 		_, newIps := d.GetChange("ips")
 		ipsVal := newIps.(*schema.Set).List()
 		ips := make([]string, 0)
-		if ipsVal != nil {
-			for _, value := range ipsVal {
-				ips = append(ips, value.(string))
-			}
+		for _, value := range ipsVal {
+			ips = append(ips, value.(string))
 		}
 		request.Properties.Ips = &ips
 	}
@@ -295,10 +293,8 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 		privateIpsVal := newPrivateIps.(*schema.Set).List()
 		privateIps := make([]string, 0)
 
-		if privateIpsVal != nil {
-			for _, value := range privateIpsVal {
-				privateIps = append(privateIps, value.(string))
-			}
+		for _, value := range privateIpsVal {
+			privateIps = append(privateIps, value.(string))
 		}
 		request.Properties.LbPrivateIps = &privateIps
 	}

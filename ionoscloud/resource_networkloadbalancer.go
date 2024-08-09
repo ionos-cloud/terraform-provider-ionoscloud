@@ -267,10 +267,8 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		log.Printf("[INFO] network loadbalancer ips changed from %+v to %+v", oldIps, newIps)
 		ipsVal := newIps.([]interface{})
 		ips := make([]string, 0)
-		if ipsVal != nil {
-			for _, ip := range ipsVal {
-				ips = append(ips, ip.(string))
-			}
+		for _, ip := range ipsVal {
+			ips = append(ips, ip.(string))
 		}
 		if len(ips) > 0 {
 			request.Properties.Ips = &ips
@@ -285,10 +283,8 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		log.Printf("[INFO] network loadbalancer lb_private_ips changed from %+v to %+v", oldLbPrivateIps, newLbPrivateIps)
 		lbPrivateIpsVal := newLbPrivateIps.([]interface{})
 		lbPrivateIps := make([]string, 0)
-		if lbPrivateIpsVal != nil {
-			for _, privateIp := range lbPrivateIpsVal {
-				lbPrivateIps = append(lbPrivateIps, privateIp.(string))
-			}
+		for _, privateIp := range lbPrivateIpsVal {
+			lbPrivateIps = append(lbPrivateIps, privateIp.(string))
 		}
 		if len(lbPrivateIps) == 0 {
 			diags := diag.FromErr(fmt.Errorf("you can not empty the lbPrivateIps field for networkloadbalancer %s", d.Id()))

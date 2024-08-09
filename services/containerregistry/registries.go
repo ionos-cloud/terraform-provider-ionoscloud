@@ -351,35 +351,33 @@ func GetScopes(d *schema.ResourceData) *[]cr.Scope {
 
 	if scopeValue, ok := d.GetOk("scopes"); ok {
 		scopeValue := scopeValue.([]interface{})
-		if scopeValue != nil {
-			for _, item := range scopeValue {
+		for _, item := range scopeValue {
 
-				scopeContent := item.(map[string]interface{})
-				connection := cr.Scope{}
+			scopeContent := item.(map[string]interface{})
+			connection := cr.Scope{}
 
-				if actions, ok := scopeContent["actions"]; ok {
-					actions := actions.([]interface{})
-					var actionsToAdd []string
-					if len(actions) > 0 {
-						for _, action := range actions {
-							actionsToAdd = append(actionsToAdd, action.(string))
-						}
+			if actions, ok := scopeContent["actions"]; ok {
+				actions := actions.([]interface{})
+				var actionsToAdd []string
+				if len(actions) > 0 {
+					for _, action := range actions {
+						actionsToAdd = append(actionsToAdd, action.(string))
 					}
-					connection.Actions = &actionsToAdd
 				}
-
-				if name, ok := scopeContent["name"]; ok {
-					name := name.(string)
-					connection.Name = &name
-				}
-
-				if scopeType, ok := scopeContent["type"]; ok {
-					scopeType := scopeType.(string)
-					connection.Type = &scopeType
-				}
-
-				scopes = append(scopes, connection)
+				connection.Actions = &actionsToAdd
 			}
+
+			if name, ok := scopeContent["name"]; ok {
+				name := name.(string)
+				connection.Name = &name
+			}
+
+			if scopeType, ok := scopeContent["type"]; ok {
+				scopeType := scopeType.(string)
+				connection.Type = &scopeType
+			}
+
+			scopes = append(scopes, connection)
 		}
 
 	}
