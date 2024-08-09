@@ -60,5 +60,4 @@ The following attributes are returned by the datasource:
 * `retention_time` - This configuration controls the maximum time we will retain a log before we will discard old log
   segments to free up space. This represents an SLA on how soon consumers must read their data. If set to -1, no time
   limit is applied.
-* `segment_bytes` - This configuration controls the segment file size for the log. Retention and cleaning is always done
-  a file at a time so a larger segment size means fewer files but less granular control over retention.
+* `segment_bytes` - This configuration controls the segment file size for the log. Retention and cleaning is always done a file at a time so a larger segment size means fewer files but less granular control over retention.

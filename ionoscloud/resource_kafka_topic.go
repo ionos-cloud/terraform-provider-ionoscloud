@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -94,6 +95,9 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(*createdTopic.Id)
 	log.Printf("[INFO] Created Kafka Cluster Topic: %s", d.Id())
+
+	// Sleep for 5 second to avoid 500 error from the API
+	time.Sleep(5 * time.Second)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsTopicAvailable)
 	if err != nil {
