@@ -29,8 +29,7 @@ func NewMariaDBClient(username, password, token, url, version, terraformVersion 
 	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigDbaas.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mariadb/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, mariadb.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
+		version, mariadb.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 	return &MariaDBClient{
 		sdkClient: mariadb.NewAPIClient(newConfigDbaas),
 	}

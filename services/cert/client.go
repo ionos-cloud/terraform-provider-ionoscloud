@@ -30,8 +30,7 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	certConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	certConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-cert-manager/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, certmanager.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
+		version, certmanager.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 	return &Client{
 		sdkClient: certmanager.NewAPIClient(certConfig),
 	}

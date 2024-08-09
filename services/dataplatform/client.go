@@ -31,7 +31,6 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	newConfigDataplatform.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigDataplatform.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dataplatform/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, dataplatform.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
+		version, dataplatform.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 	return &Client{sdkClient: *dataplatform.NewAPIClient(newConfigDataplatform)}
 }
