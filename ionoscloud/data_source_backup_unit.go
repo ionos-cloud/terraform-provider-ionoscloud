@@ -59,7 +59,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if idOk {
 		/* search by ID */
-		backupUnit, apiResponse, err = client.BackupUnitsApi.BackupunitsFindById(ctx, id.(string)).Execute()
+		backupUnit, apiResponse, err = BackupUnitFindByID(ctx, id.(string), client)
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the backup unit %s: %w", id.(string), err))
@@ -82,7 +82,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		if backupUnits.Items != nil {
 			for _, bu := range *backupUnits.Items {
 				if bu.Properties != nil && bu.Properties.Name != nil && *bu.Properties.Name == name.(string) {
-					tmpBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, *bu.Id).Execute()
+					tmpBackupUnit, apiResponse, err := BackupUnitFindByID(ctx, *bu.Id, client)
 					logApiRequestTime(apiResponse)
 					if err != nil {
 						return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %w", *bu.Id, err))

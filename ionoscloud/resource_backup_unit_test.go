@@ -93,7 +93,7 @@ func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		_, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+		_, apiResponse, err := BackupUnitFindByID(ctx, rs.Primary.ID, client)
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -129,7 +129,7 @@ func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 			defer cancel()
 		}
 
-		foundBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+		foundBackupUnit, apiResponse, err := BackupUnitFindByID(ctx, rs.Primary.ID, client)
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
