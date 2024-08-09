@@ -920,7 +920,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 					return diags
 				}
 			}
-			if update == false {
+			if !update {
 
 				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, dcId, *server.Id, *nic.Id).Firewallrule(firewall).Execute()
 			} else {

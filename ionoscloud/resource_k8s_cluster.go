@@ -378,7 +378,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				}
 			}
 
-			if updateMaintenanceWindow == true {
+			if updateMaintenanceWindow {
 				request.Properties.MaintenanceWindow = maintenanceWindow
 			}
 		}

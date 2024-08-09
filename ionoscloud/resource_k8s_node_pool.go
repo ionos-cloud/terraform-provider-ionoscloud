@@ -198,7 +198,7 @@ func resourceK8sNodePool() *schema.Resource {
 			//	Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
 			//	ForceNew:    true,
 			//	Optional:    true,
-			//},
+			// },
 			"labels": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -486,7 +486,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	// if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
 	//	gatewayIp := gatewayIp.(string)
 	//	k8sNodepool.Properties.GatewayIp = &gatewayIp
-	//}
+	// }
 
 	labelsProp, ok := d.GetOk("labels")
 	if ok {
@@ -661,7 +661,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 				}
 			}
 
-			if updateMaintenanceWindow == true {
+			if updateMaintenanceWindow {
 				request.Properties.MaintenanceWindow = maintenanceWindow
 			}
 		}
@@ -957,7 +957,7 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 		//	if err := d.Set("gateway_ip", *nodePool.Properties.GatewayIp); err != nil {
 		//		return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %w", d.Id(), err)
 		//	}
-		//}
+		// }
 
 		labels := make(map[string]interface{})
 		if nodePool.Properties.Labels != nil && len(*nodePool.Properties.Labels) > 0 {

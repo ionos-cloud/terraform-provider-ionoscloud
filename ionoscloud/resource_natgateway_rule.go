@@ -307,7 +307,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 				}
 			}
 
-			if updateTargetPortRange == true {
+			if updateTargetPortRange {
 				request.Properties.TargetPortRange = targetPortRange
 			}
 		}
