@@ -34,9 +34,6 @@ export IONOS_S3_ACCESS_KEY="accesskey"
 export IONOS_S3_SECRET_KEY="secretkey"
 ```
 
-
-
-```bash
 Also, you can overwrite the api endpoint: `api.ionos.com` via the following environment variable:
 
 ```bash
@@ -144,7 +141,6 @@ The following arguments are supported:
 | `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS S3 STORAGE API                                                                                              |
 | `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS S3 STORAGE API                                                                                              |
 
-
 ## Resource Timeout
 
 Individual resources may provide a `timeouts` block to configure the amount of time a specific operation is allowed to take before being considered an error. Each resource may provide configurable timeouts for the `create`, `update`, and `delete` operations. Each resource that supports timeouts will have or inherit default values for that operation.
@@ -158,41 +154,6 @@ The default `timeouts` values are:
 - default - (Default 60 minutes) Used for every other action on a resource.
 
 An example of overwriting the `create`, `update`, and `delete` timeouts:
-
-## Debugging
-
-In the default mode, the Terraform provider returns only HTTP client errors. These usually consist only of the HTTP status code. There is no clear description of the problem. But if you want to see the API call error messages as well, you need to set the SDK and Terraform provider environment variables.
-
-You can enable logging now using the `IONOS_LOG_LEVEL` env variable. Allowed values: `off`, `debug` and `trace`. Defaults to `off`.
-
-⚠️ **Note:** We recommend you only use `trace` level for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
-Verbose request and response logging can also significantly impact your application’s performance.
-
-```bash
-$ export IONOS_LOG_LEVEL=debug
-```
-
-⚠️ **Note:** `IONOS_DEBUG` is now deprecated and will be removed in a future release.
-
-⚠️ **Note:** We recommend you only use `IONOS_DEBUG` for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
-Verbose request and response logging can also significantly impact your application’s performance.
-
-```bash
-$ export TF_LOG=debug
-$ export IONOS_DEBUG=true
-$ terraform apply
-```
-now you can see the response body incl. api error message:
-```json
-{
-  "httpStatus" : 422,
-  "messages" : [ {
-    "errorCode" : "200",
-    "message" : "[VDC-yy-xxxx] Operation cannot be executed since this Kubernetes Nodepool is already marked for deletion. Current state of the resource is FAILED_DESTROYING."
-  }]
-}
-```
-
 ```hcl
 resource "ionoscloud_server" "example" {
     name                  = "Server Example"
@@ -250,6 +211,40 @@ Individual resources must opt-in to providing configurable `timeouts`, and attem
 ~> **Note:** Terraform does not automatically rollback in the face of errors.
 Instead, your Terraform state file will be partially updated with
 any resources that successfully completed.
+
+## Debugging
+
+In the default mode, the Terraform provider returns only HTTP client errors. These usually consist only of the HTTP status code. There is no clear description of the problem. But if you want to see the API call error messages as well, you need to set the SDK and Terraform provider environment variables.
+
+You can enable logging now using the `IONOS_LOG_LEVEL` env variable. Allowed values: `off`, `debug` and `trace`. Defaults to `off`.
+
+⚠️ **Note:** We recommend you only use `trace` level for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
+Verbose request and response logging can also significantly impact your application’s performance.
+
+```bash
+$ export IONOS_LOG_LEVEL=debug
+```
+
+⚠️ **Note:** `IONOS_DEBUG` is now deprecated and will be removed in a future release.
+
+⚠️ **Note:** We recommend you only use `IONOS_DEBUG` for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
+Verbose request and response logging can also significantly impact your application’s performance.
+
+```bash
+$ export TF_LOG=debug
+$ export IONOS_DEBUG=true
+$ terraform apply
+```
+now you can see the response body incl. api error message:
+```json
+{
+  "httpStatus" : 422,
+  "messages" : [ {
+    "errorCode" : "200",
+    "message" : "[VDC-yy-xxxx] Operation cannot be executed since this Kubernetes Nodepool is already marked for deletion. Current state of the resource is FAILED_DESTROYING."
+  }]
+}
+```
 
 ## Migrating from the ProfitBricks provider
 
