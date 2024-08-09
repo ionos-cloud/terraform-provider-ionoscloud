@@ -2,8 +2,6 @@ package s3
 
 import (
 	"context"
-	"crypto/md5" // nolint:gosec
-	"encoding/base64"
 	"fmt"
 	"io"
 	"log"
@@ -659,12 +657,6 @@ func setMetadata(ctx context.Context, data *objectResourceModel, apiResponse *s3
 
 	return nil
 }
-func getMD5Hash(text string) string {
-	hasher := md5.New() // nolint:gosec
-	hasher.Write([]byte(text))
-	result := hasher.Sum(nil)
-	return base64.StdEncoding.EncodeToString(result)
-}
 
 func (r *objectResource) setDataModel(ctx context.Context, data *objectResourceModel, apiResponse *s3.APIResponse) diag.Diagnostics {
 	diags := diag.Diagnostics{}
@@ -961,7 +953,10 @@ func addMD5Header(req *s3.ApiPutObjectRequest, file io.ReadSeeker) error {
 		return fmt.Errorf("failed to reset file pointer: %w", err)
 	}
 
-	md5Hash := getMD5Hash(string(body))
+	md5Hash, err := getMD5Hash(body)
+	if err != nil {
+		return fmt.Errorf("failed to get MD5 hash: %w", err)
+	}
 	*req = req.ContentMD5(md5Hash)
 	return nil
 }

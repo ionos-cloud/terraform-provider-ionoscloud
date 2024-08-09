@@ -147,12 +147,12 @@ func (r *objectLockConfiguration) Create(ctx context.Context, req resource.Creat
 	}
 
 	input := buildObjectLockConfigurationFromModel(data)
-	md5Sum, err := generateMD5Sum(input)
+	md5Sum, err := getMD5Hash(input)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to generate MD5 sum", err.Error())
 		return
 	}
-	_, err = r.client.ObjectLockApi.PutObjectLockConfiguration(ctx, data.Bucket.ValueString()).PutObjectLockConfigurationRequest(input).ContentMD5(md5Sum).Execute()
+	_, err = r.client.ObjectLockApi.PutObjectLockConfiguration(ctx, data.Bucket.ValueString()).PutObjectLockConfigurationRequest(input).ContentMD5(hex.EncodeToString([]byte(md5Sum))).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create resource", err.Error())
 		return
@@ -207,12 +207,12 @@ func (r *objectLockConfiguration) Update(ctx context.Context, req resource.Updat
 	}
 
 	input := buildObjectLockConfigurationFromModel(data)
-	md5Sum, err := generateMD5Sum(input)
+	md5Sum, err := getMD5Hash(input)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to generate MD5 sum", err.Error())
 		return
 	}
-	_, err = r.client.ObjectLockApi.PutObjectLockConfiguration(ctx, data.Bucket.ValueString()).PutObjectLockConfigurationRequest(input).ContentMD5(md5Sum).Execute()
+	_, err = r.client.ObjectLockApi.PutObjectLockConfiguration(ctx, data.Bucket.ValueString()).PutObjectLockConfigurationRequest(input).ContentMD5(hex.EncodeToString([]byte(md5Sum))).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create resource", err.Error())
 		return
@@ -281,7 +281,7 @@ func buildObjectLockConfigurationFromModel(data *objectLockConfigurationModel) s
 	return req
 }
 
-func generateMD5Sum(data interface{}) (string, error) {
+func getMD5Hash(data interface{}) (string, error) {
 	// Marshal the struct to JSON
 	jsonBytes, err := xml.Marshal(data)
 	if err != nil {
@@ -299,9 +299,7 @@ func generateMD5Sum(data interface{}) (string, error) {
 
 	// Compute the MD5 checksum
 	md5sum := hasher.Sum(nil)
-
-	// Convert the checksum to a hex string
-	return hex.EncodeToString(md5sum), nil
+	return string(md5sum), nil
 }
 
 func toInt32(i *int64) *int32 {
