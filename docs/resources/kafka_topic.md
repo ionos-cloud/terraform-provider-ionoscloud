@@ -63,7 +63,7 @@ locals {
   kafka_cluster_broker_ips_cidr = [for ip in local.kafka_cluster_broker_ips : format("%s/%s", ip, "24")]
 }
 
-resource "ionoscloud_kafka_cluster" "example_cluster" {
+resource "ionoscloud_kafka_cluster" "example" {
   name     = "example-kafka-cluster"
   location = ionoscloud_datacenter.example.location
   version  = "3.7.0"
@@ -75,7 +75,7 @@ resource "ionoscloud_kafka_cluster" "example_cluster" {
   }
 }
 
-resource "ionoscloud_kafka_cluster_topic" "example_cluster_topic" {
+resource "ionoscloud_kafka_cluster_topic" "example" {
   cluster_id           = ionoscloud_kafka_cluster.example.id
   name                 = "kafka-cluster-topic"
   location             = ionoscloud_kafka_cluster.example.location
