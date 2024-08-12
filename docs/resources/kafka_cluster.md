@@ -17,8 +17,8 @@ This resource will create an operational Kafka Cluster. After this section compl
 
 ```hcl
 resource "ionoscloud_datacenter" "example" {
-  name        = "example-kafka-datacenter"
-  location    = "de/fra"
+  name     = "example-kafka-datacenter"
+  location = "de/fra"
 }
 
 resource "ionoscloud_lan" "example" {
@@ -34,7 +34,7 @@ resource "ionoscloud_server" "example" {
   ram               = 2 * 1024
   availability_zone = "AUTO"
   cpu_family        = "INTEL_SKYLAKE"
-  image_name        = "ubuntu:latest" # alias name
+  image_name = "ubuntu:latest" # alias name
   image_password    = random_password.password.result
   volume {
     name      = "example-kafka-volume"
@@ -54,17 +54,19 @@ resource "random_password" "password" {
 }
 
 locals {
-  prefix              = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
-  server_net_index    = split(".", ionoscloud_server.example.nic[0].ips[0])[3]
-  kafka_cluster_broker_ips = [for i in range(local.server_net_index + 1, local.server_net_index + 4): cidrhost(local.prefix, i)]
-  kafka_cluster_broker_ips_cidr = [for ip in local.kafka_cluster_broker_ips: format("%s/%s", ip, "24")]
+  prefix = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
+  server_net_index              = split(".", ionoscloud_server.example.nic[0].ips[0])[3]
+  kafka_cluster_broker_ips      = [
+    for i in range(local.server_net_index + 1, local.server_net_index + 4) :cidrhost(local.prefix, i)
+  ]
+  kafka_cluster_broker_ips_cidr = [for ip in local.kafka_cluster_broker_ips : format("%s/%s", ip, "24")]
 }
 
 resource "ionoscloud_kafka_cluster" "example" {
   name     = "example-kafka-cluster"
   location = ionoscloud_datacenter.example.location
-  version = "3.7.0"
-  size    = "S"
+  version  = "3.7.0"
+  size     = "S"
   connections {
     datacenter_id    = ionoscloud_datacenter.example.id
     lan_id           = ionoscloud_lan.example.id
