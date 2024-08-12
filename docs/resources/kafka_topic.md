@@ -17,10 +17,38 @@ This resource will create an operational Kafka Cluster Topic. After this section
 called.
 
 ```hcl
+resource "ionoscloud_datacenter" "datacenter" {
+  name                    = "example"
+  location                = "es/vit"
+  description             = "Datacenter for testing kafka cluster"
+}
+
+resource "ionoscloud_lan" "lan" {
+  datacenter_id           = ionoscloud_datacenter.datacenter.id
+  public                  = false
+  name                    = "example"
+}
+
+resource "ionoscloud_kafka_cluster" "kafka_cluster" {
+  name     = "kafka-cluster"
+  location = "de/fra"
+  version  = "3.7.0"
+  size     = "S"
+  connections {
+    datacenter_id = ionoscloud_datacenter.datacenter.id
+    lan_id = ionoscloud_lan.lan.id
+    broker_addresses = [
+      "192.168.1.101/24",
+      "192.168.1.102/24",
+      "192.168.1.103/24"
+    ]
+  }
+}
+
 resource "ionoscloud_kafka_cluster_topic" "kafka_cluster_topic" {
-  cluster_id = <your_kafka_cluster_id>
+  cluster_id = ionoscloud_kafka_cluster.kafka_cluster.id
   name     = "kafka-cluster-topic"
-  location = <location_of_kafka_cluster>
+  location = "es/vit"
   replication_factor = 1
   number_of_partitions = 1
   retention_time = 86400000
