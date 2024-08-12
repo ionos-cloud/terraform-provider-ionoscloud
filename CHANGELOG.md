@@ -9,7 +9,9 @@
 - Add tags for certificate manager test files.
 - Add computed `id` for `ionoscloud_s3_bucket` resource. Same as name, used for crossplane generation.
 - New sdk-go-bundle versions to fix default params not being sent when having default values on marshalling
-- 
+- Fix CDN tests
+- Fix small CDN bug that led to an inconsistent state
+
 ### Documentation
 - Update documentation for S3 bucket resource
 - Update documentation for `ionoscloud_inmemorydb_replicaset` resource
@@ -22,6 +24,7 @@
 - Minor fixes to documentation for api gateway and api gateway route resources.
 - Only valid hcl in resource examples
 - `connections` needs to be required for `ionoscloud_vpn_wireguard_gateway` resource
+- Minor documentation fix for CDN resource
 
 ## 6.5.0
 ### Features

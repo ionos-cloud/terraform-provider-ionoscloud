@@ -24,9 +24,26 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) 
 		}
 	}
 
+	// The Certificate ID must be read all the time, even if it is 'nil'. If we don't read it when
+	// it's 'nil', there will be a problem with the following scenario: we have a CDN distribution
+	// without a 'certificate_id' and with an HTTP scheme:
+	// 1. We add the 'certificate_id' attribute with a valid certificate ID.
+	// 2. We run 'terraform plan' and TF notices that we want to change the 'certificate_id'.
+	// 3. We run 'terraform apply' and an error is raised: "When the certificate ID is present, at "
+	// "least one routingRule must support the 'https' or 'http/https' scheme.". This error is raised
+	// correctly since the scheme is HTTP.
+	// 4. We run 'terraform plan' again and TF outputs "No changes". This is incorrect since we
+	// are trying to add the 'certificate_id'. Even though the previous request failed, the
+	// 'certificate_id' was set in the state, but since we are not reading the 'certificate_id' from
+	// the API when the value it's 'nil', TF doesn't notice a difference between the values.
+	// We need to read the 'certificate_id' when it's 'nil' in order to avoid this.
 	if distribution.Properties.CertificateId != nil {
 		if err := d.Set("certificate_id", *distribution.Properties.CertificateId); err != nil {
-			return utils.GenerateSetError(resourceName, "certificateId", err)
+			return utils.GenerateSetError(resourceName, "certificate_id", err)
+		}
+	} else {
+		if err := d.Set("certificate_id", ""); err != nil {
+			return utils.GenerateSetError(resourceName, "certificate_id", err)
 		}
 	}
 
