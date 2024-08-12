@@ -77,7 +77,7 @@ resource "ionoscloud_pg_cluster" "example" {
   }
   synchronization_mode    = "ASYNCHRONOUS"
   from_backup {
-    backup_id             = <backup_uuid>
+    backup_id             = "backup_uuid"
     recovery_target_time  = "2021-12-06T13:54:08Z"
   }
 }
@@ -111,7 +111,7 @@ resource "random_password" "cluster_password" {
     * `password` - (Required)[string]
 * `synchronization_mode` - (Required) [string] Represents different modes of replication. Can have one of the following values: ASYNCHRONOUS, SYNCHRONOUS, STRICTLY_SYNCHRONOUS. This attribute is immutable(disallowed in update requests).
 * `from_backup` - (Optional)[string] The unique ID of the backup you want to restore. This attribute is immutable(disallowed in update requests).
-  * `backup_id` - (Required)[string] The PostgreSQL version of your cluster.
+  * `backup_id` - (Required)[string] The unique ID of the backup you want to restore.
   * `recovery_target_time` - (Optional)[string] If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
 * `dns_name` - (Computed)[string] The DNS name pointing to your cluster.
 
