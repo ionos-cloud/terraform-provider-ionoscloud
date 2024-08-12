@@ -7,6 +7,8 @@
 - Remove `public_endpoint` from api gateway route resource.
 - Add temporary fix for backup units resources.
 - Add tags for certificate manager test files.
+- Fix CDN tests
+- Fix small CDN bug that led to an inconsistent state
 
 ### Documentation
 - Update documentation for S3 bucket resource
@@ -18,6 +20,7 @@
 - Fixes #632 update docs with `Principal` example for `s3_bucket_policy`
 - Update examples for vpn gateway resources
 - Minor fixes to documentation for api gateway and api gateway route resources.
+- Minor documentation fix for CDN resource
 
 ## 6.5.0
 ### Features
