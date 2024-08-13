@@ -194,11 +194,12 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 			}
 		}
 
-		if len(results) == 0 {
+		switch {
+		case len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no registry found with the specified criteria: name = %s location = %s", name, location))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one registry found with the specified criteria: name = %s location = %s", name, location))
-		} else {
+		default:
 			registry = results[0]
 		}
 	}
