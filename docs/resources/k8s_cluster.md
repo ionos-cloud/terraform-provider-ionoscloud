@@ -25,7 +25,7 @@ resource "ionoscloud_k8s_cluster" "example" {
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets { 
-     name               = "your_s3_bucket"
+     name               = "globally_unique_s3_bucket_name"
   }
 }
 ```
