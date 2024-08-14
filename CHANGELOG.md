@@ -6,6 +6,7 @@
 - Minor fixes to documentation for api gateway route resource.
 - Remove `public_endpoint` from api gateway route resource.
 - Add temporary fix for backup units resources.
+- Add tags for certificate manager test files.
 
 ### Documentation
 - Update documentation for S3 bucket resource
