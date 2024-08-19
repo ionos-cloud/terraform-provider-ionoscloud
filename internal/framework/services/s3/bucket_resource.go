@@ -39,6 +39,7 @@ type bucketResourceModel struct {
 	Name     types.String   `tfsdk:"name"`
 	Region   types.String   `tfsdk:"region"`
 	Timeouts timeouts.Value `tfsdk:"timeouts"`
+	ID       types.String   `tfsdk:"id"`
 }
 
 // Metadata returns the metadata for the bucket resource.
@@ -63,6 +64,10 @@ func (r *bucketResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Optional:    true,
 				Computed:    true,
 				Default:     stringdefault.StaticString("eu-central-3"),
+			},
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "Same value as name",
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -141,7 +146,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 		resp.Diagnostics.AddError("failed to get bucket location", err.Error())
 		return
 	}
-
+	data.ID = data.Name
 	data.Region = types.StringPointerValue(location.LocationConstraint)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -180,6 +185,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 	data.Region = types.StringValue(*location.LocationConstraint)
+	data.ID = data.Name
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
