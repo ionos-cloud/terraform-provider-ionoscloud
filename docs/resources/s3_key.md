@@ -17,7 +17,7 @@ Manages an **S3 Key** on IonosCloud.
 resource "ionoscloud_user" "example" {
     first_name              = "example"
     last_name               = "example"
-    email                   = <unique_email>
+    email                   = "unique@email.com"
     password                = "abc123-321CBA"
     administrator           = false
     force_sec_auth          = false

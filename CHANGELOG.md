@@ -18,6 +18,7 @@
 - Fixes #632 update docs with `Principal` example for `s3_bucket_policy`
 - Update examples for vpn gateway resources
 - Minor fixes to documentation for api gateway and api gateway route resources.
+- Only valid hcl in resource examples
 
 ## 6.5.0
 ### Features

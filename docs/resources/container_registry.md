@@ -21,7 +21,7 @@ resource "ionoscloud_container_registry" "example" {
   }
   location              = "de/fra"
   name                  = "container-registry-example"
-  api_subnet_allow_list = ["<IP1>", "<IP2>"]
+  api_subnet_allow_list = ["1.2.3.4/32"]
 }
 ```
 

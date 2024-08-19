@@ -68,9 +68,13 @@ resource "ionoscloud_kafka_cluster" "example" {
   version  = "3.7.0"
   size     = "S"
   connections {
-    datacenter_id    = ionoscloud_datacenter.example.id
-    lan_id           = ionoscloud_lan.example.id
-    broker_addresses = local.kafka_cluster_broker_ips_cidr
+    datacenter_id = ionoscloud_datacenter.example.id
+    lan_id = ionoscloud_lan.example.id
+    broker_addresses = [
+      "192.168.1.101/24",
+      "192.168.1.102/24",
+      "192.168.1.103/24"
+    ]
   }
 }
 ```
