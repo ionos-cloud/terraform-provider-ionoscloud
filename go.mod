@@ -16,10 +16,10 @@ require (
 	github.com/huandu/xstrings v1.3.3
 	github.com/iancoleman/strcase v0.3.0
 	github.com/ionos-cloud/sdk-go-api-gateway v1.0.0
+	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
-	github.com/ionos-cloud/sdk-go-cdn v1.0.0
 	github.com/ionos-cloud/sdk-go-cert-manager v1.1.0
 	github.com/ionos-cloud/sdk-go-container-registry v1.2.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.0.3
@@ -27,8 +27,8 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2
-	github.com/ionos-cloud/sdk-go-kafka v1.0.0
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
+	github.com/ionos-cloud/sdk-go-kafka v1.0.0
 	github.com/ionos-cloud/sdk-go-nfs v1.0.0
 	github.com/ionos-cloud/sdk-go-s3 v1.0.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.0
@@ -38,7 +38,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-
 require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
@@ -47,9 +46,9 @@ require (
 )
 
 require (
-	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/ProtonMail/go-crypto v1.1.0-alpha.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/go-test/deep v1.0.6 // indirect

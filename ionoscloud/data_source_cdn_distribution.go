@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	cdn "github.com/ionos-cloud/sdk-go-cdn"
+	cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
@@ -150,16 +150,16 @@ func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, 
 			return diags
 		}
 
-		results = *distributions.Items
+		results = distributions.Items
 		if domainOk {
 			partialMatch := d.Get("partial_match").(bool)
 
 			log.Printf("[INFO] Using data source for container registry by domain with partial_match %t and domain: %s", partialMatch, domain)
 
-			if distributions.Items != nil && len(*distributions.Items) > 0 {
+			if len(distributions.Items) > 0 {
 				var distributionsByDomain []cdn.Distribution
 
-				for _, distributionItem := range *distributions.Items {
+				for _, distributionItem := range distributions.Items {
 					if isValidDomain(distributionItem.Properties, domain, partialMatch) {
 						distributionsByDomain = append(distributionsByDomain, distributionItem)
 					}
@@ -190,12 +190,9 @@ func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, 
 
 }
 
-func isValidDomain(properties *cdn.DistributionProperties, domain string, partialMatch bool) bool {
-	if properties == nil || properties.Domain == nil {
-		return false
-	}
+func isValidDomain(properties cdn.DistributionProperties, domain string, partialMatch bool) bool {
 	if partialMatch {
-		return strings.Contains(*properties.Domain, domain)
+		return strings.Contains(properties.Domain, domain)
 	}
-	return strings.EqualFold(*properties.Domain, domain)
+	return strings.EqualFold(properties.Domain, domain)
 }

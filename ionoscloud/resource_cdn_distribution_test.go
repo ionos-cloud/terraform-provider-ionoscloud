@@ -8,8 +8,7 @@ import (
 	"regexp"
 	"testing"
 
-	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-cdn"
-
+	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -31,7 +30,7 @@ func TestAccDistributionBasic(t *testing.T) {
 				Config: testAccCheckCDNDistributionConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCDNDistributionExists(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, &distribution),
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "another.unique.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
@@ -44,7 +43,7 @@ func TestAccDistributionBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceCDNDistributionMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "another.unique.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
@@ -57,7 +56,7 @@ func TestAccDistributionBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceCDNDistributionMatchDomain,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "another.unique.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
@@ -75,7 +74,7 @@ func TestAccDistributionBasic(t *testing.T) {
 				Config: testAccCheckCDNDistributionConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCDNDistributionExists(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, &distribution),
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "another.unique.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http/https"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api2"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.server.example.com"),
@@ -150,7 +149,7 @@ func testAccCheckCDNDistributionExists(n string, distribution *ionoscloud_cdn.Di
 		if err != nil {
 			return fmt.Errorf("error occurred while fetching distribution: %s", rs.Primary.ID)
 		}
-		if *foundDistribution.Id != rs.Primary.ID {
+		if foundDistribution.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
 		}
 		distribution = &foundDistribution
@@ -188,7 +187,7 @@ EOT
 EOT
 }
 ` + `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
-	domain         = "unique.example.com"
+	domain         = "another.unique.example.com"
 	certificate_id = ` + constant.CertificateResource + `.` + constant.TestCertName + `.id` + `
 	routing_rules {
 		scheme = "http/https"
