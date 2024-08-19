@@ -1,3 +1,5 @@
+//go:build compute || all || cert
+
 package ionoscloud
 
 import (
