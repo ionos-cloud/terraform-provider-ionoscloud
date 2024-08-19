@@ -82,7 +82,6 @@ func resourceNFSCluster() *schema.Resource {
 							Description:      "The minimum Network File Storage version",
 							Type:             schema.TypeString,
 							Optional:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"4.2"}, false)),
 						},
 					},
 				},
