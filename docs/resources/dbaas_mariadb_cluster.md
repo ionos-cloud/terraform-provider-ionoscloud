@@ -37,7 +37,7 @@ resource "ionoscloud_server" "example" {
   image_password          = "password"
   volume {
     name                  = "example"
-    size                  = 6
+    size                  = 10
     disk_type             = "SSD Standard"
   }
   nic {
