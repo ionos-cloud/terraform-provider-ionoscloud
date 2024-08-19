@@ -79,9 +79,9 @@ func resourceNFSCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"min_version": {
-							Description:      "The minimum Network File Storage version",
-							Type:             schema.TypeString,
-							Optional:         true,
+							Description: "The minimum Network File Storage version",
+							Type:        schema.TypeString,
+							Optional:    true,
 						},
 					},
 				},
