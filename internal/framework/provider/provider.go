@@ -170,6 +170,7 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		s3.NewServerSideEncryptionConfigurationResource,
 		s3.NewBucketCorsConfigurationResource,
 		s3.NewBucketLifecycleConfigurationResource,
+		s3.NewBucketWebsiteConfigurationResource,
 	}
 }
 
