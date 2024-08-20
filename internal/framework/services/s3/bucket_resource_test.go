@@ -30,6 +30,7 @@ func TestAccBucketResource(t *testing.T) {
 				Config: testAccBucketConfig_basic(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "name", rName),
+					resource.TestCheckResourceAttr(name, "id", rName),
 					resource.TestCheckResourceAttr(name, "region", "eu-central-3"),
 				),
 			},
