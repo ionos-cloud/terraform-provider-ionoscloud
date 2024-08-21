@@ -101,19 +101,9 @@ func (o *ResourceState) SetMessage(v string) {
 	o.Message = &v
 }
 
-func (o ResourceState) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o ResourceState) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.State) {
-		toSerialize["state"] = o.State
-	}
+	toSerialize["state"] = o.State
 	if !IsNil(o.Message) {
 		toSerialize["message"] = o.Message
 	}

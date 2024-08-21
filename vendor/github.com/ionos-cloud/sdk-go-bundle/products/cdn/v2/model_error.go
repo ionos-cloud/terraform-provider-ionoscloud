@@ -107,14 +107,6 @@ func (o *Error) SetMessages(v []ErrorMessages) {
 	o.Messages = v
 }
 
-func (o Error) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o Error) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.HttpStatus) {

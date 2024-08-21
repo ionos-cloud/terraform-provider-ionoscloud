@@ -128,25 +128,13 @@ func (o *DistributionProperties) SetRoutingRules(v []RoutingRule) {
 	o.RoutingRules = v
 }
 
-func (o DistributionProperties) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o DistributionProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Domain) {
-		toSerialize["domain"] = o.Domain
-	}
+	toSerialize["domain"] = o.Domain
 	if !IsNil(o.CertificateId) {
 		toSerialize["certificateId"] = o.CertificateId
 	}
-	if !IsZero(o.RoutingRules) {
-		toSerialize["routingRules"] = o.RoutingRules
-	}
+	toSerialize["routingRules"] = o.RoutingRules
 	return toSerialize, nil
 }
 

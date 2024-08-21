@@ -107,14 +107,6 @@ func (o *IpAddresses) SetPublicEndpointIpv6(v string) {
 	o.PublicEndpointIpv6 = &v
 }
 
-func (o IpAddresses) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o IpAddresses) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.PublicEndpointIpv4) {

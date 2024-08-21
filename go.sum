@@ -114,6 +114,8 @@ github.com/ionos-cloud/sdk-go-api-gateway v1.0.0 h1:T+JzarV1Iw7NjWQfEuv5bESnHoCL
 github.com/ionos-cloud/sdk-go-api-gateway v1.0.0/go.mod h1:TkSlamP+qKRT8cgBaZEN8rawanVluOR0dXbXXdmmwTY=
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.0.0 h1:j9uHe3UdX031HPUIdYVd2pHTjO9N4AsZGJPHh1oyoT0=
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.0.0/go.mod h1:Yg1CY2TmpSOt/2CsXNYcherSVGwxSPAH/Hb8nmYxgw4=
+github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.0.1 h1:tl9kZwY1+7nW7fFDTlV0wdNts8dbyupN/PvrgArgHZg=
+github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.0.1/go.mod h1:nd6z+U8wGfqtgR3Ck8mQ5b1FJty0oaQIQPkmVARuYbE=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0 h1:Ba5bkt9CPzygXytD7Qwgbeqs7E3UTMtq9revM+nWlyY=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0/go.mod h1:Ci6xo7oPA3TpxtB0as6UISNvlUShCX1gN332MqVYHGY=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.0 h1:TFEzZgjaw8T7u8e/P1MIMeHXP3EWteXWrdIJJfVZIFY=

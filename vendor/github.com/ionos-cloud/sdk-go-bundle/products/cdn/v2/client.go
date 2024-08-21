@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "products/cdn/v2.0.0"
+	Version = "products/cdn/v2.0.1"
 )
 
 // APIClient manages communication with the IONOS Cloud - CDN Distribution API API v0.1.7
@@ -706,11 +706,6 @@ func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer, err e
 		err = json.NewEncoder(bodyBuf).Encode(body)
 	} else if xmlCheck.MatchString(contentType) {
 		err = xml.NewEncoder(bodyBuf).Encode(body)
-	}
-
-	bodyStr := bodyBuf.String()
-	if bodyStr == "" {
-		return nil, err
 	}
 
 	if err != nil {

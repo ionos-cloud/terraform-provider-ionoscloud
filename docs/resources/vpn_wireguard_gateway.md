@@ -11,7 +11,7 @@ description: |-
 
 ## Overview
 
-The `ionoscloud_vpn_wireguard_peer` resource manages a WireGuard Gateway within the IONOS Cloud infrastructure. 
+The `ionoscloud_vpn_wireguard_gateway` resource manages a WireGuard Gateway within the IONOS Cloud infrastructure. 
 This resource facilitates the creation, management, and deletion of WireGuard VPN Gateways, enabling secure connections between your network resources.
 
 ## Example Usage
@@ -32,7 +32,7 @@ resource "ionoscloud_lan" "lan_example" {
   datacenter_id = ionoscloud_datacenter.datacenter_example.id
 }
 
-resource ionoscloud_vpn_wireguard_gateway "gateway" {
+resource "ionoscloud_vpn_wireguard_gateway" "gateway" {
   location = "de/fra"
   name = "gateway_example"
   description = "description"
