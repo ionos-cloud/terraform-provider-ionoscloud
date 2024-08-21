@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	"fmt"
+
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
@@ -18,7 +19,7 @@ type ListObjectsV2Input struct {
 	MaxKeys           *int32
 }
 
-// ListObjectsV2Paginator is a paginator for listing object versions in an S3 bucket.
+// ListObjectsV2Paginator is a paginator for listing objects from S3 bucket
 type ListObjectsV2Paginator struct {
 	client  *s3.APIClient
 	input   *ListObjectsV2Input
@@ -44,7 +45,7 @@ func (p *ListObjectsV2Paginator) HasMorePages() bool {
 	return p.hasMore
 }
 
-// NextPage retrieves the next page of object versions.
+// NextPage retrieves the next page of objects.
 func (p *ListObjectsV2Paginator) NextPage(ctx context.Context) (*s3.ListBucketResultV2, error) {
 	if !p.hasMore {
 		return nil, fmt.Errorf("no more pages")

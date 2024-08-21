@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	s3 "github.com/ionos-cloud/sdk-go-s3"
+
 	tfs3 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
 )
 
@@ -30,6 +32,7 @@ type objectsDataSourceModel struct {
 	Owners         []types.String `tfsdk:"owners"`
 }
 
+// NewObjectsDataSource creates a new data source for fetching objects from an S3 bucket.
 func NewObjectsDataSource() datasource.DataSource {
 	return &objectsDataSource{}
 }
