@@ -181,31 +181,15 @@ func (o *Upstream) SetRateLimitClass(v string) {
 	o.RateLimitClass = v
 }
 
-func (o Upstream) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o Upstream) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Host) {
-		toSerialize["host"] = o.Host
-	}
-	if !IsZero(o.Caching) {
-		toSerialize["caching"] = o.Caching
-	}
-	if !IsZero(o.Waf) {
-		toSerialize["waf"] = o.Waf
-	}
+	toSerialize["host"] = o.Host
+	toSerialize["caching"] = o.Caching
+	toSerialize["waf"] = o.Waf
 	if !IsNil(o.GeoRestrictions) {
 		toSerialize["geoRestrictions"] = o.GeoRestrictions
 	}
-	if !IsZero(o.RateLimitClass) {
-		toSerialize["rateLimitClass"] = o.RateLimitClass
-	}
+	toSerialize["rateLimitClass"] = o.RateLimitClass
 	return toSerialize, nil
 }
 

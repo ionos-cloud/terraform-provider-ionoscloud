@@ -30,7 +30,7 @@ func TestAccDistributionBasic(t *testing.T) {
 				Config: testAccCheckCDNDistributionConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCDNDistributionExists(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, &distribution),
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "another.unique.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
@@ -43,7 +43,7 @@ func TestAccDistributionBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceCDNDistributionMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "another.unique.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
@@ -56,7 +56,7 @@ func TestAccDistributionBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceCDNDistributionMatchDomain,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "another.unique.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
@@ -74,7 +74,7 @@ func TestAccDistributionBasic(t *testing.T) {
 				Config: testAccCheckCDNDistributionConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCDNDistributionExists(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, &distribution),
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "another.unique.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http/https"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api2"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.server.example.com"),
@@ -187,7 +187,7 @@ EOT
 EOT
 }
 ` + `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
-	domain         = "another.unique.example.com"
+	domain         = "unique.test.example.com"
 	certificate_id = ` + constant.CertificateResource + `.` + constant.TestCertName + `.id` + `
 	routing_rules {
 		scheme = "http/https"

@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "products/cdn/v2.0.0"
+	Version = "products/cdn/v2.0.1"
 )
 
 // APIClient manages communication with the IONOS Cloud - CDN Distribution API API v0.1.7

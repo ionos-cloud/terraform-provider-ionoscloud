@@ -3,9 +3,10 @@ package cdn
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"log"
 	"strings"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -144,9 +145,9 @@ func (c *Client) IsDistributionReady(ctx context.Context, d *schema.ResourceData
 	distributionID := d.Id()
 	distribution, _, err := c.SdkClient.DistributionsApi.DistributionsFindById(ctx, distributionID).Execute()
 	if err != nil {
-		return true, fmt.Errorf("status check failed for MariaDB distribution with ID: %v, error: %w", distributionID, err)
+		return true, fmt.Errorf("status check failed for distribution with ID: %v, error: %w", distributionID, err)
 	}
 
-	log.Printf("[INFO] state of the MariaDB distribution with ID: %v is: %s ", distributionID, distribution.Metadata.State)
+	log.Printf("[INFO] state of the distribution with ID: %v is: %s ", distributionID, distribution.Metadata.State)
 	return strings.EqualFold(distribution.Metadata.State, constant.Available), nil
 }
