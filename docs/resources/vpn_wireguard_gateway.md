@@ -60,7 +60,7 @@ The following arguments are supported by the `vpn_wireguard_gateway` resource:
 - `gateway_ip` - (Required)[String] The IP address of the WireGuard Gateway.
 - `interface_ipv4_cidr` - (Optional)[String] The IPv4 CIDR for the WireGuard Gateway interface.
 - `interface_ipv6_cidr` - (Optional)[String] The IPv6 CIDR for the WireGuard Gateway interface.
-- `connections` - (Optional)[Block] The connection configuration for the WireGuard Gateway. This block supports fields documented below.
+- `connections` - (Required)[Block] The connection configuration for the WireGuard Gateway. This block supports fields documented below.
   - `datacenter_id` - (Required)[String] The ID of the datacenter where the WireGuard Gateway is located.
   - `lan_id` - (Required)[String] The ID of the LAN where the WireGuard Gateway is connected.
   - `ipv4_cidr` - (Required)[String] The IPv4 CIDR for the WireGuard Gateway connection.

@@ -189,31 +189,17 @@ func (o *WireguardPeer) SetPublicKey(v string) {
 	o.PublicKey = v
 }
 
-func (o WireguardPeer) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o WireguardPeer) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Name) {
-		toSerialize["name"] = o.Name
-	}
+	toSerialize["name"] = o.Name
 	if !IsNil(o.Description) {
 		toSerialize["description"] = o.Description
 	}
 	if !IsNil(o.Endpoint) {
 		toSerialize["endpoint"] = o.Endpoint
 	}
-	if !IsZero(o.AllowedIPs) {
-		toSerialize["allowedIPs"] = o.AllowedIPs
-	}
-	if !IsZero(o.PublicKey) {
-		toSerialize["publicKey"] = o.PublicKey
-	}
+	toSerialize["allowedIPs"] = o.AllowedIPs
+	toSerialize["publicKey"] = o.PublicKey
 	return toSerialize, nil
 }
 

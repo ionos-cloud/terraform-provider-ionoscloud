@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "products/logging/v2.1.0"
+	Version = "products/logging/v2.1.1"
 )
 
 // APIClient manages communication with the IONOS Logging REST API API v0.0.1
