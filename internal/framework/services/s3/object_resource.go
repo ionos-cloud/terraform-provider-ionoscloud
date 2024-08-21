@@ -853,10 +853,6 @@ func fillServerSideEncryptionData(data *objectResourceModel, req *s3.ApiPutObjec
 		*req = req.XAmzServerSideEncryption(data.ServerSideEncryption.ValueString())
 	}
 
-	if !data.WebsiteRedirect.IsNull() {
-		*req = req.XAmzWebsiteRedirectLocation(data.WebsiteRedirect.ValueString())
-	}
-
 	if !data.ServerSideEncryptionCustomerAlgorithm.IsNull() {
 		*req = req.XAmzServerSideEncryptionCustomerAlgorithm(data.ServerSideEncryptionCustomerAlgorithm.ValueString())
 	}

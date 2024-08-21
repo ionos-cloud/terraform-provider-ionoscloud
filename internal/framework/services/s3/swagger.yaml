@@ -2408,14 +2408,6 @@ paths:
                   required: true
                   schema:
                       $ref: "#/components/schemas/BucketName"
-                - name: website
-                  in: query
-                  required: true
-                  schema:
-                      type: boolean
-                      enum:
-                          - true
-                  allowEmptyValue: true
         put:
             tags:
                 - Website
@@ -2471,46 +2463,25 @@ paths:
                   required: false
                   schema:
                       $ref: "#/components/schemas/Content-MD5"
-                - name: website
-                  in: query
-                  required: true
-                  schema:
-                      type: boolean
-                      enum:
-                          - true
-                  allowEmptyValue: true
             requestBody:
                 required: true
                 content:
                     application/xml:
                         schema:
+                            description: Specifies website configuration parameters for an IONOS S3 Object
+                                Storage bucket.
+                            xml:
+                              name: WebsiteConfiguration
                             type: object
-                            required:
-                                - WebsiteConfiguration
                             properties:
-                                WebsiteConfiguration:
-                                    description: Specifies website configuration parameters for an IONOS S3 Object
-                                        Storage bucket.
-                                    type: object
-                                    properties:
-                                        ErrorDocument:
-                                            $ref: "#/components/schemas/ErrorDocument"
-                                        IndexDocument:
-                                            $ref: "#/components/schemas/IndexDocument"
-                                        RedirectAllRequestsTo:
-                                            allOf:
-                                                - $ref: "#/components/schemas/RedirectAllRequestsTo"
-                                                  description: <p>The redirect behavior for every request to this bucket's website
-                                                      endpoint.</p> <important>
-                                                      <p>If you specify this
-                                                      property, you can't
-                                                      specify any other
-                                                      property.</p> </important>
-                                        RoutingRules:
-                                            allOf:
-                                                - $ref: "#/components/schemas/RoutingRules"
-                                                  description: Rules that define when a redirect is applied and the redirect
-                                                      behavior.
+                                ErrorDocument:
+                                    $ref: "#/components/schemas/ErrorDocument"
+                                IndexDocument:
+                                    $ref: "#/components/schemas/IndexDocument"
+                                RedirectAllRequestsTo:
+                                    $ref: "#/components/schemas/RedirectAllRequestsTo"
+                                RoutingRules:
+                                     $ref: "#/components/schemas/RoutingRules"
                         examples:
                             Payload:
                                 value: >
@@ -2554,14 +2525,6 @@ paths:
                   required: true
                   schema:
                       $ref: "#/components/schemas/BucketName"
-                - name: website
-                  in: query
-                  required: true
-                  schema:
-                      type: boolean
-                      enum:
-                          - true
-                  allowEmptyValue: true
     "/{Bucket}/{Key}":
         get:
             tags:
@@ -3946,6 +3909,12 @@ paths:
                       enum:
                           - ON
                           - OFF
+                - name: x-amz-meta
+                  in: header
+                  required: false
+                  description: A map of metadata to store with the object in S3.
+                  schema:
+                    $ref: "#/components/schemas/Metadata"
             requestBody:
                 content:
                     application/xml:
@@ -6582,6 +6551,8 @@ components:
                 namespace: http://s3.amazonaws.com/doc/2006-03-01/
         GetBucketWebsiteOutput:
             type: object
+            xml:
+                name: WebsiteConfiguration
             example:
                 ErrorDocument:
                     Key: error.html
@@ -7091,6 +7062,8 @@ components:
         RedirectAllRequestsTo:
             description: Specifies the redirect behavior of all requests to a website
                 endpoint of an IONOS S3 Object Storage bucket.
+            xml:
+                name: RedirectAllRequestsTo
             type: object
             required:
                 - HostName
@@ -7386,6 +7359,8 @@ components:
                 directory specified by Prefix. For example, if the prefix is
                 `notes/` and the delimiter is a slash (`/``) as in
                 `notes/summer/july``, the common prefix is `notes/summer/``.
+            xml:
+              name: CommonPrefixes
             type: object
             properties:
                 Prefix:
@@ -8335,6 +8310,8 @@ components:
                         4xx, redirect request to another host where you might
                         process the error.
                     type: object
+                    xml:
+                        name: Condition
                     properties:
                         HttpErrorCodeReturnedEquals:
                             $ref: "#/components/schemas/HttpErrorCodeReturnedEquals"

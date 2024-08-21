@@ -141,8 +141,9 @@ func deleteVersionsPage(ctx context.Context, client *s3.APIClient, versions *[]s
 			}
 
 			objCount++
+		} else {
+			lastErr = err
 		}
-		lastErr = err
 	}
 
 	return objCount, lastErr

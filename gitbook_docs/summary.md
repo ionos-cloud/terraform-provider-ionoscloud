@@ -83,7 +83,7 @@
   * Data Sources
     * [Group](../docs/data-sources/group.md)
     * [Resource](../docs/data-sources/resource.md)
-    * [S3 Key](../docs/data-sources/s3_key.md)
+    * [S3 Key](../docs/data-sources/s3/key)
     * [Share](../docs/data-sources/share.md)
     * [User](../docs/data-sources/user.md)
 
@@ -196,11 +196,13 @@
     * [S3 Bucket Object Lock Configuration](../docs/resources/s3/bucket_object_lock_configuration)
     * [S3 Bucket Versioning Configuration](../docs/resources/s3/bucket_versioning)
     * [S3 Bucket Server Side Encryption Configuration](../docs/resources/s3/bucket_server_side_encryption_configuration)
+    * [S3 Object Copy](../docs/resources/s3/object_copy)
   * Data Sources
-    * [S3 Bucket](../docs/data-sources/s3_bucket.md)
-    * [S3 Bucket Policy](../docs/data-sources/s3_bucket_policy.md)
-    * [S3 Object](../docs/data-sources/s3_object.md)
-    * [S3 Bucket Public Access Block](../docs/data-sources/s3_bucket_access_block.md)
+    * [S3 Bucket](../docs/data-sources/s3/bucket)
+    * [S3 Bucket Policy](../docs/data-sources/s3/bucket_policy)
+    * [S3 Object](../docs/data-sources/s3/object)
+    * [S3 Bucket Public Access Block](../docs/data-sources/s3/bucket_access_block)
+    * [S3 Objects](../docs/data-sources/s3/objects)
   
 * CDN
   * Resources
