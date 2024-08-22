@@ -24,7 +24,7 @@ func TestAccLoggingPipeline(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-		//CheckDestroy:             testAccLoggingPipelineDestroyCheck,
+		CheckDestroy:             testAccLoggingPipelineDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: LoggingPipelineConfig,
