@@ -7,7 +7,7 @@ description: |-
   Creates and manages IonosCloud VPN Wireguard Gateway objects.
 ---
 
-# VPN WireGuard Gateway Resource
+# ionoscloud_vpn_wireguard_gateway
 
 ## Overview
 

@@ -24,6 +24,7 @@ func TestVpnIPSecGatewayResource(t *testing.T) {
 				testAccPreCheck(t)
 			},
 			ProviderFactories: testAccProviderFactories,
+			ExternalProviders: randomProviderVersion343(),
 			CheckDestroy:      testCheckIPSecGatewayDestroy,
 			Steps: []resource.TestStep{
 				{
