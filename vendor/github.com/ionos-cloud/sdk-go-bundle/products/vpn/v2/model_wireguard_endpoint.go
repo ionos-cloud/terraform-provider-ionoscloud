@@ -106,19 +106,9 @@ func (o *WireguardEndpoint) SetPort(v int32) {
 	o.Port = &v
 }
 
-func (o WireguardEndpoint) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o WireguardEndpoint) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Host) {
-		toSerialize["host"] = o.Host
-	}
+	toSerialize["host"] = o.Host
 	if !IsNil(o.Port) {
 		toSerialize["port"] = o.Port
 	}

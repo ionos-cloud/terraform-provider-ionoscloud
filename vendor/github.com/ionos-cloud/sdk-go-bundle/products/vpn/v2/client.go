@@ -53,7 +53,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "products/vpn/v2.0.0"
+	Version = "products/vpn/v2.0.1"
 )
 
 // APIClient manages communication with the VPN Gateways API v0.0.1

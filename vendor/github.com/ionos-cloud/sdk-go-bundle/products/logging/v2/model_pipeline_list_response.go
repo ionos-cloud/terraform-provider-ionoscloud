@@ -138,14 +138,6 @@ func (o *PipelineListResponse) SetItems(v []Pipeline) {
 	o.Items = v
 }
 
-func (o PipelineListResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o PipelineListResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Id) {

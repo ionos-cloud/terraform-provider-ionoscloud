@@ -68,19 +68,9 @@ func (o *IPSecPSK) SetKey(v string) {
 	o.Key = v
 }
 
-func (o IPSecPSK) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o IPSecPSK) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Key) {
-		toSerialize["key"] = o.Key
-	}
+	toSerialize["key"] = o.Key
 	return toSerialize, nil
 }
 
