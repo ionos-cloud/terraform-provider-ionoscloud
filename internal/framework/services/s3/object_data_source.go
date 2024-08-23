@@ -301,6 +301,8 @@ func setContentDataSource(data *objectDataSourceModel, apiResponse *s3.APIRespon
 		data.ContentLength = types.Int64Value(int64(intLength))
 	}
 
+	data.VersionID = types.StringValue(apiResponse.Header.Get("x-amz-version-id"))
+
 	etag := strings.Trim(apiResponse.Header.Get("ETag"), "\"")
 	if etag != "" {
 		data.Etag = types.StringValue(etag)
