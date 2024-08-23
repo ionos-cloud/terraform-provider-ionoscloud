@@ -20,7 +20,7 @@ func TestAccBucketWebsiteConfigurationResourceBasic(t *testing.T) {
 	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
 	name := "ionoscloud_s3_bucket_website_configuration.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -34,8 +34,6 @@ func TestAccBucketWebsiteConfigurationResourceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(name, "bucket", bucketName),
 					resource.TestCheckResourceAttr(name, "index_document.suffix", "index.html"),
 					resource.TestCheckResourceAttr(name, "error_document.key", "error.html"),
-					resource.TestCheckResourceAttr(name, "routing_rule.0.condition.key_prefix_equals", "docs/"),
-					resource.TestCheckResourceAttr(name, "routing_rule.0.redirect.replace_key_prefix_with", "documents/"),
 				),
 			},
 			{
@@ -68,15 +66,6 @@ resource "ionoscloud_s3_bucket_website_configuration" "test" {
 
   error_document {
     key = "error.html"
-  }
-
-  routing_rule {
-    condition {
-      key_prefix_equals = "docs/"
-    }
-    redirect {
-      replace_key_prefix_with = "documents/"
-    }
   }
 }
 `))

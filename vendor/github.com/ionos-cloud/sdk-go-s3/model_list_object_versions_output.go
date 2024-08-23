@@ -1,7 +1,7 @@
 /*
  * IONOS S3 Object Storage API for contract-owned buckets
  *
- * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 Management API Reference](https://api.ionos.com/docs/s3-management/v1/) for managing Access Keys - S3 API Reference for contract-owned buckets - current document - [S3 API Reference for user-owned buckets](https://api.ionos.com/docs/s3-user-owned-buckets/v2/)  ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
+ * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 API Reference for contract-owned buckets](https://api.ionos.com/docs/s3-contract-owned-buckets/v2/) ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
  *
  * API version: 2.0.2
  * Contact: support@cloud.ionos.com
@@ -19,7 +19,7 @@ import "encoding/xml"
 
 // ListObjectVersionsOutput struct for ListObjectVersionsOutput
 type ListObjectVersionsOutput struct {
-	XMLName xml.Name `xml:"ListObjectVersionsOutput"`
+	XMLName xml.Name `xml:"ListVersionsResult"`
 	// A flag that indicates whether IONOS S3 Object Storage returned all of the results that satisfied the search criteria. If your results were truncated, you can make a follow-up paginated request using the NextKeyMarker and NextVersionIdMarker response parameters as a starting place in another request to return the rest of the results.
 	IsTruncated *bool `json:"IsTruncated,omitempty" xml:"IsTruncated"`
 	// Marks the last key returned in a truncated response.
@@ -31,7 +31,8 @@ type ListObjectVersionsOutput struct {
 	// When the number of responses exceeds the value of `MaxKeys`, `NextVersionIdMarker` specifies the first object version not returned that satisfies the search criteria. Use this value for the version-id-marker request parameter in a subsequent request.
 	NextVersionIdMarker *string `json:"NextVersionIdMarker,omitempty" xml:"NextVersionIdMarker"`
 	// Container for version information.
-	Versions *[]ObjectVersion `json:"Versions,omitempty" xml:"Versions"`
+	Versions      *[]ObjectVersion     `json:"Versions,omitempty" xml:"Version"`
+	DeleteMarkers *[]DeleteMarkerEntry `json:"DeleteMarkers,omitempty" xml:"DeleteMarker"`
 	// The bucket name.
 	Name *string `json:"Name,omitempty" xml:"Name"`
 	// Selects objects that start with the value supplied by this parameter.
@@ -290,6 +291,44 @@ func (o *ListObjectVersionsOutput) HasVersions() bool {
 	return false
 }
 
+// GetDeleteMarkers returns the DeleteMarkers field value
+// If the value is explicit nil, the zero value for []DeleteMarkerEntry will be returned
+func (o *ListObjectVersionsOutput) GetDeleteMarkers() *[]DeleteMarkerEntry {
+	if o == nil {
+		return nil
+	}
+
+	return o.DeleteMarkers
+
+}
+
+// GetDeleteMarkersOk returns a tuple with the DeleteMarkers field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ListObjectVersionsOutput) GetDeleteMarkersOk() (*[]DeleteMarkerEntry, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.DeleteMarkers, true
+}
+
+// SetDeleteMarkers sets field value
+func (o *ListObjectVersionsOutput) SetDeleteMarkers(v []DeleteMarkerEntry) {
+
+	o.DeleteMarkers = &v
+
+}
+
+// HasDeleteMarkers returns a boolean if a field has been set.
+func (o *ListObjectVersionsOutput) HasDeleteMarkers() bool {
+	if o != nil && o.DeleteMarkers != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ListObjectVersionsOutput) GetName() *string {
@@ -542,6 +581,10 @@ func (o ListObjectVersionsOutput) MarshalJSON() ([]byte, error) {
 
 	if o.Versions != nil {
 		toSerialize["Versions"] = o.Versions
+	}
+
+	if o.DeleteMarkers != nil {
+		toSerialize["DeleteMarkers"] = o.DeleteMarkers
 	}
 
 	if o.Name != nil {

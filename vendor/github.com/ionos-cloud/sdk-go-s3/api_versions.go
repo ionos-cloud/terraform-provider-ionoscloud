@@ -1,7 +1,7 @@
 /*
  * IONOS S3 Object Storage API for contract-owned buckets
  *
- * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 Management API Reference](https://api.ionos.com/docs/s3-management/v1/) for managing Access Keys - S3 API Reference for contract-owned buckets - current document - [S3 API Reference for user-owned buckets](https://api.ionos.com/docs/s3-user-owned-buckets/v2/)  ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
+ * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 API Reference for contract-owned buckets](https://api.ionos.com/docs/s3-contract-owned-buckets/v2/) ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
  *
  * API version: 2.0.2
  * Contact: support@cloud.ionos.com
@@ -28,7 +28,6 @@ type ApiListObjectVersionsRequest struct {
 	ctx              context.Context
 	ApiService       *VersionsApiService
 	bucket           string
-	versions         *bool
 	delimiter        *string
 	encodingType     *string
 	keyMarker        *string
@@ -38,11 +37,6 @@ type ApiListObjectVersionsRequest struct {
 	maxKeys2         *string
 	keyMarker2       *string
 	versionIdMarker2 *string
-}
-
-func (r ApiListObjectVersionsRequest) Versions(versions bool) ApiListObjectVersionsRequest {
-	r.versions = &versions
-	return r
 }
 
 // A delimiter is a character that you specify to group keys. All keys that contain the same string between the &#x60;prefix&#x60; and the first occurrence of the delimiter are grouped under a single result element in CommonPrefixes. These groups are counted as one result against the max-keys limitation. These keys are not returned elsewhere in the response.
@@ -149,9 +143,6 @@ func (a *VersionsApiService) ListObjectVersionsExecute(r ApiListObjectVersionsRe
 	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.versions == nil {
-		return localVarReturnValue, nil, reportError("versions is required and must be specified")
-	}
 
 	if r.delimiter != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "delimiter", r.delimiter, "")
@@ -180,7 +171,6 @@ func (a *VersionsApiService) ListObjectVersionsExecute(r ApiListObjectVersionsRe
 	if r.versionIdMarker2 != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "VersionIdMarker", r.versionIdMarker2, "")
 	}
-	parameterAddToHeaderOrQuery(localVarQueryParams, "versions", r.versions, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

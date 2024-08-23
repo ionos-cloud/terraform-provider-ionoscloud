@@ -1,7 +1,7 @@
 /*
  * IONOS S3 Object Storage API for contract-owned buckets
  *
- * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 Management API Reference](https://api.ionos.com/docs/s3-management/v1/) for managing Access Keys - S3 API Reference for contract-owned buckets - current document - [S3 API Reference for user-owned buckets](https://api.ionos.com/docs/s3-user-owned-buckets/v2/)  ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
+ * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 API Reference for contract-owned buckets](https://api.ionos.com/docs/s3-contract-owned-buckets/v2/) ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
  *
  * API version: 2.0.2
  * Contact: support@cloud.ionos.com
@@ -17,10 +17,13 @@ import (
 
 import "encoding/xml"
 
-// PutObjectRetentionRequest struct for PutObjectRetentionRequest
+// PutObjectRetentionRequest A Retention configuration for an object.
 type PutObjectRetentionRequest struct {
-	XMLName   xml.Name                            `xml:"PutObjectRetentionRequest"`
-	Retention *PutObjectRetentionRequestRetention `json:"Retention,omitempty" xml:"Retention"`
+	XMLName xml.Name `xml:"Retention"`
+	// Indicates the Retention mode for the specified object.
+	Mode *string `json:"Mode,omitempty" xml:"Mode"`
+	// The date on which this Object Lock Retention will expire.
+	RetainUntilDate *string `json:"RetainUntilDate,omitempty" xml:"RetainUntilDate"`
 }
 
 // NewPutObjectRetentionRequest instantiates a new PutObjectRetentionRequest object
@@ -41,38 +44,76 @@ func NewPutObjectRetentionRequestWithDefaults() *PutObjectRetentionRequest {
 	return &this
 }
 
-// GetRetention returns the Retention field value
-// If the value is explicit nil, the zero value for PutObjectRetentionRequestRetention will be returned
-func (o *PutObjectRetentionRequest) GetRetention() *PutObjectRetentionRequestRetention {
+// GetMode returns the Mode field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *PutObjectRetentionRequest) GetMode() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Retention
+	return o.Mode
 
 }
 
-// GetRetentionOk returns a tuple with the Retention field value
+// GetModeOk returns a tuple with the Mode field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *PutObjectRetentionRequest) GetRetentionOk() (*PutObjectRetentionRequestRetention, bool) {
+func (o *PutObjectRetentionRequest) GetModeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Retention, true
+	return o.Mode, true
 }
 
-// SetRetention sets field value
-func (o *PutObjectRetentionRequest) SetRetention(v PutObjectRetentionRequestRetention) {
+// SetMode sets field value
+func (o *PutObjectRetentionRequest) SetMode(v string) {
 
-	o.Retention = &v
+	o.Mode = &v
 
 }
 
-// HasRetention returns a boolean if a field has been set.
-func (o *PutObjectRetentionRequest) HasRetention() bool {
-	if o != nil && o.Retention != nil {
+// HasMode returns a boolean if a field has been set.
+func (o *PutObjectRetentionRequest) HasMode() bool {
+	if o != nil && o.Mode != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetRetainUntilDate returns the RetainUntilDate field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *PutObjectRetentionRequest) GetRetainUntilDate() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.RetainUntilDate
+
+}
+
+// GetRetainUntilDateOk returns a tuple with the RetainUntilDate field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *PutObjectRetentionRequest) GetRetainUntilDateOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.RetainUntilDate, true
+}
+
+// SetRetainUntilDate sets field value
+func (o *PutObjectRetentionRequest) SetRetainUntilDate(v string) {
+
+	o.RetainUntilDate = &v
+
+}
+
+// HasRetainUntilDate returns a boolean if a field has been set.
+func (o *PutObjectRetentionRequest) HasRetainUntilDate() bool {
+	if o != nil && o.RetainUntilDate != nil {
 		return true
 	}
 
@@ -81,8 +122,12 @@ func (o *PutObjectRetentionRequest) HasRetention() bool {
 
 func (o PutObjectRetentionRequest) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Retention != nil {
-		toSerialize["Retention"] = o.Retention
+	if o.Mode != nil {
+		toSerialize["Mode"] = o.Mode
+	}
+
+	if o.RetainUntilDate != nil {
+		toSerialize["RetainUntilDate"] = o.RetainUntilDate
 	}
 
 	return json.Marshal(toSerialize)

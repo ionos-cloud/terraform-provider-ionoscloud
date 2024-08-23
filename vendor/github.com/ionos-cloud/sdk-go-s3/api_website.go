@@ -1,7 +1,7 @@
 /*
  * IONOS S3 Object Storage API for contract-owned buckets
  *
- * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 Management API Reference](https://api.ionos.com/docs/s3-management/v1/) for managing Access Keys - S3 API Reference for contract-owned buckets - current document - [S3 API Reference for user-owned buckets](https://api.ionos.com/docs/s3-user-owned-buckets/v2/)  ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
+ * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 API Reference for contract-owned buckets](https://api.ionos.com/docs/s3-contract-owned-buckets/v2/) ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
  *
  * API version: 2.0.2
  * Contact: support@cloud.ionos.com
@@ -28,12 +28,6 @@ type ApiDeleteBucketWebsiteRequest struct {
 	ctx        context.Context
 	ApiService *WebsiteApiService
 	bucket     string
-	website    *bool
-}
-
-func (r ApiDeleteBucketWebsiteRequest) Website(website bool) ApiDeleteBucketWebsiteRequest {
-	r.website = &website
-	return r
 }
 
 func (r ApiDeleteBucketWebsiteRequest) Execute() (*APIResponse, error) {
@@ -84,11 +78,7 @@ func (a *WebsiteApiService) DeleteBucketWebsiteExecute(r ApiDeleteBucketWebsiteR
 	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.website == nil {
-		return nil, reportError("website is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "website", r.website, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -160,12 +150,6 @@ type ApiGetBucketWebsiteRequest struct {
 	ctx        context.Context
 	ApiService *WebsiteApiService
 	bucket     string
-	website    *bool
-}
-
-func (r ApiGetBucketWebsiteRequest) Website(website bool) ApiGetBucketWebsiteRequest {
-	r.website = &website
-	return r
 }
 
 func (r ApiGetBucketWebsiteRequest) Execute() (*GetBucketWebsiteOutput, *APIResponse, error) {
@@ -219,11 +203,7 @@ func (a *WebsiteApiService) GetBucketWebsiteExecute(r ApiGetBucketWebsiteRequest
 	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.website == nil {
-		return localVarReturnValue, nil, reportError("website is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "website", r.website, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -304,14 +284,8 @@ type ApiPutBucketWebsiteRequest struct {
 	ctx                     context.Context
 	ApiService              *WebsiteApiService
 	bucket                  string
-	website                 *bool
 	putBucketWebsiteRequest *PutBucketWebsiteRequest
 	contentMD5              *string
-}
-
-func (r ApiPutBucketWebsiteRequest) Website(website bool) ApiPutBucketWebsiteRequest {
-	r.website = &website
-	return r
 }
 
 func (r ApiPutBucketWebsiteRequest) PutBucketWebsiteRequest(putBucketWebsiteRequest PutBucketWebsiteRequest) ApiPutBucketWebsiteRequest {
@@ -372,14 +346,10 @@ func (a *WebsiteApiService) PutBucketWebsiteExecute(r ApiPutBucketWebsiteRequest
 	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.website == nil {
-		return nil, reportError("website is required and must be specified")
-	}
 	if r.putBucketWebsiteRequest == nil {
 		return nil, reportError("putBucketWebsiteRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "website", r.website, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 

@@ -20,7 +20,7 @@ func TestAccS3ObjectCopy_basic(t *testing.T) {
 	resourceName := "ionoscloud_s3_object_copy.test"
 	sourceName := "ionoscloud_s3_object.source"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -69,7 +69,7 @@ func TestAccS3ObjectCopy_metadata(t *testing.T) {
 	rName2 := acctest.GenerateRandomResourceName(bucketPrefix)
 	resourceName := "ionoscloud_s3_object_copy.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -96,7 +96,7 @@ func TestAccS3ObjectCopy_sourceWithSlashes(t *testing.T) {
 	resourceName := "ionoscloud_s3_object_copy.test"
 	sourceKey := "dir1/dir2/source"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -126,7 +126,7 @@ func TestAccS3ObjectCopy_objectLockLegalHold(t *testing.T) {
 	rName2 := acctest.GenerateRandomResourceName(bucketPrefix)
 	resourceName := "ionoscloud_s3_object_copy.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -158,7 +158,7 @@ func TestAccS3ObjectCopy_targetWithMultipleSlashes(t *testing.T) {
 	resourceName := "ionoscloud_s3_object_copy.test"
 	targetKey := "/dir//target/"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)

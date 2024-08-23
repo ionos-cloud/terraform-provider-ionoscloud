@@ -1,7 +1,7 @@
 /*
  * IONOS S3 Object Storage API for contract-owned buckets
  *
- * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 Management API Reference](https://api.ionos.com/docs/s3-management/v1/) for managing Access Keys - S3 API Reference for contract-owned buckets - current document - [S3 API Reference for user-owned buckets](https://api.ionos.com/docs/s3-user-owned-buckets/v2/)  ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
+ * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 API Reference for contract-owned buckets](https://api.ionos.com/docs/s3-contract-owned-buckets/v2/) ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
  *
  * API version: 2.0.2
  * Contact: support@cloud.ionos.com
@@ -28,12 +28,6 @@ type ApiDeleteBucketEncryptionRequest struct {
 	ctx        context.Context
 	ApiService *EncryptionApiService
 	bucket     string
-	encryption *bool
-}
-
-func (r ApiDeleteBucketEncryptionRequest) Encryption(encryption bool) ApiDeleteBucketEncryptionRequest {
-	r.encryption = &encryption
-	return r
 }
 
 func (r ApiDeleteBucketEncryptionRequest) Execute() (*APIResponse, error) {
@@ -84,11 +78,7 @@ func (a *EncryptionApiService) DeleteBucketEncryptionExecute(r ApiDeleteBucketEn
 	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.encryption == nil {
-		return nil, reportError("encryption is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "encryption", r.encryption, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -160,15 +150,9 @@ type ApiGetBucketEncryptionRequest struct {
 	ctx        context.Context
 	ApiService *EncryptionApiService
 	bucket     string
-	encryption *bool
 }
 
-func (r ApiGetBucketEncryptionRequest) Encryption(encryption bool) ApiGetBucketEncryptionRequest {
-	r.encryption = &encryption
-	return r
-}
-
-func (r ApiGetBucketEncryptionRequest) Execute() (*GetBucketEncryptionOutput, *APIResponse, error) {
+func (r ApiGetBucketEncryptionRequest) Execute() (*ServerSideEncryptionConfiguration, *APIResponse, error) {
 	return r.ApiService.GetBucketEncryptionExecute(r)
 }
 
@@ -191,13 +175,13 @@ func (a *EncryptionApiService) GetBucketEncryption(ctx context.Context, bucket s
 
 // Execute executes the request
 //
-//	@return GetBucketEncryptionOutput
-func (a *EncryptionApiService) GetBucketEncryptionExecute(r ApiGetBucketEncryptionRequest) (*GetBucketEncryptionOutput, *APIResponse, error) {
+//	@return ServerSideEncryptionConfiguration
+func (a *EncryptionApiService) GetBucketEncryptionExecute(r ApiGetBucketEncryptionRequest) (*ServerSideEncryptionConfiguration, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *GetBucketEncryptionOutput
+		localVarReturnValue *ServerSideEncryptionConfiguration
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EncryptionApiService.GetBucketEncryption")
@@ -219,11 +203,7 @@ func (a *EncryptionApiService) GetBucketEncryptionExecute(r ApiGetBucketEncrypti
 	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.encryption == nil {
-		return localVarReturnValue, nil, reportError("encryption is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "encryption", r.encryption, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -313,13 +293,7 @@ type ApiPutBucketEncryptionRequest struct {
 	ctx                        context.Context
 	ApiService                 *EncryptionApiService
 	bucket                     string
-	encryption                 *bool
 	putBucketEncryptionRequest *PutBucketEncryptionRequest
-}
-
-func (r ApiPutBucketEncryptionRequest) Encryption(encryption bool) ApiPutBucketEncryptionRequest {
-	r.encryption = &encryption
-	return r
 }
 
 func (r ApiPutBucketEncryptionRequest) PutBucketEncryptionRequest(putBucketEncryptionRequest PutBucketEncryptionRequest) ApiPutBucketEncryptionRequest {
@@ -375,14 +349,10 @@ func (a *EncryptionApiService) PutBucketEncryptionExecute(r ApiPutBucketEncrypti
 	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.encryption == nil {
-		return nil, reportError("encryption is required and must be specified")
-	}
 	if r.putBucketEncryptionRequest == nil {
 		return nil, reportError("putBucketEncryptionRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "encryption", r.encryption, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 

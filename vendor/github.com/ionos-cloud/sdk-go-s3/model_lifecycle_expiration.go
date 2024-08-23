@@ -1,7 +1,7 @@
 /*
  * IONOS S3 Object Storage API for contract-owned buckets
  *
- * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 Management API Reference](https://api.ionos.com/docs/s3-management/v1/) for managing Access Keys - S3 API Reference for contract-owned buckets - current document - [S3 API Reference for user-owned buckets](https://api.ionos.com/docs/s3-user-owned-buckets/v2/)  ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
+ * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 API Reference for contract-owned buckets](https://api.ionos.com/docs/s3-contract-owned-buckets/v2/) ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
  *
  * API version: 2.0.2
  * Contact: support@cloud.ionos.com
@@ -13,16 +13,15 @@ package ionoscloud
 
 import (
 	"encoding/json"
-	"time"
 )
 
 import "encoding/xml"
 
 // LifecycleExpiration Specifies when the object expires based on the values defined in the lifecycle configuration.
 type LifecycleExpiration struct {
-	XMLName xml.Name `xml:"LifecycleExpiration"`
+	XMLName xml.Name `xml:"Expiration"`
 	// Indicates at what date the object is to be moved or deleted. Should be in GMT ISO 8601 Format.
-	Date *IonosTime `json:"Date,omitempty" xml:"Date"`
+	Date *string `json:"Date,omitempty" xml:"Date"`
 	// Indicates the lifetime, in days, of the objects that are subject to the rule. The value must be a non-zero positive integer.
 	Days *int32 `json:"Days,omitempty" xml:"Days"`
 	// Indicates whether IONOS S3 Object Storage will remove a delete marker with no noncurrent versions. If set to true, the delete marker will be expired; if set to false the policy takes no operation. This cannot be specified with Days or Date in a Lifecycle Expiration Policy.
@@ -48,38 +47,31 @@ func NewLifecycleExpirationWithDefaults() *LifecycleExpiration {
 }
 
 // GetDate returns the Date field value
-// If the value is explicit nil, the zero value for time.Time will be returned
-func (o *LifecycleExpiration) GetDate() *time.Time {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *LifecycleExpiration) GetDate() *string {
 	if o == nil {
 		return nil
 	}
 
-	if o.Date == nil {
-		return nil
-	}
-	return &o.Date.Time
+	return o.Date
 
 }
 
 // GetDateOk returns a tuple with the Date field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *LifecycleExpiration) GetDateOk() (*time.Time, bool) {
+func (o *LifecycleExpiration) GetDateOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	if o.Date == nil {
-		return nil, false
-	}
-	return &o.Date.Time, true
-
+	return o.Date, true
 }
 
 // SetDate sets field value
-func (o *LifecycleExpiration) SetDate(v time.Time) {
+func (o *LifecycleExpiration) SetDate(v string) {
 
-	o.Date = &IonosTime{v}
+	o.Date = &v
 
 }
 

@@ -16,7 +16,7 @@ func TestAccS3ObjectsDataSource_basic(t *testing.T) {
 	rName := acctest.GenerateRandomResourceName(bucketPrefix)
 	dataSourceName := "data.ionoscloud_s3_objects.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -39,7 +39,7 @@ func TestAccS3ObjectsDataSource_prefixes(t *testing.T) {
 	rName := acctest.GenerateRandomResourceName(bucketPrefix)
 	dataSourceName := "data.ionoscloud_s3_objects.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -62,7 +62,7 @@ func TestAccS3ObjectsDataSource_encoded(t *testing.T) {
 	rName := acctest.GenerateRandomResourceName(bucketPrefix)
 	dataSourceName := "data.ionoscloud_s3_objects.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -86,7 +86,7 @@ func TestAccS3ObjectsDataSource_maxKeysSmall(t *testing.T) {
 	rName := acctest.GenerateRandomResourceName(bucketPrefix)
 	dataSourceName := "data.ionoscloud_s3_objects.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -122,7 +122,7 @@ func TestAccS3ObjectsDataSource_maxKeysLarge(t *testing.T) {
 		keys = append(keys, fmt.Sprintf("data%d", i))
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -154,7 +154,7 @@ func TestAccS3ObjectsDataSource_startAfter(t *testing.T) {
 	rName := acctest.GenerateRandomResourceName(bucketPrefix)
 	dataSourceName := "data.ionoscloud_s3_objects.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -177,7 +177,7 @@ func TestAccS3ObjectsDataSource_fetchOwner(t *testing.T) {
 	rName := acctest.GenerateRandomResourceName(bucketPrefix)
 	dataSourceName := "data.ionoscloud_s3_objects.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)

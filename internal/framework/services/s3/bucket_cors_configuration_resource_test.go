@@ -20,7 +20,7 @@ func TestAccBucketCORSConfigurationResourceBasic(t *testing.T) {
 	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
 	name := "ionoscloud_s3_bucket_cors_configuration.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -61,7 +61,7 @@ func TestAccBucketCORSConfigurationResourceMultiple(t *testing.T) {
 	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
 	name := "ionoscloud_s3_bucket_cors_configuration.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)

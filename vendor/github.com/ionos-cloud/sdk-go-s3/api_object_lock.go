@@ -1,7 +1,7 @@
 /*
  * IONOS S3 Object Storage API for contract-owned buckets
  *
- * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 Management API Reference](https://api.ionos.com/docs/s3-management/v1/) for managing Access Keys - S3 API Reference for contract-owned buckets - current document - [S3 API Reference for user-owned buckets](https://api.ionos.com/docs/s3-user-owned-buckets/v2/)  ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
+ * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 API Reference for contract-owned buckets](https://api.ionos.com/docs/s3-contract-owned-buckets/v2/) ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
  *
  * API version: 2.0.2
  * Contact: support@cloud.ionos.com
@@ -29,13 +29,7 @@ type ApiGetObjectLegalHoldRequest struct {
 	ApiService *ObjectLockApiService
 	bucket     string
 	key        string
-	legalHold  *bool
 	versionId  *string
-}
-
-func (r ApiGetObjectLegalHoldRequest) LegalHold(legalHold bool) ApiGetObjectLegalHoldRequest {
-	r.legalHold = &legalHold
-	return r
 }
 
 // The version ID of the object whose Legal Hold status you want to retrieve.
@@ -105,11 +99,7 @@ func (a *ObjectLockApiService) GetObjectLegalHoldExecute(r ApiGetObjectLegalHold
 	if Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
-	if r.legalHold == nil {
-		return localVarReturnValue, nil, reportError("legalHold is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "legal-hold", r.legalHold, "")
 	if r.versionId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "versionId", r.versionId, "")
 	}
@@ -380,13 +370,7 @@ type ApiGetObjectRetentionRequest struct {
 	ApiService *ObjectLockApiService
 	bucket     string
 	key        string
-	retention  *bool
 	versionId  *string
-}
-
-func (r ApiGetObjectRetentionRequest) Retention(retention bool) ApiGetObjectRetentionRequest {
-	r.retention = &retention
-	return r
 }
 
 // The version ID of the object whose retention settings you want to retrieve.
@@ -395,7 +379,7 @@ func (r ApiGetObjectRetentionRequest) VersionId(versionId string) ApiGetObjectRe
 	return r
 }
 
-func (r ApiGetObjectRetentionRequest) Execute() (*GetObjectRetentionOutput, *APIResponse, error) {
+func (r ApiGetObjectRetentionRequest) Execute() (*ObjectLockRetention, *APIResponse, error) {
 	return r.ApiService.GetObjectRetentionExecute(r)
 }
 
@@ -424,13 +408,13 @@ func (a *ObjectLockApiService) GetObjectRetention(ctx context.Context, bucket st
 
 // Execute executes the request
 //
-//	@return GetObjectRetentionOutput
-func (a *ObjectLockApiService) GetObjectRetentionExecute(r ApiGetObjectRetentionRequest) (*GetObjectRetentionOutput, *APIResponse, error) {
+//	@return ObjectLockRetention
+func (a *ObjectLockApiService) GetObjectRetentionExecute(r ApiGetObjectRetentionRequest) (*ObjectLockRetention, *APIResponse, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *GetObjectRetentionOutput
+		localVarReturnValue *ObjectLockRetention
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectLockApiService.GetObjectRetention")
@@ -456,11 +440,7 @@ func (a *ObjectLockApiService) GetObjectRetentionExecute(r ApiGetObjectRetention
 	if Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
-	if r.retention == nil {
-		return localVarReturnValue, nil, reportError("retention is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "retention", r.retention, "")
 	if r.versionId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "versionId", r.versionId, "")
 	}
@@ -570,23 +550,17 @@ func (a *ObjectLockApiService) GetObjectRetentionExecute(r ApiGetObjectRetention
 }
 
 type ApiPutObjectLegalHoldRequest struct {
-	ctx                       context.Context
-	ApiService                *ObjectLockApiService
-	bucket                    string
-	key                       string
-	legalHold                 *bool
-	putObjectLegalHoldRequest *PutObjectLegalHoldRequest
-	versionId                 *string
-	contentMD5                *string
+	ctx                          context.Context
+	ApiService                   *ObjectLockApiService
+	bucket                       string
+	key                          string
+	objectLegalHoldConfiguration *ObjectLegalHoldConfiguration
+	versionId                    *string
+	contentMD5                   *string
 }
 
-func (r ApiPutObjectLegalHoldRequest) LegalHold(legalHold bool) ApiPutObjectLegalHoldRequest {
-	r.legalHold = &legalHold
-	return r
-}
-
-func (r ApiPutObjectLegalHoldRequest) PutObjectLegalHoldRequest(putObjectLegalHoldRequest PutObjectLegalHoldRequest) ApiPutObjectLegalHoldRequest {
-	r.putObjectLegalHoldRequest = &putObjectLegalHoldRequest
+func (r ApiPutObjectLegalHoldRequest) ObjectLegalHoldConfiguration(objectLegalHoldConfiguration ObjectLegalHoldConfiguration) ApiPutObjectLegalHoldRequest {
+	r.objectLegalHoldConfiguration = &objectLegalHoldConfiguration
 	return r
 }
 
@@ -659,14 +633,10 @@ func (a *ObjectLockApiService) PutObjectLegalHoldExecute(r ApiPutObjectLegalHold
 	if Strlen(r.key) < 1 {
 		return nil, reportError("key must have at least 1 elements")
 	}
-	if r.legalHold == nil {
-		return nil, reportError("legalHold is required and must be specified")
-	}
-	if r.putObjectLegalHoldRequest == nil {
-		return nil, reportError("putObjectLegalHoldRequest is required and must be specified")
+	if r.objectLegalHoldConfiguration == nil {
+		return nil, reportError("objectLegalHoldConfiguration is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "legal-hold", r.legalHold, "")
 	if r.versionId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "versionId", r.versionId, "")
 	}
@@ -691,7 +661,7 @@ func (a *ObjectLockApiService) PutObjectLegalHoldExecute(r ApiPutObjectLegalHold
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "Content-MD5", r.contentMD5, "")
 	}
 	// body params
-	localVarPostBody = r.putObjectLegalHoldRequest
+	localVarPostBody = r.objectLegalHoldConfiguration
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -962,16 +932,10 @@ type ApiPutObjectRetentionRequest struct {
 	ApiService                    *ObjectLockApiService
 	bucket                        string
 	key                           string
-	retention                     *bool
 	putObjectRetentionRequest     *PutObjectRetentionRequest
 	versionId                     *string
 	xAmzBypassGovernanceRetention *bool
 	contentMD5                    *string
-}
-
-func (r ApiPutObjectRetentionRequest) Retention(retention bool) ApiPutObjectRetentionRequest {
-	r.retention = &retention
-	return r
 }
 
 func (r ApiPutObjectRetentionRequest) PutObjectRetentionRequest(putObjectRetentionRequest PutObjectRetentionRequest) ApiPutObjectRetentionRequest {
@@ -1055,14 +1019,10 @@ func (a *ObjectLockApiService) PutObjectRetentionExecute(r ApiPutObjectRetention
 	if Strlen(r.key) < 1 {
 		return nil, reportError("key must have at least 1 elements")
 	}
-	if r.retention == nil {
-		return nil, reportError("retention is required and must be specified")
-	}
 	if r.putObjectRetentionRequest == nil {
 		return nil, reportError("putObjectRetentionRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "retention", r.retention, "")
 	if r.versionId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "versionId", r.versionId, "")
 	}

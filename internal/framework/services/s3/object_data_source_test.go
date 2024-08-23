@@ -17,7 +17,7 @@ func TestAccObjectDataSource(t *testing.T) {
 	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
 	objKey := acctest.GenerateRandomResourceName(objectPrefix)
 	dataSourceName := "data.ionoscloud_s3_object.test"
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -45,7 +45,7 @@ func TestAccObjectDataSource_allParams(t *testing.T) {
 	objKey := acctest.GenerateRandomResourceName(objectPrefix)
 	dataSourceName := "data.ionoscloud_s3_object.test"
 	resourceName := "ionoscloud_s3_object.test"
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)

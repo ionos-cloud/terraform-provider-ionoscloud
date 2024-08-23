@@ -1,7 +1,7 @@
 /*
  * IONOS S3 Object Storage API for contract-owned buckets
  *
- * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 Management API Reference](https://api.ionos.com/docs/s3-management/v1/) for managing Access Keys - S3 API Reference for contract-owned buckets - current document - [S3 API Reference for user-owned buckets](https://api.ionos.com/docs/s3-user-owned-buckets/v2/)  ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
+ * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 API Reference for contract-owned buckets](https://api.ionos.com/docs/s3-contract-owned-buckets/v2/) ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
  *
  * API version: 2.0.2
  * Contact: support@cloud.ionos.com
@@ -17,10 +17,11 @@ import (
 
 import "encoding/xml"
 
-// PutBucketLifecycleRequest struct for PutBucketLifecycleRequest
+// PutBucketLifecycleRequest Container for lifecycle rules. You can add as many as 1000 rules.
 type PutBucketLifecycleRequest struct {
-	XMLName                xml.Name                                         `xml:"PutBucketLifecycleRequest"`
-	LifecycleConfiguration *PutBucketLifecycleRequestLifecycleConfiguration `json:"LifecycleConfiguration,omitempty" xml:"LifecycleConfiguration"`
+	XMLName xml.Name `xml:"LifecycleConfiguration"`
+	// Container for a lifecycle rules.
+	Rules *[]Rule `json:"Rules,omitempty" xml:"Rule"`
 }
 
 // NewPutBucketLifecycleRequest instantiates a new PutBucketLifecycleRequest object
@@ -41,38 +42,38 @@ func NewPutBucketLifecycleRequestWithDefaults() *PutBucketLifecycleRequest {
 	return &this
 }
 
-// GetLifecycleConfiguration returns the LifecycleConfiguration field value
-// If the value is explicit nil, the zero value for PutBucketLifecycleRequestLifecycleConfiguration will be returned
-func (o *PutBucketLifecycleRequest) GetLifecycleConfiguration() *PutBucketLifecycleRequestLifecycleConfiguration {
+// GetRules returns the Rules field value
+// If the value is explicit nil, the zero value for []Rule will be returned
+func (o *PutBucketLifecycleRequest) GetRules() *[]Rule {
 	if o == nil {
 		return nil
 	}
 
-	return o.LifecycleConfiguration
+	return o.Rules
 
 }
 
-// GetLifecycleConfigurationOk returns a tuple with the LifecycleConfiguration field value
+// GetRulesOk returns a tuple with the Rules field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *PutBucketLifecycleRequest) GetLifecycleConfigurationOk() (*PutBucketLifecycleRequestLifecycleConfiguration, bool) {
+func (o *PutBucketLifecycleRequest) GetRulesOk() (*[]Rule, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.LifecycleConfiguration, true
+	return o.Rules, true
 }
 
-// SetLifecycleConfiguration sets field value
-func (o *PutBucketLifecycleRequest) SetLifecycleConfiguration(v PutBucketLifecycleRequestLifecycleConfiguration) {
+// SetRules sets field value
+func (o *PutBucketLifecycleRequest) SetRules(v []Rule) {
 
-	o.LifecycleConfiguration = &v
+	o.Rules = &v
 
 }
 
-// HasLifecycleConfiguration returns a boolean if a field has been set.
-func (o *PutBucketLifecycleRequest) HasLifecycleConfiguration() bool {
-	if o != nil && o.LifecycleConfiguration != nil {
+// HasRules returns a boolean if a field has been set.
+func (o *PutBucketLifecycleRequest) HasRules() bool {
+	if o != nil && o.Rules != nil {
 		return true
 	}
 
@@ -81,8 +82,8 @@ func (o *PutBucketLifecycleRequest) HasLifecycleConfiguration() bool {
 
 func (o PutBucketLifecycleRequest) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.LifecycleConfiguration != nil {
-		toSerialize["LifecycleConfiguration"] = o.LifecycleConfiguration
+	if o.Rules != nil {
+		toSerialize["Rules"] = o.Rules
 	}
 
 	return json.Marshal(toSerialize)

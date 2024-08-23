@@ -1,7 +1,7 @@
 /*
  * IONOS S3 Object Storage API for contract-owned buckets
  *
- * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 Management API Reference](https://api.ionos.com/docs/s3-management/v1/) for managing Access Keys - S3 API Reference for contract-owned buckets - current document - [S3 API Reference for user-owned buckets](https://api.ionos.com/docs/s3-user-owned-buckets/v2/)  ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
+ * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 API Reference for contract-owned buckets](https://api.ionos.com/docs/s3-contract-owned-buckets/v2/) ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
  *
  * API version: 2.0.2
  * Contact: support@cloud.ionos.com
@@ -28,12 +28,6 @@ type ApiDeleteBucketCorsRequest struct {
 	ctx        context.Context
 	ApiService *CORSApiService
 	bucket     string
-	cors       *bool
-}
-
-func (r ApiDeleteBucketCorsRequest) Cors(cors bool) ApiDeleteBucketCorsRequest {
-	r.cors = &cors
-	return r
 }
 
 func (r ApiDeleteBucketCorsRequest) Execute() (*APIResponse, error) {
@@ -85,11 +79,7 @@ func (a *CORSApiService) DeleteBucketCorsExecute(r ApiDeleteBucketCorsRequest) (
 	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.cors == nil {
-		return nil, reportError("cors is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "cors", r.cors, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -161,12 +151,6 @@ type ApiGetBucketCorsRequest struct {
 	ctx        context.Context
 	ApiService *CORSApiService
 	bucket     string
-	cors       *bool
-}
-
-func (r ApiGetBucketCorsRequest) Cors(cors bool) ApiGetBucketCorsRequest {
-	r.cors = &cors
-	return r
 }
 
 func (r ApiGetBucketCorsRequest) Execute() (*GetBucketCorsOutput, *APIResponse, error) {
@@ -222,11 +206,7 @@ func (a *CORSApiService) GetBucketCorsExecute(r ApiGetBucketCorsRequest) (*GetBu
 	if Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.cors == nil {
-		return localVarReturnValue, nil, reportError("cors is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "cors", r.cors, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -307,14 +287,8 @@ type ApiPutBucketCorsRequest struct {
 	ctx                  context.Context
 	ApiService           *CORSApiService
 	bucket               string
-	cors                 *bool
 	putBucketCorsRequest *PutBucketCorsRequest
 	contentMD5           *string
-}
-
-func (r ApiPutBucketCorsRequest) Cors(cors bool) ApiPutBucketCorsRequest {
-	r.cors = &cors
-	return r
 }
 
 func (r ApiPutBucketCorsRequest) PutBucketCorsRequest(putBucketCorsRequest PutBucketCorsRequest) ApiPutBucketCorsRequest {
@@ -375,14 +349,10 @@ func (a *CORSApiService) PutBucketCorsExecute(r ApiPutBucketCorsRequest) (*APIRe
 	if Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.cors == nil {
-		return nil, reportError("cors is required and must be specified")
-	}
 	if r.putBucketCorsRequest == nil {
 		return nil, reportError("putBucketCorsRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "cors", r.cors, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 

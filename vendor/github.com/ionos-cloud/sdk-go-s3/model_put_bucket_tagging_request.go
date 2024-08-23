@@ -1,7 +1,7 @@
 /*
  * IONOS S3 Object Storage API for contract-owned buckets
  *
- * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 Management API Reference](https://api.ionos.com/docs/s3-management/v1/) for managing Access Keys - S3 API Reference for contract-owned buckets - current document - [S3 API Reference for user-owned buckets](https://api.ionos.com/docs/s3-user-owned-buckets/v2/)  ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
+ * ## Overview The IONOS S3 Object Storage API for contract-owned buckets is a REST-based API that allows developers and applications to interact directly with IONOS' scalable storage solution, leveraging the S3 protocol for object storage operations. Its design ensures seamless compatibility with existing tools and libraries tailored for S3 systems.  ### API References - [S3 API Reference for contract-owned buckets](https://api.ionos.com/docs/s3-contract-owned-buckets/v2/) ### User documentation [IONOS S3 Object Storage User Guide](https://docs.ionos.com/cloud/managed-services/s3-object-storage) * [Documentation on user-owned and contract-owned buckets](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/buckets) * [Documentation on S3 API Compatibility](https://docs.ionos.com/cloud/managed-services/s3-object-storage/concepts/s3-api-compatibility) * [S3 Tools](https://docs.ionos.com/cloud/managed-services/s3-object-storage/s3-tools)  ## Endpoints for contract-owned buckets | Location | Region Name | Bucket Type | Endpoint | | --- | --- | --- | --- | | **Berlin, Germany** | **eu-central-3** | Contract-owned | `https://s3.eu-central-3.ionoscloud.com` |  ## Changelog - 30.05.2024 Initial version
  *
  * API version: 2.0.2
  * Contact: support@cloud.ionos.com
@@ -17,20 +17,19 @@ import (
 
 import "encoding/xml"
 
-// PutBucketTaggingRequest struct for PutBucketTaggingRequest
+// PutBucketTaggingRequest Container for `TagSet` elements.
 type PutBucketTaggingRequest struct {
-	XMLName xml.Name                        `xml:"PutBucketTaggingRequest"`
-	Tagging *PutBucketTaggingRequestTagging `json:"Tagging" xml:"Tagging"`
+	XMLName xml.Name `xml:"Tagging"`
+	// Contains the tag set.
+	TagSet *[]Tag `json:"TagSet,omitempty" xml:"TagSet>Tag"`
 }
 
 // NewPutBucketTaggingRequest instantiates a new PutBucketTaggingRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPutBucketTaggingRequest(tagging PutBucketTaggingRequestTagging) *PutBucketTaggingRequest {
+func NewPutBucketTaggingRequest() *PutBucketTaggingRequest {
 	this := PutBucketTaggingRequest{}
-
-	this.Tagging = &tagging
 
 	return &this
 }
@@ -43,38 +42,38 @@ func NewPutBucketTaggingRequestWithDefaults() *PutBucketTaggingRequest {
 	return &this
 }
 
-// GetTagging returns the Tagging field value
-// If the value is explicit nil, the zero value for PutBucketTaggingRequestTagging will be returned
-func (o *PutBucketTaggingRequest) GetTagging() *PutBucketTaggingRequestTagging {
+// GetTagSet returns the TagSet field value
+// If the value is explicit nil, the zero value for []Tag will be returned
+func (o *PutBucketTaggingRequest) GetTagSet() *[]Tag {
 	if o == nil {
 		return nil
 	}
 
-	return o.Tagging
+	return o.TagSet
 
 }
 
-// GetTaggingOk returns a tuple with the Tagging field value
+// GetTagSetOk returns a tuple with the TagSet field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *PutBucketTaggingRequest) GetTaggingOk() (*PutBucketTaggingRequestTagging, bool) {
+func (o *PutBucketTaggingRequest) GetTagSetOk() (*[]Tag, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Tagging, true
+	return o.TagSet, true
 }
 
-// SetTagging sets field value
-func (o *PutBucketTaggingRequest) SetTagging(v PutBucketTaggingRequestTagging) {
+// SetTagSet sets field value
+func (o *PutBucketTaggingRequest) SetTagSet(v []Tag) {
 
-	o.Tagging = &v
+	o.TagSet = &v
 
 }
 
-// HasTagging returns a boolean if a field has been set.
-func (o *PutBucketTaggingRequest) HasTagging() bool {
-	if o != nil && o.Tagging != nil {
+// HasTagSet returns a boolean if a field has been set.
+func (o *PutBucketTaggingRequest) HasTagSet() bool {
+	if o != nil && o.TagSet != nil {
 		return true
 	}
 
@@ -83,8 +82,8 @@ func (o *PutBucketTaggingRequest) HasTagging() bool {
 
 func (o PutBucketTaggingRequest) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Tagging != nil {
-		toSerialize["Tagging"] = o.Tagging
+	if o.TagSet != nil {
+		toSerialize["TagSet"] = o.TagSet
 	}
 
 	return json.Marshal(toSerialize)

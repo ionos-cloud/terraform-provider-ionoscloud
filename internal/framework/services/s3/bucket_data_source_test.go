@@ -14,7 +14,7 @@ import (
 
 func TestAccBucketDataSource(t *testing.T) {
 	rName := acctest.GenerateRandomResourceName(bucketPrefix)
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)

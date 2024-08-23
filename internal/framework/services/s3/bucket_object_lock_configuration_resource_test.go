@@ -20,7 +20,7 @@ func TestAccBucketObjectLockConfigurationResourceBasic(t *testing.T) {
 	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
 	name := "ionoscloud_s3_bucket_object_lock_configuration.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -51,7 +51,7 @@ func TestAccBucketObjectLockConfigurationResourceYears(t *testing.T) {
 	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
 	name := "ionoscloud_s3_bucket_object_lock_configuration.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -74,7 +74,7 @@ func TestAccBucketObjectLockConfigurationResourceYears(t *testing.T) {
 func TestAccBucketObjectLockConfigurationResourceConflict(t *testing.T) {
 	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
@@ -93,7 +93,7 @@ func TestAccBucketObjectLockConfigurationResourceUpdate(t *testing.T) {
 	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
 	name := "ionoscloud_s3_bucket_object_lock_configuration.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
 			acctest.PreCheck(t)
