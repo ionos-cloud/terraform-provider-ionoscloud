@@ -40,12 +40,12 @@ type bucketResource struct {
 }
 
 type bucketResourceModel struct {
-	Name              types.String `tfsdk:"name"`
-	Region            types.String `tfsdk:"region"`
-	ObjectLockEnabled types.Bool   `tfsdk:"object_lock_enabled"`
-	ForceDestroy      types.Bool   `tfsdk:"force_destroy"`
-	Timeouts timeouts.Value `tfsdk:"timeouts"`
-	ID       types.String   `tfsdk:"id"`
+	Name              types.String   `tfsdk:"name"`
+	Region            types.String   `tfsdk:"region"`
+	ObjectLockEnabled types.Bool     `tfsdk:"object_lock_enabled"`
+	ForceDestroy      types.Bool     `tfsdk:"force_destroy"`
+	Timeouts          timeouts.Value `tfsdk:"timeouts"`
+	ID                types.String   `tfsdk:"id"`
 }
 
 // Metadata returns the metadata for the bucket resource.
