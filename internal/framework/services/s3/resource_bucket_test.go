@@ -33,6 +33,7 @@ func TestAccBucketResource(t *testing.T) {
 					testAccCheckBucketExists(context.Background(), name),
 					resource.TestCheckResourceAttr(name, "name", rName),
 					resource.TestCheckResourceAttr(name, "region", "eu-central-3"),
+					resource.TestCheckResourceAttr(name, "id", rName),
 					resource.TestCheckResourceAttr(name, "object_lock_enabled", "false"),
 				),
 			},
@@ -87,6 +88,7 @@ func TestAccBucketResource_ObjectLockEnabled(t *testing.T) {
 				Config: testAccBucketConfig_objectLockEnabled(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "name", rName),
+					resource.TestCheckResourceAttr(name, "id", rName),
 					resource.TestCheckResourceAttr(name, "region", "eu-central-3"),
 					resource.TestCheckResourceAttr(name, "object_lock_enabled", "true"),
 				),
