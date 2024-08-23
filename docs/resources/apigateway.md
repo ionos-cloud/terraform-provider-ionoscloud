@@ -16,7 +16,6 @@ An API gateway consists of the generic rules and configurations.
 ```
 resource "ionoscloud_apigateway" "example" {
     name              = "example-gateway"
-    logs              = true
     metrics           = true
     
     custom_domains {

@@ -92,6 +92,7 @@ func resourceVpnWireguardPeer() *schema.Resource {
 				Computed:    true,
 			},
 		},
+		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 

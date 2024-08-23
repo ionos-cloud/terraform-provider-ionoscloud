@@ -1,3 +1,28 @@
+## 6.5.1
+### Fixes
+- Pass timeouts to `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
+- Add configurable timeouts to s3 buckets. Default stays 60 minutes.
+- Fix for vpn wireguard peer when there is no endpoint set
+- Minor fixes to documentation for api gateway route resource.
+- Remove `public_endpoint` from api gateway route resource.
+- Add temporary fix for backup units resources.
+- Add tags for certificate manager test files.
+- Add computed `id` for `ionoscloud_s3_bucket` resource. Same as name, used for crossplane generation.
+- New sdk-go-bundle versions to fix default params not being sent when having default values on marshalling
+- 
+### Documentation
+- Update documentation for S3 bucket resource
+- Update documentation for `ionoscloud_inmemorydb_replicaset` resource
+- Fix error message for `ionoscloud_s3_bucket_policy` data source when bucket or policy does not exist.
+- Fix error message for `ionoscloud_s3_bucket_public_access_block` data source when bucket or public access block does not exist.
+- Add validation for `persistence_mode` and `eviction_policy` fields of `ionoscloud_inmemorydb_replicaset`
+- Add `ForceNew: true` for some attributes in `ionoscloud_inmemorydb_replicaset` resource
+- Fixes #632 update docs with `Principal` example for `s3_bucket_policy`
+- Update examples for vpn gateway resources
+- Minor fixes to documentation for api gateway and api gateway route resources.
+- Only valid hcl in resource examples
+- `connections` needs to be required for `ionoscloud_vpn_wireguard_gateway` resource
+
 ## 6.5.0
 ### Features
 - Add support for CDN

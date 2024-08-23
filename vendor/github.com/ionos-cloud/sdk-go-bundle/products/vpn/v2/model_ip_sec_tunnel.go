@@ -261,40 +261,18 @@ func (o *IPSecTunnel) SetPeerNetworkCIDRs(v []string) {
 	o.PeerNetworkCIDRs = v
 }
 
-func (o IPSecTunnel) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o IPSecTunnel) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Name) {
-		toSerialize["name"] = o.Name
-	}
+	toSerialize["name"] = o.Name
 	if !IsNil(o.Description) {
 		toSerialize["description"] = o.Description
 	}
-	if !IsZero(o.RemoteHost) {
-		toSerialize["remoteHost"] = o.RemoteHost
-	}
-	if !IsZero(o.Auth) {
-		toSerialize["auth"] = o.Auth
-	}
-	if !IsZero(o.Ike) {
-		toSerialize["ike"] = o.Ike
-	}
-	if !IsZero(o.Esp) {
-		toSerialize["esp"] = o.Esp
-	}
-	if !IsZero(o.CloudNetworkCIDRs) {
-		toSerialize["cloudNetworkCIDRs"] = o.CloudNetworkCIDRs
-	}
-	if !IsZero(o.PeerNetworkCIDRs) {
-		toSerialize["peerNetworkCIDRs"] = o.PeerNetworkCIDRs
-	}
+	toSerialize["remoteHost"] = o.RemoteHost
+	toSerialize["auth"] = o.Auth
+	toSerialize["ike"] = o.Ike
+	toSerialize["esp"] = o.Esp
+	toSerialize["cloudNetworkCIDRs"] = o.CloudNetworkCIDRs
+	toSerialize["peerNetworkCIDRs"] = o.PeerNetworkCIDRs
 	return toSerialize, nil
 }
 

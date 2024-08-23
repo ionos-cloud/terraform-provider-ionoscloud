@@ -1,13 +1,13 @@
 ---
 subcategory: "VPN"
 layout: "ionoscloud"
-page_title: "IonosCloud: server"
-sidebar_current: "docs-resource-server"
+page_title: "IonosCloud: vpn_wireguard_gateway"
+sidebar_current: "docs-resource-vpn-wireguard-gateway"
 description: |-
   Creates and manages IonosCloud VPN Wireguard Gateway objects.
 ---
 
-# VPN WireGuard Gateway Resource
+# ionoscloud_vpn_wireguard_gateway
 
 ## Overview
 
@@ -24,7 +24,7 @@ resource "ionoscloud_datacenter" "datacenter_example" {
 resource "ionoscloud_ipblock" "ipblock_example" {
   location = "de/fra"
   size = 1
-  name = "` + constant.IpBlockTestResource + `"
+  name = "ipblock_example"
 }
 
 resource "ionoscloud_lan" "lan_example" {
@@ -34,7 +34,7 @@ resource "ionoscloud_lan" "lan_example" {
 
 resource ionoscloud_vpn_wireguard_gateway "gateway" {
   location = "de/fra"
-  name = "my vpn test gateway"
+  name = "gateway_example"
   description = "description"
   private_key = "private"
 
@@ -60,7 +60,7 @@ The following arguments are supported by the `vpn_wireguard_gateway` resource:
 - `gateway_ip` - (Required)[String] The IP address of the WireGuard Gateway.
 - `interface_ipv4_cidr` - (Optional)[String] The IPv4 CIDR for the WireGuard Gateway interface.
 - `interface_ipv6_cidr` - (Optional)[String] The IPv6 CIDR for the WireGuard Gateway interface.
-- `connections` - (Optional)[Block] The connection configuration for the WireGuard Gateway. This block supports fields documented below.
+- `connections` - (Required)[Block] The connection configuration for the WireGuard Gateway. This block supports fields documented below.
   - `datacenter_id` - (Required)[String] The ID of the datacenter where the WireGuard Gateway is located.
   - `lan_id` - (Required)[String] The ID of the LAN where the WireGuard Gateway is connected.
   - `ipv4_cidr` - (Required)[String] The IPv4 CIDR for the WireGuard Gateway connection.

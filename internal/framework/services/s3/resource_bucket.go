@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -43,6 +44,8 @@ type bucketResourceModel struct {
 	Region            types.String `tfsdk:"region"`
 	ObjectLockEnabled types.Bool   `tfsdk:"object_lock_enabled"`
 	ForceDestroy      types.Bool   `tfsdk:"force_destroy"`
+	Timeouts timeouts.Value `tfsdk:"timeouts"`
+	ID       types.String   `tfsdk:"id"`
 }
 
 // Metadata returns the metadata for the bucket resource.
@@ -51,9 +54,13 @@ func (r *bucketResource) Metadata(_ context.Context, req resource.MetadataReques
 }
 
 // Schema returns the schema for the bucket resource.
-func (r *bucketResource) Schema(_ context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *bucketResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "Same value as name",
+			},
 			"name": schema.StringAttribute{
 				Description: "The name of the bucket. It must start and end with a letter or number and contain only lowercase alphanumeric characters, hyphens, periods and underscores.",
 				Required:    true,
@@ -63,7 +70,7 @@ func (r *bucketResource) Schema(_ context.Context, req resource.SchemaRequest, r
 				},
 			},
 			"region": schema.StringAttribute{
-				Description: "The region of the bucket",
+				Description: "The region of the bucket. Defaults to eu-central-3.",
 				Optional:    true,
 				Computed:    true,
 				Default:     stringdefault.StaticString("eu-central-3"),
@@ -83,6 +90,14 @@ func (r *bucketResource) Schema(_ context.Context, req resource.SchemaRequest, r
 				Optional:    true,
 				Default:     booldefault.StaticBool(false),
 			},
+		},
+		Blocks: map[string]schema.Block{
+			"timeouts": timeouts.Block(ctx, timeouts.Opts{
+				Create: true,
+				Read:   true,
+				Update: true,
+				Delete: true,
+			}),
 		},
 	}
 }
@@ -123,6 +138,14 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 	createBucketConfig := s3.CreateBucketConfiguration{
 		LocationConstraint: data.Region.ValueStringPointer(),
 	}
+	createTimeout, diag := data.Timeouts.Create(ctx, utils.DefaultTimeout)
+	if diag != nil {
+		resp.Diagnostics = diag
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, createTimeout)
+	defer cancel()
 
 	createReq := r.client.BucketsApi.CreateBucket(ctx, data.Name.ValueString()).CreateBucketConfiguration(createBucketConfig)
 	if !data.ObjectLockEnabled.IsNull() {
@@ -137,7 +160,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 	// Wait for bucket creation
 	err = backoff.Retry(func() error {
 		return BucketExists(ctx, r.client, data.Name.ValueString())
-	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(utils.DefaultTimeout)))
+	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(createTimeout)))
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create bucket", fmt.Sprintf("error verifying bucket creation: %s", err))
 		return
@@ -148,7 +171,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 		resp.Diagnostics.AddError("failed to get bucket location", err.Error())
 		return
 	}
-
+	data.ID = data.Name
 	data.Region = types.StringPointerValue(location.LocationConstraint)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -197,6 +220,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	data.Region = types.StringPointerValue(location.GetLocationConstraint())
+	data.ID = data.Name
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -229,10 +253,18 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 	var data bucketResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	deleteTimeout, diag := data.Timeouts.Delete(ctx, utils.DefaultTimeout)
+	if diag != nil {
+		resp.Diagnostics = diag
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
+	defer cancel()
 
 	apiResponse, err := r.client.BucketsApi.DeleteBucket(ctx, data.Name.ValueString()).Execute()
 	if apiResponse.HttpNotFound() {
@@ -256,7 +288,7 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	}
 
 	// Wait for deletion
-	backOff := backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(utils.DefaultTimeout))
+	backOff := backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(deleteTimeout))
 	err = backoff.Retry(func() error {
 		return IsBucketDeleted(ctx, r.client, data.Name.ValueString())
 	}, backOff)

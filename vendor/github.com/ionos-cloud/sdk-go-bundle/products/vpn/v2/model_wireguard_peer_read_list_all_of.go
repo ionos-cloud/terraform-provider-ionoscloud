@@ -156,25 +156,11 @@ func (o *WireguardPeerReadListAllOf) SetItems(v []WireguardPeerRead) {
 	o.Items = v
 }
 
-func (o WireguardPeerReadListAllOf) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o WireguardPeerReadListAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Id) {
-		toSerialize["id"] = o.Id
-	}
-	if !IsZero(o.Type) {
-		toSerialize["type"] = o.Type
-	}
-	if !IsZero(o.Href) {
-		toSerialize["href"] = o.Href
-	}
+	toSerialize["id"] = o.Id
+	toSerialize["type"] = o.Type
+	toSerialize["href"] = o.Href
 	if !IsNil(o.Items) {
 		toSerialize["items"] = o.Items
 	}

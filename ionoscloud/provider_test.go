@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
 	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/provider"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"

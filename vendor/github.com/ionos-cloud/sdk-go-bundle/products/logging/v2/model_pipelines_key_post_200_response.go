@@ -72,14 +72,6 @@ func (o *PipelinesKeyPost200Response) SetKey(v string) {
 	o.Key = &v
 }
 
-func (o PipelinesKeyPost200Response) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o PipelinesKeyPost200Response) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Key) {

@@ -1171,7 +1171,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	if strings.ToLower(*server.Properties.Type) != "cube" {
+	if !strings.EqualFold(*server.Properties.Type, "cube") {
 		diags := deleteInlineVolumes(ctx, d, meta, client)
 		if diags != nil {
 			return diags

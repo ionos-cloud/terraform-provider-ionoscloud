@@ -242,7 +242,8 @@ func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn Re
 	if d.Id() == "" {
 		return fmt.Errorf("id not present for resource")
 	}
-	return retry.RetryContext(ctx, DefaultTimeout, func() *retry.RetryError {
+	// might be a good idea to pass the timeout from outside
+	return retry.RetryContext(ctx, d.Timeout(schema.TimeoutCreate), func() *retry.RetryError {
 		isReady, err := fn(ctx, d)
 		if isReady {
 			return nil
@@ -261,7 +262,7 @@ type IsResourceDeletedFunc func(ctx context.Context, d *schema.ResourceData) (bo
 // WaitForResourceToBeDeleted - keeps retrying until resource is not found(404), or until ctx is cancelled
 func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn IsResourceDeletedFunc) error {
 
-	err := retry.RetryContext(ctx, DefaultTimeout, func() *retry.RetryError {
+	err := retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
 		isDeleted, err := fn(ctx, d)
 		if isDeleted {
 			return nil
@@ -375,7 +376,7 @@ func ReadPublicKey(pathOrKey string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error for public key %s, check if path is correct or key is in correct format", pathOrKey)
 	}
-	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
+	return string(ssh.MarshalAuthorizedKey(pubKey)), nil
 }
 
 // MergeMaps merges a slice of map[string]any entries into one map.

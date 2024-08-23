@@ -156,25 +156,11 @@ func (o *Connection) SetIpv6CIDR(v string) {
 	o.Ipv6CIDR = &v
 }
 
-func (o Connection) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o Connection) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.DatacenterId) {
-		toSerialize["datacenterId"] = o.DatacenterId
-	}
-	if !IsZero(o.LanId) {
-		toSerialize["lanId"] = o.LanId
-	}
-	if !IsZero(o.Ipv4CIDR) {
-		toSerialize["ipv4CIDR"] = o.Ipv4CIDR
-	}
+	toSerialize["datacenterId"] = o.DatacenterId
+	toSerialize["lanId"] = o.LanId
+	toSerialize["ipv4CIDR"] = o.Ipv4CIDR
 	if !IsNil(o.Ipv6CIDR) {
 		toSerialize["ipv6CIDR"] = o.Ipv6CIDR
 	}

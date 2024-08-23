@@ -20,6 +20,12 @@ resource "ionoscloud_datacenter" "example" {
   description = "Datacenter for testing Dataplatform Cluster"
 }
 
+resource "ionoscloud_lan" "example" {
+  datacenter_id = ionoscloud_datacenter.example.id
+  public        = false
+  name          = "LAN_Example"
+}
+
 resource "ionoscloud_dataplatform_cluster" "example" {
   datacenter_id   		=  ionoscloud_datacenter.example.id
   name 					= "Dataplatform_Cluster_Example"
@@ -29,27 +35,11 @@ resource "ionoscloud_dataplatform_cluster" "example" {
   }
   version	= "23.11"
   lans {
-    lan_id = <LAN_ID>
+    lan_id = ionoscloud_lan.example.id
     dhcp = false
     routes {
-      network = <CIDR>
-      gateway = <GATEWAY_IP>
-    }
-  }
-  lans {
-    lan_id = <LAN_ID>
-    dhcp = false
-    routes {
-      network = <CIDR>
-      gateway = <GATEWAY_IP>
-    }
-    routes {
-      network = <CIDR>
-      gateway = <GATEWAY_IP>
-    }
-    routes {
-      network = <CIDR>
-      gateway = <GATEWAY_IP>
+      network = "182.168.42.1/24"
+      gateway = "192.168.42.1"
     }
   }
 }

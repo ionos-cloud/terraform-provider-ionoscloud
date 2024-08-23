@@ -2,7 +2,6 @@ package s3
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
@@ -88,13 +87,10 @@ func (d *bucketPolicyDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	policy, err := GetBucketPolicy(ctx, d.client, data.Bucket.ValueString())
+	bucket := data.Bucket.ValueString()
+	policy, err := GetBucketPolicy(ctx, d.client, bucket)
 	if err != nil {
-		if errors.Is(err, ErrBucketPolicyNotFound) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-		resp.Diagnostics.AddError("Failed to retrieve bucket policy", err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("Failed to retrieve policy for bucket: %s", bucket), err.Error())
 		return
 	}
 	var policyData bucketPolicyModel

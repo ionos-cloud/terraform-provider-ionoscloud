@@ -17,7 +17,7 @@ Manages **Users** and list users and groups associated with that user.
 resource "ionoscloud_user" "example" {
   first_name              = "example"
   last_name               = "example"
-  email                   = <unique_email>
+  email                   = "unique@email.com"
   password                = random_password.user_password.result
   administrator           = false
   force_sec_auth          = false

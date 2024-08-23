@@ -3,12 +3,14 @@ package dns
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 	"log"
 	"strings"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dns "github.com/ionos-cloud/sdk-go-dns"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 

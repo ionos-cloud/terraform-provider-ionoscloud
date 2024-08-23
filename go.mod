@@ -8,6 +8,7 @@ require (
 	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/hashicorp/terraform-plugin-framework v1.9.0
 	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.1.0
+	github.com/hashicorp/terraform-plugin-framework-timeouts v0.4.1
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
 	github.com/hashicorp/terraform-plugin-mux v0.16.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
@@ -15,8 +16,8 @@ require (
 	github.com/huandu/xstrings v1.3.3
 	github.com/iancoleman/strcase v0.3.0
 	github.com/ionos-cloud/sdk-go-api-gateway v1.0.0
-	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.0
-	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.0
+	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
+	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
 	github.com/ionos-cloud/sdk-go-cdn v1.0.0
 	github.com/ionos-cloud/sdk-go-cert-manager v1.1.0
@@ -26,6 +27,7 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2
+	github.com/ionos-cloud/sdk-go-kafka v1.0.0
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
 	github.com/ionos-cloud/sdk-go-nfs v1.0.0
 	github.com/ionos-cloud/sdk-go-s3 v1.1.0
@@ -36,9 +38,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-
-require github.com/ionos-cloud/sdk-go-kafka v1.0.0
 
 require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
@@ -48,6 +47,7 @@ require (
 )
 
 require (
+	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/ProtonMail/go-crypto v1.1.0-alpha.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect

@@ -84,7 +84,7 @@ resource "random_password" "server_image_password" {
 > following options:
 1. Create multiple IP failover groups resources and use `depends_on` meta-argument to specify the order
 of creation, for example:
-```hcl
+```example
 resource "ionoscloud_ipfailover" "firstexample" {
   datacenter_id         = <datacenter ID>
   lan_id                = <LAN ID>

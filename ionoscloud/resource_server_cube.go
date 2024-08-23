@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
@@ -915,7 +916,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 			if err != nil {
 				if !httpNotFound(apiResponse) {
-					diags := diag.FromErr(fmt.Errorf("error occurred at checking existance of firewall %s %s", firewallId, err))
+					diags := diag.FromErr(fmt.Errorf("error occurred at checking existence of firewall %s %w", firewallId, err))
 					return diags
 				} else if httpNotFound(apiResponse) {
 					diags := diag.FromErr(fmt.Errorf("firewall does not exist %s", firewallId))
