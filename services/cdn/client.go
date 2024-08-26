@@ -1,17 +1,12 @@
 package cdn
 
 import (
-	"context"
 	"fmt"
-	"log"
-	"net/http"
-	"os"
-	"runtime"
-	"strings"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	cdn "github.com/ionos-cloud/sdk-go-cdn"
+	cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"net/http"
+	"runtime"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -24,11 +19,7 @@ type Client struct {
 
 // NewCDNClient returns a new CDN client
 func NewCDNClient(username, password, token, url, version, terraformVersion string) *Client {
-	newConfigCDN := cdn.NewConfiguration(username, password, token, url)
-
-	if os.Getenv(constant.IonosDebug) != "" {
-		newConfigCDN.Debug = true
-	}
+	newConfigCDN := shared.NewConfiguration(username, password, token, url)
 	newConfigCDN.MaxRetries = constant.MaxRetries
 	newConfigCDN.MaxWaitTime = constant.MaxWaitTime
 
@@ -40,20 +31,4 @@ func NewCDNClient(username, password, token, url, version, terraformVersion stri
 	return &Client{
 		SdkClient: cdn.NewAPIClient(newConfigCDN),
 	}
-}
-
-// IsDistributionReady checks if the distribution is ready
-func (c *Client) IsDistributionReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	distributionID := d.Id()
-	distribution, _, err := c.SdkClient.DistributionsApi.DistributionsFindById(ctx, distributionID).Execute()
-	if err != nil {
-		return true, fmt.Errorf("status check failed for MariaDB distribution with ID: %v, error: %w", distributionID, err)
-	}
-
-	if distribution.Metadata == nil || distribution.Metadata.State == nil {
-		return false, fmt.Errorf("distribution metadata or state is empty for MariaDB distribution with ID: %v", distributionID)
-	}
-
-	log.Printf("[INFO] state of the MariaDB distribution with ID: %v is: %s ", distributionID, *distribution.Metadata.State)
-	return strings.EqualFold(*distribution.Metadata.State, constant.Available), nil
 }

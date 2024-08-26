@@ -68,19 +68,9 @@ func (o *CentralLoggingToggleProperties) SetEnabled(v bool) {
 	o.Enabled = v
 }
 
-func (o CentralLoggingToggleProperties) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o CentralLoggingToggleProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Enabled) {
-		toSerialize["enabled"] = o.Enabled
-	}
+	toSerialize["enabled"] = o.Enabled
 	return toSerialize, nil
 }
 

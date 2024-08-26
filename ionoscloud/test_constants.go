@@ -1679,7 +1679,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
 }`
 
 const testAccCheckCDNDistributionConfigBasic = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
-	domain         = "ionossdk.terra.example.basic"
+	domain         = "unique.test.example.com"
 	routing_rules {
 		scheme = "http"
 		prefix = "/api"
@@ -1726,8 +1726,8 @@ resource "random_string" "simple_string" {
 
 // K8s values
 const (
-	K8sVersion                  = "1.29.5"
-	UpgradedK8sVersion          = "1.26.6"
+	K8sVersion                  = "1.29.6"
+	UpgradedK8sVersion          = "1.29.7"
 	K8sBucket                   = "test_k8s_terraform_v7"
 	K8sPrivateClusterNodeSubnet = "192.168.0.0/16"
 )

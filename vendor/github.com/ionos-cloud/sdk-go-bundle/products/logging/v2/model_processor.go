@@ -209,14 +209,6 @@ func (o *Processor) SetDestinations(v []Destination) {
 	o.Destinations = v
 }
 
-func (o Processor) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o Processor) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Source) {

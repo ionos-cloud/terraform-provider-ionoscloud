@@ -72,14 +72,6 @@ func (o *PipelineResponseAllOf) SetPublic(v bool) {
 	o.Public = &v
 }
 
-func (o PipelineResponseAllOf) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o PipelineResponseAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Public) {

@@ -1,12 +1,13 @@
 ---
 subcategory: "VPN"
 layout: "ionoscloud"
-page_title: "IonosCloud: vpn_wireguard_gateway_peer"
-sidebar_current: "docs-ionoscloud-vpn-wireguard-peer"
+page_title: "IonosCloud: vpn_wireguard_peer"
+sidebar_current: "docs-resource-vpn-wireguard-peer"
 description: |-
-  Provides information about a specific IonosCloud VPN WireGuard Peer.
+  Creates and manages IonosCloud VPN Wireguard Gateway Peer objects.
 ---
-# VPN WireGuard Gateway Resource
+
+# ionoscloud_vpn_wireguard_peer
 
 This page provides an overview of the `ionoscloud_vpn_wireguard_peer` resource, which allows you to manage a WireGuard Peer in your cloud infrastructure. 
 This resource enables the creation, management, and deletion of a WireGuard VPN Peer, facilitating secure connections between your network resources.
@@ -46,7 +47,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-- `status` - The current status of the WireGuard Gateway.
+- `status` - The current status of the WireGuard Gateway Peer.
 
 ## Import
 

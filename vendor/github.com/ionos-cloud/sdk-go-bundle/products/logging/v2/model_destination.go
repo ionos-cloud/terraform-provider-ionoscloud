@@ -116,14 +116,6 @@ func (o *Destination) SetRetentionInDays(v int32) {
 	o.RetentionInDays = &v
 }
 
-func (o Destination) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o Destination) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Type) {
