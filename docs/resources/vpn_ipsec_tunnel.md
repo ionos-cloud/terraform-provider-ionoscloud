@@ -50,7 +50,7 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
 }
 
 resource "ionoscloud_vpn_ipsec_tunnel" "example" {
-    location = "es/vit"
+    location = "de/fra"
     gateway_id = ionoscloud_vpn_ipsec_gateway.example.id
     
     name = "example-tunnel"
@@ -161,7 +161,7 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
 }
 
 resource "ionoscloud_vpn_ipsec_tunnel" "example" {
-    location = "es/vit"
+    location = "de/fra"
     gateway_id = ionoscloud_vpn_ipsec_gateway.example.id
     
     name = "example-tunnel"
