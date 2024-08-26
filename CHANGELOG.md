@@ -11,6 +11,7 @@
 - New sdk-go-bundle versions to fix default params not being sent when having default values on marshalling
 - Fix CDN tests
 - Fix small CDN bug that led to an inconsistent state
+- Fix k8s tests.
 
 ### Documentation
 - Update documentation for S3 bucket resource
