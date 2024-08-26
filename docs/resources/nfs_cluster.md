@@ -14,6 +14,41 @@ Create clusters of Network File Storage (NFS) on IonosCloud.
 ## Example Usage
 
 ```hcl
+# Basic example
+
+resource "ionoscloud_datacenter" "nfs_dc" {
+  name                = "NFS Datacenter"
+  location            = "de/txl"
+  description         = "Datacenter Description"
+  sec_auth_protection = false
+}
+
+resource "ionoscloud_lan" "nfs_lan" {
+  datacenter_id = ionoscloud_datacenter.nfs_dc.id
+  public        = false
+  name          = "Lan for NFS"
+}
+
+resource "ionoscloud_nfs_cluster" "example" {
+  name = "test"
+  location = "de/txl"
+  size = 2
+
+  nfs {
+    min_version = "4.2"
+  }
+  
+  connections {
+    datacenter_id = ionoscloud_datacenter.nfs_dc.id
+    ip_address    = "192.168.100.10/24"
+    lan           = ionoscloud_lan.nfs_lan.id
+  }
+}
+```
+
+```hcl
+# Complete example
+
 resource "ionoscloud_datacenter" "nfs_dc" {
   name                = "NFS Datacenter"
   location            = "de/txl"
