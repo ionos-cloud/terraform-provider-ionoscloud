@@ -26,6 +26,7 @@
 - Only valid hcl in resource examples
 - `connections` needs to be required for `ionoscloud_vpn_wireguard_gateway` resource
 - Minor documentation fix for CDN resource
+- Add basic examples for NFS, VPN Gateway and Kafka resources
 
 ## 6.5.0
 ### Features
