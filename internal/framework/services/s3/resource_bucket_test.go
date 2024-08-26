@@ -122,6 +122,46 @@ func TestAccBucketResource_ForceDestroyObjectVersions(t *testing.T) {
 	})
 }
 
+func TestAccBucketResource_Tags(t *testing.T) {
+	rName := acctest.GenerateRandomResourceName(bucketPrefix)
+	name := "ionoscloud_s3_bucket.test"
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		CheckDestroy: testAccCheckBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBucketConfig_tags(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(name, "name", rName),
+					resource.TestCheckResourceAttr(name, "id", rName),
+					resource.TestCheckResourceAttr(name, "region", "eu-central-3"),
+					resource.TestCheckResourceAttr(name, "tags.key1", "value1"),
+					resource.TestCheckResourceAttr(name, "tags.key2", "value2"),
+				),
+			},
+			{
+				Config: testAccBucketConfig_tagsUpdated(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(name, "tags.key1", "value1"),
+					resource.TestCheckNoResourceAttr(name, "tags.key2"),
+					resource.TestCheckResourceAttr(name, "tags.key3", "value3"),
+				),
+			},
+			{
+				Config: testAccBucketConfig_basic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(name, "tags.%", "0"),
+				),
+			},
+		},
+	})
+
+}
+
 func TestAccBucketResource_ForceDestroyObjectLockEnabled(t *testing.T) {
 	ctx := context.Background()
 	rName := acctest.GenerateRandomResourceName(bucketPrefix)
@@ -149,6 +189,30 @@ func testAccBucketConfig_basic(bucketName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_s3_bucket" "test" {
   name = %[1]q
+}
+`, bucketName)
+}
+
+func testAccBucketConfig_tags(bucketName string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_s3_bucket" "test" {
+  name = %[1]q
+  tags = {
+	key1 = "value1"
+    key2 = "value2"
+  }
+}
+`, bucketName)
+}
+
+func testAccBucketConfig_tagsUpdated(bucketName string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_s3_bucket" "test" {
+  name = %[1]q
+  tags = {
+	key1 = "value1"
+	key3 = "value3"
+  }
 }
 `, bucketName)
 }

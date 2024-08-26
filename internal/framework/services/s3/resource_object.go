@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -275,22 +277,6 @@ func (r *objectResource) Create(ctx context.Context, req resource.CreateRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func setComputedAttributes(ctx context.Context, data *objectResourceModel, apiResponse *s3.APIResponse, client *s3.APIClient) error {
-	contentType := apiResponse.Header.Get("Content-Type")
-	if contentType != "" {
-		data.ContentType = types.StringValue(contentType)
-	}
-
-	data.VersionID = types.StringValue(apiResponse.Header.Get("x-amz-version-id"))
-
-	etag := apiResponse.Header.Get("ETag")
-	if etag != "" {
-		data.Etag = types.StringValue(strings.Trim(etag, "\""))
-	}
-
-	return setContentType(ctx, data, client)
-}
-
 func (r *objectResource) refreshData(ctx context.Context, data *objectResourceModel) diag.Diagnostics {
 	diags := diag.Diagnostics{}
 	_, apiResponse, err := findObject(ctx, r.client, data)
@@ -396,6 +382,13 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 		}
 	}
 
+	if !plan.Tags.Equal(state.Tags) {
+		if err := tfs3.UpdateObjectTags(ctx, r.client, plan.Bucket.ValueString(), plan.Key.ValueString(), tags.NewFromTFMap(plan.Tags), tags.NewFromTFMap(state.Tags)); err != nil {
+			resp.Diagnostics.AddError("failed to update object tags", err.Error())
+			return
+		}
+	}
+
 	setStateForUnknown(plan, state)
 	diags := r.refreshData(ctx, plan)
 	if diags.HasError() {
@@ -404,6 +397,22 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+}
+
+func setComputedAttributes(ctx context.Context, data *objectResourceModel, apiResponse *s3.APIResponse, client *s3.APIClient) error {
+	contentType := apiResponse.Header.Get("Content-Type")
+	if contentType != "" {
+		data.ContentType = types.StringValue(contentType)
+	}
+
+	data.VersionID = types.StringValue(apiResponse.Header.Get("x-amz-version-id"))
+
+	etag := apiResponse.Header.Get("ETag")
+	if etag != "" {
+		data.Etag = types.StringValue(strings.Trim(etag, "\""))
+	}
+
+	return setContentType(ctx, data, client)
 }
 
 func setStateForUnknown(plan, state *objectResourceModel) {

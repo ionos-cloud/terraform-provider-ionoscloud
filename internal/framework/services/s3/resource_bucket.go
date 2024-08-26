@@ -7,6 +7,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -17,6 +18,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
 
 	tfs3 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
 
@@ -45,6 +48,7 @@ type bucketResourceModel struct {
 	ObjectLockEnabled types.Bool     `tfsdk:"object_lock_enabled"`
 	ForceDestroy      types.Bool     `tfsdk:"force_destroy"`
 	Timeouts          timeouts.Value `tfsdk:"timeouts"`
+	Tags              types.Map      `tfsdk:"tags"`
 	ID                types.String   `tfsdk:"id"`
 }
 
@@ -89,6 +93,11 @@ func (r *bucketResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Computed:    true,
 				Optional:    true,
 				Default:     booldefault.StaticBool(false),
+			},
+			"tags": schema.MapAttribute{
+				Description: "A mapping of tags to assign to the bucket",
+				Optional:    true,
+				ElementType: types.StringType,
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -166,6 +175,11 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
+	if err = tfs3.CreateBucketTags(ctx, r.client, data.Name.ValueString(), tags.NewFromTFMap(data.Tags)); err != nil {
+		resp.Diagnostics.AddError("failed to create tags", err.Error())
+		return
+	}
+
 	location, _, err := r.client.BucketsApi.GetBucketLocation(ctx, data.Name.ValueString()).Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get bucket location", err.Error())
@@ -219,6 +233,13 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		data.ObjectLockEnabled = types.BoolValue(*objLockConfig.ObjectLockEnabled == "Enabled")
 	}
 
+	tags, diags := getBucketTags(ctx, r.client, data.Name.ValueString())
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	data.Tags = tags
 	data.Region = types.StringPointerValue(location.GetLocationConstraint())
 	data.ID = data.Name
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -231,17 +252,24 @@ func (r *bucketResource) ImportState(ctx context.Context, req resource.ImportSta
 
 // Update updates the bucket.
 func (r *bucketResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data bucketResourceModel
+	var plan, state *bucketResourceModel
 
 	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Nothing to update for now
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	if !plan.Tags.Equal(state.Tags) {
+		if err := tfs3.UpdateBucketTags(ctx, r.client, plan.Name.ValueString(), tags.NewFromTFMap(plan.Tags), tags.NewFromTFMap(state.Tags)); err != nil {
+			resp.Diagnostics.AddError("failed to update tags", err.Error())
+			return
+		}
+	}
+
+	plan.ID = state.ID
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 // Delete deletes the bucket.
@@ -321,4 +349,47 @@ func BucketExists(ctx context.Context, client *s3.APIClient, bucket string) erro
 		return backoff.Permanent(fmt.Errorf("failed to check if bucket exists: %w", formatXMLError(err)))
 	}
 	return nil
+}
+
+func getBucketTags(ctx context.Context, client *s3.APIClient, bucketName string) (types.Map, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
+	output, apiResponse, err := client.TaggingApi.GetBucketTagging(ctx, bucketName).Execute()
+	if apiResponse.HttpNotFound() {
+		return types.MapNull(types.StringType), nil
+	}
+
+	if err != nil {
+		diags.AddError("failed to get bucket tags", formatXMLError(err).Error())
+		return types.MapNull(types.StringType), diags
+	}
+
+	tags, diagErr := getTagsFromAPIResponse(ctx, output)
+	if diagErr != nil {
+		return types.MapNull(types.StringType), diagErr
+	}
+
+	return tags, nil
+}
+
+func getTagsFromAPIResponse(ctx context.Context, response *s3.GetBucketTaggingOutput) (types.Map, diag.Diagnostics) {
+	if response == nil || response.TagSet == nil {
+		return types.Map{}, nil
+
+	}
+
+	result := make(map[string]string)
+	for _, tag := range *response.TagSet {
+		if tag.Key == nil || tag.Value == nil {
+			continue
+		}
+
+		result[*tag.Key] = *tag.Value
+	}
+
+	tfResult, diagErr := types.MapValueFrom(ctx, types.StringType, result)
+	if diagErr != nil {
+		return types.Map{}, diagErr
+	}
+
+	return tfResult, nil
 }

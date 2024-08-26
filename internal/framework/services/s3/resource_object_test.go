@@ -351,6 +351,22 @@ func TestAccObjectResource_Tags(t *testing.T) {
 					resource.TestCheckResourceAttr(objectResourceName, "tags.key2", "value2"),
 				),
 			},
+			{
+				Config: testAccObjectConfig_tagsUpdated(bucket, key),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObjectExists(ctx, objectResourceName, &body),
+					testAccCheckObjectBody(&body, "test"),
+					resource.TestCheckResourceAttr(objectResourceName, "tags.key1", "value1"),
+					resource.TestCheckNoResourceAttr(objectResourceName, "tags.key2"),
+					resource.TestCheckResourceAttr(objectResourceName, "tags.key3", "value3"),
+				),
+			},
+			{
+				Config: testAccObjectConfig_basic(bucket, key),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(objectResourceName, "tags.%", "0"),
+				),
+			},
 		},
 	})
 
@@ -568,6 +584,21 @@ resource "ionoscloud_s3_object" "test" {
   tags = {
 	key1 = "value1"
 	key2 = "value2"
+  }
+}
+
+`, key))
+}
+
+func testAccObjectConfig_tagsUpdated(bucketName, key string) string {
+	return utils.ConfigCompose(testAccObjectConfig_base(bucketName), fmt.Sprintf(`
+resource "ionoscloud_s3_object" "test" {
+  bucket = ionoscloud_s3_bucket.test.name
+  key = %[1]q
+  content = "test"
+  tags = {
+	key1 = "value1"
+	key3 = "value3"
   }
 }
 
