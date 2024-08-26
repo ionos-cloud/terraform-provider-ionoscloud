@@ -299,6 +299,9 @@ github.com/iancoleman/strcase
 # github.com/ionos-cloud/sdk-go-api-gateway v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-api-gateway
+# github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.0.1
+## explicit; go 1.21
+github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2
@@ -308,9 +311,6 @@ github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
 # github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
 ## explicit; go 1.20
 github.com/ionos-cloud/sdk-go-bundle/shared
-# github.com/ionos-cloud/sdk-go-cdn v1.0.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-cdn
 # github.com/ionos-cloud/sdk-go-cert-manager v1.1.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-cert-manager
