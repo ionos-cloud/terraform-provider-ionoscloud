@@ -16,6 +16,39 @@ Manages a **Kafka Cluster** on IonosCloud.
 This resource will create an operational Kafka Cluster. After this section completes, the provisioner can be called.
 
 ```hcl
+# Basic example
+
+resource "ionoscloud_datacenter" "example" {
+  name     = "example-kafka-datacenter"
+  location = "de/fra"
+}
+
+resource "ionoscloud_lan" "example" {
+  datacenter_id = ionoscloud_datacenter.example.id
+  public        = false
+  name          = "example-kafka-lan"
+}
+
+resource "ionoscloud_kafka_cluster" "example" {
+  name     = "example-kafka-cluster"
+  location = "de/fra"
+  version  = "3.7.0"
+  size     = "S"
+  connections {
+    datacenter_id = ionoscloud_datacenter.example.id
+    lan_id = ionoscloud_lan.example.id
+    broker_addresses = [
+      "192.168.1.101/24",
+      "192.168.1.102/24",
+      "192.168.1.103/24"
+    ]
+  }
+}
+```
+
+```hcl
+# Complete example
+
 resource "ionoscloud_datacenter" "example" {
   name     = "example-kafka-datacenter"
   location = "de/fra"
@@ -70,11 +103,7 @@ resource "ionoscloud_kafka_cluster" "example" {
   connections {
     datacenter_id = ionoscloud_datacenter.example.id
     lan_id = ionoscloud_lan.example.id
-    broker_addresses = [
-      "192.168.1.101/24",
-      "192.168.1.102/24",
-      "192.168.1.103/24"
-    ]
+    broker_addresses = local.kafka_cluster_broker_ips_cidr
   }
 }
 ```

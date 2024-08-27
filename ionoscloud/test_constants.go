@@ -1677,9 +1677,22 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     availability_zone = "ZONE_1"
   }
 }`
+const testAccCheckCDNDistributionConfigOnlyRequired = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
+	domain         = "unique.test.example.com"
+	routing_rules {
+		scheme = "http"
+		prefix = "/api"
+		upstream {
+			host             = "server.example.com"
+			caching          = true
+			waf              = true
+			rate_limit_class = "R100"
+		}
+	}
+}`
 
 const testAccCheckCDNDistributionConfigBasic = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
-	domain         = "ionossdk.terra.example.basic"
+	domain         = "unique.test.example.com"
 	routing_rules {
 		scheme = "http"
 		prefix = "/api"
@@ -1726,8 +1739,8 @@ resource "random_string" "simple_string" {
 
 // K8s values
 const (
-	K8sVersion                  = "1.29.5"
-	UpgradedK8sVersion          = "1.26.6"
+	K8sVersion                  = "1.29.6"
+	UpgradedK8sVersion          = "1.29.7"
 	K8sBucket                   = "test_k8s_terraform_v7"
 	K8sPrivateClusterNodeSubnet = "192.168.0.0/16"
 )
