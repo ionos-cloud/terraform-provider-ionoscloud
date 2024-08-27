@@ -1,3 +1,8 @@
+## 6.5.2
+### Features
+- support for all s3 resources configurations
+
+
 ## 6.5.1
 ### Fixes
 - Fix nil deref due to `GeoRestrictions` not being checked against nil
