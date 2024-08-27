@@ -1,5 +1,9 @@
 ## 6.5.1
 ### Fixes
+- Fix nil deref due to `GeoRestrictions` not being checked against nil
+
+## 6.5.1
+### Fixes
 - Pass timeouts to `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
 - Add configurable timeouts to s3 buckets. Default stays 60 minutes.
 - Fix for vpn wireguard peer when there is no endpoint set
