@@ -1677,6 +1677,19 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     availability_zone = "ZONE_1"
   }
 }`
+const testAccCheckCDNDistributionConfigOnlyRequired = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
+	domain         = "unique.test.example.com"
+	routing_rules {
+		scheme = "http"
+		prefix = "/api"
+		upstream {
+			host             = "server.example.com"
+			caching          = true
+			waf              = true
+			rate_limit_class = "R100"
+		}
+	}
+}`
 
 const testAccCheckCDNDistributionConfigBasic = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
 	domain         = "unique.test.example.com"

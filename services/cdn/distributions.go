@@ -42,13 +42,14 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) 
 			upstreamEntry["waf"] = rule.Upstream.Waf
 			upstreamEntry["host"] = rule.Upstream.Host
 			upstreamEntry["rate_limit_class"] = rule.Upstream.RateLimitClass
-
-			geoRestrictionsEntry := make(map[string]interface{})
-			geoRestrictionsEntry["allow_list"] = rule.Upstream.GeoRestrictions.AllowList
-			geoRestrictionsEntry["block_list"] = rule.Upstream.GeoRestrictions.BlockList
-			geoRestrictionsList := make([]interface{}, 0)
-			geoRestrictionsList = append(geoRestrictionsList, geoRestrictionsEntry)
-			upstreamEntry["geo_restrictions"] = geoRestrictionsList
+			if rule.Upstream.GeoRestrictions != nil {
+				geoRestrictionsEntry := make(map[string]interface{})
+				geoRestrictionsEntry["allow_list"] = rule.Upstream.GeoRestrictions.AllowList
+				geoRestrictionsEntry["block_list"] = rule.Upstream.GeoRestrictions.BlockList
+				geoRestrictionsList := make([]interface{}, 0)
+				geoRestrictionsList = append(geoRestrictionsList, geoRestrictionsEntry)
+				upstreamEntry["geo_restrictions"] = geoRestrictionsList
+			}
 			upstreamList := make([]interface{}, 0)
 			upstreamList = append(upstreamList, upstreamEntry)
 			ruleEntry["upstream"] = upstreamList
