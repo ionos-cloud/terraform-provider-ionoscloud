@@ -55,6 +55,3 @@ jobs:
       - name: Run tests without tags
         if: ${{ github.event.inputs.test-tags == ''}}
         run: go test ./... -v -failfast -timeout 180m
-      - name: Run tests for ${{ github.event.inputs.test-tags }}
-        if: ${{ github.event.inputs.test-tags != '' && github.events.inputs.failfast == true }}
-        run: go test ./... -v -failfast -timeout 240m -tags ${{ github.event.inputs.test-tags }}
