@@ -99,5 +99,5 @@ func S3Client() (*s3.APIClient, error) {
 		return nil, fmt.Errorf("%s and %s must be set for acceptance tests", envar.IonosS3AccessKey, envar.IonosS3SecretKey)
 	}
 
-	return s3service.NewClient(accessKey, secretKey, ""), nil
+	return s3service.NewClient(accessKey, secretKey, "").GetBaseClient(), nil
 }

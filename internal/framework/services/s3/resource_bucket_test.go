@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/s3"
 	"log"
 	"os"
 	"testing"
@@ -329,10 +328,16 @@ func testAccCheckBucketDestroy(s *terraform.State) error {
 		}
 
 		if rs.Primary.Attributes["name"] != "" {
-			err = s3.IsBucketDeleted(context.Background(), client, rs.Primary.Attributes["name"])
+			apiResponse, err := client.BucketsApi.HeadBucket(context.Background(), rs.Primary.Attributes["name"]).Execute()
+			if apiResponse.HttpNotFound() {
+				return nil
+			}
+
 			if err != nil {
 				return err
 			}
+
+			return fmt.Errorf("bucket still exists")
 		}
 	}
 

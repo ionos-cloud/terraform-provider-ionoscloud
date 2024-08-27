@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/s3"
 )
 
 func TestAccBucketPublicAccessBlockResource(t *testing.T) {
@@ -69,10 +68,16 @@ func testAccCheckBucketPublicAccessBlockDestroy(s *terraform.State) error {
 		}
 
 		if rs.Primary.Attributes["bucket"] != "" {
-			_, err = s3.GetBucketPublicAccessBlock(context.Background(), client, rs.Primary.Attributes["bucket"])
-			if err != s3.ErrBucketPublicAccessBlockNotFound {
-				return err
+			_, apiResponse, err := client.PublicAccessBlockApi.GetPublicAccessBlock(context.Background(), rs.Primary.Attributes["bucket"]).Execute()
+			if apiResponse.HttpNotFound() {
+				return nil
 			}
+
+			if err != nil {
+				return fmt.Errorf("error checking for bucket public access block: %s", err)
+			}
+
+			return fmt.Errorf("bucket public access block still exists")
 		}
 	}
 

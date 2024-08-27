@@ -4,12 +4,9 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -19,9 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	s3 "github.com/ionos-cloud/sdk-go-s3"
 
-	tfs3 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
 )
 
 var (
@@ -35,43 +31,7 @@ func NewObjectCopyResource() resource.Resource {
 }
 
 type objectCopyResource struct {
-	client *s3.APIClient
-}
-
-type objectCopyResourceModel struct {
-	Bucket                                types.String `tfsdk:"bucket"`
-	Key                                   types.String `tfsdk:"key"`
-	Source                                types.String `tfsdk:"source"`
-	CacheControl                          types.String `tfsdk:"cache_control"`
-	ContentDisposition                    types.String `tfsdk:"content_disposition"`
-	ContentEncoding                       types.String `tfsdk:"content_encoding"`
-	ContentLanguage                       types.String `tfsdk:"content_language"`
-	ContentType                           types.String `tfsdk:"content_type"`
-	CopyIfMatch                           types.String `tfsdk:"copy_if_match"`
-	CopyIfModifiedSince                   types.String `tfsdk:"copy_if_modified_since"`
-	CopyIfNoneMatch                       types.String `tfsdk:"copy_if_none_match"`
-	CopyIfUnmodifiedSince                 types.String `tfsdk:"copy_if_unmodified_since"`
-	Expires                               types.String `tfsdk:"expires"`
-	MetadataDirective                     types.String `tfsdk:"metadata_directive"`
-	TaggingDirective                      types.String `tfsdk:"tagging_directive"`
-	ServerSideEncryption                  types.String `tfsdk:"server_side_encryption"`
-	StorageClass                          types.String `tfsdk:"storage_class"`
-	WebsiteRedirect                       types.String `tfsdk:"website_redirect"`
-	ServerSideEncryptionCustomerAlgorithm types.String `tfsdk:"server_side_encryption_customer_algorithm"`
-	ServerSideEncryptionCustomerKey       types.String `tfsdk:"server_side_encryption_customer_key"`
-	ServerSideEncryptionCustomerKeyMD5    types.String `tfsdk:"server_side_encryption_customer_key_md5"`
-	SourceCustomerAlgorithm               types.String `tfsdk:"source_customer_algorithm"`
-	SourceCustomerKey                     types.String `tfsdk:"source_customer_key"`
-	SourceCustomerKeyMD5                  types.String `tfsdk:"source_customer_key_md5"`
-	ObjectLockMode                        types.String `tfsdk:"object_lock_mode"`
-	ObjectLockRetainUntilDate             types.String `tfsdk:"object_lock_retain_until_date"`
-	ObjectLockLegalHold                   types.String `tfsdk:"object_lock_legal_hold"`
-	LastModified                          types.String `tfsdk:"last_modified"`
-	Etag                                  types.String `tfsdk:"etag"`
-	Metadata                              types.Map    `tfsdk:"metadata"`
-	Tags                                  types.Map    `tfsdk:"tags"`
-	VersionID                             types.String `tfsdk:"version_id"`
-	ForceDestroy                          types.Bool   `tfsdk:"force_destroy"`
+	client *s3.Client
 }
 
 // Metadata returns the metadata for the object copy resource.
@@ -255,11 +215,11 @@ func (r *objectCopyResource) Configure(_ context.Context, req resource.Configure
 		return
 	}
 
-	client, ok := req.ProviderData.(*s3.APIClient)
+	client, ok := req.ProviderData.(*s3.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *s3.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -275,14 +235,13 @@ func (r *objectCopyResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	var data *objectCopyResourceModel
+	var data *s3.ObjectCopyResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	err := copyObject(ctx, r.client, data)
-	if err != nil {
+	if err := r.client.CopyObject(ctx, data); err != nil {
 		resp.Diagnostics.AddError("failed to create object copy", formatXMLError(err).Error())
 		return
 	}
@@ -297,29 +256,24 @@ func (r *objectCopyResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	var data *objectCopyResourceModel
+	var data *s3.ObjectCopyResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, apiResponse, err := findObjectCopy(ctx, r.client, data)
+	result, found, err := r.client.GetObjectCopy(ctx, data)
 	if err != nil {
-		if apiResponse.HttpNotFound() {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-
 		resp.Diagnostics.AddError("failed to read object copy", formatXMLError(err).Error())
 		return
 	}
 
-	diags := r.setDataModel(ctx, data, apiResponse)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	if !found {
+		resp.State.RemoveResource(ctx)
 		return
 	}
 
+	data = result
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -336,13 +290,9 @@ func (r *objectCopyResource) ImportState(ctx context.Context, req resource.Impor
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("key"), key)...)
 }
 
-func hasCopyConditions(plan *objectCopyResourceModel) bool {
-	return !plan.CopyIfMatch.IsNull() || !plan.CopyIfModifiedSince.IsNull() || !plan.CopyIfNoneMatch.IsNull() || !plan.CopyIfUnmodifiedSince.IsNull()
-}
-
 // Update updates the object copy.
 func (r *objectCopyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state *objectCopyResourceModel
+	var plan, state *s3.ObjectCopyResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -351,18 +301,8 @@ func (r *objectCopyResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	if hasCopyConditions(plan) || hasObjectCopyContentChanges(plan, state) {
-		err := copyObject(ctx, r.client, plan)
-		if err != nil {
-			resp.Diagnostics.AddError("failed to update object copy", formatXMLError(err).Error())
-			return
-		}
-	}
-
-	setObjectCopyStateForUnknown(plan, state)
-	diags := r.refreshData(ctx, plan)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	if err := r.client.UpdateObjectCopy(ctx, plan, state); err != nil {
+		resp.Diagnostics.AddError("failed to update object copy", formatXMLError(err).Error())
 		return
 	}
 
@@ -376,476 +316,14 @@ func (r *objectCopyResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	var data objectCopyResourceModel
+	var data *s3.ObjectCopyResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if !data.VersionID.IsNull() {
-		if _, err := tfs3.DeleteAllObjectVersions(ctx, r.client, &tfs3.DeleteRequest{
-			Bucket:       data.Bucket.ValueString(),
-			Key:          data.Key.ValueString(),
-			ForceDestroy: data.ForceDestroy.ValueBool(),
-			VersionID:    data.VersionID.ValueString(),
-		}); err != nil {
-			resp.Diagnostics.AddError("failed to delete object copy versions", formatXMLError(err).Error())
-			return
-		}
-	} else {
-		_, apiResponse, err := deleteObjectCopy(ctx, r.client, &data)
-		if err != nil {
-			if apiResponse.HttpNotFound() {
-				return
-			}
-
-			resp.Diagnostics.AddError("failed to delete object copy", formatXMLError(err).Error())
-			return
-		}
+	if err := r.client.DeleteObjectCopy(ctx, data); err != nil {
+		resp.Diagnostics.AddError("failed to delete object copy", formatXMLError(err).Error())
+		return
 	}
-}
-
-func copyObject(ctx context.Context, client *s3.APIClient, data *objectCopyResourceModel) error {
-	req := client.ObjectsApi.CopyObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
-	err := fillObjectCopyRequest(&req, data)
-	if err != nil {
-		return err
-	}
-
-	output, apiResponse, err := req.Execute()
-	if err != nil {
-		return err
-	}
-
-	return setObjectCopyComputedAttributes(ctx, data, apiResponse, output, client)
-}
-
-func setObjectCopyComputedAttributes(ctx context.Context, data *objectCopyResourceModel, apiResponse *s3.APIResponse, output *s3.CopyObjectResult, client *s3.APIClient) error {
-	contentType := apiResponse.Header.Get("Content-Type")
-	if contentType != "" {
-		data.ContentType = types.StringValue(contentType)
-	}
-
-	data.VersionID = types.StringValue(apiResponse.Header.Get("x-amz-version-id"))
-
-	if output.ETag != nil {
-		data.Etag = types.StringValue(strings.Trim(*output.ETag, "\""))
-	}
-
-	data.LastModified = types.StringValue(output.LastModified.Format(time.RFC3339))
-
-	return setObjectCopyContentType(ctx, data, client)
-}
-
-func (r *objectCopyResource) refreshData(ctx context.Context, data *objectCopyResourceModel) diag.Diagnostics {
-	diags := diag.Diagnostics{}
-	_, apiResponse, err := findObjectCopy(ctx, r.client, data)
-	if err != nil {
-		diags.AddError("failed to read object copy", formatXMLError(err).Error())
-		return diags
-	}
-
-	diags = r.setDataModel(ctx, data, apiResponse)
-	if diags.HasError() {
-		diags.Append(diags...)
-		return diags
-	}
-
-	return nil
-}
-
-func setObjectCopyStateForUnknown(plan, state *objectCopyResourceModel) {
-	if plan.VersionID.IsUnknown() {
-		plan.VersionID = state.VersionID
-	}
-
-	if plan.Etag.IsUnknown() {
-		plan.Etag = state.Etag
-	}
-}
-
-func setObjectCopyContentData(data *objectCopyResourceModel, apiResponse *s3.APIResponse) {
-	contentType := apiResponse.Header.Get("Content-Type")
-	if contentType != "" {
-		data.ContentType = types.StringValue(contentType)
-	}
-
-	data.VersionID = types.StringValue(apiResponse.Header.Get("x-amz-version-id"))
-
-	etag := apiResponse.Header.Get("ETag")
-	if etag != "" {
-		data.Etag = types.StringValue(strings.Trim(etag, "\""))
-	}
-
-	cacheControl := apiResponse.Header.Get("Cache-Control")
-	if cacheControl != "" {
-		data.CacheControl = types.StringValue(cacheControl)
-	}
-
-	contentDisposition := apiResponse.Header.Get("Content-Disposition")
-	if contentDisposition != "" {
-		data.ContentDisposition = types.StringValue(contentDisposition)
-	}
-
-	contentEncoding := apiResponse.Header.Get("Content-Encoding")
-	if contentEncoding != "" {
-		data.ContentEncoding = types.StringValue(contentEncoding)
-	}
-
-	contentLanguage := apiResponse.Header.Get("Content-Language")
-	if contentLanguage != "" {
-		data.ContentLanguage = types.StringValue(contentLanguage)
-	}
-
-	expires := apiResponse.Header.Get("Expires")
-	if expires != "" {
-		data.Expires = types.StringValue(expires)
-	}
-}
-
-func setObjectCopyServerSideEncryptionData(data *objectCopyResourceModel, apiResponse *s3.APIResponse) {
-	serverSideEncryption := apiResponse.Header.Get("x-amz-server-side-encryption")
-	if serverSideEncryption != "" {
-		data.ServerSideEncryption = types.StringValue(serverSideEncryption)
-	}
-
-	serverSideEncryptionCustomerAlgorithm := apiResponse.Header.Get("x-amz-server-side-encryption-customer-algorithm")
-	if serverSideEncryptionCustomerAlgorithm != "" {
-		data.ServerSideEncryptionCustomerAlgorithm = types.StringValue(serverSideEncryptionCustomerAlgorithm)
-	}
-
-	serverSideEncryptionCustomerKey := apiResponse.Header.Get("x-amz-server-side-encryption-customer-key")
-	if serverSideEncryptionCustomerKey != "" {
-		data.ServerSideEncryptionCustomerKey = types.StringValue(serverSideEncryptionCustomerKey)
-	}
-
-	serverSideEncryptionCustomerKeyMD5 := apiResponse.Header.Get("x-amz-server-side-encryption-customer-key-MD5")
-	if serverSideEncryptionCustomerKeyMD5 != "" {
-		data.ServerSideEncryptionCustomerKeyMD5 = types.StringValue(serverSideEncryptionCustomerKeyMD5)
-	}
-}
-
-func setObjectCopyLockData(data *objectCopyResourceModel, apiResponse *s3.APIResponse) error {
-	objectCopyLockMode := apiResponse.Header.Get("x-amz-object copy-lock-mode")
-	if objectCopyLockMode != "" {
-		data.ObjectLockMode = types.StringValue(objectCopyLockMode)
-	}
-
-	objectCopyLockRetainUntilDate := apiResponse.Header.Get("x-amz-object copy-lock-retain-until-date")
-	if objectCopyLockRetainUntilDate != "" {
-		parsedTime, err := time.Parse(time.RFC3339, objectCopyLockRetainUntilDate)
-		if err != nil {
-			return fmt.Errorf("failed to parse object copy lock retain until date: %w", err)
-		}
-
-		data.ObjectLockRetainUntilDate = types.StringValue(parsedTime.Format(time.RFC3339))
-	}
-
-	objectCopyLockLegalHold := apiResponse.Header.Get("x-amz-object copy-lock-legal-hold")
-	if objectCopyLockLegalHold != "" {
-		data.ObjectLockLegalHold = types.StringValue(objectCopyLockLegalHold)
-	}
-
-	return nil
-}
-
-func (r *objectCopyResource) setTagsData(ctx context.Context, data *objectCopyResourceModel) diag.Diagnostics {
-	tagsMap, err := getTags(ctx, r.client, data.Bucket.ValueString(), data.Key.ValueString())
-	if err != nil {
-		diags := diag.Diagnostics{}
-		diags.AddError("failed to get tags", err.Error())
-		return diags
-	}
-
-	if len(tagsMap) > 0 {
-		tags, diagErr := types.MapValueFrom(ctx, types.StringType, tagsMap)
-		if diagErr.HasError() {
-			return diagErr
-		}
-		data.Tags = tags
-	}
-
-	return nil
-}
-
-func setObjectCopyMetadata(ctx context.Context, data *objectCopyResourceModel, apiResponse *s3.APIResponse) diag.Diagnostics {
-	metadataMap := getMetadataMapFromHeaders(apiResponse, "X-Amz-Meta-")
-
-	if len(metadataMap) > 0 {
-		metadata, diagErr := types.MapValueFrom(ctx, types.StringType, metadataMap)
-		if diagErr.HasError() {
-			return diagErr
-		}
-		data.Metadata = metadata
-	}
-
-	return nil
-}
-
-func (r *objectCopyResource) setDataModel(ctx context.Context, data *objectCopyResourceModel, apiResponse *s3.APIResponse) diag.Diagnostics {
-	diags := diag.Diagnostics{}
-	setObjectCopyContentData(data, apiResponse)
-	setObjectCopyServerSideEncryptionData(data, apiResponse)
-
-	if err := setObjectCopyLockData(data, apiResponse); err != nil {
-		diags.AddError("failed to set object copy lock data", err.Error())
-		return diags
-	}
-
-	storageClass := apiResponse.Header.Get("x-amz-storage-class")
-	if storageClass != "" {
-		data.StorageClass = types.StringValue(storageClass)
-	}
-
-	websiteRedirect := apiResponse.Header.Get("x-amz-website-redirect-location")
-	if websiteRedirect != "" {
-		data.WebsiteRedirect = types.StringValue(websiteRedirect)
-	}
-
-	if diags = setObjectCopyMetadata(ctx, data, apiResponse); diags.HasError() {
-		return diags
-	}
-
-	if diags = r.setTagsData(ctx, data); diags.HasError() {
-		return diags
-	}
-
-	return nil
-}
-
-func setObjectCopyContentType(ctx context.Context, data *objectCopyResourceModel, client *s3.APIClient) error {
-	_, apiResponse, err := findObjectCopy(ctx, client, data)
-	if err != nil {
-		return err
-	}
-
-	contentType := apiResponse.Header.Get("Content-Type")
-	if contentType != "" {
-		data.ContentType = types.StringValue(contentType)
-	}
-
-	return nil
-}
-
-func deleteObjectCopy(ctx context.Context, client *s3.APIClient, data *objectCopyResourceModel) (map[string]interface{}, *s3.APIResponse, error) {
-	req := client.ObjectsApi.DeleteObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
-	if !data.VersionID.IsNull() {
-		req = req.VersionId(data.VersionID.ValueString())
-	}
-
-	if !data.ForceDestroy.IsNull() {
-		req = req.XAmzBypassGovernanceRetention(data.ForceDestroy.ValueBool())
-	}
-
-	return req.Execute()
-}
-
-func findObjectCopy(ctx context.Context, client *s3.APIClient, data *objectCopyResourceModel) (*s3.HeadObjectOutput, *s3.APIResponse, error) {
-	req := client.ObjectsApi.HeadObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
-	if !data.Etag.IsNull() {
-		req = req.IfMatch(data.Etag.ValueString())
-	}
-
-	if !data.VersionID.IsNull() {
-		req = req.VersionId(data.VersionID.ValueString())
-	}
-
-	if !data.ServerSideEncryptionCustomerAlgorithm.IsNull() {
-		req = req.XAmzServerSideEncryptionCustomerAlgorithm(data.ServerSideEncryptionCustomerAlgorithm.ValueString())
-	}
-
-	if !data.ServerSideEncryptionCustomerKey.IsNull() {
-		req = req.XAmzServerSideEncryptionCustomerKey(data.ServerSideEncryptionCustomerKey.ValueString())
-	}
-
-	if !data.ServerSideEncryptionCustomerKeyMD5.IsNull() {
-		req = req.XAmzServerSideEncryptionCustomerKeyMD5(data.ServerSideEncryptionCustomerKeyMD5.ValueString())
-	}
-
-	return req.Execute()
-}
-
-func fillObjectCopyContentData(data *objectCopyResourceModel, req *s3.ApiCopyObjectRequest) error {
-	if !data.CacheControl.IsNull() {
-		*req = req.CacheControl(data.CacheControl.ValueString())
-	}
-
-	if !data.ContentDisposition.IsNull() {
-		*req = req.ContentDisposition(data.ContentDisposition.ValueString())
-	}
-
-	if !data.ContentEncoding.IsNull() {
-		*req = req.ContentEncoding(data.ContentEncoding.ValueString())
-	}
-
-	if !data.ContentLanguage.IsNull() {
-		*req = req.ContentLanguage(data.ContentLanguage.ValueString())
-	}
-
-	if !data.ContentType.IsNull() {
-		*req = req.ContentType(data.ContentType.ValueString())
-	}
-
-	if !data.Expires.IsNull() {
-		t, err := time.Parse(time.RFC3339, data.Expires.ValueString())
-		if err != nil {
-			return fmt.Errorf("failed to parse expires time: %s", err.Error())
-		}
-
-		*req = req.Expires(t)
-	}
-
-	if !data.Source.IsNull() {
-		*req = req.XAmzCopySource(data.Source.ValueString())
-	}
-
-	if !data.CopyIfMatch.IsNull() {
-		*req = req.XAmzCopySourceIfMatch(data.CopyIfMatch.ValueString())
-	}
-
-	if !data.CopyIfModifiedSince.IsNull() {
-		t, err := time.Parse(time.RFC3339, data.CopyIfModifiedSince.ValueString())
-		if err != nil {
-			return fmt.Errorf("failed to parse copy_if_modified_since time: %s", err.Error())
-		}
-
-		*req = req.XAmzCopySourceIfModifiedSince(t)
-	}
-
-	if !data.CopyIfNoneMatch.IsNull() {
-		*req = req.XAmzCopySourceIfNoneMatch(data.CopyIfNoneMatch.ValueString())
-	}
-
-	if !data.CopyIfUnmodifiedSince.IsNull() {
-		t, err := time.Parse(time.RFC3339, data.CopyIfUnmodifiedSince.ValueString())
-		if err != nil {
-			return fmt.Errorf("failed to parse copy_if_unmodified_since time: %s", err.Error())
-		}
-
-		*req = req.XAmzCopySourceIfUnmodifiedSince(t)
-	}
-
-	return nil
-}
-
-func fillObjectCopyServerSideEncryptionData(data *objectCopyResourceModel, req *s3.ApiCopyObjectRequest) {
-	if !data.ServerSideEncryption.IsNull() {
-		*req = req.XAmzServerSideEncryption(data.ServerSideEncryption.ValueString())
-	}
-
-	if !data.ServerSideEncryptionCustomerAlgorithm.IsNull() {
-		*req = req.XAmzServerSideEncryptionCustomerAlgorithm(data.ServerSideEncryptionCustomerAlgorithm.ValueString())
-	}
-
-	if !data.ServerSideEncryptionCustomerKey.IsNull() {
-		*req = req.XAmzServerSideEncryptionCustomerKey(data.ServerSideEncryptionCustomerKey.ValueString())
-	}
-
-	if !data.ServerSideEncryptionCustomerKeyMD5.IsNull() {
-		*req = req.XAmzServerSideEncryptionCustomerKeyMD5(data.ServerSideEncryptionCustomerKeyMD5.ValueString())
-	}
-
-	if !data.SourceCustomerAlgorithm.IsNull() {
-		*req = req.XAmzCopySourceServerSideEncryptionCustomerAlgorithm(data.SourceCustomerAlgorithm.ValueString())
-	}
-
-	if !data.SourceCustomerKey.IsNull() {
-		*req = req.XAmzCopySourceServerSideEncryptionCustomerKey(data.SourceCustomerKey.ValueString())
-	}
-
-	if !data.SourceCustomerKeyMD5.IsNull() {
-		*req = req.XAmzCopySourceServerSideEncryptionCustomerKeyMD5(data.SourceCustomerKeyMD5.ValueString())
-	}
-}
-
-func fillObjectCopyLockData(data *objectCopyResourceModel, req *s3.ApiCopyObjectRequest) error {
-	if !data.ObjectLockMode.IsNull() {
-		*req = req.XAmzObjectLockMode(data.ObjectLockMode.ValueString())
-	}
-
-	if !data.ObjectLockRetainUntilDate.IsNull() {
-		t, err := time.Parse(time.RFC3339, data.ObjectLockRetainUntilDate.ValueString())
-		if err != nil {
-			return fmt.Errorf("can't parse objectCopy_lock_retain_until_date: %w", err)
-		}
-
-		*req = req.XAmzObjectLockRetainUntilDate(t)
-	}
-
-	if !data.ObjectLockLegalHold.IsNull() {
-		*req = req.XAmzObjectLockLegalHold(data.ObjectLockLegalHold.ValueString())
-	}
-
-	return nil
-}
-
-func fillObjectCopyRequest(req *s3.ApiCopyObjectRequest, data *objectCopyResourceModel) error {
-	fillObjectCopyServerSideEncryptionData(data, req)
-	if err := fillObjectCopyContentData(data, req); err != nil {
-		return err
-	}
-
-	if err := fillObjectCopyLockData(data, req); err != nil {
-		return err
-	}
-
-	if !data.StorageClass.IsNull() {
-		*req = req.XAmzStorageClass(data.StorageClass.ValueString())
-	}
-
-	if !data.WebsiteRedirect.IsNull() {
-		*req = req.XAmzWebsiteRedirectLocation(data.WebsiteRedirect.ValueString())
-	}
-
-	if !data.TaggingDirective.IsNull() {
-		*req = req.XAmzTaggingDirective(data.TaggingDirective.ValueString())
-	}
-
-	if !data.Tags.IsNull() {
-		tags, err := buildQueryString(data.Tags)
-		if err != nil {
-			return fmt.Errorf("failed to build tags query string: %s", err.Error())
-		}
-		*req = req.XAmzTagging(tags)
-	}
-
-	if !data.MetadataDirective.IsNull() {
-		*req = req.XAmzMetadataDirective(data.MetadataDirective.ValueString())
-	}
-
-	if !data.Metadata.IsNull() {
-		metadata, err := fromTFMap(data.Metadata)
-		if err != nil {
-			return fmt.Errorf("failed to convert metadata: %s", err.Error())
-		}
-
-		*req = req.XAmzMeta(metadata)
-	}
-
-	return nil
-}
-
-// hasObjectCopyContentChanges returns true if the plan has changes to the object copy content.
-func hasObjectCopyContentChanges(plan, state *objectCopyResourceModel) bool {
-	needsChange := !(plan.Source.Equal(state.Source) &&
-		plan.CacheControl.Equal(state.CacheControl) &&
-		plan.ContentDisposition.Equal(state.ContentDisposition) &&
-		plan.ContentEncoding.Equal(state.ContentEncoding) &&
-		plan.ContentLanguage.Equal(state.ContentLanguage) &&
-		plan.ContentType.Equal(state.ContentType) &&
-		plan.Expires.Equal(state.Expires) &&
-		plan.ServerSideEncryption.Equal(state.ServerSideEncryption) &&
-		plan.StorageClass.Equal(state.StorageClass) &&
-		plan.WebsiteRedirect.Equal(state.WebsiteRedirect) &&
-		plan.ServerSideEncryptionCustomerAlgorithm.Equal(state.ServerSideEncryptionCustomerAlgorithm) &&
-		plan.ServerSideEncryptionCustomerKey.Equal(state.ServerSideEncryptionCustomerKey) &&
-		plan.ServerSideEncryptionCustomerKeyMD5.Equal(state.ServerSideEncryptionCustomerKeyMD5) &&
-		plan.SourceCustomerAlgorithm.Equal(state.SourceCustomerAlgorithm) &&
-		plan.SourceCustomerKey.Equal(state.SourceCustomerKey) &&
-		plan.SourceCustomerKeyMD5.Equal(state.SourceCustomerKeyMD5) &&
-		plan.MetadataDirective.Equal(state.MetadataDirective) &&
-		plan.TaggingDirective.Equal(state.TaggingDirective) &&
-		plan.Metadata.Equal(state.Metadata) &&
-		plan.Source.Equal(state.Source))
-	return needsChange
 }

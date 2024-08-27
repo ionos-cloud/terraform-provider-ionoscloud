@@ -11,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/s3"
-
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 )
 
@@ -90,10 +88,16 @@ func testAccCheckBucketPolicyDestroy(s *terraform.State) error {
 		}
 
 		if rs.Primary.Attributes["bucket"] != "" {
-			_, err = s3.GetBucketPolicy(context.Background(), client, rs.Primary.Attributes["bucket"])
-			if err != s3.ErrBucketPolicyNotFound {
-				return err
+			_, apiResponse, err := client.PolicyApi.GetBucketPolicy(context.Background(), rs.Primary.Attributes["bucket"]).Execute()
+			if apiResponse.HttpNotFound() {
+				return nil
 			}
+
+			if err != nil {
+				return fmt.Errorf("error checking for bucket policy")
+			}
+
+			return fmt.Errorf("bucket policy still exists")
 		}
 	}
 

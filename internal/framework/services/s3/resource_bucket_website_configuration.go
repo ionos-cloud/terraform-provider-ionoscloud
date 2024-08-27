@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 )
 
 type bucketWebsiteConfiguration struct {
-	client *s3.APIClient
+	client *s3.Client
 }
 
 func (r *bucketWebsiteConfiguration) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
@@ -39,45 +39,6 @@ func (r *bucketWebsiteConfiguration) ConfigValidators(ctx context.Context) []res
 			path.MatchRoot("routing_rule"),
 		),
 	}
-}
-
-type bucketWebsiteConfigurationModel struct {
-	Bucket                types.String           `tfsdk:"bucket"`
-	IndexDocument         *indexDocument         `tfsdk:"index_document"`
-	ErrorDocument         *errorDocument         `tfsdk:"error_document"`
-	RedirectAllRequestsTo *redirectAllRequestsTo `tfsdk:"redirect_all_requests_to"`
-	RoutingRule           []routingRule          `tfsdk:"routing_rule"`
-}
-
-type indexDocument struct {
-	Suffix types.String `tfsdk:"suffix"`
-}
-
-type errorDocument struct {
-	Key types.String `tfsdk:"key"`
-}
-
-type redirectAllRequestsTo struct {
-	HostName types.String `tfsdk:"host_name"`
-	Protocol types.String `tfsdk:"protocol"`
-}
-
-type routingRule struct {
-	Condition *condition `tfsdk:"condition"`
-	Redirect  *redirect  `tfsdk:"redirect"`
-}
-
-type condition struct {
-	HTTPErrorCodeReturnedEquals types.String `tfsdk:"http_error_code_returned_equals"`
-	KeyPrefixEquals             types.String `tfsdk:"key_prefix_equals"`
-}
-
-type redirect struct {
-	HostName             types.String `tfsdk:"host_name"`
-	HTTPRedirectCode     types.String `tfsdk:"http_redirect_code"`
-	Protocol             types.String `tfsdk:"protocol"`
-	ReplaceKeyPrefixWith types.String `tfsdk:"replace_key_prefix_with"`
-	ReplaceKeyWith       types.String `tfsdk:"replace_key_with"`
 }
 
 // NewBucketWebsiteConfigurationResource creates a new resource for the bucket website configuration resource.
@@ -190,11 +151,11 @@ func (r *bucketWebsiteConfiguration) Configure(_ context.Context, req resource.C
 		return
 	}
 
-	client, ok := req.ProviderData.(*s3.APIClient)
+	client, ok := req.ProviderData.(*s3.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *s3.APIClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *s3.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -210,14 +171,13 @@ func (r *bucketWebsiteConfiguration) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	var data *bucketWebsiteConfigurationModel
+	var data *s3.BucketWebsiteConfigurationModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, err := r.client.WebsiteApi.PutBucketWebsite(ctx, data.Bucket.ValueString()).PutBucketWebsiteRequest(buildBucketWebsiteConfigurationFromModel(data)).Execute()
-	if err != nil {
+	if err := r.client.CreateBucketWebsite(ctx, data); err != nil {
 		resp.Diagnostics.AddError("Failed to create resource", err.Error())
 		return
 	}
@@ -232,23 +192,24 @@ func (r *bucketWebsiteConfiguration) Read(ctx context.Context, req resource.Read
 		return
 	}
 
-	var data *bucketWebsiteConfigurationModel
+	var data *s3.BucketWebsiteConfigurationModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	output, apiResponse, err := r.client.WebsiteApi.GetBucketWebsite(ctx, data.Bucket.ValueString()).Execute()
-	if apiResponse.HttpNotFound() {
-		resp.State.RemoveResource(ctx)
-		return
-	}
+	result, found, err := r.client.GetBucketWebsite(ctx, data.Bucket)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read resource", err.Error())
 		return
 	}
 
-	data = buildBucketWebsiteConfigurationModelFromAPIResponse(output, data)
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
+	data = result
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -264,25 +225,17 @@ func (r *bucketWebsiteConfiguration) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	var data *bucketWebsiteConfigurationModel
+	var data *s3.BucketWebsiteConfigurationModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, err := r.client.WebsiteApi.PutBucketWebsite(ctx, data.Bucket.ValueString()).PutBucketWebsiteRequest(buildBucketWebsiteConfigurationFromModel(data)).Execute()
-	if err != nil {
+	if err := r.client.UpdateBucketWebsite(ctx, data); err != nil {
 		resp.Diagnostics.AddError("Failed to update resource", err.Error())
 		return
 	}
 
-	output, _, err := r.client.WebsiteApi.GetBucketWebsite(ctx, data.Bucket.ValueString()).Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", err.Error())
-		return
-	}
-
-	data = buildBucketWebsiteConfigurationModelFromAPIResponse(output, data)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -293,133 +246,14 @@ func (r *bucketWebsiteConfiguration) Delete(ctx context.Context, req resource.De
 		return
 	}
 
-	var data *bucketWebsiteConfigurationModel
+	var data *s3.BucketWebsiteConfigurationModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, err := r.client.WebsiteApi.DeleteBucketWebsite(ctx, data.Bucket.ValueString()).Execute()
-	if err != nil {
+	if err := r.client.DeleteBucketWebsite(ctx, data.Bucket); err != nil {
 		resp.Diagnostics.AddError("Failed to delete resource", err.Error())
 		return
 	}
-}
-
-func buildBucketWebsiteConfigurationModelFromAPIResponse(output *s3.GetBucketWebsiteOutput, data *bucketWebsiteConfigurationModel) *bucketWebsiteConfigurationModel {
-	built := &bucketWebsiteConfigurationModel{
-		Bucket: data.Bucket,
-	}
-
-	if output.IndexDocument != nil {
-		built.IndexDocument = &indexDocument{
-			Suffix: types.StringPointerValue(output.IndexDocument.Suffix),
-		}
-	}
-
-	if output.ErrorDocument != nil {
-		built.ErrorDocument = &errorDocument{
-			Key: types.StringPointerValue(output.ErrorDocument.Key),
-		}
-	}
-
-	if output.RedirectAllRequestsTo != nil {
-		built.RedirectAllRequestsTo = &redirectAllRequestsTo{
-			HostName: types.StringPointerValue(output.RedirectAllRequestsTo.HostName),
-			Protocol: types.StringPointerValue(output.RedirectAllRequestsTo.Protocol),
-		}
-	}
-
-	if output.RoutingRules != nil {
-		built.RoutingRule = make([]routingRule, 0, len(*output.RoutingRules))
-		for _, r := range *output.RoutingRules {
-			var rl routingRule
-			if r.Condition != nil {
-				rl.Condition = &condition{
-					HTTPErrorCodeReturnedEquals: types.StringPointerValue(r.Condition.HttpErrorCodeReturnedEquals),
-				}
-			}
-			if r.Redirect != nil {
-				rl.Redirect = &redirect{
-					HostName:             types.StringPointerValue(r.Redirect.HostName),
-					HTTPRedirectCode:     types.StringPointerValue(r.Redirect.HttpRedirectCode),
-					Protocol:             types.StringPointerValue(r.Redirect.Protocol),
-					ReplaceKeyPrefixWith: types.StringPointerValue(r.Redirect.ReplaceKeyPrefixWith),
-					ReplaceKeyWith:       types.StringPointerValue(r.Redirect.ReplaceKeyWith),
-				}
-			}
-			built.RoutingRule = append(built.RoutingRule, rl)
-		}
-	}
-
-	return built
-}
-
-func buildBucketWebsiteConfigurationFromModel(data *bucketWebsiteConfigurationModel) s3.PutBucketWebsiteRequest {
-	return s3.PutBucketWebsiteRequest{
-		IndexDocument:         buildIndexDocumentFromModel(data.IndexDocument),
-		ErrorDocument:         buildErrorDocumentFromModel(data.ErrorDocument),
-		RedirectAllRequestsTo: buildRedirectAllRequestsToFromModel(data.RedirectAllRequestsTo),
-		RoutingRules:          buildRoutingRulesFromModel(data.RoutingRule),
-	}
-}
-
-func buildIndexDocumentFromModel(data *indexDocument) *s3.IndexDocument {
-	if data == nil {
-		return nil
-	}
-
-	return &s3.IndexDocument{
-		Suffix: data.Suffix.ValueStringPointer(),
-	}
-}
-
-func buildErrorDocumentFromModel(data *errorDocument) *s3.ErrorDocument {
-	if data == nil {
-		return nil
-	}
-
-	return &s3.ErrorDocument{
-		Key: data.Key.ValueStringPointer(),
-	}
-}
-
-func buildRedirectAllRequestsToFromModel(data *redirectAllRequestsTo) *s3.RedirectAllRequestsTo {
-	if data == nil {
-		return nil
-	}
-
-	return &s3.RedirectAllRequestsTo{
-		HostName: data.HostName.ValueStringPointer(),
-		Protocol: data.Protocol.ValueStringPointer(),
-	}
-}
-
-func buildRoutingRulesFromModel(data []routingRule) *[]s3.RoutingRule {
-	if len(data) == 0 {
-		return nil
-	}
-
-	rules := make([]s3.RoutingRule, 0, len(data))
-	for _, r := range data {
-		var rl s3.RoutingRule
-		if r.Condition != nil {
-			rl.Condition = &s3.RoutingRuleCondition{
-				HttpErrorCodeReturnedEquals: r.Condition.HTTPErrorCodeReturnedEquals.ValueStringPointer(),
-				KeyPrefixEquals:             r.Condition.KeyPrefixEquals.ValueStringPointer(),
-			}
-		}
-		if r.Redirect != nil {
-			rl.Redirect = &s3.Redirect{
-				HostName:             r.Redirect.HostName.ValueStringPointer(),
-				HttpRedirectCode:     r.Redirect.HTTPRedirectCode.ValueStringPointer(),
-				Protocol:             r.Redirect.Protocol.ValueStringPointer(),
-				ReplaceKeyPrefixWith: r.Redirect.ReplaceKeyPrefixWith.ValueStringPointer(),
-				ReplaceKeyWith:       r.Redirect.ReplaceKeyWith.ValueStringPointer(),
-			}
-		}
-		rules = append(rules, rl)
-	}
-
-	return &rules
 }

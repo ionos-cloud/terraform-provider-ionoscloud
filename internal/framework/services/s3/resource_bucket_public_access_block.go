@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -13,9 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
 var (
@@ -32,15 +31,7 @@ func NewBucketPublicAccessBlockResource() resource.Resource {
 }
 
 type bucketPublicAccessBlockResource struct {
-	client *s3.APIClient
-}
-
-type bucketPublicAccessBlockResourceModel struct {
-	Bucket                types.String `tfsdk:"bucket"`
-	BlockPublicACLS       types.Bool   `tfsdk:"block_public_acls"`
-	BlockPublicPolicy     types.Bool   `tfsdk:"block_public_policy"`
-	IgnorePublicACLS      types.Bool   `tfsdk:"ignore_public_acls"`
-	RestrictPublicBuckets types.Bool   `tfsdk:"restrict_public_buckets"`
+	client *s3.Client
 }
 
 // Metadata returns the metadata for the bucket resource.
@@ -89,11 +80,11 @@ func (r *bucketPublicAccessBlockResource) Configure(_ context.Context, req resou
 		return
 	}
 
-	client, ok := req.ProviderData.(*s3.APIClient)
+	client, ok := req.ProviderData.(*s3.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *s3.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -109,15 +100,13 @@ func (r *bucketPublicAccessBlockResource) Create(ctx context.Context, req resour
 		return
 	}
 
-	var data bucketPublicAccessBlockResourceModel
-
+	var data *s3.BucketPublicAccessBlockResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	requestInput := putBucketPublicAccessBlockInput(data)
-	_, err := r.client.PublicAccessBlockApi.PutPublicAccessBlock(ctx, data.Bucket.ValueString()).BlockPublicAccessPayload(requestInput).Execute()
-	if err != nil {
+
+	if err := r.client.CreateBucketPublicAccessBlock(ctx, data); err != nil {
 		resp.Diagnostics.AddError("failed to create bucket public access block", err.Error())
 		return
 	}
@@ -132,27 +121,24 @@ func (r *bucketPublicAccessBlockResource) Read(ctx context.Context, req resource
 		return
 	}
 
-	var data bucketPublicAccessBlockResourceModel
+	var data *s3.BucketPublicAccessBlockResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	bucket := data.Bucket.ValueString()
-	response, err := GetBucketPublicAccessBlock(ctx, r.client, bucket)
+	result, found, err := r.client.GetBucketPublicAccessBlock(ctx, data.Bucket)
 	if err != nil {
-		if errors.Is(err, ErrBucketPublicAccessBlockNotFound) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-		resp.Diagnostics.AddError(fmt.Sprintf("Failed to retrieve public access block for bucket: %s", bucket), err.Error())
+		resp.Diagnostics.AddError("failed to read bucket public access block", err.Error())
 		return
 	}
-	data.IgnorePublicACLS = types.BoolPointerValue(response.IgnorePublicAcls)
-	data.BlockPublicACLS = types.BoolPointerValue(response.BlockPublicAcls)
-	data.BlockPublicPolicy = types.BoolPointerValue(response.BlockPublicPolicy)
-	data.RestrictPublicBuckets = types.BoolPointerValue(response.RestrictPublicBuckets)
 
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
+	data = result
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -163,15 +149,18 @@ func (r *bucketPublicAccessBlockResource) ImportState(ctx context.Context, req r
 
 // Update updates the bucket.
 func (r *bucketPublicAccessBlockResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data bucketPublicAccessBlockResourceModel
+	if r.client == nil {
+		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
+		return
+	}
 
+	var data *s3.BucketPublicAccessBlockResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	requestInput := putBucketPublicAccessBlockInput(data)
-	_, err := r.client.PublicAccessBlockApi.PutPublicAccessBlock(ctx, data.Bucket.ValueString()).BlockPublicAccessPayload(requestInput).Execute()
-	if err != nil {
+
+	if err := r.client.UpdateBucketPublicAccessBlock(ctx, data); err != nil {
 		resp.Diagnostics.AddError("failed to update bucket public access block", err.Error())
 		return
 	}
@@ -186,38 +175,14 @@ func (r *bucketPublicAccessBlockResource) Delete(ctx context.Context, req resour
 		return
 	}
 
-	var data bucketPublicAccessBlockResourceModel
+	var data *s3.BucketPublicAccessBlockResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
-	if apiResponse, err := r.client.PublicAccessBlockApi.DeletePublicAccessBlock(ctx, data.Bucket.ValueString()).Execute(); err != nil {
-		if apiResponse.HttpNotFound() {
-			return
-		}
-
-		resp.Diagnostics.AddError("failed to delete bucket public access block", err.Error())
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-}
-
-// GetBucketPublicAccessBlock retrieves the public access block for the bucket
-func GetBucketPublicAccessBlock(ctx context.Context, client *s3.APIClient, bucketName string) (*s3.BlockPublicAccessOutput, error) {
-	response, apiResponse, err := client.PublicAccessBlockApi.GetPublicAccessBlock(ctx, bucketName).Execute()
-	if err != nil {
-		if apiResponse.HttpNotFound() {
-			return nil, ErrBucketPublicAccessBlockNotFound
-		}
-		return nil, err
+	if err := r.client.DeleteBucketPublicAccessBlock(ctx, data.Bucket); err != nil {
+		resp.Diagnostics.AddError("failed to delete bucket public access block", err.Error())
+		return
 	}
-	return response, nil
-}
-
-func putBucketPublicAccessBlockInput(model bucketPublicAccessBlockResourceModel) s3.BlockPublicAccessPayload {
-	input := s3.BlockPublicAccessPayload{
-		BlockPublicPolicy:     model.BlockPublicPolicy.ValueBoolPointer(),
-		IgnorePublicAcls:      model.IgnorePublicACLS.ValueBoolPointer(),
-		BlockPublicAcls:       model.BlockPublicACLS.ValueBoolPointer(),
-		RestrictPublicBuckets: model.RestrictPublicBuckets.ValueBoolPointer(),
-	}
-	return input
 }

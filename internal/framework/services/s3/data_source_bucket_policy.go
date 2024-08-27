@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
+
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-
-	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
 var _ datasource.DataSourceWithConfigure = (*bucketPolicyDataSource)(nil)
@@ -21,12 +19,7 @@ func NewBucketPolicyDataSource() datasource.DataSource {
 }
 
 type bucketPolicyDataSource struct {
-	client *s3.APIClient
-}
-
-type bucketPolicyDataSourceModel struct {
-	Bucket types.String         `tfsdk:"bucket"`
-	Policy jsontypes.Normalized `tfsdk:"policy"`
+	client *s3.Client
 }
 
 // Metadata returns the metadata for the data source.
@@ -42,11 +35,11 @@ func (d *bucketPolicyDataSource) Configure(ctx context.Context, req datasource.C
 		return
 	}
 
-	client, ok := req.ProviderData.(*s3.APIClient)
+	client, ok := req.ProviderData.(*s3.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *s3.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -74,32 +67,28 @@ func (d *bucketPolicyDataSource) Schema(ctx context.Context, req datasource.Sche
 
 // Read reads the data source.
 func (d *bucketPolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var diags diag.Diagnostics
-
 	if d.client == nil {
 		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
 		return
 	}
 
-	var data bucketPolicyDataSourceModel
+	var data *s3.BucketPolicyModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	bucket := data.Bucket.ValueString()
-	policy, err := GetBucketPolicy(ctx, d.client, bucket)
+	result, found, err := d.client.GetBucketPolicy(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Failed to retrieve policy for bucket: %s", bucket), err.Error())
+		resp.Diagnostics.AddError("Failed to read resource", err.Error())
 		return
 	}
-	var policyData bucketPolicyModel
-	if diags = setBucketPolicyData(policy, &policyData); diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-	data.Policy = policyData.Policy
 
-	// Save data into Terraform state
+	if !found {
+		resp.Diagnostics.AddError("Failed to read resource", "Resource not found")
+		return
+	}
+
+	data = result
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

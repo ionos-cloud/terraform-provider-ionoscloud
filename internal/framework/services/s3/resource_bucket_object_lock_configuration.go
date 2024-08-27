@@ -2,10 +2,9 @@ package s3
 
 import (
 	"context"
-	"crypto/md5" // nolint:gosec
-	"encoding/hex"
-	"encoding/xml"
 	"fmt"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
@@ -17,8 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
 var (
@@ -28,23 +25,7 @@ var (
 )
 
 type objectLockConfiguration struct {
-	client *s3.APIClient
-}
-
-type objectLockConfigurationModel struct {
-	Bucket            types.String `tfsdk:"bucket"`
-	ObjectLockEnabled types.String `tfsdk:"object_lock_enabled"`
-	Rule              *rule        `tfsdk:"rule"`
-}
-
-type rule struct {
-	DefaultRetention *defaultRetention `tfsdk:"default_retention"`
-}
-
-type defaultRetention struct {
-	Mode  types.String `tfsdk:"mode"`
-	Days  types.Int64  `tfsdk:"days"`
-	Years types.Int64  `tfsdk:"years"`
+	client *s3.Client
 }
 
 // NewObjectLockConfigurationResource creates a new resource for the bucket object lock configuration resource.
@@ -120,7 +101,7 @@ func (r *objectLockConfiguration) Configure(_ context.Context, req resource.Conf
 		return
 	}
 
-	client, ok := req.ProviderData.(*s3.APIClient)
+	client, ok := req.ProviderData.(*s3.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
@@ -140,20 +121,13 @@ func (r *objectLockConfiguration) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	var data *objectLockConfigurationModel
+	var data *s3.ObjectLockConfigurationModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	input := buildObjectLockConfigurationFromModel(data)
-	md5Sum, err := getMD5Hash(input)
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to generate MD5 sum", err.Error())
-		return
-	}
-	_, err = r.client.ObjectLockApi.PutObjectLockConfiguration(ctx, data.Bucket.ValueString()).PutObjectLockConfigurationRequest(input).ContentMD5(hex.EncodeToString([]byte(md5Sum))).Execute()
-	if err != nil {
+	if err := r.client.CreateObjectLock(ctx, data); err != nil {
 		resp.Diagnostics.AddError("Failed to create resource", err.Error())
 		return
 	}
@@ -168,23 +142,24 @@ func (r *objectLockConfiguration) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	var data *objectLockConfigurationModel
+	var data *s3.ObjectLockConfigurationModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	output, apiResponse, err := r.client.ObjectLockApi.GetObjectLockConfiguration(ctx, data.Bucket.ValueString()).Execute()
-	if apiResponse.HttpNotFound() {
-		resp.State.RemoveResource(ctx)
-		return
-	}
+	result, found, err := r.client.GetObjectLock(ctx, data.Bucket)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read resource", err.Error())
 		return
 	}
 
-	data = buildObjectLockConfigurationModelFromAPIResponse(output, data)
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
+	data = result
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -200,36 +175,17 @@ func (r *objectLockConfiguration) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	var data *objectLockConfigurationModel
+	var data *s3.ObjectLockConfigurationModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	input := buildObjectLockConfigurationFromModel(data)
-	md5Sum, err := getMD5Hash(input)
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to generate MD5 sum", err.Error())
-		return
-	}
-	_, err = r.client.ObjectLockApi.PutObjectLockConfiguration(ctx, data.Bucket.ValueString()).PutObjectLockConfigurationRequest(input).ContentMD5(hex.EncodeToString([]byte(md5Sum))).Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to create resource", err.Error())
+	if err := r.client.UpdateObjectLock(ctx, data); err != nil {
+		resp.Diagnostics.AddError("Failed to update resource", err.Error())
 		return
 	}
 
-	output, apiResponse, err := r.client.ObjectLockApi.GetObjectLockConfiguration(ctx, data.Bucket.ValueString()).Execute()
-	if apiResponse.HttpNotFound() {
-		resp.State.RemoveResource(ctx)
-		return
-	}
-
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", err.Error())
-		return
-	}
-
-	data = buildObjectLockConfigurationModelFromAPIResponse(output, data)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -240,82 +196,11 @@ func (r *objectLockConfiguration) Delete(ctx context.Context, req resource.Delet
 		return
 	}
 
-	var data *objectLockConfigurationModel
+	var data *s3.ObjectLockConfigurationModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Custom delete logic
-}
-
-func buildObjectLockConfigurationModelFromAPIResponse(output *s3.GetObjectLockConfigurationOutput, data *objectLockConfigurationModel) *objectLockConfigurationModel {
-	built := &objectLockConfigurationModel{
-		Bucket:            data.Bucket,
-		ObjectLockEnabled: types.StringPointerValue(output.ObjectLockEnabled),
-	}
-	if output.Rule != nil {
-		built.Rule = &rule{
-			DefaultRetention: &defaultRetention{
-				Mode:  types.StringPointerValue(output.Rule.DefaultRetention.Mode),
-				Days:  types.Int64PointerValue(toInt64(output.Rule.DefaultRetention.Days)),
-				Years: types.Int64PointerValue(toInt64(output.Rule.DefaultRetention.Years)),
-			},
-		}
-	}
-
-	return built
-}
-
-func buildObjectLockConfigurationFromModel(data *objectLockConfigurationModel) s3.PutObjectLockConfigurationRequest {
-	req := s3.PutObjectLockConfigurationRequest{
-		ObjectLockEnabled: data.ObjectLockEnabled.ValueStringPointer(),
-		Rule: &s3.PutObjectLockConfigurationRequestRule{
-			DefaultRetention: &s3.DefaultRetention{
-				Mode:  data.Rule.DefaultRetention.Mode.ValueStringPointer(),
-				Days:  toInt32(data.Rule.DefaultRetention.Days.ValueInt64Pointer()),
-				Years: toInt32(data.Rule.DefaultRetention.Years.ValueInt64Pointer()),
-			},
-		},
-	}
-	return req
-}
-
-func getMD5Hash(data interface{}) (string, error) {
-	// Marshal the struct to JSON
-	jsonBytes, err := xml.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-
-	// Create an MD5 hasher
-	hasher := md5.New() // nolint:gosec
-
-	// Write the JSON bytes to the hasher
-	_, err = hasher.Write(jsonBytes)
-	if err != nil {
-		return "", err
-	}
-
-	// Compute the MD5 checksum
-	md5sum := hasher.Sum(nil)
-	return string(md5sum), nil
-}
-
-func toInt32(i *int64) *int32 {
-	if i == nil {
-		return nil
-	}
-
-	v := int32(*i)
-	return &v
-}
-
-func toInt64(i *int32) *int64 {
-	if i == nil {
-		return nil
-	}
-
-	v := int64(*i)
-	return &v
+	// Cannot be deleted
 }

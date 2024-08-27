@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -13,8 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
 var (
@@ -23,24 +22,7 @@ var (
 )
 
 type bucketVersioningResource struct {
-	client *s3.APIClient
-}
-
-type bucketVersioningResourceModel struct {
-	Bucket                  types.String             `tfsdk:"bucket"`
-	VersioningConfiguration *versioningConfiguration `tfsdk:"versioning_configuration"`
-}
-
-type versioningConfiguration struct {
-	Status    types.String `tfsdk:"status"`
-	MfaDelete types.String `tfsdk:"mfa_delete"`
-}
-
-func (v versioningConfiguration) AttributeTypes() map[string]attr.Type {
-	return map[string]attr.Type{
-		"status":     types.StringType,
-		"mfa_delete": types.StringType,
-	}
+	client *s3.Client
 }
 
 // NewBucketVersioningResource creates a new resource for the bucket versioning resource.
@@ -93,11 +75,11 @@ func (r *bucketVersioningResource) Configure(_ context.Context, req resource.Con
 		return
 	}
 
-	client, ok := req.ProviderData.(*s3.APIClient)
+	client, ok := req.ProviderData.(*s3.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *s3.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -113,14 +95,13 @@ func (r *bucketVersioningResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	var data *bucketVersioningResourceModel
+	var data *s3.BucketVersioningResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, err := r.client.VersioningApi.PutBucketVersioning(ctx, data.Bucket.ValueString()).PutBucketVersioningRequest(buildPutRequestFromModel(data)).Execute()
-	if err != nil {
+	if err := r.client.CreateBucketVersioning(ctx, data); err != nil {
 		resp.Diagnostics.AddError("Failed to create bucket versioning", err.Error())
 		return
 	}
@@ -135,23 +116,24 @@ func (r *bucketVersioningResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	var data *bucketVersioningResourceModel
+	var data *s3.BucketVersioningResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	output, apiResponse, err := r.client.VersioningApi.GetBucketVersioning(ctx, data.Bucket.ValueString()).Execute()
-	if apiResponse.HttpNotFound() {
-		resp.State.RemoveResource(ctx)
-		return
-	}
+	result, found, err := r.client.GetBucketVersioning(ctx, data.Bucket)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read bucket versioning", err.Error())
 		return
 	}
 
-	data = buildModelFromAPIResponse(output, data)
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
+	data = result
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -167,30 +149,17 @@ func (r *bucketVersioningResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	var data *bucketVersioningResourceModel
+	var data *s3.BucketVersioningResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, err := r.client.VersioningApi.PutBucketVersioning(ctx, data.Bucket.ValueString()).PutBucketVersioningRequest(buildPutRequestFromModel(data)).Execute()
-	if err != nil {
+	if err := r.client.UpdateBucketVersioning(ctx, data); err != nil {
 		resp.Diagnostics.AddError("Failed to update bucket versioning", err.Error())
 		return
 	}
 
-	output, apiResponse, err := r.client.VersioningApi.GetBucketVersioning(ctx, data.Bucket.ValueString()).Execute()
-	if apiResponse.HttpNotFound() {
-		resp.State.RemoveResource(ctx)
-		return
-	}
-
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to read bucket versioning", err.Error())
-		return
-	}
-
-	data = buildModelFromAPIResponse(output, data)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -201,57 +170,14 @@ func (r *bucketVersioningResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	var data *bucketVersioningResourceModel
+	var data *s3.BucketVersioningResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Removing S3 bucket versioning for un-versioned bucket from state
-	if data.VersioningConfiguration.Status.ValueString() == string(s3.BUCKETVERSIONINGSTATUS_SUSPENDED) {
-		return
-	}
-
-	_, err := r.client.VersioningApi.PutBucketVersioning(ctx, data.Bucket.ValueString()).
-		PutBucketVersioningRequest(s3.PutBucketVersioningRequest{
-			Status: s3.BUCKETVERSIONINGSTATUS_SUSPENDED.Ptr(),
-		}).Execute()
-	if isInvalidStateBucketWithObjectLock(err) {
-		return
-	}
-
-	if err != nil {
+	if err := r.client.DeleteBucketVersioning(ctx, data); err != nil {
 		resp.Diagnostics.AddError("Failed to create bucket versioning", err.Error())
 		return
 	}
-}
-
-func buildModelFromAPIResponse(output *s3.GetBucketVersioningOutput, data *bucketVersioningResourceModel) *bucketVersioningResourceModel {
-	var versioningConfiguration versioningConfiguration
-	if output.Status != nil {
-		versioningConfiguration.Status = types.StringValue(string(*output.Status))
-	}
-
-	if output.MfaDelete != nil {
-		versioningConfiguration.MfaDelete = types.StringValue(string(*output.MfaDelete))
-	}
-
-	built := bucketVersioningResourceModel{
-		Bucket:                  data.Bucket,
-		VersioningConfiguration: &versioningConfiguration,
-	}
-
-	return &built
-}
-
-func buildPutRequestFromModel(data *bucketVersioningResourceModel) s3.PutBucketVersioningRequest {
-	var request s3.PutBucketVersioningRequest
-	if !data.VersioningConfiguration.Status.IsNull() {
-		request.Status = s3.BucketVersioningStatus(data.VersioningConfiguration.Status.ValueString()).Ptr()
-	}
-
-	if !data.VersioningConfiguration.MfaDelete.IsNull() {
-		request.MfaDelete = s3.MfaDeleteStatus(data.VersioningConfiguration.MfaDelete.ValueString()).Ptr()
-	}
-	return request
 }

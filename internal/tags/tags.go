@@ -1,6 +1,9 @@
 package tags
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
@@ -19,8 +22,22 @@ func New(tags []s3.Tag) KeyValueTags {
 	return result
 }
 
-// NewFromTFMap creates a new KeyValueTags from a Terraform map.
-func NewFromTFMap(m types.Map) KeyValueTags {
+// ToMap converts KeyValueTags to a Terraform map.
+func (t KeyValueTags) ToMap(ctx context.Context) (types.Map, error) {
+	if len(t) == 0 {
+		return types.MapNull(types.StringType), nil
+	}
+
+	tfResult, diagErr := types.MapValueFrom(ctx, types.StringType, t)
+	if diagErr != nil {
+		return types.Map{}, fmt.Errorf("failed to convert KeyValueTags to types.Map: %v", diagErr)
+	}
+
+	return tfResult, nil
+}
+
+// NewFromMap creates a new KeyValueTags from a Terraform map.
+func NewFromMap(m types.Map) KeyValueTags {
 	result := make(KeyValueTags)
 
 	for k, v := range m.Elements() {

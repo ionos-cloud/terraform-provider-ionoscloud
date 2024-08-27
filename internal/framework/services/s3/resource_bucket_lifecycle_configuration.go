@@ -2,8 +2,9 @@ package s3
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -11,8 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
 var (
@@ -21,35 +20,7 @@ var (
 )
 
 type bucketLifecycleConfiguration struct {
-	client *s3.APIClient
-}
-
-type bucketLifecycleConfigurationModel struct {
-	Bucket types.String    `tfsdk:"bucket"`
-	Rule   []lifecycleRule `tfsdk:"rule"`
-}
-
-type lifecycleRule struct {
-	ID                             types.String                    `tfsdk:"id"`
-	Prefix                         types.String                    `tfsdk:"prefix"`
-	Status                         types.String                    `tfsdk:"status"`
-	Expiration                     *expiration                     `tfsdk:"expiration"`
-	NoncurrentVersionExpiration    *noncurrentVersionExpiration    `tfsdk:"noncurrent_version_expiration"`
-	AbortIncompleteMultipartUpload *abortIncompleteMultipartUpload `tfsdk:"abort_incomplete_multipart_upload"`
-}
-
-type expiration struct {
-	Days                      types.Int64  `tfsdk:"days"`
-	Date                      types.String `tfsdk:"date"`
-	ExpiredObjectDeleteMarker types.Bool   `tfsdk:"expired_object_delete_marker"`
-}
-
-type noncurrentVersionExpiration struct {
-	NoncurrentDays types.Int64 `tfsdk:"noncurrent_days"`
-}
-
-type abortIncompleteMultipartUpload struct {
-	DaysAfterInitiation types.Int64 `tfsdk:"days_after_initiation"`
+	client *s3.Client
 }
 
 // NewBucketLifecycleConfigurationResource creates a new resource for the bucket lifecycle configuration resource.
@@ -154,7 +125,7 @@ func (r *bucketLifecycleConfiguration) Configure(_ context.Context, req resource
 		return
 	}
 
-	client, ok := req.ProviderData.(*s3.APIClient)
+	client, ok := req.ProviderData.(*s3.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
@@ -174,13 +145,13 @@ func (r *bucketLifecycleConfiguration) Create(ctx context.Context, req resource.
 		return
 	}
 
-	var data *bucketLifecycleConfigurationModel
+	var data *s3.BucketLifecycleConfigurationModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	err := putWithContentMD5Header(ctx, r.client, data)
+	err := r.client.CreateBucketLifecycle(ctx, data)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create resource", err.Error())
 		return
@@ -196,23 +167,24 @@ func (r *bucketLifecycleConfiguration) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	var data *bucketLifecycleConfigurationModel
+	var data *s3.BucketLifecycleConfigurationModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	output, apiResponse, err := r.client.LifecycleApi.GetBucketLifecycle(ctx, data.Bucket.ValueString()).Execute()
-	if apiResponse.HttpNotFound() {
-		resp.State.RemoveResource(ctx)
-		return
-	}
+	result, found, err := r.client.GetBucketLifecycle(ctx, data.Bucket)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read resource", err.Error())
 		return
 	}
 
-	data = buildBucketLifecycleConfigurationModelFromAPIResponse(output, data)
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
+	data = result
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -228,25 +200,17 @@ func (r *bucketLifecycleConfiguration) Update(ctx context.Context, req resource.
 		return
 	}
 
-	var data *bucketLifecycleConfigurationModel
+	var data *s3.BucketLifecycleConfigurationModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	err := putWithContentMD5Header(ctx, r.client, data)
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to create resource", err.Error())
+	if err := r.client.UpdateBucketLifecycle(ctx, data); err != nil {
+		resp.Diagnostics.AddError("Failed to update resource", err.Error())
 		return
 	}
 
-	output, _, err := r.client.LifecycleApi.GetBucketLifecycle(ctx, data.Bucket.ValueString()).Execute()
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", err.Error())
-		return
-	}
-
-	data = buildBucketLifecycleConfigurationModelFromAPIResponse(output, data)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -257,141 +221,14 @@ func (r *bucketLifecycleConfiguration) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	var data *bucketLifecycleConfigurationModel
+	var data *s3.BucketLifecycleConfigurationModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	_, err := r.client.LifecycleApi.DeleteBucketLifecycle(ctx, data.Bucket.ValueString()).Execute()
-	if err != nil {
+	if err := r.client.DeleteBucketLifecycle(ctx, data.Bucket); err != nil {
 		resp.Diagnostics.AddError("Failed to delete resource", err.Error())
 		return
-	}
-}
-
-func putWithContentMD5Header(ctx context.Context, client *s3.APIClient, data *bucketLifecycleConfigurationModel) error {
-	body := buildBucketLifecycleConfigurationFromModel(data)
-	hash, err := getMD5Hash(body)
-	if err != nil {
-		return fmt.Errorf("failed to generate MD5 sum: %s", err.Error())
-	}
-
-	_, err = client.LifecycleApi.PutBucketLifecycle(ctx, data.Bucket.ValueString()).PutBucketLifecycleRequest(body).ContentMD5(base64.StdEncoding.EncodeToString([]byte(hash))).Execute()
-	return err
-}
-
-func buildBucketLifecycleConfigurationModelFromAPIResponse(output *s3.GetBucketLifecycleOutput, data *bucketLifecycleConfigurationModel) *bucketLifecycleConfigurationModel {
-	data.Rule = buildRulesFromAPIResponse(output.Rules)
-	return data
-}
-
-func buildRulesFromAPIResponse(rules *[]s3.Rule) []lifecycleRule {
-	if rules == nil {
-		return nil
-	}
-
-	result := make([]lifecycleRule, 0, len(*rules))
-	for _, r := range *rules {
-		result = append(result, lifecycleRule{
-			ID:                             types.StringPointerValue(r.ID),
-			Prefix:                         types.StringPointerValue(r.Prefix),
-			Status:                         types.StringValue(string(*r.Status)),
-			Expiration:                     buildExpirationFromAPIResponse(r.Expiration),
-			NoncurrentVersionExpiration:    buildNoncurrentVersionExpirationFromAPIResponse(r.NoncurrentVersionExpiration),
-			AbortIncompleteMultipartUpload: buildAbortIncompleteMultipartUploadFromAPIResponse(r.AbortIncompleteMultipartUpload),
-		})
-	}
-
-	return result
-}
-
-func buildExpirationFromAPIResponse(exp *s3.LifecycleExpiration) *expiration {
-	if exp == nil {
-		return nil
-	}
-
-	return &expiration{
-		Days:                      types.Int64PointerValue(toInt64(exp.Days)),
-		Date:                      types.StringPointerValue(exp.Date),
-		ExpiredObjectDeleteMarker: types.BoolPointerValue(exp.ExpiredObjectDeleteMarker),
-	}
-}
-
-func buildNoncurrentVersionExpirationFromAPIResponse(exp *s3.NoncurrentVersionExpiration) *noncurrentVersionExpiration {
-	if exp == nil {
-		return nil
-	}
-
-	return &noncurrentVersionExpiration{
-		NoncurrentDays: types.Int64PointerValue(toInt64(exp.NoncurrentDays)),
-	}
-}
-
-func buildAbortIncompleteMultipartUploadFromAPIResponse(abort *s3.AbortIncompleteMultipartUpload) *abortIncompleteMultipartUpload {
-	if abort == nil {
-		return nil
-	}
-
-	return &abortIncompleteMultipartUpload{
-		DaysAfterInitiation: types.Int64PointerValue(toInt64(abort.DaysAfterInitiation)),
-	}
-}
-
-func buildBucketLifecycleConfigurationFromModel(data *bucketLifecycleConfigurationModel) s3.PutBucketLifecycleRequest {
-	return s3.PutBucketLifecycleRequest{
-		Rules: buildRulesFromModel(data.Rule),
-	}
-}
-
-func buildRulesFromModel(rules []lifecycleRule) *[]s3.Rule {
-	if rules == nil {
-		return nil
-	}
-
-	result := make([]s3.Rule, 0, len(rules))
-	for _, r := range rules {
-		result = append(result, s3.Rule{
-			ID:                             r.ID.ValueStringPointer(),
-			Prefix:                         r.Prefix.ValueStringPointer(),
-			Status:                         s3.ExpirationStatus(r.Status.ValueString()).Ptr(),
-			Expiration:                     buildExpirationFromModel(r.Expiration),
-			NoncurrentVersionExpiration:    buildNoncurrentVersionExpirationFromModel(r.NoncurrentVersionExpiration),
-			AbortIncompleteMultipartUpload: buildAbortIncompleteMultipartUploadFromModel(r.AbortIncompleteMultipartUpload),
-		})
-	}
-
-	return &result
-}
-
-func buildExpirationFromModel(expiration *expiration) *s3.LifecycleExpiration {
-	if expiration == nil {
-		return nil
-	}
-
-	return &s3.LifecycleExpiration{
-		Days:                      toInt32(expiration.Days.ValueInt64Pointer()),
-		Date:                      expiration.Date.ValueStringPointer(),
-		ExpiredObjectDeleteMarker: expiration.ExpiredObjectDeleteMarker.ValueBoolPointer(),
-	}
-}
-
-func buildNoncurrentVersionExpirationFromModel(expiration *noncurrentVersionExpiration) *s3.NoncurrentVersionExpiration {
-	if expiration == nil {
-		return nil
-	}
-
-	return &s3.NoncurrentVersionExpiration{
-		NoncurrentDays: toInt32(expiration.NoncurrentDays.ValueInt64Pointer()),
-	}
-}
-
-func buildAbortIncompleteMultipartUploadFromModel(abort *abortIncompleteMultipartUpload) *s3.AbortIncompleteMultipartUpload {
-	if abort == nil {
-		return nil
-	}
-
-	return &s3.AbortIncompleteMultipartUpload{
-		DaysAfterInitiation: toInt32(abort.DaysAfterInitiation.ValueInt64Pointer()),
 	}
 }

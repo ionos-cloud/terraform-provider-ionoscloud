@@ -14,8 +14,8 @@ const errAccessDenied = "AccessDenied"
 // If `force` is `true` then S3 Object Lock governance mode restrictions are bypassed and
 // an attempt is made to remove any S3 Object Lock legal holds.
 // Returns the number of object versions and delete markers deleted.
-func EmptyBucket(ctx context.Context, client *s3.APIClient, bucket string, forceDestroy bool) (int64, error) {
-	objCount, err := forEachObjectVersionsPage(ctx, client, bucket, func(ctx context.Context, conn *s3.APIClient, bucket string, page *s3.ListObjectVersionsOutput) (int64, error) {
+func (c *Client) EmptyBucket(ctx context.Context, bucket string, forceDestroy bool) (int64, error) {
+	objCount, err := c.forEachObjectVersionsPage(ctx, bucket, func(ctx context.Context, conn *s3.APIClient, bucket string, page *s3.ListObjectVersionsOutput) (int64, error) {
 		return deletePageOfObjectVersions(ctx, conn, bucket, forceDestroy, page)
 	})
 
@@ -23,13 +23,13 @@ func EmptyBucket(ctx context.Context, client *s3.APIClient, bucket string, force
 		return objCount, err
 	}
 
-	n, err := forEachObjectVersionsPage(ctx, client, bucket, deletePageOfDeleteMarkers)
+	n, err := c.forEachObjectVersionsPage(ctx, bucket, deletePageOfDeleteMarkers)
 	objCount += n
 
 	return objCount, err
 }
 
-func forEachObjectVersionsPage(ctx context.Context, conn *s3.APIClient, bucket string, fn func(ctx context.Context, conn *s3.APIClient, bucket string, page *s3.ListObjectVersionsOutput) (int64, error)) (int64, error) {
+func (c *Client) forEachObjectVersionsPage(ctx context.Context, bucket string, fn func(ctx context.Context, conn *s3.APIClient, bucket string, page *s3.ListObjectVersionsOutput) (int64, error)) (int64, error) {
 	var objCount int64
 
 	input := &ListObjectVersionsInput{
@@ -37,7 +37,7 @@ func forEachObjectVersionsPage(ctx context.Context, conn *s3.APIClient, bucket s
 	}
 	var lastErr error
 
-	pages := NewListObjectVersionsPaginator(conn, input)
+	pages := NewListObjectVersionsPaginator(c.client, input)
 	for pages.HasMorePages() {
 		page, err := pages.NextPage(ctx)
 
@@ -45,7 +45,7 @@ func forEachObjectVersionsPage(ctx context.Context, conn *s3.APIClient, bucket s
 			return objCount, fmt.Errorf("listing S3 bucket (%s) object versions: %w", bucket, err)
 		}
 
-		n, err := fn(ctx, conn, bucket, page)
+		n, err := fn(ctx, c.client, bucket, page)
 		objCount += n
 
 		if err != nil {

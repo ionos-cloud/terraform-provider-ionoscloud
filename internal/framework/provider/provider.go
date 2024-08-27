@@ -181,7 +181,6 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		s3.NewBucketDataSource,
 		s3.NewObjectDataSource,
 		s3.NewBucketPolicyDataSource,
-		s3.NewBucketPublicAccessBlockDataSource,
 		s3.NewObjectsDataSource,
 	}
 }

@@ -13,8 +13,18 @@ import (
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
 
+// Client is a wrapper around the S3 client.
+type Client struct {
+	client *s3.APIClient
+}
+
+// GetBaseClient returns the base client.
+func (c *Client) GetBaseClient() *s3.APIClient {
+	return c.client
+}
+
 // NewClient creates a new S3 client with the given credentials and region.
-func NewClient(id, secret, region string) *s3.APIClient {
+func NewClient(id, secret, region string) *Client {
 	cfg := s3.NewConfiguration()
 	signer := awsv4.NewSigner(credentials.NewStaticCredentials(id, secret, ""))
 	cfg.MiddlewareWithError = func(r *http.Request) error {
@@ -36,5 +46,7 @@ func NewClient(id, secret, region string) *s3.APIClient {
 		}
 		return err
 	}
-	return s3.NewAPIClient(cfg)
+	return &Client{
+		client: s3.NewAPIClient(cfg),
+	}
 }
