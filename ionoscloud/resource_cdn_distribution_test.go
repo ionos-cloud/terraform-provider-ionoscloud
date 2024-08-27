@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -26,6 +27,21 @@ func TestAccDistributionBasic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckCDNDistributionDestroyCheck,
 		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckCDNDistributionConfigOnlyRequired,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCDNDistributionExists(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, &distribution),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.caching", "true"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.waf", "true"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.rate_limit_class", "R100"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "certificate_id", ""),
+					resource.TestCheckNoResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.geo_restrictions.#"),
+				),
+			},
 			{
 				Config: testAccCheckCDNDistributionConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
