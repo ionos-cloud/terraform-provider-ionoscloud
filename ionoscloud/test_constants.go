@@ -1842,11 +1842,12 @@ const pipelineLogUpdated = pipelineLogAttribute + `{
 	` + pipelineLogDestinationUpdated + `
 }`
 
-// Standard configuration
+// LoggingPipelineConfig Standard configuration
 const LoggingPipelineConfig = `
 resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestResourceName + ` {
 	` + nameAttribute + ` = "` + pipelineNameValue + `"
 	` + pipelineLog + `
+	location = "es/vit"
 }
 `
 

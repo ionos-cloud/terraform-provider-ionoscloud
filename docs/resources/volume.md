@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: server"
+page_title: "IonosCloud: volume"
 sidebar_current: "docs-resource-volume"
 description: |-
   Creates and manages IonosCloud Volume objects.

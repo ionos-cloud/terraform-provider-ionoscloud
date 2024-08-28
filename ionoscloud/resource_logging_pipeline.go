@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"slices"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	validation "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -23,6 +26,13 @@ func resourceLoggingPipeline() *schema.Resource {
 			StateContext: pipelineImport,
 		},
 		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:             schema.TypeString,
+				Description:      fmt.Sprintf("The location of your logging pipeline. Default: de/txl. Supported locations: %s", strings.Join(logging.AvailableLocations, ", ")),
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(logging.AvailableLocations, false)),
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -41,7 +51,7 @@ func resourceLoggingPipeline() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							Description:      "The source parser to be used",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"kubernetes", "docker", "systemd"}, false)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"kubernetes", "docker", "systemd", "generic"}, false)),
 						},
 						"tag": {
 							Type:        schema.TypeString,
@@ -71,10 +81,11 @@ func resourceLoggingPipeline() *schema.Resource {
 										Computed: true,
 									},
 									"retention_in_days": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Computed:    true,
-										Description: "Defines the number of days a log record should be kept in loki. Works with loki destination type only. Possible values are: 7, 14, 30.",
+										Type:             schema.TypeInt,
+										Optional:         true,
+										Computed:         true,
+										Description:      "Defines the number of days a log record should be kept in loki. Works with loki destination type only. Possible values are: 7, 14, 30.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntInSlice([]int{7, 14, 30})),
 									},
 								},
 							},
@@ -98,25 +109,26 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the pipeline with ID: %s to become available: %w", *pipelineResponse.Id, err))
 	}
-	// Make another read and set the data in the state because 'grafanaAdress` is not returned in the create response
+	// Make another read and set the data in the state because 'grafanaAddress` is not returned in the create response
 	return pipelineRead(ctx, d, meta)
 }
 
 func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).LoggingClient
-	pipelineId := d.Id()
-	pipeline, apiResponse, err := client.GetPipelineByID(ctx, pipelineId)
+	pipelineID := d.Id()
+	location := d.Get("location").(string)
 
+	pipeline, apiResponse, err := client.GetPipelineByID(ctx, location, pipelineID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Could not find Logging pipeline with ID: %s", pipelineId)
+			log.Printf("[INFO] Could not find Logging pipeline with ID: %s", pipelineID)
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("error while fetching Logging pipeline with ID: %s, err: %w", pipelineId, err))
+		return diag.FromErr(fmt.Errorf("error while fetching Logging pipeline with ID: %s, err: %w", pipelineID, err))
 	}
 
-	log.Printf("[INFO] Successfully retrieved Logging pipeline with ID: %s: %+v", pipelineId, pipeline)
+	log.Printf("[INFO] Successfully retrieved Logging pipeline with ID: %s: %+v", pipelineID, pipeline)
 	if err := client.SetPipelineData(d, pipeline); err != nil {
 		return diag.FromErr(err)
 	}
@@ -126,35 +138,35 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).LoggingClient
-	pipelineId := d.Id()
-
-	apiResponse, err := client.DeletePipeline(ctx, pipelineId)
+	pipelineID := d.Id()
+	location := d.Get("location").(string)
+	apiResponse, err := client.DeletePipeline(ctx, location, pipelineID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("error while deleting Logging pipeline with ID: %s, error: %w", pipelineId, err))
+		return diag.FromErr(fmt.Errorf("error while deleting Logging pipeline with ID: %s, location %s, error: %w", pipelineID, location, err))
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsPipelineDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while wainting for Logging pipeline with ID: %s to be deleted, error: %w", pipelineId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while wainting for Logging pipeline with ID: %s to be deleted, error: %w", pipelineID, err))
 	}
 	return nil
 }
 
 func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).LoggingClient
-	pipelineId := d.Id()
+	pipelineID := d.Id()
 
-	pipelineResponse, _, err := client.UpdatePipeline(ctx, pipelineId, d)
+	pipelineResponse, _, err := client.UpdatePipeline(ctx, pipelineID, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while updating the Logging pipeline with ID: %s, error: %w", pipelineId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while updating the Logging pipeline with ID: %s, error: %w", pipelineID, err))
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the Logging pipeline with ID: %s to become available: %w", pipelineId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the Logging pipeline with ID: %s to become available: %w", pipelineID, err))
 	}
 	if err := client.SetPipelineData(d, pipelineResponse); err != nil {
 		return diag.FromErr(err)
@@ -163,6 +175,24 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func pipelineImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	pipelineRead(ctx, d, meta)
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("expected ID in the format location:id")
+	}
+
+	location := parts[0]
+	if !slices.Contains(logging.AvailableLocations, location) {
+		return nil, fmt.Errorf("invalid location: %v, location must be one of: %v", location, logging.AvailableLocations)
+	}
+
+	if err := d.Set("location", parts[0]); err != nil {
+		return nil, fmt.Errorf("failed to set location Kafka Cluster for import: %w", err)
+	}
+	d.SetId(parts[1])
+
+	diags := pipelineRead(ctx, d, meta)
+	if diags != nil && diags.HasError() {
+		return nil, fmt.Errorf(diags[0].Summary)
+	}
 	return []*schema.ResourceData{d}, nil
 }
