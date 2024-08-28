@@ -27,7 +27,6 @@ func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (lo
 
 // IsPipelineAvailable checks if the pipeline is available
 func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	c.changeConfigURL(d.Get("location").(string))
 	pipelineID := d.Id()
 	location := d.Get("location").(string)
 	pipeline, _, err := c.GetPipelineByID(ctx, location, pipelineID)
