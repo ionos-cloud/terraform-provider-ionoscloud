@@ -1,9 +1,9 @@
 /*
  * IONOS Cloud - DNS API
  *
- * DNS API Specification
+ * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.2.0
+ * API version: 1.16.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -17,29 +17,32 @@ import (
 
 // ZoneReadList struct for ZoneReadList
 type ZoneReadList struct {
-	Type  *string     `json:"type"`
-	Href  *string     `json:"href"`
-	Items *[]ZoneRead `json:"items"`
+	// ID (UUID) created to identify this action.
+	Id   *string `json:"id"`
+	Type *string `json:"type"`
+	Href *string `json:"href"`
 	// Pagination offset.
 	Offset *float32 `json:"offset"`
 	// Pagination limit.
-	Limit *float32 `json:"limit"`
-	Links *Links   `json:"_links"`
+	Limit *float32    `json:"limit"`
+	Links *Links      `json:"_links"`
+	Items *[]ZoneRead `json:"items"`
 }
 
 // NewZoneReadList instantiates a new ZoneReadList object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewZoneReadList(type_ string, href string, items []ZoneRead, offset float32, limit float32, links Links) *ZoneReadList {
+func NewZoneReadList(id string, type_ string, href string, offset float32, limit float32, links Links, items []ZoneRead) *ZoneReadList {
 	this := ZoneReadList{}
 
+	this.Id = &id
 	this.Type = &type_
 	this.Href = &href
-	this.Items = &items
 	this.Offset = &offset
 	this.Limit = &limit
 	this.Links = &links
+	this.Items = &items
 
 	return &this
 }
@@ -50,6 +53,44 @@ func NewZoneReadList(type_ string, href string, items []ZoneRead, offset float32
 func NewZoneReadListWithDefaults() *ZoneReadList {
 	this := ZoneReadList{}
 	return &this
+}
+
+// GetId returns the Id field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ZoneReadList) GetId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Id
+
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ZoneReadList) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Id, true
+}
+
+// SetId sets field value
+func (o *ZoneReadList) SetId(v string) {
+
+	o.Id = &v
+
+}
+
+// HasId returns a boolean if a field has been set.
+func (o *ZoneReadList) HasId() bool {
+	if o != nil && o.Id != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetType returns the Type field value
@@ -122,44 +163,6 @@ func (o *ZoneReadList) SetHref(v string) {
 // HasHref returns a boolean if a field has been set.
 func (o *ZoneReadList) HasHref() bool {
 	if o != nil && o.Href != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetItems returns the Items field value
-// If the value is explicit nil, the zero value for []ZoneRead will be returned
-func (o *ZoneReadList) GetItems() *[]ZoneRead {
-	if o == nil {
-		return nil
-	}
-
-	return o.Items
-
-}
-
-// GetItemsOk returns a tuple with the Items field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ZoneReadList) GetItemsOk() (*[]ZoneRead, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Items, true
-}
-
-// SetItems sets field value
-func (o *ZoneReadList) SetItems(v []ZoneRead) {
-
-	o.Items = &v
-
-}
-
-// HasItems returns a boolean if a field has been set.
-func (o *ZoneReadList) HasItems() bool {
-	if o != nil && o.Items != nil {
 		return true
 	}
 
@@ -280,18 +283,56 @@ func (o *ZoneReadList) HasLinks() bool {
 	return false
 }
 
+// GetItems returns the Items field value
+// If the value is explicit nil, the zero value for []ZoneRead will be returned
+func (o *ZoneReadList) GetItems() *[]ZoneRead {
+	if o == nil {
+		return nil
+	}
+
+	return o.Items
+
+}
+
+// GetItemsOk returns a tuple with the Items field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ZoneReadList) GetItemsOk() (*[]ZoneRead, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Items, true
+}
+
+// SetItems sets field value
+func (o *ZoneReadList) SetItems(v []ZoneRead) {
+
+	o.Items = &v
+
+}
+
+// HasItems returns a boolean if a field has been set.
+func (o *ZoneReadList) HasItems() bool {
+	if o != nil && o.Items != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o ZoneReadList) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Id != nil {
+		toSerialize["id"] = o.Id
+	}
+
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
-	}
-
-	if o.Items != nil {
-		toSerialize["items"] = o.Items
 	}
 
 	if o.Offset != nil {
@@ -304,6 +345,10 @@ func (o ZoneReadList) MarshalJSON() ([]byte, error) {
 
 	if o.Links != nil {
 		toSerialize["_links"] = o.Links
+	}
+
+	if o.Items != nil {
+		toSerialize["items"] = o.Items
 	}
 
 	return json.Marshal(toSerialize)
