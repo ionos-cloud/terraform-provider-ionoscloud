@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud: s3_objects"
 sidebar_current: "docs-ionoscloud-datasource-s3_objects"
 description: |-
-     Get information about IonosCloud S3 Objects.
+  Get information about IonosCloud S3 Objects.
 ---
 
 # ionoscloud_s3_objects
