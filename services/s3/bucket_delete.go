@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
@@ -128,10 +129,11 @@ func deletePageOfObjectVersions(ctx context.Context, conn *s3.APIClient, bucket 
 	objCount -= int64(len(*output.Errors))
 	var errs []error
 	for _, v := range *output.Errors {
-		if force && toString(v.Code) == errAccessDenied {
-			_, err := tryDisableLegalHold(ctx, conn, bucket, toString(v.Key), toString(v.VersionId))
+		if force && shared.ToValueDefault(v.Code) == errAccessDenied {
+			_, err := tryDisableLegalHold(ctx, conn, bucket, shared.ToValueDefault(v.Key), shared.ToValueDefault(v.VersionId))
 			if err != nil {
-				errs = append(errs, []error{newDeleteObjectVersionError(v), fmt.Errorf("removing legal hold: %w", newObjectVersionError(toString(v.Key), toString(v.VersionId), err))}...)
+				errs = append(errs, []error{newDeleteObjectVersionError(v), fmt.Errorf("removing legal hold: %w",
+					newObjectVersionError(shared.ToValueDefault(v.Key), shared.ToValueDefault(v.VersionId), err))}...)
 			} else {
 				if _, err = deleteObject(ctx, conn, &DeleteRequest{
 					Bucket:       bucket,
@@ -139,7 +141,7 @@ func deletePageOfObjectVersions(ctx context.Context, conn *s3.APIClient, bucket 
 					VersionID:    *v.VersionId,
 					ForceDestroy: force,
 				}); err != nil {
-					errs = append(errs, newObjectVersionError(toString(v.Key), toString(v.VersionId), err))
+					errs = append(errs, newObjectVersionError(shared.ToValueDefault(v.Key), shared.ToValueDefault(v.VersionId), err))
 				} else {
 					objCount++
 				}

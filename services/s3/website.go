@@ -77,7 +77,7 @@ func (c *Client) UpdateBucketWebsite(ctx context.Context, data *BucketWebsiteCon
 
 	model, found, err := c.GetBucketWebsite(ctx, data.Bucket)
 	if !found {
-		return fmt.Errorf("bucket website configuration not found")
+		return fmt.Errorf("bucket website configuration not found for bucket %s", data.Bucket.ValueString())
 	}
 
 	if err != nil {

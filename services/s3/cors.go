@@ -68,7 +68,10 @@ func (c *Client) UpdateBucketCors(ctx context.Context, data *BucketCorsConfigura
 
 // DeleteBucketCors deletes a bucket cors configuration.
 func (c *Client) DeleteBucketCors(ctx context.Context, bucketName types.String) error {
-	_, err := c.client.CORSApi.DeleteBucketCors(ctx, bucketName.ValueString()).Execute()
+	apiResponse, err := c.client.CORSApi.DeleteBucketCors(ctx, bucketName.ValueString()).Execute()
+	if apiResponse.HttpNotFound() {
+		return nil
+	}
 	return err
 }
 

@@ -4,6 +4,7 @@
 package s3_test
 
 import (
+	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
@@ -112,42 +113,42 @@ func TestAccS3ObjectsDataSource_maxKeysSmall(t *testing.T) {
 	})
 }
 
-//func TestAccS3ObjectsDataSource_maxKeysLarge(t *testing.T) {
-//	ctx := context.Background()
-//	rName := acctest.GenerateRandomResourceName(bucketPrefix)
-//	dataSourceName := "data.ionoscloud_s3_objects.test"
-//	var keys []string
-//	for i := 0; i < 1500; i++ {
-//		keys = append(keys, fmt.Sprintf("data%d", i))
-//	}
-//
-//	resource.Test(t, resource.TestCase{
-//		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
-//		PreCheck: func() {
-//			acctest.PreCheck(t)
-//		},
-//		PreventPostDestroyRefresh: true,
-//		Steps: []resource.TestStep{
-//			{
-//				Config: testAccObjectsDataSourceConfig_maxKeysLarge(rName, 1002),
-//				Check: resource.ComposeAggregateTestCheckFunc(
-//					resource.TestCheckResourceAttr(dataSourceName, "common_prefixes.#", "0"),
-//					resource.TestCheckResourceAttr(dataSourceName, "keys.#", "0"),
-//					resource.TestCheckResourceAttr(dataSourceName, "owners.#", "0"),
-//					testAccCheckBucketAddObjects(ctx, "ionoscloud_s3_bucket.test", keys...),
-//				),
-//			},
-//			{
-//				Config: testAccObjectsDataSourceConfig_maxKeysLarge(rName, 1002),
-//				Check: resource.ComposeAggregateTestCheckFunc(
-//					resource.TestCheckResourceAttr(dataSourceName, "common_prefixes.#", "0"),
-//					resource.TestCheckResourceAttr(dataSourceName, "keys.#", "1002"),
-//					resource.TestCheckResourceAttr(dataSourceName, "owners.#", "0"),
-//				),
-//			},
-//		},
-//	})
-//}
+func TestAccS3ObjectsDataSource_maxKeysLarge(t *testing.T) {
+	ctx := context.Background()
+	rName := acctest.GenerateRandomResourceName(bucketPrefix)
+	dataSourceName := "data.ionoscloud_s3_objects.test"
+	var keys []string
+	for i := 0; i < 1500; i++ {
+		keys = append(keys, fmt.Sprintf("data%d", i))
+	}
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		PreventPostDestroyRefresh: true,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObjectsDataSourceConfig_maxKeysLarge(rName, 1002),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(dataSourceName, "common_prefixes.#", "0"),
+					resource.TestCheckResourceAttr(dataSourceName, "keys.#", "0"),
+					resource.TestCheckResourceAttr(dataSourceName, "owners.#", "0"),
+					testAccCheckBucketAddObjects(ctx, "ionoscloud_s3_bucket.test", keys...),
+				),
+			},
+			{
+				Config: testAccObjectsDataSourceConfig_maxKeysLarge(rName, 1002),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(dataSourceName, "common_prefixes.#", "0"),
+					resource.TestCheckResourceAttr(dataSourceName, "keys.#", "1002"),
+					resource.TestCheckResourceAttr(dataSourceName, "owners.#", "0"),
+				),
+			},
+		},
+	})
+}
 
 func TestAccS3ObjectsDataSource_startAfter(t *testing.T) {
 	rName := acctest.GenerateRandomResourceName(bucketPrefix)

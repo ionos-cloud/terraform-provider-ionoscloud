@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 )
 
+// MD5 computes the MD5 checksum of a struct.
 func MD5(data interface{}) (string, error) {
 	// Marshal the struct to JSON
 	jsonBytes, err := xml.Marshal(data)

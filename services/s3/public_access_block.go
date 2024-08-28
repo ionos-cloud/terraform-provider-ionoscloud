@@ -57,7 +57,11 @@ func (c *Client) UpdateBucketPublicAccessBlock(ctx context.Context, data *Bucket
 
 // DeleteBucketPublicAccessBlock deletes a BucketPublicAccessBlock.
 func (c *Client) DeleteBucketPublicAccessBlock(ctx context.Context, bucketName types.String) error {
-	_, err := c.client.PublicAccessBlockApi.DeletePublicAccessBlock(ctx, bucketName.ValueString()).Execute()
+	apiResponse, err := c.client.PublicAccessBlockApi.DeletePublicAccessBlock(ctx, bucketName.ValueString()).Execute()
+	if apiResponse.HttpNotFound() {
+		return nil
+	}
+
 	return err
 }
 

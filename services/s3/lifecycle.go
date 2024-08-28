@@ -88,7 +88,10 @@ func (c *Client) UpdateBucketLifecycle(ctx context.Context, data *BucketLifecycl
 
 // DeleteBucketLifecycle deletes a bucket lifecycle configuration.
 func (c *Client) DeleteBucketLifecycle(ctx context.Context, bucketName types.String) error {
-	_, err := c.client.LifecycleApi.DeleteBucketLifecycle(ctx, bucketName.ValueString()).Execute()
+	apiResponse, err := c.client.LifecycleApi.DeleteBucketLifecycle(ctx, bucketName.ValueString()).Execute()
+	if apiResponse.HttpNotFound() {
+		return nil
+	}
 	return err
 }
 

@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"net/http"
 
 	s3 "github.com/ionos-cloud/sdk-go-s3"
@@ -10,11 +11,10 @@ import (
 
 // DeleteRequest represents a request to delete an object from an S3 general purpose bucket.
 type DeleteRequest struct {
-	Bucket              string
-	Key                 string
-	VersionID           string
-	ForceDestroy        bool
-	IgnoreObjectsErrors bool
+	Bucket       string
+	Key          string
+	VersionID    string
+	ForceDestroy bool
 }
 
 // DeleteAllObjectVersions deletes all versions of a specified key from an S3 general purpose bucket.
@@ -45,10 +45,7 @@ func DeleteAllObjectVersions(ctx context.Context, client *s3.APIClient, req *Del
 	}
 
 	if lastErr != nil {
-		if !req.IgnoreObjectsErrors {
-			return objCount, lastErr
-		}
-		lastErr = nil
+		return objCount, lastErr
 	}
 
 	pages = NewListObjectVersionsPaginator(client, &ListObjectVersionsInput{
@@ -68,9 +65,7 @@ func DeleteAllObjectVersions(ctx context.Context, client *s3.APIClient, req *Del
 	}
 
 	if lastErr != nil {
-		if !req.IgnoreObjectsErrors {
-			return objCount, fmt.Errorf("deleting at least one S3 Object delete marker, last error: %w", lastErr)
-		}
+		return objCount, fmt.Errorf("deleting at least one S3 Object delete marker, last error: %w", lastErr)
 	}
 
 	return objCount, nil
@@ -101,14 +96,14 @@ func deleteVersionsPage(ctx context.Context, client *s3.APIClient, versions *[]s
 	}
 
 	for _, v := range *versions {
-		if key != toString(v.Key) {
+		if key != shared.ToValueDefault(v.Key) {
 			continue
 		}
 
 		apiResponse, err := deleteObject(ctx, client, &DeleteRequest{
 			Bucket:       bucket,
 			Key:          key,
-			VersionID:    toString(v.VersionId),
+			VersionID:    shared.ToValueDefault(v.VersionId),
 			ForceDestroy: force,
 		})
 
@@ -119,7 +114,7 @@ func deleteVersionsPage(ctx context.Context, client *s3.APIClient, versions *[]s
 
 		// If the object is locked by Object Lock, we need to disable the legal hold before deleting it
 		if httpForbidden(apiResponse) && force {
-			success, err := tryDisableLegalHold(ctx, client, bucket, key, toString(v.VersionId))
+			success, err := tryDisableLegalHold(ctx, client, bucket, key, shared.ToValueDefault(v.VersionId))
 			if err != nil {
 				lastErr = err
 				continue
@@ -133,7 +128,7 @@ func deleteVersionsPage(ctx context.Context, client *s3.APIClient, versions *[]s
 			if _, err = deleteObject(ctx, client, &DeleteRequest{
 				Bucket:       bucket,
 				Key:          key,
-				VersionID:    toString(v.VersionId),
+				VersionID:    shared.ToValueDefault(v.VersionId),
 				ForceDestroy: force,
 			}); err != nil {
 				lastErr = err
@@ -160,7 +155,7 @@ func deleteMarkersPage(ctx context.Context, client *s3.APIClient, markers *[]s3.
 	}
 
 	for _, m := range *markers {
-		if key != toString(m.Key) {
+		if key != shared.ToValueDefault(m.Key) {
 			continue
 		}
 
@@ -194,7 +189,7 @@ func tryDisableLegalHold(ctx context.Context, client *s3.APIClient, bucket, key,
 
 	_, err = client.ObjectLockApi.PutObjectLegalHold(ctx, bucket, key).VersionId(versionID).
 		ObjectLegalHoldConfiguration(s3.ObjectLegalHoldConfiguration{
-			Status: strPtr("OFF"),
+			Status: shared.ToPtr("OFF"),
 		}).Execute()
 
 	if err != nil {
@@ -205,9 +200,5 @@ func tryDisableLegalHold(ctx context.Context, client *s3.APIClient, bucket, key,
 }
 
 func httpForbidden(response *s3.APIResponse) bool {
-	return response != nil && response.StatusCode == http.StatusForbidden
-}
-
-func strPtr(s string) *string {
-	return &s
+	return response != nil && response.Response != nil && response.StatusCode == http.StatusForbidden
 }
