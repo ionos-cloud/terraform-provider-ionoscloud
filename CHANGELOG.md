@@ -23,6 +23,7 @@
 - Fix CDN tests
 - Fix small CDN bug that led to an inconsistent state
 - Fix k8s tests.
+- Fix DBaaS tests.
 
 ### Documentation
 - Update documentation for S3 bucket resource
