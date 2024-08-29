@@ -1,4 +1,6 @@
 ## 6.5.1
+### Features
+- Add `location` to `logging_pipeline` resource and data source
 ### Fixes
 - Fix nil deref due to `GeoRestrictions` not being checked against nil
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
+	ionoscloudcdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
@@ -122,8 +122,8 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 
 	distributionDomain := d.Get("domain").(string)
 
-	distribution := ionoscloud_cdn.DistributionCreate{
-		Properties: ionoscloud_cdn.DistributionProperties{
+	distribution := ionoscloudcdn.DistributionCreate{
+		Properties: ionoscloudcdn.DistributionProperties{
 			Domain: distributionDomain,
 		},
 	}
@@ -183,9 +183,9 @@ func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	distributionDomain := d.Get("domain").(string)
 
-	request := ionoscloud_cdn.DistributionUpdate{
+	request := ionoscloudcdn.DistributionUpdate{
 		Id: d.Id(),
-		Properties: ionoscloud_cdn.DistributionProperties{
+		Properties: ionoscloudcdn.DistributionProperties{
 			Domain: distributionDomain,
 		},
 	}

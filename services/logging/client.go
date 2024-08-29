@@ -31,3 +31,25 @@ func NewClient(username, password, token, url, terraformVersion string) *Client 
 
 	return &Client{sdkClient: *logging.NewAPIClient(newConfigLogging)}
 }
+
+func (c *Client) changeConfigURL(location string) {
+	config := c.sdkClient.GetConfig()
+	config.Servers = shared.ServerConfigurations{
+		{
+			URL: locationToURL[location],
+		},
+	}
+}
+
+var (
+	// AvailableLocations is a list of available locations
+	AvailableLocations = []string{"de/fra", "de/txl", "es/vit", "gb/lhr", "fr/par"}
+
+	locationToURL = map[string]string{
+		"de/fra": "https://logging.de-fra.ionos.com",
+		"de/txl": "https://logging.de-txl.ionos.com",
+		"es/vit": "https://logging.es-vit.ionos.com",
+		"gb/lhr": "https://logging.gb-lhr.ionos.com",
+		"fr/par": "https://logging.fr-par.ionos.com",
+	}
+)
