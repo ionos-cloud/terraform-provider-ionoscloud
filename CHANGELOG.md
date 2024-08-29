@@ -1,3 +1,8 @@
+## 6.5.2
+### Features
+- support for all s3 resources configurations
+
+
 ## 6.5.1
 ### Features
 - Add `location` to `logging_pipeline` resource and data source

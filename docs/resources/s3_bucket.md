@@ -18,6 +18,14 @@ Manages **S3 Buckets** on IonosCloud.
 resource "ionoscloud_s3_bucket" "example" {
   name = "example"
   region = "eu-central-3"
+  object_lock_enabled = true
+  force_destroy = true
+  
+  tags = {
+    key1 = "value1"
+    key2 = "value2"
+  }
+
   timeouts {
     create = "10m"
     delete = "10m"
@@ -31,11 +39,17 @@ resource "ionoscloud_s3_bucket" "example" {
 The following arguments are supported:
 
 - `name` - (Required)[string] The bucket name. [ 3 .. 63 ] characters
-- `region` - (Optional)[string] Specifies the Region where the bucket will be created. Please refer to the list of available regions. Defaults to "eu-central-3".
+- `region` - (Optional)[string] Specifies the Region where the bucket will be created. Please refer to the list of available regions
+- `object_lock_enabled` - (Optional)[bool] The object lock configuration status of the bucket. Must be `true` or `false`.
+- `tags` - (Optional) A mapping of tags to assign to the bucket.
+- `timeouts` - (Optional) Timeouts for this resource.
+  - `create` - (Optional)[string] Time to wait for the bucket to be created. Default is `10m`.
+  - `delete` - (Optional)[string] Time to wait for the bucket to be deleted. Default is `10m`.
+- `force_destroy` - (Optional)[bool] If true, the bucket and the contents of the bucket will be destroyed. Default is `false`.
 
 ## Attributes Reference
 
- - `id` - (Computed) Name of the bucket
+- `id` - (Computed) Name of the bucket
 
 ⚠️ **Note:** The name must be unique across all IONOS accounts in all S3 regions. The name should adhere to the following [restrictions](https://docs.ionos.com/cloud/storage-and-backup/s3-object-storage/concepts/buckets#naming-conventions).
 

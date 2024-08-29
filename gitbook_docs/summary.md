@@ -190,11 +190,19 @@
     * [S3 Bucket Policy](../docs/resources/s3_bucket_policy.md)
     * [S3 Object](../docs/resources/s3_object.md)
     * [S3 Bucket Public Access Block](../docs/resources/s3_bucket_access_block.md)
+    * [S3 Bucket Website Configuration](../docs/resources/s3_bucket_website_configuration.md)
+    * [S3 Bucket CORS Configuration](../docs/resources/s3_bucket_cors_configuration.md)
+    * [S3 Bucket Lifecycle Configuration](../docs/resources/s3_bucket_lifecycle_configuration.md)
+    * [S3 Bucket Object Lock Configuration](../docs/resources/s3_bucket_object_lock_configuration.md)
+    * [S3 Bucket Versioning Configuration](../docs/resources/s3_bucket_versioning.md)
+    * [S3 Bucket Server Side Encryption Configuration](../docs/resources/s3_bucket_server_side_encryption_configuration.md)
+    * [S3 Object Copy](../docs/resources/s3_object_copy.md)
   * Data Sources
     * [S3 Bucket](../docs/data-sources/s3_bucket.md)
     * [S3 Bucket Policy](../docs/data-sources/s3_bucket_policy.md)
     * [S3 Object](../docs/data-sources/s3_object.md)
     * [S3 Bucket Public Access Block](../docs/data-sources/s3_bucket_access_block.md)
+    * [S3 Objects](../docs/data-sources/s3_objects.md)
   
 * CDN
   * Resources
