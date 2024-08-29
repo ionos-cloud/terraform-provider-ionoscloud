@@ -66,7 +66,7 @@ func (c *Client) GetBucketWebsite(ctx context.Context, bucketName types.String) 
 		return nil, false, err
 	}
 
-	return buildBucketWebsiteConfigurationModelFromAPIResponse(output, &BucketWebsiteConfigurationModel{Bucket: bucketName}), true, nil
+	return buildBucketWebsiteConfigurationModelFromAPIResponse(output, bucketName), true, nil
 }
 
 // UpdateBucketWebsite updates a BucketWebsiteConfiguration.
@@ -94,9 +94,9 @@ func (c *Client) DeleteBucketWebsite(ctx context.Context, bucketName types.Strin
 	return err
 }
 
-func buildBucketWebsiteConfigurationModelFromAPIResponse(output *s3.GetBucketWebsiteOutput, data *BucketWebsiteConfigurationModel) *BucketWebsiteConfigurationModel {
+func buildBucketWebsiteConfigurationModelFromAPIResponse(output *s3.GetBucketWebsiteOutput, bucket types.String) *BucketWebsiteConfigurationModel {
 	built := &BucketWebsiteConfigurationModel{
-		Bucket: data.Bucket,
+		Bucket: bucket,
 	}
 
 	if output.IndexDocument != nil {

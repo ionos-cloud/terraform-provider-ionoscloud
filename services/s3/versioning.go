@@ -44,7 +44,7 @@ func (c *Client) GetBucketVersioning(ctx context.Context, bucketName types.Strin
 		return nil, false, err
 	}
 
-	builtModel := buildModelFromAPIResponse(output, &BucketVersioningResourceModel{Bucket: bucketName})
+	builtModel := buildBucketVersioningModelFromAPIResponse(output, bucketName)
 	return builtModel, true, nil
 }
 
@@ -97,7 +97,7 @@ func buildPutVersioningRequestFromModel(data *BucketVersioningResourceModel) s3.
 	return request
 }
 
-func buildModelFromAPIResponse(output *s3.GetBucketVersioningOutput, data *BucketVersioningResourceModel) *BucketVersioningResourceModel {
+func buildBucketVersioningModelFromAPIResponse(output *s3.GetBucketVersioningOutput, bucket types.String) *BucketVersioningResourceModel {
 	var vc versioningConfiguration
 	if output.Status != nil {
 		vc.Status = types.StringValue(string(*output.Status))
@@ -108,7 +108,7 @@ func buildModelFromAPIResponse(output *s3.GetBucketVersioningOutput, data *Bucke
 	}
 
 	built := BucketVersioningResourceModel{
-		Bucket:                  data.Bucket,
+		Bucket:                  bucket,
 		VersioningConfiguration: &vc,
 	}
 

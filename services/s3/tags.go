@@ -25,15 +25,16 @@ func (c *Client) UpdateBucketTags(ctx context.Context, bucketName string, new, o
 		return err
 	}
 
-	ignoredTags := allTags.Ignore(old).Ignore(new)
-	if len(new)+len(ignoredTags) > 0 {
+	// Keep only the tags that are not in the old or new tags.
+	tagsToKeep := allTags.Ignore(old).Ignore(new)
+	if len(new)+len(tagsToKeep) > 0 { // The API overwrite the tags list every time, so we need to merge new and the ones we want to keep.
 		if _, err = c.client.TaggingApi.PutBucketTagging(ctx, bucketName).PutBucketTaggingRequest(
 			s3.PutBucketTaggingRequest{
-				TagSet: new.Merge(ignoredTags).ToListPointer(),
+				TagSet: new.Merge(tagsToKeep).ToListPointer(),
 			}).Execute(); err != nil {
 			return fmt.Errorf("failed to update bucket tags: %w", err)
 		}
-	} else if len(old) > 0 && len(ignoredTags) == 0 {
+	} else if len(old) > 0 && len(tagsToKeep) == 0 {
 		if _, err = c.client.TaggingApi.DeleteBucketTagging(ctx, bucketName).Execute(); err != nil {
 			return fmt.Errorf("failed to delete bucket tags: %w", err)
 		}
@@ -85,15 +86,16 @@ func (c *Client) UpdateObjectTags(ctx context.Context, bucketName, objectName st
 		return err
 	}
 
-	ignoredTags := allTags.Ignore(old).Ignore(new)
-	if len(new)+len(ignoredTags) > 0 {
+	// Keep only the tags that are not in the old or new tags.
+	tagsToKeep := allTags.Ignore(old).Ignore(new)
+	if len(new)+len(tagsToKeep) > 0 { // The API overwrite the tags list every time, so we need to merge new and the ones we want to keep.
 		if _, _, err = c.client.TaggingApi.PutObjectTagging(ctx, bucketName, objectName).PutObjectTaggingRequest(
 			s3.PutObjectTaggingRequest{
-				TagSet: new.Merge(ignoredTags).ToListPointer(),
+				TagSet: new.Merge(tagsToKeep).ToListPointer(),
 			}).Execute(); err != nil {
 			return fmt.Errorf("failed to update object tags: %w", err)
 		}
-	} else if len(old) > 0 && len(ignoredTags) == 0 {
+	} else if len(old) > 0 && len(tagsToKeep) == 0 {
 		if _, _, err = c.client.TaggingApi.DeleteObjectTagging(ctx, bucketName, objectName).Execute(); err != nil {
 			return fmt.Errorf("failed to delete object tags: %w", err)
 		}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	s3 "github.com/ionos-cloud/sdk-go-s3"
@@ -62,10 +63,6 @@ func (c *Client) forEachObjectVersionsPage(ctx context.Context, bucket string, f
 	return objCount, nil
 }
 
-func boolPtr(b bool) *bool {
-	return &b
-}
-
 func getObjectsToDelete(page *s3.ListObjectVersionsOutput) []s3.ObjectIdentifier {
 	if page.Versions == nil {
 		return nil
@@ -107,7 +104,7 @@ func deletePageOfObjectVersions(ctx context.Context, conn *s3.APIClient, bucket 
 
 	req := conn.ObjectsApi.DeleteObjects(ctx, bucket).DeleteObjectsRequest(s3.DeleteObjectsRequest{
 		Objects: &toDelete,
-		Quiet:   boolPtr(true),
+		Quiet:   shared.ToPtr(true),
 	})
 	if force {
 		req = req.XAmzBypassGovernanceRetention(true)
@@ -157,14 +154,6 @@ func deletePageOfObjectVersions(ctx context.Context, conn *s3.APIClient, bucket 
 	return objCount, nil
 }
 
-func toString(v *string) string {
-	if v == nil {
-		return ""
-	}
-
-	return *v
-}
-
 func deletePageOfDeleteMarkers(ctx context.Context, conn *s3.APIClient, bucket string, page *s3.ListObjectVersionsOutput) (int64, error) {
 	toDelete := getDeleteMarkersToDelete(page)
 	var objCount int64
@@ -174,7 +163,7 @@ func deletePageOfDeleteMarkers(ctx context.Context, conn *s3.APIClient, bucket s
 
 	output, apiResponse, err := conn.ObjectsApi.DeleteObjects(ctx, bucket).DeleteObjectsRequest(s3.DeleteObjectsRequest{
 		Objects: &toDelete,
-		Quiet:   boolPtr(true),
+		Quiet:   shared.ToPtr(true),
 	}).Execute()
 	if apiResponse.HttpNotFound() {
 		return objCount, nil

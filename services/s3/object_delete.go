@@ -3,8 +3,9 @@ package s3
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"net/http"
+
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 )

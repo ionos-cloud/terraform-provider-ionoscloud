@@ -3,6 +3,7 @@ package s3
 import (
 	"encoding/xml"
 	"errors"
+	"log"
 
 	s3 "github.com/ionos-cloud/sdk-go-s3"
 )
@@ -13,6 +14,7 @@ func isBucketNotEmptyError(err error) bool {
 		body := apiErr.Body()
 		var s3Err s3.Error
 		if err := xml.Unmarshal(body, &s3Err); err != nil {
+			log.Printf("failed to unmarshal error response: %v", err)
 			return false
 		}
 
@@ -29,6 +31,7 @@ func isInvalidStateBucketWithObjectLock(err error) bool {
 		body := apiErr.Body()
 		var s3Err s3.Error
 		if err := xml.Unmarshal(body, &s3Err); err != nil {
+			log.Printf("failed to unmarshal error response: %v", err)
 			return false
 		}
 

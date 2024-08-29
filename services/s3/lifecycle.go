@@ -46,7 +46,7 @@ func (c *Client) CreateBucketLifecycle(ctx context.Context, data *BucketLifecycl
 	body := buildBucketLifecycleConfigurationFromModel(data)
 	hash, err := hash2.MD5(body)
 	if err != nil {
-		return fmt.Errorf("failed to generate MD5 sum: %s", err.Error())
+		return fmt.Errorf("failed to generate MD5 sum: %w", err)
 	}
 
 	_, err = c.client.LifecycleApi.PutBucketLifecycle(ctx, data.Bucket.ValueString()).PutBucketLifecycleRequest(body).ContentMD5(base64.StdEncoding.EncodeToString([]byte(hash))).Execute()

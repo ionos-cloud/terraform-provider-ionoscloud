@@ -160,7 +160,7 @@ func testAccCheckBucketCORSConfigurationDestroy(s *terraform.State) error {
 			}
 
 			if err != nil {
-				return fmt.Errorf("error checking for bucket cors: %s", err)
+				return fmt.Errorf("error checking for bucket cors: %w", err)
 			}
 
 			return fmt.Errorf("bucket cors still exists")

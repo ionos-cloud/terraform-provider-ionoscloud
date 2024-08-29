@@ -63,7 +63,7 @@ pageLoop:
 			for _, v := range *page.Contents {
 				if nKeys >= maxKeys {
 					// The break statement with label is used to break out of the keys loop and the page loop when
-					//the number of keys fetched is equal to or greater than the max keys specified.
+					// the number of keys fetched is equal to or greater than the max keys specified.
 					break pageLoop
 				}
 
