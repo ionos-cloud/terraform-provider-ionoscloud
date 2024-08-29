@@ -151,7 +151,7 @@ const DNSZoneDataSourceMatchByName = DNSZoneConfig + `
 
 var DNSZoneDataSourceMatchByNamePartialMatch = DNSZoneConfig + `
 ` + constant.DataSource + ` ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestDataSourceName + ` {
-	name = "` + zoneNameValue[:4] + `"
+	name = "` + zoneNameValue[:5] + `"
 	partial_match = true
 }
 `
