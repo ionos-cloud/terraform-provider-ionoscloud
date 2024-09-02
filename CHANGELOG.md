@@ -1,3 +1,7 @@
+## 6.5.3
+### Fixes
+- Fix DBaaS tests
+
 ## 6.5.2
 ### Features
 - support for all s3 resources configurations
