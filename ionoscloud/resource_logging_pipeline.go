@@ -128,7 +128,6 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 	if newLocation, ok := d.GetOk("location"); ok {
 		location = newLocation.(string)
 	}
-	//location := d.Get("location").(string)
 	pipeline, apiResponse, err := client.GetPipelineByID(ctx, location, pipelineID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
