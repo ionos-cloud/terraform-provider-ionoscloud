@@ -33,6 +33,9 @@ func NewClient(username, password, token, url, terraformVersion string) *Client 
 }
 
 func (c *Client) changeConfigURL(location string) {
+	if location == "" {
+		location = "de/txl"
+	}
 	config := c.sdkClient.GetConfig()
 	config.Servers = shared.ServerConfigurations{
 		{

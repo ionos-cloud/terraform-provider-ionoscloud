@@ -106,7 +106,7 @@ terraform apply -var-file="vars.tfvars"
 
 ## Argument reference
 
-* `location` - (Required)[string] The location of the Logging pipeline. One of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`.
+* `location` - (Optional)[string] The location of the Logging pipeline. Default: `de/txl` One of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`.
 * `name` - (Required)[string] The name of the Logging pipeline.
 * `grafana_address` - (Computed)[string] The address of the client's grafana instance.
 * `log` - (Required)[list] Pipeline logs, a list that contains elements with the following structure:
@@ -124,7 +124,6 @@ In order to import a Logging pipeline, you can define an empty Logging pipeline 
 
 ```hcl
 resource "ionoscloud_logging_pipeline" "example" {
-  
 }
 ```
 
