@@ -22,8 +22,8 @@ type ServerCollection struct {
 	// The resource type.
 	Type *string `json:"type,omitempty"`
 	// The absolute URL to the resource's representation.
-	Href  *string           `json:"href,omitempty"`
-	Items *[]ServerResource `json:"items,omitempty"`
+	Href  *string   `json:"href,omitempty"`
+	Items *[]Server `json:"items,omitempty"`
 }
 
 // NewServerCollection instantiates a new ServerCollection object
@@ -161,8 +161,8 @@ func (o *ServerCollection) HasHref() bool {
 }
 
 // GetItems returns the Items field value
-// If the value is explicit nil, the zero value for []ServerResource will be returned
-func (o *ServerCollection) GetItems() *[]ServerResource {
+// If the value is explicit nil, the zero value for []Server will be returned
+func (o *ServerCollection) GetItems() *[]Server {
 	if o == nil {
 		return nil
 	}
@@ -174,7 +174,7 @@ func (o *ServerCollection) GetItems() *[]ServerResource {
 // GetItemsOk returns a tuple with the Items field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ServerCollection) GetItemsOk() (*[]ServerResource, bool) {
+func (o *ServerCollection) GetItemsOk() (*[]Server, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -183,7 +183,7 @@ func (o *ServerCollection) GetItemsOk() (*[]ServerResource, bool) {
 }
 
 // SetItems sets field value
-func (o *ServerCollection) SetItems(v []ServerResource) {
+func (o *ServerCollection) SetItems(v []Server) {
 
 	o.Items = &v
 

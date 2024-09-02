@@ -22,10 +22,10 @@ type Group struct {
 	// The resource type.
 	Type *string `json:"type,omitempty"`
 	// The absolute URL to the resource's representation.
-	Href       *string            `json:"href,omitempty"`
-	Metadata   *Metadata          `json:"metadata,omitempty"`
-	Properties *GroupProperties   `json:"properties"`
-	Entities   *GroupPostEntities `json:"entities,omitempty"`
+	Href       *string          `json:"href,omitempty"`
+	Metadata   *Metadata        `json:"metadata,omitempty"`
+	Properties *GroupProperties `json:"properties"`
+	Entities   *GroupEntities   `json:"entities,omitempty"`
 }
 
 // NewGroup instantiates a new Group object
@@ -240,8 +240,8 @@ func (o *Group) HasProperties() bool {
 }
 
 // GetEntities returns the Entities field value
-// If the value is explicit nil, the zero value for GroupPostEntities will be returned
-func (o *Group) GetEntities() *GroupPostEntities {
+// If the value is explicit nil, the zero value for GroupEntities will be returned
+func (o *Group) GetEntities() *GroupEntities {
 	if o == nil {
 		return nil
 	}
@@ -253,7 +253,7 @@ func (o *Group) GetEntities() *GroupPostEntities {
 // GetEntitiesOk returns a tuple with the Entities field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Group) GetEntitiesOk() (*GroupPostEntities, bool) {
+func (o *Group) GetEntitiesOk() (*GroupEntities, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -262,7 +262,7 @@ func (o *Group) GetEntitiesOk() (*GroupPostEntities, bool) {
 }
 
 // SetEntities sets field value
-func (o *Group) SetEntities(v GroupPostEntities) {
+func (o *Group) SetEntities(v GroupEntities) {
 
 	o.Entities = &v
 

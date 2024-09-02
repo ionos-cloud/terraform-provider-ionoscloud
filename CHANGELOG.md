@@ -2,6 +2,8 @@
 ### Fixes
 - `ionoslcoud_logging_pipeline` - `location` should be optional with `de/txl` default. Upgrading should not break existing pipelines.
 - Fix DBaaS tests
+### Enhancements
+- Increase GO version to 1.22, update dependencies
 
 ## 6.5.2
 ### Features
