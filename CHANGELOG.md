@@ -1,14 +1,11 @@
 ## 6.5.3
 ### Fixes
+- `ionoslcoud_logging_pipeline` - `location` should be optional with `de/txl` default. Upgrading should not break existing pipelines.
 - Fix DBaaS tests
 
 ## 6.5.2
 ### Features
 - support for all s3 resources configurations
-
-
-## 6.5.1
-### Features
 - Add `location` to `logging_pipeline` resource and data source
 ### Fixes
 - Fix nil deref due to `GeoRestrictions` not being checked against nil

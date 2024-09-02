@@ -27,10 +27,18 @@ func resourceLoggingPipeline() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"location": {
-				Type:             schema.TypeString,
-				Description:      fmt.Sprintf("The location of your logging pipeline. Default: de/txl. Supported locations: %s", strings.Join(logging.AvailableLocations, ", ")),
-				Required:         true,
-				ForceNew:         true,
+				Type:        schema.TypeString,
+				Description: fmt.Sprintf("The location of your logging pipeline. Default: de/txl. Supported locations: %s", strings.Join(logging.AvailableLocations, ", ")),
+				Optional:    true,
+				Default:     logging.DefaultLocation,
+				ForceNew:    true,
+				// no diff in case it moves from "" to de/txl since it's an upgrade from when we had no location
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					if old == "" && new == logging.DefaultLocation {
+						return true
+					}
+					return false
+				},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(logging.AvailableLocations, false)),
 			},
 			"name": {
@@ -116,8 +124,10 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).LoggingClient
 	pipelineID := d.Id()
-	location := d.Get("location").(string)
-
+	location := logging.DefaultLocation
+	if newLocation, ok := d.GetOk("location"); ok {
+		location = newLocation.(string)
+	}
 	pipeline, apiResponse, err := client.GetPipelineByID(ctx, location, pipelineID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {

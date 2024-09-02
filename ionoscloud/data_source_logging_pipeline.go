@@ -20,9 +20,17 @@ func dataSourceLoggingPipeline() *schema.Resource {
 		ReadContext: dataSourcePipelineRead,
 		Schema: map[string]*schema.Schema{
 			"location": {
-				Type:             schema.TypeString,
-				Description:      fmt.Sprintf("The location of your logging pipeline. Supported locations: %s", strings.Join(loggingService.AvailableLocations, ", ")),
-				Required:         true,
+				Type:        schema.TypeString,
+				Description: fmt.Sprintf("The location of your logging pipeline. Default: de/txl. Supported locations: %s", strings.Join(loggingService.AvailableLocations, ", ")),
+				Optional:    true,
+				Default:     "de/txl",
+				// no diff in case it moves from "" to de/txl since it's an upgrade from when we had no location
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					if old == "" && new == "de/txl" {
+						return true
+					}
+					return false
+				},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(loggingService.AvailableLocations, false)),
 			},
 			"id": {

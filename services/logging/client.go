@@ -33,6 +33,9 @@ func NewClient(username, password, token, url, terraformVersion string) *Client 
 }
 
 func (c *Client) changeConfigURL(location string) {
+	if location == "" {
+		location = DefaultLocation
+	}
 	config := c.sdkClient.GetConfig()
 	config.Servers = shared.ServerConfigurations{
 		{
@@ -44,6 +47,8 @@ func (c *Client) changeConfigURL(location string) {
 var (
 	// AvailableLocations is a list of available locations
 	AvailableLocations = []string{"de/fra", "de/txl", "es/vit", "gb/lhr", "fr/par"}
+	// DefaultLocation is the default logging pipeline location
+	DefaultLocation = "de/txl"
 
 	locationToURL = map[string]string{
 		"de/fra": "https://logging.de-fra.ionos.com",

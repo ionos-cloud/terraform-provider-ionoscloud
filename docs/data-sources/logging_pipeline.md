@@ -19,6 +19,7 @@ If a single match is found, it will be returned. If your search results in multi
 ### By ID
 ```hcl
 data "ionoscloud_logging_pipeline" "example" {
+  location = "de/txl"
   id = <pipeline_id>
 }
 ```
@@ -32,7 +33,7 @@ data "ionoscloud_logging_pipeline" "example" {
 ```
 
 ## Argument reference
-* `location` - (Required)[string] The location of the Logging pipeline. One of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`.
+* `location` - (Optional)[string] The location of the Logging pipeline. Default: `de/txl`. One of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`.
 * `id` - (Optional)[string] The ID of the Logging pipeline you want to search for.
 * `name` - (Optional)[string] The name of the Logging pipeline you want to search for.
 
