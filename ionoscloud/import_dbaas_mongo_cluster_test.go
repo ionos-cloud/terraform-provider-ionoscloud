@@ -21,7 +21,7 @@ func TestAccDbaasMongoClusterImportBasic(t *testing.T) {
 		CheckDestroy:             testAccCheckDbaasMongoClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: mariaDBClusterConfigBasic,
+				Config: testAccCheckDbaasMongoClusterConfigBasic,
 			},
 			{
 				ResourceName:            constant.DBaasMongoClusterResource + "." + constant.DBaaSClusterTestResource,

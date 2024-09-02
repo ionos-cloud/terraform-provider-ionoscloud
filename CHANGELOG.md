@@ -1,6 +1,7 @@
 ## 6.5.3
 ### Fixes
 - `ionoslcoud_logging_pipeline` - `location` should be optional with `de/txl` default. Upgrading should not break existing pipelines.
+- Fix DBaaS tests
 
 ## 6.5.2
 ### Features
