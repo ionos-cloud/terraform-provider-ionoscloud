@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	"encoding/base64"
+	"encoding/xml"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -44,7 +45,13 @@ type abortIncompleteMultipartUpload struct {
 // CreateBucketLifecycle creates a new bucket lifecycle configuration.
 func (c *Client) CreateBucketLifecycle(ctx context.Context, data *BucketLifecycleConfigurationModel) error {
 	body := buildBucketLifecycleConfigurationFromModel(data)
-	hash, err := hash2.MD5(body)
+
+	bytes, err := xml.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("failed to marshal bucket lifecycle configuration: %w", err)
+	}
+
+	hash, err := hash2.MD5(bytes)
 	if err != nil {
 		return fmt.Errorf("failed to generate MD5 sum: %w", err)
 	}

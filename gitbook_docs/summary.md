@@ -189,7 +189,7 @@
     * [S3 Bucket](../docs/resources/s3_bucket.md)
     * [S3 Bucket Policy](../docs/resources/s3_bucket_policy.md)
     * [S3 Object](../docs/resources/s3_object.md)
-    * [S3 Bucket Public Access Block](../docs/resources/s3_bucket_access_block.md)
+    * [S3 Bucket Public Access Block](../docs/resources/s3_bucket_public_access_block)
     * [S3 Bucket Website Configuration](../docs/resources/s3_bucket_website_configuration.md)
     * [S3 Bucket CORS Configuration](../docs/resources/s3_bucket_cors_configuration.md)
     * [S3 Bucket Lifecycle Configuration](../docs/resources/s3_bucket_lifecycle_configuration.md)

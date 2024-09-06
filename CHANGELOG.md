@@ -1,3 +1,9 @@
+## 6.5.4
+
+### Fixes
+- Fixed bucket public access block documentation
+- Fixed resources that need generate MD5 header for the API
+
 ## 6.5.3
 ### Fixes
 - `ionoslcoud_logging_pipeline` - `location` should be optional with `de/txl` default. Upgrading should not break existing pipelines.
