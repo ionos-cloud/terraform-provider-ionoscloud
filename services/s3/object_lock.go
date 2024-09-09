@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	"encoding/hex"
+	"encoding/xml"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -34,7 +35,12 @@ type defaultRetention struct {
 // CreateObjectLock creates a new bucket object lock configuration.
 func (c *Client) CreateObjectLock(ctx context.Context, data *ObjectLockConfigurationModel) error {
 	input := buildObjectLockConfigurationFromModel(data)
-	md5Sum, err := hash2.MD5(input)
+	bytes, err := xml.Marshal(input)
+	if err != nil {
+		return fmt.Errorf("failed to marshal bucket lifecycle configuration: %w", err)
+	}
+
+	md5Sum, err := hash2.MD5(bytes)
 	if err != nil {
 		return fmt.Errorf("failed to generate MD5 sum: %s", err.Error())
 	}

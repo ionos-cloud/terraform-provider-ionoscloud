@@ -426,6 +426,33 @@ func TestAccObjectResource_SourceFile(t *testing.T) {
 
 }
 
+func TestAccObjectLegalHold(t *testing.T) {
+	ctx := context.Background()
+	var body string
+	bucket := acctest.GenerateRandomResourceName(bucketPrefix)
+	key := acctest.GenerateRandomResourceName(objectPrefix)
+	content := "test"
+	retainUntilDate := time.Now().UTC().AddDate(0, 0, 1).Format(time.RFC3339)
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.PreCheck(t) },
+		CheckDestroy:             testAccCheckObjectDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObjectConfig_LegalHold(bucket, key, retainUntilDate, content),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObjectExists(ctx, objectResourceName, &body),
+					testAccCheckObjectBody(&body, content),
+					resource.TestCheckResourceAttr(objectResourceName, "object_lock_legal_hold", "ON"),
+					resource.TestCheckResourceAttr(objectResourceName, "object_lock_retain_until_date", retainUntilDate),
+					resource.TestCheckResourceAttr(objectResourceName, "object_lock_mode", "GOVERNANCE"),
+				),
+			},
+		},
+	})
+
+}
+
 func testAccObjectConfig_base(bucketName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_s3_bucket" "test" {
@@ -569,6 +596,27 @@ resource "ionoscloud_s3_object" "test" {
   content_type = "text/plain"
   object_lock_mode = "GOVERNANCE"
   object_lock_retain_until_date = %[3]q
+  force_destroy = true
+}
+
+`, bucketName, key, retention, content)
+}
+
+func testAccObjectConfig_LegalHold(bucketName, key, retention, content string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_s3_bucket" "test" {
+  name = %[1]q
+  object_lock_enabled = true
+}
+
+resource "ionoscloud_s3_object" "test" {
+  bucket = ionoscloud_s3_bucket.test.name
+  key = %[2]q
+  content = %[4]q
+  content_type = "text/plain"
+  object_lock_mode = "GOVERNANCE"
+  object_lock_retain_until_date = %[3]q	
+  object_lock_legal_hold = "ON"
   force_destroy = true
 }
 

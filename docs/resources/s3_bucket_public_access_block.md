@@ -1,8 +1,8 @@
 ---
 subcategory: "S3"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_bucket_access_block"
-sidebar_current: "docs-resource-s3_bucket_access_block"
+page_title: "IonosCloud: s3_bucket_public_access_block"
+sidebar_current: "docs-resource-s3_bucket_public_access_block"
 description: |-
   Creates and manages IonosCloud S3 Public Access Block for buckets.
 ---
