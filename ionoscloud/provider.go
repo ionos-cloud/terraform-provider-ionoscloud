@@ -293,9 +293,14 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.Password = password.(string)
 	clientOpts.Token = token.(string)
 	clientOpts.Url = cleanedUrl
-	clientOpts.Version = ionoscloud.Version
 	clientOpts.TerraformVersion = terraformVersion
 
+	return NewSDKBundleClient(clientOpts), nil
+}
+
+// NewSDKBundleClient returns a new SDK bundle client
+func NewSDKBundleClient(clientOpts ClientOptions) interface{} {
+	clientOpts.Version = ionoscloud.Version
 	return services.SdkBundle{
 		CDNClient:          NewClientByType(clientOpts, cdnClient).(*cdnService.Client),
 		AutoscalingClient:  NewClientByType(clientOpts, autoscalingClient).(*autoscalingService.Client),
@@ -313,7 +318,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		APIGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
 		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
 		InMemoryDBClient:   NewClientByType(clientOpts, inMemoryDBClient).(*inmemorydb.InMemoryDBClient),
-	}, nil
+	}
 }
 
 type clientType int
@@ -338,6 +343,7 @@ const (
 	inMemoryDBClient
 )
 
+// NewClientByType returns a new client based on the client type
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
 	switch clientType {
 	case ionosClient:
