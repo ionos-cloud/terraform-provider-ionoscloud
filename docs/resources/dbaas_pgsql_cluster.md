@@ -9,11 +9,54 @@ description: |-
 
 # ionoscloud\_pg_cluster
 
-Manages a **DbaaS PgSql Cluster**. 
+Manages a **DbaaS PgSql Cluster**.
 
 ## Example Usage
 
 ```hcl
+# Basic example
+
+resource "ionoscloud_datacenter" "example" {
+  name                    = "example"
+  location                = "de/txl"
+  description             = "Datacenter for testing dbaas cluster"
+}
+
+resource "ionoscloud_lan"  "example" {
+  datacenter_id           = ionoscloud_datacenter.example.id
+  public                  = false
+  name                    = "example"
+}
+
+resource "ionoscloud_pg_cluster" "example" {
+  postgres_version        = "12"
+  instances               = 1
+  cores                   = 4
+  ram                     = 2048
+  storage_size            = 2048
+  storage_type            = "HDD"
+  connections   {
+    datacenter_id         =  ionoscloud_datacenter.example.id
+    lan_id                =  ionoscloud_lan.example.id
+    cidr                  =  "192.168.100.1/24"
+  }
+  location                = ionoscloud_datacenter.example.location
+  display_name            = "PostgreSQL_cluster"
+  maintenance_window {
+    day_of_the_week       = "Sunday"
+    time                  = "09:00:00"
+  }
+  credentials {
+    username              = "username"
+    password              = "strongPassword"
+  }
+  synchronization_mode    = "ASYNCHRONOUS"
+}
+```
+
+```hcl
+# Complete example
+
 resource "ionoscloud_datacenter" "example" {
   name                    = "example"
   location                = "de/txl"
@@ -54,7 +97,7 @@ locals {
 }
 
 resource "ionoscloud_pg_cluster" "example" {
-  postgres_version        = 12
+  postgres_version        = "12"
   instances               = 1
   cores                   = 4
   ram                     = 2048
