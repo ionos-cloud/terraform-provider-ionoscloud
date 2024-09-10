@@ -14,6 +14,55 @@ Manages a **DbaaS Mongo User**. .
 ## Example Usage
 
 ```hcl
+# Basic example
+
+resource "ionoscloud_datacenter" "datacenter_example" {
+  name        = "example"
+  location    = "de/txl"
+  description = "Datacenter for testing dbaas cluster"
+}
+
+resource "ionoscloud_lan" "lan_example" {
+  datacenter_id = ionoscloud_datacenter.datacenter_example.id
+  public        = false
+  name          = "example"
+}
+
+resource "ionoscloud_mongo_cluster" "example_mongo_cluster" {
+  maintenance_window {
+    day_of_the_week = "Sunday"
+    time            = "09:00:00"
+  }
+  mongodb_version = "5.0"
+  instances       = 1
+  display_name    = "example_mongo_cluster"
+  location        = ionoscloud_datacenter.datacenter_example.location
+  connections {
+    datacenter_id = ionoscloud_datacenter.datacenter_example.id
+    lan_id        = ionoscloud_lan.lan_example.id
+    cidr_list = ["192.168.1.108/24"]
+  }
+  template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
+}
+
+resource "ionoscloud_mongo_user" "example_mongo_user" {
+  cluster_id = ionoscloud_mongo_cluster.example_mongo_cluster.id
+  username   = "myUser"
+  password   = "strongPassword"
+  roles {
+    role     = "read"
+    database = "db1"
+  }
+  roles {
+    role     = "readWrite"
+    database = "db2"
+  }
+}
+```
+
+```hcl
+# Complete example
+
 resource "ionoscloud_datacenter" "datacenter_example" {
   name                    = "example"
   location                = "de/txl"
