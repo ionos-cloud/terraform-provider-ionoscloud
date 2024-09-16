@@ -47,6 +47,71 @@ func TestAccBucketWebsiteConfigurationResourceBasic(t *testing.T) {
 	})
 }
 
+func TestAccBucketWebsiteConfigurationResourceIndex(t *testing.T) {
+	ctx := context.Background()
+	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
+	name := "ionoscloud_s3_bucket_website_configuration.test"
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		CheckDestroy: testAccCheckBucketWebsiteConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBucketWebsiteConfigurationConfig_index(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWebsiteConfigurationExists(ctx, name),
+					resource.TestCheckResourceAttr(name, "bucket", bucketName),
+					resource.TestCheckResourceAttr(name, "index_document.suffix", "index.html"),
+				),
+			},
+			{
+				ResourceName:                         name,
+				ImportStateId:                        bucketName,
+				ImportState:                          true,
+				ImportStateVerifyIdentifierAttribute: "bucket",
+				ImportStateVerify:                    true,
+			},
+		},
+	})
+
+}
+
+func TestAccBucketWebsiteConfigurationResourceRedirectAll(t *testing.T) {
+	ctx := context.Background()
+	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
+	name := "ionoscloud_s3_bucket_website_configuration.test"
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		CheckDestroy: testAccCheckBucketWebsiteConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBucketWebsiteConfigurationConfig_redirectAll(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckWebsiteConfigurationExists(ctx, name),
+					resource.TestCheckResourceAttr(name, "bucket", bucketName),
+					resource.TestCheckResourceAttr(name, "redirect_all_requests_to.host_name", "example.com"),
+					resource.TestCheckResourceAttr(name, "redirect_all_requests_to.protocol", "https"),
+				),
+			},
+			{
+				ResourceName:                         name,
+				ImportStateId:                        bucketName,
+				ImportState:                          true,
+				ImportStateVerifyIdentifierAttribute: "bucket",
+				ImportStateVerify:                    true,
+			},
+		},
+	})
+
+}
+
 func testAccBucketWebsiteConfigurationConfig_base(bucketName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_s3_bucket" "test" {
@@ -66,6 +131,29 @@ resource "ionoscloud_s3_bucket_website_configuration" "test" {
 
   error_document {
     key = "error.html"
+  }
+}
+`))
+}
+
+func testAccBucketWebsiteConfigurationConfig_index(bucketName string) string {
+	return utils.ConfigCompose(testAccBucketWebsiteConfigurationConfig_base(bucketName), fmt.Sprintf(`
+resource "ionoscloud_s3_bucket_website_configuration" "test" {
+  bucket = ionoscloud_s3_bucket.test.name
+  index_document {
+    suffix = "index.html"
+  }
+}
+`))
+}
+
+func testAccBucketWebsiteConfigurationConfig_redirectAll(bucketName string) string {
+	return utils.ConfigCompose(testAccBucketWebsiteConfigurationConfig_base(bucketName), fmt.Sprintf(`
+resource "ionoscloud_s3_bucket_website_configuration" "test" {
+  bucket = ionoscloud_s3_bucket.test.name
+  redirect_all_requests_to {
+	host_name = "example.com"
+    protocol = "https"
   }
 }
 `))

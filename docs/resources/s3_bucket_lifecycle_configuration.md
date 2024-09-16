@@ -21,22 +21,13 @@ resource "ionoscloud_s3_bucket" "example" {
 resource "ionoscloud_s3_bucket_lifecycle_configuration" "example" {
   bucket = ionoscloud_s3_bucket.example.name
   rule {
-
-    id = "Logs delete"
+    id     = "Logs delete"
     status = "Enabled"
 
     prefix = "/logs"
 
     expiration {
       days = 90
-    }
-
-    noncurrent_version_expiration {
-      noncurrent_days = 90
-    }
-
-    abort_incomplete_multipart_upload {
-      days_after_initiation = 1
     }
   }
 }
