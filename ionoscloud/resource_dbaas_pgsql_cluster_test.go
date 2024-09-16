@@ -142,7 +142,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "3072"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "3072"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled", "enabled"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled", "true"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.pool_mode", "transaction"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example_update", "id"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example_update", "id"),
@@ -167,7 +167,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "3072"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "3072"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled", "enabled"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled", "true"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.pool_mode", "transaction"),
 					resource.TestCheckNoResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.%"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example_update", "location"),
@@ -292,7 +292,7 @@ func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse
 const testAccCheckDbaasPgSqlClusterConfigBasic = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -342,13 +342,13 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 const testAccCheckDbaasPgSqlClusterConfigUpdate = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
 resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -405,13 +405,13 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 const testAccCheckDbaasPgSqlClusterConfigUpdateRemoveConnections = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
 resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -462,13 +462,13 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 const testAccCheckDbaasPgSqlClusterConfigUpdateRemoveDBaaS = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
 resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -488,7 +488,7 @@ resource ` + constant.LanResource + ` "lan_example_update" {
 const testAccFromBackup = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
