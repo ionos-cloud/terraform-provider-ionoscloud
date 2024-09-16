@@ -62,6 +62,8 @@
 - Add support for API Gateway
 - Add support for VPN Gateway
 
+⚠️ **Note:** Upgrading to 6.5.0 also means using a new version for Certificate Manager service. If, after upgrading to 6.5.0, you receive this error: `{"errorCode": "paas-feature-1", "message": "feature is not enabled for the contract"}`, please send an e-mail to one of the addresses listed here: https://docs.ionos.com/support/general-information/contact-information.
+
 
 ## 6.4.19
 ### Features
