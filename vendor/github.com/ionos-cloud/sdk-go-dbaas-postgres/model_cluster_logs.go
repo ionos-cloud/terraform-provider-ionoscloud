@@ -16,7 +16,7 @@ import (
 
 // ClusterLogs The logs of the PostgreSQL cluster.
 type ClusterLogs struct {
-	Instances *[]ClusterLogsInstancesInner `json:"instances,omitempty"`
+	Instances *[]ClusterLogsInstances `json:"instances,omitempty"`
 }
 
 // NewClusterLogs instantiates a new ClusterLogs object
@@ -38,8 +38,8 @@ func NewClusterLogsWithDefaults() *ClusterLogs {
 }
 
 // GetInstances returns the Instances field value
-// If the value is explicit nil, the zero value for []ClusterLogsInstancesInner will be returned
-func (o *ClusterLogs) GetInstances() *[]ClusterLogsInstancesInner {
+// If the value is explicit nil, the zero value for []ClusterLogsInstances will be returned
+func (o *ClusterLogs) GetInstances() *[]ClusterLogsInstances {
 	if o == nil {
 		return nil
 	}
@@ -51,7 +51,7 @@ func (o *ClusterLogs) GetInstances() *[]ClusterLogsInstancesInner {
 // GetInstancesOk returns a tuple with the Instances field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterLogs) GetInstancesOk() (*[]ClusterLogsInstancesInner, bool) {
+func (o *ClusterLogs) GetInstancesOk() (*[]ClusterLogsInstances, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -60,7 +60,7 @@ func (o *ClusterLogs) GetInstancesOk() (*[]ClusterLogsInstancesInner, bool) {
 }
 
 // SetInstances sets field value
-func (o *ClusterLogs) SetInstances(v []ClusterLogsInstancesInner) {
+func (o *ClusterLogs) SetInstances(v []ClusterLogsInstances) {
 
 	o.Instances = &v
 

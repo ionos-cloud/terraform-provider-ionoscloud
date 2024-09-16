@@ -186,6 +186,10 @@ func GetPgSqlClusterDataCreate(d *schema.ResourceData) (*psql.CreateClusterReque
 		dbaasCluster.Properties.StorageType = &storageType
 	}
 
+	if _, ok := d.GetOk("connection_pooler"); ok {
+		dbaasCluster.Properties.ConnectionPooler = getConnectionPoolerData(d)
+	}
+
 	if _, ok := d.GetOk("connections"); ok {
 		dbaasCluster.Properties.Connections = GetPsqlClusterConnectionsData(d)
 	} else {
@@ -458,6 +462,10 @@ func GetPgSqlClusterDataUpdate(d *schema.ResourceData) (*psql.PatchClusterReques
 	if storageSize, ok := d.GetOk("storage_size"); ok {
 		storageSize := int32(storageSize.(int))
 		dbaasCluster.Properties.StorageSize = &storageSize
+	}
+
+	if _, ok := d.GetOk("connection_pooler"); ok {
+		dbaasCluster.Properties.ConnectionPooler = getConnectionPoolerData(d)
 	}
 
 	dbaasCluster.Properties.Connections = GetPsqlClusterConnectionsData(d)
@@ -774,6 +782,15 @@ func SetPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterResponse) e
 		}
 	}
 
+	if cluster.Properties.ConnectionPooler != nil {
+		var connectionPooler []interface{}
+		connectionPoolerEntry := setConnectionPoolerProperties(*cluster.Properties.ConnectionPooler)
+		connectionPooler = append(connectionPooler, connectionPoolerEntry)
+		if err := d.Set("connection_pooler", connectionPooler); err != nil {
+			return utils.GenerateSetError(resourceName, "connection_pooler", err)
+		}
+	}
+
 	if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
 		var connections []interface{}
 		for _, connection := range *cluster.Properties.Connections {
@@ -1076,4 +1093,27 @@ func MongoClusterCheckRequiredFieldsSet(d *schema.ResourceData) error {
 		}
 	}
 	return nil
+}
+
+func getConnectionPoolerData(d *schema.ResourceData) *psql.ConnectionPooler {
+	var connectionPooler psql.ConnectionPooler
+
+	enabledIntf := d.Get("connection_pooler.0.enabled")
+	enabledValue := enabledIntf.(bool)
+	connectionPooler.Enabled = &enabledValue
+
+	poolModeIntf := d.Get("connection_pooler.0.pool_mode")
+	poolModeValue := psql.PoolMode(poolModeIntf.(string))
+	connectionPooler.PoolMode = &poolModeValue
+
+	return &connectionPooler
+}
+
+func setConnectionPoolerProperties(connectionPoolerProperties psql.ConnectionPooler) map[string]interface{} {
+	connectionPoolerMap := map[string]interface{}{}
+
+	utils.SetPropWithNilCheck(connectionPoolerMap, "enabled", *connectionPoolerProperties.Enabled)
+	utils.SetPropWithNilCheck(connectionPoolerMap, "pool_mode", *connectionPoolerProperties.PoolMode)
+
+	return connectionPoolerMap
 }

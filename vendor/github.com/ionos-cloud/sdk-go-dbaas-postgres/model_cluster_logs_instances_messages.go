@@ -15,33 +15,33 @@ import (
 	"time"
 )
 
-// ClusterLogsInstancesInnerMessagesInner struct for ClusterLogsInstancesInnerMessagesInner
-type ClusterLogsInstancesInnerMessagesInner struct {
+// ClusterLogsInstancesMessages struct for ClusterLogsInstancesMessages
+type ClusterLogsInstancesMessages struct {
 	Time    *IonosTime `json:"time,omitempty"`
 	Message *string    `json:"message,omitempty"`
 }
 
-// NewClusterLogsInstancesInnerMessagesInner instantiates a new ClusterLogsInstancesInnerMessagesInner object
+// NewClusterLogsInstancesMessages instantiates a new ClusterLogsInstancesMessages object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewClusterLogsInstancesInnerMessagesInner() *ClusterLogsInstancesInnerMessagesInner {
-	this := ClusterLogsInstancesInnerMessagesInner{}
+func NewClusterLogsInstancesMessages() *ClusterLogsInstancesMessages {
+	this := ClusterLogsInstancesMessages{}
 
 	return &this
 }
 
-// NewClusterLogsInstancesInnerMessagesInnerWithDefaults instantiates a new ClusterLogsInstancesInnerMessagesInner object
+// NewClusterLogsInstancesMessagesWithDefaults instantiates a new ClusterLogsInstancesMessages object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewClusterLogsInstancesInnerMessagesInnerWithDefaults() *ClusterLogsInstancesInnerMessagesInner {
-	this := ClusterLogsInstancesInnerMessagesInner{}
+func NewClusterLogsInstancesMessagesWithDefaults() *ClusterLogsInstancesMessages {
+	this := ClusterLogsInstancesMessages{}
 	return &this
 }
 
 // GetTime returns the Time field value
 // If the value is explicit nil, the zero value for time.Time will be returned
-func (o *ClusterLogsInstancesInnerMessagesInner) GetTime() *time.Time {
+func (o *ClusterLogsInstancesMessages) GetTime() *time.Time {
 	if o == nil {
 		return nil
 	}
@@ -56,7 +56,7 @@ func (o *ClusterLogsInstancesInnerMessagesInner) GetTime() *time.Time {
 // GetTimeOk returns a tuple with the Time field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterLogsInstancesInnerMessagesInner) GetTimeOk() (*time.Time, bool) {
+func (o *ClusterLogsInstancesMessages) GetTimeOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -69,14 +69,14 @@ func (o *ClusterLogsInstancesInnerMessagesInner) GetTimeOk() (*time.Time, bool) 
 }
 
 // SetTime sets field value
-func (o *ClusterLogsInstancesInnerMessagesInner) SetTime(v time.Time) {
+func (o *ClusterLogsInstancesMessages) SetTime(v time.Time) {
 
 	o.Time = &IonosTime{v}
 
 }
 
 // HasTime returns a boolean if a field has been set.
-func (o *ClusterLogsInstancesInnerMessagesInner) HasTime() bool {
+func (o *ClusterLogsInstancesMessages) HasTime() bool {
 	if o != nil && o.Time != nil {
 		return true
 	}
@@ -86,7 +86,7 @@ func (o *ClusterLogsInstancesInnerMessagesInner) HasTime() bool {
 
 // GetMessage returns the Message field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *ClusterLogsInstancesInnerMessagesInner) GetMessage() *string {
+func (o *ClusterLogsInstancesMessages) GetMessage() *string {
 	if o == nil {
 		return nil
 	}
@@ -98,7 +98,7 @@ func (o *ClusterLogsInstancesInnerMessagesInner) GetMessage() *string {
 // GetMessageOk returns a tuple with the Message field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterLogsInstancesInnerMessagesInner) GetMessageOk() (*string, bool) {
+func (o *ClusterLogsInstancesMessages) GetMessageOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -107,14 +107,14 @@ func (o *ClusterLogsInstancesInnerMessagesInner) GetMessageOk() (*string, bool) 
 }
 
 // SetMessage sets field value
-func (o *ClusterLogsInstancesInnerMessagesInner) SetMessage(v string) {
+func (o *ClusterLogsInstancesMessages) SetMessage(v string) {
 
 	o.Message = &v
 
 }
 
 // HasMessage returns a boolean if a field has been set.
-func (o *ClusterLogsInstancesInnerMessagesInner) HasMessage() bool {
+func (o *ClusterLogsInstancesMessages) HasMessage() bool {
 	if o != nil && o.Message != nil {
 		return true
 	}
@@ -122,7 +122,7 @@ func (o *ClusterLogsInstancesInnerMessagesInner) HasMessage() bool {
 	return false
 }
 
-func (o ClusterLogsInstancesInnerMessagesInner) MarshalJSON() ([]byte, error) {
+func (o ClusterLogsInstancesMessages) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Time != nil {
 		toSerialize["time"] = o.Time
@@ -135,38 +135,38 @@ func (o ClusterLogsInstancesInnerMessagesInner) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableClusterLogsInstancesInnerMessagesInner struct {
-	value *ClusterLogsInstancesInnerMessagesInner
+type NullableClusterLogsInstancesMessages struct {
+	value *ClusterLogsInstancesMessages
 	isSet bool
 }
 
-func (v NullableClusterLogsInstancesInnerMessagesInner) Get() *ClusterLogsInstancesInnerMessagesInner {
+func (v NullableClusterLogsInstancesMessages) Get() *ClusterLogsInstancesMessages {
 	return v.value
 }
 
-func (v *NullableClusterLogsInstancesInnerMessagesInner) Set(val *ClusterLogsInstancesInnerMessagesInner) {
+func (v *NullableClusterLogsInstancesMessages) Set(val *ClusterLogsInstancesMessages) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableClusterLogsInstancesInnerMessagesInner) IsSet() bool {
+func (v NullableClusterLogsInstancesMessages) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableClusterLogsInstancesInnerMessagesInner) Unset() {
+func (v *NullableClusterLogsInstancesMessages) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableClusterLogsInstancesInnerMessagesInner(val *ClusterLogsInstancesInnerMessagesInner) *NullableClusterLogsInstancesInnerMessagesInner {
-	return &NullableClusterLogsInstancesInnerMessagesInner{value: val, isSet: true}
+func NewNullableClusterLogsInstancesMessages(val *ClusterLogsInstancesMessages) *NullableClusterLogsInstancesMessages {
+	return &NullableClusterLogsInstancesMessages{value: val, isSet: true}
 }
 
-func (v NullableClusterLogsInstancesInnerMessagesInner) MarshalJSON() ([]byte, error) {
+func (v NullableClusterLogsInstancesMessages) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableClusterLogsInstancesInnerMessagesInner) UnmarshalJSON(src []byte) error {
+func (v *NullableClusterLogsInstancesMessages) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

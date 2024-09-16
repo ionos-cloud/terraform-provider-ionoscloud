@@ -63,6 +63,25 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD", "SSD Premium", "SSD Standard"}, true)),
 			},
+			"connection_pooler": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Description: "Configuration options for the connection pooler",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+						"pool_mode": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Represents different modes of connection pooling for the connection pooler",
+						},
+					},
+				},
+			},
 			"connections": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -268,7 +287,6 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 	client := meta.(services.SdkBundle).PsqlClient
 
 	cluster, diags := dbaasService.GetPgSqlClusterDataUpdate(d)
-
 	if diags != nil {
 		return diags
 	}
