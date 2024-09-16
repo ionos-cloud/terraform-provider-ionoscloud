@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
