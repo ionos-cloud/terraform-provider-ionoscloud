@@ -6,7 +6,6 @@ require (
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/gofrs/uuid/v5 v5.3.0
-	github.com/hashicorp/terraform-plugin-docs v0.19.4
 	github.com/hashicorp/terraform-plugin-framework v1.11.0
 	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.1.0
 	github.com/hashicorp/terraform-plugin-framework-timeouts v0.4.1
@@ -40,26 +39,11 @@ require (
 )
 
 require (
-	github.com/BurntSushi/toml v1.2.1 // indirect
-	github.com/Kunde21/markdownfmt/v3 v3.1.0 // indirect
-	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.2.0 // indirect
-	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
-	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/bgentry/speakeasy v0.1.0 // indirect
-	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
-	github.com/hashicorp/cli v1.1.6 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
-	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/mattn/go-runewidth v0.0.9 // indirect
-	github.com/posener/complete v1.2.3 // indirect
-	github.com/shopspring/decimal v1.3.1 // indirect
-	github.com/spf13/cast v1.5.0 // indirect
-	github.com/yuin/goldmark v1.7.1 // indirect
-	github.com/yuin/goldmark-meta v1.1.0 // indirect
-	go.abhg.dev/goldmark/frontmatter v0.2.0 // indirect
-	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df // indirect
+	github.com/kr/pretty v0.3.0 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
+	github.com/stretchr/testify v1.8.2 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
