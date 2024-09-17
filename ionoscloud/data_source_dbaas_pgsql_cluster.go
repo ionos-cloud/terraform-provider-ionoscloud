@@ -60,6 +60,24 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 				Description: "The storage type used in your cluster.",
 				Computed:    true,
 			},
+			"connection_pooler": {
+				Type:        schema.TypeList,
+				Description: "Configuration options for the connection pooler",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"pool_mode": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Represents different modes of connection pooling for the connection pooler",
+						},
+					},
+				},
+			},
 			"connections": {
 				Type:        schema.TypeList,
 				Description: "Details about the network connection for your cluster.",

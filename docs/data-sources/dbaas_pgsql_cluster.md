@@ -46,7 +46,10 @@ The following attributes are returned by the datasource:
 * `cores` - The number of CPU cores per replica.
 * `ram` - The amount of memory per instance in megabytes. 
 * `storage_size` - The amount of storage per instance in MB.
-* `storage_type` - The storage type used in your cluster. 
+* `storage_type` - The storage type used in your cluster.
+* `connection_pooler` - Details about the connection pooler.
+  * `enabled`
+  * `pool_mode` - Represents different modes of connection pooling for the connection pooler.
 * `connections` - Details about the network connection for your cluster.
   * `datacenter_id` - The datacenter to connect your cluster to.
   * `lan_id` - The LAN to connect your cluster to.

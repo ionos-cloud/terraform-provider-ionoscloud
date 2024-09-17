@@ -134,8 +134,8 @@ github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1 h1:EBsHfY/Bt7CcSsP7W7ohVsnhFA
 github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1/go.mod h1:627dsH56YGQD7x0g2FGdVsxNtBySvQ3QU0uG+d6/Evk=
 github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1 h1:+tDoZ8IEPxYwJd6fDIpWksNJs9Zzw7Pu5A39jTew058=
 github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1/go.mod h1:rxOAeyAU6BTfghJibSRDdRNrKm2cIXMpSMe7JIWewJ8=
-github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2 h1:AaKbci+kVS6/k43VwJwmXxCJ7pzj9jwuOPqO8Wd5560=
-github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2/go.mod h1:nmJEwuRX65A5/PxwvdFW0XrV+N6WFYnMV1TiIafAwz4=
+github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3 h1:T05nbKqBIw2zmPwaV2pWyFcUVjblLMoShPM9nAYQjLM=
+github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3/go.mod h1:5cKJUIcXfMbG5vVkz6cYjnToZvaQylkLsIuhOW7PhEI=
 github.com/ionos-cloud/sdk-go-dns v1.2.1 h1:Sy7Jg5trzObad9VPvEh7BgeJrIhaxdGlBEvG2aHJZH8=
 github.com/ionos-cloud/sdk-go-dns v1.2.1/go.mod h1:l9gYdwtUshlBOiIi4nHn3RCX81XlV3VoNvLJrO2VfHg=
 github.com/ionos-cloud/sdk-go-kafka v1.0.0 h1:S0Tfy/KlYW7UJW6DoU43fF0/iNPc1YKC+AC56G9wfA4=

@@ -29,7 +29,8 @@ type PatchClusterProperties struct {
 	// The PostgreSQL version of your cluster.
 	PostgresVersion *string `json:"postgresVersion,omitempty"`
 	// The total number of instances in the cluster (one master and n-1 standbys).
-	Instances *int32 `json:"instances,omitempty"`
+	Instances        *int32            `json:"instances,omitempty"`
+	ConnectionPooler *ConnectionPooler `json:"connectionPooler,omitempty"`
 }
 
 // NewPatchClusterProperties instantiates a new PatchClusterProperties object
@@ -354,6 +355,44 @@ func (o *PatchClusterProperties) HasInstances() bool {
 	return false
 }
 
+// GetConnectionPooler returns the ConnectionPooler field value
+// If the value is explicit nil, the zero value for ConnectionPooler will be returned
+func (o *PatchClusterProperties) GetConnectionPooler() *ConnectionPooler {
+	if o == nil {
+		return nil
+	}
+
+	return o.ConnectionPooler
+
+}
+
+// GetConnectionPoolerOk returns a tuple with the ConnectionPooler field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *PatchClusterProperties) GetConnectionPoolerOk() (*ConnectionPooler, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.ConnectionPooler, true
+}
+
+// SetConnectionPooler sets field value
+func (o *PatchClusterProperties) SetConnectionPooler(v ConnectionPooler) {
+
+	o.ConnectionPooler = &v
+
+}
+
+// HasConnectionPooler returns a boolean if a field has been set.
+func (o *PatchClusterProperties) HasConnectionPooler() bool {
+	if o != nil && o.ConnectionPooler != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o PatchClusterProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Cores != nil {
@@ -386,6 +425,10 @@ func (o PatchClusterProperties) MarshalJSON() ([]byte, error) {
 
 	if o.Instances != nil {
 		toSerialize["instances"] = o.Instances
+	}
+
+	if o.ConnectionPooler != nil {
+		toSerialize["connectionPooler"] = o.ConnectionPooler
 	}
 
 	return json.Marshal(toSerialize)

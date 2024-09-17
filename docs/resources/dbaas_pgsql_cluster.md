@@ -35,6 +35,10 @@ resource "ionoscloud_pg_cluster" "example" {
   ram                     = 2048
   storage_size            = 2048
   storage_type            = "HDD"
+  connection_pooler {
+    enabled = true
+    pool_mode = "session"
+  }
   connections   {
     datacenter_id         =  ionoscloud_datacenter.example.id
     lan_id                =  ionoscloud_lan.example.id
@@ -76,7 +80,7 @@ resource "ionoscloud_server" "example" {
   ram                     = 2048
   availability_zone       = "ZONE_1"
   cpu_family              = "INTEL_SKYLAKE"
-  image_name              = "Debian-10-cloud-init.qcow2"
+  image_name              = "rockylinux-8-GenericCloud-20230518"
   image_password          = "password"
   volume {
     name                  = "example"
@@ -103,6 +107,10 @@ resource "ionoscloud_pg_cluster" "example" {
   ram                     = 2048
   storage_size            = 2048
   storage_type            = "HDD"
+  connection_pooler {
+    enabled = true
+    pool_mode = "session"
+  }
   connections   {
     datacenter_id         =  ionoscloud_datacenter.example.id 
     lan_id                =  ionoscloud_lan.example.id 
@@ -139,6 +147,9 @@ resource "random_password" "cluster_password" {
 * `ram` - (Required)[int] The amount of memory per instance in megabytes. Has to be a multiple of 1024.
 * `storage_size` - (Required)[int] The amount of storage per instance in MB. Has to be a multiple of 2048.
 * `storage_type` - (Required)[string] SSD, SSD Standard, SSD Premium, or HDD. Value "SSD" is deprecated, use the equivalent "SSD Premium" instead. This attribute is immutable(disallowed in update requests).
+* `connection_pooler` - (Optional)[object]
+  * `enabled` - (Required)[bool]
+  * `pool_mode` - (Required)[string] Represents different modes of connection pooling for the connection pooler.
 * `connections` - (Required)[string] Details about the network connection for your cluster.
   * `datacenter_id` - (Required)[true] The datacenter to connect your cluster to.
   * `lan_id` - (Required)[true] The LAN to connect your cluster to.
