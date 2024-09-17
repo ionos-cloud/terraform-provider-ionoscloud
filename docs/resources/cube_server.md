@@ -1,8 +1,8 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: cube server"
-sidebar_current: "docs-resource-server"
+page_title: "IonosCloud: ionoscloud_cube_server"
+sidebar_current: "docs-resource-cube_server"
 description: |-
   Creates and manages IonosCloud Cube Server objects.
 ---

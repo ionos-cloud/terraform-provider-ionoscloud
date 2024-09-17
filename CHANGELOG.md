@@ -1,3 +1,9 @@
+## 6.5.5
+
+### Fixes
+- Fix for optional blocks in `ionoscloud_s3_bucket_lifecycle_configuration` 
+  and `ionoscloud_s3_bucket_website_configuration` resources, before were wrongly marked as required
+
 ## 6.5.4
 
 ### Fixes
