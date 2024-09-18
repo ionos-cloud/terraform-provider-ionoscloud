@@ -2,6 +2,7 @@ package s3
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"log"
@@ -766,7 +767,7 @@ func addMD5Header(req *s3.ApiPutObjectRequest, file io.ReadSeeker) error {
 	if err != nil {
 		return fmt.Errorf("failed to get MD5 hash: %w", err)
 	}
-	*req = req.ContentMD5(md5Hash)
+	*req = req.ContentMD5(base64.StdEncoding.EncodeToString([]byte(md5Hash)))
 	return nil
 }
 

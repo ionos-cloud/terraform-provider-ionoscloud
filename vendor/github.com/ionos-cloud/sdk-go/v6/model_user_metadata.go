@@ -21,6 +21,16 @@ type UserMetadata struct {
 	Etag *string `json:"etag,omitempty"`
 	// The time the user was created.
 	CreatedDate *IonosTime
+	// The user who has created the resource.
+	CreatedBy *string `json:"createdBy,omitempty"`
+	// The unique ID of the user who created the resource.
+	CreatedByUserId *string `json:"createdByUserId,omitempty"`
+	// The last time the resource was modified.
+	LastModifiedDate *IonosTime
+	// The user who last modified the resource.
+	LastModifiedBy *string `json:"lastModifiedBy,omitempty"`
+	// The unique ID of the user who last modified the resource.
+	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
 	// The time of the last login by the user.
 	LastLogin *IonosTime
 }
@@ -126,6 +136,203 @@ func (o *UserMetadata) HasCreatedDate() bool {
 	return false
 }
 
+// GetCreatedBy returns the CreatedBy field value
+// If the value is explicit nil, nil is returned
+func (o *UserMetadata) GetCreatedBy() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.CreatedBy
+
+}
+
+// GetCreatedByOk returns a tuple with the CreatedBy field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UserMetadata) GetCreatedByOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.CreatedBy, true
+}
+
+// SetCreatedBy sets field value
+func (o *UserMetadata) SetCreatedBy(v string) {
+
+	o.CreatedBy = &v
+
+}
+
+// HasCreatedBy returns a boolean if a field has been set.
+func (o *UserMetadata) HasCreatedBy() bool {
+	if o != nil && o.CreatedBy != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetCreatedByUserId returns the CreatedByUserId field value
+// If the value is explicit nil, nil is returned
+func (o *UserMetadata) GetCreatedByUserId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.CreatedByUserId
+
+}
+
+// GetCreatedByUserIdOk returns a tuple with the CreatedByUserId field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UserMetadata) GetCreatedByUserIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.CreatedByUserId, true
+}
+
+// SetCreatedByUserId sets field value
+func (o *UserMetadata) SetCreatedByUserId(v string) {
+
+	o.CreatedByUserId = &v
+
+}
+
+// HasCreatedByUserId returns a boolean if a field has been set.
+func (o *UserMetadata) HasCreatedByUserId() bool {
+	if o != nil && o.CreatedByUserId != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetLastModifiedDate returns the LastModifiedDate field value
+// If the value is explicit nil, nil is returned
+func (o *UserMetadata) GetLastModifiedDate() *time.Time {
+	if o == nil {
+		return nil
+	}
+
+	if o.LastModifiedDate == nil {
+		return nil
+	}
+	return &o.LastModifiedDate.Time
+
+}
+
+// GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UserMetadata) GetLastModifiedDateOk() (*time.Time, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	if o.LastModifiedDate == nil {
+		return nil, false
+	}
+	return &o.LastModifiedDate.Time, true
+
+}
+
+// SetLastModifiedDate sets field value
+func (o *UserMetadata) SetLastModifiedDate(v time.Time) {
+
+	o.LastModifiedDate = &IonosTime{v}
+
+}
+
+// HasLastModifiedDate returns a boolean if a field has been set.
+func (o *UserMetadata) HasLastModifiedDate() bool {
+	if o != nil && o.LastModifiedDate != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetLastModifiedBy returns the LastModifiedBy field value
+// If the value is explicit nil, nil is returned
+func (o *UserMetadata) GetLastModifiedBy() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.LastModifiedBy
+
+}
+
+// GetLastModifiedByOk returns a tuple with the LastModifiedBy field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UserMetadata) GetLastModifiedByOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.LastModifiedBy, true
+}
+
+// SetLastModifiedBy sets field value
+func (o *UserMetadata) SetLastModifiedBy(v string) {
+
+	o.LastModifiedBy = &v
+
+}
+
+// HasLastModifiedBy returns a boolean if a field has been set.
+func (o *UserMetadata) HasLastModifiedBy() bool {
+	if o != nil && o.LastModifiedBy != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetLastModifiedByUserId returns the LastModifiedByUserId field value
+// If the value is explicit nil, nil is returned
+func (o *UserMetadata) GetLastModifiedByUserId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.LastModifiedByUserId
+
+}
+
+// GetLastModifiedByUserIdOk returns a tuple with the LastModifiedByUserId field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UserMetadata) GetLastModifiedByUserIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.LastModifiedByUserId, true
+}
+
+// SetLastModifiedByUserId sets field value
+func (o *UserMetadata) SetLastModifiedByUserId(v string) {
+
+	o.LastModifiedByUserId = &v
+
+}
+
+// HasLastModifiedByUserId returns a boolean if a field has been set.
+func (o *UserMetadata) HasLastModifiedByUserId() bool {
+	if o != nil && o.LastModifiedByUserId != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetLastLogin returns the LastLogin field value
 // If the value is explicit nil, nil is returned
 func (o *UserMetadata) GetLastLogin() *time.Time {
@@ -179,6 +386,26 @@ func (o UserMetadata) MarshalJSON() ([]byte, error) {
 
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
+	}
+
+	if o.CreatedBy != nil {
+		toSerialize["createdBy"] = o.CreatedBy
+	}
+
+	if o.CreatedByUserId != nil {
+		toSerialize["createdByUserId"] = o.CreatedByUserId
+	}
+
+	if o.LastModifiedDate != nil {
+		toSerialize["lastModifiedDate"] = o.LastModifiedDate
+	}
+
+	if o.LastModifiedBy != nil {
+		toSerialize["lastModifiedBy"] = o.LastModifiedBy
+	}
+
+	if o.LastModifiedByUserId != nil {
+		toSerialize["lastModifiedByUserId"] = o.LastModifiedByUserId
 	}
 
 	if o.LastLogin != nil {

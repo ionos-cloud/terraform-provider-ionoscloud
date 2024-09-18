@@ -1,9 +1,9 @@
 /*
  * IONOS Cloud - DNS API
  *
- * DNS API Specification
+ * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.2.0
+ * API version: 1.16.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -51,10 +51,10 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "v1.1.1"
+	Version = "1.2.1"
 )
 
-// APIClient manages communication with the IONOS Cloud - DNS API API v1.2.0
+// APIClient manages communication with the IONOS Cloud - DNS API API v1.16.0
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration
@@ -62,7 +62,17 @@ type APIClient struct {
 
 	// API Services
 
+	DNSSECApi *DNSSECApiService
+
+	QuotaApi *QuotaApiService
+
 	RecordsApi *RecordsApiService
+
+	ReverseRecordsApi *ReverseRecordsApiService
+
+	SecondaryZonesApi *SecondaryZonesApiService
+
+	ZoneFilesApi *ZoneFilesApiService
 
 	ZonesApi *ZonesApiService
 }
@@ -90,7 +100,12 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.common.client = c
 
 	// API Services
+	c.DNSSECApi = (*DNSSECApiService)(&c.common)
+	c.QuotaApi = (*QuotaApiService)(&c.common)
 	c.RecordsApi = (*RecordsApiService)(&c.common)
+	c.ReverseRecordsApi = (*ReverseRecordsApiService)(&c.common)
+	c.SecondaryZonesApi = (*SecondaryZonesApiService)(&c.common)
+	c.ZoneFilesApi = (*ZoneFilesApiService)(&c.common)
 	c.ZonesApi = (*ZonesApiService)(&c.common)
 
 	return c
@@ -292,6 +307,9 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		case http.StatusServiceUnavailable,
 			http.StatusGatewayTimeout,
 			http.StatusBadGateway:
+			if request.Method == http.MethodPost {
+				return resp, httpRequestTime, err
+			}
 			backoffTime = c.GetConfig().WaitTime
 
 		case http.StatusTooManyRequests:
@@ -315,21 +333,31 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 			}
 			break
 		} else {
-			c.backOff(backoffTime)
+			c.backOff(request.Context(), backoffTime)
 		}
 	}
 
 	return resp, httpRequestTime, err
 }
 
-func (c *APIClient) backOff(t time.Duration) {
+func (c *APIClient) backOff(ctx context.Context, t time.Duration) {
 	if t > c.GetConfig().MaxWaitTime {
 		t = c.GetConfig().MaxWaitTime
 	}
 	if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
 		c.cfg.Logger.Printf(" Sleeping %s before retrying request\n", t.String())
 	}
-	time.Sleep(t)
+	if t <= 0 {
+		return
+	}
+
+	timer := time.NewTimer(t)
+	defer timer.Stop()
+
+	select {
+	case <-ctx.Done():
+	case <-timer.C:
+	}
 }
 
 // Allow modification of underlying config for alternate implementations and testing

@@ -38,6 +38,7 @@ type CreateClusterProperties struct {
 	Credentials         *DBUser               `json:"credentials"`
 	SynchronizationMode *SynchronizationMode  `json:"synchronizationMode"`
 	FromBackup          *CreateRestoreRequest `json:"fromBackup,omitempty"`
+	ConnectionPooler    *ConnectionPooler     `json:"connectionPooler,omitempty"`
 }
 
 // NewCreateClusterProperties instantiates a new CreateClusterProperties object
@@ -602,6 +603,44 @@ func (o *CreateClusterProperties) HasFromBackup() bool {
 	return false
 }
 
+// GetConnectionPooler returns the ConnectionPooler field value
+// If the value is explicit nil, the zero value for ConnectionPooler will be returned
+func (o *CreateClusterProperties) GetConnectionPooler() *ConnectionPooler {
+	if o == nil {
+		return nil
+	}
+
+	return o.ConnectionPooler
+
+}
+
+// GetConnectionPoolerOk returns a tuple with the ConnectionPooler field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *CreateClusterProperties) GetConnectionPoolerOk() (*ConnectionPooler, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.ConnectionPooler, true
+}
+
+// SetConnectionPooler sets field value
+func (o *CreateClusterProperties) SetConnectionPooler(v ConnectionPooler) {
+
+	o.ConnectionPooler = &v
+
+}
+
+// HasConnectionPooler returns a boolean if a field has been set.
+func (o *CreateClusterProperties) HasConnectionPooler() bool {
+	if o != nil && o.ConnectionPooler != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o CreateClusterProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.PostgresVersion != nil {
@@ -658,6 +697,10 @@ func (o CreateClusterProperties) MarshalJSON() ([]byte, error) {
 
 	if o.FromBackup != nil {
 		toSerialize["fromBackup"] = o.FromBackup
+	}
+
+	if o.ConnectionPooler != nil {
+		toSerialize["connectionPooler"] = o.ConnectionPooler
 	}
 
 	return json.Marshal(toSerialize)

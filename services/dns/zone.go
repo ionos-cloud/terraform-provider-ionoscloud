@@ -16,6 +16,7 @@ import (
 
 var zoneResourceName = "DNS Zone"
 
+//nolint:golint
 func (c *Client) CreateZone(ctx context.Context, d *schema.ResourceData) (zoneResponse dns.ZoneRead, responseInfo utils.ApiResponseInfo, err error) {
 	zoneUuid := uuidgen.ResourceUuid()
 	request := setZonePutRequest(d)
@@ -24,26 +25,29 @@ func (c *Client) CreateZone(ctx context.Context, d *schema.ResourceData) (zoneRe
 	return responseData, apiResponse, err
 }
 
+//nolint:golint
 func (c *Client) IsZoneCreated(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	zoneId := d.Id()
-	zone, _, err := c.GetZoneById(ctx, zoneId)
+	zoneID := d.Id()
+	zone, _, err := c.GetZoneById(ctx, zoneID)
 	if err != nil {
 		return false, err
 	}
 	if zone.Metadata == nil || zone.Metadata.State == nil {
-		return false, fmt.Errorf("expected metadata, got empty for zone with ID: %s", zoneId)
+		return false, fmt.Errorf("expected metadata, got empty for zone with ID: %s", zoneID)
 	}
 	log.Printf("[DEBUG] zone state: %s", *zone.Metadata.State)
 
-	return strings.EqualFold((string)(*zone.Metadata.State), (string)(dns.AVAILABLE)), nil
+	return strings.EqualFold((string)(*zone.Metadata.State), (string)(dns.PROVISIONINGSTATE_AVAILABLE)), nil
 }
 
+//nolint:golint
 func (c *Client) GetZoneById(ctx context.Context, id string) (dns.ZoneRead, *dns.APIResponse, error) {
 	zone, apiResponse, err := c.sdkClient.ZonesApi.ZonesFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return zone, apiResponse, err
 }
 
+//nolint:golint
 func (c *Client) ListZones(ctx context.Context, filterName string) (dns.ZoneReadList, *dns.APIResponse, error) {
 	request := c.sdkClient.ZonesApi.ZonesGet(ctx)
 	if filterName != "" {
@@ -54,6 +58,7 @@ func (c *Client) ListZones(ctx context.Context, filterName string) (dns.ZoneRead
 	return zones, apiResponse, err
 }
 
+//nolint:golint
 func (c *Client) SetZoneData(d *schema.ResourceData, zone dns.ZoneRead) error {
 	if zone.Id != nil {
 		d.SetId(*zone.Id)
@@ -94,6 +99,7 @@ func (c *Client) SetZoneData(d *schema.ResourceData, zone dns.ZoneRead) error {
 	return nil
 }
 
+//nolint:golint
 func (c *Client) UpdateZone(ctx context.Context, id string, d *schema.ResourceData) (dns.ZoneRead, utils.ApiResponseInfo, error) {
 	request := setZonePutRequest(d)
 	zoneResponse, apiResponse, err := c.sdkClient.ZonesApi.ZonesPut(ctx, id).ZoneEnsure(*request).Execute()
@@ -101,38 +107,18 @@ func (c *Client) UpdateZone(ctx context.Context, id string, d *schema.ResourceDa
 	return zoneResponse, apiResponse, err
 }
 
+//nolint:golint
 func (c *Client) DeleteZone(ctx context.Context, id string) (utils.ApiResponseInfo, error) {
-	apiResponse, err := c.sdkClient.ZonesApi.ZonesDelete(ctx, id).Execute()
+	_, apiResponse, err := c.sdkClient.ZonesApi.ZonesDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
+//nolint:golint
 func (c *Client) IsZoneDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := c.sdkClient.ZonesApi.ZonesFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
-}
-
-func setZoneCreateRequest(d *schema.ResourceData) *dns.ZoneCreate {
-	request := dns.ZoneCreate{
-		Properties: &dns.Zone{},
-	}
-
-	if nameValue, ok := d.GetOk("name"); ok {
-		name := nameValue.(string)
-		request.Properties.ZoneName = &name
-	}
-
-	if descriptionValue, ok := d.GetOk("description"); ok {
-		description := descriptionValue.(string)
-		request.Properties.Description = &description
-	}
-
-	if enabledValue, ok := d.GetOkExists("enabled"); ok {
-		enabled := enabledValue.(bool)
-		request.Properties.Enabled = &enabled
-	}
-	return &request
 }
 
 func setZonePutRequest(d *schema.ResourceData) *dns.ZoneEnsure {
@@ -150,7 +136,7 @@ func setZonePutRequest(d *schema.ResourceData) *dns.ZoneEnsure {
 		request.Properties.Description = &description
 	}
 
-	if enabledValue, ok := d.GetOkExists("enabled"); ok {
+	if enabledValue, ok := d.GetOkExists("enabled"); ok { //nolint:staticcheck
 		enabled := enabledValue.(bool)
 		request.Properties.Enabled = &enabled
 	}

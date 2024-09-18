@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	kafka "github.com/ionos-cloud/sdk-go-kafka"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -87,7 +88,7 @@ func (c *Client) IsTopicDeleted(ctx context.Context, d *schema.ResourceData) (bo
 
 	c.changeConfigURL(location)
 
-	_, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, topicID, clusterID).Execute()
+	_, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()
 
 	return apiResponse.HttpNotFound(), err

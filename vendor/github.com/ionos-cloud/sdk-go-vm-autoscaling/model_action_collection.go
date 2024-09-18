@@ -22,8 +22,8 @@ type ActionCollection struct {
 	// The resource type.
 	Type *string `json:"type,omitempty"`
 	// The absolute URL to the resource's representation.
-	Href  *string           `json:"href,omitempty"`
-	Items *[]ActionResource `json:"items,omitempty"`
+	Href  *string   `json:"href,omitempty"`
+	Items *[]Action `json:"items,omitempty"`
 }
 
 // NewActionCollection instantiates a new ActionCollection object
@@ -161,8 +161,8 @@ func (o *ActionCollection) HasHref() bool {
 }
 
 // GetItems returns the Items field value
-// If the value is explicit nil, the zero value for []ActionResource will be returned
-func (o *ActionCollection) GetItems() *[]ActionResource {
+// If the value is explicit nil, the zero value for []Action will be returned
+func (o *ActionCollection) GetItems() *[]Action {
 	if o == nil {
 		return nil
 	}
@@ -174,7 +174,7 @@ func (o *ActionCollection) GetItems() *[]ActionResource {
 // GetItemsOk returns a tuple with the Items field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ActionCollection) GetItemsOk() (*[]ActionResource, bool) {
+func (o *ActionCollection) GetItemsOk() (*[]Action, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -183,7 +183,7 @@ func (o *ActionCollection) GetItemsOk() (*[]ActionResource, bool) {
 }
 
 // SetItems sets field value
-func (o *ActionCollection) SetItems(v []ActionResource) {
+func (o *ActionCollection) SetItems(v []Action) {
 
 	o.Items = &v
 
