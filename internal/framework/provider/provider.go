@@ -2,7 +2,10 @@ package provider
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 	"os"
+	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -10,9 +13,31 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/s3"
-	s3service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/s3management"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
+	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
+	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
+	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
+	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
+	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
+	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
+	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
+	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
+	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
+	s3Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
+	s3managementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 // ClientOptions is the configuration for the provider.
@@ -120,6 +145,8 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	accessKey := os.Getenv("IONOS_S3_ACCESS_KEY")
 	secretKey := os.Getenv("IONOS_S3_SECRET_KEY")
 	region := os.Getenv("IONOS_S3_REGION")
+	endpoint := os.Getenv("IONOS_API_URL")
+	terraformVersion := "0.12+compatible"
 
 	if !clientOpts.Token.IsNull() {
 		token = clientOpts.Token.ValueString()
@@ -145,6 +172,10 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		region = clientOpts.S3Region.ValueString()
 	}
 
+	if !clientOpts.Endpoint.IsNull() {
+		endpoint = clientOpts.Endpoint.ValueString()
+	}
+
 	if token == "" && (username == "" || password == "") {
 		resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
 	}
@@ -153,7 +184,45 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	client := s3service.NewClient(accessKey, secretKey, region)
+	cleanedEndpoint := cleanURL(endpoint)
+	version := "v6"
+
+	newConfig := ionoscloud.NewConfiguration(username, password, token, endpoint)
+	newConfig.UserAgent = fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	)
+	if os.Getenv(constant.IonosDebug) != "" {
+		newConfig.Debug = true
+	}
+	newConfig.MaxRetries = constant.MaxRetries
+	newConfig.WaitTime = constant.MaxWaitTime
+	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	cloudapiClient := ionoscloud.NewAPIClient(newConfig)
+
+	client := &services.SdkBundle{
+		CDNClient:          cdnService.NewCDNClient(username, password, token, endpoint, version, terraformVersion),
+		AutoscalingClient:  autoscalingService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		CertManagerClient:  cert.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		CloudApiClient:     cloudapiClient,
+		ContainerClient:    crService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		DataplatformClient: dataplatformService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		DNSClient:          dnsService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		LoggingClient:      loggingService.NewClient(username, password, token, cleanedEndpoint, terraformVersion),
+		MariaDBClient:      mariadb.NewMariaDBClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		MongoClient:        dbaasService.NewMongoClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		NFSClient:          nfsService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		PsqlClient:         dbaasService.NewPsqlClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		KafkaClient:        kafkaService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		APIGatewayClient: apiGatewayService.NewClient(
+			username, password, token, cleanedEndpoint, version, terraformVersion,
+		),
+		VPNClient:          vpn.NewClient(username, password, token, cleanedEndpoint, terraformVersion),
+		InMemoryDBClient:   inmemorydb.NewInMemoryDBClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		S3Client:           s3Service.NewClient(accessKey, secretKey, region),
+		S3ManagementClient: s3managementService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
@@ -172,6 +241,7 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		s3.NewBucketCorsConfigurationResource,
 		s3.NewBucketLifecycleConfigurationResource,
 		s3.NewBucketWebsiteConfigurationResource,
+		s3management.NewAccesskeyResource,
 	}
 }
 
@@ -183,4 +253,13 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		s3.NewBucketPolicyDataSource,
 		s3.NewObjectsDataSource,
 	}
+}
+
+func cleanURL(url string) string {
+	length := len(url)
+	if length > 1 && url[length-1] == '/' {
+		url = url[:length-1]
+	}
+
+	return url
 }

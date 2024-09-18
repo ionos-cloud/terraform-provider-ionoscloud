@@ -1,4 +1,4 @@
-package s3
+package s3management
 
 import (
 	"context"
@@ -10,9 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
 	s3management "github.com/ionos-cloud/sdk-go-s3-management"
-	s3managementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -27,12 +27,12 @@ func NewAccesskeyResource() resource.Resource {
 }
 
 type accesskeyResource struct {
-	client *s3managementService.Client
+	client *services.SdkBundle
 }
 
 type accesskeyResourceModel struct {
-	AccessKey       types.String   `tfsdk:"accessKey"`
-	SecretKey       types.String   `tfsdk:"secretKey"`
+	AccessKey       types.String   `tfsdk:"accesskey"`
+	SecretKey       types.String   `tfsdk:"secretkey"`
 	CanonicalUserId types.String   `tfsdk:"canonical_user_id"`
 	ContractUserId  types.String   `tfsdk:"contract_user_id"`
 	Description     types.String   `tfsdk:"description"`
@@ -57,11 +57,11 @@ func (r *accesskeyResource) Schema(ctx context.Context, req resource.SchemaReque
 				Description: "Description of the Access key.",
 				Optional:    true,
 			},
-			"access_key": schema.StringAttribute{
+			"accesskey": schema.StringAttribute{
 				Description: "Access key metadata is a string of 92 characters.",
 				Computed:    true,
 			},
-			"secret_key": schema.StringAttribute{
+			"secretkey": schema.StringAttribute{
 				Description: "The secret key of the Access key.",
 				Computed:    true,
 			},
@@ -90,7 +90,7 @@ func (r *accesskeyResource) Configure(_ context.Context, req resource.ConfigureR
 		return
 	}
 
-	client, ok := req.ProviderData.(*s3managementService.Client)
+	client, ok := req.ProviderData.(*services.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
@@ -126,7 +126,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 			Description: data.Description.ValueStringPointer(),
 		},
 	}
-	accessKeyResponse, _, err := r.client.CreateAccessKey(ctx, accessKey, createTimeout)
+	accessKeyResponse, _, err := r.client.S3ManagementClient.CreateAccessKey(ctx, accessKey, createTimeout)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create accessKey", err.Error())
 		return
@@ -134,7 +134,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 
 	data.ID = basetypes.NewStringPointerValue(accessKeyResponse.Id)
 
-	accessKeyRead, _, err := r.client.GetAccessKey(ctx, *accessKeyResponse.Id)
+	accessKeyRead, _, err := r.client.S3ManagementClient.GetAccessKey(ctx, *accessKeyResponse.Id)
 	if err != nil {
 		resp.Diagnostics.AddError("Access Key API error", err.Error())
 		return
@@ -163,7 +163,7 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	accessKey, _, err := r.client.GetAccessKey(ctx, data.ID.String())
+	accessKey, _, err := r.client.S3ManagementClient.GetAccessKey(ctx, data.ID.String())
 	if err != nil {
 		resp.Diagnostics.AddError("Access Key API error", err.Error())
 		return
@@ -211,7 +211,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 			Description: data.Description.ValueStringPointer(),
 		},
 	}
-	accessKeyResponse, _, err := r.client.UpdateAccessKey(ctx, data.ID.String(), accessKey, updateTimeout)
+	accessKeyResponse, _, err := r.client.S3ManagementClient.UpdateAccessKey(ctx, data.ID.String(), accessKey, updateTimeout)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update accessKey", err.Error())
 		return
@@ -219,7 +219,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 
 	data.ID = basetypes.NewStringPointerValue(accessKeyResponse.Id)
 
-	accessKeyRead, _, err := r.client.GetAccessKey(ctx, *accessKeyResponse.Id)
+	accessKeyRead, _, err := r.client.S3ManagementClient.GetAccessKey(ctx, *accessKeyResponse.Id)
 	if err != nil {
 		resp.Diagnostics.AddError("Access Key API error", err.Error())
 		return
@@ -257,7 +257,7 @@ func (r *accesskeyResource) Delete(ctx context.Context, req resource.DeleteReque
 	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
 	defer cancel()
 
-	if _, err := r.client.DeleteAccessKey(ctx, data.ID.String(), deleteTimeout); err != nil {
+	if _, err := r.client.S3ManagementClient.DeleteAccessKey(ctx, data.ID.String(), deleteTimeout); err != nil {
 		resp.Diagnostics.AddError("failed to delete bucket", err.Error())
 		return
 	}
