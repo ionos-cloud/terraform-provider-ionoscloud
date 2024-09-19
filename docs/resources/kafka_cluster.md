@@ -112,8 +112,7 @@ resource "ionoscloud_kafka_cluster" "example" {
 
 * `id` - (Computed)[string] The UUID of the Kafka Cluster.
 * `name` - (Required)[string] Name of the Kafka Cluster.
-* `location` - (Required)[string] The location of the Kafka Cluster. Possible values: `de/fra`, `de/txl`, `es/vit`,
-  `gb/lhr`, `us/ewr`, `us/las`, `us/mci`, `fr/par`
+* `location` - (Required)[string] The location of the Kafka Cluster. Possible values: `de/fra`, `de/txl`
 * `version` - (Required)[string] Version of the Kafka Cluster. Possible values: `3.7.0`
 * `size` - (Required)[string] Size of the Kafka Cluster. Possible values: `XS`, `S`
 * `connections` - (Required) Connection information of the Kafka Cluster. Minimum items: 1, maximum items: 1.

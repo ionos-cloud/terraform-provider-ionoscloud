@@ -1,5 +1,8 @@
-## 6.5.5
+## 6.5.6
+### Fixes
+- Fix `kafka` remove unavailable locations from resources and data sources
 
+## 6.5.5
 ### Fixes
 - Fix for optional blocks in `ionoscloud_s3_bucket_lifecycle_configuration`
   and `ionoscloud_s3_bucket_website_configuration` resources, before were wrongly marked as required
@@ -7,7 +10,6 @@
 - Add `connection_pooler` attribute for PostgreSQL clusters
 
 ## 6.5.4
-
 ### Fixes
 - Fixed bucket public access block documentation
 - Fixed resources that need generate MD5 header for the API
