@@ -1,6 +1,7 @@
 ## 6.5.6
 ### Fixes
 - Fix `kafka` remove unavailable locations from resources and data sources
+- Fix update behavior for container registry property: `apiSubnetAllowList`
 
 ## 6.5.5
 ### Fixes
