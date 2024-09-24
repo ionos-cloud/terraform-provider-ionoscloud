@@ -146,7 +146,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	secretKey := os.Getenv("IONOS_S3_SECRET_KEY")
 	region := os.Getenv("IONOS_S3_REGION")
 	endpoint := os.Getenv("IONOS_API_URL")
-	terraformVersion := "0.12+compatible"
+	terraformVersion := req.TerraformVersion
 
 	if !clientOpts.Token.IsNull() {
 		token = clientOpts.Token.ValueString()
@@ -185,7 +185,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	}
 
 	cleanedEndpoint := cleanURL(endpoint)
-	version := "v6"
+	version := "DEV"
 
 	newConfig := ionoscloud.NewConfiguration(username, password, token, endpoint)
 	newConfig.UserAgent = fmt.Sprintf(
@@ -199,6 +199,8 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	newConfig.WaitTime = constant.MaxWaitTime
 	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	cloudapiClient := ionoscloud.NewAPIClient(newConfig)
+
+	version = ionoscloud.Version
 
 	client := &services.SdkBundle{
 		CDNClient:          cdnService.NewCDNClient(username, password, token, endpoint, version, terraformVersion),
