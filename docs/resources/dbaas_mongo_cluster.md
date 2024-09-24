@@ -26,7 +26,7 @@ resource "ionoscloud_lan"  "lan_example" {
   name                    = "example"
 }
 
-resource ionoscloud_mongo_cluster "example_mongo_cluster" {
+resource "ionoscloud_mongo_cluster" "example_mongo_cluster" {
   maintenance_window {
     day_of_the_week  = "Sunday"
   time             = "09:00:00"

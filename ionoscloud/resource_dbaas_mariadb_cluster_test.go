@@ -159,7 +159,7 @@ func testAccCheckDBaaSMariaDBClusterExists(n string, cluster *mariadb.ClusterRes
 const mariaDBClusterConfigBasic = `
 resource ` + constant.DatacenterResource + ` ` + datacenterResourceName + ` {
   name        = "mariadb_datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing MariaDB cluster"
 }
 
@@ -283,7 +283,7 @@ const clusterVersionAttribute = "mariadb_version"
 const (
 	clusterVersionValue             = "10.6"
 	clusterInstancesValue           = "1"
-	clusterLocationValue            = "es/vit"
+	clusterLocationValue            = "gb/lhr"
 	clusterCoresValue               = "4"
 	clusterRamValue                 = "4"
 	clusterStorageSizeValue         = "10"

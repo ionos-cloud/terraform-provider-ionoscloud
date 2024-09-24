@@ -3,6 +3,7 @@
 - Fix `kafka` remove unavailable locations from resources and data sources
 - Fix update behavior for container registry property: `apiSubnetAllowList`
 - Fix `ionoscloud_certificate` data source
+- Fix `DBaaS` tests, change location for clusters creation, mark `connection_pooler` as computed
 
 ## 6.5.5
 ### Fixes
