@@ -31,12 +31,12 @@ type accesskeyResource struct {
 	client *services.SdkBundle
 }
 
-// Metadata returns the metadata for the bucket resource.
+// Metadata returns the metadata for the accesskey resource.
 func (r *accesskeyResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_s3_accesskey"
 }
 
-// Schema returns the schema for the bucket resource.
+// Schema returns the schema for the accesskey resource.
 func (r *accesskeyResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -75,7 +75,7 @@ func (r *accesskeyResource) Schema(ctx context.Context, req resource.SchemaReque
 	}
 }
 
-// Configure configures the bucket resource.
+// Configure configures the accesskey resource.
 func (r *accesskeyResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -94,7 +94,7 @@ func (r *accesskeyResource) Configure(_ context.Context, req resource.ConfigureR
 	r.client = client
 }
 
-// Create creates the bucket.
+// Create creates the accesskey.
 func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
@@ -135,7 +135,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-// Read reads the bucket.
+// Read reads the accesskey.
 func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
 		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
@@ -163,7 +163,7 @@ func (r *accesskeyResource) ImportState(ctx context.Context, req resource.Import
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-// Update updates the bucket.
+// Update updates the accesskey.
 func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan, state *s3managementService.AccesskeyResourceModel
 
@@ -225,7 +225,7 @@ func (r *accesskeyResource) Delete(ctx context.Context, req resource.DeleteReque
 	defer cancel()
 
 	if _, err := r.client.S3ManagementClient.DeleteAccessKey(ctx, data.ID.ValueString(), deleteTimeout); err != nil {
-		resp.Diagnostics.AddError("failed to delete bucket", err.Error())
+		resp.Diagnostics.AddError("failed to delete accesskey", err.Error())
 		return
 	}
 }
