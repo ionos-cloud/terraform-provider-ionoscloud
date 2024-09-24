@@ -6,6 +6,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
+	s3managementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -13,8 +14,8 @@ import (
 
 var _ datasource.DataSourceWithConfigure = (*accessKeyDataSource)(nil)
 
-// NewBucketDataSource creates a new data source for the accesskey resource.
-func NewBucketDataSource() datasource.DataSource {
+// NewAccesskeyDataSource creates a new data source for the accesskey resource.
+func NewAccesskeyDataSource() datasource.DataSource {
 	return &accessKeyDataSource{}
 }
 
@@ -53,7 +54,7 @@ func (d *accessKeyDataSource) Schema(ctx context.Context, req datasource.SchemaR
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Optional:    true,
+				Required:    true,
 				Description: "The ID (UUID) of the AccessKey.",
 			},
 			"description": schema.StringAttribute{
@@ -89,17 +90,19 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	// result, found, err := d.client.GetAccessKeyForDataSource(ctx, data.Name)
-	// if err != nil {
-	// 	resp.Diagnostics.AddError("failed to get accesskey", err.Error())
-	// 	return
-	// }
+	id := data.ID.String()
 
-	if !found {
+	accessKey, apiResponse, err := d.client.S3ManagementClient.GetAccessKey(ctx, id)
+
+	if apiResponse.HttpNotFound() {
 		resp.Diagnostics.AddError("accesskey not found", "The accesskey was not found")
 		return
 	}
+	if err != nil {
+		resp.Diagnostics.AddError("an error occurred while fetching the accesskey with", err.Error())
+		return
+	}
 
-	data = result
+	s3managementService.SetAccessKeyPropertiesToDataSourcePlan(data, accessKey)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

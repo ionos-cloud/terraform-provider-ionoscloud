@@ -113,6 +113,27 @@ func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey s3mana
 	}
 }
 
+func SetAccessKeyPropertiesToDataSourcePlan(plan *AccessKeyDataSourceModel, accessKey s3management.AccessKey) {
+
+	if accessKey.Properties != nil {
+		if accessKey.Properties.AccessKey != nil {
+			plan.AccessKey = basetypes.NewStringPointerValue(accessKey.Properties.AccessKey)
+		}
+		if accessKey.Properties.CanonicalUserId != nil {
+			plan.CanonicalUserId = basetypes.NewStringPointerValue(accessKey.Properties.CanonicalUserId)
+		}
+		if accessKey.Properties.ContractUserId != nil {
+			plan.ContractUserId = basetypes.NewStringPointerValue(accessKey.Properties.ContractUserId)
+		}
+		if accessKey.Properties.Description != nil {
+			plan.Description = basetypes.NewStringPointerValue(accessKey.Properties.Description)
+		}
+	}
+	if accessKey.Id != nil {
+		plan.ID = basetypes.NewStringPointerValue(accessKey.Id)
+	}
+}
+
 func (c *Client) accessKeyDeletedCheck(ctx context.Context, id string) error {
 	_, apiResponse, err := c.GetAccessKey(ctx, id)
 	if apiResponse.HttpNotFound() {

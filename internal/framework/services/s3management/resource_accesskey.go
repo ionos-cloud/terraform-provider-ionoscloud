@@ -125,7 +125,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 
 	s3managementService.SetAccessKeyPropertiesToPlan(data, accessKeyResponse)
 
-	accessKeyRead, _, err := r.client.S3ManagementClient.GetAccessKey(ctx, data.ID.String())
+	accessKeyRead, _, err := r.client.S3ManagementClient.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Access Key API error", err.Error())
 		return
@@ -148,7 +148,7 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	accessKey, _, err := r.client.S3ManagementClient.GetAccessKey(ctx, data.ID.String())
+	accessKey, _, err := r.client.S3ManagementClient.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Access Key API error", err.Error())
 		return
@@ -174,30 +174,24 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	var data *s3managementService.AccesskeyResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	updateTimeout, diags := data.Timeouts.Update(ctx, utils.DefaultTimeout)
+	updateTimeout, diags := plan.Timeouts.Update(ctx, utils.DefaultTimeout)
 	resp.Diagnostics.Append(diags...)
 	ctx, cancel := context.WithTimeout(ctx, updateTimeout)
 	defer cancel()
 
 	var accessKey = s3management.AccessKeyEnsure{
 		Properties: &s3management.AccessKeyProperties{
-			Description: data.Description.ValueStringPointer(),
+			Description: plan.Description.ValueStringPointer(),
 		},
 	}
 
-	accessKeyResponse, _, err := r.client.S3ManagementClient.UpdateAccessKey(ctx, state.ID.String(), accessKey, updateTimeout)
+	accessKeyResponse, _, err := r.client.S3ManagementClient.UpdateAccessKey(ctx, state.ID.ValueString(), accessKey, updateTimeout)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update accessKey", err.Error())
 		return
 	}
 
-	data.ID = basetypes.NewStringPointerValue(accessKeyResponse.Id)
+	plan.ID = basetypes.NewStringPointerValue(accessKeyResponse.Id)
 
 	accessKeyRead, _, err := r.client.S3ManagementClient.GetAccessKey(ctx, *accessKeyResponse.Id)
 	if err != nil {
@@ -205,8 +199,8 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	s3managementService.SetAccessKeyPropertiesToPlan(plan, accessKeyRead)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	s3managementService.SetAccessKeyPropertiesToPlan(state, accessKeyRead)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 // Delete deletes the accessKey.
@@ -230,7 +224,7 @@ func (r *accesskeyResource) Delete(ctx context.Context, req resource.DeleteReque
 	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
 	defer cancel()
 
-	if _, err := r.client.S3ManagementClient.DeleteAccessKey(ctx, data.ID.String(), deleteTimeout); err != nil {
+	if _, err := r.client.S3ManagementClient.DeleteAccessKey(ctx, data.ID.ValueString(), deleteTimeout); err != nil {
 		resp.Diagnostics.AddError("failed to delete bucket", err.Error())
 		return
 	}
