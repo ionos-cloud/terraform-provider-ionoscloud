@@ -37,7 +37,7 @@ The following arguments are supported:
 * `name` - (Optional) Name of an existing certificate that you want to search for.
 * `id` - (Optional) ID of the certificate you want to search for.
 
-Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.
+Either `name` or `id` must be provided, or both. If none are provided, the datasource will return an error.
 
 ## Attributes Reference
 
