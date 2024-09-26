@@ -68,6 +68,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				MaxItems:    1,
 				Description: "Configuration options for the connection pooler",
 				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
