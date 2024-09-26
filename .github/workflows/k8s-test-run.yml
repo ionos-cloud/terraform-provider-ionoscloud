@@ -1,9 +1,7 @@
 name: Weekly k8s test run
-# TODO -- After pipeline is fixed, uncomment this section and remove 'workflow_dispatch'
-on: workflow_dispatch
-#  schedule:
-#    # At 09:00:00 - UTC, every week on Monday.
-#    - cron: '0 09 * * MON'
+schedule:
+  # At 09:00:00 - UTC, every week on Monday.
+  - cron: '0 09 * * MON'
 
 jobs:
   test:
