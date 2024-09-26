@@ -21,7 +21,11 @@ func TestAccS3RegionDataSource(t *testing.T) {
 			{
 				Config: testAccRegionDataSourceConfig_basic(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair("data.ionoscloud_s3_region.testreg", "id", "ionoscloud_s3_region.testreg", "de"),
+					resource.TestCheckResourceAttr("data.ionoscloud_s3_region.testreg", "id", "de"),
+					resource.TestCheckResourceAttr("data.ionoscloud_s3_region.testreg", "endpoint", "s3.eu-central-1.ionoscloud.com"),
+					resource.TestCheckResourceAttr("data.ionoscloud_s3_region.testreg", "website", "s3-website.de-central.profitbricks.com"),
+					resource.TestCheckResourceAttr("data.ionoscloud_s3_region.testreg", "storage_classes.0", "standard"),
+					resource.TestCheckResourceAttr("data.ionoscloud_s3_region.testreg", "capability.iam", "false"),
 				),
 			},
 		},

@@ -22,8 +22,7 @@ func TestAccS3AccesskeyDataSource(t *testing.T) {
 			{
 				Config: testAccAccesskeyDataSourceConfig_basic(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair("data.ionoscloud_s3_accesskey.test", "name", "ionoscloud_s3_accesskey.test", "name"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_s3_accesskey.test", "region", "ionoscloud_s3_accesskey.test", "region"),
+					resource.TestCheckResourceAttr("data.ionoscloud_s3_accesskey.testres", "description", "desc"),
 				),
 			},
 		},
@@ -31,7 +30,7 @@ func TestAccS3AccesskeyDataSource(t *testing.T) {
 }
 
 func testAccAccesskeyDataSourceConfig_basic() string {
-	return utils.ConfigCompose(testAccAccesskeyConfig_basic(), `
+	return utils.ConfigCompose(testAccAccesskeyConfig_description("desc"), `
 data "ionoscloud_s3_accesskey" "testres" {
 	id = ionoscloud_s3_accesskey.test.id
 }

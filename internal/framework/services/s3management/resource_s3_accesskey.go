@@ -47,6 +47,7 @@ func (r *accesskeyResource) Schema(ctx context.Context, req resource.SchemaReque
 			"description": schema.StringAttribute{
 				Description: "Description of the Access key.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"accesskey": schema.StringAttribute{
 				Description: "Access key metadata is a string of 92 characters.",
