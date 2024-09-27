@@ -26,7 +26,7 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1
 	github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
-	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2
+	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3
 	github.com/ionos-cloud/sdk-go-dns v1.2.1
 	github.com/ionos-cloud/sdk-go-kafka v1.0.0
 	github.com/ionos-cloud/sdk-go-nfs v1.0.0
@@ -41,9 +41,13 @@ require (
 require (
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/kr/pretty v0.3.0 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
+	github.com/stretchr/testify v1.8.2 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
 require (
@@ -75,7 +79,6 @@ require (
 	github.com/hashicorp/terraform-registry-address v0.2.3 // indirect
 	github.com/hashicorp/terraform-svchost v0.1.1 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
-	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect

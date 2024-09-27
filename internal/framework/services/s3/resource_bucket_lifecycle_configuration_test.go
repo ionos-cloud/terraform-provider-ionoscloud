@@ -36,8 +36,6 @@ func TestAccBucketLifecycleConfigurationResourceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(name, "rule.0.status", "Enabled"),
 					resource.TestCheckResourceAttr(name, "rule.0.prefix", "/logs"),
 					resource.TestCheckResourceAttr(name, "rule.0.expiration.days", "90"),
-					resource.TestCheckResourceAttr(name, "rule.0.noncurrent_version_expiration.noncurrent_days", "90"),
-					resource.TestCheckResourceAttr(name, "rule.0.abort_incomplete_multipart_upload.days_after_initiation", "1"),
 				),
 			},
 			{
@@ -49,6 +47,92 @@ func TestAccBucketLifecycleConfigurationResourceBasic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccBucketLifecycleConfigurationResourceNoncurrent(t *testing.T) {
+	ctx := context.Background()
+	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
+	name := "ionoscloud_s3_bucket_lifecycle_configuration.test"
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		CheckDestroy: testAccCheckBucketLifecycleConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBucketLifecycleConfigurationConfig_noncurrent(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLifecycleConfigurationExists(ctx, name),
+					resource.TestCheckResourceAttr(name, "bucket", bucketName),
+					resource.TestCheckResourceAttr(name, "rule.0.id", "Logs delete"),
+					resource.TestCheckResourceAttr(name, "rule.0.status", "Enabled"),
+					resource.TestCheckResourceAttr(name, "rule.0.prefix", "/logs"),
+					resource.TestCheckResourceAttr(name, "rule.0.noncurrent_version_expiration.noncurrent_days", "90"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccBucketLifecycleConfigurationResourceAbort(t *testing.T) {
+	ctx := context.Background()
+	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
+	name := "ionoscloud_s3_bucket_lifecycle_configuration.test"
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		CheckDestroy: testAccCheckBucketLifecycleConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBucketLifecycleConfigurationConfig_abort(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLifecycleConfigurationExists(ctx, name),
+					resource.TestCheckResourceAttr(name, "bucket", bucketName),
+					resource.TestCheckResourceAttr(name, "rule.0.id", "Logs delete"),
+					resource.TestCheckResourceAttr(name, "rule.0.status", "Enabled"),
+					resource.TestCheckResourceAttr(name, "rule.0.prefix", "/logs"),
+					resource.TestCheckResourceAttr(name, "rule.0.abort_incomplete_multipart_upload.days_after_initiation", "1"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccBucketLifecycleConfigurationResourceMultipleRules(t *testing.T) {
+	ctx := context.Background()
+	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
+	name := "ionoscloud_s3_bucket_lifecycle_configuration.test"
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		CheckDestroy: testAccCheckBucketLifecycleConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBucketLifecycleConfigurationConfig_multipleRules(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLifecycleConfigurationExists(ctx, name),
+					resource.TestCheckResourceAttr(name, "bucket", bucketName),
+					resource.TestCheckResourceAttr(name, "rule.0.id", "Logs delete"),
+					resource.TestCheckResourceAttr(name, "rule.0.status", "Enabled"),
+					resource.TestCheckResourceAttr(name, "rule.0.prefix", "/logs"),
+					resource.TestCheckResourceAttr(name, "rule.0.abort_incomplete_multipart_upload.days_after_initiation", "1"),
+					resource.TestCheckResourceAttr(name, "rule.1.id", "Rule 2"),
+					resource.TestCheckResourceAttr(name, "rule.1.status", "Enabled"),
+					resource.TestCheckResourceAttr(name, "rule.1.prefix", "/logs"),
+					resource.TestCheckResourceAttr(name, "rule.1.expiration.days", "90"),
+				),
+			},
+		},
+	})
+
 }
 
 func testAccBucketLifecycleConfigurationConfig_base(bucketName string) string {
@@ -74,14 +158,76 @@ resource "ionoscloud_s3_bucket_lifecycle_configuration" "test" {
 	expiration {
       days = 90
     }
+  }
+}
+`))
+}
+
+func testAccBucketLifecycleConfigurationConfig_noncurrent(bucketName string) string {
+	return utils.ConfigCompose(testAccBucketLifecycleConfigurationConfig_base(bucketName), fmt.Sprintf(`
+resource "ionoscloud_s3_bucket_lifecycle_configuration" "test" {
+  bucket = ionoscloud_s3_bucket.test.name
+  rule {
+
+	id = "Logs delete"
+	status = "Enabled"
+	
+	prefix = "/logs"
+
+	expiration {
+      days = 90
+    }
 
     noncurrent_version_expiration {
 	  noncurrent_days = 90
 	}
+  }
+}
+`))
+}
 
+func testAccBucketLifecycleConfigurationConfig_abort(bucketName string) string {
+	return utils.ConfigCompose(testAccBucketLifecycleConfigurationConfig_base(bucketName), fmt.Sprintf(`
+resource "ionoscloud_s3_bucket_lifecycle_configuration" "test" {
+  bucket = ionoscloud_s3_bucket.test.name
+  rule {
+
+	id = "Logs delete"
+	status = "Enabled"
+	
+	prefix = "/logs"
+	
 	abort_incomplete_multipart_upload {
 	  days_after_initiation = 1
 	}
+  }
+}
+`))
+}
+
+func testAccBucketLifecycleConfigurationConfig_multipleRules(bucketName string) string {
+	return utils.ConfigCompose(testAccBucketLifecycleConfigurationConfig_base(bucketName), fmt.Sprintf(`
+resource "ionoscloud_s3_bucket_lifecycle_configuration" "test" {
+  bucket = ionoscloud_s3_bucket.test.name
+  rule {
+
+	id = "Logs delete"
+	status = "Enabled"
+	
+	prefix = "/logs"
+	
+	abort_incomplete_multipart_upload {
+	  days_after_initiation = 1
+	}
+  }
+
+  rule {
+    id = "Rule 2"
+	status = "Enabled"
+	prefix = "/logs"
+	expiration {
+      days = 90
+    }
   }
 }
 `))

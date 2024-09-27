@@ -283,8 +283,8 @@ var Locations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/e
 // Container Registry Constants
 const (
 	// ContainerRegistryTestResource needs to be with -, do not change
-	ContainerRegistryTestResource      = "test-container-registry"
-	ContainerRegistryTokenTestResource = "test-container-registry-token"
+	ContainerRegistryTestResource      = "test-terraform-container-registry"
+	ContainerRegistryTokenTestResource = "test-terraform-container-registry-token"
 
 	ContainerRegistryResource                  = "ionoscloud_container_registry"
 	ContainerRegistryTestDataSourceById        = "test_container_registry_id"

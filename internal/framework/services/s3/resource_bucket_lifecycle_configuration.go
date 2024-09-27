@@ -8,6 +8,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -99,17 +100,23 @@ func (r *bucketLifecycleConfiguration) Schema(ctx context.Context, req resource.
 							Description: "A lifecycle rule for when non-current object versions expire.",
 							Attributes: map[string]schema.Attribute{
 								"noncurrent_days": schema.Int64Attribute{
-									Required:    true,
+									Optional:    true,
 									Description: "Specifies the number of days an object is noncurrent before Amazon S3 can perform the associated action.",
 								},
+							},
+							Validators: []validator.Object{
+								objectvalidator.AlsoRequires(path.Expressions{path.MatchRelative().AtName("noncurrent_days")}...),
 							},
 						},
 						"abort_incomplete_multipart_upload": schema.SingleNestedBlock{
 							Attributes: map[string]schema.Attribute{
 								"days_after_initiation": schema.Int64Attribute{
-									Required:    true,
+									Optional:    true,
 									Description: "Specifies the number of days after which IONOS S3 Object Storage aborts an incomplete multipart upload.",
 								},
+							},
+							Validators: []validator.Object{
+								objectvalidator.AlsoRequires(path.Expressions{path.MatchRelative().AtName("days_after_initiation")}...),
 							},
 							Description: "Specifies the days since the initiation of an incomplete multipart upload that IONOS S3 Object Storage will wait before permanently removing all parts of the upload.",
 						},

@@ -170,16 +170,19 @@ func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, erro
 		registry.GarbageCollectionSchedule = GetWeeklySchedule(d, "garbage_collection_schedule")
 	}
 
-	if v, ok := d.GetOk("api_subnet_allow_list"); ok {
+	// When api_subnet_allow_list = [] in the TF plan:
+	// GetOk => _, false
+	// GetOkExists => _, true
+	// We don't want to ignore the cases in which we modify the api_subnet_allow_list to an empty list, so
+	// here we need to use 'GetOkExists'.
+	if v, ok := d.GetOkExists("api_subnet_allow_list"); ok { //nolint:staticcheck
 		raw := v.([]interface{})
 		ips := make([]string, len(raw))
 		err := utils.DecodeInterfaceToStruct(raw, ips)
 		if err != nil {
 			return nil, err
 		}
-		if len(ips) > 0 {
-			registry.ApiSubnetAllowList = &ips
-		}
+		registry.ApiSubnetAllowList = &ips
 	}
 
 	return &registry, nil

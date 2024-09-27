@@ -69,7 +69,7 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 		}
 		if nameOk {
 			if certificate.Properties != nil && certificate.Properties.Name != nil &&
-				strings.EqualFold(*certificate.Properties.Name, name) {
+				!strings.EqualFold(*certificate.Properties.Name, name) {
 				return diag.FromErr(fmt.Errorf("name of cert (UUID=%s, name=%s) does not match expected name: %s",
 					*certificate.Id, *certificate.Properties.Name, name))
 			}

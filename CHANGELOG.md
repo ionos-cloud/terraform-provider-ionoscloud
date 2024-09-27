@@ -1,5 +1,18 @@
-## 6.5.4
+## 6.5.6
+### Fixes
+- Fix `kafka` remove unavailable locations from resources and data sources
+- Fix update behavior for container registry property: `apiSubnetAllowList`
+- Fix `ionoscloud_certificate` data source
+- Fix `DBaaS` tests, change location for clusters creation, mark `connection_pooler` as computed
 
+## 6.5.5
+### Fixes
+- Fix for optional blocks in `ionoscloud_s3_bucket_lifecycle_configuration`
+  and `ionoscloud_s3_bucket_website_configuration` resources, before were wrongly marked as required
+### Features
+- Add `connection_pooler` attribute for PostgreSQL clusters
+
+## 6.5.4
 ### Fixes
 - Fixed bucket public access block documentation
 - Fixed resources that need generate MD5 header for the API
@@ -61,6 +74,8 @@
 - Add support for In-Memory DB
 - Add support for API Gateway
 - Add support for VPN Gateway
+
+⚠️ **Note:** Upgrading to 6.5.0 also means using a new version for Certificate Manager service. If, after upgrading to 6.5.0, you receive this error: `{"errorCode": "paas-feature-1", "message": "feature is not enabled for the contract"}`, please send an e-mail to one of the addresses listed here: https://docs.ionos.com/support/general-information/contact-information.
 
 
 ## 6.4.19

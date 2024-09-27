@@ -13,7 +13,7 @@ An API gateway consists of the generic rules and configurations.
 
 ## Usage example
 
-```
+```hcl
 resource "ionoscloud_apigateway" "example" {
     name              = "example-gateway"
     metrics           = true

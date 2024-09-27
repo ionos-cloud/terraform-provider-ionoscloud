@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
 
@@ -39,6 +41,7 @@ func (r *bucketWebsiteConfiguration) ConfigValidators(ctx context.Context) []res
 			path.MatchRoot("redirect_all_requests_to"),
 			path.MatchRoot("routing_rule"),
 		),
+		resourcevalidator.ExactlyOneOf(path.MatchRoot("index_document"), path.MatchRoot("redirect_all_requests_to")),
 	}
 }
 
@@ -67,9 +70,12 @@ func (r *bucketWebsiteConfiguration) Schema(ctx context.Context, req resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"suffix": schema.StringAttribute{
 						Description: "A suffix that is appended to a request that is for a directory on the website endpoint (for example, if the suffix is index.html and you make a request to samplebucket/images/ the data that is returned will be for the object with the key name images/index.html) The suffix must not be empty and must not include a slash character. Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests.",
-						Required:    true,
+						Optional:    true,
 						Validators:  []validator.String{stringvalidator.LengthAtLeast(1), stringvalidator.NoneOf("/")},
 					},
+				},
+				Validators: []validator.Object{
+					objectvalidator.AlsoRequires(path.Expressions{path.MatchRelative().AtName("suffix")}...),
 				},
 			},
 			"error_document": schema.SingleNestedBlock{
@@ -77,9 +83,13 @@ func (r *bucketWebsiteConfiguration) Schema(ctx context.Context, req resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"key": schema.StringAttribute{
 						Description: "The object key.",
-						Required:    true,
+						Optional:    true,
 						Validators:  []validator.String{stringvalidator.LengthBetween(1, 1024)},
 					},
+				},
+
+				Validators: []validator.Object{
+					objectvalidator.AlsoRequires(path.Expressions{path.MatchRelative().AtName("key")}...),
 				},
 			},
 			"redirect_all_requests_to": schema.SingleNestedBlock{

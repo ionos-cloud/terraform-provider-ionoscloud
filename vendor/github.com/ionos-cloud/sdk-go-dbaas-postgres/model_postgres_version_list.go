@@ -16,7 +16,7 @@ import (
 
 // PostgresVersionList List of PostgreSQL versions.
 type PostgresVersionList struct {
-	Data *[]PostgresVersionListDataInner `json:"data,omitempty"`
+	Data *[]PostgresVersionListData `json:"data,omitempty"`
 }
 
 // NewPostgresVersionList instantiates a new PostgresVersionList object
@@ -38,8 +38,8 @@ func NewPostgresVersionListWithDefaults() *PostgresVersionList {
 }
 
 // GetData returns the Data field value
-// If the value is explicit nil, the zero value for []PostgresVersionListDataInner will be returned
-func (o *PostgresVersionList) GetData() *[]PostgresVersionListDataInner {
+// If the value is explicit nil, the zero value for []PostgresVersionListData will be returned
+func (o *PostgresVersionList) GetData() *[]PostgresVersionListData {
 	if o == nil {
 		return nil
 	}
@@ -51,7 +51,7 @@ func (o *PostgresVersionList) GetData() *[]PostgresVersionListDataInner {
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *PostgresVersionList) GetDataOk() (*[]PostgresVersionListDataInner, bool) {
+func (o *PostgresVersionList) GetDataOk() (*[]PostgresVersionListData, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -60,7 +60,7 @@ func (o *PostgresVersionList) GetDataOk() (*[]PostgresVersionListDataInner, bool
 }
 
 // SetData sets field value
-func (o *PostgresVersionList) SetData(v []PostgresVersionListDataInner) {
+func (o *PostgresVersionList) SetData(v []PostgresVersionListData) {
 
 	o.Data = &v
 
