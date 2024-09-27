@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	s3 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
 )
 
@@ -188,17 +189,17 @@ func (r *objectResource) Configure(_ context.Context, req resource.ConfigureRequ
 		return
 	}
 
-	client, ok := req.ProviderData.(*s3.Client)
+	clientBundle, ok := req.ProviderData.(*services.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *s3.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *services.SdkBundle, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
 	}
 
-	r.client = client
+	r.client = clientBundle.S3Client
 }
 
 func (r *objectResource) ConfigValidators(_ context.Context) []resource.ConfigValidator {
