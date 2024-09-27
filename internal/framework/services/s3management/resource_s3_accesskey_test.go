@@ -23,7 +23,7 @@ func TestAccACcesskeyResource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccesskeyConfig_description(description),
+				Config: testAccAccesskeyConfigDescription(description),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "description", description),
 					resource.TestCheckResourceAttrSet(name, "id"),
@@ -34,7 +34,7 @@ func TestAccACcesskeyResource(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccAccesskeyConfig_description(descriptionUpdated),
+				Config: testAccAccesskeyConfigDescription(descriptionUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "description", descriptionUpdated),
 					resource.TestCheckResourceAttrSet(name, "id"),
@@ -48,7 +48,7 @@ func TestAccACcesskeyResource(t *testing.T) {
 	})
 }
 
-func testAccAccesskeyConfig_description(description string) string {
+func testAccAccesskeyConfigDescription(description string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_s3_accesskey" "test" {
   description = %[1]q

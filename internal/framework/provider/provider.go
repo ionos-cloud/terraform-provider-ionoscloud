@@ -147,6 +147,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	region := os.Getenv("IONOS_S3_REGION")
 	endpoint := os.Getenv("IONOS_API_URL")
 	terraformVersion := req.TerraformVersion
+	version := ionoscloud.Version
 
 	if !clientOpts.Token.IsNull() {
 		token = clientOpts.Token.ValueString()
@@ -185,28 +186,12 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	}
 
 	cleanedEndpoint := cleanURL(endpoint)
-	version := "DEV"
-
-	newConfig := ionoscloud.NewConfiguration(username, password, token, endpoint)
-	newConfig.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
-	)
-	if os.Getenv(constant.IonosDebug) != "" {
-		newConfig.Debug = true
-	}
-	newConfig.MaxRetries = constant.MaxRetries
-	newConfig.WaitTime = constant.MaxWaitTime
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
-	cloudapiClient := ionoscloud.NewAPIClient(newConfig)
-
-	version = ionoscloud.Version
 
 	client := &services.SdkBundle{
 		CDNClient:          cdnService.NewCDNClient(username, password, token, endpoint, version, terraformVersion),
 		AutoscalingClient:  autoscalingService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
 		CertManagerClient:  cert.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
-		CloudApiClient:     cloudapiClient,
+		CloudApiClient:     newCloudapiClient(username, password, token, endpoint, "DEV", terraformVersion),
 		ContainerClient:    crService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
 		DataplatformClient: dataplatformService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
 		DNSClient:          dnsService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
@@ -227,6 +212,21 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
+}
+
+func newCloudapiClient(username, password, token, endpoint, version, terraformVersion string) *ionoscloud.APIClient {
+	newConfig := ionoscloud.NewConfiguration(username, password, token, endpoint)
+	newConfig.UserAgent = fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	)
+	if os.Getenv(constant.IonosDebug) != "" {
+		newConfig.Debug = true
+	}
+	newConfig.MaxRetries = constant.MaxRetries
+	newConfig.WaitTime = constant.MaxWaitTime
+	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	return ionoscloud.NewAPIClient(newConfig)
 }
 
 // Resources returns the resources for the provider.

@@ -13,6 +13,7 @@ import (
 )
 
 func TestAccS3AccesskeyDataSource(t *testing.T) {
+	name := "data.ionoscloud_s3_accesskey.testres"
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
@@ -20,21 +21,21 @@ func TestAccS3AccesskeyDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccesskeyDataSourceConfig_basic(),
+				Config: testAccAccesskeyDataSourceConfigBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_s3_accesskey.testres", "description", "desc"),
-					resource.TestCheckResourceAttrSet("data.ionoscloud_s3_accesskey.testres", "id"),
-					resource.TestCheckResourceAttrSet("data.ionoscloud_s3_accesskey.testres", "accesskey"),
-					resource.TestCheckResourceAttrSet("data.ionoscloud_s3_accesskey.testres", "canonical_user_id"),
-					resource.TestCheckResourceAttrSet("data.ionoscloud_s3_accesskey.testres", "contract_user_id"),
+					resource.TestCheckResourceAttr(name, "description", "desc"),
+					resource.TestCheckResourceAttrSet(name, "id"),
+					resource.TestCheckResourceAttrSet(name, "accesskey"),
+					resource.TestCheckResourceAttrSet(name, "canonical_user_id"),
+					resource.TestCheckResourceAttrSet(name, "contract_user_id"),
 				),
 			},
 		},
 	})
 }
 
-func testAccAccesskeyDataSourceConfig_basic() string {
-	return utils.ConfigCompose(testAccAccesskeyConfig_description("desc"), `
+func testAccAccesskeyDataSourceConfigBasic() string {
+	return utils.ConfigCompose(testAccAccesskeyConfigDescription("desc"), `
 data "ionoscloud_s3_accesskey" "testres" {
 	id = ionoscloud_s3_accesskey.test.id
 }

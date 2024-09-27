@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccS3RegionDataSource(t *testing.T) {
+	name := "data.ionoscloud_s3_region.testreg"
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
