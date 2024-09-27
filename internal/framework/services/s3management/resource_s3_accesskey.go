@@ -123,7 +123,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 		resp.Diagnostics.AddError("failed to create accessKey", err.Error())
 		return
 	}
-
+	// we need this because secretkey is only available on create response
 	s3managementService.SetAccessKeyPropertiesToPlan(data, accessKeyResponse)
 
 	accessKeyRead, _, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
@@ -132,6 +132,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
+	// we need this because canonical_user_id not available on create response
 	s3managementService.SetAccessKeyPropertiesToPlan(data, accessKeyRead)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
