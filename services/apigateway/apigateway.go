@@ -155,13 +155,13 @@ func setGatewayConfig(d *schema.ResourceData) apigateway.Gateway {
 	for i, domain := range customDomainsRaw {
 		domainData := domain.(map[string]interface{})
 		name := domainData["name"].(string)
-		certificateID := domainData["certificate_id"].(string)
 
 		customDomainObj := apigateway.GatewayCustomDomains{
-			Name:          &name,
-			CertificateId: &certificateID,
+			Name: &name,
 		}
-
+		if cert, ok := domainData["certificate_id"]; ok && cert != "" {
+			customDomainObj.CertificateId = apigateway.ToPtr(cert.(string))
+		}
 		customDomains[i] = customDomainObj
 	}
 
