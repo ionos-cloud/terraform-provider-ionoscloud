@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
+	s3managementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -20,7 +20,7 @@ func NewRegionDataSource() datasource.DataSource {
 }
 
 type regionDataSource struct {
-	client *services.SdkBundle
+	client *s3managementService.Client
 }
 
 // Metadata returns the metadata for the data source.
@@ -36,17 +36,17 @@ func (d *regionDataSource) Configure(ctx context.Context, req datasource.Configu
 		return
 	}
 
-	client, ok := req.ProviderData.(*services.SdkBundle)
+	clientbundle, ok := req.ProviderData.(*services.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *s3.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *services.SdkBundle, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
 	}
 
-	d.client = client
+	d.client = clientbundle.S3ManagementClient
 }
 
 // Schema returns the schema for the data source.
@@ -78,10 +78,9 @@ func (d *regionDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 				Description: "The data center location of the region as per [Get Location](/docs/cloud/v6/#tag/Locations/operation/locationsGet). *Can't be used as `LocationConstraint` on bucket creation.*",
 				Computed:    true,
 			},
-		},
-		Blocks: map[string]schema.Block{
-			"capability": schema.SingleNestedBlock{
+			"capability": schema.SingleNestedAttribute{
 				Description: "The capabilities of the region",
+				Computed:    true,
 				Attributes: map[string]schema.Attribute{
 					"iam": schema.BoolAttribute{
 						Description: "Indicates if IAM policy based access is supported",
@@ -104,13 +103,13 @@ func (d *regionDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	var data *s3management.RegionDataSourceModel
+	var data *s3managementService.RegionDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	region, apiResponse, err := d.client.S3ManagementClient.GetRegion(ctx, data.ID.ValueString(), 1)
+	region, apiResponse, err := d.client.GetRegion(ctx, data.ID.ValueString(), 1)
 
 	if apiResponse.HttpNotFound() {
 		resp.Diagnostics.AddError("region not found", "The region was not found")
@@ -121,5 +120,5 @@ func (d *regionDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, s3management.BuildRegionModelFromAPIResponse(&region))...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, s3managementService.BuildRegionModelFromAPIResponse(&region))...)
 }

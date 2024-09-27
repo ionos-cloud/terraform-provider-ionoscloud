@@ -20,7 +20,7 @@ func NewAccesskeyDataSource() datasource.DataSource {
 }
 
 type accessKeyDataSource struct {
-	client *services.SdkBundle
+	client *s3managementService.Client
 }
 
 // Metadata returns the metadata for the data source.
@@ -36,17 +36,17 @@ func (d *accessKeyDataSource) Configure(ctx context.Context, req datasource.Conf
 		return
 	}
 
-	client, ok := req.ProviderData.(*services.SdkBundle)
+	clientBundle, ok := req.ProviderData.(*services.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *s3.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *services.SdkBundle: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
 	}
 
-	d.client = client
+	d.client = clientBundle.S3ManagementClient
 }
 
 // Schema returns the schema for the data source.
@@ -92,7 +92,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 	id := data.ID.String()
 
-	accessKey, apiResponse, err := d.client.S3ManagementClient.GetAccessKey(ctx, id)
+	accessKey, apiResponse, err := d.client.GetAccessKey(ctx, id)
 
 	if apiResponse.HttpNotFound() {
 		resp.Diagnostics.AddError("accesskey not found", "The accesskey was not found")

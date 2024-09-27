@@ -23,6 +23,10 @@ func TestAccS3AccesskeyDataSource(t *testing.T) {
 				Config: testAccAccesskeyDataSourceConfig_basic(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_s3_accesskey.testres", "description", "desc"),
+					resource.TestCheckResourceAttrSet("data.ionoscloud_s3_accesskey.testres", "id"),
+					resource.TestCheckResourceAttrSet("data.ionoscloud_s3_accesskey.testres", "accesskey"),
+					resource.TestCheckResourceAttrSet("data.ionoscloud_s3_accesskey.testres", "canonical_user_id"),
+					resource.TestCheckResourceAttrSet("data.ionoscloud_s3_accesskey.testres", "contract_user_id"),
 				),
 			},
 		},

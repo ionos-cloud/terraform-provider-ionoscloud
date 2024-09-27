@@ -12,6 +12,7 @@ import (
 	s3management "github.com/ionos-cloud/sdk-go-s3-management"
 )
 
+// AccesskeyResourceModel is used to represent an accesskey
 type AccesskeyResourceModel struct {
 	AccessKey       types.String   `tfsdk:"accesskey"`
 	SecretKey       types.String   `tfsdk:"secretkey"`

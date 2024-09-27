@@ -13,6 +13,7 @@ import (
 
 func TestAccACcesskeyResource(t *testing.T) {
 	description := acctest.GenerateRandomResourceName("description")
+	descriptionUpdated := acctest.GenerateRandomResourceName("description")
 	name := "ionoscloud_s3_accesskey.test"
 
 	resource.Test(t, resource.TestCase{
@@ -25,17 +26,26 @@ func TestAccACcesskeyResource(t *testing.T) {
 				Config: testAccAccesskeyConfig_description(description),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "description", description),
+					resource.TestCheckResourceAttrSet(name, "id"),
+					resource.TestCheckResourceAttrSet(name, "accesskey"),
+					resource.TestCheckResourceAttrSet(name, "secretkey"),
+					resource.TestCheckResourceAttrSet(name, "canonical_user_id"),
+					resource.TestCheckResourceAttrSet(name, "contract_user_id"),
+				),
+			},
+			{
+				Config: testAccAccesskeyConfig_description(descriptionUpdated),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(name, "description", descriptionUpdated),
+					resource.TestCheckResourceAttrSet(name, "id"),
+					resource.TestCheckResourceAttrSet(name, "accesskey"),
+					resource.TestCheckResourceAttrSet(name, "secretkey"),
+					resource.TestCheckResourceAttrSet(name, "canonical_user_id"),
+					resource.TestCheckResourceAttrSet(name, "contract_user_id"),
 				),
 			},
 		},
 	})
-}
-
-func testAccAccesskeyConfig_basic() string {
-	return `
-resource "ionoscloud_s3_accesskey" "test" {
-}
-`
 }
 
 func testAccAccesskeyConfig_description(description string) string {

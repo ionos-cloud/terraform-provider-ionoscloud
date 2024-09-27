@@ -28,7 +28,7 @@ func NewAccesskeyResource() resource.Resource {
 }
 
 type accesskeyResource struct {
-	client *services.SdkBundle
+	client *s3managementService.Client
 }
 
 // Metadata returns the metadata for the accesskey resource.
@@ -82,17 +82,17 @@ func (r *accesskeyResource) Configure(_ context.Context, req resource.ConfigureR
 		return
 	}
 
-	client, ok := req.ProviderData.(*services.SdkBundle)
+	clientBundle, ok := req.ProviderData.(*services.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *s3.APIClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *services.SdkBundle, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
 	}
 
-	r.client = client
+	r.client = clientBundle.S3ManagementClient
 }
 
 // Create creates the accesskey.
@@ -118,7 +118,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 			Description: data.Description.ValueStringPointer(),
 		},
 	}
-	accessKeyResponse, _, err := r.client.S3ManagementClient.CreateAccessKey(ctx, accessKey, createTimeout)
+	accessKeyResponse, _, err := r.client.CreateAccessKey(ctx, accessKey, createTimeout)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create accessKey", err.Error())
 		return
@@ -126,7 +126,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 
 	s3managementService.SetAccessKeyPropertiesToPlan(data, accessKeyResponse)
 
-	accessKeyRead, _, err := r.client.S3ManagementClient.GetAccessKey(ctx, data.ID.ValueString())
+	accessKeyRead, _, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Access Key API error", err.Error())
 		return
@@ -149,7 +149,7 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	accessKey, _, err := r.client.S3ManagementClient.GetAccessKey(ctx, data.ID.ValueString())
+	accessKey, _, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Access Key API error", err.Error())
 		return
@@ -186,7 +186,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 		},
 	}
 
-	accessKeyResponse, _, err := r.client.S3ManagementClient.UpdateAccessKey(ctx, state.ID.ValueString(), accessKey, updateTimeout)
+	accessKeyResponse, _, err := r.client.UpdateAccessKey(ctx, state.ID.ValueString(), accessKey, updateTimeout)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update accessKey", err.Error())
 		return
@@ -194,7 +194,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 
 	plan.ID = basetypes.NewStringPointerValue(accessKeyResponse.Id)
 
-	accessKeyRead, _, err := r.client.S3ManagementClient.GetAccessKey(ctx, *accessKeyResponse.Id)
+	accessKeyRead, _, err := r.client.GetAccessKey(ctx, *accessKeyResponse.Id)
 	if err != nil {
 		resp.Diagnostics.AddError("Access Key API error", err.Error())
 		return
@@ -225,7 +225,7 @@ func (r *accesskeyResource) Delete(ctx context.Context, req resource.DeleteReque
 	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
 	defer cancel()
 
-	if _, err := r.client.S3ManagementClient.DeleteAccessKey(ctx, data.ID.ValueString(), deleteTimeout); err != nil {
+	if _, err := r.client.DeleteAccessKey(ctx, data.ID.ValueString(), deleteTimeout); err != nil {
 		resp.Diagnostics.AddError("failed to delete accesskey", err.Error())
 		return
 	}
