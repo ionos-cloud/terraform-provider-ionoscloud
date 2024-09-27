@@ -101,6 +101,7 @@ func (c *Client) DeleteAccessKey(ctx context.Context, accessKeyId string, timeou
 func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey s3management.AccessKey) {
 
 	if accessKey.Properties != nil {
+		// Here we check the properties because based on the request not all are set and we do not want to overwrite with nil
 		if accessKey.Properties.AccessKey != nil {
 			plan.AccessKey = basetypes.NewStringPointerValue(accessKey.Properties.AccessKey)
 		}
@@ -125,6 +126,7 @@ func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey s3mana
 func SetAccessKeyPropertiesToDataSourcePlan(plan *AccessKeyDataSourceModel, accessKey s3management.AccessKey) {
 
 	if accessKey.Properties != nil {
+		// Here we check the properties because based on the request not all are set and we do not want to overwrite with nil
 		if accessKey.Properties.AccessKey != nil {
 			plan.AccessKey = basetypes.NewStringPointerValue(accessKey.Properties.AccessKey)
 		}
