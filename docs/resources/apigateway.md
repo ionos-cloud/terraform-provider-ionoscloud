@@ -38,7 +38,7 @@ resource "ionoscloud_apigateway" "example" {
 * `metrics` - (Optional)[bool] Enable or disable metrics. Defaults to `false`.
 * `custom_domains` - (Optional)[list] Custom domains for the API Gateway, a list that contains elements with the following structure:
     * `name` - (Required)[string] The domain name.
-    * `certificate_id` - (Required)[string] The certificate ID for the domain.
+    * `certificate_id` - (Optional)[string] The certificate ID for the domain.
 * `public_endpoint` - (Computed)[string] The public endpoint of the API Gateway.
 
 ## Import

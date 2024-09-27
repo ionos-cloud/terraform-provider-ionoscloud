@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -57,9 +58,10 @@ func resourceAPIGateway() *schema.Resource {
 							Required:    true,
 						},
 						"certificate_id": {
-							Type:        schema.TypeString,
-							Description: "The certificate ID for the domain.",
-							Required:    true,
+							Type:             schema.TypeString,
+							Description:      "The certificate ID for the domain.",
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 						},
 					},
 				},
