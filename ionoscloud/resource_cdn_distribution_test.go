@@ -60,6 +60,11 @@ func TestAccDistributionBasic(t *testing.T) {
 				Config: testAccDataSourceCDNDistributionMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
+
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByID, "public_endpoint_v4", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v4"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByID, "public_endpoint_v6", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByID, "resource_urn", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "resource_urn"),
+
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
@@ -72,6 +77,10 @@ func TestAccDistributionBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceCDNDistributionMatchDomain,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByDomain, "public_endpoint_v4", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v4"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByDomain, "public_endpoint_v6", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByDomain, "resource_urn", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "resource_urn"),
+
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),

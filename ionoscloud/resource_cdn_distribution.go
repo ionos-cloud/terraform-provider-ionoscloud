@@ -32,6 +32,21 @@ func resourceCDNDistribution() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"resource_urn": {
+				Type:        schema.TypeString,
+				Description: "Unique name of the resource.",
+				Computed:    true,
+			},
+			"public_endpoint_v4": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as A record.",
+				Computed:    true,
+			},
+			"public_endpoint_v6": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as AAAA record.",
+				Computed:    true,
+			},
 			"certificate_id": {
 				Type:        schema.TypeString,
 				Description: "The ID of the certificate to use for the distribution.",

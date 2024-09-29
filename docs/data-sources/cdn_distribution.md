@@ -63,3 +63,6 @@ The following attributes are returned by the datasource:
         * `geo_restrictions` - A map of geo_restrictions
             * `allow_list` - List of allowed countries
             * `block_list` - List of blocked countries
+- `public_endpoint_v4` - IP of the distribution, it has to be included on the domain DNS Zone as A record.
+- `public_endpoint_v6` - IP of the distribution, it has to be included on the domain DNS Zone as AAAA record.
+- `resource_urn` - Unique resource identifier.
