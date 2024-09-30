@@ -10,12 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-
 	s3management "github.com/ionos-cloud/sdk-go-s3-management"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	s3managementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 var (
