@@ -23,18 +23,21 @@ type capability struct {
 	S3select types.Bool `tfsdk:"s3select"`
 }
 
+// GetRegion retrieves a region
 func (c *Client) GetRegion(ctx context.Context, regionId string, depth float32) (s3management.Region, *s3management.APIResponse, error) {
 	region, apiResponse, err := c.client.RegionsApi.RegionsFindByRegion(ctx, regionId).Execute()
 	apiResponse.LogInfo()
 	return region, apiResponse, err
 }
 
+// ListRegions lists all regions
 func (c *Client) ListRegions(ctx context.Context) (s3management.RegionList, *s3management.APIResponse, error) {
 	regions, apiResponse, err := c.client.RegionsApi.RegionsGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return regions, apiResponse, err
 }
 
+// SetAccessKeyPropertiesToDataSourcePlan builds an RegionDataSourceModel from a region SDK object
 func BuildRegionModelFromAPIResponse(output *s3management.Region) *RegionDataSourceModel {
 	built := &RegionDataSourceModel{}
 
@@ -61,8 +64,8 @@ func BuildRegionModelFromAPIResponse(output *s3management.Region) *RegionDataSou
 
 		if output.Properties.Storageclasses != nil {
 			built.Storageclasses = make([]types.String, 0, len(*output.Properties.Storageclasses))
-			for _, storageClass := range *output.Properties.Storageclasses {
-				built.Storageclasses = append(built.Storageclasses, types.StringPointerValue(&storageClass))
+			for i := range *output.Properties.Storageclasses {
+				built.Storageclasses = append(built.Storageclasses, types.StringPointerValue(&(*output.Properties.Storageclasses)[i]))
 			}
 		}
 	}

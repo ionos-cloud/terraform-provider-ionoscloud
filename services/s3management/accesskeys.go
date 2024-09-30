@@ -16,8 +16,8 @@ import (
 type AccesskeyResourceModel struct {
 	AccessKey       types.String   `tfsdk:"accesskey"`
 	SecretKey       types.String   `tfsdk:"secretkey"`
-	CanonicalUserId types.String   `tfsdk:"canonical_user_id"`
-	ContractUserId  types.String   `tfsdk:"contract_user_id"`
+	CanonicalUserID types.String   `tfsdk:"canonical_user_id"`
+	ContractUserID  types.String   `tfsdk:"contract_user_id"`
 	Description     types.String   `tfsdk:"description"`
 	ID              types.String   `tfsdk:"id"`
 	Timeouts        timeouts.Value `tfsdk:"timeouts"`
@@ -26,24 +26,27 @@ type AccesskeyResourceModel struct {
 // AccessKeyDataSourceModel is used to represent an accesskey for a data source.
 type AccessKeyDataSourceModel struct {
 	AccessKey       types.String `tfsdk:"accesskey"`
-	CanonicalUserId types.String `tfsdk:"canonical_user_id"`
-	ContractUserId  types.String `tfsdk:"contract_user_id"`
+	CanonicalUserID types.String `tfsdk:"canonical_user_id"`
+	ContractUserID  types.String `tfsdk:"contract_user_id"`
 	Description     types.String `tfsdk:"description"`
 	ID              types.String `tfsdk:"id"`
 }
 
+// GetAccessKey retrieves an accesskey
 func (c *Client) GetAccessKey(ctx context.Context, accessKeyId string) (s3management.AccessKey, *s3management.APIResponse, error) {
 	accessKey, apiResponse, err := c.client.AccesskeysApi.AccesskeysFindById(ctx, accessKeyId).Execute()
 	apiResponse.LogInfo()
 	return accessKey, apiResponse, err
 }
 
+// ListAccessKeys retrieves all accesskeys
 func (c *Client) ListAccessKeys(ctx context.Context) (s3management.AccessKeyList, *s3management.APIResponse, error) {
 	accessKeys, apiResponse, err := c.client.AccesskeysApi.AccesskeysGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return accessKeys, apiResponse, err
 }
 
+// CreateAccessKey creates an accesskey
 func (c *Client) CreateAccessKey(ctx context.Context, accessKey s3management.AccessKeyCreate, timeout time.Duration) (s3management.AccessKey, *s3management.APIResponse, error) {
 	accessKeyResponse, apiResponse, err := c.client.AccesskeysApi.AccesskeysPost(ctx).AccessKeyCreate(accessKey).Execute()
 	apiResponse.LogInfo()
@@ -62,6 +65,7 @@ func (c *Client) CreateAccessKey(ctx context.Context, accessKey s3management.Acc
 	return accessKeyResponse, apiResponse, err
 }
 
+// UpdateAccessKey updates an accesskey
 func (c *Client) UpdateAccessKey(ctx context.Context, accessKeyId string, accessKey s3management.AccessKeyEnsure, timeout time.Duration) (s3management.AccessKey, *s3management.APIResponse, error) {
 	accessKeyResponse, apiResponse, err := c.client.AccesskeysApi.AccesskeysPut(ctx, accessKeyId).AccessKeyEnsure(accessKey).Execute()
 	apiResponse.LogInfo()
@@ -80,6 +84,7 @@ func (c *Client) UpdateAccessKey(ctx context.Context, accessKeyId string, access
 	return accessKeyResponse, apiResponse, err
 }
 
+// DeleteAccessKey deletes an accesskey
 func (c *Client) DeleteAccessKey(ctx context.Context, accessKeyId string, timeout time.Duration) (*s3management.APIResponse, error) {
 	apiResponse, err := c.client.AccesskeysApi.AccesskeysDelete(ctx, accessKeyId).Execute()
 	apiResponse.LogInfo()
@@ -98,6 +103,7 @@ func (c *Client) DeleteAccessKey(ctx context.Context, accessKeyId string, timeou
 	return apiResponse, err
 }
 
+// SetAccessKeyPropertiesToPlan sets accesskey properties from an SDK object to a AccesskeyResourceModel
 func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey s3management.AccessKey) {
 
 	if accessKey.Properties != nil {
@@ -106,10 +112,10 @@ func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey s3mana
 			plan.AccessKey = basetypes.NewStringPointerValue(accessKey.Properties.AccessKey)
 		}
 		if accessKey.Properties.CanonicalUserId != nil {
-			plan.CanonicalUserId = basetypes.NewStringPointerValue(accessKey.Properties.CanonicalUserId)
+			plan.CanonicalUserID = basetypes.NewStringPointerValue(accessKey.Properties.CanonicalUserId)
 		}
 		if accessKey.Properties.ContractUserId != nil {
-			plan.ContractUserId = basetypes.NewStringPointerValue(accessKey.Properties.ContractUserId)
+			plan.ContractUserID = basetypes.NewStringPointerValue(accessKey.Properties.ContractUserId)
 		}
 		if accessKey.Properties.Description != nil {
 			plan.Description = basetypes.NewStringPointerValue(accessKey.Properties.Description)
@@ -123,6 +129,7 @@ func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey s3mana
 	}
 }
 
+// SetAccessKeyPropertiesToDataSourcePlan sets accesskey properties from an SDK object to a AccessKeyDataSourceModel
 func SetAccessKeyPropertiesToDataSourcePlan(plan *AccessKeyDataSourceModel, accessKey s3management.AccessKey) {
 
 	if accessKey.Properties != nil {
@@ -131,10 +138,10 @@ func SetAccessKeyPropertiesToDataSourcePlan(plan *AccessKeyDataSourceModel, acce
 			plan.AccessKey = basetypes.NewStringPointerValue(accessKey.Properties.AccessKey)
 		}
 		if accessKey.Properties.CanonicalUserId != nil {
-			plan.CanonicalUserId = basetypes.NewStringPointerValue(accessKey.Properties.CanonicalUserId)
+			plan.CanonicalUserID = basetypes.NewStringPointerValue(accessKey.Properties.CanonicalUserId)
 		}
 		if accessKey.Properties.ContractUserId != nil {
-			plan.ContractUserId = basetypes.NewStringPointerValue(accessKey.Properties.ContractUserId)
+			plan.ContractUserID = basetypes.NewStringPointerValue(accessKey.Properties.ContractUserId)
 		}
 		if accessKey.Properties.Description != nil {
 			plan.Description = basetypes.NewStringPointerValue(accessKey.Properties.Description)
