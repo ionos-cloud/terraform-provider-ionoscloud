@@ -54,7 +54,7 @@ func resourceAPIGateway() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"name": {
 							Type:        schema.TypeString,
-							Description: "The domain name. self - means that the endpoint used will be the public_endpoint returned by the creation",
+							Description: "The domain name.",
 							Required:    true,
 						},
 						"certificate_id": {
