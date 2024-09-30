@@ -7,6 +7,7 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+
 	s3management "github.com/ionos-cloud/sdk-go-s3-management"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
