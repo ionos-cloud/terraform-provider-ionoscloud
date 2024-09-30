@@ -23,6 +23,21 @@ func dataSourceCDNDistribution() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"resource_urn": {
+				Type:        schema.TypeString,
+				Description: "Unique name of the resource.",
+				Computed:    true,
+			},
+			"public_endpoint_v4": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as A record.",
+				Computed:    true,
+			},
+			"public_endpoint_v6": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as AAAA record.",
+				Computed:    true,
+			},
 			"partial_match": {
 				Type:        schema.TypeBool,
 				Description: "Whether partial matching is allowed or not when using domain argument.",
