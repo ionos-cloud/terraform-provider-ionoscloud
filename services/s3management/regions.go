@@ -24,8 +24,8 @@ type capability struct {
 }
 
 // GetRegion retrieves a region
-func (c *Client) GetRegion(ctx context.Context, regionId string, depth float32) (s3management.Region, *s3management.APIResponse, error) {
-	region, apiResponse, err := c.client.RegionsApi.RegionsFindByRegion(ctx, regionId).Execute()
+func (c *Client) GetRegion(ctx context.Context, regionID string, depth float32) (s3management.Region, *s3management.APIResponse, error) {
+	region, apiResponse, err := c.client.RegionsApi.RegionsFindByRegion(ctx, regionID).Execute()
 	apiResponse.LogInfo()
 	return region, apiResponse, err
 }
@@ -37,7 +37,7 @@ func (c *Client) ListRegions(ctx context.Context) (s3management.RegionList, *s3m
 	return regions, apiResponse, err
 }
 
-// SetAccessKeyPropertiesToDataSourcePlan builds an RegionDataSourceModel from a region SDK object
+// BuildRegionModelFromAPIResponse builds an RegionDataSourceModel from a region SDK object
 func BuildRegionModelFromAPIResponse(output *s3management.Region) *RegionDataSourceModel {
 	built := &RegionDataSourceModel{}
 

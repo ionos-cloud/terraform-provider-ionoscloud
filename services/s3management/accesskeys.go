@@ -33,8 +33,8 @@ type AccessKeyDataSourceModel struct {
 }
 
 // GetAccessKey retrieves an accesskey
-func (c *Client) GetAccessKey(ctx context.Context, accessKeyId string) (s3management.AccessKey, *s3management.APIResponse, error) {
-	accessKey, apiResponse, err := c.client.AccesskeysApi.AccesskeysFindById(ctx, accessKeyId).Execute()
+func (c *Client) GetAccessKey(ctx context.Context, accessKeyID string) (s3management.AccessKey, *s3management.APIResponse, error) {
+	accessKey, apiResponse, err := c.client.AccesskeysApi.AccesskeysFindById(ctx, accessKeyID).Execute()
 	apiResponse.LogInfo()
 	return accessKey, apiResponse, err
 }
@@ -66,8 +66,8 @@ func (c *Client) CreateAccessKey(ctx context.Context, accessKey s3management.Acc
 }
 
 // UpdateAccessKey updates an accesskey
-func (c *Client) UpdateAccessKey(ctx context.Context, accessKeyId string, accessKey s3management.AccessKeyEnsure, timeout time.Duration) (s3management.AccessKey, *s3management.APIResponse, error) {
-	accessKeyResponse, apiResponse, err := c.client.AccesskeysApi.AccesskeysPut(ctx, accessKeyId).AccessKeyEnsure(accessKey).Execute()
+func (c *Client) UpdateAccessKey(ctx context.Context, accessKeyID string, accessKey s3management.AccessKeyEnsure, timeout time.Duration) (s3management.AccessKey, *s3management.APIResponse, error) {
+	accessKeyResponse, apiResponse, err := c.client.AccesskeysApi.AccesskeysPut(ctx, accessKeyID).AccessKeyEnsure(accessKey).Execute()
 	apiResponse.LogInfo()
 
 	if err != nil || accessKeyResponse.Id == nil {
@@ -75,7 +75,7 @@ func (c *Client) UpdateAccessKey(ctx context.Context, accessKeyId string, access
 	}
 
 	err = backoff.Retry(func() error {
-		return c.accessKeyAvailableCheck(ctx, accessKeyId)
+		return c.accessKeyAvailableCheck(ctx, accessKeyID)
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(timeout)))
 	if err != nil {
 		return accessKeyResponse, apiResponse, fmt.Errorf("failed to wait for accessKey available: %w", err)
@@ -85,8 +85,8 @@ func (c *Client) UpdateAccessKey(ctx context.Context, accessKeyId string, access
 }
 
 // DeleteAccessKey deletes an accesskey
-func (c *Client) DeleteAccessKey(ctx context.Context, accessKeyId string, timeout time.Duration) (*s3management.APIResponse, error) {
-	apiResponse, err := c.client.AccesskeysApi.AccesskeysDelete(ctx, accessKeyId).Execute()
+func (c *Client) DeleteAccessKey(ctx context.Context, accessKeyID string, timeout time.Duration) (*s3management.APIResponse, error) {
+	apiResponse, err := c.client.AccesskeysApi.AccesskeysDelete(ctx, accessKeyID).Execute()
 	apiResponse.LogInfo()
 
 	if err != nil {
@@ -94,7 +94,7 @@ func (c *Client) DeleteAccessKey(ctx context.Context, accessKeyId string, timeou
 	}
 
 	err = backoff.Retry(func() error {
-		return c.accessKeyDeletedCheck(ctx, accessKeyId)
+		return c.accessKeyDeletedCheck(ctx, accessKeyID)
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(timeout)))
 	if err != nil {
 		return apiResponse, fmt.Errorf("failed to wait for accessKey available: %w", err)
