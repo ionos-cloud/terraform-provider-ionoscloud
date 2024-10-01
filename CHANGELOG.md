@@ -6,6 +6,9 @@
 - Fix `DBaaS` tests, change location for clusters creation, mark `connection_pooler` as computed
 - `certificate_id` should not be required for API Gateway resource, `custom_domains` field.
 - `cdn distribution` add metadata ipv4, ipv6 and resource_urn to resource and data source
+- set 'server_side_encryption' as computed for `ionoscloud_s3_object` resource
+### Documentation
+- Update documentation for `force_destroy` field in `ionoscloud_s3_bucket` resource
 
 ## 6.5.5
 ### Fixes
