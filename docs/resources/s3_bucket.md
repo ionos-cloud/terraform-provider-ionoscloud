@@ -45,7 +45,7 @@ The following arguments are supported:
 - `timeouts` - (Optional) Timeouts for this resource.
   - `create` - (Optional)[string] Time to wait for the bucket to be created. Default is `10m`.
   - `delete` - (Optional)[string] Time to wait for the bucket to be deleted. Default is `10m`.
-- `force_destroy` - (Optional)[bool] If true, the bucket and the contents of the bucket will be destroyed. Default is `false`.
+- `force_destroy` - (Optional)[bool] Default is `false`.By setting force_destroy to true, you instruct Terraform to delete the bucket and all its contents during the terraform destroy process. This is particularly useful when dealing with buckets that contain objects, as it allows for automatic cleanup without requiring the manual deletion of objects beforehand. If force_destroy is not set or is set to false, Terraform will refuse to delete a bucket that still contains objects. You must manually empty the bucket before Terraform can remove it.There is a significant risk of accidental data loss when using this attribute, as it irreversibly deletes all contents of the bucket. It's crucial to ensure that the bucket does not contain critical data before using force_destroy.
 
 ## Attributes Reference
 

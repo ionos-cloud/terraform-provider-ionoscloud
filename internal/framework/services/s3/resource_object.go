@@ -98,6 +98,7 @@ func (r *objectResource) Schema(_ context.Context, req resource.SchemaRequest, r
 			"server_side_encryption": schema.StringAttribute{
 				Description: "The server-side encryption algorithm used when storing this object in IONOS S3 Object Storage (AES256).",
 				Optional:    true,
+				Computed:    true,
 				Validators:  []validator.String{stringvalidator.OneOf("AES256")},
 			},
 			"storage_class": schema.StringAttribute{
