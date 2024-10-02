@@ -1,3 +1,12 @@
+---
+subcategory: "Database as a Service - MongoDB"
+layout: "ionoscloud"
+page_title: "IonosCloud: ionoscloud_mongo_template"
+sidebar_current: "docs-ionoscloud_mongo_template"
+description: |-
+  Get information on DbaaS MongoDB Cluster objects.
+---
+
 # ionoscloud_mongo_template
 
 The **DbaaS Mongo Template data source** can be used to search for and return an existing DbaaS MongoDB Template.

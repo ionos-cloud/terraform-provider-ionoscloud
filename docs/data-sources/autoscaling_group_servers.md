@@ -1,4 +1,5 @@
 ---
+subcategory: "Autoscaling"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_autoscaling_group_servers"
 sidebar_current: "docs-ionoscloud_autoscaling_group_servers"

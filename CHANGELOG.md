@@ -1,3 +1,7 @@
+## 6.5.7
+### Fixes
+  - Fix documentation rendering of `autoscaling_group` resource and data source, `dbaas_mongo_template` data source and `server_boot_device_selection` resource in Terraform registry
+
 ## 6.5.6
 ### Fixes
 - Fix `kafka` remove unavailable locations from resources and data sources
