@@ -1,4 +1,5 @@
 ---
+subcategory: "Autoscaling"
 layout: "ionoscloud"
 page_title: "IonosCloud : autoscaling_group"
 sidebar_current: "docs-datasource-autoscaling_group"
