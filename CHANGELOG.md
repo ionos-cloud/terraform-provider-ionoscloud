@@ -1,3 +1,8 @@
+## 6.5.8 - upcoming release
+### Refactor
+  - Remove `image_alias` sets from `ionoscloud_volume` data source and resource
+### Documentation
+  - Remove `image_alias` from `ionocloud_volume` data source and resource docs
 ## 6.5.7
 ### Fixes
   - Fix documentation rendering of `autoscaling_group` resource and data source, `dbaas_mongo_template` data source and `server_boot_device_selection` resource in Terraform registry

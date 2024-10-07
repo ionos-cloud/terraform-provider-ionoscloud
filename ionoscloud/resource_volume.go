@@ -499,13 +499,6 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 		}
 	}
 
-	if volume.Properties.ImageAlias != nil {
-		err := d.Set("image_alias", *volume.Properties.ImageAlias)
-		if err != nil {
-			return fmt.Errorf("error while setting image_alias property for volume %s: %w", d.Id(), err)
-		}
-	}
-
 	if volume.Properties.AvailabilityZone != nil {
 		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
 		if err != nil {
