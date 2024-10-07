@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -75,17 +76,17 @@ func (d *objectsDataSource) Configure(ctx context.Context, req datasource.Config
 		return
 	}
 
-	client, ok := req.ProviderData.(*s3.Client)
+	clientBundle, ok := req.ProviderData.(*services.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *s3.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *services.SdkBundle, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
 	}
 
-	d.client = client
+	d.client = clientBundle.S3Client
 }
 
 func (d *objectsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
