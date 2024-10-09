@@ -438,8 +438,8 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 				return diags
 			}
 
-			backupUnitId := backupUnitID.(string)
-			volume.BackupunitId = &backupUnitId
+			backupUnitID := backupUnitID.(string)
+			volume.BackupunitId = &backupUnitID
 		}
 	}
 
