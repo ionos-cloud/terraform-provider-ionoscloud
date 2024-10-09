@@ -7,6 +7,7 @@
 ### Fixes
   - Fix documentation rendering of `autoscaling_group` resource and data source, `dbaas_mongo_template` data source and `server_boot_device_selection` resource in Terraform registry
   - Fix `application_loadbalancer_forwardingrule` docs typo
+  - Fix for [#687](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/687) by setting `user_data` and `backupunit_id` in `ionoscloud_cube_server`
 
 ## 6.5.6
 ### Fixes
