@@ -135,6 +135,33 @@ func TestAccBucketLifecycleConfigurationResourceMultipleRules(t *testing.T) {
 
 }
 
+func TestAccBucketLifecycleConfigurationResourceEmptyPrefix(t *testing.T) {
+	ctx := context.Background()
+	bucketName := acctest.GenerateRandomResourceName(bucketPrefix)
+	name := "ionoscloud_s3_bucket_lifecycle_configuration.test"
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		CheckDestroy: testAccCheckBucketLifecycleConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBucketLifecycleConfigurationConfig_emptyPrefix(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLifecycleConfigurationExists(ctx, name),
+					resource.TestCheckResourceAttr(name, "bucket", bucketName),
+					resource.TestCheckResourceAttr(name, "rule.0.id", "Logs delete"),
+					resource.TestCheckResourceAttr(name, "rule.0.status", "Enabled"),
+					resource.TestCheckResourceAttr(name, "rule.0.prefix", ""),
+					resource.TestCheckResourceAttr(name, "rule.0.expiration.days", "90"),
+				),
+			},
+		},
+	})
+}
+
 func testAccBucketLifecycleConfigurationConfig_base(bucketName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_s3_bucket" "test" {
@@ -154,6 +181,25 @@ resource "ionoscloud_s3_bucket_lifecycle_configuration" "test" {
 	status = "Enabled"
 	
 	prefix = "/logs"
+
+	expiration {
+      days = 90
+    }
+  }
+}
+`))
+}
+
+func testAccBucketLifecycleConfigurationConfig_emptyPrefix(bucketName string) string {
+	return utils.ConfigCompose(testAccBucketLifecycleConfigurationConfig_base(bucketName), fmt.Sprintf(`
+resource "ionoscloud_s3_bucket_lifecycle_configuration" "test" {
+  bucket = ionoscloud_s3_bucket.test.name
+  rule {
+
+	id = "Logs delete"
+	status = "Enabled"
+	
+	prefix = ""
 
 	expiration {
       days = 90

@@ -62,7 +62,7 @@ func (r *bucketLifecycleConfiguration) Schema(ctx context.Context, req resource.
 						"prefix": schema.StringAttribute{
 							Required: true,
 							Validators: []validator.String{
-								stringvalidator.LengthBetween(1, 1024),
+								stringvalidator.LengthBetween(0, 1024),
 							},
 							Description: "Object key prefix identifying one or more objects to which the rule applies.",
 						},
