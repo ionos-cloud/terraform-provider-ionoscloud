@@ -1,10 +1,13 @@
 ## 6.5.8 - upcoming release
+### Features
+  - Add `sni_mode` for `ionoscloud_cdn_distribution` resource and data source
+### Fixes
+  - Allow empty `prefix` for bucket lifecycle configuration rules
 ### Refactor
   - Remove `image_alias` sets from `ionoscloud_volume` data source and resource
 ### Documentation
   - Remove `image_alias` from `ionocloud_volume` data source and resource docs
-### Fixes
-  - Allow empty `prefix` for bucket lifecycle configuration rules
+
 ## 6.5.7
 ### Fixes
   - Fix documentation rendering of `autoscaling_group` resource and data source, `dbaas_mongo_template` data source and `server_boot_device_selection` resource in Terraform registry
