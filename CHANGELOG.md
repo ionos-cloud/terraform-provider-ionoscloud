@@ -1,6 +1,8 @@
-## 6.5.8 - upcoming release
+## 6.5.9 - upcoming release
 ### Features
   - Add `sni_mode` for `ionoscloud_cdn_distribution` resource and data source
+
+## 6.5.8
 ### Fixes
   - Allow empty `prefix` for bucket lifecycle configuration rules
 ### Refactor
