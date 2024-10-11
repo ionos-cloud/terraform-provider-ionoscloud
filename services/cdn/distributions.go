@@ -56,6 +56,7 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) 
 			upstreamEntry["caching"] = rule.Upstream.Caching
 			upstreamEntry["waf"] = rule.Upstream.Waf
 			upstreamEntry["host"] = rule.Upstream.Host
+			upstreamEntry["sni_mode"] = rule.Upstream.SniMode
 			upstreamEntry["rate_limit_class"] = rule.Upstream.RateLimitClass
 			if rule.Upstream.GeoRestrictions != nil {
 				geoRestrictionsEntry := make(map[string]interface{})
@@ -110,7 +111,9 @@ func GetRoutingRulesData(d *schema.ResourceData) (*[]cdn.RoutingRule, error) {
 			if waf, wafOk := d.GetOkExists(fmt.Sprintf("routing_rules.%d.upstream.0.waf", routingRuleIndex)); wafOk { //nolint:staticcheck
 				routingRule.Upstream.Waf = waf.(bool)
 			}
-
+			if sniMode, sniModeOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.sni_mode", routingRuleIndex)); sniModeOk {
+				routingRule.Upstream.SniMode = sniMode.(string)
+			}
 			if _, geoRestrictionsOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions", routingRuleIndex)); geoRestrictionsOk {
 				routingRule.Upstream.GeoRestrictions = &cdn.UpstreamGeoRestrictions{}
 				if allowList, allowListOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions.0.allow_list", routingRuleIndex)); allowListOk {
