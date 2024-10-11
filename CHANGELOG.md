@@ -5,12 +5,12 @@
   - Add `FAQ` section in `README.md`, add information about IP retrieval for `NIC`s
 
 ## 6.5.8
-### Fixes
-  - Allow empty `prefix` for bucket lifecycle configuration rules
 ### Refactor
   - Remove `image_alias` sets from `ionoscloud_volume` data source and resource
 ### Documentation
   - Remove `image_alias` from `ionocloud_volume` data source and resource docs
+### Fixes
+  - Allow empty `prefix` for bucket lifecycle configuration rules
 
 ## 6.5.7
 ### Fixes
