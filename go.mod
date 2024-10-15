@@ -31,12 +31,15 @@ require (
 	github.com/ionos-cloud/sdk-go-kafka v1.0.0
 	github.com/ionos-cloud/sdk-go-nfs v1.0.0
 	github.com/ionos-cloud/sdk-go-s3 v1.1.0
+	github.com/ionos-cloud/sdk-go-s3-management v1.0.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1
 	github.com/ionos-cloud/sdk-go/v6 v6.2.1
 	github.com/mitchellh/go-homedir v1.1.0
 	golang.org/x/crypto v0.26.0
 	gopkg.in/yaml.v3 v3.0.1
 )
+
+replace github.com/ionos-cloud/sdk-go-s3-management v1.0.0 => /home/radu/work/rubygeneration/sdk-go-s3-management
 
 require (
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
