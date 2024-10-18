@@ -47,7 +47,7 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 						},
 						"location": {
 							Type:        schema.TypeString,
-							Description: "The S3 location where the backups will be stored.",
+							Description: "The Object Storage location where the backups will be stored.",
 							Computed:    true,
 						},
 						"version": {

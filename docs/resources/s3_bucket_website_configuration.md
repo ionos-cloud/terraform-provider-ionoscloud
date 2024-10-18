@@ -1,5 +1,5 @@
 ---
-subcategory: "S3"
+subcategory: "Object Storage"
 layout: "ionoscloud"
 page_title: "IonosCloud: s3_bucket_website_configuration"
 sidebar_current: "docs-resource-s3_bucket_website_configuration"
@@ -64,7 +64,7 @@ The following arguments are supported:
     - `http_redirect_code` - (Optional) The HTTP redirect code to use on the response. Not required if one of the siblings is present.
 ## Import
 
-S3 Bucket website configuration can be imported using the `bucket` name.
+IONOS Object Storage Bucket website configuration can be imported using the `bucket` name.
 
 ```shell
 terraform import ionoscloud_s3_bucket_website_configuration.example example

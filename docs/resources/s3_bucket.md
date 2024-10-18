@@ -1,15 +1,15 @@
 ---
-subcategory: "S3"
+subcategory: "Object Storage"
 layout: "ionoscloud"
 page_title: "IonosCloud: s3_bucket"
 sidebar_current: "docs-resource-s3_bucket"
 description: |-
-  Creates and manages IonosCloud S3 Buckets.
+  Creates and manages IONOS Object Storage Buckets.
 ---
 
 # ionoscloud_s3_bucket
 
-Manages **S3 Buckets** on IonosCloud.
+Manages **IONOS Object Storage Buckets** on IonosCloud.
 
 ## Example Usage
 
@@ -51,7 +51,7 @@ The following arguments are supported:
 
 - `id` - (Computed) Name of the bucket
 
-⚠️ **Note:** The name must be unique across all IONOS accounts in all S3 regions. The name should adhere to the following [restrictions](https://docs.ionos.com/cloud/storage-and-backup/s3-object-storage/concepts/buckets#naming-conventions).
+⚠️ **Note:** The name must be unique across all IONOS accounts in all IONOS Object Storage regions. The name should adhere to the following [restrictions](https://docs.ionos.com/cloud/storage-and-backup/s3-object-storage/concepts/buckets#naming-conventions).
 
 ## Import
 

@@ -17,7 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccS3KeyBasic(t *testing.T) {
+func TestAccKeyBasic(t *testing.T) {
 	var s3Key ionoscloud.S3Key
 
 	resource.Test(t, resource.TestCase{
@@ -25,12 +25,12 @@ func TestAccS3KeyBasic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-		CheckDestroy:             testAccChecks3KeyDestroyCheck,
+		CheckDestroy:             testAccChecksKeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccChecks3KeyConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccChecks3KeyExists(constant.S3KeyResource+"."+constant.S3KeyTestResource, &s3Key),
+					testAccCheckKeyExists(constant.S3KeyResource+"."+constant.S3KeyTestResource, &s3Key),
 					resource.TestCheckResourceAttrSet(constant.S3KeyResource+"."+constant.S3KeyTestResource, "secret_key"),
 					resource.TestCheckResourceAttr(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", "true"),
 				),
@@ -56,7 +56,7 @@ func TestAccS3KeyBasic(t *testing.T) {
 	})
 }
 
-func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
+func testAccChecksKeyDestroyCheck(s *terraform.State) error {
 
 	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
@@ -71,17 +71,17 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while fetching s3 key %s: %w", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while fetching Object Storage key %s: %w", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("s3 Key still exists %s", rs.Primary.ID)
+			return fmt.Errorf("Object Storage Key still exists %s", rs.Primary.ID)
 		}
 	}
 
 	return nil
 }
 
-func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestCheckFunc {
+func testAccCheckKeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
 		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
@@ -101,7 +101,7 @@ func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestChe
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occurred while fetching S3 Key: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching Object Storage Key: %s", rs.Primary.ID)
 		}
 
 		if *foundS3Key.Id != rs.Primary.ID {
@@ -129,7 +129,7 @@ resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
   active     = true
 }`
 
-// this step is commented since the current behaviour of s3 keys is that when you create an s3 key with active set on false
+// this step is commented since the current behaviour of Object Storage keys is that when you create an Object Storage key with active set on false
 // it is set to true by the API, so an update from false to true can not be done
 
 // var testAccChecks3KeyConfigUpdate = `

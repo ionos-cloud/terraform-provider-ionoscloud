@@ -9,13 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceS3Key() *schema.Resource {
+func dataSourceObjectStorageKey() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceS3KeyRead,
+		ReadContext: dataSourceObjectStorageKeyRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,
-				Description: "Id of the s3 key.",
+				Description: "Id of the key.",
 				Optional:    true,
 			},
 			"user_id": {
@@ -26,7 +26,7 @@ func dataSourceS3Key() *schema.Resource {
 			},
 			"secret_key": {
 				Type:        schema.TypeString,
-				Description: "The S3 Secret key.",
+				Description: "The Secret key.",
 				Computed:    true,
 			},
 			"active": {
@@ -40,12 +40,12 @@ func dataSourceS3Key() *schema.Resource {
 	}
 }
 
-func dataSourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	id, idOk := d.GetOk("id")
 
 	if !idOk {
-		return diag.FromErr(fmt.Errorf("please provide the s3 key id"))
+		return diag.FromErr(fmt.Errorf("please provide the object storage key id"))
 	}
 	d.SetId(id.(string))
 

@@ -35,7 +35,7 @@ func resourceS3Key() *schema.Resource {
 			},
 			"secret_key": {
 				Type:        schema.TypeString,
-				Description: "The S3 Secret key.",
+				Description: "The Object Storage Secret key.",
 				Computed:    true,
 			},
 			"active": {
@@ -58,12 +58,12 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating S3 key: %w", err))
+		diags := diag.FromErr(fmt.Errorf("error creating Object Storage key: %w", err))
 		return diags
 	}
 
 	if rsp.Id == nil {
-		return diag.FromErr(fmt.Errorf("the API didn't return an s3 key ID"))
+		return diag.FromErr(fmt.Errorf("the API didn't return an Object Storage key ID"))
 	}
 	keyId := *rsp.Id
 	d.SetId(keyId)
@@ -71,7 +71,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(errState)
 	}
 
-	log.Printf("[INFO] Created S3 key: %s", d.Id())
+	log.Printf("[INFO] Created Object Storage key: %s", d.Id())
 
 	active := d.Get("active").(bool)
 	s3Key := ionoscloud.S3Key{
@@ -106,14 +106,14 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while reading S3 key %s: %w, %+v", d.Id(), err, s3Key))
+		diags := diag.FromErr(fmt.Errorf("error while reading Object Storage key %s: %w, %+v", d.Id(), err, s3Key))
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retrieved S3 key %+v \n", *s3Key.Id)
+	log.Printf("[INFO] Successfully retrieved Object Storage key %+v \n", *s3Key.Id)
 
 	if s3Key.HasProperties() && s3Key.Properties.HasActive() {
-		log.Printf("[INFO] Successfully retrieved S3 key with status: %t", *s3Key.Properties.Active)
+		log.Printf("[INFO] Successfully retrieved Object Storage key with status: %t", *s3Key.Properties.Active)
 	}
 
 	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
@@ -129,10 +129,10 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	request := ionoscloud.S3Key{}
 	request.Properties = &ionoscloud.S3KeyProperties{}
 
-	log.Printf("[INFO] Attempting to update S3 key %s", d.Id())
+	log.Printf("[INFO] Attempting to update Object Storage key %s", d.Id())
 
 	newActiveSetting := d.Get("active")
-	log.Printf("[INFO] S3 key active setting changed to %+v", newActiveSetting)
+	log.Printf("[INFO] Object Storage key active setting changed to %+v", newActiveSetting)
 	active := newActiveSetting.(bool)
 	request.Properties.Active = &active
 
@@ -145,7 +145,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating S3 key %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while updating Object Storage key %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -168,7 +168,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting S3 key %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting Object Storage key %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -178,12 +178,12 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		s3KeyDeleted, dsErr := s3KeyDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of S3 key %s: %w", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of Object Storage key %s: %w", d.Id(), dsErr))
 			return diags
 		}
 
 		if s3KeyDeleted {
-			log.Printf("[INFO] Successfully deleted S3 key: %s", d.Id())
+			log.Printf("[INFO] Successfully deleted Object Storage key: %s", d.Id())
 			break
 		}
 
@@ -192,7 +192,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] delete timed out")
-			diags := diag.FromErr(fmt.Errorf("s3 key delete timed out! WARNING: your s3 key will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			diags := diag.FromErr(fmt.Errorf("Object Storage key delete timed out! WARNING: your Object Storage key will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
 			return diags
 		}
 	}
@@ -209,7 +209,7 @@ func s3KeyDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 		if httpNotFound(apiResponse) {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking S3 key deletion status: %w", err)
+		return true, fmt.Errorf("error checking Object Storage key deletion status: %w", err)
 	}
 	return false, nil
 }
@@ -220,7 +220,7 @@ func s3Ready(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resour
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking S3 Key status: %w", err)
+		return true, fmt.Errorf("error checking Object Storage Key status: %w", err)
 	}
 	active := d.Get("active").(bool)
 	return *rsp.Properties.Active == active, nil
@@ -244,9 +244,9 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find S3 key %q", keyId)
+			return nil, fmt.Errorf("unable to find Object Storage key %q", keyId)
 		}
-		return nil, fmt.Errorf("unable to retrieve S3 key %q, error:%w", keyId, err)
+		return nil, fmt.Errorf("unable to retrieve Object Storage key %q, error:%w", keyId, err)
 	}
 
 	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {

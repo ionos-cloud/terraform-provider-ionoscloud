@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/s3"
-	s3service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
+	objstorage "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 )
 
 // ClientOptions is the configuration for the provider.
@@ -72,15 +72,15 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 			},
 			"s3_secret_key": schema.StringAttribute{
 				Optional:    true,
-				Description: "Secret key for IONOS S3 operations.",
+				Description: "Secret key for IONOS Object Storage operations.",
 			},
 			"s3_access_key": schema.StringAttribute{
 				Optional:    true,
-				Description: "Access key for IONOS S3 operations.",
+				Description: "Access key for IONOS Object Storage operations.",
 			},
 			"s3_region": schema.StringAttribute{
 				Optional:    true,
-				Description: "Region for IONOS S3 operations.",
+				Description: "Region for IONOS Object Storage operations.",
 			},
 		},
 	}
@@ -153,7 +153,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	client := s3service.NewClient(accessKey, secretKey, region)
+	client := objstorage.NewClient(accessKey, secretKey, region)
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
@@ -161,26 +161,26 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 // Resources returns the resources for the provider.
 func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		s3.NewBucketResource,
-		s3.NewBucketPolicyResource,
-		s3.NewObjectResource,
-		s3.NewObjectCopyResource,
-		s3.NewBucketPublicAccessBlockResource,
-		s3.NewBucketVersioningResource,
-		s3.NewObjectLockConfigurationResource,
-		s3.NewServerSideEncryptionConfigurationResource,
-		s3.NewBucketCorsConfigurationResource,
-		s3.NewBucketLifecycleConfigurationResource,
-		s3.NewBucketWebsiteConfigurationResource,
+		objectstorage.NewBucketResource,
+		objectstorage.NewBucketPolicyResource,
+		objectstorage.NewObjectResource,
+		objectstorage.NewObjectCopyResource,
+		objectstorage.NewBucketPublicAccessBlockResource,
+		objectstorage.NewBucketVersioningResource,
+		objectstorage.NewObjectLockConfigurationResource,
+		objectstorage.NewServerSideEncryptionConfigurationResource,
+		objectstorage.NewBucketCorsConfigurationResource,
+		objectstorage.NewBucketLifecycleConfigurationResource,
+		objectstorage.NewBucketWebsiteConfigurationResource,
 	}
 }
 
 // DataSources returns the data sources for the provider.
 func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		s3.NewBucketDataSource,
-		s3.NewObjectDataSource,
-		s3.NewBucketPolicyDataSource,
-		s3.NewObjectsDataSource,
+		objectstorage.NewBucketDataSource,
+		objectstorage.NewObjectDataSource,
+		objectstorage.NewBucketPolicyDataSource,
+		objectstorage.NewObjectsDataSource,
 	}
 }

@@ -1,15 +1,15 @@
 ---
-subcategory: "S3"
+subcategory: "Object Storage"
 layout: "ionoscloud"
 page_title: "IonosCloud: s3_bucket_policy"
 sidebar_current: "docs-resource-s3_bucket_policy"
 description: |-
-  Creates and manages IonosCloud S3 Buckets policies.
+  Creates and manages IonosCloud IONOS Object Storage Buckets policies.
 ---
 
 # ionoscloud_s3_bucket_policy
 
-Manages **S3 Buckets policies** on IonosCloud.
+Manages **Buckets policies** on IonosCloud.
 
 ## Example Usage
 

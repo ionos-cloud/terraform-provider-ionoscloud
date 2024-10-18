@@ -1,10 +1,10 @@
 ---
-subcategory: "S3"
+subcategory: "Object Storage"
 layout: "ionoscloud"
 page_title: "IonosCloud: s3_bucket"
 sidebar_current: "docs-ionoscloud-datasource-s3_bucket"
 description: |-
-  Get information about IonosCloud S3 Buckets.
+  Get information about IonosCloud IONOS Object Storage Buckets.
 ---
 
 # ionoscloud_s3_bucket

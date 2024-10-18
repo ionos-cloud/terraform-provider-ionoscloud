@@ -1,5 +1,5 @@
 ---
-subcategory: "S3"
+subcategory: "Object Storage"
 layout: "ionoscloud"
 page_title: "IonosCloud: s3_bucket_cors_configuration"
 sidebar_current: "docs-resource-s3_bucket_cors_configuration"
@@ -48,7 +48,7 @@ The following arguments are supported:
 Days and years are mutually exclusive. You can only specify one of them.
 ## Import
 
-S3 Bucket cors configuration can be imported using the `bucket` name.
+IONOS Object Storage Bucket cors configuration can be imported using the `bucket` name.
 
 ```shell
 terraform import ionoscloud_s3_bucket_cors_configuration.example example

@@ -25,7 +25,7 @@ resource "ionoscloud_k8s_cluster" "example" {
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets { 
-     name               = "globally_unique_s3_bucket_name"
+     name               = "globally_unique_bucket_name"
   }
 }
 ```
@@ -54,7 +54,7 @@ resource "ionoscloud_k8s_cluster" "example" {
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets {
-     name               = "globally_unique_s3_bucket_name"
+     name               = "globally_unique_bucket_name"
   }
   location = "de/fra"
   nat_gateway_ip = ionoscloud_ipblock.k8sip.ips[0]
@@ -74,7 +74,7 @@ The following arguments are supported:
   - `day_of_the_week` - (Required)[string] Day of the week when maintenance is allowed
 - `viable_node_pool_versions` - (Computed)[list] List of versions that may be used for node pools under this cluster
 - `api_subnet_allow_list` - (Optional)[list] Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not affected by this restriction. If no allowlist is specified, access is not restricted. If an IP without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.
-- `s3_buckets` - (Optional)[list] List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.
+- `s3_buckets` - (Optional)[list] List of IONOS Object Storage bucket configured for K8s usage. For now it contains only an IONOS Object Storage bucket used to store K8s API audit logs.
 - `public` - (Optional)[boolean] Indicates if the cluster is public or private. This attribute is immutable.
 - `nat_gateway_ip` - (Optional)[string] The NAT gateway IP of the cluster if the cluster is private. This attribute is immutable. Must be a reserved IP in the same location as the cluster's location. This attribute is mandatory if the cluster is private.
 - `node_subnet` - (Optional)[string] The node subnet of the cluster, if the cluster is private. This attribute is optional and immutable. Must be a valid CIDR notation for an IPv4 network prefix of 16 bits length.

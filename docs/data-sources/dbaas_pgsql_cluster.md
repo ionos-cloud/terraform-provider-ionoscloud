@@ -55,7 +55,7 @@ The following attributes are returned by the datasource:
   * `lan_id` - The LAN to connect your cluster to.
   * `cidr` - The IP and subnet for the database. 
 * `location` - The physical location where the cluster will be created. This will be where all of your instances live. 
-* `backup_location` - The S3 location where the backups will be stored. 
+* `backup_location` - The IONOS Object Storage location where the backups will be stored. 
 * `display_name` - The friendly name of your cluster.
 * `maintenance_window` - A weekly 4 hour-long window, during which maintenance might occur
   * `time` 

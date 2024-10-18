@@ -13,12 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	s3 "github.com/ionos-cloud/sdk-go-s3"
+	objstorage "github.com/ionos-cloud/sdk-go-s3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/envar"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/provider"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud"
-	s3service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
+	objstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 )
 
 const (
@@ -91,13 +91,13 @@ func PreCheck(t *testing.T) {
 	})
 }
 
-// S3Client returns a new S3 client for acceptance testing
-func S3Client() (*s3.APIClient, error) {
+// ObjectStorageClient returns a new S3 client for acceptance testing
+func ObjectStorageClient() (*objstorage.APIClient, error) {
 	accessKey := os.Getenv(envar.IonosS3AccessKey)
 	secretKey := os.Getenv(envar.IonosS3SecretKey)
 	if accessKey == "" || secretKey == "" {
 		return nil, fmt.Errorf("%s and %s must be set for acceptance tests", envar.IonosS3AccessKey, envar.IonosS3SecretKey)
 	}
 
-	return s3service.NewClient(accessKey, secretKey, "").GetBaseClient(), nil
+	return objstorageservice.NewClient(accessKey, secretKey, "").GetBaseClient(), nil
 }

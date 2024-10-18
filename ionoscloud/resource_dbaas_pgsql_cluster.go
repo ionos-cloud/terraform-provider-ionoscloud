@@ -119,7 +119,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 			},
 			"backup_location": {
 				Type:             schema.TypeString,
-				Description:      "The S3 location where the backups will be stored.",
+				Description:      "The Object Storage location where the backups will be stored.",
 				Optional:         true,
 				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"de", "eu-south-2", "eu-central-2"}, true)),

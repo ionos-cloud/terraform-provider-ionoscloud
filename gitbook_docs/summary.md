@@ -77,13 +77,13 @@
 * User Management
   * Resources
     * [Group](../docs/resources/group.md)
-    * [S3 Key](../docs/resources/s3_key.md)
+    * [Key](../docs/resources/s3_key.md)
     * [Share](../docs/resources/share.md)
     * [User](../docs/resources/user.md)
   * Data Sources
     * [Group](../docs/data-sources/group.md)
     * [Resource](../docs/data-sources/resource.md)
-    * [S3 Key](../docs/data-sources/s3_key.md)
+    * [Key](../docs/data-sources/s3_key.md)
     * [Share](../docs/data-sources/share.md)
     * [User](../docs/data-sources/user.md)
 
@@ -184,25 +184,24 @@
     * [Network File Storage Cluster](../docs/data-sources/nfs_cluster.md)
     * [Network File Storage Share](../docs/data-sources/nfs_share.md)
 
-* S3
+* Object Storage
   * Resources
-    * [S3 Bucket](../docs/resources/s3_bucket.md)
-    * [S3 Bucket Policy](../docs/resources/s3_bucket_policy.md)
-    * [S3 Object](../docs/resources/s3_object.md)
-    * [S3 Bucket Public Access Block](../docs/resources/s3_bucket_public_access_block)
-    * [S3 Bucket Website Configuration](../docs/resources/s3_bucket_website_configuration.md)
-    * [S3 Bucket CORS Configuration](../docs/resources/s3_bucket_cors_configuration.md)
-    * [S3 Bucket Lifecycle Configuration](../docs/resources/s3_bucket_lifecycle_configuration.md)
-    * [S3 Bucket Object Lock Configuration](../docs/resources/s3_bucket_object_lock_configuration.md)
-    * [S3 Bucket Versioning Configuration](../docs/resources/s3_bucket_versioning.md)
-    * [S3 Bucket Server Side Encryption Configuration](../docs/resources/s3_bucket_server_side_encryption_configuration.md)
-    * [S3 Object Copy](../docs/resources/s3_object_copy.md)
+    * [Bucket](../docs/resources/s3_bucket.md)
+    * [Bucket Policy](../docs/resources/s3_bucket_policy.md)
+    * [Object](../docs/resources/s3_object.md)
+    * [Bucket Public Access Block](../docs/resources/s3_bucket_public_access_block)
+    * [Bucket Website Configuration](../docs/resources/s3_bucket_website_configuration.md)
+    * [Bucket CORS Configuration](../docs/resources/s3_bucket_cors_configuration.md)
+    * [Bucket Lifecycle Configuration](../docs/resources/s3_bucket_lifecycle_configuration.md)
+    * [Bucket Object Lock Configuration](../docs/resources/s3_bucket_object_lock_configuration.md)
+    * [Bucket Versioning Configuration](../docs/resources/s3_bucket_versioning.md)
+    * [Bucket Server Side Encryption Configuration](../docs/resources/s3_bucket_server_side_encryption_configuration.md)
+    * [Object Copy](../docs/resources/s3_object_copy.md)
   * Data Sources
-    * [S3 Bucket](../docs/data-sources/s3_bucket.md)
-    * [S3 Bucket Policy](../docs/data-sources/s3_bucket_policy.md)
-    * [S3 Object](../docs/data-sources/s3_object.md)
-    * [S3 Bucket Public Access Block](../docs/data-sources/s3_bucket_access_block.md)
-    * [S3 Objects](../docs/data-sources/s3_objects.md)
+    * [Bucket](../docs/data-sources/s3_bucket.md)
+    * [Bucket Policy](../docs/data-sources/s3_bucket_policy.md)
+    * [Object](../docs/data-sources/s3_object.md)
+    * [Objects](../docs/data-sources/s3_objects.md)
   
 * CDN
   * Resources
