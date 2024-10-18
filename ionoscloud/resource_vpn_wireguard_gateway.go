@@ -44,6 +44,7 @@ func resourceVpnWireguardGateway() *schema.Resource {
 			},
 			"connections": {
 				MinItems: 1,
+				// TODO -- Change this from 10 to 5 or leave this validation for the API
 				MaxItems: 10,
 				Type:     schema.TypeList,
 				Required: true,
@@ -109,6 +110,33 @@ func resourceVpnWireguardGateway() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The status of the WireGuard Gateway",
 				Computed:    true,
+			},
+			"maintenance_window": {
+				Type:        schema.TypeList,
+				Description: "A weekly 4 hour-long window, during which maintenance might occur",
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"time": {
+							Type:        schema.TypeString,
+							Description: "Start of the maintenance window in UTC time.",
+							Required:    true,
+						},
+						"day_of_the_week": {
+							Type:        schema.TypeString,
+							Description: "The name of the week day",
+							Required:    true,
+						},
+					},
+				},
+			},
+			"tier": {
+				Type:        schema.TypeString,
+				Description: "Gateway performance options. See the documentation for the available options",
+				Computed:    true,
+				Optional:    true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

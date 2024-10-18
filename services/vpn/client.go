@@ -20,14 +20,13 @@ type Client struct {
 
 var (
 	// AvailableLocations is a list of supported locations for VPN
-	AvailableLocations = []string{"de/fra", "de/txl"}
-	// todo for now we only support de/fra and de/txl.
-	// AvailableLocations = []string{"de/fra", "de/txl", "es/vit", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par"}
+	AvailableLocations = []string{"de/fra", "de/txl", "es/vit", "gb/bhx", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par"}
 
 	locationToURL = map[string]string{
 		"de/fra": "https://vpn.de-fra.ionos.com",
 		"de/txl": "https://vpn.de-txl.ionos.com",
 		"es/vit": "https://vpn.es-vit.ionos.com",
+		"gb/bhx": "https://vpn.gb-bhx.ionos.com",
 		"gb/lhr": "https://vpn.gb-lhr.ionos.com",
 		"us/ewr": "https://vpn.us-ewr.ionos.com",
 		"us/las": "https://vpn.us-las.ionos.com",

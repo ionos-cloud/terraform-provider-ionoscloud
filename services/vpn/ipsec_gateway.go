@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
+	vpn "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -123,6 +123,17 @@ func SetIPSecGatewayData(d *schema.ResourceData, gateway vpn.IPSecGatewayRead) e
 		return utils.GenerateSetError(ipsecGatewayResourceName, "connections", err)
 	}
 
+	if gateway.Properties.MaintenanceWindow != nil {
+		if err := d.Set("maintenance_window", setIPSecMaintenanceWindowData(gateway.Properties)); err != nil {
+			return utils.GenerateSetError(ipsecGatewayResourceName, "maintenance_window", err)
+		}
+	}
+	if gateway.Properties.Tier != nil {
+		if err := d.Set("tier", gateway.Properties.Tier); err != nil {
+			return utils.GenerateSetError(ipsecGatewayResourceName, "tier", err)
+		}
+	}
+
 	return nil
 }
 
@@ -156,8 +167,14 @@ func setIPSecGatewayProperties(d *schema.ResourceData) vpn.IPSecGateway {
 	for i := range d.Get("connections").([]interface{}) {
 		connections[i] = setConnectionData(d, i)
 	}
-
 	properties.Connections = connections
+
+	if _, ok := d.GetOk("maintenance_window"); ok {
+		properties.MaintenanceWindow = GetMaintenanceWindowData(d)
+	}
+	if v, ok := d.GetOk("tier"); ok {
+		properties.Tier = shared.ToPtr(v.(string))
+	}
 
 	return properties
 }
@@ -173,4 +190,14 @@ func setConnectionData(d *schema.ResourceData, index int) vpn.Connection {
 	}
 
 	return conn
+}
+
+func setIPSecMaintenanceWindowData(ipSecGateway vpn.IPSecGateway) []interface{} {
+	var maintenanceWindows []interface{}
+	maintenanceWindow := map[string]interface{}{}
+	utils.SetPropWithNilCheck(maintenanceWindow, "time", ipSecGateway.MaintenanceWindow.Time)
+	utils.SetPropWithNilCheck(maintenanceWindow, "day_of_the_week", ipSecGateway.MaintenanceWindow.DayOfTheWeek)
+
+	maintenanceWindows = append(maintenanceWindows, maintenanceWindow)
+	return maintenanceWindows
 }

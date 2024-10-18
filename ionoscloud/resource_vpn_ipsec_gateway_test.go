@@ -126,6 +126,9 @@ func checkIPSecGatewayResourceAttributes(fullResourceName, attributeNameReferenc
 		resource.TestCheckResourceAttrPair(fullResourceName, "connections.0.datacenter_id", "ionoscloud_datacenter.test_datacenter", "id"),
 		resource.TestCheckResourceAttrPair(fullResourceName, "connections.0.lan_id", "ionoscloud_lan.test_lan", "id"),
 		resource.TestCheckResourceAttrSet(fullResourceName, "connections.0.ipv4_cidr"),
+		resource.TestCheckResourceAttr(fullResourceName, "maintenance_window.0.day_of_the_week", "Monday"),
+		resource.TestCheckResourceAttr(fullResourceName, "maintenance_window.0.time", "09:00:00"),
+		resource.TestCheckResourceAttr(fullResourceName, "tier", "STANDARD"),
 		//resource.TestCheckResourceAttrSet(fullResourceName, "connections.0.ipv6_cidr"),
 	)
 }
@@ -138,6 +141,9 @@ func checkIPSecGatewayResourceAttributesComparative(fullResourceName, fullRefere
 		resource.TestCheckResourceAttrPair(fullResourceName, "connections.0.datacenter_id", fullReferenceResourceName, "connections.0.datacenter_id"),
 		resource.TestCheckResourceAttrPair(fullResourceName, "connections.0.lan_id", fullReferenceResourceName, "connections.0.lan_id"),
 		resource.TestCheckResourceAttrPair(fullResourceName, "connections.0.ipv4_cidr", fullReferenceResourceName, "connections.0.ipv4_cidr"),
+		resource.TestCheckResourceAttrPair(fullResourceName, "maintenance_window.0.day_of_the_week", fullReferenceResourceName, "maintenance_window.0.day_of_the_week"),
+		resource.TestCheckResourceAttrPair(fullResourceName, "maintenance_window.0.time", fullReferenceResourceName, "maintenance_window.0.time"),
+		resource.TestCheckResourceAttrPair(fullResourceName, "tier", fullReferenceResourceName, "tier"),
 		//resource.TestCheckResourceAttrPair(fullResourceName, "connections.0.ipv6_cidr", fullReferenceResourceName, "connections.0.ipv6_cidr"),
 	)
 }
@@ -193,6 +199,11 @@ resource "ionoscloud_vpn_ipsec_gateway" "%v" {
 		lan_id = ionoscloud_lan.test_lan.id
 		ipv4_cidr = local.ipv4_cidr_block
 	}
+	maintenance_window {
+    	day_of_the_week       = "Monday"
+    	time                  = "09:00:00"
+	}
+  	tier = "STANDARD"
 }`
 
 const templateIPSecGatewayDataIDConfig = `

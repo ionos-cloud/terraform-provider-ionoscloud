@@ -1,4 +1,8 @@
-## 6.5.8 - upcoming release
+## 6.5.9 -- upcoming release
+### Features
+  - Add `maintenance_window`, `tier` and multiple regional endpoints for VPN Wireguard & IPSec resources.
+
+## 6.5.8
 ### Refactor
   - Remove `image_alias` sets from `ionoscloud_volume` data source and resource
 ### Documentation
