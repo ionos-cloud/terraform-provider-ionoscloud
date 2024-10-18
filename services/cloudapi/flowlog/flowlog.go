@@ -27,7 +27,7 @@ var FlowlogSchemaResource = &schema.Resource{
 		},
 		"bucket": {
 			Type:        schema.TypeString,
-			Description: "The S3 bucket name of an existing IONOS Cloud S3 bucket. Immutable, forces re-recreation of the nic resource.",
+			Description: "The bucket name of an existing IONOS Object Storage bucket. Immutable, forces re-recreation of the nic resource.",
 			Required:    true,
 		},
 		"direction": {
@@ -60,7 +60,7 @@ var FlowlogSchemaDatasource = &schema.Resource{
 		},
 		"bucket": {
 			Type:        schema.TypeString,
-			Description: "The S3 bucket name of an existing IONOS Cloud S3 bucket.",
+			Description: "The bucket name of an existing IONOS Object Storage bucket.",
 			Computed:    true,
 		},
 		"direction": {

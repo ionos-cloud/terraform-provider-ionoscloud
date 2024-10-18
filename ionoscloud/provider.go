@@ -8,7 +8,7 @@ import (
 	"os"
 	"runtime"
 
-	s3 "github.com/ionos-cloud/sdk-go-s3"
+	objstorage "github.com/ionos-cloud/sdk-go-s3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -91,20 +91,20 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_ACCESS_KEY", nil),
-				Description: "Access key for IONOS S3 operations.",
+				Description: "Access key for IONOS Object Storage operations.",
 			},
 			"s3_secret_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_SECRET_KEY", nil),
-				Description: "Secret key for IONOS S3 operations.",
+				Description: "Secret key for IONOS Object Storage operations.",
 			},
 			"s3_region": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "eu-central-3",
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_REGION", nil),
-				Description: "Region for IONOS S3 operations.",
+				Description: "Region for IONOS Object Storage operations.",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -193,7 +193,7 @@ func Provider() *schema.Provider {
 			constant.TemplateResource:                          dataSourceTemplate(),
 			constant.BackupUnitResource:                        dataSourceBackupUnit(),
 			constant.FirewallResource:                          dataSourceFirewall(),
-			constant.S3KeyResource:                             dataSourceS3Key(),
+			constant.S3KeyResource:                             dataSourceObjectStorageKey(),
 			constant.GroupResource:                             dataSourceGroup(),
 			constant.UserResource:                              dataSourceUser(),
 			constant.IpBlockResource:                           dataSourceIpBlock(),
@@ -384,7 +384,7 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	case psqlClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	case s3Client:
-		return s3.NewAPIClient(s3.NewConfiguration())
+		return objstorage.NewAPIClient(objstorage.NewConfiguration())
 	case kafkaClient:
 		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	case apiGatewayClient:

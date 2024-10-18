@@ -1,5 +1,5 @@
 ---
-subcategory: "S3"
+subcategory: "Object Storage"
 layout: "ionoscloud"
 page_title: "IonosCloud: s3_bucket_versioning"
 sidebar_current: "docs-resource-s3_bucket_versioning"
@@ -37,7 +37,7 @@ The following arguments are supported:
   - `mfa_delete` - (Optional)[string] Specifies whether MFA delete is enabled or not. Can be `Enabled` or `Disabled`.
 ## Import
 
-S3 Bucket Versioning can be imported using the `bucket` name.
+IONOS Object Storage Bucket Versioning can be imported using the `bucket` name.
 
 ```shell
 terraform import ionoscloud_s3_bucket_versioning.example example

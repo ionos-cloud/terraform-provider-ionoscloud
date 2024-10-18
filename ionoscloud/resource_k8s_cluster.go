@@ -118,13 +118,13 @@ func resourcek8sCluster() *schema.Resource {
 			},
 			"s3_buckets": {
 				Type:        schema.TypeList,
-				Description: "List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.",
+				Description: "List of Object Storage bucket configured for K8s usage. For now it contains only an Object Storage bucket used to store K8s API audit logs.",
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
 							Type:        schema.TypeString,
-							Description: "Name of the S3 bucket",
+							Description: "Name of the Object Storage bucket",
 							Optional:    true,
 						},
 					},
@@ -236,7 +236,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 					s3Bucket.Name = &name
 					addBucket = true
 				} else {
-					diags := diag.FromErr(fmt.Errorf("name must be provided for s3 bucket"))
+					diags := diag.FromErr(fmt.Errorf("name must be provided for Object Storage bucket"))
 					return diags
 				}
 				if addBucket {
