@@ -91,7 +91,7 @@ func (r *bucketVersioningResource) Configure(_ context.Context, req resource.Con
 // Create creates the bucket versioning resource.
 func (r *bucketVersioningResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -112,7 +112,7 @@ func (r *bucketVersioningResource) Create(ctx context.Context, req resource.Crea
 // Read reads the bucket versioning resource.
 func (r *bucketVersioningResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -145,7 +145,7 @@ func (r *bucketVersioningResource) ImportState(ctx context.Context, req resource
 // Update updates the bucket versioning resource.
 func (r *bucketVersioningResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -166,7 +166,7 @@ func (r *bucketVersioningResource) Update(ctx context.Context, req resource.Upda
 // Delete deletes the bucket versioning resource.
 func (r *bucketVersioningResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 

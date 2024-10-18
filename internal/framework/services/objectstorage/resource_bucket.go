@@ -129,7 +129,7 @@ func (r *bucketResource) Configure(_ context.Context, req resource.ConfigureRequ
 // Create creates the bucket.
 func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -164,7 +164,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 // Read reads the bucket.
 func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -222,7 +222,7 @@ func (r *bucketResource) Update(ctx context.Context, req resource.UpdateRequest,
 // Delete deletes the bucket.
 func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 

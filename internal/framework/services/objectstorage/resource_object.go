@@ -214,7 +214,7 @@ func (r *objectResource) ConfigValidators(_ context.Context) []resource.ConfigVa
 // Create creates the object.
 func (r *objectResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -241,7 +241,7 @@ func (r *objectResource) Create(ctx context.Context, req resource.CreateRequest,
 // Read reads the object.
 func (r *objectResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -299,7 +299,7 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 // Delete deletes the object.
 func (r *objectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 

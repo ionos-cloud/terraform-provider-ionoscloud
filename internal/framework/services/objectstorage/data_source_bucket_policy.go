@@ -68,7 +68,7 @@ func (d *bucketPolicyDataSource) Schema(ctx context.Context, req datasource.Sche
 // Read reads the data source.
 func (d *bucketPolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	if d.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 

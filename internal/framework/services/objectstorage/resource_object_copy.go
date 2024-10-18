@@ -231,7 +231,7 @@ func (r *objectCopyResource) Configure(_ context.Context, req resource.Configure
 // Create creates the object copy.
 func (r *objectCopyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -252,7 +252,7 @@ func (r *objectCopyResource) Create(ctx context.Context, req resource.CreateRequ
 // Read reads the object copy.
 func (r *objectCopyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -312,7 +312,7 @@ func (r *objectCopyResource) Update(ctx context.Context, req resource.UpdateRequ
 // Delete deletes the object copy.
 func (r *objectCopyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 

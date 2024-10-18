@@ -75,7 +75,7 @@ func (r *bucketPolicyResource) Configure(_ context.Context, req resource.Configu
 // Create creates the bucket policy.
 func (r *bucketPolicyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured") // todo: const for this error maybe?
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured") // todo: const for this error maybe?
 		return
 	}
 
@@ -96,7 +96,7 @@ func (r *bucketPolicyResource) Create(ctx context.Context, req resource.CreateRe
 // Read reads the bucket policy.
 func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -130,7 +130,7 @@ func (r *bucketPolicyResource) ImportState(ctx context.Context, req resource.Imp
 // Update updates the bucket policy.
 func (r *bucketPolicyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 	var data *objectstorage.BucketPolicyModel
@@ -150,7 +150,7 @@ func (r *bucketPolicyResource) Update(ctx context.Context, req resource.UpdateRe
 // Delete deletes the bucket.
 func (r *bucketPolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 

@@ -23,7 +23,7 @@ var (
 )
 
 // ErrBucketPublicAccessBlockNotFound returned for 404
-var ErrBucketPublicAccessBlockNotFound = errors.New("object storagebucket public access block not found")
+var ErrBucketPublicAccessBlockNotFound = errors.New("object storage bucket public access block not found")
 
 // NewBucketPublicAccessBlockResource creates a new resource for the bucket public access block resource.
 func NewBucketPublicAccessBlockResource() resource.Resource {
@@ -96,7 +96,7 @@ func (r *bucketPublicAccessBlockResource) Configure(_ context.Context, req resou
 // Create creates the bucket.
 func (r *bucketPublicAccessBlockResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -117,7 +117,7 @@ func (r *bucketPublicAccessBlockResource) Create(ctx context.Context, req resour
 // Read reads the bucket.
 func (r *bucketPublicAccessBlockResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -150,7 +150,7 @@ func (r *bucketPublicAccessBlockResource) ImportState(ctx context.Context, req r
 // Update updates the bucket.
 func (r *bucketPublicAccessBlockResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
@@ -171,7 +171,7 @@ func (r *bucketPublicAccessBlockResource) Update(ctx context.Context, req resour
 // Delete deletes the bucket.
 func (r *bucketPublicAccessBlockResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("object storageapi client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage api client not configured", "The provider client is not configured")
 		return
 	}
 
