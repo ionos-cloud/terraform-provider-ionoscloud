@@ -45,6 +45,11 @@ resource "ionoscloud_vpn_wireguard_gateway" "gateway" {
     lan_id          =  ionoscloud_lan.lan_example.id
     ipv4_cidr       =  "192.168.1.108/24"
   }
+  maintenance_window {
+    day_of_the_week       = "Monday"
+    time                  = "09:00:00"
+  }
+  tier = "STANDARD"
 }
 ```
 
@@ -65,6 +70,11 @@ The following arguments are supported by the `vpn_wireguard_gateway` resource:
   - `lan_id` - (Required)[String] The ID of the LAN where the WireGuard Gateway is connected.
   - `ipv4_cidr` - (Required)[String] The IPv4 CIDR for the WireGuard Gateway connection.
   - `ipv6_cidr` - (Optional)[String] The IPv6 CIDR for the WireGuard Gateway connection.
+  
+- `maintenance_window` - (Optional)(Computed)[string] A weekly 4 hour-long window, during which maintenance might occur.
+  - `time` - (Required)[string] Start of the maintenance window in UTC time.
+  - `day_of_the_week` - (Required)[string] The name of the week day.
+- `tier` - (Optional)(Computed)[string] Gateway performance options.  See product documentation for full details. Options: STANDARD, STANDARD_HA, ENHANCED, ENHANCED_HA, PREMIUM, PREMIUM_HA.
 
 ## Attributes Reference
 

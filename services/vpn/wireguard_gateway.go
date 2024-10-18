@@ -118,6 +118,14 @@ func setWireguardGWPostRequest(d *schema.ResourceData) *vpnSdk.WireguardGatewayC
 		valueStr := (int32)(value.(int))
 		request.Properties.ListenPort = &valueStr
 	}
+	if _, ok := d.GetOk("maintenance_window"); ok {
+		request.Properties.MaintenanceWindow = GetMaintenanceWindowData(d)
+	}
+	if value, ok := d.GetOk("tier"); ok {
+		valueStr := value.(string)
+		request.Properties.Tier = &valueStr
+	}
+
 	request.Properties.Connections = getWireguardGwConnectionsData(d)
 
 	return &request
@@ -174,6 +182,12 @@ func setWireguardGatewayPutRequest(d *schema.ResourceData) *vpnSdk.WireguardGate
 	if v, ok := d.GetOk("listen_port"); ok {
 		request.Properties.ListenPort = shared.ToPtr(int32(v.(int)))
 	}
+	if _, ok := d.GetOk("maintenance_window"); ok {
+		request.Properties.MaintenanceWindow = GetMaintenanceWindowData(d)
+	}
+	if v, ok := d.GetOk("tier"); ok {
+		request.Properties.Tier = shared.ToPtr(v.(string))
+	}
 	return &request
 }
 
@@ -184,6 +198,7 @@ func SetWireguardGWData(d *schema.ResourceData, wireguard vpnSdk.WireguardGatewa
 	if err := d.Set("name", wireguard.Properties.Name); err != nil {
 		return utils.GenerateSetError(wireguardResourceName, "name", err)
 	}
+	// TODO -- Check if reading a GW with a nil description will lead to an error here.
 	if err := d.Set("description", wireguard.Properties.Description); err != nil {
 		return utils.GenerateSetError(wireguardResourceName, "description", err)
 	}
@@ -218,6 +233,26 @@ func SetWireguardGWData(d *schema.ResourceData, wireguard vpnSdk.WireguardGatewa
 	if err := d.Set("status", wireguard.Metadata.Status); err != nil {
 		return utils.GenerateSetError(wireguardResourceName, "status", err)
 	}
+	if wireguard.Properties.MaintenanceWindow != nil {
+		if err := d.Set("maintenance_window", setWireguardMaintenanceWindowData(wireguard.Properties)); err != nil {
+			return utils.GenerateSetError(wireguardResourceName, "maintenance_window", err)
+		}
+	}
+	if wireguard.Properties.Tier != nil {
+		if err := d.Set("tier", wireguard.Properties.Tier); err != nil {
+			return utils.GenerateSetError(wireguardResourceName, "tier", err)
+		}
+	}
 
 	return nil
+}
+
+func setWireguardMaintenanceWindowData(wireguardGateway vpnSdk.WireguardGateway) []interface{} {
+	var maintenanceWindows []interface{}
+	maintenanceWindow := map[string]interface{}{}
+	utils.SetPropWithNilCheck(maintenanceWindow, "time", wireguardGateway.MaintenanceWindow.Time)
+	utils.SetPropWithNilCheck(maintenanceWindow, "day_of_the_week", wireguardGateway.MaintenanceWindow.DayOfTheWeek)
+
+	maintenanceWindows = append(maintenanceWindows, maintenanceWindow)
+	return maintenanceWindows
 }
