@@ -88,6 +88,28 @@ func dataSourceVpnWireguardGateway() *schema.Resource {
 				Description: "The status of the WireGuard Gateway",
 				Computed:    true,
 			},
+			"maintenance_window": {
+				Type:        schema.TypeList,
+				Description: "a weekly 4 hour-long window, during which maintenance might occur",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"day_of_the_week": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+			"tier": {
+				Type:        schema.TypeString,
+				Description: "Gateway performance options",
+				Computed:    true,
+			},
 		},
 	}
 }

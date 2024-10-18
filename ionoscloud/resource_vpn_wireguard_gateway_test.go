@@ -36,6 +36,9 @@ func TestAccWireguardGateway(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "connections.0.datacenter_id", "ionoscloud_datacenter.datacenter_example", "id"),
 					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "connections.0.lan_id", "ionoscloud_lan.lan_example", "id"),
 					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "connections.0.ipv4_cidr", "192.168.1.108/24"),
+					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
+					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.time", "09:00:00"),
+					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "tier", "STANDARD"),
 				),
 			},
 			{
@@ -49,6 +52,9 @@ func TestAccWireguardGateway(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "description", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "description"),
 					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "interface_ipv4_cidr", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "interface_ipv4_cidr"),
 					//resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "interface_ipv6_cidr", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "interface_ipv6_cidr"),
+					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.day_of_the_week", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.time", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "tier", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "tier"),
 				),
 			},
 			{
@@ -59,6 +65,9 @@ func TestAccWireguardGateway(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "description", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "description"),
 					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "interface_ipv4_cidr", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "interface_ipv4_cidr"),
 					//resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "interface_ipv6_cidr", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "interface_ipv6_cidr"),
+					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.day_of_the_week", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.time", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "tier", constant.DataSource+"."+constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "tier"),
 				),
 			},
 			{
@@ -86,6 +95,9 @@ func TestAccWireguardGateway(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "connections.1.lan_id", "ionoscloud_lan.lan_example2", "id"),
 					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "connections.0.ipv4_cidr", "192.168.1.109/24"),
 					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "connections.1.ipv4_cidr", "192.168.1.110/24"),
+					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.day_of_the_week", "Tuesday"),
+					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "maintenance_window.0.time", "13:00:00"),
+					resource.TestCheckResourceAttr(constant.WireGuardGatewayResource+"."+constant.WireGuardGatewayTestResource, "tier", "STANDARD_HA"),
 				),
 			},
 		},
@@ -177,7 +189,7 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
   description = "description1"
   gateway_ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
   interface_ipv4_cidr =  "192.168.1.101/24"
-  private_key = "private"
+  private_key = "0HpE4BNwGHabeaC4aY/GFxB6fBSc0d49Db0qAzRVSVc="
   connections   {
     datacenter_id   =  ionoscloud_datacenter.datacenter_example.id
     lan_id          =  ionoscloud_lan.lan_example.id
@@ -188,5 +200,10 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
     lan_id          =  ionoscloud_lan.lan_example2.id
     ipv4_cidr       =  "192.168.1.110/24"
   }
+  maintenance_window {
+    day_of_the_week       = "Tuesday"
+    time                  = "13:00:00"
+  }
+  tier = "STANDARD_HA"
 }
 `
