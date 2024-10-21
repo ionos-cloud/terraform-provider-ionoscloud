@@ -241,3 +241,8 @@ now you can see the response body incl. api error message:
   ## Migrating from the ProfitBricks provider
 
   Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-provider) on how to migrate from the ProfitBricks provider.
+
+  ## Frequently Asked Questions
+
+  ### How do we find out the IP for the added NIC on a K8s nodepool?
+  Please check out this [module](https://github.com/ionos-cloud/terraform-ionoscloud-kube-lan-ip).
