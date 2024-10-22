@@ -114,8 +114,8 @@ github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSAS
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
 github.com/ionos-cloud/sdk-go-api-gateway v1.0.0 h1:T+JzarV1Iw7NjWQfEuv5bESnHoCLOMpPtbcKC4T5Uzk=
 github.com/ionos-cloud/sdk-go-api-gateway v1.0.0/go.mod h1:TkSlamP+qKRT8cgBaZEN8rawanVluOR0dXbXXdmmwTY=
-github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.0.1 h1:tl9kZwY1+7nW7fFDTlV0wdNts8dbyupN/PvrgArgHZg=
-github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.0.1/go.mod h1:nd6z+U8wGfqtgR3Ck8mQ5b1FJty0oaQIQPkmVARuYbE=
+github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0 h1:8fRICa4i+GJHrCgnLe8t3uwfahkg7pcDDwoLkH3B2Xc=
+github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0/go.mod h1:BF6R+j1GdJEMImxkeh32qjIVWqsBfgi6VgyfsY5ezIA=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1 h1:GXxdNKl7haQnHO1QewZeXazur5+LDCpHqvP+nNObGaA=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1/go.mod h1:N0ifRq3ENqGg6qht1WPrVgSkcavPS5SRWlNfkHUZbfQ=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.1 h1:/CO5Y+21l9m8tkW/N/SXX6TIgJKBfEvNQ+I08GjxASU=

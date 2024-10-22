@@ -1,4 +1,6 @@
-## 6.5.9 - upcoming release
+## 6.5.9
+### Features
+  - Add new, required `sni_mode` attribute for `ionoscloud_cdn_distribution` resource and data source
 ### Documentation
   - Add `FAQ` section in `README.md`, add information about IP retrieval for `NIC`s
 
@@ -9,6 +11,7 @@
   - Remove `image_alias` from `ionocloud_volume` data source and resource docs
 ### Fixes
   - Allow empty `prefix` for bucket lifecycle configuration rules
+
 ## 6.5.7
 ### Fixes
   - Fix documentation rendering of `autoscaling_group` resource and data source, `dbaas_mongo_template` data source and `server_boot_device_selection` resource in Terraform registry

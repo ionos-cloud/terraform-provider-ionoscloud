@@ -1686,6 +1686,7 @@ const testAccCheckCDNDistributionConfigOnlyRequired = `resource ` + constant.CDN
 			host             = "server.example.com"
 			caching          = true
 			waf              = true
+			sni_mode		 = "distribution"
 			rate_limit_class = "R100"
 		}
 	}
@@ -1700,6 +1701,7 @@ const testAccCheckCDNDistributionConfigBasic = `resource ` + constant.CDNDistrib
 			host             = "server.example.com"
 			caching          = true
 			waf              = true
+			sni_mode		 = "distribution"
 			rate_limit_class = "R100"
 			geo_restrictions {
 				allow_list = [ "RO"]
@@ -1718,6 +1720,7 @@ const testAccCheckCDNDistributionConfigBasicImport = `resource ` + constant.CDND
 			caching          = true
 			waf              = true
 			rate_limit_class = "R100"
+			sni_mode		 = "distribution"
 			geo_restrictions {
 				allow_list = [ "RO"]
 			}

@@ -90,6 +90,11 @@ func dataSourceCDNDistribution() *schema.Resource {
 										Description: "Enable or disable WAF to protect the upstream host.",
 										Computed:    true,
 									},
+									"sni_mode": {
+										Type:        schema.TypeString,
+										Description: "The SNI (Server Name Indication) mode of the upstream host. It supports two modes: 'distribution' and 'origin', for more information about these modes please check the data source docs.",
+										Computed:    true,
+									},
 									"geo_restrictions": {
 										Type:     schema.TypeList,
 										Computed: true,
