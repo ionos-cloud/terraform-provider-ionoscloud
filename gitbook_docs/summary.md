@@ -77,7 +77,7 @@
 * User Management
   * Resources
     * [Group](../docs/resources/group.md)
-    * [Key](../docs/resources/s3_key.md)
+    * [Object Storage Key](../docs/resources/s3_key.md)
     * [Share](../docs/resources/share.md)
     * [User](../docs/resources/user.md)
   * Data Sources
