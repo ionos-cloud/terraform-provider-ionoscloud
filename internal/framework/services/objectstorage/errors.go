@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	objstorage "github.com/ionos-cloud/sdk-go-s3"
+	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 )
 
 func formatXMLError(err error) error {

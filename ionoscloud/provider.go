@@ -8,7 +8,7 @@ import (
 	"os"
 	"runtime"
 
-	objstorage "github.com/ionos-cloud/sdk-go-s3"
+	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"

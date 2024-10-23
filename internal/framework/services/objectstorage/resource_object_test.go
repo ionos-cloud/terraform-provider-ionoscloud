@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	objstorage "github.com/ionos-cloud/sdk-go-s3"
+	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"io"
 	"os"
