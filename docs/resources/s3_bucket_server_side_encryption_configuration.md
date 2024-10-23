@@ -1,5 +1,5 @@
 ---
-subcategory: "S3"
+subcategory: "Object Storage"
 layout: "ionoscloud"
 page_title: "IonosCloud: s3_bucket_server_side_encryption_configuration"
 sidebar_current: "docs-resource-s3_bucket_server_side_encryption_configuration"
@@ -38,7 +38,7 @@ The following arguments are supported:
     - `sse_algorithm` - (Required)[string] Server-side encryption algorithm to use. Valid values are 'AES256'
 ## Import
 
-S3 Bucket server side encryption configuration can be imported using the `bucket` name.
+IONOS Object Storage Bucket server side encryption configuration can be imported using the `bucket` name.
 
 ```shell
 terraform import ionoscloud_s3_bucket_server_side_encryption_configuration.example example

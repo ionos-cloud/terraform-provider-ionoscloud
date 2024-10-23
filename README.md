@@ -55,7 +55,7 @@ export IONOS_USERNAME="username"
 export IONOS_PASSWORD="password"
 ```
 
-For managing IONOS S3 STORAGE resources you need to set the following environment variables with your credentials
+For managing IONOS Object Storage resources you need to set the following environment variables with your credentials
 ```bash
 export IONOS_S3_ACCESS_KEY="accesskey"
 export IONOS_S3_SECRET_KEY="secretkey"
@@ -104,8 +104,8 @@ See the [IonosCloud Provider documentation](https://registry.terraform.io/provid
 | `IONOS_LOG_LEVEL`       | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace                                                                                           |
 | `IONOS_PINNED_CERT`     | Specify the SHA-256 public fingerprint here, enables certificate pinning                                                                                                 |
 | `IONOS_CONTRACT_NUMBER` | Specify the contract number on which you wish to provision. Only valid for reseller accounts, for other types of accounts the header will be ignored                     |
-| `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS S3 STORAGE API                                                                                              |
-| `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS S3 STORAGE API                                                                                              |
+| `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS Object Storage API                                                                                              |
+| `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS Object Storage API                                                                                              |
 
 
 ## Certificate pinning:
