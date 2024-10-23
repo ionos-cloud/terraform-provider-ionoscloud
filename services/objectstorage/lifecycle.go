@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objstorage "github.com/ionos-cloud/sdk-go-s3"
+	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
 	convptr "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/convptr"
 	hash2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/hash"

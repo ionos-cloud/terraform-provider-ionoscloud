@@ -1,3 +1,7 @@
+## 6.6.0
+### Refactor
+- Rename `S3` occurrences to `Object Storage`
+
 ## 6.5.9
 ### Features
   - Add new, required `sni_mode` attribute for `ionoscloud_cdn_distribution` resource and data source

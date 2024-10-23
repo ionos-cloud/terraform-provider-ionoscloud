@@ -7,7 +7,7 @@ import (
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
-	objstorage "github.com/ionos-cloud/sdk-go-s3"
+	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 )
 
 // DeleteRequest represents a request to delete an object from a general purpose bucket.

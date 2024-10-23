@@ -30,7 +30,7 @@ require (
 	github.com/ionos-cloud/sdk-go-dns v1.2.1
 	github.com/ionos-cloud/sdk-go-kafka v1.0.0
 	github.com/ionos-cloud/sdk-go-nfs v1.0.0
-	github.com/ionos-cloud/sdk-go-s3 v1.1.0
+	github.com/ionos-cloud/sdk-go-object-storage v1.0.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1
 	github.com/ionos-cloud/sdk-go/v6 v6.2.1
 	github.com/mitchellh/go-homedir v1.1.0
