@@ -430,15 +430,14 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	} else {
 		volume.ImageAlias = nil
 	}
-	if backupUnitId, ok := d.GetOk("volume.0.backup_unit_id"); ok {
-		if utils.IsValidUUID(backupUnitId.(string)) {
+	if backupUnitID, ok := d.GetOk("volume.0.backup_unit_id"); ok {
+		if utils.IsValidUUID(backupUnitID.(string)) {
 			if image == "" && imageAlias == "" {
 				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property"))
 				return diags
-			} else {
-				backupUnitId := backupUnitId.(string)
-				volume.BackupunitId = &backupUnitId
 			}
+			backupUnitId := backupUnitID.(string)
+			volume.BackupunitId = &backupUnitId
 		}
 	}
 	if userData, ok := d.GetOk("volume.0.user_data"); ok {
