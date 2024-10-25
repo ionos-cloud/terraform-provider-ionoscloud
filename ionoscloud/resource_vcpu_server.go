@@ -27,6 +27,12 @@ func resourceVCPUServer() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"hostname": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "The hostname of the  resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringIsNotWhiteSpace, validation.StringLenBetween(1, 63))),
+			},
 			"cores": {
 				Type:     schema.TypeInt,
 				Required: true,

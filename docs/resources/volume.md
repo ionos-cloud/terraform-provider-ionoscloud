@@ -93,7 +93,7 @@ resource "ionoscloud_volume" "example" {
   user_data               = "foo"
 }
 
-resource "ionoscloud_volume" "example" {
+resource "ionoscloud_volume" "example2" {
   datacenter_id           = ionoscloud_datacenter.example.id
   server_id               = ionoscloud_server.example.id
   name                    = "Another Volume Example"

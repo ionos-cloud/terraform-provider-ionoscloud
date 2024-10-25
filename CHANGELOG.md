@@ -1,3 +1,9 @@
+## 6.6.1
+
+### Features
+- Add `hostname` to `ionoscloud_server` resource and data source
+- Add `hostname` to `ionoscloud_vcpu_server` resource and data source
+
 ## 6.6.0
 ### Refactor
 - Rename `S3` occurrences to `Object Storage`
