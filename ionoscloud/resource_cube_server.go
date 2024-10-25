@@ -444,10 +444,9 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		if image == "" && imageAlias == "" {
 			diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property "))
 			return diags
-		} else {
-			userData := userData.(string)
-			volume.UserData = &userData
 		}
+		userData := userData.(string)
+		volume.UserData = &userData
 	}
 	server.Entities = &ionoscloud.ServerEntities{
 		Volumes: &ionoscloud.AttachedVolumes{
