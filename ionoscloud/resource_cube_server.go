@@ -436,8 +436,8 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property"))
 				return diags
 			}
-			backupUnitId := backupUnitID.(string)
-			volume.BackupunitId = &backupUnitId
+			backupUnitID := backupUnitID.(string)
+			volume.BackupunitId = &backupUnitID
 		}
 	}
 	if userData, ok := d.GetOk("volume.0.user_data"); ok {
