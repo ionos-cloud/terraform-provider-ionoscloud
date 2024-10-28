@@ -245,8 +245,8 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property "))
 				return diags
 			} else {
-				backupUnitId := backupUnitId.(string)
-				volume.Properties.BackupunitId = &backupUnitId
+				backupUnitID := backupUnitId.(string)
+				volume.Properties.BackupunitId = &backupUnitID
 			}
 		} else {
 			diags := diag.FromErr(fmt.Errorf("the backup_unit_id that you specified is not a valid UUID"))

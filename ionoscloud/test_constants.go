@@ -692,10 +692,10 @@ resource ` + constant.RandomPassword + ` "server_image_password_updated" {
 // Cube Server Constants
 const testAccCheckCubeServerConfigBasic = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-    name = "CUBES XS"
+    name = "Basic Cube XS"
     cores = 1
-    ram   = 1024
-    storage_size = 30
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
@@ -714,6 +714,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
   image_name ="ubuntu:latest"
@@ -747,10 +748,10 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
 
 const testAccCheckCubeServerEnableIpv6 = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -816,10 +817,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 `
 const testAccCheckCubeServerUpdateIpv6 = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -885,10 +886,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 `
 const testAccCheckCubeServerSuspend = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -947,10 +948,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 `
 const testAccCheckCubeServerResume = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -1010,10 +1011,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 
 const testAccCheckCubeServerUpdateWhenSuspended = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"

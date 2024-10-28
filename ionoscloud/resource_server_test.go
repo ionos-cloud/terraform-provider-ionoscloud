@@ -1604,10 +1604,10 @@ resource ` + constant.RandomPassword + ` "server_image_password" {
 
 const testAccCheckCubeServerAndServersDataSource = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-   name = "CUBES XS"
-   cores = 1
-   ram   = 1024
-   storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 
 resource ` + constant.DatacenterResource + " " + constant.DatacenterTestResource + `{

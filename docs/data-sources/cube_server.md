@@ -46,6 +46,7 @@ The following attributes are returned by the datasource:
 * `template_uuid` - The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
 * `id` - The id of that resource
 * `name` - The name of that resource
+* `hostname` - The hostname of the server
 * `type` - Server usages: CUBE
 * `vm_state`- Status of the virtual Machine
 * `datacenter_id` - The id of the datacenter

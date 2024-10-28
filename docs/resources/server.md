@@ -170,7 +170,7 @@ resource "random_password" "server_image_password" {
 
 ```hcl
 data "ionoscloud_template" "example" {
-    name            = "CUBES XS"
+    name            = "Basic Cube XS"
 }
 
 resource "ionoscloud_datacenter" "example" {

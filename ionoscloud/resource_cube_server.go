@@ -44,6 +44,12 @@ func resourceCubeServer() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"hostname": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "The hostname of the resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringIsNotWhiteSpace, validation.StringLenBetween(1, 63))),
+			},
 			"availability_zone": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -395,6 +401,13 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	serverType := constant.CubeType
 	server.Properties.Type = &serverType
 
+	if v, ok := d.GetOk("hostname"); ok {
+		if v.(string) != "" {
+			vStr := v.(string)
+			server.Properties.Hostname = &vStr
+		}
+	}
+
 	if _, ok := d.GetOk("boot_cdrom"); ok {
 		resId := d.Get("boot_cdrom").(string)
 		server.Properties.BootCdrom = &ionoscloud.ResourceReference{
@@ -630,6 +643,13 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			}
 		}
 
+		if server.Properties.Hostname != nil {
+			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+
 		if server.Properties.AvailabilityZone != nil {
 			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
 				diags := diag.FromErr(err)
@@ -780,6 +800,12 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		_, n := d.GetChange("name")
 		nStr := n.(string)
 		request.Name = &nStr
+	}
+
+	if d.HasChange("hostname") {
+		_, n := d.GetChange("hostname")
+		nStr := n.(string)
+		request.Hostname = &nStr
 	}
 
 	if d.HasChange("boot_cdrom") {
@@ -1086,7 +1112,11 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 				return nil, fmt.Errorf("error setting name %w", err)
 			}
 		}
-
+		if server.Properties.Hostname != nil {
+			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
+				return nil, fmt.Errorf("error setting hostname %w", err)
+			}
+		}
 		if server.Properties.Name != nil {
 			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
 				return nil, fmt.Errorf("error setting template uuid %w", err)

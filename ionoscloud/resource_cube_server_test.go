@@ -36,6 +36,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCubeServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "hostname", constant.ServerTestHostname),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
 					utils.TestImageNotNull(constant.ServerCubeResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
@@ -65,6 +66,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 				Config: testAccDataSourceCubeServerMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "name", constant.ServerCubeResource+"."+constant.ServerTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "hostname", constant.ServerCubeResource+"."+constant.ServerTestResource, "hostname"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "availability_zone", constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "type", constant.ServerCubeResource+"."+constant.ServerTestResource, "type"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "volumes.0.name", constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.name"),
@@ -93,6 +95,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 				Config: testAccDataSourceCubeServerMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "name", constant.ServerCubeResource+"."+constant.ServerTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "hostname", constant.ServerCubeResource+"."+constant.ServerTestResource, "hostname"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "availability_zone", constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "type", constant.ServerCubeResource+"."+constant.ServerTestResource, "type"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "volumes.0.name", constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.name"),
@@ -126,6 +129,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCubeServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "hostname", "updatedhostname"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
 					utils.TestImageNotNull(constant.ServerCubeResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password_updated", "result"),
@@ -403,10 +407,10 @@ func testAccCheckCubeServerExists(n string, server *ionoscloud.Server) resource.
 
 const testAccCheckCubeServerConfigUpdate = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-    name = "CUBES XS"
+    name = "Basic Cube XS"
     cores = 1
-    ram   = 1024
-    storage_size = 30
+    ram   = 2048
+    storage_size = 60
 }
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
@@ -426,6 +430,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.UpdatedResources + `"
+  hostname = "updatedhostname"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
   image_name ="ubuntu:latest"
@@ -480,10 +485,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceByName + `
 
 const testAccCheckCubeServerConfigBootCdromNoImage = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-    name = "CUBES XS"
+    name = "Basic Cube XS"
     cores = 1
-    ram   = 1024
-    storage_size = 30
+    ram   = 2048
+    storage_size = 60
 }
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
@@ -521,10 +526,10 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
 
 const testAccCheckCubeServerResolveImageName = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-    name = "CUBES XS"
+    name = "Basic Cube XS"
     cores = 1
-    ram   = 1024
-    storage_size = 30
+    ram   = 2048
+    storage_size = 60
 }
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
@@ -563,10 +568,10 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
 
 const testAccCheckCubeServerWithSnapshot = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-    name = "CUBES XS"
+    name = "Basic Cube XS"
     cores = 1
-    ram   = 1024
-    storage_size = 30
+    ram   = 2048
+    storage_size = 60
 }
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
@@ -621,10 +626,10 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
 
 const testAccCheckCubeServerNoFirewall = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-    name = "CUBES XS"
+    name = "Basic Cube XS"
     cores = 1
-    ram   = 1024
-    storage_size = 30
+    ram   = 2048
+    storage_size = 60
 }
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
@@ -664,10 +669,10 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
 
 const testAccCheckCubeServerICMP = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-    name = "CUBES XS"
+    name = "Basic Cube XS"
     cores = 1
-    ram   = 1024
-    storage_size = 30
+    ram   = 2048
+    storage_size = 60
 }
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {

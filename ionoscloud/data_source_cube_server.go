@@ -37,6 +37,10 @@ func dataSourceCubeServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"hostname": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -198,6 +202,11 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 
 		if server.Properties.Name != nil {
 			if err := d.Set("name", *server.Properties.Name); err != nil {
+				return err
+			}
+		}
+		if server.Properties.Hostname != nil {
+			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
 				return err
 			}
 		}
