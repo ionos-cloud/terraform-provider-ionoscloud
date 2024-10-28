@@ -49,7 +49,7 @@ func dataSourceServers() *schema.Resource {
 						},
 						"hostname": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 						"cores": {
 							Type:     schema.TypeInt,

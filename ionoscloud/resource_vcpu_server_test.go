@@ -63,6 +63,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				Config: testAccCheckServerVCPUNoNicUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "hostname", "updated"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "vm_state", constant.VMStateStop),

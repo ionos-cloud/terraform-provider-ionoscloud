@@ -1385,10 +1385,8 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 		}
 	}
 	if v, ok := d.GetOk("hostname"); ok {
-		if v.(string) != "" {
-			vStr := v.(string)
-			server.Properties.Hostname = &vStr
-		}
+		vStr := v.(string)
+		server.Properties.Hostname = &vStr
 	}
 	if _, ok := d.GetOk("boot_cdrom"); ok {
 		bootCdrom := d.Get("boot_cdrom").(string)

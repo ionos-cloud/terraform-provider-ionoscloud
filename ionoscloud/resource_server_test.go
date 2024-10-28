@@ -212,6 +212,7 @@ func TestAccServerBasic(t *testing.T) {
 				Config: testAccCheckServerConfigIpv6Enabled,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcpv6", "true"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "hostname", "updated"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.dhcpv6", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcpv6"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_cidr_block", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_cidr_block"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.0", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.0"),

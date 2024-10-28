@@ -426,6 +426,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "updated"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
@@ -1598,6 +1599,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "updated"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
@@ -1632,6 +1634,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   vm_state = "` + constant.VMStateStop + `"
   cores = 1
