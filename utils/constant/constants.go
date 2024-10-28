@@ -176,6 +176,12 @@ const (
 	NetworkLoadBalancerForwardingRuleDataSourceByName = "test_networkloadbalancer_forwardingrule_name"
 )
 
+// NFS Constants
+const (
+	NFSClusterResource = "ionoscloud_nfs_cluster"
+	NFSShareResource   = "ionoscloud_nfs_share"
+)
+
 // Private Cross Connect Constants
 // The resource name was changed from Private Cross Connect to Cross Connect
 // But the terraform resources names did not change for backwards compatibility reasons
@@ -192,6 +198,7 @@ const (
 	ServerCubeResource     = "ionoscloud_cube_server"
 	ServerVCPUResource     = "ionoscloud_vcpu_server"
 	ServerTestResource     = "test_server"
+	ServerTestHostname     = "myhostname"
 	ServerDataSourceById   = "test_server_id"
 	ServerDataSourceByName = "test_server_name"
 )
@@ -250,6 +257,7 @@ const (
 	DBaaSClusterTestDataSourceById   = "test_dbaas_cluster_id"
 	DBaaSClusterTestResource         = "test_dbaas_cluster"
 	DBaaSClusterTestDataSourceByName = "test_dbaas_cluster_name"
+	DBaaSReplicaSetTestResource      = "test_dbaas_replicaset"
 
 	// PgSql constants
 	PsqlClusterResource          = "ionoscloud_pg_cluster"
@@ -273,13 +281,22 @@ const (
 	DBaasMongoUserResource           = "ionoscloud_mongo_user"
 	DBaaSMongoTemplateResource       = "ionoscloud_mongo_template"
 	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
+
+	// InMemoryDB constants
+	DBaaSReplicaSetTestDataSourceByID   = "test_dbaas_replicaset_id"
+	DBaaSReplicaSetTestDataSourceByName = "test_dbaas_replicaset_name"
+	DBaaSInMemoryDBReplicaSetResource   = "ionoscloud_inmemorydb_replicaset"
+	DBaaSInMemoryDBSnapshotResource     = "ionoscloud_inmemorydb_snapshot"
 )
+
+// Locations slice represents the locations in which services are available.
+var Locations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
 
 // Container Registry Constants
 const (
 	// ContainerRegistryTestResource needs to be with -, do not change
-	ContainerRegistryTestResource      = "test-container-registry"
-	ContainerRegistryTokenTestResource = "test-container-registry-token"
+	ContainerRegistryTestResource      = "test-terraform-container-registry"
+	ContainerRegistryTokenTestResource = "test-terraform-container-registry-token"
 
 	ContainerRegistryResource                  = "ionoscloud_container_registry"
 	ContainerRegistryTestDataSourceById        = "test_container_registry_id"
@@ -305,8 +322,8 @@ const (
 	DataplatformVersionsDataSource           = "ionoscloud_dataplatform_versions"
 	DataplatformNodePoolsTestDataSource      = "test_dataplatform_node_pools"
 	DataplatformVersionsTestDataSource       = "test_dataplatform_versions"
-	// DataPlatformVersion lowest 'available' version is now 23.7
-	DataPlatformVersion             = "23.7"
+	// DataPlatformVersion lowest 'available' version is now 24.3
+	DataPlatformVersion             = "24.3"
 	DataPlatformNameRegexConstraint = "^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"
 	DataPlatformRegexNameError      = "name should match " + DataPlatformNameRegexConstraint
 )
@@ -326,6 +343,15 @@ const (
 	ShareResource         = "ionoscloud_share"
 	ShareResourceFullName = ShareResource + "." + SourceShareName
 	SourceShareName       = "share"
+)
+
+// CDN Constants
+const (
+	CDNDistributionResource           = "ionoscloud_cdn_distribution"
+	CDNDistributionTestResource       = "test_cdn_distribution"
+	CDNDistributionDataSourceByID     = "test_cdn_distribution_id"
+	CDNDistributionDataSourceByDomain = "test_cdn_distribution_domain"
+	CDNDistributionDataSourceMatching = "test_cdn_distribution_matching"
 )
 
 const (
@@ -354,9 +380,63 @@ const (
 
 const ServersDataSource = "ionoscloud_servers"
 
+// Certificate constants
 const (
-	CertificateResource = "ionoscloud_certificate"
-	TestCertName        = "certTest"
+	TestCertificate = `-----BEGIN CERTIFICATE-----
+MIIDazCCAlOgAwIBAgIUOH1cikhurIjCjm5Zxt7sfJmhIVAwDQYJKoZIhvcNAQEL
+BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
+GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yMjA2MDkxMjM0MzVaFw0zMjA2
+MDYxMjM0MzVaMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEw
+HwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwggEiMA0GCSqGSIb3DQEB
+AQUAA4IBDwAwggEKAoIBAQDkVU596LWGR+/nC3r3MndJfimGMDvt9W4SwL0bOa+V
+XxgVgUKYTTCPvwZaAQrtJRUjW2bGxwwj8/3uDEY6vwHJ1Yh+OrbrQHPFPKcBbRie
+8mqwgjnAveqvlRKxi3VWwG0Bevki54ghwolmZ5GppvzeqLNYFF8nYuSAbseRoPFb
+EJMLd5vuEkDytZl42eiZkv/aHEtUGXvcTY29K6G4yGOEr3Pr320ts8tVW4UNlBt4
+0mDfBjtXAeSIcQfww/c69Pc3Xrfd3FVf4Qjo3bhMCvbg5shvRHmJrcbOPJO5kUn+
+mwPU7DlJM9YeOMQBMgmw3NoKKI4dOU3HUBpBiN3M5tztAgMBAAGjUzBRMB0GA1Ud
+DgQWBBRCecVMYml89VvfhBl+DTxzqcwWoTAfBgNVHSMEGDAWgBRCecVMYml89Vvf
+hBl+DTxzqcwWoTAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQDJ
+oF3c5MGbrg5Iu8TF9X8g3tgVANGUVWDHDxx0Fe3zQojW0NSfHPtQ+Qkf6BdYH6oc
+OzQBUgWFGnrhPliUW9rD4/8c3BoVvT9ukYPOhwLDd2lPqTTbbfhdkzDSM/BKPP1g
+7Ok2m/uk9jnsLQSCQE4zc8+X0M+zG9ZPyC0MJqM3d7gB+LVOE8PKIJz6fXCyoakz
+18PV+e4RhL5daTFCdZ1XAL146kIorS4XX5iIyvCt1WBzSS8IUtAIgR/QLxk7ZqrL
+BKEkcU1X0yvgyDUkpcJ1BS/++5q/EDEQCYP6gN0cvPFhFvQeNor5SId6EFFlEkMn
+MYuea4TP5Gk2UkmDOxuJ
+-----END CERTIFICATE-----`
+	PrivateKey = `-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDkVU596LWGR+/n
+C3r3MndJfimGMDvt9W4SwL0bOa+VXxgVgUKYTTCPvwZaAQrtJRUjW2bGxwwj8/3u
+DEY6vwHJ1Yh+OrbrQHPFPKcBbRie8mqwgjnAveqvlRKxi3VWwG0Bevki54ghwolm
+Z5GppvzeqLNYFF8nYuSAbseRoPFbEJMLd5vuEkDytZl42eiZkv/aHEtUGXvcTY29
+K6G4yGOEr3Pr320ts8tVW4UNlBt40mDfBjtXAeSIcQfww/c69Pc3Xrfd3FVf4Qjo
+3bhMCvbg5shvRHmJrcbOPJO5kUn+mwPU7DlJM9YeOMQBMgmw3NoKKI4dOU3HUBpB
+iN3M5tztAgMBAAECggEBANJZQFlAA9Kz/O+VpO+L/1amMmzbjKo4evItu0kUiIwM
+MezFyurx2XXjnl9WLJGxotqSvokLIEUS5vDhP+Wox2YAIKFhR9hL5RtkN9pZfeAY
+JW98WOYWT9j3dWQ4vJ1x4joF5vRf5gpr5BaB/TAUlUoukiHnio2HTkh/Rb0ETrT7
+Pvl9hYFO50xmaxwd5Vy+726ZLwOkkraDpXB1jZC9Kp7EfnMi7ekZ8LfBYmEdl87Y
+VvBghjSsRL4VdY/WTOpWM1DnOIBrUmM/0UfYW1uaV4upSPScOjFeBllY+lSpyO38
+B+L1eQSJghIULOntN5XUGnrTpMSXW8C67qaEFPfa9qECgYEA/UyAQCEXuFiEDpia
+CkZ0Ykh6xxY2sA6jMB52RvjpWxqbrVUE6yGMM2UJxNplwdZk9lmpzU9KPfDgulKX
+Uq34O94wDSXKJQYI0GsrXs3IgheXKVT/4s3t9oCc2hH0F3/o37jYOkYP571e2sdd
+yQd0aTZqG1qp7bZlRKWahKrB/FUCgYEA5sSmc7dIwxgX/kp/4VUdjgFUy/GU5xr9
+6xnioGsdnb6rBpicklri/h2E4eLLzgVbuzVQMLIAG/MpwrIxWspUR64yAaPEAVm8
+3GIg771JZHl06lYYjAqaSy1qC8v3/3T+masWwa/MNCxXB6YN9ptohAf4M3hlEL/J
+jlR8Qp5M9jkCgYAqcPgIRsM3szUlUPJ2iEmV8jkIRLOTGlDDjkcZKznGdxXgnB8/
+2pYoQmS5pDJqoSa3lFx8Ny3kZQjyj0Ylp1qxhVAd09gkDffKHDrfHrHbAmLknQZn
+FUQrCm+9pkZ07Yyyd8FbOkQN+0/6bm9LcMFTo7dxr+ZLG0Wqk+jpE8d/JQKBgCFf
+s0rs6OL+KwolsBTggGO3IZJVH9nEd5B2r+XPV/smRgmwLISmDEn/7uXULPFgqQGM
+FkrUk1t3cUStDKI6vLGZKbY+/uvLFJsyvdyuHV0gi54QUYB/UA0rRjjqiLUzMFb8
+/U+JoxiwiO2cQEy38QeXN3gKI2OmuPmSkl34Et1RAoGBAIqPAdXfyoMb6stylvC1
+N20fcwpG3aiTESteYpnXCNFW8XrMnoBWL6bK6st4eBSUbvOfjTJrSVC/KBLR6awV
+i+U582LTWq8y6WA8tdqfeZO+TUl+8DBk6k6aDbA8a3+X/D+sTsRfSavEVyEeV7EO
+wkv+4ThHJ677Dpi/P8F8iOJp
+-----END PRIVATE KEY-----`
+	CertificateResource             = "ionoscloud_certificate" //nolint:golint
+	AutoCertificateProviderResource = "ionoscloud_auto_certificate_provider"
+	AutoCertificateResource         = "ionoscloud_auto_certificate"
+	TestCertName                    = "certTest"
+	TestCMProviderName              = "CMProviderTest"
+	TestCMAutoCertificateName       = "CMAutoCertificateTest"
 )
 
 // Server type constants
@@ -404,6 +484,21 @@ const (
 	TestServerBootDeviceSelectionResource = "boot_device_selection_example"
 )
 
+const (
+	// WireGuardGatewayResource is the full name of the WireGuardGatewayResource
+	WireGuardGatewayResource = "ionoscloud_vpn_wireguard_gateway"
+	// WireGuardPeerResource is the full name of the WireGuardGatewayResource
+	WireGuardPeerResource = "ionoscloud_vpn_wireguard_peer"
+	// WireGuardGatewayTestResource is the name used for testing
+	WireGuardGatewayTestResource = "test_wireguard_gateway"
+	// WireGuardPeerTestResource is the name used for testing
+	WireGuardPeerTestResource = "test_wireguard_peer"
+	// IPSecGatewayResource is the full name of the IPSecGatewayResource
+	IPSecGatewayResource = "ionoscloud_vpn_ipsec_gateway"
+	// IPSecTunnelResource is the full name of the IPSecTunnelResource
+	IPSecTunnelResource = "ionoscloud_vpn_ipsec_tunnel"
+)
+
 var ForwardingRuleAlgorithms = []string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}
 var LBTargetProxyProtocolVersions = []string{"none", "v1", "v2", "v2ssl"}
 
@@ -412,4 +507,16 @@ var LBTargetProxyProtocolVersions = []string{"none", "v1", "v2", "v2ssl"}
 const (
 	TargetGroupLimit = 200
 	IPBlockLimit     = 1000
+)
+
+// Kafka Constants
+const (
+	KafkaClusterResource      = "ionoscloud_kafka_cluster"
+	KafkaClusterTopicResource = "ionoscloud_kafka_cluster_topic"
+)
+
+// API Gateway Constants
+const (
+	APIGatewayResource      = "ionoscloud_apigateway"
+	APIGatewayRouteResource = "ionoscloud_apigateway_route"
 )

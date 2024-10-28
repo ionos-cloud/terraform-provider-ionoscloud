@@ -66,6 +66,17 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"central_logging": {
+				Type:        schema.TypeBool,
+				Description: "Turn logging on and off for this product. Default value is 'false'.",
+				Optional:    true,
+				Default:     false,
+			},
+			"logging_format": {
+				Type:        schema.TypeString,
+				Description: "Specifies the format of the logs.",
+				Optional:    true,
+			},
 			"datacenter_id": {
 				Type:             schema.TypeString,
 				Required:         true,
@@ -117,6 +128,16 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	} else {
 		diags := diag.FromErr(fmt.Errorf("target lan must be provided for network loadbalancer"))
 		return diags
+	}
+
+	if centralLogging, centralLoggingOk := d.GetOk("central_logging"); centralLoggingOk {
+		centralLogging := centralLogging.(bool)
+		networkLoadBalancer.Properties.CentralLogging = &centralLogging
+	}
+
+	if loggingFormat, loggingFormatOk := d.GetOk("logging_format"); loggingFormatOk {
+		loggingFormat := loggingFormat.(string)
+		networkLoadBalancer.Properties.LoggingFormat = &loggingFormat
 	}
 
 	if ipsVal, ipsOk := d.GetOk("ips"); ipsOk {
@@ -194,7 +215,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	log.Printf("[INFO] Successfully retreived network load balancer %s: %+v", d.Id(), networkLoadBalancer)
+	log.Printf("[INFO] Successfully retrieved network load balancer %s: %+v", d.Id(), networkLoadBalancer)
 
 	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
 		return diag.FromErr(err)
@@ -227,6 +248,18 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		_, v := d.GetChange("target_lan")
 		vInt := int32(v.(int))
 		request.Properties.TargetLan = &vInt
+	}
+
+	if d.HasChange("central_logging") {
+		_, v := d.GetChange("central_logging")
+		vBool := v.(bool)
+		request.Properties.CentralLogging = &vBool
+	}
+
+	if d.HasChange("loggingFormat") {
+		_, v := d.GetChange("loggingFormat")
+		vStr := v.(string)
+		request.Properties.LoggingFormat = &vStr
 	}
 
 	if d.HasChange("ips") {
@@ -297,7 +330,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse)))
 		return diags
 	}
 
@@ -317,7 +350,7 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network loadbalancer %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a network loadbalancer %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -350,7 +383,7 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find network load balancer %q", networkLoadBalancerId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving network load balancer  %q: %q ", networkLoadBalancerId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving network load balancer  %q: %q ", networkLoadBalancerId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {
@@ -396,6 +429,20 @@ func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ion
 			err := d.Set("ips", *networkLoadBalancer.Properties.Ips)
 			if err != nil {
 				return fmt.Errorf("error while setting ips property for network load balancer %s: %w", d.Id(), err)
+			}
+		}
+
+		if networkLoadBalancer.Properties.CentralLogging != nil {
+			err := d.Set("central_logging", *networkLoadBalancer.Properties.CentralLogging)
+			if err != nil {
+				return fmt.Errorf("error while setting central_logging property for network load balancer %s: %w", d.Id(), err)
+			}
+		}
+
+		if networkLoadBalancer.Properties.LoggingFormat != nil {
+			err := d.Set("logging_format", *networkLoadBalancer.Properties.LoggingFormat)
+			if err != nil {
+				return fmt.Errorf("error while setting logging_format property for network load balancer %s: %w", d.Id(), err)
 			}
 		}
 

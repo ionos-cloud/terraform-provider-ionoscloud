@@ -5,14 +5,16 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
@@ -32,8 +34,8 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 				VersionConstraint: "0.11.1",
 			},
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckDBaaSMariaDBClusterDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckDBaaSMariaDBClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: mariaDBClusterConfigBasic,
@@ -115,10 +117,10 @@ func testAccCheckDBaaSMariaDBClusterDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.DBaaSMariaDBClusterResource {
 			continue
 		}
-		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID)
+		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID, rs.Primary.Attributes[clusterLocationAttribute])
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occured while checking the destruction of MariaDB cluster with ID: %v, error: %w", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking the destruction of MariaDB cluster with ID: %v, error: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("MariaDB cluster with ID: %v still exists", rs.Primary.ID)
@@ -141,9 +143,9 @@ func testAccCheckDBaaSMariaDBClusterExists(n string, cluster *mariadb.ClusterRes
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
 
-		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID)
+		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID, rs.Primary.Attributes[clusterLocationAttribute])
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching MariaDB cluster with ID: %v, error: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching MariaDB cluster with ID: %v, error: %w", rs.Primary.ID, err)
 		}
 		if *foundCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("resource not found")
@@ -157,7 +159,7 @@ func testAccCheckDBaaSMariaDBClusterExists(n string, cluster *mariadb.ClusterRes
 const mariaDBClusterConfigBasic = `
 resource ` + constant.DatacenterResource + ` ` + datacenterResourceName + ` {
   name        = "mariadb_datacenter_example"
-  location    = "de/txl"
+  location    = "gb/lhr"
   description = "Datacenter for testing MariaDB cluster"
 }
 
@@ -174,7 +176,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   ram                     = 2048
   availability_zone       = "ZONE_1"
   cpu_family              = "INTEL_SKYLAKE"
-  image_name              = "debian-10-genericcloud-amd64-20240114-1626"
+  image_name              = "rockylinux-8-GenericCloud-20230518"
   image_password          = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name                  = "example"
@@ -197,6 +199,7 @@ locals {
 resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   ` + clusterVersionAttribute + ` = "` + clusterVersionValue + `"
   ` + clusterInstancesAttribute + ` = "` + clusterInstancesValue + `"
+  ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
   ` + clusterCoresAttribute + ` = "` + clusterCoresValue + `"
   ` + clusterRamAttribute + ` = "` + clusterRamValue + `"
   ` + clusterStorageSizeAttribute + ` = "` + clusterStorageSizeValue + `"
@@ -222,18 +225,21 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 const mariaDBClusterDataSourceMatchId = mariaDBClusterConfigBasic + `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
 	id = ` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
+    ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
 }
-`
 
+`
 const mariaDBClusterDataSourceMatchName = mariaDBClusterConfigBasic + `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceByName + ` {
 	display_name	= "` + clusterDisplayNameValue + `"
+    ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
 }
 `
 
 const mariaDBBackupsDataSourceMatchClusterID = mariaDBClusterConfigBasic + `
 data ` + constant.DBaaSMariaDBBackupsDataSource + ` ` + constant.DBaasMariaDBBackupsDataSourceName + ` {
 	cluster_id = ` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
+	` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
     # Use the previously created 'time' resource to delay information retrieval for the data source
 	depends_on = [time_sleep.wait_30_seconds]
 }
@@ -241,6 +247,7 @@ data ` + constant.DBaaSMariaDBBackupsDataSource + ` ` + constant.DBaasMariaDBBac
 const mariaDBClusterDataSourceWrongName = `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceByName + ` {
   display_name = "wrong_name"
+  ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
 }
 `
 
@@ -248,6 +255,7 @@ data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestD
 const mariaDBClusterDataSourceWrongId = `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
   id = "178d6a7d-5ed4-44de-88f0-27f1182d8ae8"
+  ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
 }
 `
 
@@ -275,6 +283,7 @@ const clusterVersionAttribute = "mariadb_version"
 const (
 	clusterVersionValue             = "10.6"
 	clusterInstancesValue           = "1"
+	clusterLocationValue            = "gb/lhr"
 	clusterCoresValue               = "4"
 	clusterRamValue                 = "4"
 	clusterStorageSizeValue         = "10"

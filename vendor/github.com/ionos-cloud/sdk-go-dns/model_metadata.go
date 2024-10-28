@@ -1,9 +1,9 @@
 /*
  * IONOS Cloud - DNS API
  *
- * DNS API Specification
+ * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.2.0
+ * API version: 1.16.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -18,10 +18,18 @@ import (
 
 // Metadata Metadata of the resource.
 type Metadata struct {
+	// The creation date formatted as yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.
+	CreatedDate *IonosTime `json:"createdDate,omitempty"`
+	// Unique name of the identity that created the resource.
+	CreatedBy *string `json:"createdBy,omitempty"`
+	// The unique ID of the user who created the resource.
+	CreatedByUserId *string `json:"createdByUserId,omitempty"`
 	// The date of the last change formatted as yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.
 	LastModifiedDate *IonosTime `json:"lastModifiedDate,omitempty"`
-	// The date of creation of the zone formatted as yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.
-	CreatedDate *IonosTime `json:"createdDate,omitempty"`
+	// Unique name of the identity that created the resource.
+	LastModifiedBy *string `json:"lastModifiedBy,omitempty"`
+	// The unique ID of the user who last modified the resource.
+	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
 }
 
 // NewMetadata instantiates a new Metadata object
@@ -40,51 +48,6 @@ func NewMetadata() *Metadata {
 func NewMetadataWithDefaults() *Metadata {
 	this := Metadata{}
 	return &this
-}
-
-// GetLastModifiedDate returns the LastModifiedDate field value
-// If the value is explicit nil, the zero value for time.Time will be returned
-func (o *Metadata) GetLastModifiedDate() *time.Time {
-	if o == nil {
-		return nil
-	}
-
-	if o.LastModifiedDate == nil {
-		return nil
-	}
-	return &o.LastModifiedDate.Time
-
-}
-
-// GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetLastModifiedDateOk() (*time.Time, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	if o.LastModifiedDate == nil {
-		return nil, false
-	}
-	return &o.LastModifiedDate.Time, true
-
-}
-
-// SetLastModifiedDate sets field value
-func (o *Metadata) SetLastModifiedDate(v time.Time) {
-
-	o.LastModifiedDate = &IonosTime{v}
-
-}
-
-// HasLastModifiedDate returns a boolean if a field has been set.
-func (o *Metadata) HasLastModifiedDate() bool {
-	if o != nil && o.LastModifiedDate != nil {
-		return true
-	}
-
-	return false
 }
 
 // GetCreatedDate returns the CreatedDate field value
@@ -132,14 +95,227 @@ func (o *Metadata) HasCreatedDate() bool {
 	return false
 }
 
+// GetCreatedBy returns the CreatedBy field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Metadata) GetCreatedBy() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.CreatedBy
+
+}
+
+// GetCreatedByOk returns a tuple with the CreatedBy field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Metadata) GetCreatedByOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.CreatedBy, true
+}
+
+// SetCreatedBy sets field value
+func (o *Metadata) SetCreatedBy(v string) {
+
+	o.CreatedBy = &v
+
+}
+
+// HasCreatedBy returns a boolean if a field has been set.
+func (o *Metadata) HasCreatedBy() bool {
+	if o != nil && o.CreatedBy != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetCreatedByUserId returns the CreatedByUserId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Metadata) GetCreatedByUserId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.CreatedByUserId
+
+}
+
+// GetCreatedByUserIdOk returns a tuple with the CreatedByUserId field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Metadata) GetCreatedByUserIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.CreatedByUserId, true
+}
+
+// SetCreatedByUserId sets field value
+func (o *Metadata) SetCreatedByUserId(v string) {
+
+	o.CreatedByUserId = &v
+
+}
+
+// HasCreatedByUserId returns a boolean if a field has been set.
+func (o *Metadata) HasCreatedByUserId() bool {
+	if o != nil && o.CreatedByUserId != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetLastModifiedDate returns the LastModifiedDate field value
+// If the value is explicit nil, the zero value for time.Time will be returned
+func (o *Metadata) GetLastModifiedDate() *time.Time {
+	if o == nil {
+		return nil
+	}
+
+	if o.LastModifiedDate == nil {
+		return nil
+	}
+	return &o.LastModifiedDate.Time
+
+}
+
+// GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Metadata) GetLastModifiedDateOk() (*time.Time, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	if o.LastModifiedDate == nil {
+		return nil, false
+	}
+	return &o.LastModifiedDate.Time, true
+
+}
+
+// SetLastModifiedDate sets field value
+func (o *Metadata) SetLastModifiedDate(v time.Time) {
+
+	o.LastModifiedDate = &IonosTime{v}
+
+}
+
+// HasLastModifiedDate returns a boolean if a field has been set.
+func (o *Metadata) HasLastModifiedDate() bool {
+	if o != nil && o.LastModifiedDate != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetLastModifiedBy returns the LastModifiedBy field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Metadata) GetLastModifiedBy() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.LastModifiedBy
+
+}
+
+// GetLastModifiedByOk returns a tuple with the LastModifiedBy field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Metadata) GetLastModifiedByOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.LastModifiedBy, true
+}
+
+// SetLastModifiedBy sets field value
+func (o *Metadata) SetLastModifiedBy(v string) {
+
+	o.LastModifiedBy = &v
+
+}
+
+// HasLastModifiedBy returns a boolean if a field has been set.
+func (o *Metadata) HasLastModifiedBy() bool {
+	if o != nil && o.LastModifiedBy != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetLastModifiedByUserId returns the LastModifiedByUserId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Metadata) GetLastModifiedByUserId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.LastModifiedByUserId
+
+}
+
+// GetLastModifiedByUserIdOk returns a tuple with the LastModifiedByUserId field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Metadata) GetLastModifiedByUserIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.LastModifiedByUserId, true
+}
+
+// SetLastModifiedByUserId sets field value
+func (o *Metadata) SetLastModifiedByUserId(v string) {
+
+	o.LastModifiedByUserId = &v
+
+}
+
+// HasLastModifiedByUserId returns a boolean if a field has been set.
+func (o *Metadata) HasLastModifiedByUserId() bool {
+	if o != nil && o.LastModifiedByUserId != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o Metadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.CreatedDate != nil {
+		toSerialize["createdDate"] = o.CreatedDate
+	}
+
+	if o.CreatedBy != nil {
+		toSerialize["createdBy"] = o.CreatedBy
+	}
+
+	if o.CreatedByUserId != nil {
+		toSerialize["createdByUserId"] = o.CreatedByUserId
+	}
+
 	if o.LastModifiedDate != nil {
 		toSerialize["lastModifiedDate"] = o.LastModifiedDate
 	}
 
-	if o.CreatedDate != nil {
-		toSerialize["createdDate"] = o.CreatedDate
+	if o.LastModifiedBy != nil {
+		toSerialize["lastModifiedBy"] = o.LastModifiedBy
+	}
+
+	if o.LastModifiedByUserId != nil {
+		toSerialize["lastModifiedByUserId"] = o.LastModifiedByUserId
 	}
 
 	return json.Marshal(toSerialize)

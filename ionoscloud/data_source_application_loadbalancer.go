@@ -60,6 +60,16 @@ func dataSourceApplicationLoadBalancer() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"central_logging": {
+				Type:        schema.TypeBool,
+				Description: "Turn logging on and off for this product. Default value is 'false'.",
+				Computed:    true,
+			},
+			"logging_format": {
+				Type:        schema.TypeString,
+				Description: "Specifies the format of the logs.",
+				Computed:    true,
+			},
 			"datacenter_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -135,7 +145,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 
 			if applicationLoadBalancers.Items != nil {
 				for _, alb := range *applicationLoadBalancers.Items {
-					if alb.Properties != nil && alb.Properties.Name != nil && strings.ToLower(*alb.Properties.Name) == strings.ToLower(name) {
+					if alb.Properties != nil && alb.Properties.Name != nil && strings.EqualFold(*alb.Properties.Name, name) {
 						tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, *alb.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {

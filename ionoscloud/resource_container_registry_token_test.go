@@ -14,8 +14,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
 )
 
@@ -32,8 +32,8 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckContainerRegistryTokenDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckContainerRegistryTokenDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: getConfigurationFromTemplate(testAccCheckContainerRegistryTokenConfigBasic, templateData),
@@ -162,7 +162,7 @@ func testAccCheckContainerRegistryTokenExists(n string, registry *cr.TokenRespon
 		foundToken, _, err := client.GetToken(ctx, rs.Primary.Attributes["registry_id"], rs.Primary.ID)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching container registry token %s: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching container registry token %s: %w", rs.Primary.ID, err)
 		}
 		if *foundToken.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

@@ -8,11 +8,12 @@ import (
 	"testing"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccShareBasic(t *testing.T) {
@@ -21,8 +22,8 @@ func TestAccShareBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckShareDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckShareDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckShareConfigBasic),
@@ -108,7 +109,7 @@ func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.Te
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Share of resource  %s in group %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"])
+			return fmt.Errorf("error occurred while fetching Share of resource  %s in group %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"])
 		}
 		if *foundshare.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -160,7 +161,6 @@ resource "ionoscloud_share" "share" {
   resource_id = "${ionoscloud_datacenter.foobar.id}"
   edit_privilege = false
   share_privilege = false
-  licence_type = LiNUX
 }
 `
 

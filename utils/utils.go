@@ -13,11 +13,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/iancoleman/strcase"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/huandu/xstrings"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/crypto/ssh"
 )
@@ -86,7 +88,7 @@ func DiffSliceOneWay(a, b []string) []string {
 }
 
 func GenerateSetError(resource, field string, err error) error {
-	return fmt.Errorf("occured while setting %s property for %s, %w", field, resource, err)
+	return fmt.Errorf("occurred while setting %s property for %s, %w", field, resource, err)
 }
 
 func GenerateImmutableError(resource, field string) error {
@@ -238,20 +240,20 @@ type ResourceReadyFunc func(ctx context.Context, d *schema.ResourceData) (bool, 
 // WaitForResourceToBeReady - keeps retrying until resource is ready(true is returned), or until err is thrown, or ctx is cancelled
 func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn ResourceReadyFunc) error {
 	if d.Id() == "" {
-		return fmt.Errorf("resource with id %s not ready, still trying ", d.Id())
+		return fmt.Errorf("id not present for resource")
 	}
-	err := retry.RetryContext(ctx, DefaultTimeout, func() *retry.RetryError {
+	// might be a good idea to pass the timeout from outside
+	return retry.RetryContext(ctx, d.Timeout(schema.TimeoutCreate), func() *retry.RetryError {
 		isReady, err := fn(ctx, d)
-		if isReady == true {
+		if isReady {
 			return nil
 		}
 		if err != nil {
-			retry.NonRetryableError(err)
+			return retry.NonRetryableError(err)
 		}
 		log.Printf("[DEBUG] resource with id %s not ready, still trying ", d.Id())
 		return retry.RetryableError(fmt.Errorf("resource with id %s not ready, still trying ", d.Id()))
 	})
-	return err
 }
 
 // IsResourceDeletedFunc polls api to see if resource exists based on id
@@ -260,13 +262,13 @@ type IsResourceDeletedFunc func(ctx context.Context, d *schema.ResourceData) (bo
 // WaitForResourceToBeDeleted - keeps retrying until resource is not found(404), or until ctx is cancelled
 func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn IsResourceDeletedFunc) error {
 
-	err := retry.RetryContext(ctx, DefaultTimeout, func() *retry.RetryError {
+	err := retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
 		isDeleted, err := fn(ctx, d)
 		if isDeleted {
 			return nil
 		}
 		if err != nil {
-			retry.NonRetryableError(err)
+			return retry.NonRetryableError(err)
 		}
 		log.Printf("[DEBUG] resource with id %s still has not been deleted", d.Id())
 		return retry.RetryableError(fmt.Errorf("resource with id %s found, still trying ", d.Id()))
@@ -301,7 +303,7 @@ func DecodeInterfaceToStruct(input, output interface{}) error {
 }
 
 func IsSnakeEqualToCamelCase(a, b string) bool {
-	return strings.EqualFold(strcase.ToCamel(a), b)
+	return strings.EqualFold(xstrings.ToCamelCase(a), b)
 }
 
 func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
@@ -316,7 +318,7 @@ func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
 // checks if value['1'] of key[`id`] is present inside a slice of maps[string]interface{}
 func IsValueInSliceOfMap[T comparable](sliceOfMaps []interface{}, key string, value T) bool {
 	for _, mmap := range sliceOfMaps {
-		//do not delete if the id in the old rule is present in the new rules to be updated
+		// do not delete if the id in the old rule is present in the new rules to be updated
 		if value == mmap.(map[string]interface{})[key] {
 			return true
 		}
@@ -349,14 +351,14 @@ func DecodeStructToMap(input interface{}) (map[string]interface{}, error) {
 
 	newResult := make(map[string]interface{})
 	for k, v := range result {
-		newResult[strcase.ToSnake(k)] = v
+		newResult[xstrings.ToSnakeCase(k)] = v
 	}
 
 	return newResult, nil
 }
 
 func IsCamelCaseEqualToSnakeCase(a, b string) bool {
-	return strings.EqualFold(strcase.ToSnake(a), b)
+	return strings.EqualFold(xstrings.ToSnakeCase(a), b)
 }
 
 // ReadPublicKey Reads public key from file or directly provided and returns key string if valid
@@ -374,7 +376,7 @@ func ReadPublicKey(pathOrKey string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error for public key %s, check if path is correct or key is in correct format", pathOrKey)
 	}
-	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
+	return string(ssh.MarshalAuthorizedKey(pubKey)), nil
 }
 
 // MergeMaps merges a slice of map[string]any entries into one map.
@@ -387,4 +389,28 @@ func MergeMaps(maps ...map[string]any) map[string]any {
 		}
 	}
 	return merged
+}
+
+// ConfigCompose can be called to concatenate multiple strings to build test configurations
+func ConfigCompose(config ...string) string {
+	var str strings.Builder
+
+	for _, conf := range config {
+		str.WriteString(conf)
+	}
+
+	return str.String()
+}
+
+// NameMatches checks if the name matches the value, with partialMatch set to true, it will check if the value is a substring of the name
+func NameMatches(name, value string, partialMatch bool) bool {
+	if partialMatch {
+		return strings.Contains(name, value)
+	}
+	return strings.EqualFold(name, value)
+}
+
+// IsStateFailed checks if the provided state represents a failed state.
+func IsStateFailed(state string) bool {
+	return state == ionoscloud.Failed || state == ionoscloud.FailedSuspended || state == ionoscloud.FailedUpdating || state == ionoscloud.FailedDestroying
 }

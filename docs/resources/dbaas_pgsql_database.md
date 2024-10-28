@@ -20,7 +20,7 @@ and link it with the previously created cluster:
 resource "ionoscloud_pg_database" "example_pg_database" {
   cluster_id = ionoscloud_pg_cluster.example.id
   name = "exampledatabase"
-  owner = <user from the database>
+  owner = "exampleuser"
 }
 ```
 

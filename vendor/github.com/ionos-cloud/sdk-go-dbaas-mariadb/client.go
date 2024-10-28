@@ -50,7 +50,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.0.0"
+	Version = "1.0.1"
 )
 
 // APIClient manages communication with the IONOS DBaaS MariaDB REST API API v0.1.0

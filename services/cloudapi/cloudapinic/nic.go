@@ -6,11 +6,11 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 type Service struct {
@@ -52,7 +52,7 @@ func (fs *Service) Delete(ctx context.Context, datacenterID, serverID, ID string
 		return apiResponse, err
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutDelete); errState != nil {
-		return apiResponse, fmt.Errorf("an error occured while waiting for nic state change on delete dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
+		return apiResponse, fmt.Errorf("an error occurred while waiting for nic state change on delete dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
 	}
 	return apiResponse, nil
 }
@@ -62,13 +62,13 @@ func (fs *Service) Create(ctx context.Context, datacenterID, serverID string, ni
 	val, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, datacenterID, serverID).Nic(nic).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while creating nic for dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while creating nic for dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, err)
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutCreate); errState != nil {
 		if cloudapi.IsRequestFailed(errState) {
 			fs.D.SetId("")
 		}
-		return nil, apiResponse, fmt.Errorf("an error occured while waiting for nic state change on create dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for nic state change on create dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 	}
 	return &val, apiResponse, nil
 }
@@ -77,10 +77,10 @@ func (fs *Service) Update(ctx context.Context, datacenterID, serverID, ID string
 	updatedNic, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, datacenterID, serverID, ID).Nic(nicProperties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while updating nic for dcId: %s, server_id: %s, id %s, Response: (%w)", datacenterID, serverID, ID, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while updating nic for dcId: %s, server_id: %s, id %s, Response: (%w)", datacenterID, serverID, ID, err)
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while waiting for nic state change on update dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for nic state change on update dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
 	}
 	return &updatedNic, apiResponse, nil
 }

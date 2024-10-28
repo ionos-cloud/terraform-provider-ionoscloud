@@ -8,8 +8,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -22,8 +22,8 @@ func TestAccDataplatformClusterBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckDataplatformClusterDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckDataplatformClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckDataplatformClusterConfigBasic,
@@ -143,7 +143,7 @@ func testAccCheckDataplatformClusterExists(n string, cluster *dataplatform.Clust
 		foundCluster, _, err := client.GetClusterById(ctx, clusterId)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching Dataplatform Cluster %s: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching Dataplatform Cluster %s: %w", rs.Primary.ID, err)
 		}
 		if *foundCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

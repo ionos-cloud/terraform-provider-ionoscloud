@@ -12,8 +12,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 const resourceNameTargetGroup = constant.TargetGroupResource + "." + constant.TargetGroupTestResource
@@ -26,8 +26,8 @@ func TestAccTargetGroupBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckTargetGroupDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckTargetGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckTargetGroupConfigBasic,
@@ -36,6 +36,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", constant.TargetGroupTestResource),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "algorithm", "ROUND_ROBIN"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol", "HTTP"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol_version", "HTTP1"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.ip", "22.231.2.2"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.port", "8080"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.weight", "1"),
@@ -48,6 +49,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "algorithm", "ROUND_ROBIN"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol", "HTTP"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol_version", "HTTP2"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.ip", "22.231.2.2"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.port", "8080"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.weight", "1"),
@@ -75,6 +77,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 				Config: testAccDataSourceTargetGroupMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "name", resourceNameTargetGroup, "name"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "protocol_version", resourceNameTargetGroup, "protocol_version"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "algorithm", resourceNameTargetGroup, "algorithm"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.ip", resourceNameTargetGroup, "targets.0.ip"),
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.port", resourceNameTargetGroup, "targets.0.port"),
@@ -168,6 +171,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "algorithm", "RANDOM"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol", "HTTP"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "protocol_version", "HTTP1"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.ip", "22.232.2.3"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.port", "8081"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.weight", "124"),
@@ -209,7 +213,7 @@ func testAccCheckTargetGroupDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured at checking deletion of forwarding rule %s %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred at checking deletion of forwarding rule %s %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("network loadbalancer forwarding rule still exists %s %s", rs.Primary.ID, err)
@@ -242,7 +246,7 @@ func testAccCheckTargetGroupExists(n string, targetGroup *ionoscloud.TargetGroup
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching TargetGroup: %s, %w", rs.Primary.ID, err)
+			return fmt.Errorf("error occurred while fetching TargetGroup: %s, %w", rs.Primary.ID, err)
 		}
 		if *foundTargetGroup.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -259,6 +263,7 @@ resource ` + constant.TargetGroupResource + ` ` + constant.TargetGroupTestResour
  name = "` + constant.TargetGroupTestResource + `"
  algorithm = "ROUND_ROBIN"
  protocol = "HTTP"
+ protocol_version = "HTTP1"
  targets {
    ip = "22.231.2.2"
    port = "8080"
@@ -272,6 +277,7 @@ resource ` + constant.TargetGroupResource + ` ` + constant.TargetGroupTestResour
  name = "` + constant.UpdatedResources + `"
  algorithm = "ROUND_ROBIN"
  protocol = "HTTP"
+ protocol_version = "HTTP2"
  targets {
    ip = "22.231.2.2"
    port = "8080"
@@ -309,6 +315,7 @@ resource ` + constant.TargetGroupResource + ` ` + constant.TargetGroupTestResour
  name = "` + constant.UpdatedResources + `"
  algorithm = "RANDOM"
  protocol = "HTTP"
+ protocol_version = "HTTP1"
  targets {
    ip = "22.232.2.3"
    port = "8081"

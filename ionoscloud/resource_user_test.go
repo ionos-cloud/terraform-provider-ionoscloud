@@ -11,8 +11,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -24,9 +24,9 @@ func TestAccUserBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckUserDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckUserDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckUserConfigBasic,
@@ -125,6 +125,12 @@ func TestAccUserBasic(t *testing.T) {
 						"name": "group1",
 					})),
 			},
+			{
+				Config:             testAccCheckNewUserGroup,
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccRemoveUserFromGroup(constant.GroupResource+".group1", constant.UserResource+"."+constant.NewUserResource)),
+			},
 		},
 	})
 }
@@ -179,7 +185,7 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching User: %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("error occurred while fetching User: %s %s", rs.Primary.ID, err)
 		}
 		if *foundUser.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -188,6 +194,35 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 		user = &foundUser
 
 		return nil
+	}
+}
+
+func testAccRemoveUserFromGroup(group, user string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		gr, ok := s.RootModule().Resources[group]
+		if !ok {
+			return fmt.Errorf("testAccRemoveUserFromGroup: group not found: %s", group)
+		}
+		if gr.Primary.ID == "" {
+			return fmt.Errorf("missing group id")
+		}
+
+		u, ok := s.RootModule().Resources[user]
+		if !ok {
+			return fmt.Errorf("testAccRemoveUserFromGroup: user not found: %s", user)
+		}
+		if u.Primary.ID == "" {
+			return fmt.Errorf("missing user id")
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		defer cancel()
+
+		apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, gr.Primary.ID, u.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
+
+		return err
 	}
 }
 

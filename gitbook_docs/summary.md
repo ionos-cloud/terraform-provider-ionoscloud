@@ -77,13 +77,13 @@
 * User Management
   * Resources
     * [Group](../docs/resources/group.md)
-    * [S3 Key](../docs/resources/s3_key.md)
+    * [Object Storage Key](../docs/resources/s3_key.md)
     * [Share](../docs/resources/share.md)
     * [User](../docs/resources/user.md)
   * Data Sources
     * [Group](../docs/data-sources/group.md)
     * [Resource](../docs/data-sources/resource.md)
-    * [S3 Key](../docs/data-sources/s3_key.md)
+    * [Key](../docs/data-sources/s3_key.md)
     * [Share](../docs/data-sources/share.md)
     * [User](../docs/data-sources/user.md)
 
@@ -116,6 +116,13 @@
     * [DBaaS MongoDB Cluster](../docs/data-sources/dbaas_mariadb_cluster.md)
     * [DBaaS MongoDB Backups](../docs/data-sources/dbaas_mariadb_backups.md)
 
+* Database as a Service - InMemory-DB
+  * Resources
+    * [DBaaS InMemoryDB ReplicaSet](../docs/resources/dbaas_inmemorydb_replica_set.md)
+  * Data sources
+    * [DBaaS InMemoryDB ReplicaSet](../docs/data-sources/dbaas_inmemorydb_replica_set.md)
+    * [DBaaS InMemoryDB Snapshot](../docs/data-sources/dbaas_inmemorydb_snapshot.md)
+
 * Application Load Balancer
   * Resources
     * [Application Load Balancer](../docs/resources/application_loadbalancer.md)
@@ -145,6 +152,15 @@
     * [Data Platform Node Pools](../docs/data-sources/dataplatform_node_pools.md)
     * [Data Platform Versions](../docs/data-sources/dataplatform_versions.md)
 
+* Certificate Manager
+  * Resources
+    * [Certificate](../docs/resources/certificate_manager_certificate.md)
+    * [Provider](../docs/resources/certificate_manager_provider.md)
+    * [Auto-certificate](../docs/resources/certificate_manager_auto_certificate.md)
+  * Data Sources
+    * [Certificate](../docs/data-sources/certificate_manager_certificate.md)
+    * [Provider](../docs/data-sources/certificate_manager_provider.md)
+    * [Auto-certificate](../docs/data-sources/certificate_manager_auto_certificate.md)
 
 * Cloud DNS
   * Resources
@@ -159,3 +175,64 @@
     * [Logging Pipeline](../docs/resources/logging_pipeline.md)
   * Data Sources
     * [Logging Pipeline](../docs/data-sources/logging_pipeline.md)
+
+* Network File Storage
+  * Resources
+    * [Network File Storage Cluster](../docs/resources/nfs_cluster.md)
+    * [Network File Storage Share](../docs/resources/nfs_share.md)
+  * Data Sources
+    * [Network File Storage Cluster](../docs/data-sources/nfs_cluster.md)
+    * [Network File Storage Share](../docs/data-sources/nfs_share.md)
+
+* Object Storage
+  * Resources
+    * [Bucket](../docs/resources/s3_bucket.md)
+    * [Bucket Policy](../docs/resources/s3_bucket_policy.md)
+    * [Object](../docs/resources/s3_object.md)
+    * [Bucket Public Access Block](../docs/resources/s3_bucket_public_access_block)
+    * [Bucket Website Configuration](../docs/resources/s3_bucket_website_configuration.md)
+    * [Bucket CORS Configuration](../docs/resources/s3_bucket_cors_configuration.md)
+    * [Bucket Lifecycle Configuration](../docs/resources/s3_bucket_lifecycle_configuration.md)
+    * [Bucket Object Lock Configuration](../docs/resources/s3_bucket_object_lock_configuration.md)
+    * [Bucket Versioning Configuration](../docs/resources/s3_bucket_versioning.md)
+    * [Bucket Server Side Encryption Configuration](../docs/resources/s3_bucket_server_side_encryption_configuration.md)
+    * [Object Copy](../docs/resources/s3_object_copy.md)
+  * Data Sources
+    * [Bucket](../docs/data-sources/s3_bucket.md)
+    * [Bucket Policy](../docs/data-sources/s3_bucket_policy.md)
+    * [Object](../docs/data-sources/s3_object.md)
+    * [Objects](../docs/data-sources/s3_objects.md)
+  
+* CDN
+  * Resources
+    * [CDN Distribution](../docs/resources/cdn_distribution.md)
+  * Data Sources
+    * [CDN Distribution](../docs/data-sources/cdn_distribution.md)
+
+* API Gateway
+  * Resources
+    * [API Gateway](../docs/resources/apigateway.md)
+    * [API Gateway Route](../docs/resources/apigateway_route.md)
+  * Data Sources
+    * [API Gateway](../docs/data-sources/apigateway.md)
+    * [API Gateway Route](../docs/data-sources/apigateway_route.md)
+
+* VPN
+  * Resources
+    * [VPN IPSEC Gateway](../docs/resources/vpn_ipsec_gateway.md)
+    * [VPN IPSEC Tunnel](../docs/resources/vpn_ipsec_tunnel.md)
+    * [VPN Wireguard Gateway](../docs/resources/vpn_wireguard_gateway.md)
+    * [VPN Wireguard Peer](../docs/resources/vpn_wireguard_peer.md)
+  * Data Sources
+    * [VPN IPSEC Gateway](../docs/data-sources/vpn_ipsec_gateway.md)
+    * [VPN IPSEC Tunnel](../docs/data-sources/vpn_ipsec_tunnel.md)
+    * [VPN Wireguard Gateway](../docs/data-sources/vpn_wireguard_gateway.md)
+    * [VPN Wireguard Peer](../docs/data-sources/vpn_wireguard_peer.md)
+
+* Event Streams for Apache Kafka
+  * Resources
+    * [Kafka Cluster](../docs/resources/kafka_cluster.md)
+    * [Kafka Topic](../docs/resources/kafka_topic.md)
+  * Data Sources
+    * [Kafka Cluster](../docs/data-sources/kafka_cluster.md)
+    * [Kafka Topic](../docs/data-sources/kafka_topic.md)

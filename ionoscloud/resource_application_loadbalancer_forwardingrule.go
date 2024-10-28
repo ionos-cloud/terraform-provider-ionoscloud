@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -270,7 +271,7 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 		}
 	}
 
-	log.Printf("[INFO] Successfully retreived application load balancer forwarding rule %s: %+v", d.Id(), applicationLoadBalancerForwardingRule)
+	log.Printf("[INFO] Successfully retrieved application load balancer forwarding rule %s: %+v", d.Id(), applicationLoadBalancerForwardingRule)
 
 	if err := setApplicationLoadBalancerForwardingRuleData(d, &applicationLoadBalancerForwardingRule); err != nil {
 		return diag.FromErr(err)
@@ -342,7 +343,7 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a application loadbalancer forwarding rule ID %s %w",
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a application loadbalancer forwarding rule ID %s %w",
 			d.Id(), err))
 		return diags
 	}
@@ -364,7 +365,7 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a application loadbalancer forwarding rule %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a application loadbalancer forwarding rule %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -398,7 +399,7 @@ func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find alb forwarding rule %q", ruleId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the alb forwarding rule %q, %w", ruleId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving the alb forwarding rule %q, %w", ruleId, err)
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
@@ -609,7 +610,7 @@ func getAlbHttpRulesData(d *schema.ResourceData) (*[]ionoscloud.ApplicationLoadB
 					if conditionVal, conditionOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.condition", httpRuleIndex, conditionIndex)); conditionOk {
 						conditionVal := conditionVal.(string)
 						condition.Condition = &conditionVal
-					} else if strings.ToUpper(typeVal) != "SOURCE_IP" {
+					} else if !strings.EqualFold(typeVal, "SOURCE_IP") {
 						return nil, fmt.Errorf("condition must be provided for application loadbalancer forwarding rule http rule condition")
 					}
 

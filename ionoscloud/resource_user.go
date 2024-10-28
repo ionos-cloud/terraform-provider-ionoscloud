@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
@@ -162,19 +163,23 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 
-	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
+	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a User ID %s %w", d.Id(), err))
 		return diags
 	}
 
-	if err := setUserData(d, &user); err != nil {
+	if err = setUserData(d, &user); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err = d.Set("group_ids", getUserGroups(&user)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -187,7 +192,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a User ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -271,7 +276,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	_, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while patching a user ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -306,18 +311,23 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 
 	userId := d.Id()
 
-	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Execute()
+	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the user %q", userId)
+			return nil, fmt.Errorf("user does not exist%q", userId)
 		}
-		return nil, fmt.Errorf("user does not exist%q", userId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the user %q, error:%w", userId, err)
+
 	}
 
-	if err := setUserData(d, &user); err != nil {
+	if err = setUserData(d, &user); err != nil {
+		return nil, err
+	}
+
+	if err = d.Set("group_ids", getUserGroups(&user)); err != nil {
 		return nil, err
 	}
 
@@ -377,4 +387,28 @@ func setUserData(d *schema.ResourceData, user *ionoscloud.User) error {
 	}
 
 	return nil
+}
+
+func getUserGroups(user *ionoscloud.User) []string {
+	var groupIDs []string
+	if user.Entities == nil {
+		return groupIDs
+	}
+
+	if !user.Entities.HasGroups() {
+		return groupIDs
+	}
+
+	if user.Entities.Groups.Items == nil {
+		return groupIDs
+	}
+
+	groups := *user.Entities.Groups.Items
+	for _, g := range groups {
+		if g.Id != nil {
+			groupIDs = append(groupIDs, *g.Id)
+		}
+	}
+
+	return groupIDs
 }

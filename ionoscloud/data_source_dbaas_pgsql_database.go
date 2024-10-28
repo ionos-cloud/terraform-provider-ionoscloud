@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
@@ -47,7 +48,7 @@ func dataSourceDbaasPgSqlReadDatabase(ctx context.Context, d *schema.ResourceDat
 		if apiResponse.HttpNotFound() {
 			return diag.FromErr(fmt.Errorf("no PgSql database found with the specified name: %s and cluster ID: %s", name, clusterId))
 		}
-		return diag.FromErr(fmt.Errorf("an error occured while fetching the PgSql database: %s, cluster ID: %s, err: %w", name, clusterId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching the PgSql database: %s, cluster ID: %s, err: %w", name, clusterId, err))
 	}
 	if err := dbaas.SetDatabasePgSqlData(d, &database); err != nil {
 		return diag.FromErr(err)

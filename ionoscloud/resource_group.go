@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
@@ -149,12 +150,12 @@ func resourceGroup() *schema.Resource {
 		//		Upgrade: resourceGroupUpgradeV0,
 		//		Version: 0,
 		//	},
-		//},
+		// },
 	}
 }
 
 //
-//func resourceGroup0() *schema.Resource {
+// func resourceGroup0() *schema.Resource {
 //	return &schema.Resource{
 //		Schema: map[string]*schema.Schema{
 //			"user_id": {
@@ -221,7 +222,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a group: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a group: %w", err))
 		return diags
 	}
 
@@ -236,7 +237,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(errState)
 	}
 
-	//add users to group if any is provided
+	// add users to group if any is provided
 	if userVal, userOK := d.GetOk("user_id"); userOK {
 		userID := userVal.(string)
 		log.Printf("[INFO] Adding user %+v to group...", userID)
@@ -271,7 +272,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Group ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a Group ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -324,7 +325,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	_, apiResponse, err := client.UserManagementApi.UmGroupsPut(ctx, d.Id()).Group(groupReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a group ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while patching a group ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -413,9 +414,10 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the group %q", grpId)
+			return nil, fmt.Errorf("group does not exist%q", grpId)
 		}
-		return nil, fmt.Errorf("group does not exist%q", grpId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the group %q, error:%w", grpId, err)
+
 	}
 
 	log.Printf("[INFO] group found: %+v", group)
@@ -535,7 +537,7 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 		users, apiResponse, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occured while UmGroupsUsersGet %s %w", d.Id(), err)
+			return fmt.Errorf("an error occurred while UmGroupsUsersGet %s %w", d.Id(), err)
 		}
 
 		usersEntries := make([]interface{}, 0)
@@ -593,7 +595,7 @@ func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.Resou
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return fmt.Errorf("an error occured while adding %s user to group ID %s %w", userId, groupId, err)
+		return fmt.Errorf("an error occurred while adding %s user to group ID %s %w", userId, groupId, err)
 	}
 
 	log.Printf("[INFO] Added user %s to group %s", userId, groupId)
@@ -612,7 +614,7 @@ func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return fmt.Errorf("an error occured while deleting %s user from group ID %s %w", userId, groupId, err)
+		return fmt.Errorf("an error occurred while deleting %s user from group ID %s %w", userId, groupId, err)
 	}
 
 	log.Printf("[INFO] Deleted user %s from group %s", userId, groupId)

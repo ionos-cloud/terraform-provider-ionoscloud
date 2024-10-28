@@ -13,8 +13,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 const networkLoadBalancerResource = constant.NetworkLoadBalancerResource + "." + constant.NetworkLoadBalancerTestResource
@@ -29,8 +29,8 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckNetworkLoadBalancerDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckNetworkLoadBalancerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckNetworkLoadBalancerConfigBasicWithoutPrivateIp,
@@ -54,6 +54,8 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "name", constant.NetworkLoadBalancerTestResource),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "ips.0", "10.12.118.224"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.0", "10.13.72.225/24"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "central_logging", true),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", constant.LanResource+".nlb_lan_1", "id"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", constant.LanResource+".nlb_lan_2", "id"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.name", "test_flowlog"),
@@ -70,6 +72,8 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "ips", dataSourceNetworkLoadBalancerId, "ips"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", dataSourceNetworkLoadBalancerId, "target_lan"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "lb_private_ips", dataSourceNetworkLoadBalancerId, "lb_private_ips"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "central_logging", true, "central_logging"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`, "logging_format"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.name", networkLoadBalancerResource, "flowlog.0.name"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.action", networkLoadBalancerResource, "flowlog.0.action"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.direction", networkLoadBalancerResource, "flowlog.0.direction"),
@@ -98,6 +102,8 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "ips.1", "10.12.119.224"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.0", "10.13.72.225/24"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.1", "10.13.73.225/24"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "central_logging", false),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", constant.LanResource+".nlb_lan_3", "id"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", constant.LanResource+".nlb_lan_4", "id"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.name", "test_flowlog_updated"),
@@ -129,7 +135,7 @@ func testAccCheckNetworkLoadBalancerDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured while checking deletion of network loadbalancer %s %s", rs.Primary.ID, responseBody(apiResponse))
+				return fmt.Errorf("an error occurred while checking deletion of network loadbalancer %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
 			return fmt.Errorf("network loadbalancer still exists %s %w", rs.Primary.ID, err)
@@ -162,7 +168,7 @@ func testAccCheckNetworkLoadBalancerExists(n string, networkLoadBalancer *ionosc
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching NetworkLoadBalancer: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching NetworkLoadBalancer: %s", rs.Primary.ID)
 		}
 		if *foundNetworkLoadBalancer.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -236,6 +242,8 @@ resource ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBa
   target_lan    = ` + constant.LanResource + `.nlb_lan_2.id
   ips           = ["10.12.118.224"]
   lb_private_ips = ["10.13.72.225/24"]
+  central_logging   = true
+  logging_format	= "%%{+Q}o %%{-Q}ci - - [%trg] %r %ST %B \"\" \"\" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
   flowlog {
     name = "test_flowlog"
     action = "ALL"
@@ -283,6 +291,8 @@ resource ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBa
   target_lan    = ` + constant.LanResource + `.nlb_lan_4.id
   ips           = ["10.12.118.224", "10.12.119.224"]
   lb_private_ips = ["10.13.72.225/24", "10.13.73.225/24"]
+  central_logging   = false
+  logging_format	= "%%{+Q}o %%{-Q}ci - - [%trg] %r %ST %B \"\" \"\" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
   flowlog {
     name = "test_flowlog_updated"
     action = "REJECTED"

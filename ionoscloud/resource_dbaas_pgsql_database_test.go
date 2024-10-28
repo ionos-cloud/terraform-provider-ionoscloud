@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -23,9 +23,9 @@ func TestAccPgSqlDatabase(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      pgSqlDatabaseDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             pgSqlDatabaseDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: PgSqlDatabaseConfig,
@@ -83,7 +83,7 @@ func pgSqlDatabaseExistsCheck(path string, database *pgsql.DatabaseResource) res
 		foundDatabase, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)
 		apiResponse.LogInfo()
 		if err != nil {
-			return fmt.Errorf("error occured while fetching the PgSql database: %s, cluster ID: %s, error: %w", name, clusterId, err)
+			return fmt.Errorf("error occurred while fetching the PgSql database: %s, cluster ID: %s, error: %w", name, clusterId, err)
 		}
 		database = &foundDatabase
 		return nil
@@ -105,7 +105,7 @@ func pgSqlDatabaseDestroyCheck(s *terraform.State) error {
 		apiResponse.LogInfo()
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occured while checking the deletion of PgSql database: %s, cluster ID: %s, error: %w", name, clusterId, err)
+				return fmt.Errorf("an error occurred while checking the deletion of PgSql database: %s, cluster ID: %s, error: %w", name, clusterId, err)
 			}
 		} else {
 			return fmt.Errorf("PgSql database %s still exists in the cluster with ID: %s", name, clusterId)

@@ -12,8 +12,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccBackupUnitBasic(t *testing.T) {
@@ -23,9 +23,9 @@ func TestAccBackupUnitBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckBackupUnitDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckBackupUnitDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckBackupUnitConfigBasic,
@@ -93,7 +93,7 @@ func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		_, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+		_, apiResponse, err := BackupUnitFindByID(ctx, rs.Primary.ID, client)
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -129,11 +129,11 @@ func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 			defer cancel()
 		}
 
-		foundBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+		foundBackupUnit, apiResponse, err := BackupUnitFindByID(ctx, rs.Primary.ID, client)
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching backup unit: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching backup unit: %s", rs.Primary.ID)
 		}
 		if *foundBackupUnit.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

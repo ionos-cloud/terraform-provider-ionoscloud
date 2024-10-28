@@ -7,12 +7,14 @@ import (
 	"time"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -369,7 +371,7 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
+	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
 
 	if err := dbaas.SetMongoDBClusterData(d, cluster); err != nil {
 		return diag.FromErr(err)
@@ -394,7 +396,7 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("The check for cluster deletion failed with the following error: %w", err))
+		return diag.FromErr(fmt.Errorf("the check for cluster deletion failed with the following error: %w", err))
 	}
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
 	time.Sleep(constant.SleepInterval * 3)
@@ -414,7 +416,7 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil, fmt.Errorf("dbaas cluster does not exist %q", clusterId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of dbaas cluster %q", clusterId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err)
 	}
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)

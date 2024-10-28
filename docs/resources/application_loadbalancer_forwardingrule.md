@@ -1,13 +1,13 @@
 ---
 subcategory: "Application Load Balancer"
 layout: "ionoscloud"
-page_title: "IonosCloud: application_loadbalancer_forwarding_rule"
-sidebar_current: "docs-resource-application_loadbalancer_forwarding_rule"
+page_title: "IonosCloud: application_loadbalancer_forwardingrule"
+sidebar_current: "docs-resource-application_loadbalancer_forwardingrule"
 description: |-
   Creates and manages IonosCloud Application Load Balancer Forwarding Rule.
 ---
 
-# ionoscloud_application_loadbalancer_forwarding_rule
+# ionoscloud_application_loadbalancer_forwardingrule
 
 Manages an **Application Load Balancer Forwarding Rule** on IonosCloud.
 
@@ -102,7 +102,7 @@ The following arguments are supported:
 - `listener_ip` - (Required)[string] Listening (inbound) IP.
 - `listener_port` - (Required)[int] Listening (inbound) port number; valid range is 1 to 65535.
 - `client_timeout` - (Optional)[int] The maximum time in milliseconds to wait for the client to acknowledge or send data; default is 50,000 (50 seconds).
-- `server_certificates` - (Optional)[list] Array of certificate ids. You can create certificates with the [certificate](certificate.md) resource.
+- `server_certificates` - (Optional)[list] Array of certificate ids. You can create certificates with the [certificate](certificate_manager_certificate.md) resource.
 - `http_rules` - (Optional)[list] Array of items in that collection
     - `name` - (Required)[string] The unique name of the Application Load Balancer HTTP rule.
     - `type` - (Required)[string] Type of the Http Rule.
@@ -124,5 +124,5 @@ The following arguments are supported:
 Resource Application Load Balancer Forwarding Rule can be imported using the `resource id`, `alb id` and `datacenter id`, e.g.
 
 ```shell
-terraform import ionoscloud_application_loadbalancer_forwarding_rule.myAlbRule {datacenter uuid}/{applicationLoadBalancer uuid}/{applicationLoadBalancerForwardingRule uuid}
+terraform import ionoscloud_application_loadbalancer_forwardingrule.my_application_loadbalancer_forwardingrule {datacenter uuid}/{application_loadbalancer uuid}/{application_loadbalancer_forwardingrule uuid}
 ```

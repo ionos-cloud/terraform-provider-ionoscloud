@@ -8,12 +8,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceCubeServer() *schema.Resource {
@@ -36,6 +36,10 @@ func dataSourceCubeServer() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"hostname": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"availability_zone": {
 				Type:     schema.TypeString,
@@ -203,6 +207,11 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 
 		if server.Properties.Name != nil {
 			if err := d.Set("name", *server.Properties.Name); err != nil {
+				return err
+			}
+		}
+		if server.Properties.Hostname != nil {
+			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
 				return err
 			}
 		}

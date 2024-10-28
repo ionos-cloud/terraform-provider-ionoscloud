@@ -77,7 +77,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   type = "ENTERPRISE"
   volume {
@@ -132,7 +132,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -185,7 +185,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -238,7 +238,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   ssh_key_path = ["` + sshKey + `"]
@@ -301,11 +301,12 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -350,7 +351,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -363,7 +364,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     availability_zone = "ZONE_1"
   }
 }
-` + ServerImagePassword //nolint:unused
+` + ServerImagePassword
 
 // Solves  #372 crash when ips field in nic resource is a list with an empty string
 const testAccCheckServerConfigEmptyNicIps = `
@@ -387,7 +388,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -438,11 +439,12 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "updated"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -510,7 +512,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -578,7 +580,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -639,7 +641,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -703,10 +705,10 @@ resource ` + constant.RandomPassword + ` "server_image_password_updated" {
 // Cube Server Constants
 const testAccCheckCubeServerConfigBasic = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-    name = "CUBES XS"
+    name = "Basic Cube XS"
     cores = 1
-    ram   = 1024
-    storage_size = 30
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
@@ -725,6 +727,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
   image_name ="ubuntu:latest"
@@ -758,10 +761,10 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
 
 const testAccCheckCubeServerEnableIpv6 = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -827,10 +830,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 `
 const testAccCheckCubeServerUpdateIpv6 = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -896,10 +899,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 `
 const testAccCheckCubeServerSuspend = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -958,10 +961,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 `
 const testAccCheckCubeServerResume = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -1021,10 +1024,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 
 const testAccCheckCubeServerUpdateWhenSuspended = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -1097,7 +1100,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = random_password.image_password.result
   type = "ENTERPRISE"
@@ -1143,11 +1146,12 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -1178,11 +1182,12 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -1422,6 +1427,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
@@ -1574,6 +1580,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
@@ -1606,6 +1613,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "updated"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
@@ -1640,6 +1648,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   vm_state = "` + constant.VMStateStop + `"
   cores = 1
@@ -1690,6 +1699,56 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     availability_zone = "ZONE_1"
   }
 }`
+const testAccCheckCDNDistributionConfigOnlyRequired = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
+	domain         = "unique.test.example.com"
+	routing_rules {
+		scheme = "http"
+		prefix = "/api"
+		upstream {
+			host             = "server.example.com"
+			caching          = true
+			waf              = true
+			sni_mode		 = "distribution"
+			rate_limit_class = "R100"
+		}
+	}
+}`
+
+const testAccCheckCDNDistributionConfigBasic = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
+	domain         = "unique.test.example.com"
+	routing_rules {
+		scheme = "http"
+		prefix = "/api"
+		upstream {
+			host             = "server.example.com"
+			caching          = true
+			waf              = true
+			sni_mode		 = "distribution"
+			rate_limit_class = "R100"
+			geo_restrictions {
+				allow_list = [ "RO"]
+			}
+		}
+	}
+}`
+
+const testAccCheckCDNDistributionConfigBasicImport = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
+	domain         = "ionossdk.terra.example.import"
+	routing_rules {
+		scheme = "http"
+		prefix = "/api"
+		upstream {
+			host             = "server.example.com"
+			caching          = true
+			waf              = true
+			rate_limit_class = "R100"
+			sni_mode		 = "distribution"
+			geo_restrictions {
+				allow_list = [ "RO"]
+			}
+		}
+	}
+}`
 
 const resourceRandomUUID = `
 resource "random_uuid" "uuid" {
@@ -1705,8 +1764,8 @@ resource "random_string" "simple_string" {
 
 // K8s values
 const (
-	K8sVersion                  = "1.26.4"
-	UpgradedK8sVersion          = "1.26.6"
+	K8sVersion                  = "1.29.6"
+	UpgradedK8sVersion          = "1.29.7"
 	K8sBucket                   = "test_k8s_terraform_v7"
 	K8sPrivateClusterNodeSubnet = "192.168.0.0/16"
 )
@@ -1763,7 +1822,8 @@ resource ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestResourceNa
 
 // Logging Pipeline constants
 // Attributes
-const pipelineNameAttribute = "name"
+const nameAttribute = "name"
+const pipelineGrafanaAddressAttribute = "grafana_address" // nolint:unused
 const pipelineLogAttribute = "log"
 const pipelineLogSourceAttribute = "source"
 const pipelineLogTagAttribute = "tag"
@@ -1807,11 +1867,12 @@ const pipelineLogUpdated = pipelineLogAttribute + `{
 	` + pipelineLogDestinationUpdated + `
 }`
 
-// Standard configuration
+// LoggingPipelineConfig Standard configuration
 const LoggingPipelineConfig = `
 resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestResourceName + ` {
-	` + pipelineNameAttribute + ` = "` + pipelineNameValue + `"
+	` + nameAttribute + ` = "` + pipelineNameValue + `"
 	` + pipelineLog + `
+	location = "es/vit"
 }
 `
 
@@ -1821,6 +1882,7 @@ resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTe
 const clusterIdAttribute = "cluster_id"
 const clusterInstancesAttribute = "instances"
 const clusterCoresAttribute = "cores"
+const clusterLocationAttribute = "location"
 const clusterRamAttribute = "ram"
 const clusterStorageSizeAttribute = "storage_size"
 const clusterConnectionsAttribute = "connections"
@@ -1837,4 +1899,37 @@ const clusterCredentialsPasswordAttribute = "password"
 
 // Values
 const clusterMaintenanceWindowDayOfTheWeekValue = "Sunday"
+const clusterMaintenanceWindowDayOfTheWeekUpdateValue = "Monday"
 const clusterMaintenanceWindowTimeValue = "09:00:00"
+const clusterMaintenanceWindowTimeUpdateValue = "10:00:00"
+
+const wireguardGatewayConfig = `
+resource "ionoscloud_datacenter" "datacenter_example" {
+  name = "datacenter_example"
+  location = "de/fra"
+}
+resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
+  location = "de/fra"
+  size = 1
+  name = "` + constant.IpBlockTestResource + `"
+}
+
+resource "ionoscloud_lan" "lan_example" {
+  name = "lan_example"
+  datacenter_id = ionoscloud_datacenter.datacenter_example.id
+}
+
+resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGatewayTestResource + `{
+  name = "` + constant.WireGuardGatewayTestResource + `"
+  location = "de/fra"
+  description = "description"
+  private_key = "private"
+
+  gateway_ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
+  interface_ipv4_cidr =  "192.168.1.100/24"
+  connections   {
+    datacenter_id   =  ionoscloud_datacenter.datacenter_example.id
+    lan_id          =  ionoscloud_lan.lan_example.id
+    ipv4_cidr       =  "192.168.1.108/24"
+  }
+}` // nolint:unused

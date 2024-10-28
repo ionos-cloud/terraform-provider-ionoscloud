@@ -26,7 +26,7 @@ resource "ionoscloud_lan"  "lan_example" {
   name                    = "example"
 }
 
-resource ionoscloud_mongo_cluster "example_mongo_cluster" {
+resource "ionoscloud_mongo_cluster" "example_mongo_cluster" {
   maintenance_window {
     day_of_the_week  = "Sunday"
   time             = "09:00:00"
@@ -107,7 +107,7 @@ resource "random_password" "cluster_password" {
 * `connections` - (Required)[List] Details about the network connection for your cluster. Updates to the value of the field force the cluster to be re-created.
     * `datacenter_id` - (Required)[string] The datacenter to connect your cluster to.
     * `lan_id` - (Required)[string] The LAN to connect your cluster to.
-    * `cidr_list` - (Required)[List] The list of IPs and subnet for your cluster. Note the following unavailable IP ranges:10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24. example: [192.168.1.100/24, 192.168.1.101/24]. See [Private IPs](https://www.ionos.com/help/server-cloud-infrastructure/private-network/private-ip-address-ranges/) and [Cluster Setup - Preparing the network](https://docs.ionos.com/reference/product-information/api-automation-guides/database-as-a-service/create-a-database#preparing-the-network).
+    * `cidr_list` - (Required)[List] The list of IPs and subnet for your cluster. Note the following unavailable IP ranges:10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24. example: [192.168.1.100/24, 192.168.1.101/24]. See [Private IPs](https://www.ionos.com/help/server-cloud-infrastructure/private-network/private-ip-address-ranges/) and [Cluster Setup - Preparing the network](https://docs.ionos.com/cloud/databases/mongodb/api-howtos/create-a-cluster#preparing-the-network).
 * `maintenance_window` - (Optional)(Computed)[string] A weekly 4 hour-long window, during which maintenance might occur.  Updates to the value of the field force the cluster to be re-created.
     * `time` - (Required)[string]
     * `day_of_the_week` - (Required)[string]

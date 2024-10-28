@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -62,6 +63,26 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD", "SSD Premium", "SSD Standard"}, true)),
 			},
+			"connection_pooler": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Description: "Configuration options for the connection pooler",
+				Optional:    true,
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+						"pool_mode": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Represents different modes of connection pooling for the connection pooler",
+						},
+					},
+				},
+			},
 			"connections": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -98,7 +119,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 			},
 			"backup_location": {
 				Type:             schema.TypeString,
-				Description:      "The S3 location where the backups will be stored.",
+				Description:      "The Object Storage location where the backups will be stored.",
 				Optional:         true,
 				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"de", "eu-south-2", "eu-central-2"}, true)),
@@ -225,7 +246,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 	dbaasClusterResponse, _, err := client.CreateCluster(ctx, *dbaasCluster)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a DBaaS psql cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a DBaaS psql cluster: %w", err))
 		return diags
 	}
 
@@ -254,7 +275,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
+	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
 
 	if err := dbaasService.SetPgSqlClusterData(d, cluster); err != nil {
 		return diag.FromErr(err)
@@ -267,7 +288,6 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 	client := meta.(services.SdkBundle).PsqlClient
 
 	cluster, diags := dbaasService.GetPgSqlClusterDataUpdate(d)
-
 	if diags != nil {
 		return diags
 	}
@@ -275,7 +295,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 	dbaasClusterResponse, _, err := client.UpdateCluster(ctx, d.Id(), *cluster)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a dbaas cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a dbaas cluster: %w", err))
 		return diags
 	}
 
@@ -307,7 +327,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("The check for cluster deletion failed with the following error: %w", err))
+		return diag.FromErr(fmt.Errorf("the check for cluster deletion failed with the following error: %w", err))
 	}
 
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
@@ -328,7 +348,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil, fmt.Errorf("dbaas cluster does not exist %q", clusterId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of dbaas cluster %q", clusterId)
+		return nil, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err)
 	}
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)

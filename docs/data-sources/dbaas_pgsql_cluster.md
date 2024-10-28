@@ -46,13 +46,16 @@ The following attributes are returned by the datasource:
 * `cores` - The number of CPU cores per replica.
 * `ram` - The amount of memory per instance in megabytes. 
 * `storage_size` - The amount of storage per instance in MB.
-* `storage_type` - The storage type used in your cluster. 
+* `storage_type` - The storage type used in your cluster.
+* `connection_pooler` - Details about the connection pooler.
+  * `enabled`
+  * `pool_mode` - Represents different modes of connection pooling for the connection pooler.
 * `connections` - Details about the network connection for your cluster.
   * `datacenter_id` - The datacenter to connect your cluster to.
   * `lan_id` - The LAN to connect your cluster to.
   * `cidr` - The IP and subnet for the database. 
 * `location` - The physical location where the cluster will be created. This will be where all of your instances live. 
-* `backup_location` - The S3 location where the backups will be stored. 
+* `backup_location` - The IONOS Object Storage location where the backups will be stored. 
 * `display_name` - The friendly name of your cluster.
 * `maintenance_window` - A weekly 4 hour-long window, during which maintenance might occur
   * `time` 

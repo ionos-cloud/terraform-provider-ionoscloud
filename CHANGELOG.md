@@ -1,14 +1,167 @@
+## 6.6.1
+
+### Features
+- Add `hostname` to `ionoscloud_server` resource and data source
+- Add `hostname` to `ionoscloud_vcpu_server` resource and data source
+- Add `hostname` to `ionoscloud_cube_server` resource and data source
+
+## 6.6.0
+### Refactor
+- Rename `S3` occurrences to `Object Storage`
+
+## 6.5.9
+### Features
+  - Add new, required `sni_mode` attribute for `ionoscloud_cdn_distribution` resource and data source
+### Documentation
+  - Add `FAQ` section in `README.md`, add information about IP retrieval for `NIC`s
+
+## 6.5.8
+### Refactor
+  - Remove `image_alias` sets from `ionoscloud_volume` data source and resource
+### Documentation
+  - Remove `image_alias` from `ionocloud_volume` data source and resource docs
+### Fixes
+  - Allow empty `prefix` for bucket lifecycle configuration rules
+
+## 6.5.7
+### Fixes
+  - Fix documentation rendering of `autoscaling_group` resource and data source, `dbaas_mongo_template` data source and `server_boot_device_selection` resource in Terraform registry
+  - Fix `application_loadbalancer_forwardingrule` docs typo
+  - Fix for [#687](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/687) by setting `user_data` and `backupunit_id` in `ionoscloud_cube_server`
+
+## 6.5.6
+### Fixes
+- Fix `kafka` remove unavailable locations from resources and data sources
+- Fix update behavior for container registry property: `apiSubnetAllowList`
+- Fix `ionoscloud_certificate` data source
+- Fix `DBaaS` tests, change location for clusters creation, mark `connection_pooler` as computed
+- `certificate_id` should not be required for API Gateway resource, `custom_domains` field.
+- `cdn distribution` add metadata ipv4, ipv6 and resource_urn to resource and data source
+- set 'server_side_encryption' as computed for `ionoscloud_s3_object` resource
+### Documentation
+- Update documentation for `force_destroy` field in `ionoscloud_s3_bucket` resource
+
+## 6.5.5
+### Fixes
+- Fix for optional blocks in `ionoscloud_s3_bucket_lifecycle_configuration`
+  and `ionoscloud_s3_bucket_website_configuration` resources, before were wrongly marked as required
+### Features
+- Add `connection_pooler` attribute for PostgreSQL clusters
+
+## 6.5.4
+### Fixes
+- Fixed bucket public access block documentation
+- Fixed resources that need generate MD5 header for the API
+
+## 6.5.3
+### Fixes
+- `ionoslcoud_logging_pipeline` - `location` should be optional with `de/txl` default. Upgrading should not break existing pipelines.
+- Fix DBaaS tests
+### Enhancements
+- Increase GO version to 1.22, update dependencies
+
+## 6.5.2
+### Features
+- support for all s3 resources configurations
+- Add `location` to `logging_pipeline` resource and data source
+### Fixes
+- Fix nil deref due to `GeoRestrictions` not being checked against nil
+
+## 6.5.1
+### Fixes
+- Pass timeouts to `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
+- Add configurable timeouts to s3 buckets. Default stays 60 minutes.
+- Fix for vpn wireguard peer when there is no endpoint set
+- Minor fixes to documentation for api gateway route resource.
+- Remove `public_endpoint` from api gateway route resource.
+- Add temporary fix for backup units resources.
+- Add tags for certificate manager test files.
+- Add computed `id` for `ionoscloud_s3_bucket` resource. Same as name, used for crossplane generation.
+- New sdk-go-bundle versions to fix default params not being sent when having default values on marshalling
+- Fix CDN tests
+- Fix small CDN bug that led to an inconsistent state
+- Fix k8s tests.
+
+### Documentation
+- Update documentation for S3 bucket resource
+- Update documentation for `ionoscloud_inmemorydb_replicaset` resource
+- Fix error message for `ionoscloud_s3_bucket_policy` data source when bucket or policy does not exist.
+- Fix error message for `ionoscloud_s3_bucket_public_access_block` data source when bucket or public access block does not exist.
+- Add validation for `persistence_mode` and `eviction_policy` fields of `ionoscloud_inmemorydb_replicaset`
+- Add `ForceNew: true` for some attributes in `ionoscloud_inmemorydb_replicaset` resource
+- Fixes #632 update docs with `Principal` example for `s3_bucket_policy`
+- Update examples for vpn gateway resources
+- Minor fixes to documentation for api gateway and api gateway route resources.
+- Only valid hcl in resource examples
+- `connections` needs to be required for `ionoscloud_vpn_wireguard_gateway` resource
+- Minor documentation fix for CDN resource
+- Add basic examples for NFS, VPN Gateway and Kafka resources
+
+## 6.5.0
+### Features
+- Add support for CDN
+- Add new attribute `api_subnet_allow_list` to `container_registry` resource and data source
+- Add new attribute `api_subnet_allow_list` to `container_registry` resource and data source
+- Add new attribute `protocol_version` to `target_group` resource and data source
+- Add new attributes `central_logging` and `logging_format` to `networkloadbalancer` resource and data source
+- Add new attributes `central_logging` and `logging_format` to `application_loadbalancer` resource and data source
+- Add support for Event Streams for Apache Kafka
+- Add support for Certificate Manager providers and auto-certificates
+- Add support for In-Memory DB
+- Add support for API Gateway
+- Add support for VPN Gateway
+
+⚠️ **Note:** Upgrading to 6.5.0 also means using a new version for Certificate Manager service. If, after upgrading to 6.5.0, you receive this error: `{"errorCode": "paas-feature-1", "message": "feature is not enabled for the contract"}`, please send an e-mail to one of the addresses listed here: https://docs.ionos.com/support/general-information/contact-information.
+
+
+## 6.4.19
+### Features
+- Add Network File Storage API Support
+- Add s3 bucket, object, policy resources with base functionality
+### Enhancements
+- Move to `sdk-go-bundle` for logging sdk
+### Fixes 
+- Fixes #607. Container registry should wait until the resource is ready before returning the ID.
+- Move tests from AMD_OPTERON to INTEL_XEON
+- Data source `ionoscloud_mongo_template` should have id `computed` and `optional`
+- Fail on k8s cluster and nodepool if creation or deletion entered failed state
+- K8s, dataplatform and MariaDB tests
+### Documentation
+- Update documentation for MariaDB cluster
+
+
+## 6.4.18
+### Features
+- Add tests for Mongo cluster and user
+- Add new fields for NICs in VM Autoscaling group (firewall_active, firewall_type, firewall_rule, flow_log, target_group)
+- Refactor VM Autoscaling group
+### Fixes
+- Wrap missing base error for resource fetching errors
+- Properly persist user group ids in state when syncing with remote configuration
+- Quick fix for MariaDB State metadata values
+### Enhancements
+- Add `grafana_address` attribute to `ionoscloud_logging_pipeline` resource and data source
+### Misc
+- Replace deprecated `--rm-dist` with `--clean` in release workflow
+### Documentation
+- Updated documentation to specify that `ionoscloud_logging_pipeline`, `ionoscloud_dns_record` and `ionoscloud_dns_zone` only accept tokens for authorization.
+- Removed Early Access (EA) warning for `ionoscloud_logging_pipeline`.
+
+
 ## 6.4.17
 ### Fixes
-- Correctly raise immutable error for changes to `template_uuid` when running `terraform plan` for Cube servers 
+- Correctly raise immutable error for changes to `template_uuid` when running `terraform plan` for Cube servers
 
 ### Documentation
 - Update `ionoscloud_user` documentation. Fix `administrator` and add other fields description
 - Change to have nested lists show correctly in tf registry docs
+- Fix documentation for `ionoscloud_server`, `ionoscloud_volume`, `ionoscloud_lan` resources and `ionoscloud_image` data sources
 
 ### Enhancements
 - Add configurable fields to `ionoscloud_share` resource. Fields that can be set on creation: `description`, `sec_auth_protection`, `licence_type`. 
 Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug`, `disc_virtio_hot_unplug`, `ram_hot_plug`.
+- Allow MariaDB cluster creation in other zones than `de/txl` by adding `location` parameter to resources and data sources
+
 
 ## 6.4.16
 ### Enhancements
@@ -309,9 +462,9 @@ Please contact your sales representative or support for more information.
 
 - New Product: **Certificate Manager**:
   - `Resources`:
-    - [ionoscloud_certificate](docs/resources/certificate.md)
+    - [ionoscloud_certificate](docs/resources/certificate_manager_certificate.md)
   - `Data Sources`:
-    - [ionoscloud_certificate](docs/data-sources/certificate.md)
+    - [ionoscloud_certificate](docs/data-sources/certificate_manager_certificate.md)
 
 
 ### Enhancement:
@@ -753,4 +906,3 @@ FEATURES:
 
 FEATURES:
 - Terraform-provider-profitbricks rebranding to terraform-provider-ionoscloud
-

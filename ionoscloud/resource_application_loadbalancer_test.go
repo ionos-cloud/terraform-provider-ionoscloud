@@ -13,8 +13,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 var resourceNameAlb = constant.ALBResource + "." + constant.ALBTestResource
@@ -28,14 +28,16 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckApplicationLoadBalancerDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckApplicationLoadBalancerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckApplicationLoadBalancerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationLoadBalancerExists(resourceNameAlb, &applicationLoadBalancer),
 					resource.TestCheckResourceAttr(resourceNameAlb, "name", constant.ALBTestResource),
+					resource.TestCheckResourceAttr(resourceNameAlb, "central_logging", true),
+					resource.TestCheckResourceAttr(resourceNameAlb, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", constant.LanResource+".alb_lan_1", "id"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", constant.LanResource+".alb_lan_2", "id"),
 					utils.TestValueInSlice(constant.ALBResource, "ips.#", "10.12.118.224"),
@@ -50,6 +52,8 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 				Config: testAccDataSourceApplicationLoadBalancerMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "name", dataSourceNameAlbById, "name"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "central_logging", true, "central_logging"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`, "logging_format"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", dataSourceNameAlbById, "listener_lan"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", dataSourceNameAlbById, "target_lan"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "ips.0", dataSourceNameAlbById, "ips.0"),
@@ -94,6 +98,8 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameAlb, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", constant.LanResource+".alb_lan_3", "id"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", constant.LanResource+".alb_lan_4", "id"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "central_logging", false),
+					resource.TestCheckResourceAttr(resourceNameAlb, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`),
 					utils.TestValueInSlice(constant.ALBResource, "ips.#", "10.12.118.224"),
 					utils.TestValueInSlice(constant.ALBResource, "ips.#", "10.12.119.224"),
 					utils.TestValueInSlice(constant.ALBResource, "lb_private_ips.#", "10.13.72.225/24"),
@@ -129,7 +135,7 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured and checking deletion of application loadbalancer %s %s", rs.Primary.ID, responseBody(apiResponse))
+				return fmt.Errorf("an error occurred and checking deletion of application loadbalancer %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
 			return fmt.Errorf("application loadbalancer still exists %s %s", rs.Primary.ID, err)
@@ -165,7 +171,7 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching NatGateway: %s, %w", rs.Primary.ID, err)
+			return fmt.Errorf("error occurred while fetching NatGateway: %s, %w", rs.Primary.ID, err)
 		}
 		if *foundNatGateway.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -182,6 +188,8 @@ resource ` + constant.DatacenterResource + ` "alb_datacenter" {
   name              = "test_alb"
   location          = "de/txl"
   description       = "datacenter for hosting "
+  central_logging   = true
+  logging_format	= "%%{+Q}o %%{-Q}ci - - [%trg] %r %ST %B \"\" \"\" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
 }
 
 resource ` + constant.LanResource + ` "alb_lan_1" {
@@ -255,6 +263,8 @@ resource ` + constant.ALBResource + ` ` + constant.ALBTestResource + ` {
     direction = "EGRESS"
     bucket = "` + constant.FlowlogBucketUpdated + `"
   }
+  central_logging   = false
+  logging_format	= "%%{+Q}o %%{-Q}ci - - [%trg] %r %ST %B \"\" \"\" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
 }`
 
 const testAccDataSourceApplicationLoadBalancerMatchId = testAccCheckApplicationLoadBalancerConfigBasic + `

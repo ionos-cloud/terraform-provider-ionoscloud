@@ -38,7 +38,7 @@ resource "ionoscloud_server" "example" {
   cores                 = 1
   ram                   = 1024
   availability_zone     = "ZONE_1"
-  cpu_family            = "AMD_OPTERON"
+  cpu_family            = "INTEL_XEON"
   image_name            = "Ubuntu-20.04"
   image_password        = random_password.server_image_password.result
   volume {
@@ -94,7 +94,7 @@ resource "ionoscloud_server" "example" {
   cores                 = 1
   ram                   = 1024
   availability_zone     = "ZONE_1"
-  cpu_family            = "AMD_OPTERON"
+  cpu_family            = "INTEL_XEON"
   image_name            = "Ubuntu-20.04"
   image_password        = random_password.server_image_password.result
   volume {
@@ -158,7 +158,7 @@ resource "ionoscloud_nic" "example" {
 }
 ```
 
-This will configure flowlog for accepted ingress traffic and will log it into an existing ionos s3 bucket named `flowlog-bucket`. Any s3 compatible client can be used to create it. Adding a flowlog does not force re-creation of the NIC, but changing any other field than 
+This will configure flowlog for accepted ingress traffic and will log it into an existing IONOS Object Storage bucket named `flowlog-bucket`. Any s3 compatible client can be used to create it. Adding a flowlog does not force re-creation of the NIC, but changing any other field than 
 `name` will. Deleting a flowlog will also force NIC re-creation.
 
 ## Argument reference
@@ -180,7 +180,7 @@ This will configure flowlog for accepted ingress traffic and will log it into an
 * `pci_slot`- (Computed) The PCI slot number of the Nic.
 * `flowlog` - (Optional) Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination IP addresses, source and destination ports, number of packets, amount of bytes, the start and end time of the recording, and the type of protocol – and log the extent to which your instances are being accessed.
   - `action` - (Required) Specifies the action to be taken when the rule is matched. Possible values: ACCEPTED, REJECTED, ALL. Immutable, update forces re-creation.
-  - `bucket` - (Required) Specifies the S3 IONOS bucket where the flow log data will be stored. The bucket must exist. Immutable, update forces re-creation.
+  - `bucket` - (Required) Specifies the IONOS Object Storage bucket where the flow log data will be stored. The bucket must exist. Immutable, update forces re-creation.
   - `direction` - (Required) Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL. Immutable, update forces re-creation.
   - `name` - (Required) Specifies the name of the flow log.
     

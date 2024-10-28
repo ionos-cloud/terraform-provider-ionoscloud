@@ -11,9 +11,9 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	logging "github.com/ionos-cloud/sdk-go-logging"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
 )
 
 func TestAccLoggingPipeline(t *testing.T) {
@@ -23,14 +23,14 @@ func TestAccLoggingPipeline(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccLoggingPipelineDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccLoggingPipelineDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: LoggingPipelineConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccLoggingPipelineExistenceCheck(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, &Pipeline),
-					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineNameAttribute, pipelineNameValue),
+					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, nameAttribute, pipelineNameValue),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".*", map[string]string{
 						pipelineLogSourceAttribute:   pipelineLogSourceValue,
 						pipelineLogTagAttribute:      pipelineLogTagValue,
@@ -40,38 +40,41 @@ func TestAccLoggingPipeline(t *testing.T) {
 						pipelineLogDestinationTypeAttribute:      pipelineLogDestinationTypeValue,
 						pipelineLogDestinationRetentionAttribute: pipelineLogDestinationRetentionValue,
 					}),
+					resource.TestCheckResourceAttrSet(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineGrafanaAddressAttribute),
 				),
 			},
 			{
 				Config: LoggingPipelineDataSourceMatchById,
 				Check: resource.ComposeTestCheckFunc(
-					testAccLoggingPipelineExistenceCheck(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, &Pipeline),
-					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineNameAttribute, pipelineNameValue),
-					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".*", map[string]string{
+					testAccLoggingPipelineExistenceCheck(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, &Pipeline),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, nameAttribute, pipelineNameValue),
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineLogAttribute+".*", map[string]string{
 						pipelineLogSourceAttribute:   pipelineLogSourceValue,
 						pipelineLogTagAttribute:      pipelineLogTagValue,
 						pipelineLogProtocolAttribute: pipelineLogProtocolValue,
 					}),
-					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".0."+pipelineLogDestinationAttribute+".*", map[string]string{
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineLogAttribute+".0."+pipelineLogDestinationAttribute+".*", map[string]string{
 						pipelineLogDestinationTypeAttribute:      pipelineLogDestinationTypeValue,
 						pipelineLogDestinationRetentionAttribute: pipelineLogDestinationRetentionValue,
 					}),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineGrafanaAddressAttribute),
 				),
 			},
 			{
 				Config: LoggingPipelineDataSourceMatchByName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccLoggingPipelineExistenceCheck(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, &Pipeline),
-					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineNameAttribute, pipelineNameValue),
-					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".*", map[string]string{
+					testAccLoggingPipelineExistenceCheck(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, &Pipeline),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, nameAttribute, pipelineNameValue),
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineLogAttribute+".*", map[string]string{
 						pipelineLogSourceAttribute:   pipelineLogSourceValue,
 						pipelineLogTagAttribute:      pipelineLogTagValue,
 						pipelineLogProtocolAttribute: pipelineLogProtocolValue,
 					}),
-					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".0."+pipelineLogDestinationAttribute+".*", map[string]string{
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineLogAttribute+".0."+pipelineLogDestinationAttribute+".*", map[string]string{
 						pipelineLogDestinationTypeAttribute:      pipelineLogDestinationTypeValue,
 						pipelineLogDestinationRetentionAttribute: pipelineLogDestinationRetentionValue,
 					}),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineGrafanaAddressAttribute),
 				),
 			},
 			{
@@ -90,7 +93,7 @@ func TestAccLoggingPipeline(t *testing.T) {
 				Config: LoggingPipelineConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccLoggingPipelineExistenceCheck(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, &Pipeline),
-					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineNameAttribute, pipelineNameUpdatedValue),
+					resource.TestCheckResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, nameAttribute, pipelineNameUpdatedValue),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineLogAttribute+".*", map[string]string{
 						pipelineLogSourceAttribute:   pipelineLogSourceUpdatedValue,
 						pipelineLogTagAttribute:      pipelineLogTagUpdatedValue,
@@ -116,10 +119,10 @@ func testAccLoggingPipelineDestroyCheck(s *terraform.State) error {
 			continue
 		}
 		pipelineId := rs.Primary.ID
-		_, apiResponse, err := client.GetPipelineById(ctx, pipelineId)
+		_, apiResponse, err := client.GetPipelineByID(ctx, rs.Primary.Attributes["location"], pipelineId)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occured while checking the destruction of Logging pipeline with ID: %s, error: %w", pipelineId, err)
+				return fmt.Errorf("an error occurred while checking the destruction of Logging pipeline with ID: %s, error: %w", pipelineId, err)
 			}
 		} else {
 			return fmt.Errorf("Logging pipeline with ID: %s still exists", pipelineId)
@@ -142,9 +145,9 @@ func testAccLoggingPipelineExistenceCheck(path string, pipeline *logging.Pipelin
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
 		pipelineId := rs.Primary.ID
-		pipelineResponse, _, err := client.GetPipelineById(ctx, pipelineId)
+		pipelineResponse, _, err := client.GetPipelineByID(ctx, rs.Primary.Attributes["location"], pipelineId)
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching Logging pipeline with ID: %s, error: %w", pipelineId, err)
+			return fmt.Errorf("an error occurred while fetching Logging pipeline with ID: %s location %s, error: %w", pipelineId, rs.Primary.Attributes["location"], err)
 		}
 		pipeline = &pipelineResponse
 		return nil
@@ -154,12 +157,14 @@ func testAccLoggingPipelineExistenceCheck(path string, pipeline *logging.Pipelin
 const LoggingPipelineDataSourceMatchById = LoggingPipelineConfig + `
 ` + constant.DataSource + ` ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestDataSourceName + `{
 	id = ` + constant.LoggingPipelineResource + `.` + constant.LoggingPipelineTestResourceName + `.id
+	location = "es/vit"
 }
 `
 
 const LoggingPipelineDataSourceMatchByName = LoggingPipelineConfig + `
 ` + constant.DataSource + ` ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestDataSourceName + `{
 	name = ` + constant.LoggingPipelineResource + `.` + constant.LoggingPipelineTestResourceName + `.name
+	location = "es/vit"
 }
 `
 
@@ -167,23 +172,27 @@ const LoggingPipelineDataSourceInvalidBothIDAndName = LoggingPipelineConfig + `
 ` + constant.DataSource + ` ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestDataSourceName + `{
 	id = ` + constant.LoggingPipelineResource + `.` + constant.LoggingPipelineTestResourceName + `.id
 	name = ` + constant.LoggingPipelineResource + `.` + constant.LoggingPipelineTestResourceName + `.name
+	location = "es/vit"
 }
 `
 
 const LoggingPipelineDataSourceInvalidNoIDNoName = `
 ` + constant.DataSource + ` ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestDataSourceName + ` {
+	location = "es/vit"
 }
 `
 
 const LoggingPipelineDataSourceWrongNameError = `
 ` + constant.DataSource + ` ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestDataSourceName + ` {
 	name = "nonexistent"
+	location = "es/vit"
 }
 `
 
 const LoggingPipelineConfigUpdate = `
 resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestResourceName + ` {
-	` + pipelineNameAttribute + ` = "` + pipelineNameUpdatedValue + `"
+	` + nameAttribute + ` = "` + pipelineNameUpdatedValue + `"
+	location = "es/vit"
 	` + pipelineLogUpdated + `
 }
 `

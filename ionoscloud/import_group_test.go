@@ -8,17 +8,17 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccGroupImportBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckGroupDestroyCheck,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImportGroupConfigBasic,
@@ -29,7 +29,7 @@ func TestAccGroupImportBasic(t *testing.T) {
 				ImportStateIdFunc:       testAccGroupImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"user_id"},
+				ImportStateVerifyIgnore: []string{"user_id", "group_ids"},
 			},
 		},
 	})

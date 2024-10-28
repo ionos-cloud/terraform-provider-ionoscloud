@@ -3,13 +3,17 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"log"
+	"slices"
+	"strings"
 	"time"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -29,6 +33,13 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The MariaDB version of your cluster.",
 				Required:    true,
+			},
+			"location": {
+				Type:             schema.TypeString,
+				Description:      "The cluster location",
+				Optional:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
 			},
 			"instances": {
 				Type:             schema.TypeInt,
@@ -151,16 +162,16 @@ func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(err)
 	}
 
-	response, _, err := client.CreateCluster(ctx, *cluster)
+	response, _, err := client.CreateCluster(ctx, *cluster, d.Get("location").(string))
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while creating a DBaaS MariaDB cluster: %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while creating a DBaaS MariaDB cluster: %w", err))
 	}
 	clusterID := *response.Id
 	d.SetId(clusterID)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error occured while checking the status for MariaDB cluster with ID: %v, error: %w", clusterID, err))
+		return diag.FromErr(fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v, error: %w", clusterID, err))
 	}
 	if err := client.SetMariaDBClusterData(d, response); err != nil {
 		return diag.FromErr(err)
@@ -171,7 +182,7 @@ func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta inte
 func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).MariaDBClient
 	clusterID := d.Id()
-	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
+	_, apiResponse, err := client.DeleteCluster(ctx, d.Id(), d.Get("location").(string))
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -192,19 +203,30 @@ func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(services.SdkBundle).MariaDBClient
-	clusterId := d.Id()
-	cluster, apiResponse, err := client.GetCluster(ctx, clusterId)
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<cluster_id>'", d.Id())
+	}
+	location := parts[0]
+	if !slices.Contains(constant.Locations, location) {
+		return nil, fmt.Errorf("invalid import ID: %q, location must be one of %v", d.Id(), constant.Locations)
+	}
+	clusterID := parts[1]
 
+	cluster, apiResponse, err := client.GetCluster(ctx, clusterID, location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("MariaDB cluster with ID: %v does not exist, error: %w", clusterId, err)
+			return nil, fmt.Errorf("MariaDB cluster with ID: %v does not exist", clusterID)
 		}
-		return nil, fmt.Errorf("an error occured while trying to import MariaDB cluster with ID: %v, error: %w", clusterId, err)
+		return nil, fmt.Errorf("an error occurred while trying to import MariaDB cluster with ID: %v, error: %w", clusterID, err)
 	}
 
 	log.Printf("[INFO] MariaDB cluster found: %+v", cluster)
 
+	if err := d.Set("location", location); err != nil {
+		return nil, utils.GenerateSetError("MariaDB cluster", "location", err)
+	}
 	if err := client.SetMariaDBClusterData(d, cluster); err != nil {
 		return nil, err
 	}
@@ -215,7 +237,7 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta inte
 func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).MariaDBClient
 	clusterID := d.Id()
-	cluster, apiResponse, err := client.GetCluster(ctx, clusterID)
+	cluster, apiResponse, err := client.GetCluster(ctx, clusterID, d.Get("location").(string))
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")

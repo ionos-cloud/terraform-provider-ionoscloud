@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -161,7 +162,7 @@ func resourceVolume() *schema.Resource {
 
 func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 
-	//we do not want to check in case of resource creation
+	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
 	}
@@ -244,8 +245,8 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property "))
 				return diags
 			} else {
-				backupUnitId := backupUnitId.(string)
-				volume.Properties.BackupunitId = &backupUnitId
+				backupUnitID := backupUnitId.(string)
+				volume.Properties.BackupunitId = &backupUnitID
 			}
 		} else {
 			diags := diag.FromErr(fmt.Errorf("the backup_unit_id that you specified is not a valid UUID"))
@@ -257,7 +258,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a volume: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a volume: %w", err))
 		return diags
 	}
 
@@ -275,7 +276,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volumeToAttach.Id, err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volumeToAttach.Id, err))
 		return diags
 	}
 
@@ -313,7 +314,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching volume with ID %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while fetching volume with ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -360,7 +361,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating volume with ID %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating volume with ID %s: %w", d.Id(), err))
 		return diags
 
 	}
@@ -371,7 +372,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode > 299 {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a volume ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a volume ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -382,7 +383,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volumeToAttach).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
+			diags := diag.FromErr(fmt.Errorf("an error occurred while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
 				dcId, serverID, *volume.Id, err))
 			return diags
 		}
@@ -403,7 +404,7 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a volume ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a volume ID %s %w", d.Id(), err))
 		return diags
 
 	}
@@ -436,7 +437,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil, fmt.Errorf("volume does not exist %q", volumeId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to find the volume %q", volumeId)
+		return nil, fmt.Errorf("an error occurred while trying to find the volume %q", volumeId)
 	}
 
 	log.Printf("[INFO] volume found: %+v", volume)
@@ -495,13 +496,6 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 		err := d.Set("image", *volume.Properties.Image)
 		if err != nil {
 			return fmt.Errorf("error while setting image property for volume %s: %w", d.Id(), err)
-		}
-	}
-
-	if volume.Properties.ImageAlias != nil {
-		err := d.Set("image_alias", *volume.Properties.ImageAlias)
-		if err != nil {
-			return fmt.Errorf("error while setting image_alias property for volume %s: %w", d.Id(), err)
 		}
 	}
 
@@ -720,7 +714,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 		} else {
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageName).Execute()
 			logApiRequestTime(apiResponse)
-			//here we search for snapshot if we do not find img based on imageName
+			// here we search for snapshot if we do not find img based on imageName
 			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 
 				snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageName).Execute()
@@ -763,7 +757,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					//we want to search for snapshot again, but we check for
+					// we want to search for snapshot again, but we check for
 					//image != "" to be sure we didn't find it when we searched above for it
 					if (apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404) && (image != "") {
 						snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageName).Execute()
@@ -856,7 +850,7 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 				alias = i
 			}
 
-			if alias != "" && strings.ToLower(alias) == strings.ToLower(imageAlias) {
+			if alias != "" && strings.EqualFold(alias, imageAlias) {
 				return i
 			}
 		}

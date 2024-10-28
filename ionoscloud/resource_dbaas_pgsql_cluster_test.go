@@ -13,8 +13,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -26,9 +26,9 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckDbaasPgSqlClusterDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
@@ -40,6 +40,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "2048"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled", "false"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.pool_mode", "session"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example", "id"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example", "id"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.100/24"),
@@ -63,6 +65,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "ram", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "storage_size", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "storage_type", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connection_pooler.0.enabled", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connection_pooler.0.pool_mode", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.pool_mode"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connections.datacenter_id", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.datacenter_id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connections.lan_id", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.lan_id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "connections.cidr", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.cidr"),
@@ -86,6 +90,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "ram", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "storage_size", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "storage_type", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connection_pooler.0.enabled", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connection_pooler.0.pool_mode", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.pool_mode"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connections.datacenter_id", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.datacenter_id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connections.lan_id", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.lan_id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, "connections.cidr", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.cidr"),
@@ -136,6 +142,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "3072"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "3072"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled", "true"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.pool_mode", "transaction"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example_update", "id"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example_update", "id"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.101/24"),
@@ -159,6 +167,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "3072"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "3072"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled", "true"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.pool_mode", "transaction"),
 					resource.TestCheckNoResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.%"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example_update", "location"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "backup_location", "de"),
@@ -171,8 +181,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				),
 			},
 			{
-				//we need this as a separate test because the psql cluster needs to be deleted first
-				//in order to be able to delete the associated lan after
+				// we need this as a separate test because the psql cluster needs to be deleted first
+				// in order to be able to delete the associated lan after
 				// otherwise we get 'Access Denied: Lan 1 is delete-protected by DBAAS'
 				Config: testAccCheckDbaasPgSqlClusterConfigUpdateRemoveDBaaS,
 			},
@@ -192,9 +202,9 @@ func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckDbaasPgSqlClusterDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFromBackup,
@@ -268,7 +278,7 @@ func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse
 		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching PgSQL cluster with ID: %v, error: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching PgSQL cluster with ID: %v, error: %w", rs.Primary.ID, err)
 		}
 		if *foundCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("resource not found")
@@ -282,7 +292,7 @@ func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse
 const testAccCheckDbaasPgSqlClusterConfigBasic = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -303,6 +313,10 @@ resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResou
 	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
     lan_id          =  ` + constant.LanResource + `.lan_example.id 
     cidr            =  "192.168.1.100/24"
+  }
+  connection_pooler {
+    enabled = false
+    pool_mode = "session"
   }
   location = ` + constant.DatacenterResource + `.datacenter_example.location
   backup_location = "de"
@@ -328,13 +342,13 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 const testAccCheckDbaasPgSqlClusterConfigUpdate = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
 resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -358,6 +372,10 @@ resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResou
   ram                = 3072
   storage_size       = 3072
   storage_type       = "HDD"
+  connection_pooler {
+	enabled = true
+	pool_mode = "transaction"
+  }
   connections   {
 	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example_update.id 
     lan_id          =  ` + constant.LanResource + `.lan_example_update.id     
@@ -387,13 +405,13 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 const testAccCheckDbaasPgSqlClusterConfigUpdateRemoveConnections = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
 resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -420,6 +438,10 @@ resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResou
   location = ` + constant.DatacenterResource + `.datacenter_example_update.location
   backup_location = "de"
   display_name = "` + constant.UpdatedResources + `"
+  connection_pooler {
+	enabled = true
+	pool_mode = "transaction"
+  } 
   maintenance_window {
     day_of_the_week = "Saturday"
     time            = "10:00:00"
@@ -440,13 +462,13 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 const testAccCheckDbaasPgSqlClusterConfigUpdateRemoveDBaaS = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
 resource ` + constant.DatacenterResource + ` "datacenter_example_update" {
   name        = "datacenter_example_update"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 
@@ -466,7 +488,7 @@ resource ` + constant.LanResource + ` "lan_example_update" {
 const testAccFromBackup = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing psql cluster"
 }
 

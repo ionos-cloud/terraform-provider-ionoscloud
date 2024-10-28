@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
@@ -47,7 +48,7 @@ func dataSourceDbaasPgSqlReadUser(ctx context.Context, d *schema.ResourceData, m
 		if apiResponse.HttpNotFound() {
 			return diag.FromErr(fmt.Errorf("no PgSql user found with the specified username: %s and cluster ID: %s", username, clusterId))
 		}
-		return diag.FromErr(fmt.Errorf("an error occured while fetching the PgSql user: %s, cluster ID: %s, err: %w", username, clusterId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching the PgSql user: %s, cluster ID: %s, err: %w", username, clusterId, err))
 	}
 	if err := dbaas.SetUserPgSqlData(d, &user); err != nil {
 		return diag.FromErr(err)

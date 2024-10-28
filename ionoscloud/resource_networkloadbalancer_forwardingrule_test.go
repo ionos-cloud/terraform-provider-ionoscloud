@@ -13,8 +13,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 const networkLoadBalancerForwardingRuleResource = constant.NetworkLoadBalancerForwardingRuleResource + "." + constant.NetworkLoadBalancerForwardingRuleTestResource
@@ -28,8 +28,8 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic,
@@ -161,7 +161,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck(s *terraform.Stat
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured at checking deletion of forwarding rule %s %w", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred at checking deletion of forwarding rule %s %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("network loadbalancer forwarding rule still exists %s %w", rs.Primary.ID, err)
@@ -194,7 +194,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleExists(n string, networkLoadBa
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching NetworkLoadBalancerForwardingRule: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching NetworkLoadBalancerForwardingRule: %s", rs.Primary.ID)
 		}
 		if *foundNetworkLoadBalancerForwardingRule.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

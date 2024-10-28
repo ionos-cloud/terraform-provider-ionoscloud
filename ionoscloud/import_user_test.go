@@ -8,17 +8,17 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccUserImportBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckUserDestroyCheck,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckUserDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImportUserConfigBasic,
@@ -55,7 +55,17 @@ resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
   last_name = "` + constant.UserTestResource + `"
   email = "` + utils.GenerateEmail() + `"
   password = "abc123-321CBA"
-  administrator = true
   force_sec_auth= true
   active  = true
-}`
+  group_ids 		= [ ionoscloud_group.group1.id]
+}
+
+resource "ionoscloud_group" "group1" {
+  name = "group1"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+`

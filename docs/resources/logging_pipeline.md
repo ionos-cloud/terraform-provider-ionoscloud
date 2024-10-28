@@ -9,16 +9,15 @@ description: |-
 
 # ionoscloud_logging_pipeline
 
-⚠️ **Note:** Logging Service is currently in the Early Access (EA) phase.
-We recommend keeping usage and testing to non-production critical applications.
-Please contact your sales representative or support for more information.
-
 Manages a **Logging pipeline**.
+
+> ⚠️  Only tokens are accepted for authorization in the **logging_pipeline** resource. Please ensure you are using tokens as other methods will not be valid.
 
 ## Usage example
 
 ```hcl
 resource "ionoscloud_logging_pipeline" "example" {
+  location = "es/vit"
   name = "pipelineexample"
   log {
     source = "kubernetes"
@@ -82,6 +81,7 @@ variable "logs" {
 }
 
 resource "ionoscloud_logging_pipeline" "example" {
+  location = "es/vit"
   name = "examplepipeline"
   dynamic "log" {
     for_each = var.logs
@@ -106,7 +106,9 @@ terraform apply -var-file="vars.tfvars"
 
 ## Argument reference
 
+* `location` - (Optional)[string] The location of the Logging pipeline. Default: `de/txl` One of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`.
 * `name` - (Required)[string] The name of the Logging pipeline.
+* `grafana_address` - (Computed)[string] The address of the client's grafana instance.
 * `log` - (Required)[list] Pipeline logs, a list that contains elements with the following structure:
   * `source` - (Required)[string] The source parser to be used.
   * `tag` - (Required)[string] The tag is used to distinguish different pipelines. Must be unique amongst the pipeline's array items.
@@ -114,7 +116,7 @@ terraform apply -var-file="vars.tfvars"
   * `public` - (Computed)[bool]
   * `destinations` - (Optional)[list] The configuration of the logs datastore, a list that contains elements with the following structure:
     * `type` - (Optional)[string] The internal output stream to send logs to.
-    * `retention_in_days` - (Optional)[int] Defines the number of days a log record should be kept in loki. Works with loki destination type only.
+    * `retention_in_days` - (Optional)[int] Defines the number of days a log record should be kept in loki. Works with loki destination type only. Can be one of: 7, 14, 30.
 
 ## Import
 
@@ -122,12 +124,11 @@ In order to import a Logging pipeline, you can define an empty Logging pipeline 
 
 ```hcl
 resource "ionoscloud_logging_pipeline" "example" {
-  
 }
 ```
 
-The resource can be imported using the `pipeline_id`, for example:
+The resource can be imported using the `location` and `pipeline_id`, for example:
 
 ```shell
-terraform import ionoscloud_logging_pipeline.example {pipeline_id}
+terraform import ionoscloud_logging_pipeline.example {location}:{pipeline_id}
 ```

@@ -8,13 +8,13 @@ import (
 	"regexp"
 	"testing"
 
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNicBasic(t *testing.T) {
@@ -25,9 +25,9 @@ func TestAccNicBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckNicDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckNicDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckNicConfigBasic, name),
@@ -186,7 +186,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching nic: %s %w", rs.Primary.ID, err)
+			return fmt.Errorf("error occurred while fetching nic: %s %w", rs.Primary.ID, err)
 		}
 		if *foundNic.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -224,7 +224,7 @@ resource "ionoscloud_server" "test_server" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {

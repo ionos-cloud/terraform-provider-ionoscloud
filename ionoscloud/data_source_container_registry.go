@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 )
@@ -35,6 +36,12 @@ func dataSourceContainerRegistry() *schema.Resource {
 			"location": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"api_subnet_allow_list": {
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Computed:    true,
+				Description: "The subnet CIDRs that are allowed to connect to the registry. Specify 'a.b.c.d/32' for an individual IP address. __Note__: If this list is empty or not set, there are no restrictions.",
 			},
 			"garbage_collection_schedule": {
 				Type:     schema.TypeList,
@@ -187,12 +194,14 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 			}
 		}
 
-		if len(results) > 1 {
+		switch {
+		case len(results) == 0:
+			return diag.FromErr(fmt.Errorf("no registry found with the specified criteria: name = %s location = %s", name, location))
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one registry found with the specified criteria: name = %s location = %s", name, location))
+		default:
+			registry = results[0]
 		}
-
-		registry = results[0]
-
 	}
 
 	if err := crService.SetRegistryData(d, registry); err != nil {

@@ -1,9 +1,8 @@
 name: Weekly k8s test run
-# TODO -- After pipeline is fixed, uncomment this section and remove 'workflow_dispatch'
-on: workflow_dispatch
-#  schedule:
-#    # At 09:00:00 - UTC, every week on Monday.
-#    - cron: '0 09 * * MON'
+on:
+  schedule:
+    # At 09:00:00 - UTC, every week on Monday.
+    - cron: '0 09 * * MON'
 
 jobs:
   test:
@@ -19,12 +18,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: master
       - name: Install Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
       - name: Run tests with 'k8s' tag

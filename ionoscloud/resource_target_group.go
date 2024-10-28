@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -41,10 +42,17 @@ func resourceTargetGroup() *schema.Resource {
 				Description:      "Balancing protocol.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HTTP"}, true)),
 			},
+			"protocol_version": {
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "The forwarding protocol version. Value is ignored when protocol is not 'HTTP'.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HTTP1", "HTTP2"}, true)),
+			},
 			"targets": {
 				Type:        schema.TypeList,
 				Description: "Array of items in the collection.",
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {
@@ -184,6 +192,11 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 		targetGroup.Properties.Protocol = &protocol
 	}
 
+	if protocolVersion, protocolVersionOk := d.GetOk("protocol_version"); protocolVersionOk {
+		protocolVersion := protocolVersion.(string)
+		targetGroup.Properties.ProtocolVersion = &protocolVersion
+	}
+
 	targetGroup.Properties.Targets = getTargetGroupTargetData(d)
 
 	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
@@ -198,7 +211,7 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a target group: %w ", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a target group: %w ", err))
 		return diags
 	}
 
@@ -224,7 +237,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a target group %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a target group %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -257,6 +270,11 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 		targetGroup.Properties.Protocol = &protocol
 	}
 
+	if protocolVersion, protocolVersionOk := d.GetOk("protocol_version"); protocolVersionOk {
+		protocolVersion := protocolVersion.(string)
+		targetGroup.Properties.ProtocolVersion = &protocolVersion
+	}
+
 	targetGroup.Properties.Targets = getTargetGroupTargetData(d)
 
 	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
@@ -271,7 +289,7 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a targetGroup ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while restoring a targetGroup ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -291,7 +309,7 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a target group %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a target group %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -317,7 +335,7 @@ func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find target group %q", groupIp)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the target group %q, %w", groupIp, err)
+		return nil, fmt.Errorf("an error occurred while retrieving the target group %q, %w", groupIp, err)
 	}
 
 	if err := setTargetGroupData(d, &groupTarget); err != nil {
@@ -352,6 +370,13 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 			err := d.Set("protocol", *targetGroup.Properties.Protocol)
 			if err != nil {
 				return fmt.Errorf("error while setting protocol property for target group %s: %w", d.Id(), err)
+			}
+		}
+
+		if targetGroup.Properties.ProtocolVersion != nil {
+			err := d.Set("protocol_version", *targetGroup.Properties.ProtocolVersion)
+			if err != nil {
+				return fmt.Errorf("error while setting protocol_version property for target group %s: %w", d.Id(), err)
 			}
 		}
 

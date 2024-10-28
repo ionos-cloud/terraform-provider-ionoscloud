@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
@@ -59,6 +60,24 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 				Description: "The storage type used in your cluster.",
 				Computed:    true,
 			},
+			"connection_pooler": {
+				Type:        schema.TypeList,
+				Description: "Configuration options for the connection pooler",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"pool_mode": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Represents different modes of connection pooling for the connection pooler",
+						},
+					},
+				},
+			},
 			"connections": {
 				Type:        schema.TypeList,
 				Description: "Details about the network connection for your cluster.",
@@ -90,7 +109,7 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 			},
 			"backup_location": {
 				Type:        schema.TypeString,
-				Description: "The S3 location where the backups will be stored.",
+				Description: "The Object Storage location where the backups will be stored.",
 				Computed:    true,
 			},
 			"maintenance_window": {

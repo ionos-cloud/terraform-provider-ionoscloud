@@ -3,12 +3,15 @@ package containerregistry
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -35,6 +38,32 @@ func (c *Client) GetRegistry(ctx context.Context, registryId string) (cr.Registr
 	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesFindById(ctx, registryId).Execute()
 	apiResponse.LogInfo()
 	return registries, apiResponse, err
+}
+
+// IsRegistryDeleted checks whether the container registry is deleted or not
+func (c *Client) IsRegistryDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	ID := d.Id()
+	_, resp, err := c.GetRegistry(ctx, ID)
+	if resp.HttpNotFound() {
+		return true, nil
+	}
+	return false, err
+}
+
+// IsRegistryReady checks whether the container registry is in a ready state or not
+func (c *Client) IsRegistryReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	ID := d.Id()
+	creg, _, err := c.GetRegistry(ctx, ID)
+	if err != nil {
+		return true, fmt.Errorf("status check failed for container registry creg with ID: %v, error: %w", ID, err)
+	}
+
+	if creg.Metadata == nil || creg.Metadata.State == nil {
+		return false, fmt.Errorf("metadata or state is empty for container registry with ID: %v", ID)
+	}
+
+	log.Printf("[INFO] state of the container registry with ID: %v is: %s ", ID, *creg.Metadata.State)
+	return strings.EqualFold(*creg.Metadata.State, "RUNNING"), nil
 }
 
 func (c *Client) PatchRegistry(ctx context.Context, registryId string, registryInput cr.PatchRegistryInput) (cr.RegistryResponse, *cr.APIResponse, error) {
@@ -96,7 +125,8 @@ func (c *Client) PutToken(ctx context.Context, registryId, tokenId string, token
 
 }
 
-func GetRegistryDataCreate(d *schema.ResourceData) *cr.PostRegistryInput {
+// GetRegistryDataCreate get registry data for create
+func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error) {
 
 	registry := cr.PostRegistryInput{
 		Properties: &cr.PostRegistryProperties{},
@@ -116,10 +146,23 @@ func GetRegistryDataCreate(d *schema.ResourceData) *cr.PostRegistryInput {
 		registry.Properties.Name = &name
 	}
 
-	return &registry
+	if v, ok := d.GetOk("api_subnet_allow_list"); ok {
+		raw := v.([]interface{})
+		ips := make([]string, len(raw))
+		err := utils.DecodeInterfaceToStruct(raw, ips)
+		if err != nil {
+			return nil, err
+		}
+		if len(ips) > 0 {
+			registry.Properties.ApiSubnetAllowList = &ips
+		}
+	}
+
+	return &registry, nil
 }
 
-func GetRegistryDataUpdate(d *schema.ResourceData) *cr.PatchRegistryInput {
+// GetRegistryDataUpdate get registry data for update
+func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, error) {
 
 	registry := cr.PatchRegistryInput{}
 
@@ -127,7 +170,22 @@ func GetRegistryDataUpdate(d *schema.ResourceData) *cr.PatchRegistryInput {
 		registry.GarbageCollectionSchedule = GetWeeklySchedule(d, "garbage_collection_schedule")
 	}
 
-	return &registry
+	// When api_subnet_allow_list = [] in the TF plan:
+	// GetOk => _, false
+	// GetOkExists => _, true
+	// We don't want to ignore the cases in which we modify the api_subnet_allow_list to an empty list, so
+	// here we need to use 'GetOkExists'.
+	if v, ok := d.GetOkExists("api_subnet_allow_list"); ok { //nolint:staticcheck
+		raw := v.([]interface{})
+		ips := make([]string, len(raw))
+		err := utils.DecodeInterfaceToStruct(raw, ips)
+		if err != nil {
+			return nil, err
+		}
+		registry.ApiSubnetAllowList = &ips
+	}
+
+	return &registry, nil
 }
 
 func GetWeeklySchedule(d *schema.ResourceData, property string) *cr.WeeklySchedule {
@@ -190,6 +248,12 @@ func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error
 		storage = append(storage, storageEntry)
 		if err := d.Set("storage_usage", storage); err != nil {
 			return utils.GenerateSetError(resourceName, "storage_usage", err)
+		}
+	}
+
+	if registry.Properties.ApiSubnetAllowList != nil {
+		if err := d.Set("api_subnet_allow_list", *registry.Properties.ApiSubnetAllowList); err != nil {
+			return fmt.Errorf("error setting api_subnet_allow_list %w", err)
 		}
 	}
 

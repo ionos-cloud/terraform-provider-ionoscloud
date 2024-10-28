@@ -44,6 +44,11 @@ func dataSourceTargetGroup() *schema.Resource {
 				Computed:    true,
 				Description: "Balancing protocol.",
 			},
+			"protocol_version": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The forwarding protocol version. Value is ignored when protocol is not 'HTTP'.",
+			},
 			"targets": {
 				Type:        schema.TypeList,
 				Description: "Array of items in the collection",
@@ -203,7 +208,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 
 			if targetGroups.Items != nil {
 				for _, t := range *targetGroups.Items {
-					if t.Properties.Name != nil && strings.ToLower(*t.Properties.Name) == strings.ToLower(name) {
+					if t.Properties.Name != nil && strings.EqualFold(*t.Properties.Name, name) {
 						tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {

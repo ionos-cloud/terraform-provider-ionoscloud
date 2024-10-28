@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -23,8 +23,8 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckContainerRegistryDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckContainerRegistryDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckContainerRegistryConfigBasic,
@@ -36,6 +36,7 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "location", "de/fra"),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "name", constant.ContainerRegistryTestResource),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "features.0.vulnerability_scanning", "false"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "api_subnet_allow_list.0", "192.168.0.167/24"),
 				),
 			},
 			{
@@ -103,6 +104,8 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "location", "de/fra"),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "name", constant.ContainerRegistryTestResource),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "features.0.vulnerability_scanning", "true"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "api_subnet_allow_list.0", "2001:0db8:85a3::/24"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "api_subnet_allow_list.1", "192.168.0.167/32"),
 				),
 			},
 			{
@@ -169,7 +172,7 @@ func testAccCheckContainerRegistryExists(n string, registry *cr.RegistryResponse
 		foundRegistry, _, err := client.GetRegistry(ctx, rs.Primary.ID)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching container registry %s: %w", rs.Primary.ID, err)
+			return fmt.Errorf("an error occurred while fetching container registry %s: %w", rs.Primary.ID, err)
 		}
 		if *foundRegistry.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -190,6 +193,7 @@ resource ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegist
     vulnerability_scanning = false
   }
   location  = "de/fra"
+  api_subnet_allow_list = ["192.168.0.167/24"]
   name      = "` + constant.ContainerRegistryTestResource + `"
 }
 `
@@ -204,6 +208,7 @@ resource ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegist
     vulnerability_scanning = true
   }
   location    = "de/fra"
+  api_subnet_allow_list = ["2001:0db8:85a3::/24", "192.168.0.167/32"]
   name        = "` + constant.ContainerRegistryTestResource + `"
 }
 `

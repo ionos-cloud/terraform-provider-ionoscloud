@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -95,7 +96,7 @@ func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	user, _, err := client.UpdateUser(ctx, clusterId, username, request)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while updating a PgSql user, username: %s, cluster ID: %s, error: %w", username, clusterId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while updating a PgSql user, username: %s, cluster ID: %s, error: %w", username, clusterId, err))
 	}
 	// Wait for the cluster to be ready again (when creating/updating the user, the cluster enters
 	// 'BUSY' state).
@@ -117,7 +118,7 @@ func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, met
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("an error occured while fetching the PgSql user with ID: %s, error: %w", d.Id(), err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching the PgSql user with ID: %s, error: %w", d.Id(), err))
 	}
 
 	if err := dbaas.SetUserPgSqlData(d, &user); err != nil {
@@ -158,7 +159,7 @@ func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData,
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find PgSql username: %s, cluster ID: %s", username, clusterId)
 		}
-		return nil, fmt.Errorf("error occured while fetching PgSql username: %s, cluster ID: %s, error: %w", username, clusterId, err)
+		return nil, fmt.Errorf("error occurred while fetching PgSql username: %s, cluster ID: %s, error: %w", username, clusterId, err)
 	}
 	if err := dbaas.SetUserPgSqlData(d, &user); err != nil {
 		return nil, err

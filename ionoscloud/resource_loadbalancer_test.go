@@ -9,11 +9,12 @@ import (
 	"testing"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccLoadbalancerBasic(t *testing.T) {
@@ -24,9 +25,9 @@ func TestAccLoadbalancerBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckLoadbalancerDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckLoadbalancerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckLoadbalancerConfigBasic, lbName),
@@ -114,7 +115,7 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Loadbalancer: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching Loadbalancer: %s", rs.Primary.ID)
 		}
 		if *foundLB.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -138,7 +139,7 @@ resource "ionoscloud_server" "webserver" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
   volume {
@@ -185,7 +186,7 @@ resource "ionoscloud_server" "webserver" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {

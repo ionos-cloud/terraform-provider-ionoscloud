@@ -1,9 +1,9 @@
 /*
  * IONOS Cloud - DNS API
  *
- * DNS API Specification
+ * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.2.0
+ * API version: 1.16.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -18,7 +18,7 @@ import (
 // MetadataWithStateNameserversAllOf struct for MetadataWithStateNameserversAllOf
 type MetadataWithStateNameserversAllOf struct {
 	State *ProvisioningState `json:"state"`
-	// The list of nameservers associated to the zone
+	// The list of nameservers associated to the zone.  Nameservers are different for primary and secondary zones. For primary zones it would be: - ns-ic.ui-dns.com - ns-ic.ui-dns.de - ns-ic.ui-dns.org - ns-ic.ui-dns.biz  And for secondary zones: - nscs.ui-dns.com - nscs.ui-dns.de - nscs.ui-dns.org - nscs.ui-dns.biz
 	Nameservers *[]string `json:"nameservers"`
 }
 

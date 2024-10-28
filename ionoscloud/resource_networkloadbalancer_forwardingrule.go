@@ -468,7 +468,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a network loadbalancer forwarding rule ID %s %s \n ApiError: %s",
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a network loadbalancer forwarding rule ID %s %s \n ApiError: %s",
 			d.Id(), err, responseBody(apiResponse)))
 		return diags
 	}
@@ -490,7 +490,7 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *sch
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network loadbalancer forwarding rule %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a network loadbalancer forwarding rule %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -524,7 +524,7 @@ func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *sche
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find network load balancer rule %q", networkLoadBalancerRuleId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving network load balancer rule  %q: %q ", networkLoadBalancerRuleId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving network load balancer rule  %q: %q ", networkLoadBalancerRuleId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {

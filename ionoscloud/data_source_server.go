@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
 func dataSourceServer() *schema.Resource {
@@ -33,6 +33,10 @@ func dataSourceServer() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"hostname": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"type": {
 				Type:     schema.TypeString,
@@ -245,7 +249,11 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				return err
 			}
 		}
-
+		if server.Properties.Hostname != nil {
+			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
+				return err
+			}
+		}
 		if server.Properties.Cores != nil {
 			if err := d.Set("cores", *server.Properties.Cores); err != nil {
 				return err

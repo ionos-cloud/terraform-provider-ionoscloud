@@ -17,7 +17,7 @@ Manages **Groups** and **Group Privileges** on IonosCloud.
 resource "ionoscloud_user" "example1" {
   first_name              = "user1"
   last_name               = "user1"
-  email                   = <unique_email>
+  email                   = "unique_email.com"
   password                = random_password.user1_password.result
   administrator           = false
   force_sec_auth          = false
@@ -26,7 +26,7 @@ resource "ionoscloud_user" "example1" {
 resource "ionoscloud_user" "example2" {
   first_name              = "user2"
   last_name               = "user2"
-  email                   = <unique_email>
+  email                   = "unique_email.com"
   password                = random_password.user2_password.result
   administrator           = false
   force_sec_auth          = false

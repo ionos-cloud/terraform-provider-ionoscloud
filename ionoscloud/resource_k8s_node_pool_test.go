@@ -14,8 +14,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccK8sNodePoolBasic(t *testing.T) {
@@ -25,8 +25,8 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sNodePoolDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckK8sNodePoolConfigBasic,
@@ -153,24 +153,24 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cores_count", "2"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "ram_size", "2048"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_size", "40"),
-					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "public_ips"),
+					// resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "public_ips"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "lans.#", "0"),
-					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "labels"),
-					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "annotations")
+					// resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "labels"),
+					// resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "annotations")
 				),
 			},
 		},
 	})
 }
 
-//func TestAccK8sNodePoolGatewayIP(t *testing.T) {
+// func TestAccK8sNodePoolGatewayIP(t *testing.T) {
 //	var k8sNodepool ionoscloud.KubernetesNodePool
 //
 //	resource.Test(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 //		},
-//		ProviderFactories: testAccProviderFactories,
+//		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 //		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
 //		Steps: []resource.TestStep{
 //			{
@@ -203,7 +203,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 //			},
 //		},
 //	})
-//}
+// }
 
 func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 	var k8sNodepool ionoscloud.KubernetesNodePool
@@ -212,8 +212,8 @@ func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sNodePoolDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckK8sNodePoolConfigNoOptionalFields,
@@ -304,7 +304,7 @@ func testAccCheckK8sNodePoolExists(n string, k8sNodepool *ionoscloud.KubernetesN
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching k8s node pool: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching k8s node pool: %s", rs.Primary.ID)
 		}
 		if *foundK8sNodepool.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

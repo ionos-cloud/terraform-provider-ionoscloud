@@ -15,6 +15,7 @@
 
 # Go API client for ionoscloud
 
+
 IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool. 
 
  Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
@@ -376,6 +377,11 @@ LabelsApi | [**DatacentersVolumesLabelsFindByKey**](docs/api/LabelsApi.md#datace
 LabelsApi | [**DatacentersVolumesLabelsGet**](docs/api/LabelsApi.md#datacentersvolumeslabelsget) | **Get** /datacenters/{datacenterId}/volumes/{volumeId}/labels | List volume labels
 LabelsApi | [**DatacentersVolumesLabelsPost**](docs/api/LabelsApi.md#datacentersvolumeslabelspost) | **Post** /datacenters/{datacenterId}/volumes/{volumeId}/labels | Create a Volume Label
 LabelsApi | [**DatacentersVolumesLabelsPut**](docs/api/LabelsApi.md#datacentersvolumeslabelsput) | **Put** /datacenters/{datacenterId}/volumes/{volumeId}/labels/{key} | Modify a Volume Label
+LabelsApi | [**ImagesLabelsDelete**](docs/api/LabelsApi.md#imageslabelsdelete) | **Delete** /images/{imageId}/labels/{key} | Delete image label
+LabelsApi | [**ImagesLabelsFindByKey**](docs/api/LabelsApi.md#imageslabelsfindbykey) | **Get** /images/{imageId}/labels/{key} | Retrieve image labels
+LabelsApi | [**ImagesLabelsGet**](docs/api/LabelsApi.md#imageslabelsget) | **Get** /images/{imageId}/labels | List image labels
+LabelsApi | [**ImagesLabelsPost**](docs/api/LabelsApi.md#imageslabelspost) | **Post** /images/{imageId}/labels | Create an Image Label
+LabelsApi | [**ImagesLabelsPut**](docs/api/LabelsApi.md#imageslabelsput) | **Put** /images/{imageId}/labels/{key} | Modify an Image Label by Key
 LabelsApi | [**IpblocksLabelsDelete**](docs/api/LabelsApi.md#ipblockslabelsdelete) | **Delete** /ipblocks/{ipblockId}/labels/{key} | Delete IP block labels
 LabelsApi | [**IpblocksLabelsFindByKey**](docs/api/LabelsApi.md#ipblockslabelsfindbykey) | **Get** /ipblocks/{ipblockId}/labels/{key} | Retrieve IP block labels
 LabelsApi | [**IpblocksLabelsGet**](docs/api/LabelsApi.md#ipblockslabelsget) | **Get** /ipblocks/{ipblockId}/labels | List IP block labels
@@ -443,11 +449,11 @@ NetworkLoadBalancersApi | [**DatacentersNetworkloadbalancersGet**](docs/api/Netw
 NetworkLoadBalancersApi | [**DatacentersNetworkloadbalancersPatch**](docs/api/NetworkLoadBalancersApi.md#datacentersnetworkloadbalancerspatch) | **Patch** /datacenters/{datacenterId}/networkloadbalancers/{networkLoadBalancerId} | Partially modify Network Load Balancers
 NetworkLoadBalancersApi | [**DatacentersNetworkloadbalancersPost**](docs/api/NetworkLoadBalancersApi.md#datacentersnetworkloadbalancerspost) | **Post** /datacenters/{datacenterId}/networkloadbalancers | Create a Network Load Balancer
 NetworkLoadBalancersApi | [**DatacentersNetworkloadbalancersPut**](docs/api/NetworkLoadBalancersApi.md#datacentersnetworkloadbalancersput) | **Put** /datacenters/{datacenterId}/networkloadbalancers/{networkLoadBalancerId} | Modify Network Load Balancers
-PrivateCrossConnectsApi | [**PccsDelete**](docs/api/PrivateCrossConnectsApi.md#pccsdelete) | **Delete** /pccs/{pccId} | Delete private Cross-Connects
-PrivateCrossConnectsApi | [**PccsFindById**](docs/api/PrivateCrossConnectsApi.md#pccsfindbyid) | **Get** /pccs/{pccId} | Retrieve private Cross-Connects
-PrivateCrossConnectsApi | [**PccsGet**](docs/api/PrivateCrossConnectsApi.md#pccsget) | **Get** /pccs | List private Cross-Connects
-PrivateCrossConnectsApi | [**PccsPatch**](docs/api/PrivateCrossConnectsApi.md#pccspatch) | **Patch** /pccs/{pccId} | Partially modify private Cross-Connects
-PrivateCrossConnectsApi | [**PccsPost**](docs/api/PrivateCrossConnectsApi.md#pccspost) | **Post** /pccs | Create a Private Cross-Connect
+PrivateCrossConnectsApi | [**PccsDelete**](docs/api/PrivateCrossConnectsApi.md#pccsdelete) | **Delete** /pccs/{pccId} | Delete Cross Connects
+PrivateCrossConnectsApi | [**PccsFindById**](docs/api/PrivateCrossConnectsApi.md#pccsfindbyid) | **Get** /pccs/{pccId} | Retrieve a Cross Connect
+PrivateCrossConnectsApi | [**PccsGet**](docs/api/PrivateCrossConnectsApi.md#pccsget) | **Get** /pccs | List Cross Connects
+PrivateCrossConnectsApi | [**PccsPatch**](docs/api/PrivateCrossConnectsApi.md#pccspatch) | **Patch** /pccs/{pccId} | Partially modify a Cross Connects
+PrivateCrossConnectsApi | [**PccsPost**](docs/api/PrivateCrossConnectsApi.md#pccspost) | **Post** /pccs | Create a Cross Connect
 RequestsApi | [**RequestsFindById**](docs/api/RequestsApi.md#requestsfindbyid) | **Get** /requests/{requestId} | Retrieve requests
 RequestsApi | [**RequestsGet**](docs/api/RequestsApi.md#requestsget) | **Get** /requests | List requests
 RequestsApi | [**RequestsStatusGet**](docs/api/RequestsApi.md#requestsstatusget) | **Get** /requests/{requestId}/status | Retrieve request status
@@ -467,7 +473,7 @@ ServersApi | [**DatacentersServersResumePost**](docs/api/ServersApi.md#datacente
 ServersApi | [**DatacentersServersStartPost**](docs/api/ServersApi.md#datacentersserversstartpost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/start | Start an Enterprise Server by ID
 ServersApi | [**DatacentersServersStopPost**](docs/api/ServersApi.md#datacentersserversstoppost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/stop | Stop an Enterprise Server by ID
 ServersApi | [**DatacentersServersSuspendPost**](docs/api/ServersApi.md#datacentersserverssuspendpost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/suspend | Suspend a Cube Server by ID
-ServersApi | [**DatacentersServersTokenGet**](docs/api/ServersApi.md#datacentersserverstokenget) | **Get** /datacenters/{datacenterId}/servers/{serverId}/token | Get JASON Web Token
+ServersApi | [**DatacentersServersTokenGet**](docs/api/ServersApi.md#datacentersserverstokenget) | **Get** /datacenters/{datacenterId}/servers/{serverId}/token | Get JSON Web Token
 ServersApi | [**DatacentersServersUpgradePost**](docs/api/ServersApi.md#datacentersserversupgradepost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/upgrade | Upgrade a Server by ID
 ServersApi | [**DatacentersServersVolumesDelete**](docs/api/ServersApi.md#datacentersserversvolumesdelete) | **Delete** /datacenters/{datacenterId}/servers/{serverId}/volumes/{volumeId} | Detach a Volume by ID
 ServersApi | [**DatacentersServersVolumesFindById**](docs/api/ServersApi.md#datacentersserversvolumesfindbyid) | **Get** /datacenters/{datacenterId}/servers/{serverId}/volumes/{volumeId} | Get Attached Volume by ID
@@ -620,9 +626,7 @@ All URIs are relative to *https://api.ionos.com/cloudapi/v6*
  - [Lan](docs/models/Lan)
  - [LanEntities](docs/models/LanEntities)
  - [LanNics](docs/models/LanNics)
- - [LanPost](docs/models/LanPost)
  - [LanProperties](docs/models/LanProperties)
- - [LanPropertiesPost](docs/models/LanPropertiesPost)
  - [Lans](docs/models/Lans)
  - [Loadbalancer](docs/models/Loadbalancer)
  - [LoadbalancerEntities](docs/models/LoadbalancerEntities)

@@ -28,6 +28,11 @@ You can set the environment variables for HTTP basic authentication:
 export IONOS_USERNAME="username"
 export IONOS_PASSWORD="password"
 ```
+For managing IONOS Object Storage resources you need to set the following environment variables with your credentials
+```bash
+export IONOS_S3_ACCESS_KEY="accesskey"
+export IONOS_S3_SECRET_KEY="secretkey"
+```
 
 Also, you can overwrite the api endpoint: `api.ionos.com` via the following environment variable:
 
@@ -49,7 +54,8 @@ provider "ionoscloud" {
 #  contract_number = "contract_number_here"
 #  optional, does not need to be configured in most cases
 #  endpoint = "custom_cloud_api_url"
-}
+#  s3_access_key     =  <your_access_key>
+#  s3_secret_key     =  <your_secret_key>
 ```
 
 ⚠️ **Note:** It's NOT usually necessary to set `endpoint` field. The SDKs the terraform uses know how to route requests to the correct endpoints in the API. 
@@ -60,6 +66,8 @@ You can either explicitly write them in the .tf file or use var.name as in the e
 export TF_VAR_ionos_token="token"
 #export TF_VAR_ionos_username="username"
 #export TF_VAR_ionos_password="password"
+#export TF_VAR_ionos_s3_access_key="accesskey"
+#export TF_VAR_ionos_s3_secret_key="secretkey"
 ```
 
 
@@ -85,6 +93,8 @@ provider "ionoscloud" {
   #  contract_number = "contract_number_here"
   #  optional, does not need to be configured in most cases
   #  endpoint = "custom_cloud_api_url"
+  #  s3_access_key     =  <your_access_key>
+  #  s3_secret_key     =  <your_secret_key>
 }
 
 resource "ionoscloud_datacenter" "main" {
@@ -113,6 +123,10 @@ The following arguments are supported:
 
 - `contract_number` - "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller account.",
 
+- `s3_access_key` - Required for managing IONOS Object Storage resources.
+
+- `s3_secret_key` - Required for managing IONOS Object Storage resources.
+
 ### Environment Variables
 
 | Environment Variable    | Description                                                                                                                                                               |
@@ -124,7 +138,8 @@ The following arguments are supported:
 | `IONOS_LOG_LEVEL`       | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace                                                                                            |
 | `IONOS_PINNED_CERT`     | Specify the SHA-256 public fingerprint here, enables certificate pinning                                                                                                  |
 | `IONOS_CONTRACT_NUMBER` | Specify the contract number on which you wish to provision. Only valid for reseller accounts, for other types of accounts the header will be ignored                      |
-
+| `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS Object Storage API                                                                                              |
+| `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS Object Storage API                                                                                              |
 
 ## Resource Timeout
 
@@ -139,41 +154,6 @@ The default `timeouts` values are:
 - default - (Default 60 minutes) Used for every other action on a resource.
 
 An example of overwriting the `create`, `update`, and `delete` timeouts:
-
-## Debugging
-
-In the default mode, the Terraform provider returns only HTTP client errors. These usually consist only of the HTTP status code. There is no clear description of the problem. But if you want to see the API call error messages as well, you need to set the SDK and Terraform provider environment variables.
-
-You can enable logging now using the `IONOS_LOG_LEVEL` env variable. Allowed values: `off`, `debug` and `trace`. Defaults to `off`.
-
-⚠️ **Note:** We recommend you only use `trace` level for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
-Verbose request and response logging can also significantly impact your application’s performance.
-
-```bash
-$ export IONOS_LOG_LEVEL=debug
-```
-
-⚠️ **Note:** `IONOS_DEBUG` is now deprecated and will be removed in a future release.
-
-⚠️ **Note:** We recommend you only use `IONOS_DEBUG` for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
-Verbose request and response logging can also significantly impact your application’s performance.
-
-```bash
-$ export TF_LOG=debug
-$ export IONOS_DEBUG=true
-$ terraform apply
-```
-now you can see the response body incl. api error message:
-```json
-{
-  "httpStatus" : 422,
-  "messages" : [ {
-    "errorCode" : "200",
-    "message" : "[VDC-yy-xxxx] Operation cannot be executed since this Kubernetes Nodepool is already marked for deletion. Current state of the resource is FAILED_DESTROYING."
-  }]
-}
-```
-
 ```hcl
 resource "ionoscloud_server" "example" {
     name                  = "Server Example"
@@ -181,7 +161,7 @@ resource "ionoscloud_server" "example" {
     cores                 = 1
     ram                   = 1024
     availability_zone     = "ZONE_1"
-    cpu_family            = "AMD_OPTERON"
+    cpu_family            = "INTEL_XEON"
     image_name            = data.ionoscloud_image.example.id
     image_password        = random_password.server_image_password.result
     type                  = "ENTERPRISE"
@@ -231,6 +211,40 @@ Individual resources must opt-in to providing configurable `timeouts`, and attem
 ~> **Note:** Terraform does not automatically rollback in the face of errors.
 Instead, your Terraform state file will be partially updated with
 any resources that successfully completed.
+
+## Debugging
+
+In the default mode, the Terraform provider returns only HTTP client errors. These usually consist only of the HTTP status code. There is no clear description of the problem. But if you want to see the API call error messages as well, you need to set the SDK and Terraform provider environment variables.
+
+You can enable logging now using the `IONOS_LOG_LEVEL` env variable. Allowed values: `off`, `debug` and `trace`. Defaults to `off`.
+
+⚠️ **Note:** We recommend you only use `trace` level for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
+Verbose request and response logging can also significantly impact your application’s performance.
+
+```bash
+$ export IONOS_LOG_LEVEL=debug
+```
+
+⚠️ **Note:** `IONOS_DEBUG` is now deprecated and will be removed in a future release.
+
+⚠️ **Note:** We recommend you only use `IONOS_DEBUG` for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
+Verbose request and response logging can also significantly impact your application’s performance.
+
+```bash
+$ export TF_LOG=debug
+$ export IONOS_DEBUG=true
+$ terraform apply
+```
+now you can see the response body incl. api error message:
+```json
+{
+  "httpStatus" : 422,
+  "messages" : [ {
+    "errorCode" : "200",
+    "message" : "[VDC-yy-xxxx] Operation cannot be executed since this Kubernetes Nodepool is already marked for deletion. Current state of the resource is FAILED_DESTROYING."
+  }]
+}
+```
 
 ## Migrating from the ProfitBricks provider
 

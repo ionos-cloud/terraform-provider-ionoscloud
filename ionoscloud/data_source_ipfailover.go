@@ -3,10 +3,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -68,7 +69,7 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 	ipFailoverGroupFound := false
 	if lan.Properties != nil && ipFailoverGroups != nil && len(*ipFailoverGroups) > 0 {
 		for _, ipFailoverGroup := range *ipFailoverGroups {
-			// Search for the appropiate IP Failover Group using the provided IP
+			// Search for the appropriate IP Failover Group using the provided IP
 			if *ipFailoverGroup.Ip == ip {
 				// Set the information only if the IP Failover Group exists
 				// Use the IP in order to generate the resource ID

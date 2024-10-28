@@ -8,13 +8,14 @@ import (
 	"regexp"
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccVolumeBasic(t *testing.T) {
@@ -24,12 +25,12 @@ func TestAccVolumeBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckVolumeDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				//added to test - #266. crash when using image_alias on volume
+				// added to test - #266. crash when using image_alias on volume
 				Config:      testAccCheckVolumeConfigBasicErrorNoPassOrSSHPath,
 				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided`),
 			},
@@ -115,9 +116,9 @@ func TestAccVolumeNoPassword(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckVolumeDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckVolumeConfigNoPassword,
@@ -146,9 +147,9 @@ func TestAccVolumeResolveImageName(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckVolumeDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckVolumeResolveImageName,
@@ -218,7 +219,7 @@ func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.Test
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Volume: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching Volume: %s", rs.Primary.ID)
 		}
 		if *foundServer.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -237,7 +238,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + `{
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -272,7 +273,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + `{
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -306,7 +307,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + `upda
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -362,7 +363,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password =  ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -393,7 +394,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -424,7 +425,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {

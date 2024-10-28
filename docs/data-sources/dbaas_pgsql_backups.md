@@ -36,7 +36,7 @@ The following attributes are returned by the datasource:
     * `id` - The unique ID of the resource.
     * `cluster_id` - The unique ID of the cluster
     * `size` - The size of all base backups including the wal size in MB.
-    * `location` - The S3 location where the backups will be stored.
+    * `location` - The IONOS Object Storage location where the backups will be stored.
     * `version` - The PostgreSQL version this backup was created from.
     * `is_active` - Whether a cluster currently backs up data to this backup.
     * `earliest_recovery_target_time` - The oldest available timestamp to which you can restore.

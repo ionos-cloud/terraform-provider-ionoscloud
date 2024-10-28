@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
@@ -131,7 +132,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while fetching IonosCloud locations %w", err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching IonosCloud locations %w", err))
 			return diags
 		}
 

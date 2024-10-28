@@ -118,13 +118,13 @@ func resourcek8sCluster() *schema.Resource {
 			},
 			"s3_buckets": {
 				Type:        schema.TypeList,
-				Description: "List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.",
+				Description: "List of Object Storage bucket configured for K8s usage. For now it contains only an Object Storage bucket used to store K8s API audit logs.",
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
 							Type:        schema.TypeString,
-							Description: "Name of the S3 bucket",
+							Description: "Name of the Object Storage bucket",
 							Optional:    true,
 						},
 					},
@@ -236,7 +236,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 					s3Bucket.Name = &name
 					addBucket = true
 				} else {
-					diags := diag.FromErr(fmt.Errorf("name must be provided for s3 bucket"))
+					diags := diag.FromErr(fmt.Errorf("name must be provided for Object Storage bucket"))
 					return diags
 				}
 				if addBucket {
@@ -305,7 +305,7 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
+	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
 
 	if err := setK8sClusterData(d, &cluster); err != nil {
 		return diag.FromErr(err)
@@ -516,7 +516,7 @@ func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find k8s cluster %q", clusterId)
 		}
-		return nil, fmt.Errorf("unable to retreive k8s cluster %q", d.Id())
+		return nil, fmt.Errorf("unable to retrieve k8s cluster %q, error:%w", d.Id(), err)
 	}
 
 	log.Printf("[INFO] K8s cluster found: %+v", cluster)
@@ -621,18 +621,23 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 }
 
 func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	subjectCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
+	resource, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
 		return true, fmt.Errorf("error checking k8s cluster status: %w", err)
 	}
-	return *subjectCluster.Metadata.State == "ACTIVE", nil
+	if resource.Metadata == nil || resource.Metadata.State == nil {
+		return false, fmt.Errorf("error while checking k8s cluster status: state is nil")
+	}
+	if utils.IsStateFailed(*resource.Metadata.State) {
+		return false, fmt.Errorf("error while checking if k8s cluster is ready %s, state %s", *resource.Id, *resource.Metadata.State)
+	}
+	return *resource.Metadata.State == "ACTIVE", nil
 }
 
 func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 
-	_, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
+	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -641,5 +646,11 @@ func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sch
 		}
 		return true, fmt.Errorf("error checking k8s cluster deletion status: %w", err)
 	}
+	if cluster.Metadata != nil && cluster.Metadata.State != nil {
+		if utils.IsStateFailed(*cluster.Metadata.State) {
+			return false, fmt.Errorf("error while checking if k8s cluster is deleted properly, cluster ID: %s, state: %s", *cluster.Id, *cluster.Metadata.State)
+		}
+	}
+
 	return false, nil
 }

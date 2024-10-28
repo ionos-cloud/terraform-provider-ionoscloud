@@ -1,9 +1,9 @@
 /*
  * IONOS Cloud - DNS API
  *
- * DNS API Specification
+ * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.2.0
+ * API version: 1.16.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -21,10 +21,10 @@ type ProvisioningState string
 
 // List of ProvisioningState
 const (
-	PROVISIONING ProvisioningState = "PROVISIONING"
-	DESTROYING   ProvisioningState = "DESTROYING"
-	AVAILABLE    ProvisioningState = "AVAILABLE"
-	FAILED       ProvisioningState = "FAILED"
+	PROVISIONINGSTATE_PROVISIONING ProvisioningState = "PROVISIONING"
+	PROVISIONINGSTATE_DESTROYING   ProvisioningState = "DESTROYING"
+	PROVISIONINGSTATE_AVAILABLE    ProvisioningState = "AVAILABLE"
+	PROVISIONINGSTATE_FAILED       ProvisioningState = "FAILED"
 )
 
 func (v *ProvisioningState) UnmarshalJSON(src []byte) error {

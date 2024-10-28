@@ -12,8 +12,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 const fullIpBlockResourceName = constant.IpBlockResource + "." + constant.IpBlockTestResource
@@ -31,8 +31,8 @@ func TestAccIPBlockBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckIPBlockDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckIPBlockDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckIPBlockConfigBasic,
@@ -122,7 +122,7 @@ func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured while checking deletion of IPBlock %s %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking deletion of IPBlock %s %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("IPBlock still exists %s %s", rs.Primary.ID, err)
@@ -167,7 +167,7 @@ func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.T
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching IP Block: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching IP Block: %s", rs.Primary.ID)
 		}
 		if *foundIP.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

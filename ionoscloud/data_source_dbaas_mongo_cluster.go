@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
@@ -99,7 +100,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Description: "The connection string for your cluster",
 				Computed:    true,
 			},
-			//enterprise edition below
+			// enterprise edition below
 			"type": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -161,7 +162,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Description: "The cluster edition. Examples: playground, business, enterprise",
 			},
 			// to be added when there is api support
-			//"from_backup": {
+			// "from_backup": {
 			//	Type:        schema.TypeList,
 			//	Description: "Creates the cluster based on the existing backup.",
 			//	Computed:    true,
@@ -186,7 +187,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Description: "Backup related properties.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						//will be added at a later date
+						// will be added at a later date
 						//"snapshot_interval_hours": {
 						//	Type:        schema.TypeInt,
 						//	Computed:    true,

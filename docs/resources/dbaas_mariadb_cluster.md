@@ -33,11 +33,11 @@ resource "ionoscloud_server" "example" {
   ram                     = 2048
   availability_zone       = "ZONE_1"
   cpu_family              = "INTEL_SKYLAKE"
-  image_name              = "debian-10-genericcloud-amd64-20240114-1626"
+  image_name              = "rockylinux-8-GenericCloud-20230518"
   image_password          = "password"
   volume {
     name                  = "example"
-    size                  = 6
+    size                  = 10
     disk_type             = "SSD Standard"
   }
   nic {
@@ -54,7 +54,8 @@ locals {
 }
 
 resource "ionoscloud_mariadb_cluster" "example" {
-  mariadb_version        = "10.6"
+  mariadb_version         = "10.6"
+  location                = "de/txl"
   instances               = 1
   cores                   = 4
   ram                     = 4
@@ -85,6 +86,7 @@ resource "random_password" "cluster_password" {
 
 * `mariadb_version` - (Required)[string] The MariaDB version of your cluster.
 * `instances` - (Required)[int] The total number of instances in the cluster (one primary and n-1 secondary).
+* `location`- (Optional)[string] The location in which the cluster will be created. Different service endpoints are used based on location, possible options are: "de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci". If not set, the endpoint will be the one corresponding to "de/txl".
 * `cores` - (Required)[int] The number of CPU cores per instance.
 * `ram` - (Required)[int] The amount of memory per instance in gigabytes (GB).
 * `storage_size` - (Required)[int] The amount of storage per instance in gigabytes (GB).
@@ -101,10 +103,12 @@ resource "random_password" "cluster_password" {
     * `password` - (Required)[string] The password for a MariaDB user.
 * `dns_name` - (Computed)[string] The DNS name pointing to your cluster.
 
+> **⚠ WARNING:** `Location` attribute will become required in the future.
+
 ## Import
 
-Resource DBaaS MariaDB Cluster can be imported using the `cluster_id`, e.g.
+Resource DBaaS MariaDB Cluster can be imported using the `cluster_id` and the `location`, separated by `:`, e.g.
 
 ```shell
-terraform import ionoscloud_mariadb_cluster.mycluster {cluster UUID}
+terraform import ionoscloud_mariadb_cluster.mycluster {location}:{cluster UUID}
 ```

@@ -51,7 +51,6 @@ The following attributes are returned by the datasource:
 * `sshkey` - The associated public SSH key.
 * `image_password` - Required if `sshkey_path` is not provided.
 * `image` - The image or snapshot UUID.
-* `image_alias` - The image alias.
 * `licence_type` - The type of the licence.
 * `availability_zone` - The storage availability zone assigned to the volume: AUTO, ZONE_1, ZONE_2, or ZONE_3. This property is immutable.
 * `user_data` - The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation. This option will work only with cloud-init compatible images.

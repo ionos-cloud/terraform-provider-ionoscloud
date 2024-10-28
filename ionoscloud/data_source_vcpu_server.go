@@ -22,6 +22,10 @@ func dataSourceVCPUServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"hostname": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"type": {
 				Type:     schema.TypeString,
 				Computed: true,

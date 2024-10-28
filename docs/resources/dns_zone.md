@@ -11,6 +11,8 @@ description: |-
 
 Manages a **DNS Zone**.
 
+> ⚠️  Only tokens are accepted for authorization in the **ionoscloud_dns_zone** resource. Please ensure you are using tokens as other methods will not be valid.
+
 ## Example Usage
 
 ```hcl

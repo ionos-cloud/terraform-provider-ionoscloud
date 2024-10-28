@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -57,7 +58,7 @@ func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 
 	database, _, err := client.CreateDatabase(ctx, clusterId, request)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while creating the PgSql database named: %s inside the cluster with ID: %s, error: %w", name, clusterId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while creating the PgSql database named: %s inside the cluster with ID: %s, error: %w", name, clusterId, err))
 	}
 	return diag.FromErr(dbaas.SetDatabasePgSqlData(d, &database))
 }
@@ -77,7 +78,7 @@ func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData,
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("an error occured while fetching the PgSql database with ID: %s, error: %w", d.Id(), err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching the PgSql database with ID: %s, error: %w", d.Id(), err))
 	}
 	if err := dbaas.SetDatabasePgSqlData(d, &database); err != nil {
 		return diag.FromErr(err)
@@ -111,7 +112,7 @@ func resourceDbaasPgSqlDatabaseImporter(ctx context.Context, d *schema.ResourceD
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find PgSql database: %s, cluster ID: %s", name, clusterId)
 		}
-		return nil, fmt.Errorf("error occured while fetching PgSql database: %s, cluster ID: %s, error: %w", name, clusterId, err)
+		return nil, fmt.Errorf("error occurred while fetching PgSql database: %s, cluster ID: %s, error: %w", name, clusterId, err)
 	}
 	if err := dbaas.SetDatabasePgSqlData(d, &database); err != nil {
 		return nil, err

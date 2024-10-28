@@ -140,7 +140,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %w ", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching ipBlocks: %w ", err))
 		}
 
 		var results []ionoscloud.IpBlock

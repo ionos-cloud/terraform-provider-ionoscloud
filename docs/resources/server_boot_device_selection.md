@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud: Server Boot Device Selection"
 sidebar_current: "docs-resource-server-boot-device-selection"

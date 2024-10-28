@@ -8,7 +8,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 const locationTestName = constant.DataSource + "." + constant.LocationResource + "." + constant.LocationTestResource
@@ -18,7 +18,7 @@ func TestAccDataSourceLocationBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		Steps: []resource.TestStep{
 			{
 

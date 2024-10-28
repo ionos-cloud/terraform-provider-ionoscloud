@@ -7,11 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
-
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 )
 
 func dataSourceNIC() *schema.Resource {
@@ -221,7 +221,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	} else {
 		nics, err := ns.List(ctx, datacenterId, serverId, 3)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching nics: %w ", err))
 		}
 
 		var results []ionoscloud.Nic

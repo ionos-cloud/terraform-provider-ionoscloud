@@ -8,8 +8,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	dns "github.com/ionos-cloud/sdk-go-dns"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -22,8 +22,8 @@ func TestAccDNSZone(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccDNSZoneDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccDNSZoneDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: DNSZoneConfig,
@@ -104,7 +104,7 @@ func testAccDNSZoneDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.GetZoneById(ctx, zoneId)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occured while checking the destruction of DNS Zone with ID: %s, error: %w", zoneId, err)
+				return fmt.Errorf("an error occurred while checking the destruction of DNS Zone with ID: %s, error: %w", zoneId, err)
 			}
 		} else {
 			return fmt.Errorf("DNS Zone with ID: %s still exists", zoneId)
@@ -130,7 +130,7 @@ func testAccDNSZoneExistenceCheck(path string, zone *dns.ZoneRead) resource.Test
 		zoneResponse, _, err := client.GetZoneById(ctx, zoneId)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching DNS Zone with ID: %s, error: %w", zoneId, err)
+			return fmt.Errorf("an error occurred while fetching DNS Zone with ID: %s, error: %w", zoneId, err)
 		}
 		zone = &zoneResponse
 		return nil
@@ -151,7 +151,7 @@ const DNSZoneDataSourceMatchByName = DNSZoneConfig + `
 
 var DNSZoneDataSourceMatchByNamePartialMatch = DNSZoneConfig + `
 ` + constant.DataSource + ` ` + constant.DNSZoneResource + ` ` + constant.DNSZoneTestDataSourceName + ` {
-	name = "` + zoneNameValue[:4] + `"
+	name = "` + zoneNameValue[:5] + `"
 	partial_match = true
 }
 `

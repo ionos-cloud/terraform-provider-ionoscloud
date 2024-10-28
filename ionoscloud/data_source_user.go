@@ -136,6 +136,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	return nil
 }
+
 func setUsersForGroup(ctx context.Context, d *schema.ResourceData, user *ionoscloud.User, client ionoscloud.APIClient) error {
 	if user == nil {
 		return fmt.Errorf("did not expect empty user")
@@ -144,7 +145,7 @@ func setUsersForGroup(ctx context.Context, d *schema.ResourceData, user *ionoscl
 	groups, apiResponse, err := client.UserManagementApi.UmUsersGroupsGet(ctx, *user.Id).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return fmt.Errorf("an error occured while executing UmUsersGroupsGet %s (%w)", *user.Id, err)
+		return fmt.Errorf("an error occurred while executing UmUsersGroupsGet %s (%w)", *user.Id, err)
 	}
 
 	groupEntries := make([]interface{}, 0)

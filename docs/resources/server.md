@@ -22,6 +22,7 @@ data "ionoscloud_image" "example" {
     type                  = "HDD"
     cloud_init            = "V1"
     image_alias           = "ubuntu:latest"
+    location              = "us/las"
 }
 
 resource "ionoscloud_datacenter" "example" {
@@ -49,8 +50,8 @@ resource "ionoscloud_server" "example" {
     cores                 = 1
     ram                   = 1024
     availability_zone     = "ZONE_1"
-    cpu_family            = "AMD_OPTERON"
-    image_name            = data.ionoscloud_image.example.id
+    cpu_family            = "INTEL_XEON"
+    image_name            = data.ionoscloud_image.example.name
     image_password        = random_password.server_image_password.result
     type                  = "ENTERPRISE"
     volume {
@@ -118,7 +119,7 @@ resource "ionoscloud_server" "example" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
+  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = random_password.server_image_password.result
   type = "ENTERPRISE"
@@ -169,7 +170,7 @@ resource "random_password" "server_image_password" {
 
 ```hcl
 data "ionoscloud_template" "example" {
-    name            = "CUBES XS"
+    name            = "Basic Cube XS"
 }
 
 resource "ionoscloud_datacenter" "example" {
@@ -260,12 +261,13 @@ resource "ionoscloud_server" "test" {
 - `template_uuid` - (Optional)[string] The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
 - `name` - (Required)[string] The name of the server.
 - `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
+- `hostname` - (Optional)[string] The hostname of the resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters.
 - `cores` - (Optional)(Computed)[integer] Number of server CPU cores.
 - `ram` - (Optional)(Computed)[integer] The amount of memory for the server in MB.
 - `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist. E.g: `AUTO`, `ZONE_1`, `ZONE_2`. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
-- `cpu_family` - (Optional)[string] CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource. E.g.: "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
+- `cpu_family` - (Optional)[string] CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource. E.g.: "INTEL_SKYLAKE" or "INTEL_XEON".
 - `vm_state` - (Optional)[string] Sets the power state of the server. E.g: `RUNNING`, `SHUTOFF` or `SUSPENDED`. SUSPENDED state is only valid for cube. SHUTOFF state is only valid for enterprise.
 - `volume` - (Required) See the [Volume](volume.md) section.
 - `nic` - (Optional) See the [Nic](nic.md) section.

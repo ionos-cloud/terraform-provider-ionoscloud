@@ -13,8 +13,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 const resourceNatGatewayRuleResource = constant.NatGatewayRuleResource + "." + constant.NatGatewayRuleTestResource
@@ -28,8 +28,8 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckNatGatewayRuleDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckNatGatewayRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigBasic, constant.NatGatewayRuleTestResource),
@@ -110,7 +110,7 @@ func testAccCheckNatGatewayRuleDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occured at checking deletion of nat gateway rule %s %w", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred at checking deletion of nat gateway rule %s %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("nat gateway rule still exists %s %w", rs.Primary.ID, err)
@@ -143,7 +143,7 @@ func testAccCheckNatGatewayRuleExists(n string, natGateway *ionoscloud.NatGatewa
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching NatGatewayRule: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching NatGatewayRule: %s", rs.Primary.ID)
 		}
 		if *foundNatGatewayRule.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

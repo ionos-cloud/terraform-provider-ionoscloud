@@ -182,7 +182,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	log.Printf("[INFO] Successfully retreived nat gateway %s: %+v", d.Id(), natGateway)
+	log.Printf("[INFO] Successfully retrieved nat gateway %s: %+v", d.Id(), natGateway)
 
 	if err := setNatGatewayData(d, &natGateway); err != nil {
 		diags := diag.FromErr(err)
@@ -263,7 +263,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a nat gateway ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a nat gateway ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -283,7 +283,7 @@ func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nat gateway %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a nat gateway %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -316,7 +316,7 @@ func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find nat gateway  %q", natGatewayId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving nat gateway  %q: %q ", natGatewayId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving nat gateway  %q: %q ", natGatewayId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {

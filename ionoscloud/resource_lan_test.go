@@ -12,8 +12,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccLanBasic(t *testing.T) {
@@ -23,8 +23,8 @@ func TestAccLanBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckLanDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckLanDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckLanConfigBasic,
@@ -128,7 +128,7 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Server: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching Server: %s", rs.Primary.ID)
 		}
 		if *foundLan.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

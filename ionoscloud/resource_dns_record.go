@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dns "github.com/ionos-cloud/sdk-go-dns"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -72,13 +73,13 @@ func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 	recordResponse, _, err := client.CreateRecord(ctx, zoneId, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while creating a record for the DNS zone with ID: %s, error: %w", zoneId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while creating a record for the DNS zone with ID: %s, error: %w", zoneId, err))
 	}
 	if recordResponse.Metadata == nil {
 		return diag.FromErr(fmt.Errorf("expected metadata in the response for the record with ID: %s, but received 'nil' instead", *recordResponse.Id))
 	}
 	if recordResponse.Metadata.State != nil {
-		if *recordResponse.Metadata.State == dns.FAILED {
+		if *recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 			// This is a temporary error message since right now the API is not returning errors that we can work with.
 			return diag.FromErr(fmt.Errorf("record creation has failed, this can happen if the data in the request is not correct, " +
 				"please check again the values defined in the plan"))
@@ -115,10 +116,10 @@ func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 	recordResponse, _, err := client.UpdateRecord(ctx, zoneId, recordId, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while updating the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while updating the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err))
 	}
 	if recordResponse.Metadata.State != nil {
-		if *recordResponse.Metadata.State == dns.FAILED {
+		if *recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 			// This is a temporary error message since right now the API is not returning errors that we can work with.
 			return diag.FromErr(fmt.Errorf("record update has failed, this can happen if the data in the request is not correct, " +
 				"please check again the values defined in the plan"))
@@ -142,7 +143,7 @@ func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsRecordDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for the DNS Record with ID: %s to be deleted, error: %w", recordId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the DNS Record with ID: %s to be deleted, error: %w", recordId, err))
 	}
 	return nil
 }
@@ -164,7 +165,7 @@ func recordImport(ctx context.Context, d *schema.ResourceData, meta interface{})
 			d.SetId("")
 			return nil, fmt.Errorf("DNS Record with ID: %s does not exist, zone ID: %s", recordId, zoneId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to import the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err)
+		return nil, fmt.Errorf("an error occurred while trying to import the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err)
 	}
 	log.Printf("[INFO] DNS Record found: %+v", record)
 	if err := client.SetRecordData(d, record); err != nil {

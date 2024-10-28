@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -96,7 +98,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	client := meta.(services.SdkBundle).CloudApiClient
 
-	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
+	backupUnit, apiResponse, err := BackupUnitFindByID(ctx, d.Id(), client)
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -116,13 +118,13 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
+	log.Printf("[INFO] Successfully retrieved contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
 
 	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Successfully retreived backup unit %s: %+v", d.Id(), backupUnit)
+	log.Printf("[INFO] Successfully retrieved backup unit %s: %+v", d.Id(), backupUnit)
 
 	return nil
 }
@@ -251,7 +253,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	buId := d.Id()
 
-	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
+	backupUnit, apiResponse, err := BackupUnitFindByID(ctx, d.Id(), client)
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -259,7 +261,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find Backup Unit %q", buId)
 		}
-		return nil, fmt.Errorf("unable to retreive Backup Unit %q", buId)
+		return nil, fmt.Errorf("unable to retrieve Backup Unit %q, error:%w", buId, err)
 	}
 
 	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
@@ -279,7 +281,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
-	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
+	backupUnit, apiResponse, err := BackupUnitFindByID(c, d.Id(), client)
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -289,7 +291,7 @@ func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c con
 }
 
 func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
-	_, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
+	_, apiResponse, err := BackupUnitFindByID(c, d.Id(), client)
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -345,4 +347,30 @@ func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit
 		}
 	}
 	return nil
+}
+
+// BackupUnitFindByID simulates a FindByID function by filtering backup units from BackupunitsGet using the given ID.
+// This is done because of a temporary bug in the API with the regular FindByID function.
+// This is a temporary fix, this function should be replaced after the API bug is fixed.
+func BackupUnitFindByID(ctx context.Context, backupUnitID string, client *ionoscloud.APIClient) (ionoscloud.BackupUnit, *ionoscloud.APIResponse, error) {
+	backupUnits, apiResponse, err := client.BackupUnitsApi.BackupunitsGet(ctx).Depth(2).Execute()
+	var backupUnit ionoscloud.BackupUnit
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		return backupUnit, apiResponse, fmt.Errorf("error while retrieving the list of backup units: %w", err)
+	}
+	if backupUnits.Items == nil {
+		return backupUnit, apiResponse, fmt.Errorf("expected a list of backup units in the response but received 'nil' instead")
+	}
+	for _, backupUnit := range *backupUnits.Items {
+		if backupUnit.Id == nil {
+			return backupUnit, apiResponse, fmt.Errorf("expected a backup unit with a valid ID but received 'nil' instead")
+		}
+		if *backupUnit.Id == backupUnitID {
+			return backupUnit, apiResponse, nil
+		}
+	}
+	// If the backup unit wasn't found, simulate a 404 error.
+	apiResponse.StatusCode = http.StatusNotFound
+	return backupUnit, apiResponse, fmt.Errorf("backup unit with ID %s not found", backupUnitID)
 }

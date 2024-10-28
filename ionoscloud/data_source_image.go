@@ -117,7 +117,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while fetching IonosCloud images %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching IonosCloud images %w", err))
 	}
 
 	nameValue, nameOk := d.GetOk("name")
@@ -141,7 +141,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 		nameVer := fmt.Sprintf("%s-%s", name, version)
 		if images.Items != nil {
 			for _, img := range *images.Items {
-				if img.Properties != nil && img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(nameVer) {
+				if img.Properties != nil && img.Properties.Name != nil && strings.EqualFold(*img.Properties.Name, nameVer) {
 					results = append(results, img)
 				}
 			}

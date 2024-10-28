@@ -8,22 +8,32 @@ import (
 	"os"
 	"runtime"
 
+	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
+	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
+	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
+	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 var Version = "DEV"
@@ -77,6 +87,25 @@ func Provider() *schema.Provider {
 				Default:     "",
 				Description: "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller account.",
 			},
+			"s3_access_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_ACCESS_KEY", nil),
+				Description: "Access key for IONOS Object Storage operations.",
+			},
+			"s3_secret_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_SECRET_KEY", nil),
+				Description: "Secret key for IONOS Object Storage operations.",
+			},
+			"s3_region": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "eu-central-3",
+				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_REGION", nil),
+				Description: "Region for IONOS Object Storage operations.",
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        resourceDatacenter(),
@@ -105,16 +134,21 @@ func Provider() *schema.Provider {
 			constant.NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
 			constant.NetworkSecurityGroupResource:              resourceNetworkSecurityGroup(),
 			constant.NSGFirewallRuleResource:                   resourceNSGFirewallRule(),
+			constant.NFSClusterResource:                        resourceNFSCluster(),
+			constant.NFSShareResource:                          resourceNFSShare(),
 			constant.PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
 			constant.PsqlUserResource:                          resourceDbaasPgSqlUser(),
 			constant.PsqlDatabaseResource:                      resourceDbaasPgSqlDatabase(),
 			constant.DBaaSMariaDBClusterResource:               resourceDBaaSMariaDBCluster(),
 			constant.DBaasMongoClusterResource:                 resourceDbaasMongoDBCluster(),
 			constant.DBaasMongoUserResource:                    resourceDbaasMongoUser(),
+			constant.DBaaSInMemoryDBReplicaSetResource:         resourceDBaaSInMemoryDBReplicaSet(),
 			constant.ALBResource:                               resourceApplicationLoadBalancer(),
 			constant.ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			constant.TargetGroupResource:                       resourceTargetGroup(),
 			constant.CertificateResource:                       resourceCertificateManager(),
+			constant.AutoCertificateProviderResource:           resourceCertificateManagerProvider(),
+			constant.AutoCertificateResource:                   resourceCertificateManagerAutoCertificate(),
 			constant.ContainerRegistryResource:                 resourceContainerRegistry(),
 			constant.ContainerRegistryTokenResource:            resourceContainerRegistryToken(),
 			constant.DataplatformClusterResource:               resourceDataplatformCluster(),
@@ -122,8 +156,17 @@ func Provider() *schema.Provider {
 			constant.DNSZoneResource:                           resourceDNSZone(),
 			constant.DNSRecordResource:                         resourceDNSRecord(),
 			constant.LoggingPipelineResource:                   resourceLoggingPipeline(),
-			constant.AutoscalingGroupResource:                  resourceAutoscalingGroup(),
+			constant.AutoscalingGroupResource:                  ResourceAutoscalingGroup(),
 			constant.ServerBootDeviceSelectionResource:         resourceServerBootDeviceSelection(),
+			constant.KafkaClusterResource:                      resourceKafkaCluster(),
+			constant.KafkaClusterTopicResource:                 resourceKafkaTopic(),
+			constant.CDNDistributionResource:                   resourceCDNDistribution(),
+			constant.APIGatewayResource:                        resourceAPIGateway(),
+			constant.APIGatewayRouteResource:                   resourceAPIGatewayRoute(),
+			constant.WireGuardGatewayResource:                  resourceVpnWireguardGateway(),
+			constant.WireGuardPeerResource:                     resourceVpnWireguardPeer(),
+			constant.IPSecGatewayResource:                      resourceVpnIPSecGateway(),
+			constant.IPSecTunnelResource:                       resourceVpnIPSecTunnel(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        dataSourceDataCenter(),
@@ -148,10 +191,12 @@ func Provider() *schema.Provider {
 			constant.NetworkLoadBalancerResource:               dataSourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: dataSourceNetworkLoadBalancerForwardingRule(),
 			constant.NetworkSecurityGroupResource:              dataSourceNetworkSecurityGroup(),
+			constant.NFSClusterResource:                        dataSourceNFSCluster(),
+			constant.NFSShareResource:                          dataSourceNFSShare(),
 			constant.TemplateResource:                          dataSourceTemplate(),
 			constant.BackupUnitResource:                        dataSourceBackupUnit(),
 			constant.FirewallResource:                          dataSourceFirewall(),
-			constant.S3KeyResource:                             dataSourceS3Key(),
+			constant.S3KeyResource:                             dataSourceObjectStorageKey(),
 			constant.GroupResource:                             dataSourceGroup(),
 			constant.UserResource:                              dataSourceUser(),
 			constant.IpBlockResource:                           dataSourceIpBlock(),
@@ -171,7 +216,11 @@ func Provider() *schema.Provider {
 			constant.ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
 			constant.TargetGroupResource:                       dataSourceTargetGroup(),
 			constant.DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
+			constant.DBaaSInMemoryDBReplicaSetResource:         dataSourceDBaaSInMemoryDBReplicaSet(),
+			constant.DBaaSInMemoryDBSnapshotResource:           dataSourceDBaaSInMemoryDBSnapshot(),
 			constant.CertificateResource:                       dataSourceCertificate(),
+			constant.AutoCertificateProviderResource:           dataSourceCertificateManagerProvider(),
+			constant.AutoCertificateResource:                   dataSourceCertificateManagerAutoCertificate(),
 			constant.ContainerRegistryResource:                 dataSourceContainerRegistry(),
 			constant.ContainerRegistryTokenResource:            dataSourceContainerRegistryToken(),
 			constant.ContainerRegistryLocationsResource:        dataSourceContainerRegistryLocations(),
@@ -182,8 +231,17 @@ func Provider() *schema.Provider {
 			constant.DNSZoneDataSource:                         dataSourceDNSZone(),
 			constant.DNSRecordDataSource:                       dataSourceDNSRecord(),
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
-			constant.AutoscalingGroupResource:                  dataSourceAutoscalingGroup(),
-			constant.AutoscalingGroupServersResource:           dataSourceAutoscalingGroupServers(),
+			constant.AutoscalingGroupResource:                  DataSourceAutoscalingGroup(),
+			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
+			constant.KafkaClusterResource:                      dataSourceKafkaCluster(),
+			constant.KafkaClusterTopicResource:                 dataSourceKafkaTopic(),
+			constant.CDNDistributionResource:                   dataSourceCDNDistribution(),
+			constant.APIGatewayResource:                        dataSourceAPIGateway(),
+			constant.APIGatewayRouteResource:                   dataSourceAPIGatewayRoute(),
+			constant.WireGuardGatewayResource:                  dataSourceVpnWireguardGateway(),
+			constant.WireGuardPeerResource:                     dataSourceVpnWireguardPeer(),
+			constant.IPSecGatewayResource:                      dataSourceVpnIPSecGateway(),
+			constant.IPSecTunnelResource:                       dataSourceVpnIPSecTunnel(),
 		},
 	}
 
@@ -238,10 +296,16 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.Password = password.(string)
 	clientOpts.Token = token.(string)
 	clientOpts.Url = cleanedUrl
-	clientOpts.Version = ionoscloud.Version
 	clientOpts.TerraformVersion = terraformVersion
 
+	return NewSDKBundleClient(clientOpts), nil
+}
+
+// NewSDKBundleClient returns a new SDK bundle client
+func NewSDKBundleClient(clientOpts ClientOptions) interface{} {
+	clientOpts.Version = ionoscloud.Version
 	return services.SdkBundle{
+		CDNClient:          NewClientByType(clientOpts, cdnClient).(*cdnService.Client),
 		AutoscalingClient:  NewClientByType(clientOpts, autoscalingClient).(*autoscalingService.Client),
 		CertManagerClient:  NewClientByType(clientOpts, certManagerClient).(*cert.Client),
 		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
@@ -251,14 +315,20 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		LoggingClient:      NewClientByType(clientOpts, loggingClient).(*loggingService.Client),
 		MariaDBClient:      NewClientByType(clientOpts, mariaDBClient).(*mariadb.MariaDBClient),
 		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
+		NFSClient:          NewClientByType(clientOpts, nfsClient).(*nfsService.Client),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
-	}, nil
+		KafkaClient:        NewClientByType(clientOpts, kafkaClient).(*kafkaService.Client),
+		APIGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
+		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
+		InMemoryDBClient:   NewClientByType(clientOpts, inMemoryDBClient).(*inmemorydb.InMemoryDBClient),
+	}
 }
 
 type clientType int
 
 const (
 	ionosClient clientType = iota
+	cdnClient
 	autoscalingClient
 	certManagerClient
 	containerRegistryClient
@@ -267,9 +337,16 @@ const (
 	loggingClient
 	mariaDBClient
 	mongoClient
+	nfsClient
 	psqlClient
+	s3Client
+	kafkaClient
+	apiGatewayClient
+	vpnClient
+	inMemoryDBClient
 )
 
+// NewClientByType returns a new client based on the client type
 func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
 	switch clientType {
 	case ionosClient:
@@ -277,7 +354,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
 			newConfig.UserAgent = fmt.Sprintf(
 				"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+			)
 			if os.Getenv(constant.IonosDebug) != "" {
 				newConfig.Debug = true
 			}
@@ -286,6 +364,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 			return ionoscloud.NewAPIClient(newConfig)
 		}
+	case cdnClient:
+		return cdnService.NewCDNClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case autoscalingClient:
 		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case certManagerClient:
@@ -297,13 +377,27 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	case dnsClient:
 		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case loggingClient:
-		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.TerraformVersion)
 	case mariaDBClient:
 		return mariadb.NewMariaDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case mongoClient:
 		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case nfsClient:
+		return nfsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case psqlClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case s3Client:
+		return objstorage.NewAPIClient(objstorage.NewConfiguration())
+	case kafkaClient:
+		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case apiGatewayClient:
+		return apiGatewayService.NewClient(
+			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
+		)
+	case vpnClient:
+		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username)
+	case inMemoryDBClient:
+		return inmemorydb.NewInMemoryDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}

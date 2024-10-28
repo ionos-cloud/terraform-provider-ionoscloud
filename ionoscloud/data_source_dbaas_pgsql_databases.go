@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -60,7 +61,7 @@ func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceDa
 
 	retrievedDatabases, _, err := client.GetDatabases(ctx, clusterId)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while fetching PgSql databases for the cluster with ID: %s, error: %w", clusterId, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching PgSql databases for the cluster with ID: %s, error: %w", clusterId, err))
 	}
 	if retrievedDatabases.Items == nil {
 		return diag.FromErr(fmt.Errorf("expected a list of PgSql databases, but received 'nil' instead, cluster ID: %s", clusterId))

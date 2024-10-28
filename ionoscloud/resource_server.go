@@ -45,6 +45,12 @@ func resourceServer() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"hostname": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "The hostname of the resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringIsNotWhiteSpace, validation.StringLenBetween(1, 63))),
+			},
 			"cores": {
 				Type:     schema.TypeInt,
 				Optional: true, // this should be required when the deprecated version will be removed
@@ -617,7 +623,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				nicPath := fmt.Sprintf("nic.%d.", nicIndex)
 				nic, err := cloudapinic.GetNicFromSchema(d, nicPath)
 				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("create error occured while getting nic from schema: %w", err))
+					diags := diag.FromErr(fmt.Errorf("create error occurred while getting nic from schema: %w", err))
 					return diags
 				}
 				*serverReq.Entities.Nics.Items = append(*serverReq.Entities.Nics.Items, nic)
@@ -828,7 +834,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 	if err := setResourceServerData(ctx, client, d, &server); err != nil {
@@ -908,6 +914,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		nStr := n.(string)
 		request.Name = &nStr
 	}
+	if d.HasChange("hostname") {
+		_, n := d.GetChange("hostname")
+		nStr := n.(string)
+		request.Hostname = &nStr
+	}
 	if d.HasChange("cores") {
 		_, n := d.GetChange("cores")
 		nInt := int32(n.(int))
@@ -944,7 +955,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while updating server ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -982,7 +993,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), volumeIdStr).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("an error occured while getting a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), volumeId, err))
+					diags := diag.FromErr(fmt.Errorf("an error occurred while getting a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), volumeId, err))
 					return diags
 				}
 				if v, ok := d.GetOk(volumePath + "name"); ok {
@@ -1231,7 +1242,7 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, volumeId.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occured while deleting volume with ID: %s of server ID %s %w", volumeId.(string), d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error occurred while deleting volume with ID: %s of server ID %s %w", volumeId.(string), d.Id(), err))
 			return diags
 		}
 
@@ -1251,11 +1262,11 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 
-	if strings.ToLower(*server.Properties.Type) != "cube" {
+	if !strings.EqualFold(*server.Properties.Type, "cube") {
 		diags := deleteInlineVolumes(ctx, d, meta, client)
 		if diags != nil {
 			return diags
@@ -1265,7 +1276,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a server ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a server ID %s %w", d.Id(), err))
 		return diags
 
 	}
@@ -1299,7 +1310,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find server %q", serverId)
 		}
-		return nil, fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err)
+		return nil, fmt.Errorf("error occurred while fetching a server ID %s %w", d.Id(), err)
 	}
 	var primaryNic ionoscloud.Nic
 	d.SetId(*server.Id)
@@ -1457,7 +1468,10 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 			server.Properties.CpuFamily = &vStr
 		}
 	}
-
+	if v, ok := d.GetOk("hostname"); ok {
+		vStr := v.(string)
+		server.Properties.Hostname = &vStr
+	}
 	if _, ok := d.GetOk("boot_cdrom"); ok {
 		bootCdrom := d.Get("boot_cdrom").(string)
 		if utils.IsValidUUID(bootCdrom) {
@@ -1503,7 +1517,11 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 				return fmt.Errorf("error setting name %w", err)
 			}
 		}
-
+		if server.Properties.Hostname != nil {
+			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
+				return fmt.Errorf("error setting hostname %w", err)
+			}
+		}
 		if server.Properties.Cores != nil {
 			if err := d.Set("cores", *server.Properties.Cores); err != nil {
 				return fmt.Errorf("error setting cores %w", err)

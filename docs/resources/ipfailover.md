@@ -39,7 +39,7 @@ resource "ionoscloud_server" "example" {
   cores                 = 1
   ram                   = 1024
   availability_zone     = "ZONE_1"
-  cpu_family            = "AMD_OPTERON"
+  cpu_family            = "INTEL_XEON"
   image_name            = "Ubuntu-20.04"
   image_password        = random_password.server_image_password.result
   volume {
@@ -84,7 +84,7 @@ resource "random_password" "server_image_password" {
 > following options:
 1. Create multiple IP failover groups resources and use `depends_on` meta-argument to specify the order
 of creation, for example:
-```hcl
+```example
 resource "ionoscloud_ipfailover" "firstexample" {
   datacenter_id         = <datacenter ID>
   lan_id                = <LAN ID>

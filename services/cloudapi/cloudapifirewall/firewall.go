@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -55,7 +56,7 @@ func (fs *Service) Delete(ctx context.Context, datacenterId, serverId, nicId, fi
 		return apiResponse, err
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutDelete); errState != nil {
-		return apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterId, serverId, nicId, firewallId, errState)
+		return apiResponse, fmt.Errorf("an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterId, serverId, nicId, firewallId, errState)
 	}
 	return apiResponse, nil
 }
@@ -64,10 +65,10 @@ func (fs *Service) Create(ctx context.Context, datacenterId, serverId, nicId str
 	firewall, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, datacenterId, serverId, nicId).Firewallrule(firewallrule).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while creating firewall rule for dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while creating firewall rule for dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, err)
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutCreate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
 	return &firewall, apiResponse, nil
 }
@@ -76,10 +77,10 @@ func (fs *Service) Update(ctx context.Context, datacenterId, serverId, nicId, id
 	firewall, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPut(ctx, datacenterId, serverId, nicId, id).Firewallrule(firewallrule).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while updating firewall rule for dcId: %s, server_id: %s, nic_id: %s, id %s, Response: (%w)", datacenterId, serverId, nicId, id, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while updating firewall rule for dcId: %s, server_id: %s, nic_id: %s, id %s, Response: (%w)", datacenterId, serverId, nicId, id, err)
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
 	return &firewall, apiResponse, nil
 }
@@ -155,15 +156,15 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, ni
 		firewallRuleIds = slice.AnyToString(firewallRuleIdsIntf)
 
 		if nicId != "" {
-			//delete old rules
+			// delete old rules
 			for idx := range oldFirewalls {
-				//we need the id, but we can't get it from oldFirewalls because it's only the property
+				// we need the id, but we can't get it from oldFirewalls because it's only the property
 				oldId := onlyOld[idx].(map[string]interface{})["id"].(string)
 
 				if deleteRule := !utils.IsValueInSliceOfMap(onlyNew, "id", oldId); deleteRule {
 					_, err = fs.Delete(ctx, dcId, serverId, nicId, oldId)
 					if err != nil {
-						return firewallRules, []string{}, diag.FromErr(fmt.Errorf("an error occured while deleting firewall prop for dcId: %s, server_id: %s, "+
+						return firewallRules, []string{}, diag.FromErr(fmt.Errorf("an error occurred while deleting firewall prop for dcId: %s, server_id: %s, "+
 							"nic_id %s, ID: %s, (%w)", dcId, serverId, nicId, oldId, err))
 					}
 
@@ -184,7 +185,7 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, ni
 			var firewall *ionoscloud.FirewallRule
 			if nicId != "" {
 				if id, ok := onlyNew[idx].(map[string]interface{})["id"]; ok && id != "" {
-					//do not send protocol, it's an update
+					// do not send protocol, it's an update
 					*fwRule.Properties = SetNullableFields(*fwRule.Properties)
 					fwRule.Properties.Protocol = nil
 					firewall, _, err = fs.Update(ctx, dcId, serverId, nicId, id.(string), fwRule)
@@ -272,7 +273,7 @@ func ExtractOrderedFirewallIds(foundRules, sentRules []ionoscloud.FirewallRule) 
 		return []string{}
 	}
 
-	//keep order of ruleIds
+	// keep order of ruleIds
 	for _, rule := range sentRules {
 		for _, foundRule := range foundRules {
 			// computed, make equal for comparison
@@ -280,7 +281,7 @@ func ExtractOrderedFirewallIds(foundRules, sentRules []ionoscloud.FirewallRule) 
 				foundRule.Properties != nil && foundRule.Properties.IpVersion != nil {
 				rule.Properties.IpVersion = foundRule.Properties.IpVersion
 			}
-			//we need deepEqual here, because the structures contain pointers and cannot be compared using the stricter `==`
+			// we need deepEqual here, because the structures contain pointers and cannot be compared using the stricter `==`
 			if reflect.DeepEqual(rule.Properties, foundRule.Properties) {
 				ruleIds = append(ruleIds, *foundRule.Id)
 			}

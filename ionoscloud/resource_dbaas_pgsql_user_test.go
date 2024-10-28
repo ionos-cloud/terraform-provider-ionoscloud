@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -23,9 +23,9 @@ func TestAccPgSqlUser(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      pgSqlUserDestroyCheck,
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             pgSqlUserDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: PgSqlUserConfig,
@@ -68,7 +68,7 @@ func pgSqlUserExistsCheck(path string, user *pgsql.UserResource) resource.TestCh
 		foundUser, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
 		apiResponse.LogInfo()
 		if err != nil {
-			return fmt.Errorf("error occured while fetching the PgSql user: %s, cluster ID: %s, error: %w", username, clusterId, err)
+			return fmt.Errorf("error occurred while fetching the PgSql user: %s, cluster ID: %s, error: %w", username, clusterId, err)
 		}
 		user = &foundUser
 		return nil
@@ -90,7 +90,7 @@ func pgSqlUserDestroyCheck(s *terraform.State) error {
 		apiResponse.LogInfo()
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occured while checking the deletion of PgSql username: %s, cluster ID: %s, error: %w", username, clusterId, err)
+				return fmt.Errorf("an error occurred while checking the deletion of PgSql username: %s, cluster ID: %s, error: %w", username, clusterId, err)
 			}
 		} else {
 			return fmt.Errorf("PgSql user %s still exists in the cluster with ID: %s", username, clusterId)
@@ -112,7 +112,7 @@ const isSystemUserValue = "false"
 const PgSqlUserConfig = `
 resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "es/vit"
+  location    = "gb/lhr"
   description = "Datacenter for testing DBaaS PgSql user"
 }
 

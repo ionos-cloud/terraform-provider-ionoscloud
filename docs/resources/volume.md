@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: server"
+page_title: "IonosCloud: volume"
 sidebar_current: "docs-resource-volume"
 description: |-
   Creates and manages IonosCloud Volume objects.
@@ -19,6 +19,7 @@ A primary volume will be created with the server. If there is a need for additio
 data "ionoscloud_image" "example" {
     type                  = "HDD"
     cloud_init            = "V1"
+    image_alias           = "ubuntu:latest"
     location              = "us/las"
 }
 
@@ -47,8 +48,8 @@ resource "ionoscloud_server" "example" {
     cores                 = 1
     ram                   = 1024
     availability_zone     = "ZONE_1"
-    cpu_family            = "AMD_OPTERON"
-    image_name            = data.ionoscloud_image.example.id
+    cpu_family            = "INTEL_XEON"
+    image_name            = data.ionoscloud_image.example.name
     image_password        = random_password.server_image_password.result
     type                  = "ENTERPRISE"
     volume {
@@ -87,12 +88,12 @@ resource "ionoscloud_volume" "example" {
   size                    = 5
   disk_type               = "SSD Standard"
   bus                     = "VIRTIO"
-  image_name              = data.ionoscloud_image.example.id
+  image_name              = data.ionoscloud_image.example.name
   image_password          = random_password.volume_image_password.result
   user_data               = "foo"
 }
 
-resource "ionoscloud_volume" "example" {
+resource "ionoscloud_volume" "example2" {
   datacenter_id           = ionoscloud_datacenter.example.id
   server_id               = ionoscloud_server.example.id
   name                    = "Another Volume Example"
@@ -127,7 +128,6 @@ resource "random_password" "volume_image_password" {
 * `image_password` - (Optional)[string] Required if `sshkey_path` is not provided.
 * `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 * `image` - (Computed) The image or snapshot UUID.
-* `image_alias` - (Computed) The image alias.
 * `licence_type` - (Optional)[string] Required if `image_name` is not provided.
 * `name` - (Optional)[string] The name of the volume.
 * `availability_zone` - (Optional)[string] The storage availability zone assigned to the volume: AUTO, ZONE_1, ZONE_2, or ZONE_3. This property is immutable

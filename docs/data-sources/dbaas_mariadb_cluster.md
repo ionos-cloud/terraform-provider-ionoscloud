@@ -16,7 +16,8 @@ The **DBaaS MariaDB Cluster data source** can be used to search for and return a
 ### By ID 
 ```hcl
 data "ionoscloud_mariadb_cluster" "example" {
-  id = <cluster_id>
+  id       = <cluster_id>
+  location = "de/txl"
 }
 ```
 
@@ -25,6 +26,7 @@ data "ionoscloud_mariadb_cluster" "example" {
 ```hcl
 data "ionoscloud_mariadb_cluster" "example" {
   display_name = "MariaDB_cluster"
+  location     = "de/txl"
 }
 ```
 
@@ -32,6 +34,9 @@ data "ionoscloud_mariadb_cluster" "example" {
 
 * `display_name` - (Optional)[string] Display Name of an existing cluster that you want to search for.
 * `id` - (Optional)[string] ID of the cluster you want to search for.
+* `location`- (Optional)[string] The location of the cluster. Different service endpoints are used based on location, possible options are: "de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci". If not set, the endpoint will be the one corresponding to "de/txl".
+
+> **⚠ WARNING:** `Location` attribute will become required in the future.
 
 Either `display_name` or `id` must be provided. If none or both are provided, the datasource will return an error.
 

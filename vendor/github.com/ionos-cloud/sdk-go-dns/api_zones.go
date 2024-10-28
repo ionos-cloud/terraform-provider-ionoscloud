@@ -1,9 +1,9 @@
 /*
  * IONOS Cloud - DNS API
  *
- * DNS API Specification
+ * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.2.0
+ * API version: 1.16.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -14,7 +14,7 @@ package ionoscloud
 import (
 	_context "context"
 	"fmt"
-	_ioutil "io/ioutil"
+	"io"
 	_nethttp "net/http"
 	_neturl "net/url"
 	"strings"
@@ -34,7 +34,7 @@ type ApiZonesDeleteRequest struct {
 	zoneId     string
 }
 
-func (r ApiZonesDeleteRequest) Execute() (*APIResponse, error) {
+func (r ApiZonesDeleteRequest) Execute() (map[string]interface{}, *APIResponse, error) {
 	return r.ApiService.ZonesDeleteExecute(r)
 }
 
@@ -55,19 +55,21 @@ func (a *ZonesApiService) ZonesDelete(ctx _context.Context, zoneId string) ApiZo
 
 /*
  * Execute executes the request
+ * @return map[string]interface{}
  */
-func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIResponse, error) {
+func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (map[string]interface{}, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodDelete
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
+		localVarReturnValue  map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ZonesApiService.ZonesDelete")
 	if err != nil {
-		return nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/zones/{zoneId}"
@@ -110,7 +112,7 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
@@ -124,14 +126,14 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarAPIResponse, err
+		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
-		return localVarAPIResponse, err
+		return localVarReturnValue, localVarAPIResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -145,7 +147,7 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
+				return localVarReturnValue, localVarAPIResponse, newErr
 			}
 			newErr.model = v
 		}
@@ -154,7 +156,7 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
+				return localVarReturnValue, localVarAPIResponse, newErr
 			}
 			newErr.model = v
 		}
@@ -163,7 +165,7 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
+				return localVarReturnValue, localVarAPIResponse, newErr
 			}
 			newErr.model = v
 		}
@@ -172,7 +174,7 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
+				return localVarReturnValue, localVarAPIResponse, newErr
 			}
 			newErr.model = v
 		}
@@ -181,14 +183,24 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
+				return localVarReturnValue, localVarAPIResponse, newErr
 			}
 			newErr.model = v
 		}
-		return localVarAPIResponse, newErr
+		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
-	return localVarAPIResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := GenericOpenAPIError{
+			statusCode: localVarHTTPResponse.StatusCode,
+			body:       localVarBody,
+			error:      err.Error(),
+		}
+		return localVarReturnValue, localVarAPIResponse, newErr
+	}
+
+	return localVarReturnValue, localVarAPIResponse, nil
 }
 
 type ApiZonesFindByIdRequest struct {
@@ -203,7 +215,7 @@ func (r ApiZonesFindByIdRequest) Execute() (ZoneRead, *APIResponse, error) {
 
 /*
  * ZonesFindById Retrieve a zone
- * Returns a DNS zone by ID.
+ * Returns a DNS zone by given ID.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param zoneId The ID (UUID) of the DNS zone.
  * @return ApiZonesFindByIdRequest
@@ -292,7 +304,7 @@ func (a *ZonesApiService) ZonesFindByIdExecute(r ApiZonesFindByIdRequest) (ZoneR
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -496,7 +508,7 @@ func (a *ZonesApiService) ZonesGetExecute(r ApiZonesGetRequest) (ZoneReadList, *
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -660,7 +672,7 @@ func (a *ZonesApiService) ZonesPostExecute(r ApiZonesPostRequest) (ZoneRead, *AP
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {
@@ -742,11 +754,12 @@ func (r ApiZonesPutRequest) Execute() (ZoneRead, *APIResponse, error) {
 }
 
 /*
- * ZonesPut Ensure a zone
- * Ensures that a zone with the provided ID is created or modified. In order to successfully update zone - all JSON parameters must be passed.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param zoneId The ID (UUID) of the DNS zone.
- * @return ApiZonesPutRequest
+* ZonesPut Update a zone
+* Updates or creates a zone for the provided zone ID.
+
+* @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+* @param zoneId The ID (UUID) of the DNS zone.
+* @return ApiZonesPutRequest
  */
 func (a *ZonesApiService) ZonesPut(ctx _context.Context, zoneId string) ApiZonesPutRequest {
 	return ApiZonesPutRequest{
@@ -837,7 +850,7 @@ func (a *ZonesApiService) ZonesPutExecute(r ApiZonesPutRequest) (ZoneRead, *APIR
 		return localVarReturnValue, localVarAPIResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
 	if err != nil {

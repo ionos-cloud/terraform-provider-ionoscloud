@@ -12,8 +12,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccPrivateCrossConnectBasic(t *testing.T) {
@@ -23,8 +23,8 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckPrivateCrossConnectDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckPrivateCrossConnectDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckPrivateCrossConnectConfigBasic,
@@ -122,7 +122,7 @@ func testAccCheckPrivateCrossConnectExists(n string, privateCrossConnect *ionosc
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching private cross-connect: %s", rs.Primary.ID)
+			return fmt.Errorf("error occurred while fetching private cross-connect: %s", rs.Primary.ID)
 		}
 		if *foundPrivateCrossConnect.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

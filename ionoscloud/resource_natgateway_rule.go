@@ -225,7 +225,7 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	log.Printf("[INFO] Successfully retreived nat gateway rule %s: %+v", d.Id(), natGatewayRule)
+	log.Printf("[INFO] Successfully retrieved nat gateway rule %s: %+v", d.Id(), natGatewayRule)
 
 	if err := setNatGatewayRuleData(d, &natGatewayRule); err != nil {
 		return diag.FromErr(err)
@@ -319,7 +319,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 		Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a nat gateway rule ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a nat gateway rule ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse)))
 		return diags
 	}
 
@@ -340,7 +340,7 @@ func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, m
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nat gateway rule %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a nat gateway rule %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -374,7 +374,7 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find nat gateway rule %q", natGatewayRuleId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving nat gateway rule  %q: %q ", natGatewayRuleId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving nat gateway rule  %q: %q ", natGatewayRuleId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {

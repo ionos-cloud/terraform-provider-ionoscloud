@@ -8,8 +8,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"gopkg.in/yaml.v3"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
@@ -241,13 +242,13 @@ func dataSourceK8sClusterSchema() map[string]*schema.Schema {
 		},
 		"s3_buckets": {
 			Type:        schema.TypeList,
-			Description: "List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.",
+			Description: "List of Object Storage bucket configured for K8s usage. For now it contains only an Object Storage bucket used to store K8s API audit logs.",
 			Computed:    true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"name": {
 						Type:        schema.TypeString,
-						Description: "Name of the S3 bucket",
+						Description: "Name of the Object Storage bucket",
 						Required:    true,
 					},
 				},
