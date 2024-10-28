@@ -112,7 +112,12 @@ func resourceNetworkSecurityGroupUpdate(ctx context.Context, d *schema.ResourceD
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating security group: %w", err))
 		return diags
 	}
-	return nil
+
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		return diag.FromErr(fmt.Errorf("an error occured while waiting for Network Security Group to be updated for datacenter dcID: %s,  %w", datacenterID, err))
+	}
+
+	return resourceNetworkSecurityGroupRead(ctx, d, meta)
 }
 
 func resourceNetworkSecurityGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -126,10 +131,10 @@ func resourceNetworkSecurityGroupDelete(ctx context.Context, d *schema.ResourceD
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network security group: %w", err))
 		return diags
 	}
-	// todo - if needed
-	// if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-	//
-	// }
+
+	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		return diag.FromErr(fmt.Errorf("an error occured while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %w", datacenterID, err))
+	}
 
 	return nil
 }

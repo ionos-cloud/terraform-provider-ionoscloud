@@ -25,7 +25,7 @@ const (
 	testAccCheckDatacenterConfigBasic = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "` + constant.DatacenterTestResource + `"
-	location = "de/fkb"
+	location = "us/las"
 	description = "Test Datacenter Description"
 	sec_auth_protection = false
 }`
