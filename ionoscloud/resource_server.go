@@ -45,6 +45,12 @@ func resourceServer() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"hostname": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "The hostname of the resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringIsNotWhiteSpace, validation.StringLenBetween(1, 63))),
+			},
 			"cores": {
 				Type:     schema.TypeInt,
 				Optional: true, // this should be required when the deprecated version will be removed
@@ -861,6 +867,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		nStr := n.(string)
 		request.Name = &nStr
 	}
+	if d.HasChange("hostname") {
+		_, n := d.GetChange("hostname")
+		nStr := n.(string)
+		request.Hostname = &nStr
+	}
 	if d.HasChange("cores") {
 		_, n := d.GetChange("cores")
 		nInt := int32(n.(int))
@@ -1373,7 +1384,10 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 			server.Properties.CpuFamily = &vStr
 		}
 	}
-
+	if v, ok := d.GetOk("hostname"); ok {
+		vStr := v.(string)
+		server.Properties.Hostname = &vStr
+	}
 	if _, ok := d.GetOk("boot_cdrom"); ok {
 		bootCdrom := d.Get("boot_cdrom").(string)
 		if utils.IsValidUUID(bootCdrom) {
@@ -1419,7 +1433,11 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 				return fmt.Errorf("error setting name %w", err)
 			}
 		}
-
+		if server.Properties.Hostname != nil {
+			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
+				return fmt.Errorf("error setting hostname %w", err)
+			}
+		}
 		if server.Properties.Cores != nil {
 			if err := d.Set("cores", *server.Properties.Cores); err != nil {
 				return fmt.Errorf("error setting cores %w", err)

@@ -187,6 +187,7 @@ const (
 	ServerCubeResource     = "ionoscloud_cube_server"
 	ServerVCPUResource     = "ionoscloud_vcpu_server"
 	ServerTestResource     = "test_server"
+	ServerTestHostname     = "myhostname"
 	ServerDataSourceById   = "test_server_id"
 	ServerDataSourceByName = "test_server_name"
 )

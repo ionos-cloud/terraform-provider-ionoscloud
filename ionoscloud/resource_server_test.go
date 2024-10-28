@@ -58,6 +58,7 @@ func TestAccServerBasic(t *testing.T) {
 				Config: testAccCheckServerNoNic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "hostname", constant.ServerTestHostname),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
@@ -68,6 +69,7 @@ func TestAccServerBasic(t *testing.T) {
 				Config: testAccCheckServerNoNicUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "hostname", constant.ServerTestHostname),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
@@ -140,6 +142,7 @@ func TestAccServerBasic(t *testing.T) {
 				Config: testAccDataSourceServerMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "name", constant.ServerResource+"."+constant.ServerTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "hostname", constant.ServerResource+"."+constant.ServerTestResource, "hostname"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "cores", constant.ServerResource+"."+constant.ServerTestResource, "cores"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "ram", constant.ServerResource+"."+constant.ServerTestResource, "ram"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "availability_zone", constant.ServerResource+"."+constant.ServerTestResource, "availability_zone"),
@@ -172,6 +175,7 @@ func TestAccServerBasic(t *testing.T) {
 				Config: testAccDataSourceServerMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceByName, "name", constant.ServerResource+"."+constant.ServerTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceByName, "hostname", constant.ServerResource+"."+constant.ServerTestResource, "hostname"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceByName, "cores", constant.ServerResource+"."+constant.ServerTestResource, "cores"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceByName, "ram", constant.ServerResource+"."+constant.ServerTestResource, "ram"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceByName, "availability_zone", constant.ServerResource+"."+constant.ServerTestResource, "availability_zone"),
@@ -208,6 +212,7 @@ func TestAccServerBasic(t *testing.T) {
 				Config: testAccCheckServerConfigIpv6Enabled,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcpv6", "true"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "hostname", "updated"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.dhcpv6", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcpv6"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_cidr_block", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_cidr_block"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.ipv6_ips.0", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.ipv6_ips.0"),
@@ -1599,10 +1604,10 @@ resource ` + constant.RandomPassword + ` "server_image_password" {
 
 const testAccCheckCubeServerAndServersDataSource = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-   name = "CUBES XS"
-   cores = 1
-   ram   = 1024
-   storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 
 resource ` + constant.DatacenterResource + " " + constant.DatacenterTestResource + `{

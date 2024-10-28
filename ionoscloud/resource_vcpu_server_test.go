@@ -44,6 +44,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				Config: testAccCheckServerVCPUNoNic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "hostname", constant.ServerTestHostname),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
@@ -62,6 +63,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				Config: testAccCheckServerVCPUNoNicUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "hostname", "updated"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "vm_state", constant.VMStateStop),
@@ -109,6 +111,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerVCPUExists(constant.ServerVCPUResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "hostname", constant.ServerTestHostname),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
@@ -144,6 +147,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				Config: testAccDataSourceServerVCPUMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "name", constant.ServerVCPUResource+"."+constant.ServerTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "hostname", constant.ServerVCPUResource+"."+constant.ServerTestResource, "hostname"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "cores", constant.ServerVCPUResource+"."+constant.ServerTestResource, "cores"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "ram", constant.ServerVCPUResource+"."+constant.ServerTestResource, "ram"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "availability_zone", constant.ServerVCPUResource+"."+constant.ServerTestResource, "availability_zone"),
@@ -176,6 +180,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				Config: testAccDataSourceServerVCPUMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceByName, "name", constant.ServerVCPUResource+"."+constant.ServerTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceByName, "hostname", constant.ServerVCPUResource+"."+constant.ServerTestResource, "hostname"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceByName, "cores", constant.ServerVCPUResource+"."+constant.ServerTestResource, "cores"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceByName, "ram", constant.ServerVCPUResource+"."+constant.ServerTestResource, "ram"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceByName, "availability_zone", constant.ServerVCPUResource+"."+constant.ServerTestResource, "availability_zone"),
