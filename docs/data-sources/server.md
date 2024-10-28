@@ -44,7 +44,7 @@ data "ionoscloud_server" "example" {
 The following attributes are returned by the datasource:
 
 * `template_uuid` - The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
-* `hostname` - The hostname of the resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters.
+* `hostname` - The hostname of the resource.
 * `id` - The id of that resource
 * `name` - The name of that resource
 * `type` - Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes)
