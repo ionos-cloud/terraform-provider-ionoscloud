@@ -16,7 +16,7 @@ func TestAccKeyImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-		CheckDestroy:             testAccChecks3KeyDestroyCheck,
+		CheckDestroy:             testAccChecksKeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImportS3KeyConfigBasic,
