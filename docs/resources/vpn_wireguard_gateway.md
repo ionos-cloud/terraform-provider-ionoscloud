@@ -57,7 +57,8 @@ resource "ionoscloud_vpn_wireguard_gateway" "gateway" {
 
 The following arguments are supported by the `vpn_wireguard_gateway` resource:
 
-- `location` - (Optional)[String] The location of the WireGuard Gateway.
+- `location` - (Optional)[String] The location of the WireGuard Gateway. Supported locations: de/fra, de/txl, es/vit,
+  gb/bhx, gb/lhr, us/ewr, us/las, us/mci, fr/par.
 - `name` - (Required)[String] The name of the WireGuard Gateway.
 - `description` - (Optional)[String] A description of the WireGuard Gateway.
 - `endpoint` - (Optional, Block) The endpoint configuration for the WireGuard Gateway. This block supports fields documented below.
@@ -71,7 +72,7 @@ The following arguments are supported by the `vpn_wireguard_gateway` resource:
   - `ipv4_cidr` - (Required)[String] The IPv4 CIDR for the WireGuard Gateway connection.
   - `ipv6_cidr` - (Optional)[String] The IPv6 CIDR for the WireGuard Gateway connection.
   
-- `maintenance_window` - (Optional)(Computed)[string] A weekly 4 hour-long window, during which maintenance might occur.
+- `maintenance_window` - (Optional)(Computed) A weekly 4 hour-long window, during which maintenance might occur.
   - `time` - (Required)[string] Start of the maintenance window in UTC time.
   - `day_of_the_week` - (Required)[string] The name of the week day.
 - `tier` - (Optional)(Computed)[string] Gateway performance options.  See product documentation for full details. Options: STANDARD, STANDARD_HA, ENHANCED, ENHANCED_HA, PREMIUM, PREMIUM_HA.

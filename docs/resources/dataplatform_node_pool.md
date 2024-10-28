@@ -64,7 +64,7 @@ resource "ionoscloud_dataplatform_node_pool" "example" {
 * `availability_zone` - (Optional)[string] The availability zone of the virtual datacenter region where the node pool resources should be provisioned. Must be set with one of the values `AUTO`, `ZONE_1` or `ZONE_2`. The default value is `AUTO`.
 * `storage_type` - (Optional)[int] The type of hardware for the volume. Must be set with one of the values `HDD` or `SSD`. The default value is `SSD`.
 * `storage_size` - (Optional)[int] The size of the volume in GB. The size must be greater than `10`GB. The default value is `20`.
-* `maintenance_window` - (Optional)[string] Starting time of a weekly 4 hour-long window, during which maintenance might occur in hh:mm:ss format
+* `maintenance_window` - (Optional) Starting time of a weekly 4 hour-long window, during which maintenance might occur in hh:mm:ss format
     * `time` - (Required)[string] Time at which the maintenance should start. Must conform to the 'HH:MM:SS' 24-hour format. This pattern matches the "HH:MM:SS 24-hour format with leading 0" format. For more information take a look at [this link](https://stackoverflow.com/questions/7536755/regular-expression-for-matching-hhmm-time-format).
     * `day_of_the_week` - (Required)[string] Must be set with one the values `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday` or `Sunday`.
 * `labels` - (Optional)[map] Key-value pairs attached to the node pool resource as [Kubernetes labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/).

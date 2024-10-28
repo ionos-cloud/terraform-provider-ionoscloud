@@ -1,4 +1,8 @@
-## 6.6.5 -- upcoming release
+## 6.6.6 -- upcoming release
+### Features
+- Add `maintenance_window`, `tier` and regional endpoints for VPN resources
+
+## 6.6.5
 ### Features
 - Resource `ionoscloud_mariadb_cluster` now supports updates
 ### Testing

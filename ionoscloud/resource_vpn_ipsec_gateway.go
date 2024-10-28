@@ -13,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceVpnIPSecGateway() *schema.Resource {
@@ -50,9 +51,7 @@ func resourceVpnIPSecGateway() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "The network connection for your gateway. Note: all connections must belong to the same datacenter.",
 				MinItems:    1,
-				// TODO -- Change this from 10 to 5 or leave this validation for the API
-				MaxItems: 10,
-				Required: true,
+				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"datacenter_id": {
@@ -112,7 +111,7 @@ func resourceVpnIPSecGateway() *schema.Resource {
 			"tier": {
 				Type:        schema.TypeString,
 				Description: "Gateway performance options. See the documentation for the available options",
-				Computed:    true,
+				Default:     constant.DefaultTier,
 				Optional:    true,
 			},
 		},

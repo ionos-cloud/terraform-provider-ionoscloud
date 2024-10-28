@@ -198,7 +198,6 @@ func SetWireguardGWData(d *schema.ResourceData, wireguard vpnSdk.WireguardGatewa
 	if err := d.Set("name", wireguard.Properties.Name); err != nil {
 		return utils.GenerateSetError(wireguardResourceName, "name", err)
 	}
-	// TODO -- Check if reading a GW with a nil description will lead to an error here.
 	if err := d.Set("description", wireguard.Properties.Description); err != nil {
 		return utils.GenerateSetError(wireguardResourceName, "description", err)
 	}

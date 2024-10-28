@@ -14,6 +14,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceVpnWireguardGateway() *schema.Resource {
@@ -43,8 +44,6 @@ func resourceVpnWireguardGateway() *schema.Resource {
 			},
 			"connections": {
 				MinItems: 1,
-				// TODO -- Change this from 10 to 5 or leave this validation for the API
-				MaxItems: 10,
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
@@ -134,7 +133,7 @@ func resourceVpnWireguardGateway() *schema.Resource {
 			"tier": {
 				Type:        schema.TypeString,
 				Description: "Gateway performance options. See the documentation for the available options",
-				Computed:    true,
+				Default:     constant.DefaultTier,
 				Optional:    true,
 			},
 		},
