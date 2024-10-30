@@ -1,3 +1,5 @@
+//go:build compute || all
+
 package ionoscloud
 
 import (
@@ -5,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -20,9 +22,8 @@ func TestAccNetworkSecurityGroupBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckNetworkSecurityGroupDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckNetworkSecurityGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckNetworkSecurityGroupConfigBasic,
@@ -77,9 +78,8 @@ func TestAccNetworkSecurityGroupFirewallRules(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		ExternalProviders: randomProviderVersion343(),
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckNSGRuleDestroyCheck,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckNSGRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckNetworkSecurityGroupFirewallRulesBasic,
