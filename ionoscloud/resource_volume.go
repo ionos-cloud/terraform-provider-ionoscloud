@@ -648,7 +648,7 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 		var publicKeys []string
 		for _, path := range sshKeys {
 			if path == nil {
-				return nil, fmt.Errorf("ssh_keys contains an empty key")
+				return nil, fmt.Errorf("ssh_keys or ssh_key_path contains empty value")
 			}
 
 			log.Printf("[DEBUG] Reading file %s", path)
