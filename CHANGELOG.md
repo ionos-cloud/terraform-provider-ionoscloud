@@ -1,3 +1,6 @@
+## 6.6.3 - upcoming release
+### Features
+- Add import tests for VPN Gateway resources
 ## 6.6.2
 ### Fixes
 - Fix empty `ssh_key` used as variable in `ssh_keys` field in `ionoscloud_server` resource
