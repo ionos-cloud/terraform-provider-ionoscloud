@@ -47,7 +47,8 @@ func resourceCubeServer() *schema.Resource {
 			"hostname": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "The hostname of the resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters.",
+				Computed:         true,
+				Description:      "The hostname of the resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters. If not value give, it will receive the name of the server",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringIsNotWhiteSpace, validation.StringLenBetween(1, 63))),
 			},
 			"availability_zone": {
