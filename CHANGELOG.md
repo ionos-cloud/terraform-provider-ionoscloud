@@ -1,3 +1,7 @@
+## 6.6.2
+### Fixes
+- Fix empty `ssh_key` used as variable in `ssh_keys` field in `ionoscloud_server` resource
+
 ## 6.6.1
 
 ### Features
