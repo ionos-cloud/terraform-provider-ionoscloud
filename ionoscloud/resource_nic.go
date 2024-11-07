@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 	"log"
 	"strings"
 	"time"
@@ -17,6 +16,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
