@@ -1039,7 +1039,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     }
   }
 }
-` + ServerImagePasswordUpdated + SecurityGroups
+` + ServerImagePasswordUpdated + testSecurityGroups
 
 const testAccDataSourceServerMatchId = testAccCheckServerConfigBasic + `
 data ` + constant.ServerResource + ` ` + constant.ServerDataSourceById + ` {

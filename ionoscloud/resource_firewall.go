@@ -220,7 +220,7 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find firewall rule %q", firewallId)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving firewall rule %q: %q ", firewallId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving firewall rule %q: %w ", firewallId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {

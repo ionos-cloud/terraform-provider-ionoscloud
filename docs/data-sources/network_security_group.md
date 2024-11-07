@@ -19,7 +19,7 @@ When this happens, please refine your search string so that it is specific enoug
 ```hcl
 data "ionoscloud_nsg" "example" {
   datacenter_id  = ionoscloud_datacenter.example.id
-  id             = <nsg_id>
+  id             = nsg_id
 }
 ```
 

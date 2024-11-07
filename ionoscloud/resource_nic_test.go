@@ -258,7 +258,7 @@ resource ` + constant.NicResource + ` "database_nic" {
     bucket = "` + constant.FlowlogBucket + `"
   }
 }
-` + SecurityGroups
+` + testSecurityGroups
 
 const testAccCheckNicConfigUpdate = testCreateDataCenterAndServer + `
 resource ` + constant.NicResource + ` "database_nic" {
@@ -291,7 +291,7 @@ data ` + constant.NicResource + ` test_nic_data {
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   id = ` + constant.FullNicResourceName + `.id
 }
-` + SecurityGroups
+` + testSecurityGroups
 
 const testAccCheckNicConfigUpdateIpv6 = testCreateDataCenterAndServer + `
 resource ` + constant.NicResource + ` "database_nic" {

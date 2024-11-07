@@ -271,7 +271,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   }
 }`
 
-const SecurityGroups = `
+const testSecurityGroups = `
 resource ` + constant.NetworkSecurityGroupResource + ` example_1 {
   name          = "testing-name-1"
   description   = "testing-description-1"

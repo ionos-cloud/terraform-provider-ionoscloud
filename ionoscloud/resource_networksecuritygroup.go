@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 
@@ -159,7 +160,7 @@ func resourceNetworkSecurityGroupImport(ctx context.Context, d *schema.ResourceD
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find Network Security Group %q", nsgID)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving the Network Security Group %q, %q", d.Id(), err)
+		return nil, fmt.Errorf("an error occurred while retrieving the Network Security Group %q, %w", d.Id(), err)
 	}
 
 	log.Printf("[INFO] Datacenter found: %+v", nsg)

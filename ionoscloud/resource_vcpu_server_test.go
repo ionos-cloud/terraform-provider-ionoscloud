@@ -928,7 +928,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     }
   }
 }
-` + ServerImagePasswordUpdated + SecurityGroups
+` + ServerImagePasswordUpdated + testSecurityGroups
 
 const testAccDataSourceServerVCPUMatchId = testAccCheckServerVCPUConfigBasic + `
 data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceById + ` {

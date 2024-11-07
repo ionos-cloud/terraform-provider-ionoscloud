@@ -42,9 +42,9 @@ resource "ionoscloud_datacenter" "example" {
 }
 
 resource "ionoscloud_nsg" "example" {
-name              = "Example NSG"
-description       = "Example NSG Description"
-datacenter_id     = ionoscloud_datacenter.example.id
+  name              = "Example NSG"
+  description       = "Example NSG Description"
+  datacenter_id     = ionoscloud_datacenter.example.id
 }
 ```
 
