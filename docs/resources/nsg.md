@@ -7,7 +7,7 @@ description: |-
   Creates and manages IonosCloud Network Security Group.
 ---
 
-# ionoscloud\_nsg
+# ionoscloud_nsg
 
 Manages a **Network Security Group** on IonosCloud.
 

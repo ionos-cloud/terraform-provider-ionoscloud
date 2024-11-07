@@ -7,7 +7,7 @@ description: |-
   Creates and manages IonosCloud Network Security Group Firewall Rule.
 ---
 
-# ionoscloud\_nsg_firewallrule
+# ionoscloud_nsg_firewallrule
 
 Manages a **Network Security Group Rule** on IonosCloud.
 
