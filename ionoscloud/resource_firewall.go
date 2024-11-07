@@ -52,25 +52,15 @@ func resourceFirewall() *schema.Resource {
 				Computed: true,
 			},
 			"port_range_start": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
-					if v.(int) < 1 && v.(int) > 65534 {
-						errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
-					}
-					return
-				}),
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
 			},
 
 			"port_range_end": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
-					if v.(int) < 1 && v.(int) > 65534 {
-						errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
-					}
-					return
-				}),
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
 			},
 			"icmp_type": {
 				Type:     schema.TypeString,
