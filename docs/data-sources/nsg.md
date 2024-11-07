@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : network security group"
 sidebar_current: "docs-datasource-nsg"
 description: |-
-  Get information on a IonosCloud Network Security Groups
+  Get information on a IonosCloud Network Security Group
 ---
 
 # ionoscloud_nsg
