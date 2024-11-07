@@ -16,7 +16,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
-func resourceNetworkSecurityGroup() *schema.Resource {
+func resourceNSG() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceNetworkSecurityGroupCreate,
 		ReadContext:   resourceNetworkSecurityGroupRead,

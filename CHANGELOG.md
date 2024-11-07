@@ -1,6 +1,13 @@
 ## 6.6.3 - upcoming release
 ### Features
 - Add import tests for VPN Gateway resources
+### New Product - **Network Security Groups**:
+- `Resources`:
+  - [ionoscloud_nsg](docs/resources/nsg.md)
+  - [ionoscloud_nsg_firewallrule](docs/resources/nsg_firewallrule.md)
+- `Data Sources`:
+  - [ionoscloud_nsg](docs/data-sources/nsg.md)
+  - [ionoscloud_nsg_firewallrule](docs/data-sources/nsg_firewallrule.md)
 ## 6.6.2
 ### Fixes
 - Fix empty `ssh_key` used as variable in `ssh_keys` field in `ionoscloud_server` resource
