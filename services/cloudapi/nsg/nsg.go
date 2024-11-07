@@ -3,9 +3,11 @@ package nsg
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 )
 
@@ -53,9 +55,9 @@ func (nsg *Service) PutNICNSG(ctx context.Context, dcID, serverID, nicID string,
 		return nil
 	}
 	ids := make([]string, 0)
-	for _, rawId := range rawIDs {
-		if rawId != nil {
-			id := rawId.(string)
+	for _, rawID := range rawIDs {
+		if rawID != nil {
+			id := rawID.(string)
 			ids = append(ids, id)
 		}
 	}

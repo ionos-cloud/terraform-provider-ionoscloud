@@ -202,9 +202,9 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if d.HasChange("default_security_group_id") {
-		_, newDefaultSecurityGroupId := d.GetChange("default_security_group_id")
-		newDefaultSecurityGroupIdStr := newDefaultSecurityGroupId.(string)
-		obj.DefaultSecurityGroupId = &newDefaultSecurityGroupIdStr
+		_, newDefaultSecurityGroupID := d.GetChange("default_security_group_id")
+		newDefaultSecurityGroupIDStr := newDefaultSecurityGroupID.(string)
+		obj.DefaultSecurityGroupId = &newDefaultSecurityGroupIDStr
 	}
 
 	if d.HasChange("create_default_security_group") {

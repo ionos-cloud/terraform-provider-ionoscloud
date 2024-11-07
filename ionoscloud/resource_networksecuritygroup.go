@@ -66,10 +66,10 @@ func resourceNetworkSecurityGroupCreate(ctx context.Context, d *schema.ResourceD
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPost(ctx, datacenterID).SecurityGroup(sg).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while creating a Network Security Group for datacenter dcID: %s, %w", datacenterID, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while creating a Network Security Group for datacenter dcID: %s, %w", datacenterID, err))
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for Network Security Group to be created for datacenter dcID: %s,  %w", datacenterID, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %w", datacenterID, err))
 	}
 	d.SetId(*securityGroup.Id)
 
@@ -83,7 +83,7 @@ func resourceNetworkSecurityGroupRead(ctx context.Context, d *schema.ResourceDat
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, d.Id()).Depth(2).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while retrieving a network security group: %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while retrieving a network security group: %w", err))
 	}
 
 	if err := setNetworkSecurityGroupData(d, &securityGroup); err != nil {
@@ -109,12 +109,12 @@ func resourceNetworkSecurityGroupUpdate(ctx context.Context, d *schema.ResourceD
 	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPut(ctx, datacenterID, d.Id()).SecurityGroup(sg).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating security group: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating security group: %w", err))
 		return diags
 	}
 
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for Network Security Group to be updated for datacenter dcID: %s,  %w", datacenterID, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %w", datacenterID, err))
 	}
 
 	return resourceNetworkSecurityGroupRead(ctx, d, meta)
@@ -128,12 +128,12 @@ func resourceNetworkSecurityGroupDelete(ctx context.Context, d *schema.ResourceD
 	apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsDelete(ctx, datacenterID, d.Id()).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network security group: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a network security group: %w", err))
 		return diags
 	}
 
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %w", datacenterID, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %w", datacenterID, err))
 	}
 
 	return nil
@@ -148,22 +148,22 @@ func resourceNetworkSecurityGroupImport(ctx context.Context, d *schema.ResourceD
 		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter UUID}/{nsg UUID}", d.Id())
 	}
 
-	datacenterId := parts[0]
-	nsgId := parts[1]
+	datacenterID := parts[0]
+	nsgID := parts[1]
 
-	nsg, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterId, nsgId).Execute()
+	nsg, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, nsgID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find Network Security Group %q", nsgId)
+			return nil, fmt.Errorf("unable to find Network Security Group %q", nsgID)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the Network Security Group %q, %q", d.Id(), err)
+		return nil, fmt.Errorf("an error occurred while retrieving the Network Security Group %q, %q", d.Id(), err)
 	}
 
 	log.Printf("[INFO] Datacenter found: %+v", nsg)
-	if err = d.Set("datacenter_id", datacenterId); err != nil {
+	if err = d.Set("datacenter_id", datacenterID); err != nil {
 		return nil, err
 	}
 	if err = setNetworkSecurityGroupData(d, &nsg); err != nil {

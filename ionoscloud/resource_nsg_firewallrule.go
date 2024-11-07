@@ -98,7 +98,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a nsg firewall rule: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a nsg firewall rule: %w", err))
 		return diags
 	}
 	d.SetId(*fw.Id)
@@ -128,7 +128,7 @@ func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta i
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a firewall rule dcId: %s nsg_id: %s ID: %s %s",
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a firewall rule dcId: %s nsg_id: %s ID: %s %w",
 			d.Get("datacenter_id").(string), d.Get("nsg_id").(string), d.Id(), err))
 		return diags
 	}
@@ -196,18 +196,18 @@ func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta
 
 	dcId := parts[0]
 	nsgId := parts[1]
-	firewallId := parts[2]
+	firewallID := parts[2]
 
 	fw, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, dcId,
-		nsgId, firewallId).Execute()
+		nsgId, firewallID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find firewall rule %q", firewallId)
+			return nil, fmt.Errorf("unable to find firewall rule %q", firewallID)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving firewall rule %q: %q ", firewallId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving firewall rule %q: %q ", firewallID, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {
