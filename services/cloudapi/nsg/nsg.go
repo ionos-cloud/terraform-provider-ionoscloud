@@ -9,12 +9,14 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 )
 
+// Service implements utility methods for the Network Security Group
 type Service struct {
 	Client *ionoscloud.APIClient
 	Meta   interface{}
 	D      *schema.ResourceData
 }
 
+// PutServerNSG updates the security groups of a server
 func (nsg *Service) PutServerNSG(ctx context.Context, dcID, serverID string, rawIDs []any) diag.Diagnostics {
 	if dcID == "" || serverID == "" {
 		return diag.Errorf("dcID and serverID must be set")
@@ -23,9 +25,9 @@ func (nsg *Service) PutServerNSG(ctx context.Context, dcID, serverID string, raw
 		return nil
 	}
 	ids := make([]string, 0)
-	for _, rawId := range rawIDs {
-		if rawId != nil {
-			id := rawId.(string)
+	for _, rawID := range rawIDs {
+		if rawID != nil {
+			id := rawID.(string)
 			ids = append(ids, id)
 		}
 	}
@@ -42,6 +44,7 @@ func (nsg *Service) PutServerNSG(ctx context.Context, dcID, serverID string, raw
 	return nil
 }
 
+// PutNICNSG updates the security groups of a NIC
 func (nsg *Service) PutNICNSG(ctx context.Context, dcID, serverID, nicID string, rawIDs []any) diag.Diagnostics {
 	if dcID == "" || serverID == "" || nicID == "" {
 		return diag.Errorf("dcID and serverID must be set")
@@ -69,6 +72,7 @@ func (nsg *Service) PutNICNSG(ctx context.Context, dcID, serverID, nicID string,
 	return nil
 }
 
+// SetNSGInResourceData sets the security groups in the schema
 func SetNSGInResourceData(d *schema.ResourceData, items *[]ionoscloud.SecurityGroup) error {
 	if items == nil {
 		return nil

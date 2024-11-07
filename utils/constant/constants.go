@@ -97,7 +97,7 @@ const (
 	NetworkSecurityGroupResource                 = "ionoscloud_nsg"
 	NSGFirewallRuleResource                      = "ionoscloud_nsg_firewallrule"
 	NetworkSecurityGroupTestResource             = "test_nsg"
-	NetworkSecurityGroupDataSourceById           = "test_nsg_id"
+	NetworkSecurityGroupDataSourceByID           = "test_nsg_id"
 	NetworkSecurityGroupDataSourceByName         = "test_nsg_name"
 	NetworkSecurityGroupFirewallRuleResource     = "ionoscloud_nsg_firewallrule"
 	NetworkSecurityGroupFirewallRuleTestResource = "test_nsg_firewallrule"

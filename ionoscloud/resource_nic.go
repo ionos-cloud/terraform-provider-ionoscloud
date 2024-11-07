@@ -131,7 +131,7 @@ and log the extent to which your instances are being accessed.`,
 // on the field that changes. This is needed because the API does not support PATCH for all flowlog fields except name.
 // The API also does not support DELETE on the flowlog, so the whole resource needs to be re-created.
 func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	//we do not want to check in case of resource creation
+	// we do not want to check in case of resource creation
 	if d.Id() == "" {
 		return nil
 	}
