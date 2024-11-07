@@ -22,7 +22,7 @@ type FlowLogProperties struct {
 	Action *string `json:"action"`
 	// Specifies the traffic direction pattern.
 	Direction *string `json:"direction"`
-	// The S3 bucket name of an existing IONOS Cloud S3 bucket.
+	// The bucket name of an existing IONOS Cloud Object storage bucket.
 	Bucket *string `json:"bucket"`
 }
 

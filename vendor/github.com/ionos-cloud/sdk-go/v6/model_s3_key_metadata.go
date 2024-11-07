@@ -19,17 +19,17 @@ import (
 type S3KeyMetadata struct {
 	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11  Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
 	Etag *string `json:"etag,omitempty"`
-	// The time when the S3 key was created.
+	// The time when the Object storage key was created.
 	CreatedDate *IonosTime
 	// Unique name of the identity that created the resource.
 	CreatedBy *string `json:"createdBy,omitempty"`
-	// The unique ID of the user who created the S3 key.
+	// The unique ID of the user who created the Object storage key.
 	CreatedByUserId *string `json:"createdByUserId,omitempty"`
-	// The last time the S3 key was modified.
+	// The last time the Object storage key was modified.
 	LastModifiedDate *IonosTime
-	// Unique name of the identity that last modified the S3 key.
+	// Unique name of the identity that last modified the Object storage key.
 	LastModifiedBy *string `json:"lastModifiedBy,omitempty"`
-	// The unique ID of the user who last modified the S3 key.
+	// The unique ID of the user who last modified the Object storage key.
 	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
 }
 

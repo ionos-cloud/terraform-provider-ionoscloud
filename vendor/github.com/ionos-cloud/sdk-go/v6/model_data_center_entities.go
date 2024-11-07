@@ -22,6 +22,7 @@ type DataCenterEntities struct {
 	Lans                 *Lans                 `json:"lans,omitempty"`
 	Networkloadbalancers *NetworkLoadBalancers `json:"networkloadbalancers,omitempty"`
 	Natgateways          *NatGateways          `json:"natgateways,omitempty"`
+	Securitygroups       *SecurityGroups       `json:"securitygroups,omitempty"`
 }
 
 // NewDataCenterEntities instantiates a new DataCenterEntities object
@@ -270,6 +271,44 @@ func (o *DataCenterEntities) HasNatgateways() bool {
 	return false
 }
 
+// GetSecuritygroups returns the Securitygroups field value
+// If the value is explicit nil, nil is returned
+func (o *DataCenterEntities) GetSecuritygroups() *SecurityGroups {
+	if o == nil {
+		return nil
+	}
+
+	return o.Securitygroups
+
+}
+
+// GetSecuritygroupsOk returns a tuple with the Securitygroups field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DataCenterEntities) GetSecuritygroupsOk() (*SecurityGroups, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Securitygroups, true
+}
+
+// SetSecuritygroups sets field value
+func (o *DataCenterEntities) SetSecuritygroups(v SecurityGroups) {
+
+	o.Securitygroups = &v
+
+}
+
+// HasSecuritygroups returns a boolean if a field has been set.
+func (o *DataCenterEntities) HasSecuritygroups() bool {
+	if o != nil && o.Securitygroups != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o DataCenterEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Servers != nil {
@@ -294,6 +333,10 @@ func (o DataCenterEntities) MarshalJSON() ([]byte, error) {
 
 	if o.Natgateways != nil {
 		toSerialize["natgateways"] = o.Natgateways
+	}
+
+	if o.Securitygroups != nil {
+		toSerialize["securitygroups"] = o.Securitygroups
 	}
 
 	return json.Marshal(toSerialize)

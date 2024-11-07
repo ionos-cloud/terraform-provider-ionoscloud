@@ -14,111 +14,111 @@ import (
 	"encoding/json"
 )
 
-// S3Bucket struct for S3Bucket
-type S3Bucket struct {
-	// The name of the Object storage bucket.
-	Name *string `json:"name"`
+// ListOfIds struct for ListOfIds
+type ListOfIds struct {
+	// The list of IDs
+	Ids *[]string `json:"ids"`
 }
 
-// NewS3Bucket instantiates a new S3Bucket object
+// NewListOfIds instantiates a new ListOfIds object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewS3Bucket(name string) *S3Bucket {
-	this := S3Bucket{}
+func NewListOfIds(ids []string) *ListOfIds {
+	this := ListOfIds{}
 
-	this.Name = &name
+	this.Ids = &ids
 
 	return &this
 }
 
-// NewS3BucketWithDefaults instantiates a new S3Bucket object
+// NewListOfIdsWithDefaults instantiates a new ListOfIds object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewS3BucketWithDefaults() *S3Bucket {
-	this := S3Bucket{}
+func NewListOfIdsWithDefaults() *ListOfIds {
+	this := ListOfIds{}
 	return &this
 }
 
-// GetName returns the Name field value
+// GetIds returns the Ids field value
 // If the value is explicit nil, nil is returned
-func (o *S3Bucket) GetName() *string {
+func (o *ListOfIds) GetIds() *[]string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Name
+	return o.Ids
 
 }
 
-// GetNameOk returns a tuple with the Name field value
+// GetIdsOk returns a tuple with the Ids field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *S3Bucket) GetNameOk() (*string, bool) {
+func (o *ListOfIds) GetIdsOk() (*[]string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Name, true
+	return o.Ids, true
 }
 
-// SetName sets field value
-func (o *S3Bucket) SetName(v string) {
+// SetIds sets field value
+func (o *ListOfIds) SetIds(v []string) {
 
-	o.Name = &v
+	o.Ids = &v
 
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *S3Bucket) HasName() bool {
-	if o != nil && o.Name != nil {
+// HasIds returns a boolean if a field has been set.
+func (o *ListOfIds) HasIds() bool {
+	if o != nil && o.Ids != nil {
 		return true
 	}
 
 	return false
 }
 
-func (o S3Bucket) MarshalJSON() ([]byte, error) {
+func (o ListOfIds) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Name != nil {
-		toSerialize["name"] = o.Name
+	if o.Ids != nil {
+		toSerialize["ids"] = o.Ids
 	}
 
 	return json.Marshal(toSerialize)
 }
 
-type NullableS3Bucket struct {
-	value *S3Bucket
+type NullableListOfIds struct {
+	value *ListOfIds
 	isSet bool
 }
 
-func (v NullableS3Bucket) Get() *S3Bucket {
+func (v NullableListOfIds) Get() *ListOfIds {
 	return v.value
 }
 
-func (v *NullableS3Bucket) Set(val *S3Bucket) {
+func (v *NullableListOfIds) Set(val *ListOfIds) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableS3Bucket) IsSet() bool {
+func (v NullableListOfIds) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableS3Bucket) Unset() {
+func (v *NullableListOfIds) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableS3Bucket(val *S3Bucket) *NullableS3Bucket {
-	return &NullableS3Bucket{value: val, isSet: true}
+func NewNullableListOfIds(val *ListOfIds) *NullableListOfIds {
+	return &NullableListOfIds{value: val, isSet: true}
 }
 
-func (v NullableS3Bucket) MarshalJSON() ([]byte, error) {
+func (v NullableListOfIds) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableS3Bucket) UnmarshalJSON(src []byte) error {
+func (v *NullableListOfIds) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

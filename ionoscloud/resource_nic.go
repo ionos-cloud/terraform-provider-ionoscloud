@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 	"log"
 	"strings"
 	"time"
@@ -186,7 +187,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
-	createdNic, apiResponse, err := ns.Create(ctx, dcid, srvid, nic)
+	createdNic, _, err := ns.Create(ctx, dcid, srvid, nic)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occurred while creating a nic: %w", err))
 		return diags
@@ -197,22 +198,12 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		if v, ok := d.GetOk("security_groups_ids"); ok {
 			raw := v.(*schema.Set).List()
-			ids := make([]string, 0)
-			for _, rawId := range raw {
-				if rawId != nil {
-					id := rawId.(string)
-					ids = append(ids, id)
-				}
-			}
-			if len(ids) > 0 {
-				_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, dcid, srvid, d.Id()).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-				if err != nil {
-					return diag.FromErr(err)
-				}
+			nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+			if diagnostic := nsgService.PutNICNSG(ctx, dcid, srvid, d.Id(), raw); diagnostic != nil {
+				return diagnostic
 			}
 		}
 	}
-
 	// Sometimes there is an error because the nic is not found after it's created.
 	//Probably a read write consistency issue.
 	//We're retrying for 5 minutes. 404 - means we keep on trying.
@@ -220,6 +211,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	// Probably a read write consistency issue.
 	// We're retrying for 5 minutes. 404 - means we keep on trying.
 	var foundNic = &ionoscloud.Nic{}
+	var apiResponse = &ionoscloud.APIResponse{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error
 		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 3)
@@ -241,7 +233,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.FromErr(fmt.Errorf("could not find nic with id %s after creation ", *nic.Id))
 	}
 
-	return diag.FromErr(cloudapinic.NicSetData(d, foundNic))
+	return resourceNicRead(ctx, d, meta)
 }
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -271,9 +263,9 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
-	dcId := d.Get("datacenter_id").(string)
-	srvId := d.Get("server_id").(string)
-	nicId := d.Id()
+	dcID := d.Get("datacenter_id").(string)
+	srvID := d.Get("server_id").(string)
+	nicID := d.Id()
 	var err error
 	if d.HasChange("flowlog") {
 		oldV, newV := d.GetChange("flowlog")
@@ -290,7 +282,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 						D:      d,
 						Client: client,
 					}
-					err = fw.CreateOrPatchForServer(ctx, dcId, srvId, nicId, firstFlowLogId, flowLog)
+					err = fw.CreateOrPatchForServer(ctx, dcID, srvID, nicID, firstFlowLogId, flowLog)
 					if err != nil {
 						//if we have a create that failed, we do not want to save in state
 						// saving in state would mean a diff that would force a re-create
@@ -310,25 +302,18 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	_, _, err = ns.Update(ctx, dcId, srvId, nicId, *nic.Properties)
+	_, _, err = ns.Update(ctx, dcID, srvID, nicID, *nic.Properties)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occurred while updating a nic: %w", err))
 		return diags
 	}
 	if d.HasChange("security_groups_ids") {
-		var ids []string
 		if v, ok := d.GetOk("security_groups_ids"); ok {
 			raw := v.(*schema.Set).List()
-			for _, rawId := range raw {
-				if rawId != nil {
-					id := rawId.(string)
-					ids = append(ids, id)
-				}
+			nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+			if diagnostic := nsgService.PutNICNSG(ctx, dcID, srvID, nicID, raw); diagnostic != nil {
+				return diagnostic
 			}
-		}
-		_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, dcId, srvId, nicId).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-		if err != nil {
-			return diag.FromErr(err)
 		}
 	}
 

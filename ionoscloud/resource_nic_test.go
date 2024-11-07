@@ -201,7 +201,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 const testCreateDataCenterAndServer = `
 resource "ionoscloud_datacenter" "test_datacenter" {
   name = "nic-test"
-	location = "de/fkb"
+  location = "us/las"
 }
 resource "ionoscloud_ipblock" "test_server" {
   location = ionoscloud_datacenter.test_datacenter.location
@@ -224,7 +224,6 @@ resource "ionoscloud_server" "test_server" {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {

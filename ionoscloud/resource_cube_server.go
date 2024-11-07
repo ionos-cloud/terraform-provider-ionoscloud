@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 	"log"
 	"strings"
 
@@ -397,7 +398,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	var image, imageAlias string
 
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
 	serverName := d.Get("name").(string)
 	server.Properties.Name = &serverName
@@ -558,19 +559,9 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
 		raw := v.(*schema.Set).List()
-		ids := make([]string, 0, len(raw))
-		for _, rawId := range raw {
-			if rawId != nil {
-				id := rawId.(string)
-				ids = append(ids, id)
-			}
-		}
-		if len(ids) > 0 {
-			_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(
-				ctx, dcId, *createdServer.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-			if err != nil {
-				return diag.FromErr(err)
-			}
+		nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+		if diagnostic := nsgService.PutServerNSG(ctx, dcID, *createdServer.Id, raw); diagnostic != nil {
+			return diagnostic
 		}
 	}
 
@@ -600,19 +591,9 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
 			raw := v.(*schema.Set).List()
-			ids := make([]string, 0, len(raw))
-			for _, rawId := range raw {
-				if rawId != nil {
-					id := rawId.(string)
-					ids = append(ids, id)
-				}
-			}
-			if len(ids) > 0 {
-				_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(
-					ctx, dcId, d.Id(), primaryNicID).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-				if err != nil {
-					return diag.FromErr(err)
-				}
+			nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+			if diagnostic := nsgService.PutNICNSG(ctx, dcID, d.Id(), primaryNicID, raw); diagnostic != nil {
+				return diagnostic
 			}
 		}
 	}
@@ -648,7 +629,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		initialState := initialState.(string)
 
 		if strings.EqualFold(initialState, constant.CubeVMStateStop) {
-			err := ss.Stop(ctx, dcId, d.Id(), serverType)
+			err := ss.Stop(ctx, dcID, d.Id(), serverType)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -724,17 +705,10 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	nsgIDs := make([]string, 0)
 	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
-		for _, group := range *server.Entities.Securitygroups.Items {
-			if group.Id != nil {
-				id := *group.Id
-				nsgIDs = append(nsgIDs, id)
-			}
+		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
+			return diag.FromErr(err)
 		}
-	}
-	if err := d.Set("security_groups_ids", nsgIDs); err != nil {
-		return diag.FromErr(fmt.Errorf("error setting security_groups_ids %w", err))
 	}
 
 	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
@@ -891,19 +865,12 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if d.HasChange("security_groups_ids") {
-		ids := make([]string, 0)
 		if v, ok := d.GetOk("security_groups_ids"); ok {
 			raw := v.(*schema.Set).List()
-			for _, rawId := range raw {
-				if rawId != nil {
-					id := rawId.(string)
-					ids = append(ids, id)
-				}
+			nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+			if diagnostic := nsgService.PutServerNSG(ctx, dcId, d.Id(), raw); diagnostic != nil {
+				return diagnostic
 			}
-		}
-		_, _, err := client.SecurityGroupsApi.DatacentersServersSecuritygroupsPut(ctx, dcId, d.Id()).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-		if err != nil {
-			return diag.FromErr(err)
 		}
 	}
 
@@ -1087,18 +1054,11 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if d.HasChange("nic.0.security_groups_ids") {
-			ids := make([]string, 0)
 			if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
 				raw := v.(*schema.Set).List()
-				for _, rawId := range raw {
-					if rawId != nil {
-						id := rawId.(string)
-						ids = append(ids, id)
-					}
-				}
-				_, _, err := client.SecurityGroupsApi.DatacentersServersNicsSecuritygroupsPut(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Securitygroups(*ionoscloud.NewListOfIds(ids)).Execute()
-				if err != nil {
-					return diag.FromErr(err)
+				nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+				if diagnostic := nsgService.PutNICNSG(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, raw); diagnostic != nil {
+					return diagnostic
 				}
 			}
 		}
@@ -1197,17 +1157,10 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	nsgIDs := make([]string, 0)
 	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
-		for _, group := range *server.Entities.Securitygroups.Items {
-			if group.Id != nil {
-				id := *group.Id
-				nsgIDs = append(nsgIDs, id)
-			}
+		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
+			return nil, err
 		}
-	}
-	if err := d.Set("security_groups_ids", nsgIDs); err != nil {
-		return nil, fmt.Errorf("error setting security_groups_ids %w", err)
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {

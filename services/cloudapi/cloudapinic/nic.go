@@ -3,6 +3,7 @@ package cloudapinic
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -284,17 +285,10 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 				return fmt.Errorf("error setting pci_slot %w", err)
 			}
 		}
-		nsgIDs := make([]string, 0)
 		if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
-			for _, group := range *nic.Entities.Securitygroups.Items {
-				if group.Id != nil {
-					id := *group.Id
-					nsgIDs = append(nsgIDs, id)
-				}
+			if err := nsg.SetNSGInResourceData(d, nic.Entities.Securitygroups.Items); err != nil {
+				return err
 			}
-		}
-		if err := d.Set("security_groups_ids", nsgIDs); err != nil {
-			return fmt.Errorf("error setting security_groups_ids %w", err)
 		}
 	}
 

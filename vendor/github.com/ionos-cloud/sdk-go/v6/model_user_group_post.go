@@ -14,111 +14,111 @@ import (
 	"encoding/json"
 )
 
-// S3Bucket struct for S3Bucket
-type S3Bucket struct {
-	// The name of the Object storage bucket.
-	Name *string `json:"name"`
+// UserGroupPost struct for UserGroupPost
+type UserGroupPost struct {
+	// The resource's unique identifier.
+	Id *string `json:"id"`
 }
 
-// NewS3Bucket instantiates a new S3Bucket object
+// NewUserGroupPost instantiates a new UserGroupPost object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewS3Bucket(name string) *S3Bucket {
-	this := S3Bucket{}
+func NewUserGroupPost(id string) *UserGroupPost {
+	this := UserGroupPost{}
 
-	this.Name = &name
+	this.Id = &id
 
 	return &this
 }
 
-// NewS3BucketWithDefaults instantiates a new S3Bucket object
+// NewUserGroupPostWithDefaults instantiates a new UserGroupPost object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewS3BucketWithDefaults() *S3Bucket {
-	this := S3Bucket{}
+func NewUserGroupPostWithDefaults() *UserGroupPost {
+	this := UserGroupPost{}
 	return &this
 }
 
-// GetName returns the Name field value
+// GetId returns the Id field value
 // If the value is explicit nil, nil is returned
-func (o *S3Bucket) GetName() *string {
+func (o *UserGroupPost) GetId() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Name
+	return o.Id
 
 }
 
-// GetNameOk returns a tuple with the Name field value
+// GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *S3Bucket) GetNameOk() (*string, bool) {
+func (o *UserGroupPost) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Name, true
+	return o.Id, true
 }
 
-// SetName sets field value
-func (o *S3Bucket) SetName(v string) {
+// SetId sets field value
+func (o *UserGroupPost) SetId(v string) {
 
-	o.Name = &v
+	o.Id = &v
 
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *S3Bucket) HasName() bool {
-	if o != nil && o.Name != nil {
+// HasId returns a boolean if a field has been set.
+func (o *UserGroupPost) HasId() bool {
+	if o != nil && o.Id != nil {
 		return true
 	}
 
 	return false
 }
 
-func (o S3Bucket) MarshalJSON() ([]byte, error) {
+func (o UserGroupPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Name != nil {
-		toSerialize["name"] = o.Name
+	if o.Id != nil {
+		toSerialize["id"] = o.Id
 	}
 
 	return json.Marshal(toSerialize)
 }
 
-type NullableS3Bucket struct {
-	value *S3Bucket
+type NullableUserGroupPost struct {
+	value *UserGroupPost
 	isSet bool
 }
 
-func (v NullableS3Bucket) Get() *S3Bucket {
+func (v NullableUserGroupPost) Get() *UserGroupPost {
 	return v.value
 }
 
-func (v *NullableS3Bucket) Set(val *S3Bucket) {
+func (v *NullableUserGroupPost) Set(val *UserGroupPost) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableS3Bucket) IsSet() bool {
+func (v NullableUserGroupPost) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableS3Bucket) Unset() {
+func (v *NullableUserGroupPost) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableS3Bucket(val *S3Bucket) *NullableS3Bucket {
-	return &NullableS3Bucket{value: val, isSet: true}
+func NewNullableUserGroupPost(val *UserGroupPost) *NullableUserGroupPost {
+	return &NullableUserGroupPost{value: val, isSet: true}
 }
 
-func (v NullableS3Bucket) MarshalJSON() ([]byte, error) {
+func (v NullableUserGroupPost) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableS3Bucket) UnmarshalJSON(src []byte) error {
+func (v *NullableUserGroupPost) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

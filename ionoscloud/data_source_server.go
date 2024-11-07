@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -438,16 +438,10 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 		}
 	}
 
-	var nsgIDs []string
-	if server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
-		for _, nsg := range *server.Entities.Securitygroups.Items {
-			if nsg.Id != nil {
-				nsgIDs = append(nsgIDs, *nsg.Id)
-			}
+	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
+			return err
 		}
-	}
-	if err := d.Set("security_groups_ids", nsgIDs); err != nil {
-		return err
 	}
 
 	if token != nil {
