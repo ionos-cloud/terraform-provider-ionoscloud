@@ -18,16 +18,16 @@ func TestAccNSGRuleImportBasic(t *testing.T) {
 		CheckDestroy:             testAccCheckNSGRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckNetworkSecurityGroupFirewallRulesBasic,
+				Config: testAccCheckNSGFirewallRulesBasic,
 			},
 			{
-				ResourceName:      constant.NetworkSecurityGroupFirewallRuleResource + "." + constant.NetworkSecurityGroupFirewallRuleTestResource + "_1",
+				ResourceName:      constant.NSGFirewallRuleResource + "." + constant.NSGFirewallRuleTestResource + "_1",
 				ImportStateIdFunc: testAccNSGRuleImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				ResourceName:      constant.NetworkSecurityGroupFirewallRuleResource + "." + constant.NetworkSecurityGroupFirewallRuleTestResource + "_2",
+				ResourceName:      constant.NSGFirewallRuleResource + "." + constant.NSGFirewallRuleTestResource + "_2",
 				ImportStateIdFunc: testAccNSGRuleImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -40,7 +40,7 @@ func testAccNSGRuleImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != constant.NetworkSecurityGroupFirewallRuleResource {
+		if rs.Type != constant.NSGFirewallRuleResource {
 			continue
 		}
 

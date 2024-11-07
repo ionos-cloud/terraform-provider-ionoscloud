@@ -272,12 +272,12 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 }`
 
 const testSecurityGroups = `
-resource ` + constant.NetworkSecurityGroupResource + ` example_1 {
+resource ` + constant.NSGResource + ` example_1 {
   name          = "testing-name-1"
   description   = "testing-description-1"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
 }
-resource ` + constant.NetworkSecurityGroupResource + ` example_2 {
+resource ` + constant.NSGResource + ` example_2 {
   name          = "testing-name-2"
   description   = "testing-description-2"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id

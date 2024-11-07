@@ -65,9 +65,9 @@ func dataSourceNSGFirewallRuleSchema() map[string]*schema.Schema {
 	}
 }
 
-func dataSourceNetworkSecurityGroup() *schema.Resource {
+func dataSourceNSG() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceNetworkSecurityGroupRead,
+		ReadContext: dataSourceNSGRead,
 		Schema: map[string]*schema.Schema{
 			"datacenter_id": {
 				Type:             schema.TypeString,
@@ -101,7 +101,7 @@ func dataSourceNetworkSecurityGroup() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkSecurityGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
@@ -121,7 +121,7 @@ func dataSourceNetworkSecurityGroupRead(ctx context.Context, d *schema.ResourceD
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while retrieving network security group with ID: %s, %w", id.(string), err))
 		}
-		return diag.FromErr(setNetworkSecurityGroupDataSource(d, &securityGroup))
+		return diag.FromErr(setNSGDataSource(d, &securityGroup))
 	}
 
 	securityGroups, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsGet(ctx, datacenterID).Depth(3).Execute()
@@ -144,15 +144,15 @@ func dataSourceNetworkSecurityGroupRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(fmt.Errorf("more than one network security group found with the specified criteria name = %s", name))
 	}
 	securityGroup := results[0]
-	if err := setNetworkSecurityGroupDataSource(d, &securityGroup); err != nil {
+	if err := setNSGDataSource(d, &securityGroup); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func setNetworkSecurityGroupDataSource(d *schema.ResourceData, securityGroup *ionoscloud.SecurityGroup) error {
-	if err := setNetworkSecurityGroupData(d, securityGroup); err != nil {
+func setNSGDataSource(d *schema.ResourceData, securityGroup *ionoscloud.SecurityGroup) error {
+	if err := setNSGData(d, securityGroup); err != nil {
 		return err
 	}
 	if securityGroup.Entities != nil {
@@ -198,7 +198,7 @@ func setNetworkSecurityGroupDataSource(d *schema.ResourceData, securityGroup *io
 			}
 			if len(rulesData) > 0 {
 				if err := d.Set("rules", rulesData); err != nil {
-					return fmt.Errorf("error while setting rules property for NetworkSecurityGroup data source %s: %w", d.Id(), err)
+					return fmt.Errorf("error while setting rules property for NSG data source %s: %w", d.Id(), err)
 				}
 			}
 		}

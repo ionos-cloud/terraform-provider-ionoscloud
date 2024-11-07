@@ -11,19 +11,19 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-func TestAccNetworkSecurityGroupImportBasic(t *testing.T) {
+func TestAccNSGImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-		CheckDestroy:             testAccCheckNetworkSecurityGroupDestroyCheck,
+		CheckDestroy:             testAccCheckNSGDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckNetworkSecurityGroupConfigBasic,
+				Config: testAccCheckNSGConfigBasic,
 			},
 
 			{
-				ResourceName:            constant.NetworkSecurityGroupResource + "." + constant.NetworkSecurityGroupTestResource,
-				ImportStateIdFunc:       testAccNetworkSecurityGroupImportStateId,
+				ResourceName:            constant.NSGResource + "." + constant.NSGTestResource,
+				ImportStateIdFunc:       testAccNSGImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"rule_ids"},
@@ -32,11 +32,11 @@ func TestAccNetworkSecurityGroupImportBasic(t *testing.T) {
 	})
 }
 
-func testAccNetworkSecurityGroupImportStateId(s *terraform.State) (string, error) {
+func testAccNSGImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != constant.NetworkSecurityGroupResource {
+		if rs.Type != constant.NSGResource {
 			continue
 		}
 

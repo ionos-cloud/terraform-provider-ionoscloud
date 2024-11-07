@@ -94,13 +94,12 @@ const (
 
 // NSG Constants
 const (
-	NetworkSecurityGroupResource                 = "ionoscloud_nsg"
-	NSGFirewallRuleResource                      = "ionoscloud_nsg_firewallrule"
-	NetworkSecurityGroupTestResource             = "test_nsg"
-	NetworkSecurityGroupDataSourceByID           = "test_nsg_id"
-	NetworkSecurityGroupDataSourceByName         = "test_nsg_name"
-	NetworkSecurityGroupFirewallRuleResource     = "ionoscloud_nsg_firewallrule"
-	NetworkSecurityGroupFirewallRuleTestResource = "test_nsg_firewallrule"
+	NSGResource                 = "ionoscloud_nsg"
+	NSGTestResource             = "test_nsg"
+	NGDataSourceByID            = "test_nsg_id"
+	NSGDataSourceByName         = "test_nsg_name"
+	NSGFirewallRuleResource     = "ionoscloud_nsg_firewallrule"
+	NSGFirewallRuleTestResource = "test_nsg_firewallrule"
 )
 
 // Lan Constants

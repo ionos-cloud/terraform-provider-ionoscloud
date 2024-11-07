@@ -15,7 +15,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
-func TestAccNetworkSecurityGroupBasic(t *testing.T) {
+func TestAccNSGBasic(t *testing.T) {
 	var nsg ionoscloud.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
@@ -23,55 +23,55 @@ func TestAccNetworkSecurityGroupBasic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-		CheckDestroy:             testAccCheckNetworkSecurityGroupDestroyCheck,
+		CheckDestroy:             testAccCheckNSGDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckNetworkSecurityGroupConfigBasic,
+				Config: testAccCheckNSGConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "testing-name"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description", "testing-description"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#", "0"),
+					testAccCheckNSGExists(constant.NSGResource+"."+constant.NSGTestResource, &nsg),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "name", "testing-name"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "description", "testing-description"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "rule_ids.#", "0"),
 				),
 			},
 			{
-				Config: testAccCheckNetworkSecurityGroupDataSourceMatchId,
+				Config: testAccCheckNSGDataSourceMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "testing-name"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description", "testing-description"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#", "0"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "name", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "description", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rule_ids.#", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#"),
+					testAccCheckNSGExists(constant.NSGResource+"."+constant.NSGTestResource, &nsg),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "name", "testing-name"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "description", "testing-description"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "rule_ids.#", "0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "name", constant.NSGResource+"."+constant.NSGTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "description", constant.NSGResource+"."+constant.NSGTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rule_ids.#", constant.NSGResource+"."+constant.NSGTestResource, "rule_ids.#"),
 				),
 			},
 			{
-				Config: testAccCheckNetworkSecurityGroupDataSourceMatchName,
+				Config: testAccCheckNSGDataSourceMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "testing-name"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description", "testing-description"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#", "0"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByName, "id", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "id"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByName, "description", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByName, "rule_ids.#", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#"),
+					testAccCheckNSGExists(constant.NSGResource+"."+constant.NSGTestResource, &nsg),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "name", "testing-name"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "description", "testing-description"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "rule_ids.#", "0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NSGDataSourceByName, "id", constant.NSGResource+"."+constant.NSGTestResource, "id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NSGDataSourceByName, "description", constant.NSGResource+"."+constant.NSGTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NSGDataSourceByName, "rule_ids.#", constant.NSGResource+"."+constant.NSGTestResource, "rule_ids.#"),
 				),
 			},
 			{
-				Config: testAccCheckNetworkSecurityGroupConfigBasicUpdated,
+				Config: testAccCheckNSGConfigBasicUpdated,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "updated-name"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description", "updated-description"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#", "0"),
+					testAccCheckNSGExists(constant.NSGResource+"."+constant.NSGTestResource, &nsg),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "name", "updated-name"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "description", "updated-description"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "rule_ids.#", "0"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccNetworkSecurityGroupFirewallRules(t *testing.T) {
+func TestAccNSGFirewallRules(t *testing.T) {
 	var nsg ionoscloud.SecurityGroup
 	var rule1, rule2, rule3 *ionoscloud.FirewallRule
 	resource.Test(t, resource.TestCase{
@@ -82,150 +82,150 @@ func TestAccNetworkSecurityGroupFirewallRules(t *testing.T) {
 		CheckDestroy:             testAccCheckNSGRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckNetworkSecurityGroupFirewallRulesBasic,
+				Config: testAccCheckNSGFirewallRulesBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
-					testAccCheckNSGFirewallRuleExists(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", rule1),
-					testAccCheckNSGFirewallRuleExists(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", rule2),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "testing-name"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description", "testing-description"),
+					testAccCheckNSGExists(constant.NSGResource+"."+constant.NSGTestResource, &nsg),
+					testAccCheckNSGFirewallRuleExists(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", rule1),
+					testAccCheckNSGFirewallRuleExists(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", rule2),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "name", "testing-name"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "description", "testing-description"),
 
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "name", "SG Rule 1"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "protocol", "ICMP"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_mac", "00:0a:95:9d:68:16"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_ip", "22.231.113.64"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "target_ip", "22.231.113.66"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_type", "1"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_code", "8"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "type", "INGRESS"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "name", "SG Rule 1"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "protocol", "ICMP"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "source_mac", "00:0a:95:9d:68:16"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "source_ip", "22.231.113.64"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "target_ip", "22.231.113.66"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "icmp_type", "1"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "icmp_code", "8"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "type", "INGRESS"),
 
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "name", "SG Rule 2"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "protocol", "TCP"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "source_mac", "00:0a:95:9d:68:16"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "source_ip", "22.231.113.64"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "target_ip", "22.231.113.70"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "port_range_start", "10"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "port_range_end", "270"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "type", "EGRESS"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "name", "SG Rule 2"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "protocol", "TCP"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "source_mac", "00:0a:95:9d:68:16"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "source_ip", "22.231.113.64"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "target_ip", "22.231.113.70"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "port_range_start", "10"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "port_range_end", "270"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "type", "EGRESS"),
 				),
 			},
 			{
-				Config: testAccCheckNetworkSecurityGroupFirewallRulesBasicAddRule,
+				Config: testAccCheckNSGFirewallRulesBasicAddRule,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
-					testAccCheckNSGFirewallRuleExists(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", rule1),
-					testAccCheckNSGFirewallRuleExists(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", rule2),
-					testAccCheckNSGFirewallRuleExists(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", rule3),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "testing-name"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description", "testing-description"),
+					testAccCheckNSGExists(constant.NSGResource+"."+constant.NSGTestResource, &nsg),
+					testAccCheckNSGFirewallRuleExists(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", rule1),
+					testAccCheckNSGFirewallRuleExists(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", rule2),
+					testAccCheckNSGFirewallRuleExists(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", rule3),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "name", "testing-name"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "description", "testing-description"),
 
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "name", "SG Rule 1"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "protocol", "ICMP"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_mac", "00:0a:95:9d:68:16"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_ip", "22.231.113.64"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "target_ip", "22.231.113.66"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_type", "1"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_code", "8"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "type", "INGRESS"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "name", "SG Rule 1"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "protocol", "ICMP"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "source_mac", "00:0a:95:9d:68:16"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "source_ip", "22.231.113.64"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "target_ip", "22.231.113.66"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "icmp_type", "1"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "icmp_code", "8"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "type", "INGRESS"),
 
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "name", "SG Rule 2"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "protocol", "TCP"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "source_mac", "00:0a:95:9d:68:16"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "source_ip", "22.231.113.64"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "target_ip", "22.231.113.70"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "port_range_start", "10"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "port_range_end", "270"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "type", "EGRESS"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "name", "SG Rule 2"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "protocol", "TCP"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "source_mac", "00:0a:95:9d:68:16"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "source_ip", "22.231.113.64"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "target_ip", "22.231.113.70"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "port_range_start", "10"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "port_range_end", "270"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "type", "EGRESS"),
 
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "name", "SG Rule 3"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "protocol", "TCP"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "source_mac", "00:0a:95:9d:68:15"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "source_ip", "22.231.113.11"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "target_ip", "22.231.113.75"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "type", "EGRESS"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "name", "SG Rule 3"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "protocol", "TCP"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "source_mac", "00:0a:95:9d:68:15"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "source_ip", "22.231.113.11"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "target_ip", "22.231.113.75"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "type", "EGRESS"),
 				),
 			},
 			{
-				Config: testAccCheckNetworkSecurityGroupFirewallRulesBasicUpdateRule,
+				Config: testAccCheckNSGFirewallRulesBasicUpdateRule,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
-					testAccCheckNSGFirewallRuleExists(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", rule1),
-					testAccCheckNSGFirewallRuleExists(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", rule2),
-					testAccCheckNSGFirewallRuleExists(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", rule3),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "testing-name"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description", "testing-description"),
+					testAccCheckNSGExists(constant.NSGResource+"."+constant.NSGTestResource, &nsg),
+					testAccCheckNSGFirewallRuleExists(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", rule1),
+					testAccCheckNSGFirewallRuleExists(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", rule2),
+					testAccCheckNSGFirewallRuleExists(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", rule3),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "name", "testing-name"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "description", "testing-description"),
 
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "name", "SG Rule 1"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "protocol", "ICMP"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_mac", "00:0a:95:9d:68:16"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_ip", "22.231.113.64"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "target_ip", "22.231.113.66"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_type", "1"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_code", "8"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "type", "INGRESS"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "name", "SG Rule 1"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "protocol", "ICMP"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "source_mac", "00:0a:95:9d:68:16"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "source_ip", "22.231.113.64"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "target_ip", "22.231.113.66"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "icmp_type", "1"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "icmp_code", "8"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "type", "INGRESS"),
 
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "name", "SG Rule 2"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "protocol", "TCP"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "source_mac", "00:0a:95:9d:68:16"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "source_ip", "22.231.113.64"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "target_ip", "22.231.113.70"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "port_range_start", "10"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "port_range_end", "270"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_2", "type", "EGRESS"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "name", "SG Rule 2"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "protocol", "TCP"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "source_mac", "00:0a:95:9d:68:16"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "source_ip", "22.231.113.64"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "target_ip", "22.231.113.70"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "port_range_start", "10"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "port_range_end", "270"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_2", "type", "EGRESS"),
 
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "name", "SG Rule 3 Updated"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "protocol", "TCP"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "source_mac", "00:0a:95:9d:68:15"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "source_ip", "22.231.113.11"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "target_ip", "22.231.113.75"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "port_range_start", "800"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "port_range_end", "900"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_3", "type", "EGRESS"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "name", "SG Rule 3 Updated"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "protocol", "TCP"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "source_mac", "00:0a:95:9d:68:15"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "source_ip", "22.231.113.11"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "target_ip", "22.231.113.75"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "port_range_start", "800"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "port_range_end", "900"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_3", "type", "EGRESS"),
 				),
 			},
 			{
-				Config: testAccCheckNetworkSecurityGroupFirewallRulesBasicDeleteRules,
+				Config: testAccCheckNSGFirewallRulesBasicDeleteRules,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
-					testAccCheckNSGFirewallRuleExists(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", rule1),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "testing-name"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description", "testing-description"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "name", "SG Rule 1"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "protocol", "ICMP"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_mac", "00:0a:95:9d:68:16"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_ip", "22.231.113.64"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "target_ip", "22.231.113.66"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_type", "1"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_code", "8"),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "type", "INGRESS"),
+					testAccCheckNSGExists(constant.NSGResource+"."+constant.NSGTestResource, &nsg),
+					testAccCheckNSGFirewallRuleExists(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", rule1),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "name", "testing-name"),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "description", "testing-description"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "name", "SG Rule 1"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "protocol", "ICMP"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "source_mac", "00:0a:95:9d:68:16"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "source_ip", "22.231.113.64"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "target_ip", "22.231.113.66"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "icmp_type", "1"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "icmp_code", "8"),
+					resource.TestCheckResourceAttr(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "type", "INGRESS"),
 				),
 			},
 			{
-				Config: testAccCheckNetworkSecurityGroupFirewallRulesDataSource,
+				Config: testAccCheckNSGFirewallRulesDataSource,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkSecurityGroupExists(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, &nsg),
-					testAccCheckNSGFirewallRuleExists(constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", rule1),
-					resource.TestCheckResourceAttr(constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name", "testing-name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "name", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "description", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "description"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rule_ids.#", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rules.#", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.#"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rules.0.id", constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupTestResource, "rule_ids.0"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rules.0.name", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rules.0.protocol", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "protocol"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rules.0.source_mac", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_mac"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rules.0.source_ip", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "source_ip"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rules.0.target_ip", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "target_ip"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rules.0.icmp_type", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_type"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rules.0.icmp_code", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "icmp_code"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NetworkSecurityGroupResource+"."+constant.NetworkSecurityGroupDataSourceByID, "rules.0.type", constant.NetworkSecurityGroupFirewallRuleResource+"."+constant.NetworkSecurityGroupFirewallRuleTestResource+"_1", "type"),
+					testAccCheckNSGExists(constant.NSGResource+"."+constant.NSGTestResource, &nsg),
+					testAccCheckNSGFirewallRuleExists(constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", rule1),
+					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "name", "testing-name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "name", constant.NSGResource+"."+constant.NSGTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "description", constant.NSGResource+"."+constant.NSGTestResource, "description"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rule_ids.#", constant.NSGResource+"."+constant.NSGTestResource, "rule_ids.#"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rules.#", constant.NSGResource+"."+constant.NSGTestResource, "rule_ids.#"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rules.0.id", constant.NSGResource+"."+constant.NSGTestResource, "rule_ids.0"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rules.0.name", constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rules.0.protocol", constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "protocol"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rules.0.source_mac", constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "source_mac"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rules.0.source_ip", constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "source_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rules.0.target_ip", constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "target_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rules.0.icmp_type", constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "icmp_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rules.0.icmp_code", constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "icmp_code"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NGDataSourceByID, "rules.0.type", constant.NSGFirewallRuleResource+"."+constant.NSGFirewallRuleTestResource+"_1", "type"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckNetworkSecurityGroupDestroyCheck(s *terraform.State) error {
+func testAccCheckNSGDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -235,7 +235,7 @@ func testAccCheckNetworkSecurityGroupDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != constant.NetworkSecurityGroupResource {
+		if rs.Type != constant.NSGResource {
 			continue
 		}
 		_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
@@ -253,14 +253,14 @@ func testAccCheckNetworkSecurityGroupDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckNetworkSecurityGroupExists(n string, nsg *ionoscloud.SecurityGroup) resource.TestCheckFunc {
+func testAccCheckNSGExists(n string, nsg *ionoscloud.SecurityGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
-			return fmt.Errorf("testAccCheckNetworkSecurityGroupExists: Not found: %s", n)
+			return fmt.Errorf("testAccCheckNSGExists: Not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
@@ -276,7 +276,7 @@ func testAccCheckNetworkSecurityGroupExists(n string, nsg *ionoscloud.SecurityGr
 		foundNSG, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("error occured while fetching NetworkSecurityGroup: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching NSG: %s", rs.Primary.ID)
 		}
 		if *foundNSG.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -296,7 +296,7 @@ func testAccCheckNSGRuleDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != constant.NetworkSecurityGroupFirewallRuleResource {
+		if rs.Type != constant.NSGFirewallRuleResource {
 			continue
 		}
 		_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["nsg_id"], rs.Primary.ID).Execute()
@@ -347,51 +347,51 @@ func testAccCheckNSGFirewallRuleExists(n string, rule *ionoscloud.FirewallRule) 
 	}
 }
 
-const testAccCheckNetworkSecurityGroupConfigBasic = testAccCheckDatacenterConfigBasic + `
-resource ` + constant.NetworkSecurityGroupResource + ` ` + constant.NetworkSecurityGroupTestResource + ` {
+const testAccCheckNSGConfigBasic = testAccCheckDatacenterConfigBasic + `
+resource ` + constant.NSGResource + ` ` + constant.NSGTestResource + ` {
   name          = "testing-name"
   description   = "testing-description"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
 }
 `
 
-const testAccCheckNetworkSecurityGroupConfigBasicUpdated = testAccCheckDatacenterConfigBasic + `
-resource ` + constant.NetworkSecurityGroupResource + ` ` + constant.NetworkSecurityGroupTestResource + ` {
+const testAccCheckNSGConfigBasicUpdated = testAccCheckDatacenterConfigBasic + `
+resource ` + constant.NSGResource + ` ` + constant.NSGTestResource + ` {
   name          = "updated-name"
   description   = "updated-description"
   datacenter_id	= ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
 }
 `
 
-const testAccCheckNetworkSecurityGroupDataSourceMatchId = testAccCheckNetworkSecurityGroupConfigBasic + `
-data ` + constant.NetworkSecurityGroupResource + ` ` + constant.NetworkSecurityGroupDataSourceByID + ` {
-  id            = ` + constant.NetworkSecurityGroupResource + `.` + constant.NetworkSecurityGroupTestResource + `.id
+const testAccCheckNSGDataSourceMatchId = testAccCheckNSGConfigBasic + `
+data ` + constant.NSGResource + ` ` + constant.NGDataSourceByID + ` {
+  id            = ` + constant.NSGResource + `.` + constant.NSGTestResource + `.id
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
 }
 `
 
-const testAccCheckNetworkSecurityGroupDataSourceMatchName = testAccCheckNetworkSecurityGroupConfigBasic + `
-data ` + constant.NetworkSecurityGroupResource + ` ` + constant.NetworkSecurityGroupDataSourceByName + ` {
+const testAccCheckNSGDataSourceMatchName = testAccCheckNSGConfigBasic + `
+data ` + constant.NSGResource + ` ` + constant.NSGDataSourceByName + ` {
   name          = "testing-name"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
 }
 `
 
-const testAccCheckNetworkSecurityGroupFirewallRulesBasic = testAccCheckNetworkSecurityGroupConfigBasic + firewallRule1 + firewallRule2
-const testAccCheckNetworkSecurityGroupFirewallRulesBasicAddRule = testAccCheckNetworkSecurityGroupFirewallRulesBasic + firewallRule3
-const testAccCheckNetworkSecurityGroupFirewallRulesBasicUpdateRule = testAccCheckNetworkSecurityGroupFirewallRulesBasic + firewallRule3Updated
-const testAccCheckNetworkSecurityGroupFirewallRulesBasicDeleteRules = testAccCheckNetworkSecurityGroupConfigBasic + firewallRule1
-const testAccCheckNetworkSecurityGroupFirewallRulesDataSource = testAccCheckNetworkSecurityGroupFirewallRulesBasicDeleteRules + `
-data ` + constant.NetworkSecurityGroupResource + ` ` + constant.NetworkSecurityGroupDataSourceByID + ` {
-  id            = ` + constant.NetworkSecurityGroupResource + `.` + constant.NetworkSecurityGroupTestResource + `.id
+const testAccCheckNSGFirewallRulesBasic = testAccCheckNSGConfigBasic + firewallRule1 + firewallRule2
+const testAccCheckNSGFirewallRulesBasicAddRule = testAccCheckNSGFirewallRulesBasic + firewallRule3
+const testAccCheckNSGFirewallRulesBasicUpdateRule = testAccCheckNSGFirewallRulesBasic + firewallRule3Updated
+const testAccCheckNSGFirewallRulesBasicDeleteRules = testAccCheckNSGConfigBasic + firewallRule1
+const testAccCheckNSGFirewallRulesDataSource = testAccCheckNSGFirewallRulesBasicDeleteRules + `
+data ` + constant.NSGResource + ` ` + constant.NGDataSourceByID + ` {
+  id            = ` + constant.NSGResource + `.` + constant.NSGTestResource + `.id
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
 }
 `
 
 const firewallRule1 = `
-resource ` + constant.NetworkSecurityGroupFirewallRuleResource + ` ` + constant.NetworkSecurityGroupFirewallRuleTestResource + `_1` + ` {
+resource ` + constant.NSGFirewallRuleResource + ` ` + constant.NSGFirewallRuleTestResource + `_1` + ` {
   datacenter_id 	= ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  nsg_id            = ` + constant.NetworkSecurityGroupResource + `.` + constant.NetworkSecurityGroupTestResource + `.id
+  nsg_id            = ` + constant.NSGResource + `.` + constant.NSGTestResource + `.id
   protocol          = "ICMP"
   name              = "SG Rule 1"
   source_mac        = "00:0a:95:9d:68:16"
@@ -403,9 +403,9 @@ resource ` + constant.NetworkSecurityGroupFirewallRuleResource + ` ` + constant.
 }
 `
 const firewallRule2 = `
-resource ` + constant.NetworkSecurityGroupFirewallRuleResource + ` ` + constant.NetworkSecurityGroupFirewallRuleTestResource + `_2` + ` {
+resource ` + constant.NSGFirewallRuleResource + ` ` + constant.NSGFirewallRuleTestResource + `_2` + ` {
   datacenter_id 	= ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  nsg_id            = ` + constant.NetworkSecurityGroupResource + `.` + constant.NetworkSecurityGroupTestResource + `.id
+  nsg_id            = ` + constant.NSGResource + `.` + constant.NSGTestResource + `.id
   protocol          = "TCP"
   name              = "SG Rule 2"
   source_mac        = "00:0a:95:9d:68:16"
@@ -417,9 +417,9 @@ resource ` + constant.NetworkSecurityGroupFirewallRuleResource + ` ` + constant.
 }
 `
 const firewallRule3 = `
-resource ` + constant.NetworkSecurityGroupFirewallRuleResource + ` ` + constant.NetworkSecurityGroupFirewallRuleTestResource + `_3` + ` {
+resource ` + constant.NSGFirewallRuleResource + ` ` + constant.NSGFirewallRuleTestResource + `_3` + ` {
   datacenter_id 	= ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  nsg_id            = ` + constant.NetworkSecurityGroupResource + `.` + constant.NetworkSecurityGroupTestResource + `.id
+  nsg_id            = ` + constant.NSGResource + `.` + constant.NSGTestResource + `.id
   protocol          = "TCP"
   name              = "SG Rule 3"
   source_mac        = "00:0a:95:9d:68:15"
@@ -429,9 +429,9 @@ resource ` + constant.NetworkSecurityGroupFirewallRuleResource + ` ` + constant.
 }
 `
 const firewallRule3Updated = `
-resource ` + constant.NetworkSecurityGroupFirewallRuleResource + ` ` + constant.NetworkSecurityGroupFirewallRuleTestResource + `_3` + ` {
+resource ` + constant.NSGFirewallRuleResource + ` ` + constant.NSGFirewallRuleTestResource + `_3` + ` {
   datacenter_id 	= ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  nsg_id            = ` + constant.NetworkSecurityGroupResource + `.` + constant.NetworkSecurityGroupTestResource + `.id	
+  nsg_id            = ` + constant.NSGResource + `.` + constant.NSGTestResource + `.id	
   protocol          = "TCP"
   name              = "SG Rule 3 Updated"
   source_mac        = "00:0a:95:9d:68:15"

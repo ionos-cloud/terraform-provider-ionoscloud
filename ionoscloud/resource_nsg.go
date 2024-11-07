@@ -18,12 +18,12 @@ import (
 
 func resourceNSG() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceNetworkSecurityGroupCreate,
-		ReadContext:   resourceNetworkSecurityGroupRead,
-		UpdateContext: resourceNetworkSecurityGroupUpdate,
-		DeleteContext: resourceNetworkSecurityGroupDelete,
+		CreateContext: resourceNSGCreate,
+		ReadContext:   resourceNSGRead,
+		UpdateContext: resourceNSGUpdate,
+		DeleteContext: resourceNSGDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceNetworkSecurityGroupImport,
+			StateContext: resourceNSGImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -50,7 +50,7 @@ func resourceNSG() *schema.Resource {
 	}
 }
 
-func resourceNetworkSecurityGroupCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
@@ -74,10 +74,10 @@ func resourceNetworkSecurityGroupCreate(ctx context.Context, d *schema.ResourceD
 	}
 	d.SetId(*securityGroup.Id)
 
-	return diag.FromErr(setNetworkSecurityGroupData(d, &securityGroup))
+	return diag.FromErr(setNSGData(d, &securityGroup))
 }
 
-func resourceNetworkSecurityGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 	datacenterID := d.Get("datacenter_id").(string)
 
@@ -87,13 +87,13 @@ func resourceNetworkSecurityGroupRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(fmt.Errorf("an error occurred while retrieving a network security group: %w", err))
 	}
 
-	if err := setNetworkSecurityGroupData(d, &securityGroup); err != nil {
+	if err := setNSGData(d, &securityGroup); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
 }
 
-func resourceNetworkSecurityGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
@@ -118,10 +118,10 @@ func resourceNetworkSecurityGroupUpdate(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %w", datacenterID, err))
 	}
 
-	return resourceNetworkSecurityGroupRead(ctx, d, meta)
+	return resourceNSGRead(ctx, d, meta)
 }
 
-func resourceNetworkSecurityGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
@@ -140,7 +140,7 @@ func resourceNetworkSecurityGroupDelete(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceNetworkSecurityGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
@@ -167,14 +167,14 @@ func resourceNetworkSecurityGroupImport(ctx context.Context, d *schema.ResourceD
 	if err = d.Set("datacenter_id", datacenterID); err != nil {
 		return nil, err
 	}
-	if err = setNetworkSecurityGroupData(d, &nsg); err != nil {
+	if err = setNSGData(d, &nsg); err != nil {
 		return nil, err
 	}
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func setNetworkSecurityGroupData(d *schema.ResourceData, securityGroup *ionoscloud.SecurityGroup) error {
+func setNSGData(d *schema.ResourceData, securityGroup *ionoscloud.SecurityGroup) error {
 
 	if securityGroup.Id != nil {
 		d.SetId(*securityGroup.Id)
@@ -204,7 +204,7 @@ func setNetworkSecurityGroupData(d *schema.ResourceData, securityGroup *ionosclo
 		}
 	}
 	if err := d.Set("rule_ids", ruleIDs); err != nil {
-		return fmt.Errorf("error while setting rule_ids property for NetworkSecurityGroup  %s: %w", d.Id(), err)
+		return fmt.Errorf("error while setting rule_ids property for NSG  %s: %w", d.Id(), err)
 	}
 	return nil
 }
