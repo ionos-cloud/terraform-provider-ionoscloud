@@ -1923,7 +1923,7 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
   name = "` + constant.WireGuardGatewayTestResource + `"
   location = "de/fra"
   description = "description"
-  private_key = "private"
+  private_key = "0HpE4BNwGHabeaC4aY/GFxB6fBSc0d49Db0qAzRVSVc="
 
   gateway_ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
   interface_ipv4_cidr =  "192.168.1.100/24"

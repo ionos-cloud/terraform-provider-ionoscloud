@@ -177,7 +177,7 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
   description = "description1"
   gateway_ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
   interface_ipv4_cidr =  "192.168.1.101/24"
-  private_key = "private"
+  private_key = "0HpE4BNwGHabeaC4aY/GFxB6fBSc0d49Db0qAzRVSVc="
   connections   {
     datacenter_id   =  ionoscloud_datacenter.datacenter_example.id
     lan_id          =  ionoscloud_lan.lan_example.id
