@@ -109,7 +109,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 			log.Printf("[DEBUG] firewall resource failed to be created")
 			d.SetId("")
 		}
-		return diag.FromErr(fmt.Errorf("an error occurred while creating a nsg firewall rule dcId: %s _id: %s %w", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState))
+		return diag.FromErr(fmt.Errorf("an error occurred while creating a nsg firewall rule dcId: %s nsg_id: %s %w", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState))
 	}
 
 	return resourceNSGFirewallRead(ctx, d, meta)
