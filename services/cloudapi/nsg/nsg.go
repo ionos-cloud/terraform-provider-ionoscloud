@@ -23,9 +23,7 @@ func (nsg *Service) PutServerNSG(ctx context.Context, dcID, serverID string, raw
 	if dcID == "" || serverID == "" {
 		return diag.Errorf("dcID and serverID must be set")
 	}
-	if len(rawIDs) == 0 {
-		return nil
-	}
+
 	ids := make([]string, 0)
 	for _, rawID := range rawIDs {
 		if rawID != nil {
@@ -51,9 +49,7 @@ func (nsg *Service) PutNICNSG(ctx context.Context, dcID, serverID, nicID string,
 	if dcID == "" || serverID == "" || nicID == "" {
 		return diag.Errorf("dcID and serverID must be set")
 	}
-	if len(rawIDs) == 0 {
-		return nil
-	}
+
 	ids := make([]string, 0)
 	for _, rawID := range rawIDs {
 		if rawID != nil {

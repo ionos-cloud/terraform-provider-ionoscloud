@@ -59,15 +59,13 @@ func resourceDatacenter() *schema.Resource {
 				},
 			},
 			"create_default_security_group": {
-				Type:         schema.TypeBool,
-				Optional:     true,
-				ExactlyOneOf: []string{"default_security_group_id"},
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			"default_security_group_id": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
-				ExactlyOneOf:     []string{"create_default_security_group"},
 			},
 			"cpu_architecture": {
 				Type:     schema.TypeList,

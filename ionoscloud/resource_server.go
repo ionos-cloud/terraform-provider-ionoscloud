@@ -937,12 +937,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if d.HasChange("security_groups_ids") {
-		if v, ok := d.GetOk("security_groups_ids"); ok {
-			raw := v.(*schema.Set).List()
-			nsgService := nsg.Service{Client: client, Meta: meta, D: d}
-			if diagnostic := nsgService.PutServerNSG(ctx, d.Get("datacenter_id").(string), d.Id(), raw); diagnostic != nil {
-				return diagnostic
-			}
+		_, v := d.GetChange("security_groups_ids")
+		raw := v.(*schema.Set).List()
+		nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+		if diagnostic := nsgService.PutServerNSG(ctx, d.Get("datacenter_id").(string), d.Id(), raw); diagnostic != nil {
+			return diagnostic
 		}
 	}
 
@@ -1121,16 +1120,16 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 
 			if d.HasChange("nic.0.security_groups_ids") {
-				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
-					raw := v.(*schema.Set).List()
-					if createNic {
-						nicID = *createdNic.Id
-					}
-					nsgService := nsg.Service{Client: client, Meta: meta, D: d}
-					if diagnostic := nsgService.PutNICNSG(ctx, d.Get("datacenter_id").(string), *server.Id, nicID, raw); diagnostic != nil {
-						return diagnostic
-					}
+				_, v := d.GetChange("nic.0.security_groups_ids")
+				raw := v.(*schema.Set).List()
+				if createNic {
+					nicID = *createdNic.Id
 				}
+				nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+				if diagnostic := nsgService.PutNICNSG(ctx, d.Get("datacenter_id").(string), *server.Id, nicID, raw); diagnostic != nil {
+					return diagnostic
+				}
+
 			}
 
 			if createNic {
