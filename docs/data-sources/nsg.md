@@ -1,15 +1,15 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : network security group"
+page_title: "IonosCloud: network security group"
 sidebar_current: "docs-datasource-nsg"
 description: |-
-  Get information on a IonosCloud Network Security Groups
+  Get information on a IonosCloud Network Security Group
 ---
 
 # ionoscloud_nsg
 
-The **NSG Data source** can be used to search for and return an existing security groups.
+The **NSG Data source** can be used to search for and return an existing security group.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 

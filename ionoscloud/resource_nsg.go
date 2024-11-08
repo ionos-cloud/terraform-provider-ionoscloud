@@ -110,7 +110,7 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPut(ctx, datacenterID, d.Id()).SecurityGroup(sg).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating security group: dcID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating network security group: dcID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -129,7 +129,7 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsDelete(ctx, datacenterID, d.Id()).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a network security group dcid %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a network security group: %w", err))
 		return diags
 	}
 
@@ -182,7 +182,8 @@ func setNSGData(d *schema.ResourceData, securityGroup *ionoscloud.SecurityGroup)
 
 	if securityGroup.Properties != nil {
 		if securityGroup.Properties.Name != nil {
-			if err := d.Set("name", *securityGroup.Properties.Name); err != nil {
+			err := d.Set("name", *securityGroup.Properties.Name)
+			if err != nil {
 				return fmt.Errorf("error while setting Network Security Group name  %s: %w", d.Id(), err)
 			}
 		}
