@@ -52,7 +52,7 @@ The following arguments are supported:
 * `port_range_end` - (Optional)[int] Defines the end range of the allowed port (from 1 to 65534) if the protocol TCP or UDP is chosen. Leave portRangeStart and portRangeEnd null to allow all ports.
 * `icmp_type` - (Optional)[string] Defines the allowed code (from 0 to 254) if protocol ICMP is chosen. Value null allows all codes.
 * `icmp_code` - (Optional)[int] Defines the allowed code (from 0 to 254) if protocol ICMP is chosen.
-* `type` - (Optional)[string] The type of firewall rule. If is not specified, it will take the default value INGRESS.
+* `type` - (Optional)(Computed)[string] The type of firewall rule. If is not specified, it will take the default value INGRESS.
 
 ## Import
 
