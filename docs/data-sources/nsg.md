@@ -23,7 +23,7 @@ data "ionoscloud_nsg" "example" {
 }
 ```
 
-### By Name & Location
+### By Name
 ```hcl
 data "ionoscloud_nsg" "example" {
   datacenter_id  = ionoscloud_datacenter.example.id
@@ -37,7 +37,7 @@ data "ionoscloud_nsg" "example" {
 * `id` - (Optional) Id of an existing Network Security Group that you want to search for.
 * `name` - (Optional) Name of an existing Network Security Group that you want to search for.
 
-Either `name`, `location` or `id` must be provided. If none, the datasource will return an error.
+Either `name`, or `id` must be provided. If none, the datasource will return an error.
 
 ## Attributes Reference
 
