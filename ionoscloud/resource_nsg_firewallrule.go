@@ -94,21 +94,19 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 	if diags != nil {
 		return diags
 	}
-	fw, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFirewallrulesPost(ctx, d.Get("datacenter_id").(string), d.Get("nsg_id").(string)).FirewallRule(firewall).Execute()
+	nsgID := d.Get("nsg_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	fw, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFirewallrulesPost(ctx, dcID, nsgID).FirewallRule(firewall).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a nsg firewall rule: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a nsg firewall rule nsg id %s dcid %s : %w", nsgID, dcID, err))
 		return diags
 	}
 	d.SetId(*fw.Id)
 
 	// Wait, catching any errors
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		if cloudapi.IsRequestFailed(errState) {
-			log.Printf("[DEBUG] firewall resource failed to be created")
-			d.SetId("")
-		}
+		d.SetId("")
 		return diag.FromErr(fmt.Errorf("an error occurred while creating a nsg firewall rule dcId: %s nsg_id: %s %w", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState))
 	}
 
@@ -147,11 +145,13 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 	if diags != nil {
 		return diags
 	}
-	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesPatch(ctx, d.Get("datacenter_id").(string), d.Get("nsg_id").(string), d.Id()).Rule(*firewall.Properties).Execute()
+	nsgID := d.Get("nsg_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesPatch(ctx, dcID, nsgID, d.Id()).Rule(*firewall.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a nsg firewall rule ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a nsg firewall rule ID %s dcID %s nsgID %s %w", d.Id(), dcID, nsgID, err))
 		return diags
 	}
 
@@ -164,15 +164,16 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
-
+	dcID := d.Get("datacenter_id").(string)
+	nsgID := d.Get("nsg_id").(string)
 	apiResponse, err := client.SecurityGroupsApi.
 		DatacentersSecuritygroupsFirewallrulesDelete(
-			ctx, d.Get("datacenter_id").(string),
-			d.Get("nsg_id").(string), d.Id()).
+			ctx, dcID,
+			nsgID, d.Id()).
 		Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a nsg firewall rule ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a nsg firewall rule ID %s nsgID %s dcID %s %w", nsgID, dcID, d.Id(), err))
 		return diags
 	}
 
