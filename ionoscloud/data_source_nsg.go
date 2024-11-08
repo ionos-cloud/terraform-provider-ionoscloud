@@ -141,7 +141,7 @@ func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	if len(results) == 0 {
 		return diag.FromErr(fmt.Errorf("no network security group found with the specified name = %s", name))
 	} else if len(results) > 1 {
-		return diag.FromErr(fmt.Errorf("more than one network security group found with the specified criteria name = %s", name))
+		return diag.FromErr(fmt.Errorf("more than one network security group found with the specified name = %s", name))
 	}
 	securityGroup := results[0]
 	if err := setNSGDataSource(d, &securityGroup); err != nil {
