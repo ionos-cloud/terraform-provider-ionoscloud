@@ -37,7 +37,7 @@ func (nsg *Service) PutServerNSG(ctx context.Context, dcID, serverID string, raw
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if errState := cloudapi.WaitForStateChange(ctx, nsg.Meta, nsg.D, apiResponse, schema.TimeoutCreate); errState != nil {
+	if errState := cloudapi.WaitForStateChange(ctx, nsg.Meta, nsg.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 		if cloudapi.IsRequestFailed(errState) {
 			nsg.D.SetId("")
 		}
