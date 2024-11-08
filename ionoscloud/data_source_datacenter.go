@@ -76,10 +76,15 @@ func dataSourceDataCenter() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"default_security_group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+			"security_group_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "This will become the default security group for the datacenter, replacing the old one if already exists. This security group must already exist prior to this request. Provide this field only if the `create_default_security_group` field is missing.You cannot provide both of them. If `create_default_security_group` is set, will be receive the value of that default group. Can only be set for update requests.",
+			},
+			"default_created_security_group_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The value of the group created if `create_default_security_group` is set.",
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

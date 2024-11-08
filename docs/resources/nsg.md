@@ -26,28 +26,6 @@ resource "ionoscloud_nsg" "example" {
 }
 ```
 
-## Creating or setting default NSG for a datacenter
-#### Either one `create_default_security_group` or `default_security_group_id` should be set, setting both will result in an error.
-#### If `create_default_security_group` is set at Datacenter creation, a default NSG is created together with the datacenter, it can also be set at update to create it later. 
-#### The ID is then set by terraform on the `default_security_group_id` field, this field is not `Computed` so the plan will have to be updated with the value. 
-#### To set a custom NSG as default for the datacenter, set an ID value for `default_security_group_id` 
-###### (Note: must specify ID as string, referencing a NSG is not possible due to resource reference cycle between datacenter and nsg)
-#### Unsetting `default_security_group_id` will unset the default security group from the datacenter.
-```hcl
-resource "ionoscloud_datacenter" "example" {
-  name            = "Datacenter NSG Example"
-  location        = "de/txl"
-  create_default_security_group = true
-#   default_security_group_id = "or your security group ID"
-}
-
-resource "ionoscloud_nsg" "example" {
-  name              = "Example NSG"
-  description       = "Example NSG Description"
-  datacenter_id     = ionoscloud_datacenter.example.id
-}
-```
-
 ## Argument Reference
 
 The following arguments are supported:

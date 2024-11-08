@@ -59,13 +59,22 @@ func resourceDatacenter() *schema.Resource {
 				},
 			},
 			"create_default_security_group": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Default:       false,
+				ConflictsWith: []string{"security_group_id"},
 			},
-			"default_security_group_id": {
+			"security_group_id": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				ConflictsWith:    []string{"create_default_security_group"},
+				Description:      "This will become the default security group for the datacenter, replacing the old one if already exists. This security group must already exist prior to this request. Provide this field only if the `create_default_security_group` field is missing.You cannot provide both of them. Can only be set for update requests.",
+			},
+			"default_created_security_group_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The value of the group created if `create_default_security_group` is set.",
 			},
 			"cpu_architecture": {
 				Type:     schema.TypeList,
@@ -201,8 +210,8 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		obj.SecAuthProtection = &newSecAuthProtectionStr
 	}
 
-	if d.HasChange("default_security_group_id") {
-		_, newDefaultSecurityGroupID := d.GetChange("default_security_group_id")
+	if d.HasChange("security_group_id") {
+		_, newDefaultSecurityGroupID := d.GetChange("security_group_id")
 		newDefaultSecurityGroupIDStr := newDefaultSecurityGroupID.(string)
 		obj.DefaultSecurityGroupId = &newDefaultSecurityGroupIDStr
 	}
@@ -321,16 +330,25 @@ func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter
 				return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %w", d.Id(), err)
 			}
 		}
-
-		if datacenter.Properties.DefaultSecurityGroupId != nil {
-			err := d.Set("default_security_group_id", *datacenter.Properties.DefaultSecurityGroupId)
-			if err != nil {
-				return fmt.Errorf("error while setting default_security_group_id property for datacenter %s: %w", d.Id(), err)
+		// because create_default_security_group populates DefaultSecurityGroupId, but security_group_id can also be set, we need a new computed field to store the default_created_security_group_id
+		createDefaultSecurityGroupIsSet := false
+		if attr, ok := d.GetOk("create_default_security_group"); ok {
+			createDefaultSecurityGroupIsSet = attr.(bool)
+		}
+		if createDefaultSecurityGroupIsSet {
+			if err := d.Set("default_created_security_group_id", *datacenter.Properties.DefaultSecurityGroupId); err != nil {
+				return fmt.Errorf("error while setting default_created_security_group_id property for datacenter %s: %w", d.Id(), err)
 			}
 		} else {
-			err := d.Set("default_security_group_id", nil)
-			if err != nil {
-				return fmt.Errorf("error while setting default_security_group_id property for datacenter %s: %w", d.Id(), err)
+			_ = d.Set("default_created_security_group_id", nil)
+			if datacenter.Properties.DefaultSecurityGroupId != nil {
+				if err := d.Set("security_group_id", *datacenter.Properties.DefaultSecurityGroupId); err != nil {
+					return fmt.Errorf("error while setting security_group_id property for datacenter %s: %w", d.Id(), err)
+				}
+			} else {
+				if err := d.Set("security_group_id", nil); err != nil {
+					return fmt.Errorf("error while setting security_group_id property for datacenter %s: %w", d.Id(), err)
+				}
 			}
 		}
 
