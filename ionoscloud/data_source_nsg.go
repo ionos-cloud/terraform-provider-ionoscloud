@@ -109,7 +109,7 @@ func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("id and name cannot be both specified in the same time"))
+		return diag.FromErr(fmt.Errorf("id and name cannot be both specified at the same time"))
 	}
 	if !idOk && !nameOk {
 		return diag.FromErr(fmt.Errorf("please provide either the network security group id or name"))
