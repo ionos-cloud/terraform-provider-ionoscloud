@@ -110,7 +110,7 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPut(ctx, datacenterID, d.Id()).SecurityGroup(sg).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating security group: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating network security group: %w", err))
 		return diags
 	}
 
