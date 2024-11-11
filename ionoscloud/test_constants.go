@@ -28,6 +28,7 @@ resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource
 	location = "us/las"
 	description = "Test Datacenter Description"
 	sec_auth_protection = false
+    create_default_security_group = true
 }`
 )
 
