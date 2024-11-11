@@ -92,6 +92,7 @@ const (
 	FirewallDataSourceByName = "test_firewall_name"
 )
 
+// FirewallProtocolEnum values for firewall rule protocol
 var FirewallProtocolEnum = []string{"TCP", "UDP", "ICMP", "ICMPv6", "GRE", "VRRP", "ESP", "AH", "ANY"}
 
 // NSG Constants
