@@ -92,6 +92,8 @@ const (
 	FirewallDataSourceByName = "test_firewall_name"
 )
 
+var FirewallProtocolEnum = []string{"TCP", "UDP", "ICMP", "ICMPv6", "GRE", "VRRP", "ESP", "AH", "ANY"}
+
 // NSG Constants
 const (
 	NSGResource                 = "ionoscloud_nsg"

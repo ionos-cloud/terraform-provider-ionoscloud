@@ -9,10 +9,12 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -35,7 +37,7 @@ func resourceFirewall() *schema.Resource {
 			"protocol": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.FirewallProtocolEnum, false)),
 			},
 			"source_mac": {
 				Type:     schema.TypeString,
