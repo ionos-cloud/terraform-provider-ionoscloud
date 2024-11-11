@@ -52,7 +52,7 @@ The following arguments are supported:
 * `sec_auth_protection` - (Optional) [bool] Boolean value representing if the data center requires extra protection e.g. two factor protection
 * `create_default_security_group` - (Optional) [bool] If true, a default security group, with predefined rules, will be created for the datacenter. Default value is false. Provide this field only if the `security_group_id` field is missing. You cannot provide both of them.
 * `security_group_id` - (Optional) [string] If `create_default_security_group` is set, it will receive the value of that default group. This will become the default security group for the datacenter, replacing the old one if already exists. This security group must already exist prior to this request. Provide this field only if the `create_default_security_group` field is missing. You cannot provide both of them. Can only be set for update requests.
-* `default_created_security_group_id` - (Computed) The ID of the default security group created for the datacenter. This field is only available if `create_default_security_group` is set to true.
+* `default_created_security_group_id` - (Computed)[string] The ID of the default security group created for the datacenter. This field is only available if `create_default_security_group` is set to true.
 * `version` - (Computed) The version of that Data Center. Gets incremented with every change
 * `features` - (Computed) List of features supported by the location this data center is part of
 * `ipv6_cidr_block` - (Computed) The automatically-assigned /56 IPv6 CIDR block if IPv6 is enabled on this virtual data center
