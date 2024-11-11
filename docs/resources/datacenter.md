@@ -23,7 +23,7 @@ resource "ionoscloud_datacenter" "example" {
 ```
 
 ## Creating or setting default NSG for a datacenter
-#### If `create_default_security_group` is set at Datacenter creation, a default NSG is created together with the datacenter, it can also be set at update to create it later. Its value is then saved to default_created_security_group_id.
+#### If `create_default_security_group` is set at Datacenter creation, a default NSG is created together with the datacenter, it can also be set at update to create it later. Its value is then saved to `default_created_security_group_id`.
 #### To set a custom NSG as default for the datacenter, set an ID value for `security_group_id`. Can only be set for update requests.
 ###### Note: must specify `security_group_id` ID as string, referencing a NSG is not possible due to resource reference cycle between datacenter and nsg.
 #### Unsetting `security_group_id` will unset the default security group from the datacenter.
