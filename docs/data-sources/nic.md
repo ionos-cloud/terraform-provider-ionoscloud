@@ -67,3 +67,4 @@ The following attributes are returned by the datasource:
     - `bucket` - Specifies the IONOS Object Storage bucket where the flow log data will be stored. The bucket must exist.
     - `direction` - Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL.
     - `name` - Specifies the name of the flow log.
+* `security_groups_ids` - The list of Security Group IDs for the resource.

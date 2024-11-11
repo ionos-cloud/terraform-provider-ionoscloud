@@ -1,6 +1,7 @@
 ## 6.6.3 - upcoming release
 ### Features
 - Add import tests for VPN Gateway resources
+- Add `security_groups_ids` to `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_nic`, `ionoscloud_vcpu_server` resources and data sources
 ### New Product - **Network Security Groups**:
 - `Resources`:
   - [ionoscloud_nsg](docs/resources/nsg.md)

@@ -123,4 +123,4 @@ The following attributes are returned by the datasource:
     * `port_range_start` - Defines the start range of the allowed port (from 1 to 65534) if protocol TCP or UDP is chosen
     * `port_range_end` - Defines the end range of the allowed port (from 1 to 65534) if the protocol TCP or UDP is chosen
     * `type` - The type of firewall rule
-  
+* `security_groups_ids` - The list of Security Group IDs for the resource.
