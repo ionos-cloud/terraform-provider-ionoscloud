@@ -41,7 +41,6 @@ func resourceNFSShare() *schema.Resource {
 					"Available locations: '%s'", strings.Join(nfs.ValidNFSLocations, ", '")),
 				Optional: true,
 				ForceNew: true,
-				//ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(nfs.ValidNFSLocations, false)),
 			},
 			"name": {
 				Type:        schema.TypeString,

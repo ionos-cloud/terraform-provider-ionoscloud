@@ -34,7 +34,6 @@ func resourceNFSCluster() *schema.Resource {
 				),
 				Optional: true,
 				ForceNew: true,
-				//ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(nfs.ValidNFSLocations, false)),
 			},
 			"id": {
 				Type:        schema.TypeString,
