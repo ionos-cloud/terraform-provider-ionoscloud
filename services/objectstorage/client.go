@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -18,6 +19,8 @@ type Client struct {
 	client *objstorage.APIClient
 }
 
+var IonosApiUrlObjectStorage = "IONOS_API_URL_OBJECT_STORAGE"
+
 // GetBaseClient returns the base client.
 func (c *Client) GetBaseClient() *objstorage.APIClient {
 	return c.client
@@ -25,6 +28,11 @@ func (c *Client) GetBaseClient() *objstorage.APIClient {
 
 // NewClient creates a new Object Storage client with the given credentials and region.
 func NewClient(id, secret, region, endpoint string) *Client {
+	// Set custom endpoint if provided
+	if envValue := os.Getenv(IonosApiUrlObjectStorage); envValue != "" {
+		endpoint = envValue
+	}
+
 	cfg := objstorage.NewConfiguration(endpoint)
 	signer := awsv4.NewSigner(credentials.NewStaticCredentials(id, secret, ""))
 	cfg.MiddlewareWithError = func(r *http.Request) error {
