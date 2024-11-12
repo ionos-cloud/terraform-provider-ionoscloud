@@ -48,8 +48,8 @@ func (c *Client) Location(location string) *Client {
 		return c
 	}
 	var locationToURL = map[string]string{
-		"de/fra":    "https://nfs.de-fra.ionos.com",
-		"de/txl":    "https://nfs.de-txl.ionos.com",
+		"de/fra": "https://nfs.de-fra.ionos.com",
+		"de/txl": "https://nfs.de-txl.ionos.com",
 	}
 	c.sdkClient.GetConfig().Servers = sdk.ServerConfigurations{
 		{
