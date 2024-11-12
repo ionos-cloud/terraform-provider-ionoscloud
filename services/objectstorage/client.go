@@ -24,8 +24,8 @@ func (c *Client) GetBaseClient() *objstorage.APIClient {
 }
 
 // NewClient creates a new Object Storage client with the given credentials and region.
-func NewClient(id, secret, region string) *Client {
-	cfg := objstorage.NewConfiguration()
+func NewClient(id, secret, region, endpoint string) *Client {
+	cfg := objstorage.NewConfiguration(endpoint)
 	signer := awsv4.NewSigner(credentials.NewStaticCredentials(id, secret, ""))
 	cfg.MiddlewareWithError = func(r *http.Request) error {
 		var reader io.ReadSeeker

@@ -384,7 +384,7 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	case psqlClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	case s3Client:
-		return objstorage.NewAPIClient(objstorage.NewConfiguration())
+		return objstorage.NewAPIClient(objstorage.NewConfiguration(clientOpts.Url))
 	case kafkaClient:
 		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	case apiGatewayClient:
