@@ -30,7 +30,6 @@ func dataSourceDBaaSMariaDBBackups() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The cluster location",
 				Optional:    true,
-				//ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
 			},
 			"backups": {
 				Type:        schema.TypeList,

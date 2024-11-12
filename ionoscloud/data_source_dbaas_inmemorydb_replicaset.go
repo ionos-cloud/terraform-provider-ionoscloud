@@ -25,7 +25,6 @@ func dataSourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The replica set location",
 				Optional:    true,
-				//ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
 			},
 			"display_name": {
 				Type:        schema.TypeString,
