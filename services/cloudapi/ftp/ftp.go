@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"os"
 	"path/filepath"
 	"time"
@@ -151,22 +152,25 @@ func CustomFtpUpload(ctx context.Context, image *os.File, targetPath string, con
 	return c.Close()
 }
 
-// PollImage is a function that waits until an image is available at a given location, and returns the image's ID
-func PollImage(ctx context.Context, meta any, imageName string, location string) (string, error) {
+// PollImage is a function that waits until an image is available at a given location, and returns
+// the image.
+func PollImage(ctx context.Context, meta any, imageName string, location string) (*ionoscloud.Image, error) {
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	for {
 		select {
 		case <-ctx.Done():
-			return "", fmt.Errorf("context cancelled or timed out: %w", ctx.Err())
+			return nil, fmt.Errorf("context cancelled or timed out: %w", ctx.Err())
 		default:
 			ls, _, err := client.ImagesApi.ImagesGet(ctx).
 				Filter("public", "false").
 				Filter("name", imageName).
+				// TODO -- What about the case in which the location is not mentioned and a custom
+				// URL is used?
 				Filter("location", location).
 				Execute()
 			if err != nil {
-				return "", fmt.Errorf("failed while fetching images: %w", err)
+				return nil, fmt.Errorf("failed while fetching images: %w", err)
 			}
 
 			if len(*ls.Items) > 1 {
@@ -174,7 +178,7 @@ func PollImage(ctx context.Context, meta any, imageName string, location string)
 				panic(fmt.Errorf("multiple images with the same name found")) // TODO Exit gracefully
 			}
 			if len(*ls.Items) == 1 {
-				return *(*ls.Items)[0].Id, nil
+				return &(*ls.Items)[0], nil
 			}
 
 			// Wait for 5 seconds before checking again
@@ -182,4 +186,5 @@ func PollImage(ctx context.Context, meta any, imageName string, location string)
 		}
 	}
 }
+
 var ValidFTPLocations = []string{"de/fra", "de/fkb", "de/txl", "us/las", "us/ewr", "es/vit"}
