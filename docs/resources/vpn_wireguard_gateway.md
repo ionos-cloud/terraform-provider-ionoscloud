@@ -52,7 +52,7 @@ resource "ionoscloud_vpn_wireguard_gateway" "gateway" {
 
 The following arguments are supported by the `vpn_wireguard_gateway` resource:
 
-- `location` - (Required)[String] The location of the WireGuard Gateway.
+- `location` - (Optional)[String] The location of the WireGuard Gateway.
 - `name` - (Required)[String] The name of the WireGuard Gateway.
 - `description` - (Optional)[String] A description of the WireGuard Gateway.
 - `endpoint` - (Optional, Block) The endpoint configuration for the WireGuard Gateway. This block supports fields documented below.
@@ -72,6 +72,8 @@ In addition to all arguments above, the following attributes are exported:
 
 - `status` - (Computed)[String] The current status of the WireGuard Gateway.
 - `public_key` - (Computed)[String] The public key for the WireGuard Gateway.
+- 
+> **⚠ NOTE:** `IONOS_API_URL_VPN` can be used to set a custom API URL for the resource. `location` field needs to be empty for this to work, otherwise it will override the custom API URL.
 
 ## Import
 

@@ -35,11 +35,10 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 				Required:    true,
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      "The cluster location",
-				Optional:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
+				Type:        schema.TypeString,
+				Description: "The cluster location",
+				Optional:    true,
+				ForceNew:    true,
 			},
 			"instances": {
 				Type:             schema.TypeInt,

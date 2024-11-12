@@ -44,7 +44,7 @@ data "ionoscloud_vpn_ipsec_gateway" "example" {
 * `id` - (Optional) ID of an existing IPSec Gateway Tunnel that you want to search for.
 * `name` - (Optional) Name of an existing IPSec Gateway Tunnel that you want to search for.
 * `gateway_id` - (Required) The ID of the IPSec Gateway that the tunnel belongs to.
-* `location` - (Required) The location of the IPSec Gateway Tunnel.
+* `location` - (Optional) The location of the IPSec Gateway Tunnel.
 
 ## Attributes reference
 

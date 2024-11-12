@@ -36,11 +36,11 @@ func resourceVpnWireguardGateway() *schema.Resource {
 				Required: true,
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      fmt.Sprintf("The location of the WireGuard Gateway. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.AvailableLocations, false)),
+				Type:        schema.TypeString,
+				Description: fmt.Sprintf("The location of the WireGuard Gateway. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
+				Optional:    true,
+				ForceNew:    true,
+				//ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.AvailableLocations, false)),
 			},
 			"connections": {
 				MinItems: 1,

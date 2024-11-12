@@ -39,9 +39,9 @@ func resourceNFSShare() *schema.Resource {
 				Type: schema.TypeString,
 				Description: fmt.Sprintf("The location of the Network File Storage Cluster. "+
 					"Available locations: '%s'", strings.Join(nfs.ValidNFSLocations, ", '")),
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(nfs.ValidNFSLocations, false)),
+				Optional: true,
+				ForceNew: true,
+				//ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(nfs.ValidNFSLocations, false)),
 			},
 			"name": {
 				Type:        schema.TypeString,

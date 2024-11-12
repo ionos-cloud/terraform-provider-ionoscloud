@@ -3,6 +3,7 @@ package logging
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
@@ -33,10 +34,18 @@ func NewClient(username, password, token, url, terraformVersion string) *Client 
 }
 
 func (c *Client) changeConfigURL(location string) {
+	config := c.sdkClient.GetConfig()
+	if location == "" && os.Getenv(ionosAPIURLLogging) != "" {
+		config.Servers = shared.ServerConfigurations{
+			{
+				URL: utils.CleanURL(os.Getenv(ionosAPIURLLogging)),
+			},
+		}
+		return
+	}
 	if location == "" {
 		location = DefaultLocation
 	}
-	config := c.sdkClient.GetConfig()
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL: locationToURL[location],
@@ -45,6 +54,7 @@ func (c *Client) changeConfigURL(location string) {
 }
 
 var (
+	ionosAPIURLLogging = "IONOS_API_URL_LOGGING"
 	// AvailableLocations is a list of available locations
 	AvailableLocations = []string{"de/fra", "de/txl", "es/vit", "gb/lhr", "fr/par"}
 	// DefaultLocation is the default logging pipeline location

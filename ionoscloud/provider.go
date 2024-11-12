@@ -279,7 +279,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		}
 	}
 
-	cleanedUrl := cleanURL(d.Get("endpoint").(string))
+	cleanedUrl := utils.CleanURL(d.Get("endpoint").(string))
 
 	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
 		// will inject x-contract-number to sdks
@@ -399,16 +399,6 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
 	return nil
-}
-
-// cleanURL makes sure trailing slash does not corrupt the state
-func cleanURL(url string) string {
-	length := len(url)
-	if length > 1 && url[length-1] == '/' {
-		url = url[:length-1]
-	}
-
-	return url
 }
 
 // resourceDefaultTimeouts sets default value for each Timeout type

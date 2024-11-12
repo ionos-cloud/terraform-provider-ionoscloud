@@ -414,3 +414,13 @@ func NameMatches(name, value string, partialMatch bool) bool {
 func IsStateFailed(state string) bool {
 	return state == ionoscloud.Failed || state == ionoscloud.FailedSuspended || state == ionoscloud.FailedUpdating || state == ionoscloud.FailedDestroying
 }
+
+// CleanURL makes sure trailing slash does not corrupt the state
+func CleanURL(url string) string {
+	length := len(url)
+	if length > 1 && url[length-1] == '/' {
+		url = url[:length-1]
+	}
+
+	return url
+}

@@ -7,11 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func dataSourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
@@ -24,10 +22,10 @@ func dataSourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 				Optional:    true,
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      "The replica set location",
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
+				Type:        schema.TypeString,
+				Description: "The replica set location",
+				Optional:    true,
+				//ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
 			},
 			"display_name": {
 				Type:        schema.TypeString,

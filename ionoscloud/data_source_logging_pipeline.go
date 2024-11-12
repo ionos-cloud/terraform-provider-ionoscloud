@@ -31,7 +31,6 @@ func dataSourceLoggingPipeline() *schema.Resource {
 					}
 					return false
 				},
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(loggingService.AvailableLocations, false)),
 			},
 			"id": {
 				Type:             schema.TypeString,
