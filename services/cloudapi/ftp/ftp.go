@@ -20,6 +20,11 @@ type Connection struct {
 	Password          string
 }
 
+// IonosFtpUpload is a function that uploads an image to an IONOS FTP server.
+// Contains IONOS-specific logic, i.e. the directory structure and naming conventions.
+//
+// image is the file to be uploaded.
+// conn are the connection details to the FTP server.
 func IonosFtpUpload(ctx context.Context, image *os.File, conn Connection) error {
 	tlsConfig := tls.Config{
 		InsecureSkipVerify: conn.SkipVerify,
@@ -38,7 +43,7 @@ func IonosFtpUpload(ctx context.Context, image *os.File, conn Connection) error 
 
 	c, err := ftps.Dial(ctx, dialOptions)
 	if err != nil {
-		return fmt.Errorf("dialing FTP server failed. Check username & password. FTP server doesn't support usage of JWT token: %w", err)
+		return fmt.Errorf("dialing FTP server failed: %w", err)
 	}
 
 	// get path of image
@@ -83,4 +88,68 @@ func IonosFtpUpload(ctx context.Context, image *os.File, conn Connection) error 
 	}
 
 	return c.Close()
+}
+
+// CustomFtpUpload is a custom FTP upload function that can be used to upload files to a non-IONOS FTP server.
+//
+// image is the file to be uploaded.
+// targetPath is the path where the file should be uploaded, including the desired filename.
+// conn are the connection details to the FTP server.
+func CustomFtpUpload(ctx context.Context, image *os.File, targetPath string, conn Connection) error {
+	tlsConfig := tls.Config{
+		InsecureSkipVerify: conn.SkipVerify,
+		ServerName:         conn.Url,
+		RootCAs:            conn.ServerCertificate,
+		MaxVersion:         tls.VersionTLS12,
+	}
+	dialOptions := ftps.DialOptions{
+		Host:        conn.Url,
+		Port:        conn.Port,
+		Username:    conn.Username,
+		Passowrd:    conn.Password,
+		ExplicitTLS: true,
+		TLSConfig:   &tlsConfig,
+	}
+
+	c, err := ftps.Dial(ctx, dialOptions)
+	if err != nil {
+		return fmt.Errorf("dialing FTP server failed: %w", err)
+	}
+
+	err = c.Chdir(filepath.Dir(targetPath))
+	if err != nil {
+		return fmt.Errorf("failed while changing directory to %s within FTP server: %w", filepath.Dir(targetPath), err)
+	}
+
+	files, err := c.List(ctx)
+	if err != nil {
+		return fmt.Errorf("failed while listing files within FTP server: %w", err)
+	}
+
+	// Check if there already exists an image with the given name at the location
+	desiredName := filepath.Base(targetPath)
+	var errExists error
+	for _, f := range files {
+		if f.Name == desiredName {
+			// Prepare an error - this MIGHT fail
+			errExists = fmt.Errorf("%s might already exist at %s/%s. Please contact support at support@cloud.ionos.com to delete the old image - or choose a different image name. We're sorry for the inconvenience", desiredName, conn.Url, targetPath)
+		}
+	}
+
+	err = c.Upload(ctx, desiredName, image)
+	if err != nil {
+		err = fmt.Errorf("failed while uploading %s to FTP server: %w", desiredName, err)
+		if errExists != nil {
+			err = fmt.Errorf("%w\nNote: %w", err, errExists)
+		}
+		return err
+
+	}
+
+	return c.Close()
+}
+
+// PollImage is a function that waits until an image is available at a given location.
+func PollImage(ctx context.Context, imageName string, location string) (string, error) {
+	return "", nil
 }
