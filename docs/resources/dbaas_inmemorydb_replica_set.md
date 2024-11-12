@@ -119,7 +119,7 @@ resource "ionoscloud_inmemorydb_replicaset" "example" {
 * `initial_snapshot_id` - (Optional)[string] The ID of a snapshot to restore the replica set from. If set, the replica set will be created from the snapshot.
 * `dns_name` - (Computed)[string] The DNS name pointing to your replica set. Will be used to connect to the active/standalone instance.
 
-> **⚠ NOTE:** `IONOS_API_URL_INMEMORYDB` can be used to set a custom API URL for the resource. `location` field needs to be empty for this to work, otherwise it will override the custom API URL.
+> **⚠ NOTE:** `IONOS_API_URL_INMEMORYDB` can be used to set a custom API URL for the resource. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
 
 ## Import
 

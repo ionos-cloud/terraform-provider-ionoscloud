@@ -103,7 +103,7 @@ resource "random_password" "cluster_password" {
     * `password` - (Required)[string] The password for a MariaDB user.
 * `dns_name` - (Computed)[string] The DNS name pointing to your cluster.
 
-> **⚠ WARNING:** `IONOS_API_URL_MARIADB` can be used to set a custom API URL for the MariaDB Cluster. `location` field needs to be empty for this to work, otherwise it will override the custom API URL.
+> **⚠ WARNING:** `IONOS_API_URL_MARIADB` can be used to set a custom API URL for the MariaDB Cluster. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
 
 ## Import
 

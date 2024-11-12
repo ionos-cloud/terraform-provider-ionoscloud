@@ -5,12 +5,12 @@
   - Make `location` optional for `vpn` resources and datasources
   - Make `location` optional for `nfs` resources and datasources
   - Make `location` optional for `kafka` resources and datasources
-  - Add `IONOS_API_URL_NFS` to set a custom API URL for the NAS/NFS product. `location` field needs to be empty for this to work, otherwise it will override the custom API URL.
-  - Add `IONOS_API_URL_VPN` to set a custom API URL for the VPN product. `location` field needs to be empty for this to work, otherwise it will override the custom API URL.
-  - Add `IONOS_API_URL_CERT` to set a custom API URL for the Certificate Manager product. `location` field needs to be empty for this to work, otherwise it will override the custom API URL.
-  - Add `IONOS_API_URL_KAFKA` to set a custom API URL for the Event Streams product. `location` field needs to be empty for this to work, otherwise it will override the custom API URL.
-  - Add `IONOS_API_URL_MARIADB` to set a custom API URL for the MariaDB product. `location` field needs to be empty for this to work, otherwise it will override the custom API URL.
-  - Add `IONOS_API_URL_INMEMORYDB` to set a custom API URL for InMemoryDB product. `location` field needs to be empty for this to work, otherwise it will override the custom API URL.
+  - Add `IONOS_API_URL_NFS` to set a custom API URL for the NAS/NFS product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+  - Add `IONOS_API_URL_VPN` to set a custom API URL for the VPN product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+  - Add `IONOS_API_URL_CERT` to set a custom API URL for the Certificate Manager product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+  - Add `IONOS_API_URL_KAFKA` to set a custom API URL for the Event Streams product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+  - Add `IONOS_API_URL_MARIADB` to set a custom API URL for the MariaDB product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+  - Add `IONOS_API_URL_INMEMORYDB` to set a custom API URL for InMemoryDB product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
 
 ## 6.6.2
 ### Fixes

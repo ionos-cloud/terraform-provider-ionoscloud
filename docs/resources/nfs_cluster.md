@@ -136,7 +136,7 @@ The following arguments are supported:
     - `ip_address` - (Required) The IP address and prefix of the Network File Storage cluster. The IP address can be either IPv4 or IPv6. The IP address has to be given with CIDR notation. 
     - `lan` - (Required) The Private LAN to which the Network File Storage cluster must be connected.
     - 
-> **⚠ NOTE:** `IONOS_API_URL_NFS` can be used to set a custom API URL for the resource. `location` field needs to be empty for this to work, otherwise it will override the custom API URL.
+> **⚠ NOTE:** `IONOS_API_URL_NFS` can be used to set a custom API URL for the resource. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
 
 ## Import
 
