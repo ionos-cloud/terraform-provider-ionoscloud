@@ -279,7 +279,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		}
 	}
 
-	cleanedUrl := utils.CleanURL(d.Get("endpoint").(string))
+	cleanedURL := utils.CleanURL(d.Get("endpoint").(string))
 
 	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
 		// will inject x-contract-number to sdks
@@ -292,7 +292,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.Username = username.(string)
 	clientOpts.Password = password.(string)
 	clientOpts.Token = token.(string)
-	clientOpts.Url = cleanedUrl
+	clientOpts.Url = cleanedURL
 	clientOpts.TerraformVersion = terraformVersion
 
 	return NewSDKBundleClient(clientOpts), nil

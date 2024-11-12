@@ -17,16 +17,16 @@ var locationToURL = map[string]string{
 	"":       "https://certificate-manager.de-fra.ionos.com",
 	"de/fra": "https://certificate-manager.de-fra.ionos.com",
 }
-var IonosApiURLCert = "IONOS_API_URL_CERT"
+var ionosAPIURLCert = "IONOS_API_URL_CERT"
 
 // modifyConfigURL modifies the URL inside the client configuration.
 // This function is required in order to make requests to different endpoints based on location.
 func (c *Client) modifyConfigURL(location string) {
 	clientConfig := c.sdkClient.GetConfig()
-	if location == "" && os.Getenv(IonosApiURLCert) != "" {
+	if location == "" && os.Getenv(ionosAPIURLCert) != "" {
 		clientConfig.Servers = certmanager.ServerConfigurations{
 			{
-				URL: utils.CleanURL(os.Getenv(IonosApiURLCert)),
+				URL: utils.CleanURL(os.Getenv(ionosAPIURLCert)),
 			},
 		}
 		return
