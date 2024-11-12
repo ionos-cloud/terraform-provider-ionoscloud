@@ -103,6 +103,7 @@ const (
 	NSGDataSourceByName         = "test_nsg_name"
 	NSGFirewallRuleResource     = "ionoscloud_nsg_firewallrule"
 	NSGFirewallRuleTestResource = "test_nsg_firewallrule"
+	NSGDefaultSelectionResource = "ionoscloud_datacenter_default_nsg_selection"
 )
 
 // Lan Constants

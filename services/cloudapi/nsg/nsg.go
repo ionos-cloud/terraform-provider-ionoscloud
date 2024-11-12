@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
@@ -66,6 +67,33 @@ func (nsg *Service) PutNICNSG(ctx context.Context, dcID, serverID, nicID string,
 			nsg.D.SetId("")
 		}
 		return diag.FromErr(fmt.Errorf("an error occurred while waiting for securitygroup state change on put. dcID: %s, server_id: %s, nic_id %s, Response: (%w)", dcID, serverID, nicID, errState))
+	}
+	return nil
+}
+
+// SetDefaultDatacenterNSG sets the NSG as the default security group of a datacenter
+func (nsg *Service) SetDefaultDatacenterNSG(ctx context.Context, dcID, nsgID string) diag.Diagnostics {
+	if dcID == "" {
+		return diag.Errorf("dcID must be set")
+	}
+	dcPropertiesPut := ionoscloud.DatacenterPropertiesPut{
+		DefaultSecurityGroupId: &nsgID,
+	}
+	_, apiResponse, err := nsg.Client.DataCentersApi.DatacentersPatch(ctx, dcID).Datacenter(dcPropertiesPut).Execute()
+	apiResponse.LogInfo()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Create a dummy ResourceData with the ID of the Datacenter to ensure WaitForStateChange tracks correctly.
+	d := &schema.ResourceData{}
+	d.SetId(dcID)
+	if errState := cloudapi.WaitForStateChange(ctx, nsg.Meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		waitErr := fmt.Errorf("an error occurred while waiting for default security group to be set for datacenter. dcID: %s, nsgID: %s, Response(%w)", dcID, nsgID, errState)
+		if nsgID == "" {
+			waitErr = fmt.Errorf("an error occurred while waiting for default security group to be unset for datacenter. dcID:%s, Response: %w", dcID, errState)
+		}
+		return diag.FromErr(waitErr)
 	}
 	return nil
 }

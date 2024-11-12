@@ -35,8 +35,6 @@ func TestAccDataCenterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "location", "us/las"),
 					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "description", "Test Datacenter Description"),
 					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "sec_auth_protection", "false"),
-					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "create_default_security_group", "true"),
-					resource.TestCheckResourceAttrSet(constant.DatacenterResource+"."+constant.DatacenterTestResource, "default_created_security_group_id"),
 				),
 			},
 			{
@@ -175,7 +173,6 @@ resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource
 	location = "us/las"
 	description = "Test Datacenter Description Updated"
 	sec_auth_protection = false
-    create_default_security_group = true
 }`
 
 const testAccDataSourceDatacenterMatchId = testAccCheckDatacenterConfigBasic + `
