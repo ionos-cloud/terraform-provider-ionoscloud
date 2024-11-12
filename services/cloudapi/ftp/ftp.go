@@ -182,3 +182,4 @@ func PollImage(ctx context.Context, meta any, imageName string, location string)
 		}
 	}
 }
+var ValidFTPLocations = []string{"de/fra", "de/fkb", "de/txl", "us/las", "us/ewr", "es/vit"}
