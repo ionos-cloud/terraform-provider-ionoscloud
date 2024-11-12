@@ -37,7 +37,6 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 // Location sets the location of the NFS client which modifies the Host URL:
 //   - de/fra:    https://nfs.de-fra.ionos.com
 //   - de/txl:    https://nfs.de-txl.ionos.com
-//   - qa/de/txl: https://qa.nfs.de-txl.ionos.com
 func (c *Client) Location(location string) *Client {
 	// if there is no location set, return the client as is. allows to overwrite the url with IONOS_API_URL
 	if location == "" && os.Getenv(ionosAPIURLNFS) != "" {
