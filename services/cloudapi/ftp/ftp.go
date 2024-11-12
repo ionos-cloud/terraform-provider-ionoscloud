@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/kardianos/ftps"
 )
 
@@ -149,7 +151,34 @@ func CustomFtpUpload(ctx context.Context, image *os.File, targetPath string, con
 	return c.Close()
 }
 
-// PollImage is a function that waits until an image is available at a given location.
-func PollImage(ctx context.Context, imageName string, location string) (string, error) {
-	return "", nil
+// PollImage is a function that waits until an image is available at a given location, and returns the image's ID
+func PollImage(ctx context.Context, meta any, imageName string, location string) (string, error) {
+	client := meta.(services.SdkBundle).CloudApiClient
+
+	for {
+		select {
+		case <-ctx.Done():
+			return "", fmt.Errorf("context cancelled or timed out: %w", ctx.Err())
+		default:
+			ls, _, err := client.ImagesApi.ImagesGet(ctx).
+				Filter("public", "false").
+				Filter("name", imageName).
+				Filter("location", location).
+				Execute()
+			if err != nil {
+				return "", fmt.Errorf("failed while fetching images: %w", err)
+			}
+
+			if len(*ls.Items) > 1 {
+				// TODO: Why did FTP let us upload a duplicate image?
+				panic(fmt.Errorf("multiple images with the same name found")) // TODO Exit gracefully
+			}
+			if len(*ls.Items) == 1 {
+				return *(*ls.Items)[0].Id, nil
+			}
+
+			// Wait for 5 seconds before checking again
+			time.Sleep(5 * time.Second)
+		}
+	}
 }
