@@ -13,7 +13,6 @@ Manages the selection of the default Network Security Group for IonosCloud datac
 
 ## Example Usage
 
-The boot device of a `ionoscloud_server`, `ionoscloud_vcpu_server` or `ionoscloud_cube_server` can be selected with this resource.
 The default Network Security Group of a `ionoscloud_datacenter` can be selected with this resource.
 Deleting this resource will unset the default NSG of the datacenter.
 
