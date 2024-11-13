@@ -99,5 +99,5 @@ func ObjectStorageClient() (*objstorage.APIClient, error) {
 		return nil, fmt.Errorf("%s and %s must be set for acceptance tests", envar.IonosS3AccessKey, envar.IonosS3SecretKey)
 	}
 
-	return objstorageservice.NewClient(accessKey, secretKey, "").GetBaseClient(), nil
+	return objstorageservice.NewClient(accessKey, secretKey, "", "").GetBaseClient(), nil
 }
