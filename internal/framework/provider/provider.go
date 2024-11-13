@@ -120,6 +120,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	accessKey := os.Getenv("IONOS_S3_ACCESS_KEY")
 	secretKey := os.Getenv("IONOS_S3_SECRET_KEY")
 	region := os.Getenv("IONOS_S3_REGION")
+	endpoint := os.Getenv("IONOS_API_URL")
 
 	if !clientOpts.Token.IsNull() {
 		token = clientOpts.Token.ValueString()
@@ -145,6 +146,10 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		region = clientOpts.S3Region.ValueString()
 	}
 
+	if !clientOpts.Endpoint.IsNull() {
+		endpoint = clientOpts.Endpoint.ValueString()
+	}
+
 	if token == "" && (username == "" || password == "") {
 		resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
 	}
@@ -153,7 +158,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	client := objstorage.NewClient(accessKey, secretKey, region)
+	client := objstorage.NewClient(accessKey, secretKey, region, endpoint)
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
