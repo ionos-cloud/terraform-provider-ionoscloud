@@ -19,7 +19,7 @@ type Client struct {
 	client *objstorage.APIClient
 }
 
-var IonosApiUrlObjectStorage = "IONOS_API_URL_OBJECT_STORAGE"
+const ionosApiUrlObjectStorage = "IONOS_API_URL_OBJECT_STORAGE"
 
 // GetBaseClient returns the base client.
 func (c *Client) GetBaseClient() *objstorage.APIClient {
@@ -29,7 +29,7 @@ func (c *Client) GetBaseClient() *objstorage.APIClient {
 // NewClient creates a new Object Storage client with the given credentials and region.
 func NewClient(id, secret, region, endpoint string) *Client {
 	// Set custom endpoint if provided
-	if envValue := os.Getenv(IonosApiUrlObjectStorage); envValue != "" {
+	if envValue := os.Getenv(ionosApiUrlObjectStorage); envValue != "" {
 		endpoint = envValue
 	}
 
