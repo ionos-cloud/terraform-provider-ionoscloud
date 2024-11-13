@@ -41,11 +41,11 @@ func resourceDatacenterNSGSelection() *schema.Resource {
 	}
 }
 func resourceDatacenterNSGSelectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	dcId := d.Get("datacenter_id").(string)
-	nsgId := d.Get("nsg_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	nsgID := d.Get("nsg_id").(string)
 
 	ns := nsg.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
-	if diags := ns.SetDefaultDatacenterNSG(ctx, dcId, nsgId); diags.HasError() {
+	if diags := ns.SetDefaultDatacenterNSG(ctx, dcID, nsgID); diags.HasError() {
 		return diags
 	}
 
@@ -55,10 +55,10 @@ func resourceDatacenterNSGSelectionCreate(ctx context.Context, d *schema.Resourc
 
 func resourceDatacenterNSGSelectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
-	dcId := d.Get("datacenter_id").(string)
-	nsgId := d.Get("nsg_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	nsgID := d.Get("nsg_id").(string)
 
-	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
+	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcID).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -69,18 +69,18 @@ func resourceDatacenterNSGSelectionRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	if err = setDatacenterDefaultNSGSelectionData(d, &datacenter); err != nil {
-		return diag.FromErr(fmt.Errorf("error reading default NSG for datacenter, dcId: %s, sId: %s, (%w)", dcId, nsgId, err))
+		return diag.FromErr(fmt.Errorf("error reading default NSG for datacenter, dcId: %s, sId: %s, (%w)", dcID, nsgID, err))
 	}
 	return nil
 }
 
 func resourceDatacenterNSGSelectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
 	if d.HasChange("nsg_id") {
 		_, newId := d.GetChange("nsg_id")
 		ns := nsg.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
-		if diags := ns.SetDefaultDatacenterNSG(ctx, dcId, newId.(string)); diags.HasError() {
+		if diags := ns.SetDefaultDatacenterNSG(ctx, dcID, newId.(string)); diags.HasError() {
 			return diags
 		}
 	}
@@ -90,9 +90,9 @@ func resourceDatacenterNSGSelectionUpdate(ctx context.Context, d *schema.Resourc
 }
 
 func resourceDatacenterNSGSelectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 	ns := nsg.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
-	if diags := ns.SetDefaultDatacenterNSG(ctx, dcId, ""); diags.HasError() {
+	if diags := ns.SetDefaultDatacenterNSG(ctx, dcID, ""); diags.HasError() {
 		return diags
 	}
 	d.SetId("")
