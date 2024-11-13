@@ -1,20 +1,20 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: Datacenter Default NSG Selection"
-sidebar_current: "docs-resource-datacenter-default-nsg-selection"
+page_title: "IonosCloud: Datacenter NSG Selection"
+sidebar_current: "docs-resource-datacenter-nsg-selection"
 description: |-
-  Manages the selection of the default Network Security Group for IonosCloud datacenters.
+  Links a Network Security Group to a IonosCloud datacenter.
 ---
 
 # ionoscloud_datacenter_nsg_selection
 
-Manages the selection of the default Network Security Group for IonosCloud datacenters.
+Links a Network Security Group to a IonosCloud datacenter. The datacenter can only have one linked NSG. To set a new NSG for the datacenter, the current one will be unlinked.
 
 ## Example Usage
 
-The default Network Security Group of a `ionoscloud_datacenter` can be selected with this resource.
-Deleting this resource will unset the default NSG of the datacenter.
+A Network Security Group can be linked to a `ionoscloud_datacenter` with this resource.
+Deleting the resource will unlink the NSG from the datacenter.
 
 ### Select an external volume
 ```hcl
