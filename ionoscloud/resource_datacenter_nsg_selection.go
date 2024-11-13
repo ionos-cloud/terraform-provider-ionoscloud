@@ -78,9 +78,9 @@ func resourceDatacenterNSGSelectionUpdate(ctx context.Context, d *schema.Resourc
 	dcID := d.Get("datacenter_id").(string)
 
 	if d.HasChange("nsg_id") {
-		_, newId := d.GetChange("nsg_id")
+		_, newID := d.GetChange("nsg_id")
 		ns := nsg.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
-		if diags := ns.SetDefaultDatacenterNSG(ctx, dcID, newId.(string)); diags.HasError() {
+		if diags := ns.SetDefaultDatacenterNSG(ctx, dcID, newID.(string)); diags.HasError() {
 			return diags
 		}
 	}
