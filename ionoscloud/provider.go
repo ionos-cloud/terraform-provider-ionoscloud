@@ -133,7 +133,7 @@ func Provider() *schema.Provider {
 			constant.NetworkLoadBalancerResource:               resourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
 			constant.NSGResource:                               resourceNSG(),
-			constant.NSGDefaultSelectionResource:               resourceDatacenterDefaultNSGSelection(),
+			constant.NSGSelectionResource:                      resourceDatacenterNSGSelection(),
 			constant.NSGFirewallRuleResource:                   resourceNSGFirewallRule(),
 			constant.NFSClusterResource:                        resourceNFSCluster(),
 			constant.NFSShareResource:                          resourceNFSShare(),

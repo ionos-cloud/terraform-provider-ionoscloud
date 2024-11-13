@@ -14,12 +14,12 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
-func resourceDatacenterDefaultNSGSelection() *schema.Resource {
+func resourceDatacenterNSGSelection() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDatacenterDefaultNSGSelectionCreate,
-		ReadContext:   resourceDatacenterDefaultNSGSelectionRead,
-		UpdateContext: resourceDatacenterDefaultNSGSelectionUpdate,
-		DeleteContext: resourceDatacenterDefaultNSGSelectionDelete,
+		CreateContext: resourceDatacenterNSGSelectionCreate,
+		ReadContext:   resourceDatacenterNSGSelectionRead,
+		UpdateContext: resourceDatacenterNSGSelectionUpdate,
+		DeleteContext: resourceDatacenterNSGSelectionDelete,
 		Schema: map[string]*schema.Schema{
 
 			"datacenter_id": {
@@ -40,7 +40,7 @@ func resourceDatacenterDefaultNSGSelection() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-func resourceDatacenterDefaultNSGSelectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterNSGSelectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	nsgId := d.Get("nsg_id").(string)
 
@@ -50,10 +50,10 @@ func resourceDatacenterDefaultNSGSelectionCreate(ctx context.Context, d *schema.
 	}
 
 	d.SetId(uuidgen.ResourceUuid().String())
-	return resourceDatacenterDefaultNSGSelectionRead(ctx, d, meta)
+	return resourceDatacenterNSGSelectionRead(ctx, d, meta)
 }
 
-func resourceDatacenterDefaultNSGSelectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterNSGSelectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 	nsgId := d.Get("nsg_id").(string)
@@ -74,7 +74,7 @@ func resourceDatacenterDefaultNSGSelectionRead(ctx context.Context, d *schema.Re
 	return nil
 }
 
-func resourceDatacenterDefaultNSGSelectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterNSGSelectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 
 	if d.HasChange("nsg_id") {
@@ -85,11 +85,11 @@ func resourceDatacenterDefaultNSGSelectionUpdate(ctx context.Context, d *schema.
 		}
 	}
 
-	return resourceDatacenterDefaultNSGSelectionRead(ctx, d, meta)
+	return resourceDatacenterNSGSelectionRead(ctx, d, meta)
 
 }
 
-func resourceDatacenterDefaultNSGSelectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterNSGSelectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	ns := nsg.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
 	if diags := ns.SetDefaultDatacenterNSG(ctx, dcId, ""); diags.HasError() {

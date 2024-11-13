@@ -7,7 +7,7 @@ description: |-
   Manages the selection of the default Network Security Group for IonosCloud datacenters.
 ---
 
-# ionoscloud_datacenter_default_nsg_selection
+# ionoscloud_datacenter_nsg_selection
 
 Manages the selection of the default Network Security Group for IonosCloud datacenters.
 
@@ -29,7 +29,7 @@ resource "ionoscloud_nsg" "example" {
   datacenter_id     = ionoscloud_datacenter.example.id
 }
 
-resource "ionoscloud_datacenter_default_nsg_selection" "example"{
+resource "ionoscloud_datacenter_nsg_selection" "example"{
   datacenter_id     = ionoscloud_datacenter.example.id
   nsg_id            = ionoscloud_nsg.example.id
 }
