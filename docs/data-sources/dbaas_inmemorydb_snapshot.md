@@ -23,7 +23,7 @@ data "ionoscloud_inmemorydb_snapshot" "example" {
 ## Argument Reference
 
 * `id` - (Required) The ID of the InMemoryDB Snapshot.
-* `location` - (Required) The location of the InMemoryDB Snapshot.
+* `location` - (Optional) The location of the InMemoryDB Snapshot.
 
 ## Attributes Reference
 

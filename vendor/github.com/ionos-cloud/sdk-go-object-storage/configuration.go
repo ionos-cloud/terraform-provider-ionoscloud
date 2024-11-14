@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -26,10 +27,13 @@ import (
 )
 
 const (
-	IonosLogLevelEnvVar = "IONOS_LOG_LEVEL"
-	defaultMaxRetries   = 3
-	defaultWaitTime     = time.Duration(100) * time.Millisecond
-	defaultMaxWaitTime  = time.Duration(2000) * time.Millisecond
+	IonosLogLevelEnvVar   = "IONOS_LOG_LEVEL"
+	IonosApiUrlEnvVar     = "IONOS_API_URL"
+	defaultMaxRetries     = 3
+	defaultWaitTime       = time.Duration(100) * time.Millisecond
+	defaultMaxWaitTime    = time.Duration(2000) * time.Millisecond
+	DefaultIonosServerUrl = "https://s3.eu-central-3.ionoscloud.com"
+	DefaultIonosBasePath  = ""
 )
 
 // contextKeys are used to identify the type of value in the context.
@@ -118,19 +122,21 @@ type Configuration struct {
 }
 
 // NewConfiguration returns a new Configuration object
-func NewConfiguration() *Configuration {
+func NewConfiguration(hostUrl string) *Configuration {
 	cfg := &Configuration{
 		DefaultHeader: make(map[string]string),
-		UserAgent:     "ionos-cloud-sdk-go-object-storage/v1.0.0",
+		UserAgent:     "ionos-cloud-sdk-go-object-storage/v1.1.0",
 		Debug:         false,
 		MaxRetries:    defaultMaxRetries,
 		MaxWaitTime:   defaultMaxWaitTime,
 		WaitTime:      defaultWaitTime,
 		Logger:        NewDefaultLogger(),
 		LogLevel:      getLogLevelFromEnv(),
+		Host:          getHost(hostUrl),
+		Scheme:        getScheme(hostUrl),
 		Servers: ServerConfigurations{
 			{
-				URL:         "https://s3.eu-central-3.ionoscloud.com",
+				URL:         getServerUrl(hostUrl),
 				Description: "The endpoint for the `eu-central-3` region (Berlin, Germany)",
 			},
 		},
@@ -142,7 +148,7 @@ func NewConfiguration() *Configuration {
 func NewConfigurationFromEnv() *Configuration {
 	region := "eu-central-3"
 	service := "s3"
-	cfg := NewConfiguration()
+	cfg := NewConfiguration(os.Getenv(IonosApiUrlEnvVar))
 	cfg.MiddlewareWithError = signerMw(region, service, os.Getenv("IONOS_S3_ACCESS_KEY"), os.Getenv("IONOS_S3_SECRET_KEY"))
 	return cfg
 }
@@ -235,6 +241,39 @@ func getServerOperationVariables(ctx context.Context, endpoint string) (map[stri
 		}
 	}
 	return getServerVariables(ctx)
+}
+
+func getServerUrl(serverUrl string) string {
+	if serverUrl == "" {
+		return DefaultIonosServerUrl
+	}
+	if !strings.HasPrefix(serverUrl, "https://") && !strings.HasPrefix(serverUrl, "http://") {
+		serverUrl = fmt.Sprintf("https://%s", serverUrl)
+	}
+	if !strings.HasSuffix(serverUrl, DefaultIonosBasePath) {
+		serverUrl = fmt.Sprintf("%s%s", serverUrl, DefaultIonosBasePath)
+	}
+	return serverUrl
+}
+
+func getHost(serverUrl string) string {
+	// url.Parse only interprets the host correctly when the scheme is set, so we prepend one here if needed
+	if !strings.HasPrefix(serverUrl, "https://") && !strings.HasPrefix(serverUrl, "http://") {
+		serverUrl = "http://" + serverUrl
+	}
+	url, err := url.Parse(serverUrl)
+	if err != nil {
+		return ""
+	}
+	return url.Host
+}
+
+func getScheme(serverUrl string) string {
+	url, err := url.Parse(serverUrl)
+	if err != nil {
+		return ""
+	}
+	return url.Scheme
 }
 
 // ServerURLWithContext returns a new server URL given an endpoint

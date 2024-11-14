@@ -76,6 +76,7 @@ token             = var.ionos_token
 #  endpoint = "custom_cloud_api_url"
 #  s3_access_key     =  <your_access_key>
 #  s3_secret_key     =  <your_secret_key>
+#  s3_region     =  <your_bucket_region>
 }
 ```
 
@@ -89,6 +90,7 @@ export TF_VAR_ionos_username="username"
 export TF_VAR_ionos_password="password"
 export TF_VAR_ionos_s3_access_key="accesskey"
 export TF_VAR_ionos_s3_secret_key="secretkey"
+export TF_VAR_ionos_s3_region="eu-central-3" # optional
 ```
 
 See the [IonosCloud Provider documentation](https://registry.terraform.io/providers/ionos-cloud/ionoscloud/latest/docs) for more details.
@@ -104,8 +106,9 @@ See the [IonosCloud Provider documentation](https://registry.terraform.io/provid
 | `IONOS_LOG_LEVEL`       | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace                                                                                           |
 | `IONOS_PINNED_CERT`     | Specify the SHA-256 public fingerprint here, enables certificate pinning                                                                                                 |
 | `IONOS_CONTRACT_NUMBER` | Specify the contract number on which you wish to provision. Only valid for reseller accounts, for other types of accounts the header will be ignored                     |
-| `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS Object Storage API                                                                                              |
-| `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS Object Storage API                                                                                              |
+| `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS Object Storage API                                                                                         |
+| `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS Object Storage API                                                                                         |
+| `IONOS_S3_REGION`       | Region for IONOS Object Storage operations. Default value: eu-central-3. **If you use IONOS_API_URL_OBJECT_STORAGE, `IONOS_S3_REGION` is mandatory**                     |
 
 
 ## Certificate pinning:

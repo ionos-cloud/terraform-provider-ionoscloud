@@ -112,7 +112,7 @@ resource "ionoscloud_kafka_cluster" "example" {
 
 * `id` - (Computed)[string] The UUID of the Kafka Cluster.
 * `name` - (Required)[string] Name of the Kafka Cluster.
-* `location` - (Required)[string] The location of the Kafka Cluster. Possible values: `de/fra`, `de/txl`
+* `location` - (Optional)[string] The location of the Kafka Cluster. Possible values: `de/fra`, `de/txl`
 * `version` - (Required)[string] Version of the Kafka Cluster. Possible values: `3.7.0`
 * `size` - (Required)[string] Size of the Kafka Cluster. Possible values: `XS`, `S`
 * `connections` - (Required) Connection information of the Kafka Cluster. Minimum items: 1, maximum items: 1.
@@ -121,6 +121,9 @@ resource "ionoscloud_kafka_cluster" "example" {
     * `broker_addresses` - (Required)[list] IP addresses and subnet of cluster brokers. **Note** the following
       unavailable IP range: 10.224.0.0/11
 * `broker_addresses` - (Computed)[list] IP address and port of cluster brokers.
+
+> **⚠ NOTE:** `IONOS_API_URL_KAFKA` can be used to set a custom API URL for the kafka resource. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+
 
 ## Import
 

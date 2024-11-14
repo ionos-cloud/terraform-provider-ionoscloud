@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -24,11 +25,20 @@ var locationToURL = map[string]string{
 	"us/las": "https://mariadb.us-las.ionos.com",
 	"us/mci": "https://mariadb.us-mci.ionos.com",
 }
+var ionosAPIURLMariaDB = "IONOS_API_URL_MARIADB"
 
 // modifyConfigURL modifies the URL inside the client configuration.
 // This function is required in order to make requests to different endpoints based on location.
 func (c *MariaDBClient) modifyConfigURL(location string) {
 	clientConfig := c.sdkClient.GetConfig()
+	if location == "" && os.Getenv(ionosAPIURLMariaDB) != "" {
+		clientConfig.Servers = mariadb.ServerConfigurations{
+			{
+				URL: utils.CleanURL(os.Getenv(ionosAPIURLMariaDB)),
+			},
+		}
+		return
+	}
 	clientConfig.Servers = mariadb.ServerConfigurations{
 		{
 			URL: locationToURL[location],

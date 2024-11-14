@@ -32,11 +32,10 @@ func resourceVpnWireguardPeer() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      fmt.Sprintf("The location of the WireGuard Peer. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.AvailableLocations, false)),
+				Type:        schema.TypeString,
+				Description: fmt.Sprintf("The location of the WireGuard Peer. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
+				Optional:    true,
+				ForceNew:    true,
 			},
 			"name": {
 				Type:         schema.TypeString,

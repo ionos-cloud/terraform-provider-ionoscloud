@@ -18,7 +18,7 @@ type Client struct {
 	sdkClient *cr.APIClient
 }
 
-func NewClient(username, password, token, url, version, terraformVersion string) *Client {
+func NewClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
 	newConfigRegistry := cr.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(constant.IonosDebug) != "" {
@@ -27,7 +27,7 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	newConfigRegistry.MaxRetries = constant.MaxRetries
 	newConfigRegistry.MaxWaitTime = constant.MaxWaitTime
 
-	newConfigRegistry.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newConfigRegistry.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	newConfigRegistry.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-container-cr/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, cr.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)

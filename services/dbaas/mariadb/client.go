@@ -17,7 +17,7 @@ type MariaDBClient struct {
 	sdkClient *mariadb.APIClient
 }
 
-func NewMariaDBClient(username, password, token, url, version, terraformVersion string) *MariaDBClient {
+func NewMariaDBClient(username, password, token, url, version, terraformVersion string, insecure bool) *MariaDBClient {
 	newConfigDbaas := mariadb.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(constant.IonosDebug) != "" {
@@ -26,7 +26,7 @@ func NewMariaDBClient(username, password, token, url, version, terraformVersion 
 	newConfigDbaas.MaxRetries = constant.MaxRetries
 	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
 
-	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	newConfigDbaas.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mariadb/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, mariadb.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)

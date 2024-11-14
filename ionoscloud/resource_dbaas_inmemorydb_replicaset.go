@@ -40,11 +40,10 @@ func resourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 				Required:    true,
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      "The replica set location",
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
+				Type:        schema.TypeString,
+				Description: "The replica set location",
+				Optional:    true,
+				ForceNew:    true,
 			},
 			"version": {
 				Type:        schema.TypeString,
