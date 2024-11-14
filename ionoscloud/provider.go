@@ -3,12 +3,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	objectStorageService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
-
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,6 +39,8 @@ var Version = "DEV"
 
 type ClientOptions struct {
 	Username         string
+	AccessKey        string
+	SecretKey        string
 	Password         string
 	Token            string
 	Url              string
@@ -283,6 +284,8 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		_ = d.Set("insecure", true)
 	}
 	insecure, insecureSet := d.GetOk("insecure")
+	accessKey := os.Getenv("IONOS_S3_ACCESS_KEY")
+	secretKey := os.Getenv("IONOS_S3_SECRET_KEY")
 
 	if !tokenOk {
 		if !usernameOk {
@@ -310,6 +313,8 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.Password = password.(string)
 	clientOpts.Token = token.(string)
 	clientOpts.Url = cleanedURL
+	clientOpts.AccessKey = accessKey
+	clientOpts.SecretKey = secretKey
 	clientOpts.TerraformVersion = terraformVersion
 	if insecureSet {
 		clientOpts.Insecure = insecure.(bool)
@@ -405,12 +410,14 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	case psqlClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case s3Client:
-		{
-			config := objstorage.NewConfiguration(clientOpts.Url)
-			config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOpts.Insecure)}
-			myS3Client := objstorage.NewAPIClient(config)
-			return myS3Client
-		}
+		//return objstorage.NewAPIClient(objstorage.NewConfiguration())
+		//{
+		//	config := objstorage.NewConfiguration(clientOpts.Url)
+		//	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOpts.Insecure)}
+		//	myS3Client := objstorage.NewAPIClient(config)
+		//	return myS3Client
+		//}
+		return objectStorageService.NewClient(clientOpts.AccessKey, clientOpts.SecretKey, "", clientOpts.Url, clientOpts.Insecure)
 	case kafkaClient:
 		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username, clientOpts.Insecure)
 	case apiGatewayClient:
