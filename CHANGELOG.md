@@ -20,6 +20,9 @@
   - [ionoscloud_nsg_firewallrule](docs/resources/nsg_firewallrule.md)
 - `Data Sources`:
   - [ionoscloud_nsg](docs/data-sources/nsg.md)
+### Documentation
+- Update documentation for `s3_region` and `IONOS_S3_REGION` variables
+
 ## 6.6.2
 ### Fixes
 - Fix empty `ssh_key` used as variable in `ssh_keys` field in `ionoscloud_server` resource
