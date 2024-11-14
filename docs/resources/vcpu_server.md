@@ -115,6 +115,7 @@ resource "random_password" "server_image_password" {
 - `image_password` - (Optional)[string] The password for the image.
 - `label` - (Optional) A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.
 - `inline_volume_ids` - (Computed) A list with the IDs for the volumes that are defined inside the server resource.
+- `security_groups_ids` - (Optional) The list of Security Group IDs for the resource.
 
 > **⚠ WARNING** 
 > 

@@ -96,6 +96,11 @@ func dataSourceNIC() *schema.Resource {
 							the start and end time of the recording, and the type of protocol – 
 							and log the extent to which your instances are being accessed.`,
 			},
+			"security_groups_ids": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}

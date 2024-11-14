@@ -127,18 +127,20 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	dcId := d.Get("datacenter_id").(string)
 	volumeId := d.Get("volume_id").(string)
 	name := d.Get("name").(string)
-
-	request := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Name(name)
+	snapshot := ionoscloud.NewCreateSnapshot()
+	snapshot.Properties = ionoscloud.NewCreateSnapshotProperties()
+	props := snapshot.Properties
+	props.Name = ionoscloud.ToPtr(name)
 	if v, ok := d.GetOk("description"); ok {
-		request = request.Description(v.(string))
+		props.Description = ionoscloud.ToPtr(v.(string))
 	}
 	if v, ok := d.GetOk("licence_type"); ok {
-		request = request.LicenceType(v.(string))
+		props.LicenceType = ionoscloud.ToPtr(v.(string))
 	}
 	if v, ok := d.GetOk("sec_auth_protection"); ok {
-		request = request.SecAuthProtection(v.(bool))
+		props.SecAuthProtection = ionoscloud.ToPtr(v.(bool))
 	}
-	rsp, apiResponse, err := request.Execute()
+	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Snapshot(*snapshot).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a snapshot: %w ", err))

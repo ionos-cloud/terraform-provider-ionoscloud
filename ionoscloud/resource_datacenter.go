@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -98,13 +99,12 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	datacenterName := d.Get("name").(string)
 	datacenterLocation := d.Get("location").(string)
 
-	datacenter := ionoscloud.Datacenter{
-		Properties: &ionoscloud.DatacenterProperties{
+	datacenter := ionoscloud.DatacenterPost{
+		Properties: &ionoscloud.DatacenterPropertiesPost{
 			Name:     &datacenterName,
 			Location: &datacenterLocation,
 		},
 	}
-
 	if attr, ok := d.GetOk("description"); ok {
 		attrStr := attr.(string)
 		datacenter.Properties.Description = &attrStr
@@ -161,7 +161,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(services.SdkBundle).CloudApiClient
-	obj := ionoscloud.DatacenterProperties{}
+	obj := ionoscloud.DatacenterPropertiesPut{}
 
 	if d.HasChange("name") {
 		_, newName := d.GetChange("name")
@@ -186,6 +186,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		newSecAuthProtectionStr := newSecAuthProtection.(bool)
 		obj.SecAuthProtection = &newSecAuthProtectionStr
 	}
+
 	_, apiResponse, err := client.DataCentersApi.DatacentersPatch(ctx, d.Id()).Datacenter(obj).Execute()
 	logApiRequestTime(apiResponse)
 

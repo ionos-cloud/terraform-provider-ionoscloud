@@ -60,13 +60,19 @@ type ResourceLimits struct {
 	NatGatewayLimitTotal *int32 `json:"natGatewayLimitTotal"`
 	// The NAT Gateways provisioned.
 	NatGatewayProvisioned *int32 `json:"natGatewayProvisioned"`
+	// The maximum number of security groups per VDC.
+	SecurityGroupsPerVdc *int32 `json:"securityGroupsPerVdc"`
+	// The maximum number of security groups that can be attached to a NIC or a VM individually. For example, a user can have maximum 10 security groups per NIC and 10 per VM.
+	SecurityGroupsPerResource *int32 `json:"securityGroupsPerResource"`
+	// The maximum number of rules per security group.
+	RulesPerSecurityGroup *int32 `json:"rulesPerSecurityGroup"`
 }
 
 // NewResourceLimits instantiates a new ResourceLimits object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewResourceLimits(coresPerServer int32, coresPerContract int32, coresProvisioned int32, ramPerServer int32, ramPerContract int32, ramProvisioned int32, hddLimitPerVolume int64, hddLimitPerContract int64, hddVolumeProvisioned int64, ssdLimitPerVolume int64, ssdLimitPerContract int64, ssdVolumeProvisioned int64, dasVolumeProvisioned int64, reservableIps int32, reservedIpsOnContract int32, reservedIpsInUse int32, k8sClusterLimitTotal int32, k8sClustersProvisioned int32, nlbLimitTotal int32, nlbProvisioned int32, natGatewayLimitTotal int32, natGatewayProvisioned int32) *ResourceLimits {
+func NewResourceLimits(coresPerServer int32, coresPerContract int32, coresProvisioned int32, ramPerServer int32, ramPerContract int32, ramProvisioned int32, hddLimitPerVolume int64, hddLimitPerContract int64, hddVolumeProvisioned int64, ssdLimitPerVolume int64, ssdLimitPerContract int64, ssdVolumeProvisioned int64, dasVolumeProvisioned int64, reservableIps int32, reservedIpsOnContract int32, reservedIpsInUse int32, k8sClusterLimitTotal int32, k8sClustersProvisioned int32, nlbLimitTotal int32, nlbProvisioned int32, natGatewayLimitTotal int32, natGatewayProvisioned int32, securityGroupsPerVdc int32, securityGroupsPerResource int32, rulesPerSecurityGroup int32) *ResourceLimits {
 	this := ResourceLimits{}
 
 	this.CoresPerServer = &coresPerServer
@@ -91,6 +97,9 @@ func NewResourceLimits(coresPerServer int32, coresPerContract int32, coresProvis
 	this.NlbProvisioned = &nlbProvisioned
 	this.NatGatewayLimitTotal = &natGatewayLimitTotal
 	this.NatGatewayProvisioned = &natGatewayProvisioned
+	this.SecurityGroupsPerVdc = &securityGroupsPerVdc
+	this.SecurityGroupsPerResource = &securityGroupsPerResource
+	this.RulesPerSecurityGroup = &rulesPerSecurityGroup
 
 	return &this
 }
@@ -939,6 +948,120 @@ func (o *ResourceLimits) HasNatGatewayProvisioned() bool {
 	return false
 }
 
+// GetSecurityGroupsPerVdc returns the SecurityGroupsPerVdc field value
+// If the value is explicit nil, nil is returned
+func (o *ResourceLimits) GetSecurityGroupsPerVdc() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.SecurityGroupsPerVdc
+
+}
+
+// GetSecurityGroupsPerVdcOk returns a tuple with the SecurityGroupsPerVdc field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ResourceLimits) GetSecurityGroupsPerVdcOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.SecurityGroupsPerVdc, true
+}
+
+// SetSecurityGroupsPerVdc sets field value
+func (o *ResourceLimits) SetSecurityGroupsPerVdc(v int32) {
+
+	o.SecurityGroupsPerVdc = &v
+
+}
+
+// HasSecurityGroupsPerVdc returns a boolean if a field has been set.
+func (o *ResourceLimits) HasSecurityGroupsPerVdc() bool {
+	if o != nil && o.SecurityGroupsPerVdc != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetSecurityGroupsPerResource returns the SecurityGroupsPerResource field value
+// If the value is explicit nil, nil is returned
+func (o *ResourceLimits) GetSecurityGroupsPerResource() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.SecurityGroupsPerResource
+
+}
+
+// GetSecurityGroupsPerResourceOk returns a tuple with the SecurityGroupsPerResource field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ResourceLimits) GetSecurityGroupsPerResourceOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.SecurityGroupsPerResource, true
+}
+
+// SetSecurityGroupsPerResource sets field value
+func (o *ResourceLimits) SetSecurityGroupsPerResource(v int32) {
+
+	o.SecurityGroupsPerResource = &v
+
+}
+
+// HasSecurityGroupsPerResource returns a boolean if a field has been set.
+func (o *ResourceLimits) HasSecurityGroupsPerResource() bool {
+	if o != nil && o.SecurityGroupsPerResource != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetRulesPerSecurityGroup returns the RulesPerSecurityGroup field value
+// If the value is explicit nil, nil is returned
+func (o *ResourceLimits) GetRulesPerSecurityGroup() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.RulesPerSecurityGroup
+
+}
+
+// GetRulesPerSecurityGroupOk returns a tuple with the RulesPerSecurityGroup field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ResourceLimits) GetRulesPerSecurityGroupOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.RulesPerSecurityGroup, true
+}
+
+// SetRulesPerSecurityGroup sets field value
+func (o *ResourceLimits) SetRulesPerSecurityGroup(v int32) {
+
+	o.RulesPerSecurityGroup = &v
+
+}
+
+// HasRulesPerSecurityGroup returns a boolean if a field has been set.
+func (o *ResourceLimits) HasRulesPerSecurityGroup() bool {
+	if o != nil && o.RulesPerSecurityGroup != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o ResourceLimits) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.CoresPerServer != nil {
@@ -1027,6 +1150,18 @@ func (o ResourceLimits) MarshalJSON() ([]byte, error) {
 
 	if o.NatGatewayProvisioned != nil {
 		toSerialize["natGatewayProvisioned"] = o.NatGatewayProvisioned
+	}
+
+	if o.SecurityGroupsPerVdc != nil {
+		toSerialize["securityGroupsPerVdc"] = o.SecurityGroupsPerVdc
+	}
+
+	if o.SecurityGroupsPerResource != nil {
+		toSerialize["securityGroupsPerResource"] = o.SecurityGroupsPerResource
+	}
+
+	if o.RulesPerSecurityGroup != nil {
+		toSerialize["rulesPerSecurityGroup"] = o.RulesPerSecurityGroup
 	}
 
 	return json.Marshal(toSerialize)

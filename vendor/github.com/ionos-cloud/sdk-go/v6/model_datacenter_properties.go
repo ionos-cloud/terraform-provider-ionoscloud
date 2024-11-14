@@ -33,6 +33,8 @@ type DatacenterProperties struct {
 	// This value is either 'null' or contains an automatically-assigned /56 IPv6 CIDR block if IPv6 is enabled on this virtual data center. It can neither be changed nor removed.
 	// to set this field to `nil` in order to be marshalled, the explicit nil address `Nilstring` can be used, or the setter `SetIpv6CidrBlockNil`
 	Ipv6CidrBlock *string `json:"ipv6CidrBlock,omitempty"`
+	// Optional property to define the default security group of the datacenter.
+	DefaultSecurityGroupId *string `json:"defaultSecurityGroupId,omitempty"`
 }
 
 // NewDatacenterProperties instantiates a new DatacenterProperties object
@@ -364,6 +366,44 @@ func (o *DatacenterProperties) HasIpv6CidrBlock() bool {
 	return false
 }
 
+// GetDefaultSecurityGroupId returns the DefaultSecurityGroupId field value
+// If the value is explicit nil, nil is returned
+func (o *DatacenterProperties) GetDefaultSecurityGroupId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.DefaultSecurityGroupId
+
+}
+
+// GetDefaultSecurityGroupIdOk returns a tuple with the DefaultSecurityGroupId field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DatacenterProperties) GetDefaultSecurityGroupIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.DefaultSecurityGroupId, true
+}
+
+// SetDefaultSecurityGroupId sets field value
+func (o *DatacenterProperties) SetDefaultSecurityGroupId(v string) {
+
+	o.DefaultSecurityGroupId = &v
+
+}
+
+// HasDefaultSecurityGroupId returns a boolean if a field has been set.
+func (o *DatacenterProperties) HasDefaultSecurityGroupId() bool {
+	if o != nil && o.DefaultSecurityGroupId != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o DatacenterProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Name != nil {
@@ -399,6 +439,10 @@ func (o DatacenterProperties) MarshalJSON() ([]byte, error) {
 	} else if o.Ipv6CidrBlock != nil {
 		toSerialize["ipv6CidrBlock"] = o.Ipv6CidrBlock
 	}
+	if o.DefaultSecurityGroupId != nil {
+		toSerialize["defaultSecurityGroupId"] = o.DefaultSecurityGroupId
+	}
+
 	return json.Marshal(toSerialize)
 }
 

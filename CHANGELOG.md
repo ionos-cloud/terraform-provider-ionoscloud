@@ -12,12 +12,22 @@
 - Add `IONOS_API_URL_INMEMORYDB` to set a custom API URL for InMemoryDB product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
 - Add `IONOS_API_URL_OBJECT_STORAGE` to set a custom API URL for Object Storage product. `region` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
 - Add `IONOS_ALLOW_INSECURE` env variable and `insecure` field to allow insecure connections to the API. This is useful for testing purposes only.
+- Add import tests for VPN Gateway resources
+- Add `security_groups_ids` to `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_nic`, `ionoscloud_vcpu_server` resources and data sources
+### New Product - **Network Security Groups**:
+- `Resources`:
+  - [ionoscloud_nsg](docs/resources/nsg.md)
+  - [ionoscloud_nsg_firewallrule](docs/resources/nsg_firewallrule.md)
+- `Data Sources`:
+  - [ionoscloud_nsg](docs/data-sources/nsg.md)
+## 6.6.2
 ### Fixes
 - Fix empty `ssh_key` used as variable in `ssh_keys` field in `ionoscloud_server` resource
 - `hostname` needs to be computed as it gets the value of the server name if not set. Fix for `resource_server`, `resource_vcpu_server` and `resource_cube_server`
 - Add import tests for VPN Gateway resources
 
 ## 6.6.1
+
 ### Features
 - Add `hostname` to `ionoscloud_server` resource and data source
 - Add `hostname` to `ionoscloud_vcpu_server` resource and data source
