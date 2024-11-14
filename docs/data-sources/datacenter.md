@@ -51,8 +51,6 @@ The following attributes are returned by the datasource:
 * `version` - The version of that Data Center. Gets incremented with every change
 * `features` - List of features supported by the location this data center is part of
 * `sec_auth_protection` - Boolean value representing if the data center requires extra protection e.g. two factor protection
-* `security_group_id` - If `create_default_security_group` is set, will be receive the value of that default group. This will become the default security group for the datacenter, replacing the old one if already exists. This security group must already exist prior to this request. Provide this field only if the `create_default_security_group` field is missing. You cannot provide both of them. Can only be set for update requests.
-* `default_created_security_group_id` - The ID of the default security group created for the datacenter. This field is only available if `create_default_security_group` is set to true.
 * `cpu_architecture` - Array of features and CPU families available in a location
   * `cpu_family` - A valid CPU family name
   * `max_cores` - The maximum number of cores available

@@ -47,7 +47,6 @@ Or by using an `import` block. Here is an example that allows you to import the 
 resource "ionoscloud_datacenter" "example" {
   name            = "Datacenter NSG Example"
   location        = "de/txl"
-  create_default_security_group = true    # NSG created by this flag
 }
 
 import {
