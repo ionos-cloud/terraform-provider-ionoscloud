@@ -274,9 +274,9 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	username, usernameOk := d.GetOk("username")
 	password, passwordOk := d.GetOk("password")
 	token, tokenOk := d.GetOk("token")
+	// for some reason, ENVDEFAULTFUNC does not work for this(boolean?) field
 	if insecure := os.Getenv("IONOS_ALLOW_INSECURE"); insecure != "" {
-		d.Set("insecure", true)
-
+		_ = d.Set("insecure", true)
 	}
 	insecure, insecureSet := d.GetOk("insecure")
 
