@@ -26,6 +26,7 @@ type ClientOptions struct {
 	S3AccessKey    types.String `tfsdk:"s3_access_key"`
 	S3Region       types.String `tfsdk:"s3_region"`
 	Retries        types.Int64  `tfsdk:"retries"`
+	Insecure       types.Bool   `tfsdk:"insecure"`
 }
 
 // IonosCloudProvider is the provider implementation.
@@ -81,6 +82,10 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 			"s3_region": schema.StringAttribute{
 				Optional:    true,
 				Description: "Region for IONOS Object Storage operations.",
+			},
+			"insecure": schema.BoolAttribute{
+				Optional:    true,
+				Description: "This field is to be set only for testing purposes. It is not recommended to set this field in production environments.",
 			},
 		},
 	}

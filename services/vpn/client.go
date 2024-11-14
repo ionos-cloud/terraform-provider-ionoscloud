@@ -40,11 +40,11 @@ var (
 )
 
 // NewClient returns a new ionoscloud logging client
-func NewClient(username, password, token, url, terraformVersion string) *Client {
+func NewClient(username, password, token, url, terraformVersion string, insecure bool) *Client {
 	newConfig := shared.NewConfiguration(username, password, token, url)
 	newConfig.MaxRetries = constant.MaxRetries
 	newConfig.MaxWaitTime = constant.MaxWaitTime
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	newConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-vpn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch",
 		vpn.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck

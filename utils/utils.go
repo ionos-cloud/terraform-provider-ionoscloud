@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net"
@@ -27,12 +28,12 @@ import (
 const DefaultTimeout = 60 * time.Minute
 
 // CreateTransport - creates customizable transport for http clients
-func CreateTransport() *http.Transport {
+func CreateTransport(insecure bool) *http.Transport {
 	dialer := &net.Dialer{
 		Timeout:   30 * time.Second,
 		KeepAlive: 30 * time.Second,
 	}
-	return &http.Transport{
+	transport := &http.Transport{
 		Proxy:                 http.ProxyFromEnvironment,
 		DialContext:           dialer.DialContext,
 		DisableKeepAlives:     true,
@@ -42,6 +43,8 @@ func CreateTransport() *http.Transport {
 		MaxIdleConnsPerHost:   3,
 		MaxConnsPerHost:       3,
 	}
+	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: insecure}
+	return transport
 }
 
 func DiffSlice(slice1 []string, slice2 []string) []string {

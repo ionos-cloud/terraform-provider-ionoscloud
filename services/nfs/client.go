@@ -20,7 +20,7 @@ type Client struct {
 }
 
 // NewClient returns a new NFS client
-func NewClient(username, password, token, url, version, terraformVersion string) *Client {
+func NewClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
 	config := sdk.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(constant.IonosDebug) != "" {
@@ -28,7 +28,7 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	}
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
-	config.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	config.UserAgent = fmt.Sprintf("terraform-provider/%s_ionos-cloud-sdk-go-nfs/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s", version, sdk.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint:staticcheck
 
 	return &Client{sdkClient: *sdk.NewAPIClient(config)}
