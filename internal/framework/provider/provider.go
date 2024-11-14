@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -175,6 +176,8 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	resp.Diagnostics.AddWarning(fmt.Sprintf("insecure mode %t", insecureBool), "")
+
 	if insecureBool == true {
 		log.Println("Insecure mode is enabled. This is not recommended for production environments.")
 		resp.Diagnostics.AddWarning("insecure mode enabled", "This is not recommended for production environments.")
