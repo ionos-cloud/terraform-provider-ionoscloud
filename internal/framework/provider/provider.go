@@ -136,7 +136,6 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 			log.Fatal(err)
 		}
 		insecureBool = boolValue
-
 	}
 	if !clientOpts.Token.IsNull() {
 		token = clientOpts.Token.ValueString()
@@ -176,7 +175,10 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	if insecureBool == true {
+		log.Println("Insecure mode is enabled. This is not recommended for production environments.")
+		resp.Diagnostics.AddWarning("insecure mode enabled", "This is not recommended for production environments.")
+	}
 	client := objstorage.NewClient(accessKey, secretKey, region, endpoint, insecureBool)
 	resp.DataSourceData = client
 	resp.ResourceData = client
