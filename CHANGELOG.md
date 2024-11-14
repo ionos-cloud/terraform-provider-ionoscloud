@@ -1,23 +1,21 @@
-## 6.6.3 - upcoming release
+## 6.6.2 - upcoming release
 ### Features
-- Add import tests for VPN Gateway resources
-  - Make `location` optional for `certificate_manager` resources and datasources
-  - Make `location` optional for `vpn` resources and datasources
-  - Make `location` optional for `nfs` resources and datasources
-  - Make `location` optional for `kafka` resources and datasources
-  - Add `IONOS_API_URL_NFS` to set a custom API URL for the NAS/NFS product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
-  - Add `IONOS_API_URL_VPN` to set a custom API URL for the VPN product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
-  - Add `IONOS_API_URL_CERT` to set a custom API URL for the Certificate Manager product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
-  - Add `IONOS_API_URL_KAFKA` to set a custom API URL for the Event Streams product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
-  - Add `IONOS_API_URL_MARIADB` to set a custom API URL for the MariaDB product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
-  - Add `IONOS_API_URL_INMEMORYDB` to set a custom API URL for InMemoryDB product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
-
-## 6.6.2
+- Make `location` optional for `certificate_manager` resources and datasources
+- Make `location` optional for `vpn` resources and datasources
+- Make `location` optional for `nfs` resources and datasources
+- Make `location` optional for `kafka` resources and datasources
+- Add `IONOS_API_URL_NFS` to set a custom API URL for the NAS/NFS product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_API_URL_VPN` to set a custom API URL for the VPN product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_API_URL_CERT` to set a custom API URL for the Certificate Manager product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_API_URL_KAFKA` to set a custom API URL for the Event Streams product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_API_URL_MARIADB` to set a custom API URL for the MariaDB product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_API_URL_INMEMORYDB` to set a custom API URL for InMemoryDB product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
 ### Fixes
 - Fix empty `ssh_key` used as variable in `ssh_keys` field in `ionoscloud_server` resource
 - `hostname` needs to be computed as it gets the value of the server name if not set. Fix for `resource_server`, `resource_vcpu_server` and `resource_cube_server`
-## 6.6.1
+- Add import tests for VPN Gateway resources
 
+## 6.6.1
 ### Features
 - Add `hostname` to `ionoscloud_server` resource and data source
 - Add `hostname` to `ionoscloud_vcpu_server` resource and data source
