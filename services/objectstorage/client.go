@@ -34,7 +34,6 @@ func NewClient(id, secret, region, endpoint string, insecure bool) *Client {
 		endpoint = envValue
 	}
 	cfg := objstorage.NewConfiguration(endpoint)
-	cfg.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	signer := awsv4.NewSigner(credentials.NewStaticCredentials(id, secret, ""))
 	cfg.MiddlewareWithError = func(r *http.Request) error {
 		var reader io.ReadSeeker
@@ -55,6 +54,7 @@ func NewClient(id, secret, region, endpoint string, insecure bool) *Client {
 		}
 		return err
 	}
+	cfg.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	return &Client{
 		client: objstorage.NewAPIClient(cfg),
 	}
