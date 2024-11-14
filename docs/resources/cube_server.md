@@ -135,6 +135,7 @@ resource "random_password" "server_image_password" {
 - `firewallrule_id` - (Computed) The associated firewall rule.
 - `ssh_key_path` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
+- `security_groups_ids` - (Optional) The list of Security Group IDs for the resource.
 
 > **⚠ WARNING** 
 > 

@@ -121,6 +121,12 @@ func resourceVCPUServer() *schema.Resource {
 				ForceNew:    true,
 				Description: "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
 			},
+			"security_groups_ids": {
+				Type:        schema.TypeSet,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "The list of Security Group IDs for the server",
+			},
 			"volume": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -288,6 +294,12 @@ func resourceVCPUServer() *schema.Resource {
 						"pci_slot": {
 							Type:     schema.TypeInt,
 							Computed: true,
+						},
+						"security_groups_ids": {
+							Type:        schema.TypeSet,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Description: "The list of Security Group IDs for the NIC",
 						},
 						"firewall": {
 							Description: "Firewall rules created in the server resource. The rules can also be created as separate resources outside the server resource",

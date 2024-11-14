@@ -16,9 +16,9 @@ import (
 
 // S3KeyProperties struct for S3KeyProperties
 type S3KeyProperties struct {
-	// Secret of the S3 key.
+	// Secret of the Object storage key.
 	SecretKey *string `json:"secretKey,omitempty"`
-	// Denotes weather the S3 key is active.
+	// Denotes weather the Object storage key is active.
 	Active *bool `json:"active,omitempty"`
 }
 

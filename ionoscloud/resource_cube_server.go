@@ -17,6 +17,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -109,6 +110,12 @@ func resourceCubeServer() *schema.Resource {
 				ConflictsWith: []string{"volume.0.ssh_key_path"},
 				Optional:      true,
 				Computed:      true,
+			},
+			"security_groups_ids": {
+				Type:        schema.TypeSet,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "The list of Security Group IDs for the server",
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -297,6 +304,12 @@ func resourceCubeServer() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"security_groups_ids": {
+							Type:        schema.TypeSet,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Description: "The list of Security Group IDs for the NIC",
+						},
 						"firewall": {
 							Type:     schema.TypeList,
 							Optional: true,
@@ -326,24 +339,14 @@ func resourceCubeServer() *schema.Resource {
 										Optional: true,
 									},
 									"port_range_start": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
-											if v.(int) < 1 && v.(int) > 65534 {
-												errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
-											}
-											return
-										}),
+										Type:             schema.TypeInt,
+										Optional:         true,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
 									},
 									"port_range_end": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
-											if v.(int) < 1 && v.(int) > 65534 {
-												errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
-											}
-											return
-										}),
+										Type:             schema.TypeInt,
+										Optional:         true,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
 									},
 									"icmp_type": {
 										Type:     schema.TypeString,
@@ -386,7 +389,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	var image, imageAlias string
 
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
 	serverName := d.Get("name").(string)
 	server.Properties.Name = &serverName
@@ -545,6 +548,13 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		diags := diag.FromErr(fmt.Errorf("error fetching server: (%w)", err))
 		return diags
 	}
+	if v, ok := d.GetOk("security_groups_ids"); ok {
+		raw := v.(*schema.Set).List()
+		nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+		if diagnostic := nsgService.PutServerNSG(ctx, dcID, *createdServer.Id, raw); diagnostic != nil {
+			return diagnostic
+		}
+	}
 
 	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
 		*createdServer.Id, *(*createdServer.Entities.Nics.Items)[0].Id).Execute()
@@ -564,10 +574,18 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if (*createdServer.Entities.Nics.Items)[0].Id != nil {
-		err := d.Set("primary_nic", *(*createdServer.Entities.Nics.Items)[0].Id)
+		primaryNicID := *(*createdServer.Entities.Nics.Items)[0].Id
+		err := d.Set("primary_nic", primaryNicID)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
 			return diags
+		}
+		if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
+			raw := v.(*schema.Set).List()
+			nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+			if diagnostic := nsgService.PutNICNSG(ctx, dcID, d.Id(), primaryNicID, raw); diagnostic != nil {
+				return diagnostic
+			}
 		}
 	}
 
@@ -602,7 +620,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		initialState := initialState.(string)
 
 		if strings.EqualFold(initialState, constant.CubeVMStateStop) {
-			err := ss.Stop(ctx, dcId, d.Id(), serverType)
+			err := ss.Stop(ctx, dcID, d.Id(), serverType)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -675,6 +693,12 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
 				return diag.FromErr(utils.GenerateSetError("cube_server", "inline_volume_ids", err))
 			}
+		}
+	}
+
+	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
@@ -829,6 +853,16 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
+	}
+
+	if d.HasChange("security_groups_ids") {
+		if v, ok := d.GetOk("security_groups_ids"); ok {
+			raw := v.(*schema.Set).List()
+			nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+			if diagnostic := nsgService.PutServerNSG(ctx, dcId, d.Id(), raw); diagnostic != nil {
+				return diagnostic
+			}
+		}
 	}
 
 	// Volume stuff
@@ -1009,6 +1043,16 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			diags := diag.FromErr(fmt.Errorf("error updating nic (%w)", err))
 			return diags
 		}
+
+		if d.HasChange("nic.0.security_groups_ids") {
+			if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
+				raw := v.(*schema.Set).List()
+				nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+				if diagnostic := nsgService.PutNICNSG(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, raw); diagnostic != nil {
+					return diagnostic
+				}
+			}
+		}
 	}
 
 	// Suspend a Cube server last, after applying other changes
@@ -1101,6 +1145,12 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		log.Printf("[DEBUG] set primary_ip to %s", (*firstNicItem.Properties.Ips)[0])
 		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
 			return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
+		}
+	}
+
+	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
+			return nil, err
 		}
 	}
 

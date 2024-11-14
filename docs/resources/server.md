@@ -287,6 +287,7 @@ resource "ionoscloud_server" "test" {
     - `key` - (Required)[string] The key of the label.
     - `value` - (Required)[string] The value of the label.
 - `inline_volume_ids` - (Computed) A list with the IDs for the volumes that are defined inside the server resource.
+- `security_groups_ids` - (Optional) The list of Security Group IDs for the
 
 > **⚠ WARNING** 
 > 

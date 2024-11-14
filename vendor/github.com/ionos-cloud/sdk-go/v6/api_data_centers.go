@@ -596,13 +596,13 @@ type ApiDatacentersPatchRequest struct {
 	ctx             _context.Context
 	ApiService      *DataCentersApiService
 	datacenterId    string
-	datacenter      *DatacenterProperties
+	datacenter      *DatacenterPropertiesPut
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
 }
 
-func (r ApiDatacentersPatchRequest) Datacenter(datacenter DatacenterProperties) ApiDatacentersPatchRequest {
+func (r ApiDatacentersPatchRequest) Datacenter(datacenter DatacenterPropertiesPut) ApiDatacentersPatchRequest {
 	r.datacenter = &datacenter
 	return r
 }
@@ -778,13 +778,13 @@ func (a *DataCentersApiService) DatacentersPatchExecute(r ApiDatacentersPatchReq
 type ApiDatacentersPostRequest struct {
 	ctx             _context.Context
 	ApiService      *DataCentersApiService
-	datacenter      *Datacenter
+	datacenter      *DatacenterPost
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
 }
 
-func (r ApiDatacentersPostRequest) Datacenter(datacenter Datacenter) ApiDatacentersPostRequest {
+func (r ApiDatacentersPostRequest) Datacenter(datacenter DatacenterPost) ApiDatacentersPostRequest {
 	r.datacenter = &datacenter
 	return r
 }
@@ -960,13 +960,13 @@ type ApiDatacentersPutRequest struct {
 	ctx             _context.Context
 	ApiService      *DataCentersApiService
 	datacenterId    string
-	datacenter      *Datacenter
+	datacenter      *DatacenterPut
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
 }
 
-func (r ApiDatacentersPutRequest) Datacenter(datacenter Datacenter) ApiDatacentersPutRequest {
+func (r ApiDatacentersPutRequest) Datacenter(datacenter DatacenterPut) ApiDatacentersPutRequest {
 	r.datacenter = &datacenter
 	return r
 }
