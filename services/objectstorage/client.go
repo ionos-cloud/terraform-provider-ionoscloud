@@ -3,6 +3,7 @@ package objectstorage
 import (
 	"bytes"
 	"errors"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"io"
 	"net/http"
 	"os"
@@ -27,13 +28,13 @@ func (c *Client) GetBaseClient() *objstorage.APIClient {
 }
 
 // NewClient creates a new Object Storage client with the given credentials and region.
-func NewClient(id, secret, region, endpoint string) *Client {
+func NewClient(id, secret, region, endpoint string, insecure bool) *Client {
 	// Set custom endpoint if provided
 	if envValue := os.Getenv(ionosAPIURLObjectStorage); envValue != "" {
 		endpoint = envValue
 	}
-
 	cfg := objstorage.NewConfiguration(endpoint)
+	cfg.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	signer := awsv4.NewSigner(credentials.NewStaticCredentials(id, secret, ""))
 	cfg.MiddlewareWithError = func(r *http.Request) error {
 		var reader io.ReadSeeker
@@ -50,7 +51,7 @@ func NewClient(id, secret, region, endpoint string) *Client {
 		}
 		_, err := signer.Sign(r, reader, "s3", region, time.Now())
 		if errors.Is(err, credentials.ErrStaticCredentialsEmpty) {
-			return errors.New("Object Storage credentials are missing. Please set s3_access_key and s3_secret_key provider attributes or environment variables IONOS_S3_ACCESS_KEY and IONOS_S3_SECRET_KEY")
+			return errors.New("object storage credentials are missing. Please set s3_access_key and s3_secret_key provider attributes or environment variables IONOS_S3_ACCESS_KEY and IONOS_S3_SECRET_KEY")
 		}
 		return err
 	}

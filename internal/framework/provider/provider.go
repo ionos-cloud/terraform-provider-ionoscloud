@@ -2,7 +2,9 @@ package provider
 
 import (
 	"context"
+	"log"
 	"os"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -126,7 +128,16 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	secretKey := os.Getenv("IONOS_S3_SECRET_KEY")
 	region := os.Getenv("IONOS_S3_REGION")
 	endpoint := os.Getenv("IONOS_API_URL")
+	insecureStr := os.Getenv("IONOS_ALLOW_INSECURE")
+	insecureBool := false
+	if insecureStr != "" {
+		boolValue, err := strconv.ParseBool(insecureStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		insecureBool = boolValue
 
+	}
 	if !clientOpts.Token.IsNull() {
 		token = clientOpts.Token.ValueString()
 	}
@@ -154,6 +165,9 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	if !clientOpts.Endpoint.IsNull() {
 		endpoint = clientOpts.Endpoint.ValueString()
 	}
+	if !clientOpts.Insecure.IsNull() {
+		insecureBool = clientOpts.Insecure.ValueBool()
+	}
 
 	if token == "" && (username == "" || password == "") {
 		resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
@@ -163,7 +177,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	client := objstorage.NewClient(accessKey, secretKey, region, endpoint)
+	client := objstorage.NewClient(accessKey, secretKey, region, endpoint, insecureBool)
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }

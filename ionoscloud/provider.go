@@ -409,7 +409,6 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			config := objstorage.NewConfiguration(clientOpts.Url)
 			config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOpts.Insecure)}
 			myS3Client := objstorage.NewAPIClient(config)
-			myS3Client.GetConfig()
 			return myS3Client
 		}
 	case kafkaClient:

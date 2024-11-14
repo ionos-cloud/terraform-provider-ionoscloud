@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"sync"
 	"testing"
 
@@ -95,9 +96,19 @@ func PreCheck(t *testing.T) {
 func ObjectStorageClient() (*objstorage.APIClient, error) {
 	accessKey := os.Getenv(envar.IonosS3AccessKey)
 	secretKey := os.Getenv(envar.IonosS3SecretKey)
+	insecureStr := os.Getenv("IONOS_ALLOW_INSECURE")
+	insecureBool := false
+	if insecureStr != "" {
+		boolValue, err := strconv.ParseBool(insecureStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		insecureBool = boolValue
+
+	}
 	if accessKey == "" || secretKey == "" {
 		return nil, fmt.Errorf("%s and %s must be set for acceptance tests", envar.IonosS3AccessKey, envar.IonosS3SecretKey)
 	}
 
-	return objstorageservice.NewClient(accessKey, secretKey, "", "").GetBaseClient(), nil
+	return objstorageservice.NewClient(accessKey, secretKey, "", "", insecureBool).GetBaseClient(), nil
 }

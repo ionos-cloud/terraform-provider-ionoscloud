@@ -17,6 +17,7 @@ const (
 	IonosS3AccessKey = "IONOS_S3_ACCESS_KEY"
 	// IonosS3SecretKey is the environment variable name for the IONOS Object Storage secret key.
 	IonosS3SecretKey = "IONOS_S3_SECRET_KEY"
+	IonosInsecure    = "IONOS_ALLOW_INSECURE"
 )
 
 // RequireOneOf verifies that at least one environment variable is non-empty or returns an error.
