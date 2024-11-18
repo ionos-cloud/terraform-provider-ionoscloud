@@ -1,4 +1,10 @@
-## 6.6.2 - upcoming release
+## 6.6.3 - upcoming release
+### Documentation
+- Fix titles for mariadb docs data sources `https://docs.ionos.com/`
+- Add Network Security Group to `https://docs.ionos.com/`
+- Add bootvolume_selector to `https://docs.ionos.com/
+- Add servers to `https://docs.ionos.com/`
+## 6.6.2 
 ### Features
 - Make `location` optional for `certificate_manager` resources and datasources
 - Make `location` optional for `vpn` resources and datasources

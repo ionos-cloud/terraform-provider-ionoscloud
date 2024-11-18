@@ -29,6 +29,7 @@
     * [Server](../docs/resources/server.md)
     * [Snapshot](../docs/resources/snapshot.md)
     * [Volume](../docs/resources/volume.md)
+    * [BootVolume_selector](../docs/resources/server_boot_device_selection.md)
   * Data Sources
     * [Datacenter](../docs/data-sources/datacenter.md)
     * [Firewall Rule](../docs/data-sources/firewall.md)
@@ -40,6 +41,7 @@
     * [Nic](../docs/data-sources/nic.md)
     * [Cross Connect](../docs/data-sources/private_crossconnect.md)
     * [Server](../docs/data-sources/server.md)
+    * [Servers](../docs/data-sources/servers.md)
     * [Snapshot](../docs/data-sources/snapshot.md)
     * [Template](../docs/data-sources/template.md)
     * [Volume](../docs/data-sources/volume.md)
@@ -67,6 +69,13 @@
   * Data Sources
     * [Network Load Balancer](../docs/data-sources/networkloadbalancer.md)
     * [Network Load Balancer Forwarding Rule](../docs/data-sources/networkloadbalancer_forwardingrule.md)
+
+* Network Security Group
+  * Resources
+    * [Network Security Group](../docs/resources/nsg.md)
+    * [Network Security Group Firewall Rule](../docs/resources/nsg_firewallrule.md)
+  * Data Sources
+    * [Network Security Group](../docs/data-sources/nsg.md)
 
 * Managed Backup
   * Resources
@@ -113,8 +122,8 @@
   * Resources
     * [DBaaS MariaDB Cluster](../docs/resources/dbaas_mariadb_cluster.md)
   * Data Sources
-    * [DBaaS MongoDB Cluster](../docs/data-sources/dbaas_mariadb_cluster.md)
-    * [DBaaS MongoDB Backups](../docs/data-sources/dbaas_mariadb_backups.md)
+    * [DBaaS MariaDB Cluster](../docs/data-sources/dbaas_mariadb_cluster.md)
+    * [DBaaS MariaDB Backups](../docs/data-sources/dbaas_mariadb_backups.md)
 
 * Database as a Service - InMemory-DB
   * Resources
