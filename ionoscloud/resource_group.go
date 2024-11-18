@@ -587,7 +587,7 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 
 func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
 	client := meta.(services.SdkBundle).CloudApiClient
-	userToAdd := ionoscloud.User{
+	userToAdd := ionoscloud.UserGroupPost{
 		Id: &userId,
 	}
 

@@ -11,7 +11,6 @@ import (
 	dbaas "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func dataSourceDBaaSMariaDBCluster() *schema.Resource {
@@ -25,10 +24,9 @@ func dataSourceDBaaSMariaDBCluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      "The cluster location",
-				Optional:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
+				Type:        schema.TypeString,
+				Description: "The cluster location",
+				Optional:    true,
 			},
 			"display_name": {
 				Type:        schema.TypeString,

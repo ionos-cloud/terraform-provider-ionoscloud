@@ -2440,13 +2440,13 @@ type ApiUmGroupsUsersPostRequest struct {
 	ctx             _context.Context
 	ApiService      *UserManagementApiService
 	groupId         string
-	user            *User
+	user            *UserGroupPost
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
 }
 
-func (r ApiUmGroupsUsersPostRequest) User(user User) ApiUmGroupsUsersPostRequest {
+func (r ApiUmGroupsUsersPostRequest) User(user UserGroupPost) ApiUmGroupsUsersPostRequest {
 	r.user = &user
 	return r
 }

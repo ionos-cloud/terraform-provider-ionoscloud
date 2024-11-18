@@ -113,6 +113,7 @@ The following attributes are returned by the datasource:
   * `firewall_type` - The type of firewall rules that will be allowed on the NIC
   * `device_number` - The Logical Unit Number (LUN) of the storage volume
   * `pci_slot` - The PCI slot number of the Nic
+  * `security_groups_ids` - The list of Security Group IDs for the resource.
   * `firewall_rules` - list of
     * `id` - Id of the firewall rule
     * `name` - Name of the firewall rule
@@ -129,3 +130,4 @@ The following attributes are returned by the datasource:
   * `id` - The Id of the label
   * `key` - The key of the label
   * `value` - The value of the label
+* `security_groups_ids` - The list of Security Group IDs for the resource.

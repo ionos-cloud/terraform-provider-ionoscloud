@@ -2,7 +2,9 @@ package provider
 
 import (
 	"context"
+	"log"
 	"os"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -26,6 +28,7 @@ type ClientOptions struct {
 	S3AccessKey    types.String `tfsdk:"s3_access_key"`
 	S3Region       types.String `tfsdk:"s3_region"`
 	Retries        types.Int64  `tfsdk:"retries"`
+	Insecure       types.Bool   `tfsdk:"insecure"`
 }
 
 // IonosCloudProvider is the provider implementation.
@@ -82,6 +85,10 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 				Optional:    true,
 				Description: "Region for IONOS Object Storage operations.",
 			},
+			"insecure": schema.BoolAttribute{
+				Optional:    true,
+				Description: "This field is to be set only for testing purposes. It is not recommended to set this field in production environments.",
+			},
 		},
 	}
 }
@@ -120,7 +127,16 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	accessKey := os.Getenv("IONOS_S3_ACCESS_KEY")
 	secretKey := os.Getenv("IONOS_S3_SECRET_KEY")
 	region := os.Getenv("IONOS_S3_REGION")
-
+	endpoint := os.Getenv("IONOS_API_URL")
+	insecureStr := os.Getenv("IONOS_ALLOW_INSECURE")
+	insecureBool := false
+	if insecureStr != "" {
+		boolValue, err := strconv.ParseBool(insecureStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		insecureBool = boolValue
+	}
 	if !clientOpts.Token.IsNull() {
 		token = clientOpts.Token.ValueString()
 	}
@@ -145,6 +161,13 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		region = clientOpts.S3Region.ValueString()
 	}
 
+	if !clientOpts.Endpoint.IsNull() {
+		endpoint = clientOpts.Endpoint.ValueString()
+	}
+	if !clientOpts.Insecure.IsNull() {
+		insecureBool = clientOpts.Insecure.ValueBool()
+	}
+
 	if token == "" && (username == "" || password == "") {
 		resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
 	}
@@ -153,7 +176,11 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	client := objstorage.NewClient(accessKey, secretKey, region)
+	if insecureBool == true {
+		resp.Diagnostics.AddWarning("insecure mode enabled", "This is not recommended for production environments.")
+	}
+
+	client := objstorage.NewClient(accessKey, secretKey, region, endpoint, insecureBool)
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }

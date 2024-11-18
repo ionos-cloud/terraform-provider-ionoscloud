@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -171,6 +172,11 @@ func dataSourceCubeServer() *schema.Resource {
 				Computed: true,
 				Elem:     nicServerDSResource,
 			},
+			"security_groups_ids": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+			},
 			"ram": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -325,6 +331,12 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 				}
 				nicsIntf = nics
 			}
+		}
+	}
+
+	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
+			return err
 		}
 	}
 

@@ -28,7 +28,7 @@ type UserProperties struct {
 	ForceSecAuth *bool `json:"forceSecAuth,omitempty"`
 	// Indicates if secure authentication is active for the user.
 	SecAuthActive *bool `json:"secAuthActive,omitempty"`
-	// Canonical (S3) ID of the user for a given identity.
+	// Canonical (Object storage) ID of the user for a given identity.
 	S3CanonicalUserId *string `json:"s3CanonicalUserId,omitempty"`
 	// Indicates if the user is active.
 	Active *bool `json:"active,omitempty"`

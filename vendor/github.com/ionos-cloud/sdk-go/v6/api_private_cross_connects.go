@@ -54,7 +54,7 @@ func (r ApiPccsDeleteRequest) Execute() (*APIResponse, error) {
 }
 
 /*
- * PccsDelete Delete Cross Connects
+ * PccsDelete Delete Private Cross-Connects
  * Remove the specified Cross Connect. Cross connect can be deleted only if it is not connected to any LANs. For non administrator users a cross connect can be deleted only if you are granted access via the user groups you are member of.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param pccId The unique ID of the Cross Connect.
@@ -216,7 +216,7 @@ func (r ApiPccsFindByIdRequest) Execute() (PrivateCrossConnect, *APIResponse, er
 
 /*
  * PccsFindById Retrieve a Cross Connect
- * Retrieve a Cross Connect by the resource ID. Cross Connect ID is in the response body when the Cross Connect is created and in the list of Cross Connects, returned by GET. For contract owner and administrators all cross connects in your contract can be retrieved. For non administrator users it only returns the cross connects you are granted access via the user groups you are member of.
+ * Retrieve a Cross Connect by the resource ID. Cross Connect ID is in the response body when the Cross Connect is created and in the list of Private Cross-Connects, returned by GET. For contract owner and administrators all Private Cross-Connects in your contract can be retrieved. For non administrator users it only returns the cross connects you are granted access via the user groups you are member of.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param pccId The unique ID of the Cross Connect.
  * @return ApiPccsFindByIdRequest
@@ -409,8 +409,8 @@ func (r ApiPccsGetRequest) Execute() (PrivateCrossConnects, *APIResponse, error)
 }
 
 /*
- * PccsGet List Cross Connects
- * List all Cross Connects. For contract owner and administrators it returns all cross connects in your contract. For non administrator users it only returns the cross connects you are granted access via the user groups you are member of.
+ * PccsGet List Private Cross-Connects
+ * List all Private Cross-Connects. For contract owner and administrators it returns all Private Cross-Connects in your contract. For non administrator users it only returns the Private Cross-Connects you are granted access via the user groups you are member of.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @return ApiPccsGetRequest
  */
@@ -598,8 +598,8 @@ func (r ApiPccsPatchRequest) Execute() (PrivateCrossConnect, *APIResponse, error
 }
 
 /*
- * PccsPatch Partially modify a Cross Connects
- * Update the properties of the specified Cross Connect.For non administrator users you can only update the cross connects you are granted access via the user groups you are member of
+ * PccsPatch Partially modify a Private Cross-Connects
+ * Update the properties of the specified Cross Connect.For non administrator users you can only update the Private Cross-Connects you are granted access via the user groups you are member of
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param pccId The unique ID of the Cross Connect.
  * @return ApiPccsPatchRequest

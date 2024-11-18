@@ -19,7 +19,7 @@ type InMemoryDBClient struct {
 }
 
 //nolint:golint
-func NewInMemoryDBClient(username, password, token, url, version, terraformVersion string) *InMemoryDBClient {
+func NewInMemoryDBClient(username, password, token, url, version, terraformVersion string, insecure bool) *InMemoryDBClient {
 	newConfigDbaas := inMemoryDB.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(constant.IonosDebug) != "" {
@@ -28,7 +28,7 @@ func NewInMemoryDBClient(username, password, token, url, version, terraformVersi
 	newConfigDbaas.MaxRetries = constant.MaxRetries
 	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
 
-	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	newConfigDbaas.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-in-memory-db/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, inMemoryDB.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck

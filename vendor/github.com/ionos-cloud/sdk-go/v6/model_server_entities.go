@@ -16,9 +16,10 @@ import (
 
 // ServerEntities struct for ServerEntities
 type ServerEntities struct {
-	Cdroms  *Cdroms          `json:"cdroms,omitempty"`
-	Volumes *AttachedVolumes `json:"volumes,omitempty"`
-	Nics    *Nics            `json:"nics,omitempty"`
+	Cdroms         *Cdroms          `json:"cdroms,omitempty"`
+	Volumes        *AttachedVolumes `json:"volumes,omitempty"`
+	Nics           *Nics            `json:"nics,omitempty"`
+	Securitygroups *SecurityGroups  `json:"securitygroups,omitempty"`
 }
 
 // NewServerEntities instantiates a new ServerEntities object
@@ -153,6 +154,44 @@ func (o *ServerEntities) HasNics() bool {
 	return false
 }
 
+// GetSecuritygroups returns the Securitygroups field value
+// If the value is explicit nil, nil is returned
+func (o *ServerEntities) GetSecuritygroups() *SecurityGroups {
+	if o == nil {
+		return nil
+	}
+
+	return o.Securitygroups
+
+}
+
+// GetSecuritygroupsOk returns a tuple with the Securitygroups field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ServerEntities) GetSecuritygroupsOk() (*SecurityGroups, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Securitygroups, true
+}
+
+// SetSecuritygroups sets field value
+func (o *ServerEntities) SetSecuritygroups(v SecurityGroups) {
+
+	o.Securitygroups = &v
+
+}
+
+// HasSecuritygroups returns a boolean if a field has been set.
+func (o *ServerEntities) HasSecuritygroups() bool {
+	if o != nil && o.Securitygroups != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o ServerEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Cdroms != nil {
@@ -165,6 +204,10 @@ func (o ServerEntities) MarshalJSON() ([]byte, error) {
 
 	if o.Nics != nil {
 		toSerialize["nics"] = o.Nics
+	}
+
+	if o.Securitygroups != nil {
+		toSerialize["securitygroups"] = o.Securitygroups
 	}
 
 	return json.Marshal(toSerialize)

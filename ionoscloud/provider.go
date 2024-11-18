@@ -45,6 +45,7 @@ type ClientOptions struct {
 	Url              string
 	Version          string
 	TerraformVersion string
+	Insecure         bool
 }
 
 // Provider returns a schema.Provider for ionoscloud
@@ -106,6 +107,13 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_REGION", nil),
 				Description: "Region for IONOS Object Storage operations.",
 			},
+			"insecure": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				DefaultFunc: schema.EnvDefaultFunc("IONOS_ALLOW_INSECURE", nil),
+				Description: "This field is to be set only for testing purposes. It is not recommended to set this field in production environments.",
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			constant.DatacenterResource:                        resourceDatacenter(),
@@ -132,6 +140,9 @@ func Provider() *schema.Provider {
 			constant.NatGatewayRuleResource:                    resourceNatGatewayRule(),
 			constant.NetworkLoadBalancerResource:               resourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
+			constant.NSGResource:                               resourceNSG(),
+			constant.NSGSelectionResource:                      resourceDatacenterNSGSelection(),
+			constant.NSGFirewallRuleResource:                   resourceNSGFirewallRule(),
 			constant.NFSClusterResource:                        resourceNFSCluster(),
 			constant.NFSShareResource:                          resourceNFSShare(),
 			constant.PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
@@ -188,6 +199,7 @@ func Provider() *schema.Provider {
 			constant.NatGatewayRuleResource:                    dataSourceNatGatewayRule(),
 			constant.NetworkLoadBalancerResource:               dataSourceNetworkLoadBalancer(),
 			constant.NetworkLoadBalancerForwardingRuleResource: dataSourceNetworkLoadBalancerForwardingRule(),
+			constant.NSGResource:                               dataSourceNSG(),
 			constant.NFSClusterResource:                        dataSourceNFSCluster(),
 			constant.NFSShareResource:                          dataSourceNFSShare(),
 			constant.TemplateResource:                          dataSourceTemplate(),
@@ -266,6 +278,11 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	username, usernameOk := d.GetOk("username")
 	password, passwordOk := d.GetOk("password")
 	token, tokenOk := d.GetOk("token")
+	// for some reason, ENVDEFAULTFUNC does not work for this(boolean?) field
+	if insecure := os.Getenv("IONOS_ALLOW_INSECURE"); insecure != "" {
+		_ = d.Set("insecure", true)
+	}
+	insecure, insecureSet := d.GetOk("insecure")
 
 	if !tokenOk {
 		if !usernameOk {
@@ -279,7 +296,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		}
 	}
 
-	cleanedUrl := cleanURL(d.Get("endpoint").(string))
+	cleanedURL := utils.CleanURL(d.Get("endpoint").(string))
 
 	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
 		// will inject x-contract-number to sdks
@@ -292,8 +309,11 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.Username = username.(string)
 	clientOpts.Password = password.(string)
 	clientOpts.Token = token.(string)
-	clientOpts.Url = cleanedUrl
+	clientOpts.Url = cleanedURL
 	clientOpts.TerraformVersion = terraformVersion
+	if insecureSet {
+		clientOpts.Insecure = insecure.(bool)
+	}
 
 	return NewSDKBundleClient(clientOpts), nil
 }
@@ -358,57 +378,53 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			}
 			newConfig.MaxRetries = constant.MaxRetries
 			newConfig.WaitTime = constant.MaxWaitTime
-			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
-			return ionoscloud.NewAPIClient(newConfig)
+			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOpts.Insecure)}
+			client := ionoscloud.NewAPIClient(newConfig)
+			return client
 		}
 	case cdnClient:
-		return cdnService.NewCDNClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return cdnService.NewCDNClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case autoscalingClient:
-		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case certManagerClient:
-		return cert.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return cert.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case containerRegistryClient:
-		return crService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return crService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case dataplatformClient:
-		return dataplatformService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return dataplatformService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case dnsClient:
-		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case loggingClient:
-		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.TerraformVersion)
+		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case mariaDBClient:
-		return mariadb.NewMariaDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return mariadb.NewMariaDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case mongoClient:
-		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case nfsClient:
-		return nfsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return nfsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case psqlClient:
-		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case s3Client:
-		return objstorage.NewAPIClient(objstorage.NewConfiguration())
+		{
+			config := objstorage.NewConfiguration(clientOpts.Url)
+			config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOpts.Insecure)}
+			myS3Client := objstorage.NewAPIClient(config)
+			return myS3Client
+		}
 	case kafkaClient:
-		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username, clientOpts.Insecure)
 	case apiGatewayClient:
 		return apiGatewayService.NewClient(
-			clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion,
-		)
+			clientOpts.Username, clientOpts.Password, clientOpts.Token,
+			clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
 	case vpnClient:
-		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username)
+		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username, clientOpts.Insecure)
 	case inMemoryDBClient:
-		return inmemorydb.NewInMemoryDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+		return inmemorydb.NewInMemoryDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username, clientOpts.Insecure)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
 	return nil
-}
-
-// cleanURL makes sure trailing slash does not corrupt the state
-func cleanURL(url string) string {
-	length := len(url)
-	if length > 1 && url[length-1] == '/' {
-		url = url[:length-1]
-	}
-
-	return url
 }
 
 // resourceDefaultTimeouts sets default value for each Timeout type

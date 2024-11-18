@@ -183,6 +183,7 @@ This will configure flowlog for accepted ingress traffic and will log it into an
   - `bucket` - (Required) Specifies the IONOS Object Storage bucket where the flow log data will be stored. The bucket must exist. Immutable, update forces re-creation.
   - `direction` - (Required) Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL. Immutable, update forces re-creation.
   - `name` - (Required) Specifies the name of the flow log.
+- `security_groups_ids` - (Optional) The list of Security Group IDs for the resource. 
     
 ⚠️ **Note:**: Removing the `flowlog` forces re-creation of the NIC resource.  
 

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -175,6 +176,11 @@ var nicServerDSResource = &schema.Resource{
 			Type:     schema.TypeList,
 			Computed: true,
 			Elem:     firewallServerDSResource,
+		},
+		"security_groups_ids": {
+			Type:     schema.TypeList,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Computed: true,
 		},
 	},
 }

@@ -9,10 +9,12 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -35,7 +37,7 @@ func resourceFirewall() *schema.Resource {
 			"protocol": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.FirewallProtocolEnum, false)),
 			},
 			"source_mac": {
 				Type:     schema.TypeString,
@@ -52,25 +54,15 @@ func resourceFirewall() *schema.Resource {
 				Computed: true,
 			},
 			"port_range_start": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
-					if v.(int) < 1 && v.(int) > 65534 {
-						errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
-					}
-					return
-				}),
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
 			},
 
 			"port_range_end": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
-					if v.(int) < 1 && v.(int) > 65534 {
-						errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
-					}
-					return
-				}),
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
 			},
 			"icmp_type": {
 				Type:     schema.TypeString,
@@ -230,7 +222,7 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find firewall rule %q", firewallId)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving firewall rule %q: %q ", firewallId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving firewall rule %q: %w ", firewallId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {

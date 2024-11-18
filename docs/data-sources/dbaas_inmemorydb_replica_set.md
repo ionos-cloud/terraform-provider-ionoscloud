@@ -33,7 +33,7 @@ data "ionoscloud_inmemorydb_replicaset" "example" {
 
 * `id` - (Optional) The ID of the InMemoryDB Replica Set.
 * `display_name` - (Optional) The display name of the InMemoryDB Replica Set.
-* `location` - (Required) The location of the InMemoryDB Replica Set.
+* `location` - (Optional) The location of the InMemoryDB Replica Set.
 
 > **Note:** Either `id` or `display_name` must be provided. If none, or both are provided, the datasource will return an error.
 

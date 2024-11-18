@@ -24,19 +24,22 @@ type TemplateProperties struct {
 	Ram *float32 `json:"ram"`
 	// The storage size in GB.
 	StorageSize *float32 `json:"storageSize"`
+	// The description of the template.
+	Category *string `json:"category"`
 }
 
 // NewTemplateProperties instantiates a new TemplateProperties object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTemplateProperties(name string, cores float32, ram float32, storageSize float32) *TemplateProperties {
+func NewTemplateProperties(name string, cores float32, ram float32, storageSize float32, category string) *TemplateProperties {
 	this := TemplateProperties{}
 
 	this.Name = &name
 	this.Cores = &cores
 	this.Ram = &ram
 	this.StorageSize = &storageSize
+	this.Category = &category
 
 	return &this
 }
@@ -201,6 +204,44 @@ func (o *TemplateProperties) HasStorageSize() bool {
 	return false
 }
 
+// GetCategory returns the Category field value
+// If the value is explicit nil, nil is returned
+func (o *TemplateProperties) GetCategory() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Category
+
+}
+
+// GetCategoryOk returns a tuple with the Category field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *TemplateProperties) GetCategoryOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Category, true
+}
+
+// SetCategory sets field value
+func (o *TemplateProperties) SetCategory(v string) {
+
+	o.Category = &v
+
+}
+
+// HasCategory returns a boolean if a field has been set.
+func (o *TemplateProperties) HasCategory() bool {
+	if o != nil && o.Category != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o TemplateProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Name != nil {
@@ -217,6 +258,10 @@ func (o TemplateProperties) MarshalJSON() ([]byte, error) {
 
 	if o.StorageSize != nil {
 		toSerialize["storageSize"] = o.StorageSize
+	}
+
+	if o.Category != nil {
+		toSerialize["category"] = o.Category
 	}
 
 	return json.Marshal(toSerialize)

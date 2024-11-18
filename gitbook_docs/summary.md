@@ -27,8 +27,11 @@
     * [Nic](../docs/resources/nic.md)
     * [Cross Connect](../docs/resources/private_crossconnect.md)
     * [Server](../docs/resources/server.md)
+    * [VCPU Server](../docs/resources/vcpu_server.md)
+    * [Cube Server](../docs/resources/cube_server.md)
     * [Snapshot](../docs/resources/snapshot.md)
     * [Volume](../docs/resources/volume.md)
+    * [Server BootVolume Selection](../docs/resources/server_boot_device_selection.md)
   * Data Sources
     * [Datacenter](../docs/data-sources/datacenter.md)
     * [Firewall Rule](../docs/data-sources/firewall.md)
@@ -40,6 +43,9 @@
     * [Nic](../docs/data-sources/nic.md)
     * [Cross Connect](../docs/data-sources/private_crossconnect.md)
     * [Server](../docs/data-sources/server.md)
+    * [VCPU Server](../docs/data-sources/vcpu_server.md)
+    * [Cube Server](../docs/data-sources/cube_server.md)
+    * [Servers](../docs/data-sources/servers.md)
     * [Snapshot](../docs/data-sources/snapshot.md)
     * [Template](../docs/data-sources/template.md)
     * [Volume](../docs/data-sources/volume.md)
@@ -68,6 +74,14 @@
     * [Network Load Balancer](../docs/data-sources/networkloadbalancer.md)
     * [Network Load Balancer Forwarding Rule](../docs/data-sources/networkloadbalancer_forwardingrule.md)
 
+* Network Security Group
+  * Resources
+    * [Network Security Group](../docs/resources/nsg.md)
+    * [Network Security Group Firewall Rule](../docs/resources/nsg_firewallrule.md)
+    * [Datacenter Network Security Group Selection](../docs/resources/datacenter_nsg_selection.md)
+  * Data Sources
+    * [Network Security Group](../docs/data-sources/nsg.md)
+
 * Managed Backup
   * Resources
     * [Backup Unit](../docs/resources/backup_unit.md)
@@ -83,7 +97,7 @@
   * Data Sources
     * [Group](../docs/data-sources/group.md)
     * [Resource](../docs/data-sources/resource.md)
-    * [Key](../docs/data-sources/s3_key.md)
+    * [Object Storage Key](../docs/data-sources/s3_key.md)
     * [Share](../docs/data-sources/share.md)
     * [User](../docs/data-sources/user.md)
 
@@ -113,8 +127,8 @@
   * Resources
     * [DBaaS MariaDB Cluster](../docs/resources/dbaas_mariadb_cluster.md)
   * Data Sources
-    * [DBaaS MongoDB Cluster](../docs/data-sources/dbaas_mariadb_cluster.md)
-    * [DBaaS MongoDB Backups](../docs/data-sources/dbaas_mariadb_backups.md)
+    * [DBaaS MariaDB Cluster](../docs/data-sources/dbaas_mariadb_cluster.md)
+    * [DBaaS MariaDB Backups](../docs/data-sources/dbaas_mariadb_backups.md)
 
 * Database as a Service - InMemory-DB
   * Resources

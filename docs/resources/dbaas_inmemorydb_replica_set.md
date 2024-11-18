@@ -82,7 +82,7 @@ resource "ionoscloud_inmemorydb_replicaset" "example" {
 
 ## Argument Reference
 * `display_name` - (Required)[string] The human-readable name of your replica set.
-* `location` - (Required)[string] The location of your replica set. Updates to the value of the field force the replica set to be re-created.
+* `location` - (Optional)[string] The location of your replica set. Updates to the value of the field force the replica set to be re-created.
 * `version` - (Required)[string] The InMemoryDB version of your replica set.
 * `replicas` - (Required)[int] The total number of replicas in the replica set (one active and n-1 passive). In case of a standalone instance, the value is 1. In all other cases, the value is > 1. The replicas will not be available as read replicas, they are only standby for a failure of the active instance.
 * `resources` - (Required)[object] The resources of the individual replicas.
@@ -118,6 +118,8 @@ resource "ionoscloud_inmemorydb_replicaset" "example" {
   * `day_of_the_week` - (Required)[string] The name of the week day.
 * `initial_snapshot_id` - (Optional)[string] The ID of a snapshot to restore the replica set from. If set, the replica set will be created from the snapshot.
 * `dns_name` - (Computed)[string] The DNS name pointing to your replica set. Will be used to connect to the active/standalone instance.
+
+> **⚠ NOTE:** `IONOS_API_URL_INMEMORYDB` can be used to set a custom API URL for the resource. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
 
 ## Import
 
