@@ -29,7 +29,7 @@
     * [Server](../docs/resources/server.md)
     * [Snapshot](../docs/resources/snapshot.md)
     * [Volume](../docs/resources/volume.md)
-    * [BootVolume_selector](../docs/resources/server_boot_device_selection.md)
+    * [Server BootVolume Selection](../docs/resources/server_boot_device_selection.md)
   * Data Sources
     * [Datacenter](../docs/data-sources/datacenter.md)
     * [Firewall Rule](../docs/data-sources/firewall.md)
@@ -74,6 +74,7 @@
   * Resources
     * [Network Security Group](../docs/resources/nsg.md)
     * [Network Security Group Firewall Rule](../docs/resources/nsg_firewallrule.md)
+    * [Datacenter Network Security Group Selection](../docs/resources/datacenter_nsg_selection.md)
   * Data Sources
     * [Network Security Group](../docs/data-sources/nsg.md)
 
