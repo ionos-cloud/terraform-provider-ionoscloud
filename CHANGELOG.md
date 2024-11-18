@@ -4,6 +4,7 @@
 - Add Network Security Group to `https://docs.ionos.com/`
 - Add bootvolume_selector to `https://docs.ionos.com/
 - Add servers to `https://docs.ionos.com/`
+- Add cube server and vcpu server to `https://docs.ionos.com/`
 ## 6.6.2 
 ### Features
 - Make `location` optional for `certificate_manager` resources and datasources

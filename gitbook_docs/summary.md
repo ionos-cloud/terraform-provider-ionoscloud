@@ -27,6 +27,8 @@
     * [Nic](../docs/resources/nic.md)
     * [Cross Connect](../docs/resources/private_crossconnect.md)
     * [Server](../docs/resources/server.md)
+    * [VCPU Server](../docs/resources/vcpu_server.md)
+    * [Cube Server](../docs/resources/cube_server.md)
     * [Snapshot](../docs/resources/snapshot.md)
     * [Volume](../docs/resources/volume.md)
     * [Server BootVolume Selection](../docs/resources/server_boot_device_selection.md)
@@ -41,6 +43,8 @@
     * [Nic](../docs/data-sources/nic.md)
     * [Cross Connect](../docs/data-sources/private_crossconnect.md)
     * [Server](../docs/data-sources/server.md)
+    * [VCPU Server](../docs/data-sources/vcpu_server.md)
+    * [Cube Server](../docs/data-sources/cube_server.md)
     * [Servers](../docs/data-sources/servers.md)
     * [Snapshot](../docs/data-sources/snapshot.md)
     * [Template](../docs/data-sources/template.md)
@@ -93,7 +97,7 @@
   * Data Sources
     * [Group](../docs/data-sources/group.md)
     * [Resource](../docs/data-sources/resource.md)
-    * [Key](../docs/data-sources/s3_key.md)
+    * [Object Storage Key](../docs/data-sources/s3_key.md)
     * [Share](../docs/data-sources/share.md)
     * [User](../docs/data-sources/user.md)
 
