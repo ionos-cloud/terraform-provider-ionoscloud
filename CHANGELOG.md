@@ -5,6 +5,10 @@
 - Add bootvolume_selector to `https://docs.ionos.com/
 - Add servers to `https://docs.ionos.com/`
 - Add cube server and vcpu server to `https://docs.ionos.com/`
+### Enhancement
+- Add `allow_replace` to node `ionoscloud_server` resource, which allows the update of immutable server fields will first
+  destroy and then re-create the resource. This field should be used with care, understanding the risks.
+
 ## 6.6.2 
 ### Features
 - Make `location` optional for `certificate_manager` resources and datasources
