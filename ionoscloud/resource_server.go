@@ -513,7 +513,7 @@ func resourceServer() *schema.Resource {
 
 func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 	allowReplace := diff.Get("allow_replace").(bool)
-	//allows the immutable fields to be updated
+	// allows the immutable fields to be updated
 	if allowReplace {
 		return nil
 	}
