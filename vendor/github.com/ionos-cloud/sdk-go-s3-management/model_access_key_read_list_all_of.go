@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -14,24 +14,24 @@ import (
 	"encoding/json"
 )
 
-// StorageClassListAllOf struct for StorageClassListAllOf
-type StorageClassListAllOf struct {
-	// ID of the list of StorageClass resources.
+// AccessKeyReadListAllOf struct for AccessKeyReadListAllOf
+type AccessKeyReadListAllOf struct {
+	// ID of the list of AccessKey resources.
 	Id *string `json:"id"`
 	// The type of the resource.
 	Type *string `json:"type"`
-	// The URL of the list of StorageClass resources.
+	// The URL of the list of AccessKey resources.
 	Href *string `json:"href"`
-	// The list of StorageClass resources.
-	Items *[]StorageClass `json:"items,omitempty"`
+	// The list of AccessKey resources.
+	Items *[]AccessKeyRead `json:"items,omitempty"`
 }
 
-// NewStorageClassListAllOf instantiates a new StorageClassListAllOf object
+// NewAccessKeyReadListAllOf instantiates a new AccessKeyReadListAllOf object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewStorageClassListAllOf(id string, type_ string, href string) *StorageClassListAllOf {
-	this := StorageClassListAllOf{}
+func NewAccessKeyReadListAllOf(id string, type_ string, href string) *AccessKeyReadListAllOf {
+	this := AccessKeyReadListAllOf{}
 
 	this.Id = &id
 	this.Type = &type_
@@ -40,17 +40,17 @@ func NewStorageClassListAllOf(id string, type_ string, href string) *StorageClas
 	return &this
 }
 
-// NewStorageClassListAllOfWithDefaults instantiates a new StorageClassListAllOf object
+// NewAccessKeyReadListAllOfWithDefaults instantiates a new AccessKeyReadListAllOf object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewStorageClassListAllOfWithDefaults() *StorageClassListAllOf {
-	this := StorageClassListAllOf{}
+func NewAccessKeyReadListAllOfWithDefaults() *AccessKeyReadListAllOf {
+	this := AccessKeyReadListAllOf{}
 	return &this
 }
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *StorageClassListAllOf) GetId() *string {
+func (o *AccessKeyReadListAllOf) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -62,7 +62,7 @@ func (o *StorageClassListAllOf) GetId() *string {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassListAllOf) GetIdOk() (*string, bool) {
+func (o *AccessKeyReadListAllOf) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,14 +71,14 @@ func (o *StorageClassListAllOf) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *StorageClassListAllOf) SetId(v string) {
+func (o *AccessKeyReadListAllOf) SetId(v string) {
 
 	o.Id = &v
 
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *StorageClassListAllOf) HasId() bool {
+func (o *AccessKeyReadListAllOf) HasId() bool {
 	if o != nil && o.Id != nil {
 		return true
 	}
@@ -88,7 +88,7 @@ func (o *StorageClassListAllOf) HasId() bool {
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *StorageClassListAllOf) GetType() *string {
+func (o *AccessKeyReadListAllOf) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -100,7 +100,7 @@ func (o *StorageClassListAllOf) GetType() *string {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassListAllOf) GetTypeOk() (*string, bool) {
+func (o *AccessKeyReadListAllOf) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -109,14 +109,14 @@ func (o *StorageClassListAllOf) GetTypeOk() (*string, bool) {
 }
 
 // SetType sets field value
-func (o *StorageClassListAllOf) SetType(v string) {
+func (o *AccessKeyReadListAllOf) SetType(v string) {
 
 	o.Type = &v
 
 }
 
 // HasType returns a boolean if a field has been set.
-func (o *StorageClassListAllOf) HasType() bool {
+func (o *AccessKeyReadListAllOf) HasType() bool {
 	if o != nil && o.Type != nil {
 		return true
 	}
@@ -126,7 +126,7 @@ func (o *StorageClassListAllOf) HasType() bool {
 
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *StorageClassListAllOf) GetHref() *string {
+func (o *AccessKeyReadListAllOf) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -138,7 +138,7 @@ func (o *StorageClassListAllOf) GetHref() *string {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassListAllOf) GetHrefOk() (*string, bool) {
+func (o *AccessKeyReadListAllOf) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -147,14 +147,14 @@ func (o *StorageClassListAllOf) GetHrefOk() (*string, bool) {
 }
 
 // SetHref sets field value
-func (o *StorageClassListAllOf) SetHref(v string) {
+func (o *AccessKeyReadListAllOf) SetHref(v string) {
 
 	o.Href = &v
 
 }
 
 // HasHref returns a boolean if a field has been set.
-func (o *StorageClassListAllOf) HasHref() bool {
+func (o *AccessKeyReadListAllOf) HasHref() bool {
 	if o != nil && o.Href != nil {
 		return true
 	}
@@ -163,8 +163,8 @@ func (o *StorageClassListAllOf) HasHref() bool {
 }
 
 // GetItems returns the Items field value
-// If the value is explicit nil, the zero value for []StorageClass will be returned
-func (o *StorageClassListAllOf) GetItems() *[]StorageClass {
+// If the value is explicit nil, the zero value for []AccessKeyRead will be returned
+func (o *AccessKeyReadListAllOf) GetItems() *[]AccessKeyRead {
 	if o == nil {
 		return nil
 	}
@@ -176,7 +176,7 @@ func (o *StorageClassListAllOf) GetItems() *[]StorageClass {
 // GetItemsOk returns a tuple with the Items field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassListAllOf) GetItemsOk() (*[]StorageClass, bool) {
+func (o *AccessKeyReadListAllOf) GetItemsOk() (*[]AccessKeyRead, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -185,14 +185,14 @@ func (o *StorageClassListAllOf) GetItemsOk() (*[]StorageClass, bool) {
 }
 
 // SetItems sets field value
-func (o *StorageClassListAllOf) SetItems(v []StorageClass) {
+func (o *AccessKeyReadListAllOf) SetItems(v []AccessKeyRead) {
 
 	o.Items = &v
 
 }
 
 // HasItems returns a boolean if a field has been set.
-func (o *StorageClassListAllOf) HasItems() bool {
+func (o *AccessKeyReadListAllOf) HasItems() bool {
 	if o != nil && o.Items != nil {
 		return true
 	}
@@ -200,7 +200,7 @@ func (o *StorageClassListAllOf) HasItems() bool {
 	return false
 }
 
-func (o StorageClassListAllOf) MarshalJSON() ([]byte, error) {
+func (o AccessKeyReadListAllOf) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
@@ -221,38 +221,38 @@ func (o StorageClassListAllOf) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableStorageClassListAllOf struct {
-	value *StorageClassListAllOf
+type NullableAccessKeyReadListAllOf struct {
+	value *AccessKeyReadListAllOf
 	isSet bool
 }
 
-func (v NullableStorageClassListAllOf) Get() *StorageClassListAllOf {
+func (v NullableAccessKeyReadListAllOf) Get() *AccessKeyReadListAllOf {
 	return v.value
 }
 
-func (v *NullableStorageClassListAllOf) Set(val *StorageClassListAllOf) {
+func (v *NullableAccessKeyReadListAllOf) Set(val *AccessKeyReadListAllOf) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableStorageClassListAllOf) IsSet() bool {
+func (v NullableAccessKeyReadListAllOf) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableStorageClassListAllOf) Unset() {
+func (v *NullableAccessKeyReadListAllOf) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableStorageClassListAllOf(val *StorageClassListAllOf) *NullableStorageClassListAllOf {
-	return &NullableStorageClassListAllOf{value: val, isSet: true}
+func NewNullableAccessKeyReadListAllOf(val *AccessKeyReadListAllOf) *NullableAccessKeyReadListAllOf {
+	return &NullableAccessKeyReadListAllOf{value: val, isSet: true}
 }
 
-func (v NullableStorageClassListAllOf) MarshalJSON() ([]byte, error) {
+func (v NullableAccessKeyReadListAllOf) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableStorageClassListAllOf) UnmarshalJSON(src []byte) error {
+func (v *NullableAccessKeyReadListAllOf) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

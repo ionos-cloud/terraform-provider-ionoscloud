@@ -14,24 +14,24 @@ import (
 	"encoding/json"
 )
 
-// BucketRead struct for BucketRead
-type BucketRead struct {
-	// The Bucket of the Bucket.
+// AccessKeyRead struct for AccessKeyRead
+type AccessKeyRead struct {
+	// The ID (UUID) of the AccessKey.
 	Id *string `json:"id"`
 	// The type of the resource.
 	Type *string `json:"type"`
-	// The URL of the Bucket.
-	Href       *string                 `json:"href"`
-	Metadata   *map[string]interface{} `json:"metadata"`
-	Properties *Bucket                 `json:"properties"`
+	// The URL of the AccessKey.
+	Href       *string                       `json:"href"`
+	Metadata   *MetadataWithSupportedRegions `json:"metadata"`
+	Properties *AccessKey                    `json:"properties"`
 }
 
-// NewBucketRead instantiates a new BucketRead object
+// NewAccessKeyRead instantiates a new AccessKeyRead object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBucketRead(id string, type_ string, href string, metadata map[string]interface{}, properties Bucket) *BucketRead {
-	this := BucketRead{}
+func NewAccessKeyRead(id string, type_ string, href string, metadata MetadataWithSupportedRegions, properties AccessKey) *AccessKeyRead {
+	this := AccessKeyRead{}
 
 	this.Id = &id
 	this.Type = &type_
@@ -42,17 +42,17 @@ func NewBucketRead(id string, type_ string, href string, metadata map[string]int
 	return &this
 }
 
-// NewBucketReadWithDefaults instantiates a new BucketRead object
+// NewAccessKeyReadWithDefaults instantiates a new AccessKeyRead object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewBucketReadWithDefaults() *BucketRead {
-	this := BucketRead{}
+func NewAccessKeyReadWithDefaults() *AccessKeyRead {
+	this := AccessKeyRead{}
 	return &this
 }
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *BucketRead) GetId() *string {
+func (o *AccessKeyRead) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -64,7 +64,7 @@ func (o *BucketRead) GetId() *string {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketRead) GetIdOk() (*string, bool) {
+func (o *AccessKeyRead) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -73,14 +73,14 @@ func (o *BucketRead) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *BucketRead) SetId(v string) {
+func (o *AccessKeyRead) SetId(v string) {
 
 	o.Id = &v
 
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *BucketRead) HasId() bool {
+func (o *AccessKeyRead) HasId() bool {
 	if o != nil && o.Id != nil {
 		return true
 	}
@@ -90,7 +90,7 @@ func (o *BucketRead) HasId() bool {
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *BucketRead) GetType() *string {
+func (o *AccessKeyRead) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -102,7 +102,7 @@ func (o *BucketRead) GetType() *string {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketRead) GetTypeOk() (*string, bool) {
+func (o *AccessKeyRead) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -111,14 +111,14 @@ func (o *BucketRead) GetTypeOk() (*string, bool) {
 }
 
 // SetType sets field value
-func (o *BucketRead) SetType(v string) {
+func (o *AccessKeyRead) SetType(v string) {
 
 	o.Type = &v
 
 }
 
 // HasType returns a boolean if a field has been set.
-func (o *BucketRead) HasType() bool {
+func (o *AccessKeyRead) HasType() bool {
 	if o != nil && o.Type != nil {
 		return true
 	}
@@ -128,7 +128,7 @@ func (o *BucketRead) HasType() bool {
 
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *BucketRead) GetHref() *string {
+func (o *AccessKeyRead) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -140,7 +140,7 @@ func (o *BucketRead) GetHref() *string {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketRead) GetHrefOk() (*string, bool) {
+func (o *AccessKeyRead) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -149,14 +149,14 @@ func (o *BucketRead) GetHrefOk() (*string, bool) {
 }
 
 // SetHref sets field value
-func (o *BucketRead) SetHref(v string) {
+func (o *AccessKeyRead) SetHref(v string) {
 
 	o.Href = &v
 
 }
 
 // HasHref returns a boolean if a field has been set.
-func (o *BucketRead) HasHref() bool {
+func (o *AccessKeyRead) HasHref() bool {
 	if o != nil && o.Href != nil {
 		return true
 	}
@@ -165,8 +165,8 @@ func (o *BucketRead) HasHref() bool {
 }
 
 // GetMetadata returns the Metadata field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *BucketRead) GetMetadata() *map[string]interface{} {
+// If the value is explicit nil, the zero value for MetadataWithSupportedRegions will be returned
+func (o *AccessKeyRead) GetMetadata() *MetadataWithSupportedRegions {
 	if o == nil {
 		return nil
 	}
@@ -178,7 +178,7 @@ func (o *BucketRead) GetMetadata() *map[string]interface{} {
 // GetMetadataOk returns a tuple with the Metadata field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketRead) GetMetadataOk() (*map[string]interface{}, bool) {
+func (o *AccessKeyRead) GetMetadataOk() (*MetadataWithSupportedRegions, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -187,14 +187,14 @@ func (o *BucketRead) GetMetadataOk() (*map[string]interface{}, bool) {
 }
 
 // SetMetadata sets field value
-func (o *BucketRead) SetMetadata(v map[string]interface{}) {
+func (o *AccessKeyRead) SetMetadata(v MetadataWithSupportedRegions) {
 
 	o.Metadata = &v
 
 }
 
 // HasMetadata returns a boolean if a field has been set.
-func (o *BucketRead) HasMetadata() bool {
+func (o *AccessKeyRead) HasMetadata() bool {
 	if o != nil && o.Metadata != nil {
 		return true
 	}
@@ -203,8 +203,8 @@ func (o *BucketRead) HasMetadata() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for Bucket will be returned
-func (o *BucketRead) GetProperties() *Bucket {
+// If the value is explicit nil, the zero value for AccessKey will be returned
+func (o *AccessKeyRead) GetProperties() *AccessKey {
 	if o == nil {
 		return nil
 	}
@@ -216,7 +216,7 @@ func (o *BucketRead) GetProperties() *Bucket {
 // GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketRead) GetPropertiesOk() (*Bucket, bool) {
+func (o *AccessKeyRead) GetPropertiesOk() (*AccessKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -225,14 +225,14 @@ func (o *BucketRead) GetPropertiesOk() (*Bucket, bool) {
 }
 
 // SetProperties sets field value
-func (o *BucketRead) SetProperties(v Bucket) {
+func (o *AccessKeyRead) SetProperties(v AccessKey) {
 
 	o.Properties = &v
 
 }
 
 // HasProperties returns a boolean if a field has been set.
-func (o *BucketRead) HasProperties() bool {
+func (o *AccessKeyRead) HasProperties() bool {
 	if o != nil && o.Properties != nil {
 		return true
 	}
@@ -240,7 +240,7 @@ func (o *BucketRead) HasProperties() bool {
 	return false
 }
 
-func (o BucketRead) MarshalJSON() ([]byte, error) {
+func (o AccessKeyRead) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
@@ -265,38 +265,38 @@ func (o BucketRead) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableBucketRead struct {
-	value *BucketRead
+type NullableAccessKeyRead struct {
+	value *AccessKeyRead
 	isSet bool
 }
 
-func (v NullableBucketRead) Get() *BucketRead {
+func (v NullableAccessKeyRead) Get() *AccessKeyRead {
 	return v.value
 }
 
-func (v *NullableBucketRead) Set(val *BucketRead) {
+func (v *NullableAccessKeyRead) Set(val *AccessKeyRead) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableBucketRead) IsSet() bool {
+func (v NullableAccessKeyRead) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableBucketRead) Unset() {
+func (v *NullableAccessKeyRead) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableBucketRead(val *BucketRead) *NullableBucketRead {
-	return &NullableBucketRead{value: val, isSet: true}
+func NewNullableAccessKeyRead(val *AccessKeyRead) *NullableAccessKeyRead {
+	return &NullableAccessKeyRead{value: val, isSet: true}
 }
 
-func (v NullableBucketRead) MarshalJSON() ([]byte, error) {
+func (v NullableAccessKeyRead) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableBucketRead) UnmarshalJSON(src []byte) error {
+func (v *NullableAccessKeyRead) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

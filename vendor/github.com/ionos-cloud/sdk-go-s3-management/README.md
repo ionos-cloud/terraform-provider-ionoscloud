@@ -1,6 +1,8 @@
+[![Gitter](https://img.shields.io/gitter/room/ionos-cloud/sdk-general)](https://gitter.im/ionos-cloud/sdk-general)
+
 # Go API client for ionoscloud
 
-S3 Management API is a RESTful API that manages the S3
+Object Storage Management API is a RESTful API that manages the object storage
 service configuration for IONOS Cloud.
 
 
@@ -17,132 +19,113 @@ Install the following dependencies:
 
 ```shell
 go get github.com/stretchr/testify/assert
+go get golang.org/x/oauth2
 go get golang.org/x/net/context
+go get github.com/antihax/optional
 ```
 
 Put the package under your project folder and add the following in import:
 
 ```golang
-import ionoscloud "github.com/ionos-cloud/ionoscloud_s3_management"
+import "./ionoscloud"
 ```
 
-To use a proxy, set the environment variable `HTTP_PROXY`:
+## Authentication
+
+All available server URLs are:
+
+- *https://s3.ionos.com* - Production
+
+By default, *https://s3.ionos.com* is used, however this can be overriden at authentication, either
+by setting the `IONOS_API_URL` environment variable or by specifying the `hostUrl` parameter when
+initializing the sdk client.
+
+The username and password or the authentication token can be manually specified when initializing
+the sdk client:
 
 ```golang
-os.Setenv("HTTP_PROXY", "http://proxy_name:proxy_port")
+
+client := ionoscloud.NewAPIClient(ionoscloud.NewConfiguration(username, password, token, hostUrl))
+
 ```
 
-## Configuration of Server URL
+Environment variables can also be used. The sdk uses the following variables:
+- IONOS_TOKEN    - login via token. This is the recommended way to authenticate.
+- IONOS_USERNAME - to specify the username used to login
+- IONOS_PASSWORD - to specify the password
+- IONOS_API_URL  - to specify the API server URL
 
-Default configuration comes with `Servers` field that contains server objects as defined in the OpenAPI specification.
-
-### Select Server Configuration
-
-For using other server than the one defined on index 0 set context value `sw.ContextServerIndex` of type `int`.
+In this case, the client configuration needs to be initialized using `NewConfigurationFromEnv()`.
 
 ```golang
-ctx := context.WithValue(context.Background(), ionoscloud.ContextServerIndex, 1)
+
+client := ionoscloud.NewAPIClient(ionoscloud.NewConfigurationFromEnv())
+
 ```
 
-### Templated Server URL
-
-Templated server URL is formatted using default variables from configuration or from context value `sw.ContextServerVariables` of type `map[string]string`.
-
-```golang
-ctx := context.WithValue(context.Background(), ionoscloud.ContextServerVariables, map[string]string{
-	"basePath": "v2",
-})
-```
-
-Note, enum values are always validated and all unused variables are silently ignored.
 
 ## Documentation for API Endpoints
 
 All URIs are relative to *https://s3.ionos.com*
+<details >
+    <summary title="Click to toggle">API Endpoints table</summary>
 
-Class | Method | HTTP request | Description
------------- | ------------- | ------------- | -------------
-*AccesskeysApi* | [**AccesskeysDelete**](docs/api/AccesskeysApi.md#accesskeysdelete) | **Delete** /accesskeys/{accesskeyId} | Delete AccessKey
-*AccesskeysApi* | [**AccesskeysFindById**](docs/api/AccesskeysApi.md#accesskeysfindbyid) | **Get** /accesskeys/{accesskeyId} | Retrieve AccessKey
-*AccesskeysApi* | [**AccesskeysGet**](docs/api/AccesskeysApi.md#accesskeysget) | **Get** /accesskeys | Retrieve all Accesskeys
-*AccesskeysApi* | [**AccesskeysPost**](docs/api/AccesskeysApi.md#accesskeyspost) | **Post** /accesskeys | Create AccessKey
-*AccesskeysApi* | [**AccesskeysPut**](docs/api/AccesskeysApi.md#accesskeysput) | **Put** /accesskeys/{accesskeyId} | Ensure AccessKey
-*AccesskeysApi* | [**AccesskeysRenew**](docs/api/AccesskeysApi.md#accesskeysrenew) | **Put** /accesskeys/{accesskeyId}/renew | Ensure AccessKey
-*RegionsApi* | [**RegionsFindByRegion**](docs/api/RegionsApi.md#regionsfindbyregion) | **Get** /regions/{region} | Retrieve Region
-*RegionsApi* | [**RegionsGet**](docs/api/RegionsApi.md#regionsget) | **Get** /regions | Retrieve all Regions
 
+| Class | Method | HTTP request | Description |
+| ------------- | ------------- | ------------- | ------------- |
+| AccesskeysApi | [**AccesskeysDelete**](docs/api/AccesskeysApi.md#AccesskeysDelete) | **Delete** /accesskeys/{accesskeyId} | Delete AccessKey |
+| AccesskeysApi | [**AccesskeysFindById**](docs/api/AccesskeysApi.md#AccesskeysFindById) | **Get** /accesskeys/{accesskeyId} | Retrieve AccessKey |
+| AccesskeysApi | [**AccesskeysGet**](docs/api/AccesskeysApi.md#AccesskeysGet) | **Get** /accesskeys | Retrieve all Accesskeys |
+| AccesskeysApi | [**AccesskeysPost**](docs/api/AccesskeysApi.md#AccesskeysPost) | **Post** /accesskeys | Create AccessKey |
+| AccesskeysApi | [**AccesskeysPut**](docs/api/AccesskeysApi.md#AccesskeysPut) | **Put** /accesskeys/{accesskeyId} | Ensure AccessKey |
+| AccesskeysApi | [**AccesskeysRenew**](docs/api/AccesskeysApi.md#AccesskeysRenew) | **Put** /accesskeys/{accesskeyId}/renew | Ensure AccessKey |
+| RegionsApi | [**RegionsFindByRegion**](docs/api/RegionsApi.md#RegionsFindByRegion) | **Get** /regions/{region} | Retrieve Region |
+| RegionsApi | [**RegionsGet**](docs/api/RegionsApi.md#RegionsGet) | **Get** /regions | Retrieve all Regions |
+
+</details>
 
 ## Documentation For Models
 
- - [AccessKey](docs/models/AccessKey.md)
- - [AccessKeyCreate](docs/models/AccessKeyCreate.md)
- - [AccessKeyEnsure](docs/models/AccessKeyEnsure.md)
- - [AccessKeyList](docs/models/AccessKeyList.md)
- - [AccessKeyListAllOf](docs/models/AccessKeyListAllOf.md)
- - [AccessKeyProperties](docs/models/AccessKeyProperties.md)
- - [Bucket](docs/models/Bucket.md)
- - [BucketCreate](docs/models/BucketCreate.md)
- - [BucketEnsure](docs/models/BucketEnsure.md)
- - [BucketRead](docs/models/BucketRead.md)
- - [BucketReadList](docs/models/BucketReadList.md)
- - [BucketReadListAllOf](docs/models/BucketReadListAllOf.md)
- - [Error](docs/models/Error.md)
- - [ErrorMessages](docs/models/ErrorMessages.md)
- - [Links](docs/models/Links.md)
- - [Metadata](docs/models/Metadata.md)
- - [MetadataWithStatus](docs/models/MetadataWithStatus.md)
- - [MetadataWithStatusAllOf](docs/models/MetadataWithStatusAllOf.md)
- - [MetadataWithSupportedRegions](docs/models/MetadataWithSupportedRegions.md)
- - [MetadataWithSupportedRegionsAllOf](docs/models/MetadataWithSupportedRegionsAllOf.md)
- - [Pagination](docs/models/Pagination.md)
- - [Region](docs/models/Region.md)
- - [RegionCreate](docs/models/RegionCreate.md)
- - [RegionEnsure](docs/models/RegionEnsure.md)
- - [RegionList](docs/models/RegionList.md)
- - [RegionListAllOf](docs/models/RegionListAllOf.md)
- - [RegionProperties](docs/models/RegionProperties.md)
- - [RegionPropertiesCapability](docs/models/RegionPropertiesCapability.md)
- - [StorageClass](docs/models/StorageClass.md)
- - [StorageClassCreate](docs/models/StorageClassCreate.md)
- - [StorageClassEnsure](docs/models/StorageClassEnsure.md)
- - [StorageClassList](docs/models/StorageClassList.md)
- - [StorageClassListAllOf](docs/models/StorageClassListAllOf.md)
- - [StorageClassProperties](docs/models/StorageClassProperties.md)
+All URIs are relative to *https://s3.ionos.com*
+<details >
+<summary title="Click to toggle">API models list</summary>
+
+ - [AccessKey](docs/models/AccessKey)
+ - [AccessKeyCreate](docs/models/AccessKeyCreate)
+ - [AccessKeyEnsure](docs/models/AccessKeyEnsure)
+ - [AccessKeyRead](docs/models/AccessKeyRead)
+ - [AccessKeyReadList](docs/models/AccessKeyReadList)
+ - [AccessKeyReadListAllOf](docs/models/AccessKeyReadListAllOf)
+ - [Bucket](docs/models/Bucket)
+ - [BucketCreate](docs/models/BucketCreate)
+ - [BucketEnsure](docs/models/BucketEnsure)
+ - [BucketRead](docs/models/BucketRead)
+ - [BucketReadList](docs/models/BucketReadList)
+ - [BucketReadListAllOf](docs/models/BucketReadListAllOf)
+ - [Error](docs/models/Error)
+ - [ErrorMessages](docs/models/ErrorMessages)
+ - [Links](docs/models/Links)
+ - [Metadata](docs/models/Metadata)
+ - [MetadataWithStatus](docs/models/MetadataWithStatus)
+ - [MetadataWithStatusAllOf](docs/models/MetadataWithStatusAllOf)
+ - [MetadataWithSupportedRegions](docs/models/MetadataWithSupportedRegions)
+ - [MetadataWithSupportedRegionsAllOf](docs/models/MetadataWithSupportedRegionsAllOf)
+ - [Pagination](docs/models/Pagination)
+ - [Region](docs/models/Region)
+ - [RegionCapability](docs/models/RegionCapability)
+ - [RegionCreate](docs/models/RegionCreate)
+ - [RegionEnsure](docs/models/RegionEnsure)
+ - [RegionRead](docs/models/RegionRead)
+ - [RegionReadList](docs/models/RegionReadList)
+ - [RegionReadListAllOf](docs/models/RegionReadListAllOf)
+ - [StorageClass](docs/models/StorageClass)
+ - [StorageClassCreate](docs/models/StorageClassCreate)
+ - [StorageClassEnsure](docs/models/StorageClassEnsure)
+ - [StorageClassRead](docs/models/StorageClassRead)
+ - [StorageClassReadList](docs/models/StorageClassReadList)
+ - [StorageClassReadListAllOf](docs/models/StorageClassReadListAllOf)
 
 
-## Documentation For Authorization
+[[Back to API list]](#documentation-for-api-endpoints) [[Back to Model list]](#documentation-for-models)
 
-
-Authentication schemes defined for the API:
-### tokenAuth
-
-- **Type**: HTTP Bearer token authentication
-
-Example
-
-```golang
-auth := context.WithValue(context.Background(), sw.ContextAccessToken, "BEARER_TOKEN_STRING")
-r, err := client.Service.Operation(auth, args)
-```
-
-
-## Documentation for Utility Methods
-
-Due to the fact that model structure members are all pointers, this package contains
-a number of utility functions to easily obtain pointers to values of basic types.
-Each of these functions takes a value of the given basic type and returns a pointer to it:
-
-* `PtrBool`
-* `PtrInt`
-* `PtrInt32`
-* `PtrInt64`
-* `PtrFloat`
-* `PtrFloat32`
-* `PtrFloat64`
-* `PtrString`
-* `PtrTime`
-
-## Author
-
-
-
+</details>

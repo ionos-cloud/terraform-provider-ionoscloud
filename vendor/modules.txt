@@ -355,7 +355,7 @@ github.com/ionos-cloud/sdk-go-nfs
 # github.com/ionos-cloud/sdk-go-s3 v1.1.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-s3
-# github.com/ionos-cloud/sdk-go-s3-management v1.0.0 => /home/radu/work/rubygeneration/sdk-go-s3-management
+# github.com/ionos-cloud/sdk-go-s3-management v1.0.0 => /home/radu/work/sdk-go-s3-management
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-s3-management
 # github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1

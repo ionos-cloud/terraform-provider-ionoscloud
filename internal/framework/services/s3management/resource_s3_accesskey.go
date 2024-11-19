@@ -114,7 +114,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	defer cancel()
 
 	var accessKey = s3management.AccessKeyCreate{
-		Properties: &s3management.AccessKeyProperties{
+		Properties: &s3management.AccessKey{
 			Description: data.Description.ValueStringPointer(),
 		},
 	}
@@ -182,7 +182,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 	defer cancel()
 
 	var accessKey = s3management.AccessKeyEnsure{
-		Properties: &s3management.AccessKeyProperties{
+		Properties: &s3management.AccessKey{
 			Description: plan.Description.ValueStringPointer(),
 		},
 	}

@@ -32,7 +32,6 @@ The following arguments are supported:
 - `timeouts` - (Optional) Timeouts for this resource.
   - `create` - (Optional)[string] Time to wait for the bucket to be created. Default is `10m`.
   - `delete` - (Optional)[string] Time to wait for the bucket to be deleted. Default is `10m`.
-- `force_destroy` - (Optional)[bool] If true, the bucket and the contents of the bucket will be destroyed. Default is `false`.
 
 ## Import
 

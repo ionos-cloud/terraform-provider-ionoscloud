@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -14,35 +14,35 @@ import (
 	"encoding/json"
 )
 
-// RegionPropertiesCapability The capabilities of the region
-type RegionPropertiesCapability struct {
+// RegionCapability The capabilities of the region
+type RegionCapability struct {
 	// Indicates if IAM policy based access is supported
 	Iam *bool `json:"iam,omitempty"`
 	// Indicates if S3 Select is supported
 	S3select *bool `json:"s3select,omitempty"`
 }
 
-// NewRegionPropertiesCapability instantiates a new RegionPropertiesCapability object
+// NewRegionCapability instantiates a new RegionCapability object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegionPropertiesCapability() *RegionPropertiesCapability {
-	this := RegionPropertiesCapability{}
+func NewRegionCapability() *RegionCapability {
+	this := RegionCapability{}
 
 	return &this
 }
 
-// NewRegionPropertiesCapabilityWithDefaults instantiates a new RegionPropertiesCapability object
+// NewRegionCapabilityWithDefaults instantiates a new RegionCapability object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewRegionPropertiesCapabilityWithDefaults() *RegionPropertiesCapability {
-	this := RegionPropertiesCapability{}
+func NewRegionCapabilityWithDefaults() *RegionCapability {
+	this := RegionCapability{}
 	return &this
 }
 
 // GetIam returns the Iam field value
 // If the value is explicit nil, the zero value for bool will be returned
-func (o *RegionPropertiesCapability) GetIam() *bool {
+func (o *RegionCapability) GetIam() *bool {
 	if o == nil {
 		return nil
 	}
@@ -54,7 +54,7 @@ func (o *RegionPropertiesCapability) GetIam() *bool {
 // GetIamOk returns a tuple with the Iam field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionPropertiesCapability) GetIamOk() (*bool, bool) {
+func (o *RegionCapability) GetIamOk() (*bool, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -63,14 +63,14 @@ func (o *RegionPropertiesCapability) GetIamOk() (*bool, bool) {
 }
 
 // SetIam sets field value
-func (o *RegionPropertiesCapability) SetIam(v bool) {
+func (o *RegionCapability) SetIam(v bool) {
 
 	o.Iam = &v
 
 }
 
 // HasIam returns a boolean if a field has been set.
-func (o *RegionPropertiesCapability) HasIam() bool {
+func (o *RegionCapability) HasIam() bool {
 	if o != nil && o.Iam != nil {
 		return true
 	}
@@ -80,7 +80,7 @@ func (o *RegionPropertiesCapability) HasIam() bool {
 
 // GetS3select returns the S3select field value
 // If the value is explicit nil, the zero value for bool will be returned
-func (o *RegionPropertiesCapability) GetS3select() *bool {
+func (o *RegionCapability) GetS3select() *bool {
 	if o == nil {
 		return nil
 	}
@@ -92,7 +92,7 @@ func (o *RegionPropertiesCapability) GetS3select() *bool {
 // GetS3selectOk returns a tuple with the S3select field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionPropertiesCapability) GetS3selectOk() (*bool, bool) {
+func (o *RegionCapability) GetS3selectOk() (*bool, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -101,14 +101,14 @@ func (o *RegionPropertiesCapability) GetS3selectOk() (*bool, bool) {
 }
 
 // SetS3select sets field value
-func (o *RegionPropertiesCapability) SetS3select(v bool) {
+func (o *RegionCapability) SetS3select(v bool) {
 
 	o.S3select = &v
 
 }
 
 // HasS3select returns a boolean if a field has been set.
-func (o *RegionPropertiesCapability) HasS3select() bool {
+func (o *RegionCapability) HasS3select() bool {
 	if o != nil && o.S3select != nil {
 		return true
 	}
@@ -116,7 +116,7 @@ func (o *RegionPropertiesCapability) HasS3select() bool {
 	return false
 }
 
-func (o RegionPropertiesCapability) MarshalJSON() ([]byte, error) {
+func (o RegionCapability) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Iam != nil {
 		toSerialize["iam"] = o.Iam
@@ -129,38 +129,38 @@ func (o RegionPropertiesCapability) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableRegionPropertiesCapability struct {
-	value *RegionPropertiesCapability
+type NullableRegionCapability struct {
+	value *RegionCapability
 	isSet bool
 }
 
-func (v NullableRegionPropertiesCapability) Get() *RegionPropertiesCapability {
+func (v NullableRegionCapability) Get() *RegionCapability {
 	return v.value
 }
 
-func (v *NullableRegionPropertiesCapability) Set(val *RegionPropertiesCapability) {
+func (v *NullableRegionCapability) Set(val *RegionCapability) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableRegionPropertiesCapability) IsSet() bool {
+func (v NullableRegionCapability) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableRegionPropertiesCapability) Unset() {
+func (v *NullableRegionCapability) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableRegionPropertiesCapability(val *RegionPropertiesCapability) *NullableRegionPropertiesCapability {
-	return &NullableRegionPropertiesCapability{value: val, isSet: true}
+func NewNullableRegionCapability(val *RegionCapability) *NullableRegionCapability {
+	return &NullableRegionCapability{value: val, isSet: true}
 }
 
-func (v NullableRegionPropertiesCapability) MarshalJSON() ([]byte, error) {
+func (v NullableRegionCapability) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableRegionPropertiesCapability) UnmarshalJSON(src []byte) error {
+func (v *NullableRegionCapability) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

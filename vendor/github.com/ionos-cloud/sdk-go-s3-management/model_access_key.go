@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -14,30 +14,30 @@ import (
 	"encoding/json"
 )
 
-// AccessKey struct for AccessKey
+// AccessKey Per user access key.
 type AccessKey struct {
-	// The ID (UUID) of the AccessKey.
-	Id *string `json:"id"`
-	// The type of the resource.
-	Type *string `json:"type"`
-	// The URL of the AccessKey.
-	Href       *string                       `json:"href"`
-	Metadata   *MetadataWithSupportedRegions `json:"metadata"`
-	Properties *AccessKeyProperties          `json:"properties"`
+	// Description of the Access key.
+	Description *string `json:"description"`
+	// Access key metadata is a string of 92 characters.
+	AccessKey *string `json:"accessKey"`
+	// The secret key of the Access key.
+	SecretKey *string `json:"secretKey"`
+	// The canonical user ID which is valid for user-owned buckets.
+	CanonicalUserId *string `json:"canonicalUserId,omitempty"`
+	// The contract user ID which is valid for contract-owned buckets.
+	ContractUserId *string `json:"contractUserId,omitempty"`
 }
 
 // NewAccessKey instantiates a new AccessKey object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAccessKey(id string, type_ string, href string, metadata MetadataWithSupportedRegions, properties AccessKeyProperties) *AccessKey {
+func NewAccessKey(description string, accessKey string, secretKey string) *AccessKey {
 	this := AccessKey{}
 
-	this.Id = &id
-	this.Type = &type_
-	this.Href = &href
-	this.Metadata = &metadata
-	this.Properties = &properties
+	this.Description = &description
+	this.AccessKey = &accessKey
+	this.SecretKey = &secretKey
 
 	return &this
 }
@@ -50,190 +50,190 @@ func NewAccessKeyWithDefaults() *AccessKey {
 	return &this
 }
 
-// GetId returns the Id field value
+// GetDescription returns the Description field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *AccessKey) GetId() *string {
+func (o *AccessKey) GetDescription() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Id
+	return o.Description
 
 }
 
-// GetIdOk returns a tuple with the Id field value
+// GetDescriptionOk returns a tuple with the Description field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AccessKey) GetIdOk() (*string, bool) {
+func (o *AccessKey) GetDescriptionOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Id, true
+	return o.Description, true
 }
 
-// SetId sets field value
-func (o *AccessKey) SetId(v string) {
+// SetDescription sets field value
+func (o *AccessKey) SetDescription(v string) {
 
-	o.Id = &v
+	o.Description = &v
 
 }
 
-// HasId returns a boolean if a field has been set.
-func (o *AccessKey) HasId() bool {
-	if o != nil && o.Id != nil {
+// HasDescription returns a boolean if a field has been set.
+func (o *AccessKey) HasDescription() bool {
+	if o != nil && o.Description != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetType returns the Type field value
+// GetAccessKey returns the AccessKey field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *AccessKey) GetType() *string {
+func (o *AccessKey) GetAccessKey() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Type
+	return o.AccessKey
 
 }
 
-// GetTypeOk returns a tuple with the Type field value
+// GetAccessKeyOk returns a tuple with the AccessKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AccessKey) GetTypeOk() (*string, bool) {
+func (o *AccessKey) GetAccessKeyOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Type, true
+	return o.AccessKey, true
 }
 
-// SetType sets field value
-func (o *AccessKey) SetType(v string) {
+// SetAccessKey sets field value
+func (o *AccessKey) SetAccessKey(v string) {
 
-	o.Type = &v
+	o.AccessKey = &v
 
 }
 
-// HasType returns a boolean if a field has been set.
-func (o *AccessKey) HasType() bool {
-	if o != nil && o.Type != nil {
+// HasAccessKey returns a boolean if a field has been set.
+func (o *AccessKey) HasAccessKey() bool {
+	if o != nil && o.AccessKey != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetHref returns the Href field value
+// GetSecretKey returns the SecretKey field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *AccessKey) GetHref() *string {
+func (o *AccessKey) GetSecretKey() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Href
+	return o.SecretKey
 
 }
 
-// GetHrefOk returns a tuple with the Href field value
+// GetSecretKeyOk returns a tuple with the SecretKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AccessKey) GetHrefOk() (*string, bool) {
+func (o *AccessKey) GetSecretKeyOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Href, true
+	return o.SecretKey, true
 }
 
-// SetHref sets field value
-func (o *AccessKey) SetHref(v string) {
+// SetSecretKey sets field value
+func (o *AccessKey) SetSecretKey(v string) {
 
-	o.Href = &v
+	o.SecretKey = &v
 
 }
 
-// HasHref returns a boolean if a field has been set.
-func (o *AccessKey) HasHref() bool {
-	if o != nil && o.Href != nil {
+// HasSecretKey returns a boolean if a field has been set.
+func (o *AccessKey) HasSecretKey() bool {
+	if o != nil && o.SecretKey != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetMetadata returns the Metadata field value
-// If the value is explicit nil, the zero value for MetadataWithSupportedRegions will be returned
-func (o *AccessKey) GetMetadata() *MetadataWithSupportedRegions {
+// GetCanonicalUserId returns the CanonicalUserId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *AccessKey) GetCanonicalUserId() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Metadata
+	return o.CanonicalUserId
 
 }
 
-// GetMetadataOk returns a tuple with the Metadata field value
+// GetCanonicalUserIdOk returns a tuple with the CanonicalUserId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AccessKey) GetMetadataOk() (*MetadataWithSupportedRegions, bool) {
+func (o *AccessKey) GetCanonicalUserIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Metadata, true
+	return o.CanonicalUserId, true
 }
 
-// SetMetadata sets field value
-func (o *AccessKey) SetMetadata(v MetadataWithSupportedRegions) {
+// SetCanonicalUserId sets field value
+func (o *AccessKey) SetCanonicalUserId(v string) {
 
-	o.Metadata = &v
+	o.CanonicalUserId = &v
 
 }
 
-// HasMetadata returns a boolean if a field has been set.
-func (o *AccessKey) HasMetadata() bool {
-	if o != nil && o.Metadata != nil {
+// HasCanonicalUserId returns a boolean if a field has been set.
+func (o *AccessKey) HasCanonicalUserId() bool {
+	if o != nil && o.CanonicalUserId != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for AccessKeyProperties will be returned
-func (o *AccessKey) GetProperties() *AccessKeyProperties {
+// GetContractUserId returns the ContractUserId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *AccessKey) GetContractUserId() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Properties
+	return o.ContractUserId
 
 }
 
-// GetPropertiesOk returns a tuple with the Properties field value
+// GetContractUserIdOk returns a tuple with the ContractUserId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AccessKey) GetPropertiesOk() (*AccessKeyProperties, bool) {
+func (o *AccessKey) GetContractUserIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Properties, true
+	return o.ContractUserId, true
 }
 
-// SetProperties sets field value
-func (o *AccessKey) SetProperties(v AccessKeyProperties) {
+// SetContractUserId sets field value
+func (o *AccessKey) SetContractUserId(v string) {
 
-	o.Properties = &v
+	o.ContractUserId = &v
 
 }
 
-// HasProperties returns a boolean if a field has been set.
-func (o *AccessKey) HasProperties() bool {
-	if o != nil && o.Properties != nil {
+// HasContractUserId returns a boolean if a field has been set.
+func (o *AccessKey) HasContractUserId() bool {
+	if o != nil && o.ContractUserId != nil {
 		return true
 	}
 
@@ -242,24 +242,24 @@ func (o *AccessKey) HasProperties() bool {
 
 func (o AccessKey) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Id != nil {
-		toSerialize["id"] = o.Id
+	if o.Description != nil {
+		toSerialize["description"] = o.Description
 	}
 
-	if o.Type != nil {
-		toSerialize["type"] = o.Type
+	if o.AccessKey != nil {
+		toSerialize["accessKey"] = o.AccessKey
 	}
 
-	if o.Href != nil {
-		toSerialize["href"] = o.Href
+	if o.SecretKey != nil {
+		toSerialize["secretKey"] = o.SecretKey
 	}
 
-	if o.Metadata != nil {
-		toSerialize["metadata"] = o.Metadata
+	if o.CanonicalUserId != nil {
+		toSerialize["canonicalUserId"] = o.CanonicalUserId
 	}
 
-	if o.Properties != nil {
-		toSerialize["properties"] = o.Properties
+	if o.ContractUserId != nil {
+		toSerialize["contractUserId"] = o.ContractUserId
 	}
 
 	return json.Marshal(toSerialize)

@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -14,16 +14,16 @@ import (
 	"encoding/json"
 )
 
-// RegionList struct for RegionList
-type RegionList struct {
-	// ID of the list of Region resources.
+// AccessKeyReadList struct for AccessKeyReadList
+type AccessKeyReadList struct {
+	// ID of the list of AccessKey resources.
 	Id *string `json:"id"`
 	// The type of the resource.
 	Type *string `json:"type"`
-	// The URL of the list of Region resources.
+	// The URL of the list of AccessKey resources.
 	Href *string `json:"href"`
-	// The list of Region resources.
-	Items *[]Region `json:"items,omitempty"`
+	// The list of AccessKey resources.
+	Items *[]AccessKeyRead `json:"items,omitempty"`
 	// The offset specified in the request (if none was specified, the default offset is 0).
 	Offset *int32 `json:"offset"`
 	// The limit specified in the request (if none was specified, use the endpoint's default pagination limit).
@@ -31,12 +31,12 @@ type RegionList struct {
 	Links *Links `json:"_links"`
 }
 
-// NewRegionList instantiates a new RegionList object
+// NewAccessKeyReadList instantiates a new AccessKeyReadList object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegionList(id string, type_ string, href string, offset int32, limit int32, links Links) *RegionList {
-	this := RegionList{}
+func NewAccessKeyReadList(id string, type_ string, href string, offset int32, limit int32, links Links) *AccessKeyReadList {
+	this := AccessKeyReadList{}
 
 	this.Id = &id
 	this.Type = &type_
@@ -48,17 +48,17 @@ func NewRegionList(id string, type_ string, href string, offset int32, limit int
 	return &this
 }
 
-// NewRegionListWithDefaults instantiates a new RegionList object
+// NewAccessKeyReadListWithDefaults instantiates a new AccessKeyReadList object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewRegionListWithDefaults() *RegionList {
-	this := RegionList{}
+func NewAccessKeyReadListWithDefaults() *AccessKeyReadList {
+	this := AccessKeyReadList{}
 	return &this
 }
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *RegionList) GetId() *string {
+func (o *AccessKeyReadList) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -70,7 +70,7 @@ func (o *RegionList) GetId() *string {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionList) GetIdOk() (*string, bool) {
+func (o *AccessKeyReadList) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -79,14 +79,14 @@ func (o *RegionList) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *RegionList) SetId(v string) {
+func (o *AccessKeyReadList) SetId(v string) {
 
 	o.Id = &v
 
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *RegionList) HasId() bool {
+func (o *AccessKeyReadList) HasId() bool {
 	if o != nil && o.Id != nil {
 		return true
 	}
@@ -96,7 +96,7 @@ func (o *RegionList) HasId() bool {
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *RegionList) GetType() *string {
+func (o *AccessKeyReadList) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -108,7 +108,7 @@ func (o *RegionList) GetType() *string {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionList) GetTypeOk() (*string, bool) {
+func (o *AccessKeyReadList) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -117,14 +117,14 @@ func (o *RegionList) GetTypeOk() (*string, bool) {
 }
 
 // SetType sets field value
-func (o *RegionList) SetType(v string) {
+func (o *AccessKeyReadList) SetType(v string) {
 
 	o.Type = &v
 
 }
 
 // HasType returns a boolean if a field has been set.
-func (o *RegionList) HasType() bool {
+func (o *AccessKeyReadList) HasType() bool {
 	if o != nil && o.Type != nil {
 		return true
 	}
@@ -134,7 +134,7 @@ func (o *RegionList) HasType() bool {
 
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *RegionList) GetHref() *string {
+func (o *AccessKeyReadList) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -146,7 +146,7 @@ func (o *RegionList) GetHref() *string {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionList) GetHrefOk() (*string, bool) {
+func (o *AccessKeyReadList) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -155,14 +155,14 @@ func (o *RegionList) GetHrefOk() (*string, bool) {
 }
 
 // SetHref sets field value
-func (o *RegionList) SetHref(v string) {
+func (o *AccessKeyReadList) SetHref(v string) {
 
 	o.Href = &v
 
 }
 
 // HasHref returns a boolean if a field has been set.
-func (o *RegionList) HasHref() bool {
+func (o *AccessKeyReadList) HasHref() bool {
 	if o != nil && o.Href != nil {
 		return true
 	}
@@ -171,8 +171,8 @@ func (o *RegionList) HasHref() bool {
 }
 
 // GetItems returns the Items field value
-// If the value is explicit nil, the zero value for []Region will be returned
-func (o *RegionList) GetItems() *[]Region {
+// If the value is explicit nil, the zero value for []AccessKeyRead will be returned
+func (o *AccessKeyReadList) GetItems() *[]AccessKeyRead {
 	if o == nil {
 		return nil
 	}
@@ -184,7 +184,7 @@ func (o *RegionList) GetItems() *[]Region {
 // GetItemsOk returns a tuple with the Items field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionList) GetItemsOk() (*[]Region, bool) {
+func (o *AccessKeyReadList) GetItemsOk() (*[]AccessKeyRead, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -193,14 +193,14 @@ func (o *RegionList) GetItemsOk() (*[]Region, bool) {
 }
 
 // SetItems sets field value
-func (o *RegionList) SetItems(v []Region) {
+func (o *AccessKeyReadList) SetItems(v []AccessKeyRead) {
 
 	o.Items = &v
 
 }
 
 // HasItems returns a boolean if a field has been set.
-func (o *RegionList) HasItems() bool {
+func (o *AccessKeyReadList) HasItems() bool {
 	if o != nil && o.Items != nil {
 		return true
 	}
@@ -210,7 +210,7 @@ func (o *RegionList) HasItems() bool {
 
 // GetOffset returns the Offset field value
 // If the value is explicit nil, the zero value for int32 will be returned
-func (o *RegionList) GetOffset() *int32 {
+func (o *AccessKeyReadList) GetOffset() *int32 {
 	if o == nil {
 		return nil
 	}
@@ -222,7 +222,7 @@ func (o *RegionList) GetOffset() *int32 {
 // GetOffsetOk returns a tuple with the Offset field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionList) GetOffsetOk() (*int32, bool) {
+func (o *AccessKeyReadList) GetOffsetOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -231,14 +231,14 @@ func (o *RegionList) GetOffsetOk() (*int32, bool) {
 }
 
 // SetOffset sets field value
-func (o *RegionList) SetOffset(v int32) {
+func (o *AccessKeyReadList) SetOffset(v int32) {
 
 	o.Offset = &v
 
 }
 
 // HasOffset returns a boolean if a field has been set.
-func (o *RegionList) HasOffset() bool {
+func (o *AccessKeyReadList) HasOffset() bool {
 	if o != nil && o.Offset != nil {
 		return true
 	}
@@ -248,7 +248,7 @@ func (o *RegionList) HasOffset() bool {
 
 // GetLimit returns the Limit field value
 // If the value is explicit nil, the zero value for int32 will be returned
-func (o *RegionList) GetLimit() *int32 {
+func (o *AccessKeyReadList) GetLimit() *int32 {
 	if o == nil {
 		return nil
 	}
@@ -260,7 +260,7 @@ func (o *RegionList) GetLimit() *int32 {
 // GetLimitOk returns a tuple with the Limit field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionList) GetLimitOk() (*int32, bool) {
+func (o *AccessKeyReadList) GetLimitOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -269,14 +269,14 @@ func (o *RegionList) GetLimitOk() (*int32, bool) {
 }
 
 // SetLimit sets field value
-func (o *RegionList) SetLimit(v int32) {
+func (o *AccessKeyReadList) SetLimit(v int32) {
 
 	o.Limit = &v
 
 }
 
 // HasLimit returns a boolean if a field has been set.
-func (o *RegionList) HasLimit() bool {
+func (o *AccessKeyReadList) HasLimit() bool {
 	if o != nil && o.Limit != nil {
 		return true
 	}
@@ -286,7 +286,7 @@ func (o *RegionList) HasLimit() bool {
 
 // GetLinks returns the Links field value
 // If the value is explicit nil, the zero value for Links will be returned
-func (o *RegionList) GetLinks() *Links {
+func (o *AccessKeyReadList) GetLinks() *Links {
 	if o == nil {
 		return nil
 	}
@@ -298,7 +298,7 @@ func (o *RegionList) GetLinks() *Links {
 // GetLinksOk returns a tuple with the Links field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionList) GetLinksOk() (*Links, bool) {
+func (o *AccessKeyReadList) GetLinksOk() (*Links, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -307,14 +307,14 @@ func (o *RegionList) GetLinksOk() (*Links, bool) {
 }
 
 // SetLinks sets field value
-func (o *RegionList) SetLinks(v Links) {
+func (o *AccessKeyReadList) SetLinks(v Links) {
 
 	o.Links = &v
 
 }
 
 // HasLinks returns a boolean if a field has been set.
-func (o *RegionList) HasLinks() bool {
+func (o *AccessKeyReadList) HasLinks() bool {
 	if o != nil && o.Links != nil {
 		return true
 	}
@@ -322,7 +322,7 @@ func (o *RegionList) HasLinks() bool {
 	return false
 }
 
-func (o RegionList) MarshalJSON() ([]byte, error) {
+func (o AccessKeyReadList) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
@@ -355,38 +355,38 @@ func (o RegionList) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableRegionList struct {
-	value *RegionList
+type NullableAccessKeyReadList struct {
+	value *AccessKeyReadList
 	isSet bool
 }
 
-func (v NullableRegionList) Get() *RegionList {
+func (v NullableAccessKeyReadList) Get() *AccessKeyReadList {
 	return v.value
 }
 
-func (v *NullableRegionList) Set(val *RegionList) {
+func (v *NullableAccessKeyReadList) Set(val *AccessKeyReadList) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableRegionList) IsSet() bool {
+func (v NullableAccessKeyReadList) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableRegionList) Unset() {
+func (v *NullableAccessKeyReadList) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableRegionList(val *RegionList) *NullableRegionList {
-	return &NullableRegionList{value: val, isSet: true}
+func NewNullableAccessKeyReadList(val *AccessKeyReadList) *NullableAccessKeyReadList {
+	return &NullableAccessKeyReadList{value: val, isSet: true}
 }
 
-func (v NullableRegionList) MarshalJSON() ([]byte, error) {
+func (v NullableAccessKeyReadList) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableRegionList) UnmarshalJSON(src []byte) error {
+func (v *NullableAccessKeyReadList) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

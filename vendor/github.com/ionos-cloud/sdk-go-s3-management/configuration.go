@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -134,7 +134,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-ionoscloud_s3_management/v1.0.0",
+		UserAgent:          "ionos-cloud-sdk-go-s3-management/v1.0.0",
 		Debug:              false,
 		Username:           username,
 		Password:           password,

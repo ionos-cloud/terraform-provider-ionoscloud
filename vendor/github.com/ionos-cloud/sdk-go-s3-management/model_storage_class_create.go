@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -18,14 +18,14 @@ import (
 type StorageClassCreate struct {
 	// Metadata
 	Metadata   *map[string]interface{} `json:"metadata,omitempty"`
-	Properties *StorageClassProperties `json:"properties"`
+	Properties *StorageClass           `json:"properties"`
 }
 
 // NewStorageClassCreate instantiates a new StorageClassCreate object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewStorageClassCreate(properties StorageClassProperties) *StorageClassCreate {
+func NewStorageClassCreate(properties StorageClass) *StorageClassCreate {
 	this := StorageClassCreate{}
 
 	this.Properties = &properties
@@ -80,8 +80,8 @@ func (o *StorageClassCreate) HasMetadata() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for StorageClassProperties will be returned
-func (o *StorageClassCreate) GetProperties() *StorageClassProperties {
+// If the value is explicit nil, the zero value for StorageClass will be returned
+func (o *StorageClassCreate) GetProperties() *StorageClass {
 	if o == nil {
 		return nil
 	}
@@ -93,7 +93,7 @@ func (o *StorageClassCreate) GetProperties() *StorageClassProperties {
 // GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassCreate) GetPropertiesOk() (*StorageClassProperties, bool) {
+func (o *StorageClassCreate) GetPropertiesOk() (*StorageClass, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -102,7 +102,7 @@ func (o *StorageClassCreate) GetPropertiesOk() (*StorageClassProperties, bool) {
 }
 
 // SetProperties sets field value
-func (o *StorageClassCreate) SetProperties(v StorageClassProperties) {
+func (o *StorageClassCreate) SetProperties(v StorageClass) {
 
 	o.Properties = &v
 

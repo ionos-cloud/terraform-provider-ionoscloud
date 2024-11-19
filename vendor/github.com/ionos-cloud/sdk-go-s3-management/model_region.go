@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -14,30 +14,33 @@ import (
 	"encoding/json"
 )
 
-// Region struct for Region
+// Region IONOS Cloud object storage regions they define the location of the bucket, can also be used as `LocationConstraint` for bucket creation.
 type Region struct {
-	// The Region of the Region.
-	Id *string `json:"id"`
-	// The type of the resource.
-	Type *string `json:"type"`
-	// The URL of the Region.
-	Href       *string                 `json:"href"`
-	Metadata   *map[string]interface{} `json:"metadata"`
-	Properties *RegionProperties       `json:"properties"`
+	// The version of the region properties
+	Version *int32 `json:"version"`
+	// The endpoint URL for the region
+	Endpoint *string `json:"endpoint"`
+	// The website URL for the region
+	Website    *string           `json:"website"`
+	Capability *RegionCapability `json:"capability"`
+	// The available classes in the region
+	StorageClasses *[]string `json:"storageClasses,omitempty"`
+	// The data center location of the region as per [Get Location](/docs/cloud/v6/#tag/Locations/operation/locationsGet). *Can't be used as `LocationConstraint` on bucket creation.*
+	Location *string `json:"location"`
 }
 
 // NewRegion instantiates a new Region object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegion(id string, type_ string, href string, metadata map[string]interface{}, properties RegionProperties) *Region {
+func NewRegion(version int32, endpoint string, website string, capability RegionCapability, location string) *Region {
 	this := Region{}
 
-	this.Id = &id
-	this.Type = &type_
-	this.Href = &href
-	this.Metadata = &metadata
-	this.Properties = &properties
+	this.Version = &version
+	this.Endpoint = &endpoint
+	this.Website = &website
+	this.Capability = &capability
+	this.Location = &location
 
 	return &this
 }
@@ -50,190 +53,228 @@ func NewRegionWithDefaults() *Region {
 	return &this
 }
 
-// GetId returns the Id field value
+// GetVersion returns the Version field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *Region) GetVersion() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.Version
+
+}
+
+// GetVersionOk returns a tuple with the Version field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Region) GetVersionOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Version, true
+}
+
+// SetVersion sets field value
+func (o *Region) SetVersion(v int32) {
+
+	o.Version = &v
+
+}
+
+// HasVersion returns a boolean if a field has been set.
+func (o *Region) HasVersion() bool {
+	if o != nil && o.Version != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetEndpoint returns the Endpoint field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Region) GetId() *string {
+func (o *Region) GetEndpoint() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Id
+	return o.Endpoint
 
 }
 
-// GetIdOk returns a tuple with the Id field value
+// GetEndpointOk returns a tuple with the Endpoint field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Region) GetIdOk() (*string, bool) {
+func (o *Region) GetEndpointOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Id, true
+	return o.Endpoint, true
 }
 
-// SetId sets field value
-func (o *Region) SetId(v string) {
+// SetEndpoint sets field value
+func (o *Region) SetEndpoint(v string) {
 
-	o.Id = &v
+	o.Endpoint = &v
 
 }
 
-// HasId returns a boolean if a field has been set.
-func (o *Region) HasId() bool {
-	if o != nil && o.Id != nil {
+// HasEndpoint returns a boolean if a field has been set.
+func (o *Region) HasEndpoint() bool {
+	if o != nil && o.Endpoint != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetType returns the Type field value
+// GetWebsite returns the Website field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Region) GetType() *string {
+func (o *Region) GetWebsite() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Type
+	return o.Website
 
 }
 
-// GetTypeOk returns a tuple with the Type field value
+// GetWebsiteOk returns a tuple with the Website field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Region) GetTypeOk() (*string, bool) {
+func (o *Region) GetWebsiteOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Type, true
+	return o.Website, true
 }
 
-// SetType sets field value
-func (o *Region) SetType(v string) {
+// SetWebsite sets field value
+func (o *Region) SetWebsite(v string) {
 
-	o.Type = &v
+	o.Website = &v
 
 }
 
-// HasType returns a boolean if a field has been set.
-func (o *Region) HasType() bool {
-	if o != nil && o.Type != nil {
+// HasWebsite returns a boolean if a field has been set.
+func (o *Region) HasWebsite() bool {
+	if o != nil && o.Website != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetHref returns the Href field value
+// GetCapability returns the Capability field value
+// If the value is explicit nil, the zero value for RegionCapability will be returned
+func (o *Region) GetCapability() *RegionCapability {
+	if o == nil {
+		return nil
+	}
+
+	return o.Capability
+
+}
+
+// GetCapabilityOk returns a tuple with the Capability field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Region) GetCapabilityOk() (*RegionCapability, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Capability, true
+}
+
+// SetCapability sets field value
+func (o *Region) SetCapability(v RegionCapability) {
+
+	o.Capability = &v
+
+}
+
+// HasCapability returns a boolean if a field has been set.
+func (o *Region) HasCapability() bool {
+	if o != nil && o.Capability != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetStorageClasses returns the StorageClasses field value
+// If the value is explicit nil, the zero value for []string will be returned
+func (o *Region) GetStorageClasses() *[]string {
+	if o == nil {
+		return nil
+	}
+
+	return o.StorageClasses
+
+}
+
+// GetStorageClassesOk returns a tuple with the StorageClasses field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Region) GetStorageClassesOk() (*[]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.StorageClasses, true
+}
+
+// SetStorageClasses sets field value
+func (o *Region) SetStorageClasses(v []string) {
+
+	o.StorageClasses = &v
+
+}
+
+// HasStorageClasses returns a boolean if a field has been set.
+func (o *Region) HasStorageClasses() bool {
+	if o != nil && o.StorageClasses != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *Region) GetHref() *string {
+func (o *Region) GetLocation() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Href
+	return o.Location
 
 }
 
-// GetHrefOk returns a tuple with the Href field value
+// GetLocationOk returns a tuple with the Location field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Region) GetHrefOk() (*string, bool) {
+func (o *Region) GetLocationOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Href, true
+	return o.Location, true
 }
 
-// SetHref sets field value
-func (o *Region) SetHref(v string) {
+// SetLocation sets field value
+func (o *Region) SetLocation(v string) {
 
-	o.Href = &v
-
-}
-
-// HasHref returns a boolean if a field has been set.
-func (o *Region) HasHref() bool {
-	if o != nil && o.Href != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetMetadata returns the Metadata field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *Region) GetMetadata() *map[string]interface{} {
-	if o == nil {
-		return nil
-	}
-
-	return o.Metadata
+	o.Location = &v
 
 }
 
-// GetMetadataOk returns a tuple with the Metadata field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Region) GetMetadataOk() (*map[string]interface{}, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Metadata, true
-}
-
-// SetMetadata sets field value
-func (o *Region) SetMetadata(v map[string]interface{}) {
-
-	o.Metadata = &v
-
-}
-
-// HasMetadata returns a boolean if a field has been set.
-func (o *Region) HasMetadata() bool {
-	if o != nil && o.Metadata != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for RegionProperties will be returned
-func (o *Region) GetProperties() *RegionProperties {
-	if o == nil {
-		return nil
-	}
-
-	return o.Properties
-
-}
-
-// GetPropertiesOk returns a tuple with the Properties field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Region) GetPropertiesOk() (*RegionProperties, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Properties, true
-}
-
-// SetProperties sets field value
-func (o *Region) SetProperties(v RegionProperties) {
-
-	o.Properties = &v
-
-}
-
-// HasProperties returns a boolean if a field has been set.
-func (o *Region) HasProperties() bool {
-	if o != nil && o.Properties != nil {
+// HasLocation returns a boolean if a field has been set.
+func (o *Region) HasLocation() bool {
+	if o != nil && o.Location != nil {
 		return true
 	}
 
@@ -242,24 +283,28 @@ func (o *Region) HasProperties() bool {
 
 func (o Region) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Id != nil {
-		toSerialize["id"] = o.Id
+	if o.Version != nil {
+		toSerialize["version"] = o.Version
 	}
 
-	if o.Type != nil {
-		toSerialize["type"] = o.Type
+	if o.Endpoint != nil {
+		toSerialize["endpoint"] = o.Endpoint
 	}
 
-	if o.Href != nil {
-		toSerialize["href"] = o.Href
+	if o.Website != nil {
+		toSerialize["website"] = o.Website
 	}
 
-	if o.Metadata != nil {
-		toSerialize["metadata"] = o.Metadata
+	if o.Capability != nil {
+		toSerialize["capability"] = o.Capability
 	}
 
-	if o.Properties != nil {
-		toSerialize["properties"] = o.Properties
+	if o.StorageClasses != nil {
+		toSerialize["storageClasses"] = o.StorageClasses
+	}
+
+	if o.Location != nil {
+		toSerialize["location"] = o.Location
 	}
 
 	return json.Marshal(toSerialize)

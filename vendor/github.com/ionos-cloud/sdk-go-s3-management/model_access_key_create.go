@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -18,14 +18,14 @@ import (
 type AccessKeyCreate struct {
 	// Metadata
 	Metadata   *map[string]interface{} `json:"metadata,omitempty"`
-	Properties *AccessKeyProperties    `json:"properties"`
+	Properties *AccessKey              `json:"properties"`
 }
 
 // NewAccessKeyCreate instantiates a new AccessKeyCreate object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAccessKeyCreate(properties AccessKeyProperties) *AccessKeyCreate {
+func NewAccessKeyCreate(properties AccessKey) *AccessKeyCreate {
 	this := AccessKeyCreate{}
 
 	this.Properties = &properties
@@ -80,8 +80,8 @@ func (o *AccessKeyCreate) HasMetadata() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for AccessKeyProperties will be returned
-func (o *AccessKeyCreate) GetProperties() *AccessKeyProperties {
+// If the value is explicit nil, the zero value for AccessKey will be returned
+func (o *AccessKeyCreate) GetProperties() *AccessKey {
 	if o == nil {
 		return nil
 	}
@@ -93,7 +93,7 @@ func (o *AccessKeyCreate) GetProperties() *AccessKeyProperties {
 // GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AccessKeyCreate) GetPropertiesOk() (*AccessKeyProperties, bool) {
+func (o *AccessKeyCreate) GetPropertiesOk() (*AccessKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -102,7 +102,7 @@ func (o *AccessKeyCreate) GetPropertiesOk() (*AccessKeyProperties, bool) {
 }
 
 // SetProperties sets field value
-func (o *AccessKeyCreate) SetProperties(v AccessKeyProperties) {
+func (o *AccessKeyCreate) SetProperties(v AccessKey) {
 
 	o.Properties = &v
 

@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -18,14 +18,14 @@ import (
 type RegionCreate struct {
 	// Metadata
 	Metadata   *map[string]interface{} `json:"metadata,omitempty"`
-	Properties *RegionProperties       `json:"properties"`
+	Properties *Region                 `json:"properties"`
 }
 
 // NewRegionCreate instantiates a new RegionCreate object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegionCreate(properties RegionProperties) *RegionCreate {
+func NewRegionCreate(properties Region) *RegionCreate {
 	this := RegionCreate{}
 
 	this.Properties = &properties
@@ -80,8 +80,8 @@ func (o *RegionCreate) HasMetadata() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for RegionProperties will be returned
-func (o *RegionCreate) GetProperties() *RegionProperties {
+// If the value is explicit nil, the zero value for Region will be returned
+func (o *RegionCreate) GetProperties() *Region {
 	if o == nil {
 		return nil
 	}
@@ -93,7 +93,7 @@ func (o *RegionCreate) GetProperties() *RegionProperties {
 // GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionCreate) GetPropertiesOk() (*RegionProperties, bool) {
+func (o *RegionCreate) GetPropertiesOk() (*Region, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -102,7 +102,7 @@ func (o *RegionCreate) GetPropertiesOk() (*RegionProperties, bool) {
 }
 
 // SetProperties sets field value
-func (o *RegionCreate) SetProperties(v RegionProperties) {
+func (o *RegionCreate) SetProperties(v Region) {
 
 	o.Properties = &v
 

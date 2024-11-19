@@ -33,21 +33,21 @@ type AccessKeyDataSourceModel struct {
 }
 
 // GetAccessKey retrieves an accesskey
-func (c *Client) GetAccessKey(ctx context.Context, accessKeyID string) (s3management.AccessKey, *s3management.APIResponse, error) {
+func (c *Client) GetAccessKey(ctx context.Context, accessKeyID string) (s3management.AccessKeyRead, *s3management.APIResponse, error) {
 	accessKey, apiResponse, err := c.client.AccesskeysApi.AccesskeysFindById(ctx, accessKeyID).Execute()
 	apiResponse.LogInfo()
 	return accessKey, apiResponse, err
 }
 
 // ListAccessKeys retrieves all accesskeys
-func (c *Client) ListAccessKeys(ctx context.Context) (s3management.AccessKeyList, *s3management.APIResponse, error) {
+func (c *Client) ListAccessKeys(ctx context.Context) (s3management.AccessKeyReadList, *s3management.APIResponse, error) {
 	accessKeys, apiResponse, err := c.client.AccesskeysApi.AccesskeysGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return accessKeys, apiResponse, err
 }
 
 // CreateAccessKey creates an accesskey
-func (c *Client) CreateAccessKey(ctx context.Context, accessKey s3management.AccessKeyCreate, timeout time.Duration) (s3management.AccessKey, *s3management.APIResponse, error) {
+func (c *Client) CreateAccessKey(ctx context.Context, accessKey s3management.AccessKeyCreate, timeout time.Duration) (s3management.AccessKeyRead, *s3management.APIResponse, error) {
 	accessKeyResponse, apiResponse, err := c.client.AccesskeysApi.AccesskeysPost(ctx).AccessKeyCreate(accessKey).Execute()
 	apiResponse.LogInfo()
 
@@ -66,7 +66,7 @@ func (c *Client) CreateAccessKey(ctx context.Context, accessKey s3management.Acc
 }
 
 // UpdateAccessKey updates an accesskey
-func (c *Client) UpdateAccessKey(ctx context.Context, accessKeyID string, accessKey s3management.AccessKeyEnsure, timeout time.Duration) (s3management.AccessKey, *s3management.APIResponse, error) {
+func (c *Client) UpdateAccessKey(ctx context.Context, accessKeyID string, accessKey s3management.AccessKeyEnsure, timeout time.Duration) (s3management.AccessKeyRead, *s3management.APIResponse, error) {
 	accessKeyResponse, apiResponse, err := c.client.AccesskeysApi.AccesskeysPut(ctx, accessKeyID).AccessKeyEnsure(accessKey).Execute()
 	apiResponse.LogInfo()
 
@@ -104,7 +104,7 @@ func (c *Client) DeleteAccessKey(ctx context.Context, accessKeyID string, timeou
 }
 
 // SetAccessKeyPropertiesToPlan sets accesskey properties from an SDK object to a AccesskeyResourceModel
-func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey s3management.AccessKey) {
+func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey s3management.AccessKeyRead) {
 
 	if accessKey.Properties != nil {
 		// Here we check the properties because based on the request not all are set and we do not want to overwrite with nil
@@ -130,7 +130,7 @@ func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey s3mana
 }
 
 // SetAccessKeyPropertiesToDataSourcePlan sets accesskey properties from an SDK object to a AccessKeyDataSourceModel
-func SetAccessKeyPropertiesToDataSourcePlan(plan *AccessKeyDataSourceModel, accessKey s3management.AccessKey) {
+func SetAccessKeyPropertiesToDataSourcePlan(plan *AccessKeyDataSourceModel, accessKey s3management.AccessKeyRead) {
 
 	if accessKey.Properties != nil {
 		// Here we check the properties because based on the request not all are set and we do not want to overwrite with nil

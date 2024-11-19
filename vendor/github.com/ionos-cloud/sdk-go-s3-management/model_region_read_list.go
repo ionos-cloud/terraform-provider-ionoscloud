@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -14,16 +14,16 @@ import (
 	"encoding/json"
 )
 
-// StorageClassList struct for StorageClassList
-type StorageClassList struct {
-	// ID of the list of StorageClass resources.
+// RegionReadList struct for RegionReadList
+type RegionReadList struct {
+	// ID of the list of Region resources.
 	Id *string `json:"id"`
 	// The type of the resource.
 	Type *string `json:"type"`
-	// The URL of the list of StorageClass resources.
+	// The URL of the list of Region resources.
 	Href *string `json:"href"`
-	// The list of StorageClass resources.
-	Items *[]StorageClass `json:"items,omitempty"`
+	// The list of Region resources.
+	Items *[]RegionRead `json:"items,omitempty"`
 	// The offset specified in the request (if none was specified, the default offset is 0).
 	Offset *int32 `json:"offset"`
 	// The limit specified in the request (if none was specified, use the endpoint's default pagination limit).
@@ -31,12 +31,12 @@ type StorageClassList struct {
 	Links *Links `json:"_links"`
 }
 
-// NewStorageClassList instantiates a new StorageClassList object
+// NewRegionReadList instantiates a new RegionReadList object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewStorageClassList(id string, type_ string, href string, offset int32, limit int32, links Links) *StorageClassList {
-	this := StorageClassList{}
+func NewRegionReadList(id string, type_ string, href string, offset int32, limit int32, links Links) *RegionReadList {
+	this := RegionReadList{}
 
 	this.Id = &id
 	this.Type = &type_
@@ -48,17 +48,17 @@ func NewStorageClassList(id string, type_ string, href string, offset int32, lim
 	return &this
 }
 
-// NewStorageClassListWithDefaults instantiates a new StorageClassList object
+// NewRegionReadListWithDefaults instantiates a new RegionReadList object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewStorageClassListWithDefaults() *StorageClassList {
-	this := StorageClassList{}
+func NewRegionReadListWithDefaults() *RegionReadList {
+	this := RegionReadList{}
 	return &this
 }
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *StorageClassList) GetId() *string {
+func (o *RegionReadList) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -70,7 +70,7 @@ func (o *StorageClassList) GetId() *string {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassList) GetIdOk() (*string, bool) {
+func (o *RegionReadList) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -79,14 +79,14 @@ func (o *StorageClassList) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *StorageClassList) SetId(v string) {
+func (o *RegionReadList) SetId(v string) {
 
 	o.Id = &v
 
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *StorageClassList) HasId() bool {
+func (o *RegionReadList) HasId() bool {
 	if o != nil && o.Id != nil {
 		return true
 	}
@@ -96,7 +96,7 @@ func (o *StorageClassList) HasId() bool {
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *StorageClassList) GetType() *string {
+func (o *RegionReadList) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -108,7 +108,7 @@ func (o *StorageClassList) GetType() *string {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassList) GetTypeOk() (*string, bool) {
+func (o *RegionReadList) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -117,14 +117,14 @@ func (o *StorageClassList) GetTypeOk() (*string, bool) {
 }
 
 // SetType sets field value
-func (o *StorageClassList) SetType(v string) {
+func (o *RegionReadList) SetType(v string) {
 
 	o.Type = &v
 
 }
 
 // HasType returns a boolean if a field has been set.
-func (o *StorageClassList) HasType() bool {
+func (o *RegionReadList) HasType() bool {
 	if o != nil && o.Type != nil {
 		return true
 	}
@@ -134,7 +134,7 @@ func (o *StorageClassList) HasType() bool {
 
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *StorageClassList) GetHref() *string {
+func (o *RegionReadList) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -146,7 +146,7 @@ func (o *StorageClassList) GetHref() *string {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassList) GetHrefOk() (*string, bool) {
+func (o *RegionReadList) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -155,14 +155,14 @@ func (o *StorageClassList) GetHrefOk() (*string, bool) {
 }
 
 // SetHref sets field value
-func (o *StorageClassList) SetHref(v string) {
+func (o *RegionReadList) SetHref(v string) {
 
 	o.Href = &v
 
 }
 
 // HasHref returns a boolean if a field has been set.
-func (o *StorageClassList) HasHref() bool {
+func (o *RegionReadList) HasHref() bool {
 	if o != nil && o.Href != nil {
 		return true
 	}
@@ -171,8 +171,8 @@ func (o *StorageClassList) HasHref() bool {
 }
 
 // GetItems returns the Items field value
-// If the value is explicit nil, the zero value for []StorageClass will be returned
-func (o *StorageClassList) GetItems() *[]StorageClass {
+// If the value is explicit nil, the zero value for []RegionRead will be returned
+func (o *RegionReadList) GetItems() *[]RegionRead {
 	if o == nil {
 		return nil
 	}
@@ -184,7 +184,7 @@ func (o *StorageClassList) GetItems() *[]StorageClass {
 // GetItemsOk returns a tuple with the Items field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassList) GetItemsOk() (*[]StorageClass, bool) {
+func (o *RegionReadList) GetItemsOk() (*[]RegionRead, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -193,14 +193,14 @@ func (o *StorageClassList) GetItemsOk() (*[]StorageClass, bool) {
 }
 
 // SetItems sets field value
-func (o *StorageClassList) SetItems(v []StorageClass) {
+func (o *RegionReadList) SetItems(v []RegionRead) {
 
 	o.Items = &v
 
 }
 
 // HasItems returns a boolean if a field has been set.
-func (o *StorageClassList) HasItems() bool {
+func (o *RegionReadList) HasItems() bool {
 	if o != nil && o.Items != nil {
 		return true
 	}
@@ -210,7 +210,7 @@ func (o *StorageClassList) HasItems() bool {
 
 // GetOffset returns the Offset field value
 // If the value is explicit nil, the zero value for int32 will be returned
-func (o *StorageClassList) GetOffset() *int32 {
+func (o *RegionReadList) GetOffset() *int32 {
 	if o == nil {
 		return nil
 	}
@@ -222,7 +222,7 @@ func (o *StorageClassList) GetOffset() *int32 {
 // GetOffsetOk returns a tuple with the Offset field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassList) GetOffsetOk() (*int32, bool) {
+func (o *RegionReadList) GetOffsetOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -231,14 +231,14 @@ func (o *StorageClassList) GetOffsetOk() (*int32, bool) {
 }
 
 // SetOffset sets field value
-func (o *StorageClassList) SetOffset(v int32) {
+func (o *RegionReadList) SetOffset(v int32) {
 
 	o.Offset = &v
 
 }
 
 // HasOffset returns a boolean if a field has been set.
-func (o *StorageClassList) HasOffset() bool {
+func (o *RegionReadList) HasOffset() bool {
 	if o != nil && o.Offset != nil {
 		return true
 	}
@@ -248,7 +248,7 @@ func (o *StorageClassList) HasOffset() bool {
 
 // GetLimit returns the Limit field value
 // If the value is explicit nil, the zero value for int32 will be returned
-func (o *StorageClassList) GetLimit() *int32 {
+func (o *RegionReadList) GetLimit() *int32 {
 	if o == nil {
 		return nil
 	}
@@ -260,7 +260,7 @@ func (o *StorageClassList) GetLimit() *int32 {
 // GetLimitOk returns a tuple with the Limit field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassList) GetLimitOk() (*int32, bool) {
+func (o *RegionReadList) GetLimitOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -269,14 +269,14 @@ func (o *StorageClassList) GetLimitOk() (*int32, bool) {
 }
 
 // SetLimit sets field value
-func (o *StorageClassList) SetLimit(v int32) {
+func (o *RegionReadList) SetLimit(v int32) {
 
 	o.Limit = &v
 
 }
 
 // HasLimit returns a boolean if a field has been set.
-func (o *StorageClassList) HasLimit() bool {
+func (o *RegionReadList) HasLimit() bool {
 	if o != nil && o.Limit != nil {
 		return true
 	}
@@ -286,7 +286,7 @@ func (o *StorageClassList) HasLimit() bool {
 
 // GetLinks returns the Links field value
 // If the value is explicit nil, the zero value for Links will be returned
-func (o *StorageClassList) GetLinks() *Links {
+func (o *RegionReadList) GetLinks() *Links {
 	if o == nil {
 		return nil
 	}
@@ -298,7 +298,7 @@ func (o *StorageClassList) GetLinks() *Links {
 // GetLinksOk returns a tuple with the Links field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClassList) GetLinksOk() (*Links, bool) {
+func (o *RegionReadList) GetLinksOk() (*Links, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -307,14 +307,14 @@ func (o *StorageClassList) GetLinksOk() (*Links, bool) {
 }
 
 // SetLinks sets field value
-func (o *StorageClassList) SetLinks(v Links) {
+func (o *RegionReadList) SetLinks(v Links) {
 
 	o.Links = &v
 
 }
 
 // HasLinks returns a boolean if a field has been set.
-func (o *StorageClassList) HasLinks() bool {
+func (o *RegionReadList) HasLinks() bool {
 	if o != nil && o.Links != nil {
 		return true
 	}
@@ -322,7 +322,7 @@ func (o *StorageClassList) HasLinks() bool {
 	return false
 }
 
-func (o StorageClassList) MarshalJSON() ([]byte, error) {
+func (o RegionReadList) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
@@ -355,38 +355,38 @@ func (o StorageClassList) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableStorageClassList struct {
-	value *StorageClassList
+type NullableRegionReadList struct {
+	value *RegionReadList
 	isSet bool
 }
 
-func (v NullableStorageClassList) Get() *StorageClassList {
+func (v NullableRegionReadList) Get() *RegionReadList {
 	return v.value
 }
 
-func (v *NullableStorageClassList) Set(val *StorageClassList) {
+func (v *NullableRegionReadList) Set(val *RegionReadList) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableStorageClassList) IsSet() bool {
+func (v NullableRegionReadList) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableStorageClassList) Unset() {
+func (v *NullableRegionReadList) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableStorageClassList(val *StorageClassList) *NullableStorageClassList {
-	return &NullableStorageClassList{value: val, isSet: true}
+func NewNullableRegionReadList(val *RegionReadList) *NullableRegionReadList {
+	return &NullableRegionReadList{value: val, isSet: true}
 }
 
-func (v NullableStorageClassList) MarshalJSON() ([]byte, error) {
+func (v NullableRegionReadList) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableStorageClassList) UnmarshalJSON(src []byte) error {
+func (v *NullableRegionReadList) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

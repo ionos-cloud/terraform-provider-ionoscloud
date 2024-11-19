@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -14,30 +14,26 @@ import (
 	"encoding/json"
 )
 
-// StorageClass struct for StorageClass
+// StorageClass Details the cross functional aspects of the given storage class.
 type StorageClass struct {
-	// The StorageClass of the StorageClass.
-	Id *string `json:"id"`
-	// The type of the resource.
-	Type *string `json:"type"`
-	// The URL of the StorageClass.
-	Href       *string                 `json:"href"`
-	Metadata   *map[string]interface{} `json:"metadata"`
-	Properties *StorageClassProperties `json:"properties"`
+	// Explains the motivation for the storage class
+	Description *string `json:"description"`
+	// The durability of the storage class
+	Durability *string `json:"durability"`
+	// The availability of the storage class
+	Availability *string `json:"availability"`
 }
 
 // NewStorageClass instantiates a new StorageClass object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewStorageClass(id string, type_ string, href string, metadata map[string]interface{}, properties StorageClassProperties) *StorageClass {
+func NewStorageClass(description string, durability string, availability string) *StorageClass {
 	this := StorageClass{}
 
-	this.Id = &id
-	this.Type = &type_
-	this.Href = &href
-	this.Metadata = &metadata
-	this.Properties = &properties
+	this.Description = &description
+	this.Durability = &durability
+	this.Availability = &availability
 
 	return &this
 }
@@ -50,190 +46,114 @@ func NewStorageClassWithDefaults() *StorageClass {
 	return &this
 }
 
-// GetId returns the Id field value
+// GetDescription returns the Description field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *StorageClass) GetId() *string {
+func (o *StorageClass) GetDescription() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Id
+	return o.Description
 
 }
 
-// GetIdOk returns a tuple with the Id field value
+// GetDescriptionOk returns a tuple with the Description field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClass) GetIdOk() (*string, bool) {
+func (o *StorageClass) GetDescriptionOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Id, true
+	return o.Description, true
 }
 
-// SetId sets field value
-func (o *StorageClass) SetId(v string) {
+// SetDescription sets field value
+func (o *StorageClass) SetDescription(v string) {
 
-	o.Id = &v
+	o.Description = &v
 
 }
 
-// HasId returns a boolean if a field has been set.
-func (o *StorageClass) HasId() bool {
-	if o != nil && o.Id != nil {
+// HasDescription returns a boolean if a field has been set.
+func (o *StorageClass) HasDescription() bool {
+	if o != nil && o.Description != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetType returns the Type field value
+// GetDurability returns the Durability field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *StorageClass) GetType() *string {
+func (o *StorageClass) GetDurability() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Type
+	return o.Durability
 
 }
 
-// GetTypeOk returns a tuple with the Type field value
+// GetDurabilityOk returns a tuple with the Durability field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClass) GetTypeOk() (*string, bool) {
+func (o *StorageClass) GetDurabilityOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Type, true
+	return o.Durability, true
 }
 
-// SetType sets field value
-func (o *StorageClass) SetType(v string) {
+// SetDurability sets field value
+func (o *StorageClass) SetDurability(v string) {
 
-	o.Type = &v
+	o.Durability = &v
 
 }
 
-// HasType returns a boolean if a field has been set.
-func (o *StorageClass) HasType() bool {
-	if o != nil && o.Type != nil {
+// HasDurability returns a boolean if a field has been set.
+func (o *StorageClass) HasDurability() bool {
+	if o != nil && o.Durability != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetHref returns the Href field value
+// GetAvailability returns the Availability field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *StorageClass) GetHref() *string {
+func (o *StorageClass) GetAvailability() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Href
+	return o.Availability
 
 }
 
-// GetHrefOk returns a tuple with the Href field value
+// GetAvailabilityOk returns a tuple with the Availability field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClass) GetHrefOk() (*string, bool) {
+func (o *StorageClass) GetAvailabilityOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Href, true
+	return o.Availability, true
 }
 
-// SetHref sets field value
-func (o *StorageClass) SetHref(v string) {
+// SetAvailability sets field value
+func (o *StorageClass) SetAvailability(v string) {
 
-	o.Href = &v
-
-}
-
-// HasHref returns a boolean if a field has been set.
-func (o *StorageClass) HasHref() bool {
-	if o != nil && o.Href != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetMetadata returns the Metadata field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *StorageClass) GetMetadata() *map[string]interface{} {
-	if o == nil {
-		return nil
-	}
-
-	return o.Metadata
+	o.Availability = &v
 
 }
 
-// GetMetadataOk returns a tuple with the Metadata field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClass) GetMetadataOk() (*map[string]interface{}, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Metadata, true
-}
-
-// SetMetadata sets field value
-func (o *StorageClass) SetMetadata(v map[string]interface{}) {
-
-	o.Metadata = &v
-
-}
-
-// HasMetadata returns a boolean if a field has been set.
-func (o *StorageClass) HasMetadata() bool {
-	if o != nil && o.Metadata != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for StorageClassProperties will be returned
-func (o *StorageClass) GetProperties() *StorageClassProperties {
-	if o == nil {
-		return nil
-	}
-
-	return o.Properties
-
-}
-
-// GetPropertiesOk returns a tuple with the Properties field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageClass) GetPropertiesOk() (*StorageClassProperties, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Properties, true
-}
-
-// SetProperties sets field value
-func (o *StorageClass) SetProperties(v StorageClassProperties) {
-
-	o.Properties = &v
-
-}
-
-// HasProperties returns a boolean if a field has been set.
-func (o *StorageClass) HasProperties() bool {
-	if o != nil && o.Properties != nil {
+// HasAvailability returns a boolean if a field has been set.
+func (o *StorageClass) HasAvailability() bool {
+	if o != nil && o.Availability != nil {
 		return true
 	}
 
@@ -242,24 +162,16 @@ func (o *StorageClass) HasProperties() bool {
 
 func (o StorageClass) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Id != nil {
-		toSerialize["id"] = o.Id
+	if o.Description != nil {
+		toSerialize["description"] = o.Description
 	}
 
-	if o.Type != nil {
-		toSerialize["type"] = o.Type
+	if o.Durability != nil {
+		toSerialize["durability"] = o.Durability
 	}
 
-	if o.Href != nil {
-		toSerialize["href"] = o.Href
-	}
-
-	if o.Metadata != nil {
-		toSerialize["metadata"] = o.Metadata
-	}
-
-	if o.Properties != nil {
-		toSerialize["properties"] = o.Properties
+	if o.Availability != nil {
+		toSerialize["availability"] = o.Availability
 	}
 
 	return json.Marshal(toSerialize)

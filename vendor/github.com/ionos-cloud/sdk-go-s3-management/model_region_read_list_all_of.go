@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -14,8 +14,8 @@ import (
 	"encoding/json"
 )
 
-// RegionListAllOf struct for RegionListAllOf
-type RegionListAllOf struct {
+// RegionReadListAllOf struct for RegionReadListAllOf
+type RegionReadListAllOf struct {
 	// ID of the list of Region resources.
 	Id *string `json:"id"`
 	// The type of the resource.
@@ -23,15 +23,15 @@ type RegionListAllOf struct {
 	// The URL of the list of Region resources.
 	Href *string `json:"href"`
 	// The list of Region resources.
-	Items *[]Region `json:"items,omitempty"`
+	Items *[]RegionRead `json:"items,omitempty"`
 }
 
-// NewRegionListAllOf instantiates a new RegionListAllOf object
+// NewRegionReadListAllOf instantiates a new RegionReadListAllOf object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegionListAllOf(id string, type_ string, href string) *RegionListAllOf {
-	this := RegionListAllOf{}
+func NewRegionReadListAllOf(id string, type_ string, href string) *RegionReadListAllOf {
+	this := RegionReadListAllOf{}
 
 	this.Id = &id
 	this.Type = &type_
@@ -40,17 +40,17 @@ func NewRegionListAllOf(id string, type_ string, href string) *RegionListAllOf {
 	return &this
 }
 
-// NewRegionListAllOfWithDefaults instantiates a new RegionListAllOf object
+// NewRegionReadListAllOfWithDefaults instantiates a new RegionReadListAllOf object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewRegionListAllOfWithDefaults() *RegionListAllOf {
-	this := RegionListAllOf{}
+func NewRegionReadListAllOfWithDefaults() *RegionReadListAllOf {
+	this := RegionReadListAllOf{}
 	return &this
 }
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *RegionListAllOf) GetId() *string {
+func (o *RegionReadListAllOf) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -62,7 +62,7 @@ func (o *RegionListAllOf) GetId() *string {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionListAllOf) GetIdOk() (*string, bool) {
+func (o *RegionReadListAllOf) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,14 +71,14 @@ func (o *RegionListAllOf) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *RegionListAllOf) SetId(v string) {
+func (o *RegionReadListAllOf) SetId(v string) {
 
 	o.Id = &v
 
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *RegionListAllOf) HasId() bool {
+func (o *RegionReadListAllOf) HasId() bool {
 	if o != nil && o.Id != nil {
 		return true
 	}
@@ -88,7 +88,7 @@ func (o *RegionListAllOf) HasId() bool {
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *RegionListAllOf) GetType() *string {
+func (o *RegionReadListAllOf) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -100,7 +100,7 @@ func (o *RegionListAllOf) GetType() *string {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionListAllOf) GetTypeOk() (*string, bool) {
+func (o *RegionReadListAllOf) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -109,14 +109,14 @@ func (o *RegionListAllOf) GetTypeOk() (*string, bool) {
 }
 
 // SetType sets field value
-func (o *RegionListAllOf) SetType(v string) {
+func (o *RegionReadListAllOf) SetType(v string) {
 
 	o.Type = &v
 
 }
 
 // HasType returns a boolean if a field has been set.
-func (o *RegionListAllOf) HasType() bool {
+func (o *RegionReadListAllOf) HasType() bool {
 	if o != nil && o.Type != nil {
 		return true
 	}
@@ -126,7 +126,7 @@ func (o *RegionListAllOf) HasType() bool {
 
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *RegionListAllOf) GetHref() *string {
+func (o *RegionReadListAllOf) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -138,7 +138,7 @@ func (o *RegionListAllOf) GetHref() *string {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionListAllOf) GetHrefOk() (*string, bool) {
+func (o *RegionReadListAllOf) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -147,14 +147,14 @@ func (o *RegionListAllOf) GetHrefOk() (*string, bool) {
 }
 
 // SetHref sets field value
-func (o *RegionListAllOf) SetHref(v string) {
+func (o *RegionReadListAllOf) SetHref(v string) {
 
 	o.Href = &v
 
 }
 
 // HasHref returns a boolean if a field has been set.
-func (o *RegionListAllOf) HasHref() bool {
+func (o *RegionReadListAllOf) HasHref() bool {
 	if o != nil && o.Href != nil {
 		return true
 	}
@@ -163,8 +163,8 @@ func (o *RegionListAllOf) HasHref() bool {
 }
 
 // GetItems returns the Items field value
-// If the value is explicit nil, the zero value for []Region will be returned
-func (o *RegionListAllOf) GetItems() *[]Region {
+// If the value is explicit nil, the zero value for []RegionRead will be returned
+func (o *RegionReadListAllOf) GetItems() *[]RegionRead {
 	if o == nil {
 		return nil
 	}
@@ -176,7 +176,7 @@ func (o *RegionListAllOf) GetItems() *[]Region {
 // GetItemsOk returns a tuple with the Items field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionListAllOf) GetItemsOk() (*[]Region, bool) {
+func (o *RegionReadListAllOf) GetItemsOk() (*[]RegionRead, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -185,14 +185,14 @@ func (o *RegionListAllOf) GetItemsOk() (*[]Region, bool) {
 }
 
 // SetItems sets field value
-func (o *RegionListAllOf) SetItems(v []Region) {
+func (o *RegionReadListAllOf) SetItems(v []RegionRead) {
 
 	o.Items = &v
 
 }
 
 // HasItems returns a boolean if a field has been set.
-func (o *RegionListAllOf) HasItems() bool {
+func (o *RegionReadListAllOf) HasItems() bool {
 	if o != nil && o.Items != nil {
 		return true
 	}
@@ -200,7 +200,7 @@ func (o *RegionListAllOf) HasItems() bool {
 	return false
 }
 
-func (o RegionListAllOf) MarshalJSON() ([]byte, error) {
+func (o RegionReadListAllOf) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
@@ -221,38 +221,38 @@ func (o RegionListAllOf) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableRegionListAllOf struct {
-	value *RegionListAllOf
+type NullableRegionReadListAllOf struct {
+	value *RegionReadListAllOf
 	isSet bool
 }
 
-func (v NullableRegionListAllOf) Get() *RegionListAllOf {
+func (v NullableRegionReadListAllOf) Get() *RegionReadListAllOf {
 	return v.value
 }
 
-func (v *NullableRegionListAllOf) Set(val *RegionListAllOf) {
+func (v *NullableRegionReadListAllOf) Set(val *RegionReadListAllOf) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableRegionListAllOf) IsSet() bool {
+func (v NullableRegionReadListAllOf) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableRegionListAllOf) Unset() {
+func (v *NullableRegionReadListAllOf) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableRegionListAllOf(val *RegionListAllOf) *NullableRegionListAllOf {
-	return &NullableRegionListAllOf{value: val, isSet: true}
+func NewNullableRegionReadListAllOf(val *RegionReadListAllOf) *NullableRegionReadListAllOf {
+	return &NullableRegionReadListAllOf{value: val, isSet: true}
 }
 
-func (v NullableRegionListAllOf) MarshalJSON() ([]byte, error) {
+func (v NullableRegionReadListAllOf) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableRegionListAllOf) UnmarshalJSON(src []byte) error {
+func (v *NullableRegionReadListAllOf) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

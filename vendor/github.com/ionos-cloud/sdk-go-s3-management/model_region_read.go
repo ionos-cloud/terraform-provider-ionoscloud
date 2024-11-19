@@ -14,43 +14,45 @@ import (
 	"encoding/json"
 )
 
-// BucketReadListAllOf struct for BucketReadListAllOf
-type BucketReadListAllOf struct {
-	// ID of the list of Bucket resources.
+// RegionRead struct for RegionRead
+type RegionRead struct {
+	// The Region of the Region.
 	Id *string `json:"id"`
 	// The type of the resource.
 	Type *string `json:"type"`
-	// The URL of the list of Bucket resources.
-	Href *string `json:"href"`
-	// The list of Bucket resources.
-	Items *[]BucketRead `json:"items,omitempty"`
+	// The URL of the Region.
+	Href       *string                 `json:"href"`
+	Metadata   *map[string]interface{} `json:"metadata"`
+	Properties *Region                 `json:"properties"`
 }
 
-// NewBucketReadListAllOf instantiates a new BucketReadListAllOf object
+// NewRegionRead instantiates a new RegionRead object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBucketReadListAllOf(id string, type_ string, href string) *BucketReadListAllOf {
-	this := BucketReadListAllOf{}
+func NewRegionRead(id string, type_ string, href string, metadata map[string]interface{}, properties Region) *RegionRead {
+	this := RegionRead{}
 
 	this.Id = &id
 	this.Type = &type_
 	this.Href = &href
+	this.Metadata = &metadata
+	this.Properties = &properties
 
 	return &this
 }
 
-// NewBucketReadListAllOfWithDefaults instantiates a new BucketReadListAllOf object
+// NewRegionReadWithDefaults instantiates a new RegionRead object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewBucketReadListAllOfWithDefaults() *BucketReadListAllOf {
-	this := BucketReadListAllOf{}
+func NewRegionReadWithDefaults() *RegionRead {
+	this := RegionRead{}
 	return &this
 }
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *BucketReadListAllOf) GetId() *string {
+func (o *RegionRead) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -62,7 +64,7 @@ func (o *BucketReadListAllOf) GetId() *string {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketReadListAllOf) GetIdOk() (*string, bool) {
+func (o *RegionRead) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,14 +73,14 @@ func (o *BucketReadListAllOf) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *BucketReadListAllOf) SetId(v string) {
+func (o *RegionRead) SetId(v string) {
 
 	o.Id = &v
 
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *BucketReadListAllOf) HasId() bool {
+func (o *RegionRead) HasId() bool {
 	if o != nil && o.Id != nil {
 		return true
 	}
@@ -88,7 +90,7 @@ func (o *BucketReadListAllOf) HasId() bool {
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *BucketReadListAllOf) GetType() *string {
+func (o *RegionRead) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -100,7 +102,7 @@ func (o *BucketReadListAllOf) GetType() *string {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketReadListAllOf) GetTypeOk() (*string, bool) {
+func (o *RegionRead) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -109,14 +111,14 @@ func (o *BucketReadListAllOf) GetTypeOk() (*string, bool) {
 }
 
 // SetType sets field value
-func (o *BucketReadListAllOf) SetType(v string) {
+func (o *RegionRead) SetType(v string) {
 
 	o.Type = &v
 
 }
 
 // HasType returns a boolean if a field has been set.
-func (o *BucketReadListAllOf) HasType() bool {
+func (o *RegionRead) HasType() bool {
 	if o != nil && o.Type != nil {
 		return true
 	}
@@ -126,7 +128,7 @@ func (o *BucketReadListAllOf) HasType() bool {
 
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *BucketReadListAllOf) GetHref() *string {
+func (o *RegionRead) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -138,7 +140,7 @@ func (o *BucketReadListAllOf) GetHref() *string {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketReadListAllOf) GetHrefOk() (*string, bool) {
+func (o *RegionRead) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -147,14 +149,14 @@ func (o *BucketReadListAllOf) GetHrefOk() (*string, bool) {
 }
 
 // SetHref sets field value
-func (o *BucketReadListAllOf) SetHref(v string) {
+func (o *RegionRead) SetHref(v string) {
 
 	o.Href = &v
 
 }
 
 // HasHref returns a boolean if a field has been set.
-func (o *BucketReadListAllOf) HasHref() bool {
+func (o *RegionRead) HasHref() bool {
 	if o != nil && o.Href != nil {
 		return true
 	}
@@ -162,45 +164,83 @@ func (o *BucketReadListAllOf) HasHref() bool {
 	return false
 }
 
-// GetItems returns the Items field value
-// If the value is explicit nil, the zero value for []BucketRead will be returned
-func (o *BucketReadListAllOf) GetItems() *[]BucketRead {
+// GetMetadata returns the Metadata field value
+// If the value is explicit nil, the zero value for map[string]interface{} will be returned
+func (o *RegionRead) GetMetadata() *map[string]interface{} {
 	if o == nil {
 		return nil
 	}
 
-	return o.Items
+	return o.Metadata
 
 }
 
-// GetItemsOk returns a tuple with the Items field value
+// GetMetadataOk returns a tuple with the Metadata field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketReadListAllOf) GetItemsOk() (*[]BucketRead, bool) {
+func (o *RegionRead) GetMetadataOk() (*map[string]interface{}, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Items, true
+	return o.Metadata, true
 }
 
-// SetItems sets field value
-func (o *BucketReadListAllOf) SetItems(v []BucketRead) {
+// SetMetadata sets field value
+func (o *RegionRead) SetMetadata(v map[string]interface{}) {
 
-	o.Items = &v
+	o.Metadata = &v
 
 }
 
-// HasItems returns a boolean if a field has been set.
-func (o *BucketReadListAllOf) HasItems() bool {
-	if o != nil && o.Items != nil {
+// HasMetadata returns a boolean if a field has been set.
+func (o *RegionRead) HasMetadata() bool {
+	if o != nil && o.Metadata != nil {
 		return true
 	}
 
 	return false
 }
 
-func (o BucketReadListAllOf) MarshalJSON() ([]byte, error) {
+// GetProperties returns the Properties field value
+// If the value is explicit nil, the zero value for Region will be returned
+func (o *RegionRead) GetProperties() *Region {
+	if o == nil {
+		return nil
+	}
+
+	return o.Properties
+
+}
+
+// GetPropertiesOk returns a tuple with the Properties field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *RegionRead) GetPropertiesOk() (*Region, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Properties, true
+}
+
+// SetProperties sets field value
+func (o *RegionRead) SetProperties(v Region) {
+
+	o.Properties = &v
+
+}
+
+// HasProperties returns a boolean if a field has been set.
+func (o *RegionRead) HasProperties() bool {
+	if o != nil && o.Properties != nil {
+		return true
+	}
+
+	return false
+}
+
+func (o RegionRead) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
@@ -214,45 +254,49 @@ func (o BucketReadListAllOf) MarshalJSON() ([]byte, error) {
 		toSerialize["href"] = o.Href
 	}
 
-	if o.Items != nil {
-		toSerialize["items"] = o.Items
+	if o.Metadata != nil {
+		toSerialize["metadata"] = o.Metadata
+	}
+
+	if o.Properties != nil {
+		toSerialize["properties"] = o.Properties
 	}
 
 	return json.Marshal(toSerialize)
 }
 
-type NullableBucketReadListAllOf struct {
-	value *BucketReadListAllOf
+type NullableRegionRead struct {
+	value *RegionRead
 	isSet bool
 }
 
-func (v NullableBucketReadListAllOf) Get() *BucketReadListAllOf {
+func (v NullableRegionRead) Get() *RegionRead {
 	return v.value
 }
 
-func (v *NullableBucketReadListAllOf) Set(val *BucketReadListAllOf) {
+func (v *NullableRegionRead) Set(val *RegionRead) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableBucketReadListAllOf) IsSet() bool {
+func (v NullableRegionRead) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableBucketReadListAllOf) Unset() {
+func (v *NullableRegionRead) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableBucketReadListAllOf(val *BucketReadListAllOf) *NullableBucketReadListAllOf {
-	return &NullableBucketReadListAllOf{value: val, isSet: true}
+func NewNullableRegionRead(val *RegionRead) *NullableRegionRead {
+	return &NullableRegionRead{value: val, isSet: true}
 }
 
-func (v NullableBucketReadListAllOf) MarshalJSON() ([]byte, error) {
+func (v NullableRegionRead) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableBucketReadListAllOf) UnmarshalJSON(src []byte) error {
+func (v *NullableRegionRead) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

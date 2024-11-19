@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -207,7 +207,7 @@ type ApiAccesskeysFindByIdRequest struct {
 	accesskeyId string
 }
 
-func (r ApiAccesskeysFindByIdRequest) Execute() (AccessKey, *APIResponse, error) {
+func (r ApiAccesskeysFindByIdRequest) Execute() (AccessKeyRead, *APIResponse, error) {
 	return r.ApiService.AccesskeysFindByIdExecute(r)
 }
 
@@ -228,16 +228,16 @@ func (a *AccesskeysApiService) AccesskeysFindById(ctx _context.Context, accesske
 
 /*
  * Execute executes the request
- * @return AccessKey
+ * @return AccessKeyRead
  */
-func (a *AccesskeysApiService) AccesskeysFindByIdExecute(r ApiAccesskeysFindByIdRequest) (AccessKey, *APIResponse, error) {
+func (a *AccesskeysApiService) AccesskeysFindByIdExecute(r ApiAccesskeysFindByIdRequest) (AccessKeyRead, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  AccessKey
+		localVarReturnValue  AccessKeyRead
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AccesskeysApiService.AccesskeysFindById")
@@ -408,7 +408,7 @@ func (r ApiAccesskeysGetRequest) FilterAccesskeyId(filterAccesskeyId string) Api
 	return r
 }
 
-func (r ApiAccesskeysGetRequest) Execute() (AccessKeyList, *APIResponse, error) {
+func (r ApiAccesskeysGetRequest) Execute() (AccessKeyReadList, *APIResponse, error) {
 	return r.ApiService.AccesskeysGetExecute(r)
 }
 
@@ -430,16 +430,16 @@ func (a *AccesskeysApiService) AccesskeysGet(ctx _context.Context) ApiAccesskeys
 
 /*
  * Execute executes the request
- * @return AccessKeyList
+ * @return AccessKeyReadList
  */
-func (a *AccesskeysApiService) AccesskeysGetExecute(r ApiAccesskeysGetRequest) (AccessKeyList, *APIResponse, error) {
+func (a *AccesskeysApiService) AccesskeysGetExecute(r ApiAccesskeysGetRequest) (AccessKeyReadList, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  AccessKeyList
+		localVarReturnValue  AccessKeyReadList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AccesskeysApiService.AccesskeysGet")
@@ -599,7 +599,7 @@ func (r ApiAccesskeysPostRequest) AccessKeyCreate(accessKeyCreate AccessKeyCreat
 	return r
 }
 
-func (r ApiAccesskeysPostRequest) Execute() (AccessKey, *APIResponse, error) {
+func (r ApiAccesskeysPostRequest) Execute() (AccessKeyRead, *APIResponse, error) {
 	return r.ApiService.AccesskeysPostExecute(r)
 }
 
@@ -622,16 +622,16 @@ func (a *AccesskeysApiService) AccesskeysPost(ctx _context.Context) ApiAccesskey
 
 /*
  * Execute executes the request
- * @return AccessKey
+ * @return AccessKeyRead
  */
-func (a *AccesskeysApiService) AccesskeysPostExecute(r ApiAccesskeysPostRequest) (AccessKey, *APIResponse, error) {
+func (a *AccesskeysApiService) AccesskeysPostExecute(r ApiAccesskeysPostRequest) (AccessKeyRead, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  AccessKey
+		localVarReturnValue  AccessKeyRead
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AccesskeysApiService.AccesskeysPost")
@@ -806,7 +806,7 @@ func (r ApiAccesskeysPutRequest) AccessKeyEnsure(accessKeyEnsure AccessKeyEnsure
 	return r
 }
 
-func (r ApiAccesskeysPutRequest) Execute() (AccessKey, *APIResponse, error) {
+func (r ApiAccesskeysPutRequest) Execute() (AccessKeyRead, *APIResponse, error) {
 	return r.ApiService.AccesskeysPutExecute(r)
 }
 
@@ -833,16 +833,16 @@ func (a *AccesskeysApiService) AccesskeysPut(ctx _context.Context, accesskeyId s
 
 /*
  * Execute executes the request
- * @return AccessKey
+ * @return AccessKeyRead
  */
-func (a *AccesskeysApiService) AccesskeysPutExecute(r ApiAccesskeysPutRequest) (AccessKey, *APIResponse, error) {
+func (a *AccesskeysApiService) AccesskeysPutExecute(r ApiAccesskeysPutRequest) (AccessKeyRead, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  AccessKey
+		localVarReturnValue  AccessKeyRead
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AccesskeysApiService.AccesskeysPut")
@@ -938,7 +938,7 @@ func (a *AccesskeysApiService) AccesskeysPutExecute(r ApiAccesskeysPutRequest) (
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 409 {
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -947,7 +947,7 @@ func (a *AccesskeysApiService) AccesskeysPutExecute(r ApiAccesskeysPutRequest) (
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 404 {
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -1030,7 +1030,7 @@ type ApiAccesskeysRenewRequest struct {
 	accesskeyId string
 }
 
-func (r ApiAccesskeysRenewRequest) Execute() (AccessKey, *APIResponse, error) {
+func (r ApiAccesskeysRenewRequest) Execute() (AccessKeyRead, *APIResponse, error) {
 	return r.ApiService.AccesskeysRenewExecute(r)
 }
 
@@ -1052,16 +1052,16 @@ func (a *AccesskeysApiService) AccesskeysRenew(ctx _context.Context, accesskeyId
 
 /*
  * Execute executes the request
- * @return AccessKey
+ * @return AccessKeyRead
  */
-func (a *AccesskeysApiService) AccesskeysRenewExecute(r ApiAccesskeysRenewRequest) (AccessKey, *APIResponse, error) {
+func (a *AccesskeysApiService) AccesskeysRenewExecute(r ApiAccesskeysRenewRequest) (AccessKeyRead, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  AccessKey
+		localVarReturnValue  AccessKeyRead
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AccesskeysApiService.AccesskeysRenew")
@@ -1152,7 +1152,7 @@ func (a *AccesskeysApiService) AccesskeysRenewExecute(r ApiAccesskeysRenewReques
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 409 {
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -1161,7 +1161,7 @@ func (a *AccesskeysApiService) AccesskeysRenewExecute(r ApiAccesskeysRenewReques
 			}
 			newErr.model = v
 		}
-		if localVarHTTPResponse.StatusCode == 404 {
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

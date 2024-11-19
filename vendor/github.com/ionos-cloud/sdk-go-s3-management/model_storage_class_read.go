@@ -14,24 +14,24 @@ import (
 	"encoding/json"
 )
 
-// BucketRead struct for BucketRead
-type BucketRead struct {
-	// The Bucket of the Bucket.
+// StorageClassRead struct for StorageClassRead
+type StorageClassRead struct {
+	// The StorageClass of the StorageClass.
 	Id *string `json:"id"`
 	// The type of the resource.
 	Type *string `json:"type"`
-	// The URL of the Bucket.
+	// The URL of the StorageClass.
 	Href       *string                 `json:"href"`
 	Metadata   *map[string]interface{} `json:"metadata"`
-	Properties *Bucket                 `json:"properties"`
+	Properties *StorageClass           `json:"properties"`
 }
 
-// NewBucketRead instantiates a new BucketRead object
+// NewStorageClassRead instantiates a new StorageClassRead object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBucketRead(id string, type_ string, href string, metadata map[string]interface{}, properties Bucket) *BucketRead {
-	this := BucketRead{}
+func NewStorageClassRead(id string, type_ string, href string, metadata map[string]interface{}, properties StorageClass) *StorageClassRead {
+	this := StorageClassRead{}
 
 	this.Id = &id
 	this.Type = &type_
@@ -42,17 +42,17 @@ func NewBucketRead(id string, type_ string, href string, metadata map[string]int
 	return &this
 }
 
-// NewBucketReadWithDefaults instantiates a new BucketRead object
+// NewStorageClassReadWithDefaults instantiates a new StorageClassRead object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewBucketReadWithDefaults() *BucketRead {
-	this := BucketRead{}
+func NewStorageClassReadWithDefaults() *StorageClassRead {
+	this := StorageClassRead{}
 	return &this
 }
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *BucketRead) GetId() *string {
+func (o *StorageClassRead) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -64,7 +64,7 @@ func (o *BucketRead) GetId() *string {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketRead) GetIdOk() (*string, bool) {
+func (o *StorageClassRead) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -73,14 +73,14 @@ func (o *BucketRead) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *BucketRead) SetId(v string) {
+func (o *StorageClassRead) SetId(v string) {
 
 	o.Id = &v
 
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *BucketRead) HasId() bool {
+func (o *StorageClassRead) HasId() bool {
 	if o != nil && o.Id != nil {
 		return true
 	}
@@ -90,7 +90,7 @@ func (o *BucketRead) HasId() bool {
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *BucketRead) GetType() *string {
+func (o *StorageClassRead) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -102,7 +102,7 @@ func (o *BucketRead) GetType() *string {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketRead) GetTypeOk() (*string, bool) {
+func (o *StorageClassRead) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -111,14 +111,14 @@ func (o *BucketRead) GetTypeOk() (*string, bool) {
 }
 
 // SetType sets field value
-func (o *BucketRead) SetType(v string) {
+func (o *StorageClassRead) SetType(v string) {
 
 	o.Type = &v
 
 }
 
 // HasType returns a boolean if a field has been set.
-func (o *BucketRead) HasType() bool {
+func (o *StorageClassRead) HasType() bool {
 	if o != nil && o.Type != nil {
 		return true
 	}
@@ -128,7 +128,7 @@ func (o *BucketRead) HasType() bool {
 
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *BucketRead) GetHref() *string {
+func (o *StorageClassRead) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -140,7 +140,7 @@ func (o *BucketRead) GetHref() *string {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketRead) GetHrefOk() (*string, bool) {
+func (o *StorageClassRead) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -149,14 +149,14 @@ func (o *BucketRead) GetHrefOk() (*string, bool) {
 }
 
 // SetHref sets field value
-func (o *BucketRead) SetHref(v string) {
+func (o *StorageClassRead) SetHref(v string) {
 
 	o.Href = &v
 
 }
 
 // HasHref returns a boolean if a field has been set.
-func (o *BucketRead) HasHref() bool {
+func (o *StorageClassRead) HasHref() bool {
 	if o != nil && o.Href != nil {
 		return true
 	}
@@ -166,7 +166,7 @@ func (o *BucketRead) HasHref() bool {
 
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *BucketRead) GetMetadata() *map[string]interface{} {
+func (o *StorageClassRead) GetMetadata() *map[string]interface{} {
 	if o == nil {
 		return nil
 	}
@@ -178,7 +178,7 @@ func (o *BucketRead) GetMetadata() *map[string]interface{} {
 // GetMetadataOk returns a tuple with the Metadata field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketRead) GetMetadataOk() (*map[string]interface{}, bool) {
+func (o *StorageClassRead) GetMetadataOk() (*map[string]interface{}, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -187,14 +187,14 @@ func (o *BucketRead) GetMetadataOk() (*map[string]interface{}, bool) {
 }
 
 // SetMetadata sets field value
-func (o *BucketRead) SetMetadata(v map[string]interface{}) {
+func (o *StorageClassRead) SetMetadata(v map[string]interface{}) {
 
 	o.Metadata = &v
 
 }
 
 // HasMetadata returns a boolean if a field has been set.
-func (o *BucketRead) HasMetadata() bool {
+func (o *StorageClassRead) HasMetadata() bool {
 	if o != nil && o.Metadata != nil {
 		return true
 	}
@@ -203,8 +203,8 @@ func (o *BucketRead) HasMetadata() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for Bucket will be returned
-func (o *BucketRead) GetProperties() *Bucket {
+// If the value is explicit nil, the zero value for StorageClass will be returned
+func (o *StorageClassRead) GetProperties() *StorageClass {
 	if o == nil {
 		return nil
 	}
@@ -216,7 +216,7 @@ func (o *BucketRead) GetProperties() *Bucket {
 // GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BucketRead) GetPropertiesOk() (*Bucket, bool) {
+func (o *StorageClassRead) GetPropertiesOk() (*StorageClass, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -225,14 +225,14 @@ func (o *BucketRead) GetPropertiesOk() (*Bucket, bool) {
 }
 
 // SetProperties sets field value
-func (o *BucketRead) SetProperties(v Bucket) {
+func (o *StorageClassRead) SetProperties(v StorageClass) {
 
 	o.Properties = &v
 
 }
 
 // HasProperties returns a boolean if a field has been set.
-func (o *BucketRead) HasProperties() bool {
+func (o *StorageClassRead) HasProperties() bool {
 	if o != nil && o.Properties != nil {
 		return true
 	}
@@ -240,7 +240,7 @@ func (o *BucketRead) HasProperties() bool {
 	return false
 }
 
-func (o BucketRead) MarshalJSON() ([]byte, error) {
+func (o StorageClassRead) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
@@ -265,38 +265,38 @@ func (o BucketRead) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableBucketRead struct {
-	value *BucketRead
+type NullableStorageClassRead struct {
+	value *StorageClassRead
 	isSet bool
 }
 
-func (v NullableBucketRead) Get() *BucketRead {
+func (v NullableStorageClassRead) Get() *StorageClassRead {
 	return v.value
 }
 
-func (v *NullableBucketRead) Set(val *BucketRead) {
+func (v *NullableStorageClassRead) Set(val *StorageClassRead) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableBucketRead) IsSet() bool {
+func (v NullableStorageClassRead) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableBucketRead) Unset() {
+func (v *NullableStorageClassRead) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableBucketRead(val *BucketRead) *NullableBucketRead {
-	return &NullableBucketRead{value: val, isSet: true}
+func NewNullableStorageClassRead(val *StorageClassRead) *NullableStorageClassRead {
+	return &NullableStorageClassRead{value: val, isSet: true}
 }
 
-func (v NullableBucketRead) MarshalJSON() ([]byte, error) {
+func (v NullableStorageClassRead) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableBucketRead) UnmarshalJSON(src []byte) error {
+func (v *NullableStorageClassRead) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

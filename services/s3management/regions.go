@@ -24,21 +24,21 @@ type capability struct {
 }
 
 // GetRegion retrieves a region
-func (c *Client) GetRegion(ctx context.Context, regionID string, depth float32) (s3management.Region, *s3management.APIResponse, error) {
+func (c *Client) GetRegion(ctx context.Context, regionID string, depth float32) (s3management.RegionRead, *s3management.APIResponse, error) {
 	region, apiResponse, err := c.client.RegionsApi.RegionsFindByRegion(ctx, regionID).Execute()
 	apiResponse.LogInfo()
 	return region, apiResponse, err
 }
 
 // ListRegions lists all regions
-func (c *Client) ListRegions(ctx context.Context) (s3management.RegionList, *s3management.APIResponse, error) {
+func (c *Client) ListRegions(ctx context.Context) (s3management.RegionReadList, *s3management.APIResponse, error) {
 	regions, apiResponse, err := c.client.RegionsApi.RegionsGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return regions, apiResponse, err
 }
 
 // BuildRegionModelFromAPIResponse builds an RegionDataSourceModel from a region SDK object
-func BuildRegionModelFromAPIResponse(output *s3management.Region) *RegionDataSourceModel {
+func BuildRegionModelFromAPIResponse(output *s3management.RegionRead) *RegionDataSourceModel {
 	built := &RegionDataSourceModel{}
 
 	if output.Id != nil {
@@ -62,10 +62,10 @@ func BuildRegionModelFromAPIResponse(output *s3management.Region) *RegionDataSou
 			}
 		}
 
-		if output.Properties.Storageclasses != nil {
-			built.Storageclasses = make([]types.String, 0, len(*output.Properties.Storageclasses))
-			for i := range *output.Properties.Storageclasses {
-				built.Storageclasses = append(built.Storageclasses, types.StringPointerValue(&(*output.Properties.Storageclasses)[i]))
+		if output.Properties.StorageClasses != nil {
+			built.Storageclasses = make([]types.String, 0, len(*output.Properties.StorageClasses))
+			for i := range *output.Properties.StorageClasses {
+				built.Storageclasses = append(built.Storageclasses, types.StringPointerValue(&(*output.Properties.StorageClasses)[i]))
 			}
 		}
 	}

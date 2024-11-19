@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -20,14 +20,14 @@ type RegionEnsure struct {
 	Id *string `json:"id"`
 	// Metadata
 	Metadata   *map[string]interface{} `json:"metadata,omitempty"`
-	Properties *RegionProperties       `json:"properties"`
+	Properties *Region                 `json:"properties"`
 }
 
 // NewRegionEnsure instantiates a new RegionEnsure object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegionEnsure(id string, properties RegionProperties) *RegionEnsure {
+func NewRegionEnsure(id string, properties Region) *RegionEnsure {
 	this := RegionEnsure{}
 
 	this.Id = &id
@@ -121,8 +121,8 @@ func (o *RegionEnsure) HasMetadata() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for RegionProperties will be returned
-func (o *RegionEnsure) GetProperties() *RegionProperties {
+// If the value is explicit nil, the zero value for Region will be returned
+func (o *RegionEnsure) GetProperties() *Region {
 	if o == nil {
 		return nil
 	}
@@ -134,7 +134,7 @@ func (o *RegionEnsure) GetProperties() *RegionProperties {
 // GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegionEnsure) GetPropertiesOk() (*RegionProperties, bool) {
+func (o *RegionEnsure) GetPropertiesOk() (*Region, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -143,7 +143,7 @@ func (o *RegionEnsure) GetPropertiesOk() (*RegionProperties, bool) {
 }
 
 // SetProperties sets field value
-func (o *RegionEnsure) SetProperties(v RegionProperties) {
+func (o *RegionEnsure) SetProperties(v Region) {
 
 	o.Properties = &v
 

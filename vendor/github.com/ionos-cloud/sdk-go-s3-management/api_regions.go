@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -33,7 +33,7 @@ type ApiRegionsFindByRegionRequest struct {
 	region     string
 }
 
-func (r ApiRegionsFindByRegionRequest) Execute() (Region, *APIResponse, error) {
+func (r ApiRegionsFindByRegionRequest) Execute() (RegionRead, *APIResponse, error) {
 	return r.ApiService.RegionsFindByRegionExecute(r)
 }
 
@@ -54,16 +54,16 @@ func (a *RegionsApiService) RegionsFindByRegion(ctx _context.Context, region str
 
 /*
  * Execute executes the request
- * @return Region
+ * @return RegionRead
  */
-func (a *RegionsApiService) RegionsFindByRegionExecute(r ApiRegionsFindByRegionRequest) (Region, *APIResponse, error) {
+func (a *RegionsApiService) RegionsFindByRegionExecute(r ApiRegionsFindByRegionRequest) (RegionRead, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  Region
+		localVarReturnValue  RegionRead
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsApiService.RegionsFindByRegion")
@@ -229,7 +229,7 @@ func (r ApiRegionsGetRequest) Limit(limit int32) ApiRegionsGetRequest {
 	return r
 }
 
-func (r ApiRegionsGetRequest) Execute() (RegionList, *APIResponse, error) {
+func (r ApiRegionsGetRequest) Execute() (RegionReadList, *APIResponse, error) {
 	return r.ApiService.RegionsGetExecute(r)
 }
 
@@ -251,16 +251,16 @@ func (a *RegionsApiService) RegionsGet(ctx _context.Context) ApiRegionsGetReques
 
 /*
  * Execute executes the request
- * @return RegionList
+ * @return RegionReadList
  */
-func (a *RegionsApiService) RegionsGetExecute(r ApiRegionsGetRequest) (RegionList, *APIResponse, error) {
+func (a *RegionsApiService) RegionsGetExecute(r ApiRegionsGetRequest) (RegionReadList, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  RegionList
+		localVarReturnValue  RegionReadList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsApiService.RegionsGet")

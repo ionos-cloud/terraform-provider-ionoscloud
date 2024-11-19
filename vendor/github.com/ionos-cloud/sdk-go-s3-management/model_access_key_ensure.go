@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - S3 Management API
+ * IONOS Cloud - Object Storage Management API
  *
- * S3 Management API is a RESTful API that manages the S3 service configuration for IONOS Cloud.
+ * Object Storage Management API is a RESTful API that manages the object storage service configuration for IONOS Cloud.
  *
  * API version: 0.1.0
  */
@@ -20,14 +20,14 @@ type AccessKeyEnsure struct {
 	Id *string `json:"id"`
 	// Metadata
 	Metadata   *map[string]interface{} `json:"metadata,omitempty"`
-	Properties *AccessKeyProperties    `json:"properties"`
+	Properties *AccessKey              `json:"properties"`
 }
 
 // NewAccessKeyEnsure instantiates a new AccessKeyEnsure object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAccessKeyEnsure(id string, properties AccessKeyProperties) *AccessKeyEnsure {
+func NewAccessKeyEnsure(id string, properties AccessKey) *AccessKeyEnsure {
 	this := AccessKeyEnsure{}
 
 	this.Id = &id
@@ -121,8 +121,8 @@ func (o *AccessKeyEnsure) HasMetadata() bool {
 }
 
 // GetProperties returns the Properties field value
-// If the value is explicit nil, the zero value for AccessKeyProperties will be returned
-func (o *AccessKeyEnsure) GetProperties() *AccessKeyProperties {
+// If the value is explicit nil, the zero value for AccessKey will be returned
+func (o *AccessKeyEnsure) GetProperties() *AccessKey {
 	if o == nil {
 		return nil
 	}
@@ -134,7 +134,7 @@ func (o *AccessKeyEnsure) GetProperties() *AccessKeyProperties {
 // GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AccessKeyEnsure) GetPropertiesOk() (*AccessKeyProperties, bool) {
+func (o *AccessKeyEnsure) GetPropertiesOk() (*AccessKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -143,7 +143,7 @@ func (o *AccessKeyEnsure) GetPropertiesOk() (*AccessKeyProperties, bool) {
 }
 
 // SetProperties sets field value
-func (o *AccessKeyEnsure) SetProperties(v AccessKeyProperties) {
+func (o *AccessKeyEnsure) SetProperties(v AccessKey) {
 
 	o.Properties = &v
 
