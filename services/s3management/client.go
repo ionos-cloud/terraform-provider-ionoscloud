@@ -25,7 +25,7 @@ func (c *Client) GetBaseClient() *s3management.APIClient {
 }
 
 // NewClient creates a new S3 client with the given credentials and region.
-func NewClient(username, password, token, url, version, terraformVersion string) *Client {
+func NewClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
 	newS3managementConfig := s3management.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(constant.IonosDebug) != "" {
@@ -33,7 +33,7 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	}
 	newS3managementConfig.MaxRetries = constant.MaxRetries
 	newS3managementConfig.MaxWaitTime = constant.MaxWaitTime
-	newS3managementConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newS3managementConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	newS3managementConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-s3-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, s3management.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck

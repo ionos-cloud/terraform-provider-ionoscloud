@@ -93,7 +93,7 @@ resource "ionoscloud_volume" "example" {
   user_data               = "foo"
 }
 
-resource "ionoscloud_volume" "example" {
+resource "ionoscloud_volume" "example2" {
   datacenter_id           = ionoscloud_datacenter.example.id
   server_id               = ionoscloud_server.example.id
   name                    = "Another Volume Example"
@@ -128,7 +128,6 @@ resource "random_password" "volume_image_password" {
 * `image_password` - (Optional)[string] Required if `sshkey_path` is not provided.
 * `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 * `image` - (Computed) The image or snapshot UUID.
-* `image_alias` - (Computed) The image alias.
 * `licence_type` - (Optional)[string] Required if `image_name` is not provided.
 * `name` - (Optional)[string] The name of the volume.
 * `availability_zone` - (Optional)[string] The storage availability zone assigned to the volume: AUTO, ZONE_1, ZONE_2, or ZONE_3. This property is immutable

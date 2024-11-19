@@ -45,7 +45,7 @@ func resourceCertificateManagerProvider() *schema.Resource {
 			},
 			"location": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The location of the certificate provider",
 			},

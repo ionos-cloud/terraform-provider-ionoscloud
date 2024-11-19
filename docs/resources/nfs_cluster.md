@@ -125,7 +125,7 @@ resource "ionoscloud_nfs_cluster" "example" {
 The following arguments are supported:
 
 - `name` - (Required) The name of the Network File Storage cluster.
-- `location` - (Required) The location where the Network File Storage cluster is located.
+- `location` - (Optional) The location where the Network File Storage cluster is located.
   - `de/fra` - Frankfurt
   - `de/txl` - Berlin
 - `size` - (Required) The size of the Network File Storage cluster in TiB. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees. Default is `2`. The minimum value is `2` and the maximum value is `42`.
@@ -135,6 +135,8 @@ The following arguments are supported:
     - `datacenter_id` - (Required) The ID of the datacenter where the Network File Storage cluster is located.
     - `ip_address` - (Required) The IP address and prefix of the Network File Storage cluster. The IP address can be either IPv4 or IPv6. The IP address has to be given with CIDR notation. 
     - `lan` - (Required) The Private LAN to which the Network File Storage cluster must be connected.
+    - 
+> **⚠ NOTE:** `IONOS_API_URL_NFS` can be used to set a custom API URL for the resource. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
 
 ## Import
 

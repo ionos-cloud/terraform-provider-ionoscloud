@@ -20,7 +20,7 @@ type Client struct {
 }
 
 // NewClient returns a new NFS client
-func NewClient(username, password, token, url, version, terraformVersion string) *Client {
+func NewClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
 	config := sdk.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(constant.IonosDebug) != "" {
@@ -28,7 +28,7 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	}
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
-	config.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	config.UserAgent = fmt.Sprintf("terraform-provider/%s_ionos-cloud-sdk-go-nfs/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s", version, sdk.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint:staticcheck
 
 	return &Client{sdkClient: *sdk.NewAPIClient(config)}
@@ -37,14 +37,20 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 // Location sets the location of the NFS client which modifies the Host URL:
 //   - de/fra:    https://nfs.de-fra.ionos.com
 //   - de/txl:    https://nfs.de-txl.ionos.com
-//   - qa/de/txl: https://qa.nfs.de-txl.ionos.com
 func (c *Client) Location(location string) *Client {
-	var locationToURL = map[string]string{
-		"de/fra":    "https://nfs.de-fra.ionos.com",
-		"de/txl":    "https://nfs.de-txl.ionos.com",
-		"qa/de/txl": "https://qa.nfs.de-txl.ionos.com",
+	// if there is no location set, return the client as is. allows to overwrite the url with IONOS_API_URL
+	if location == "" && os.Getenv(ionosAPIURLNFS) != "" {
+		c.sdkClient.GetConfig().Servers = sdk.ServerConfigurations{
+			{
+				URL: utils.CleanURL(os.Getenv(ionosAPIURLNFS)),
+			},
+		}
+		return c
 	}
-
+	var locationToURL = map[string]string{
+		"de/fra": "https://nfs.de-fra.ionos.com",
+		"de/txl": "https://nfs.de-txl.ionos.com",
+	}
 	c.sdkClient.GetConfig().Servers = sdk.ServerConfigurations{
 		{
 			URL: locationToURL[location],
@@ -56,3 +62,6 @@ func (c *Client) Location(location string) *Client {
 
 // ValidNFSLocations is a list of valid locations for the Network File Storage Cluster.
 var ValidNFSLocations = []string{"de/fra", "de/txl"}
+
+// ionosAPIURLNFS is the environment variable key for the NFS API URL.
+var ionosAPIURLNFS = "IONOS_API_URL_NFS"

@@ -16,7 +16,7 @@ require (
 	github.com/huandu/xstrings v1.5.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/ionos-cloud/sdk-go-api-gateway v1.0.0
-	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.0.1
+	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
@@ -30,10 +30,10 @@ require (
 	github.com/ionos-cloud/sdk-go-dns v1.2.1
 	github.com/ionos-cloud/sdk-go-kafka v1.0.0
 	github.com/ionos-cloud/sdk-go-nfs v1.0.0
-	github.com/ionos-cloud/sdk-go-s3 v1.1.0
+	github.com/ionos-cloud/sdk-go-object-storage v1.1.0
 	github.com/ionos-cloud/sdk-go-s3-management v1.0.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1
-	github.com/ionos-cloud/sdk-go/v6 v6.2.1
+	github.com/ionos-cloud/sdk-go/v6 v6.3.0
 	github.com/mitchellh/go-homedir v1.1.0
 	golang.org/x/crypto v0.26.0
 	gopkg.in/yaml.v3 v3.0.1

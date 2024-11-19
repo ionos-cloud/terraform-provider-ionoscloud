@@ -16,6 +16,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -114,6 +115,12 @@ IP addresses, source and destination ports, number of packets, amount of bytes,
 the start and end time of the recording, and the type of protocol – 
 and log the extent to which your instances are being accessed.`,
 			},
+			"security_groups_ids": {
+				Type:        schema.TypeSet,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "The list of Security Group IDs",
+			},
 		},
 		Timeouts:      &resourceDefaultTimeouts,
 		CustomizeDiff: ForceNewForFlowlogChanges,
@@ -180,7 +187,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
-	createdNic, apiResponse, err := ns.Create(ctx, dcid, srvid, nic)
+	createdNic, _, err := ns.Create(ctx, dcid, srvid, nic)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occurred while creating a nic: %w", err))
 		return diags
@@ -188,12 +195,23 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if createdNic.Id != nil {
 		d.SetId(*createdNic.Id)
-	}
 
+		if v, ok := d.GetOk("security_groups_ids"); ok {
+			raw := v.(*schema.Set).List()
+			nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+			if diagnostic := nsgService.PutNICNSG(ctx, dcid, srvid, d.Id(), raw); diagnostic != nil {
+				return diagnostic
+			}
+		}
+	}
 	// Sometimes there is an error because the nic is not found after it's created.
 	//Probably a read write consistency issue.
 	//We're retrying for 5 minutes. 404 - means we keep on trying.
+	// Sometimes there is an error because the nic is not found after it's created.
+	// Probably a read write consistency issue.
+	// We're retrying for 5 minutes. 404 - means we keep on trying.
 	var foundNic = &ionoscloud.Nic{}
+	var apiResponse = &ionoscloud.APIResponse{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error
 		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 3)
@@ -215,7 +233,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.FromErr(fmt.Errorf("could not find nic with id %s after creation ", *nic.Id))
 	}
 
-	return diag.FromErr(cloudapinic.NicSetData(d, foundNic))
+	return resourceNicRead(ctx, d, meta)
 }
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -245,9 +263,9 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
-	dcId := d.Get("datacenter_id").(string)
-	srvId := d.Get("server_id").(string)
-	nicId := d.Id()
+	dcID := d.Get("datacenter_id").(string)
+	srvID := d.Get("server_id").(string)
+	nicID := d.Id()
 	var err error
 	if d.HasChange("flowlog") {
 		oldV, newV := d.GetChange("flowlog")
@@ -264,7 +282,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 						D:      d,
 						Client: client,
 					}
-					err = fw.CreateOrPatchForServer(ctx, dcId, srvId, nicId, firstFlowLogId, flowLog)
+					err = fw.CreateOrPatchForServer(ctx, dcID, srvID, nicID, firstFlowLogId, flowLog)
 					if err != nil {
 						// if we have a create that failed, we do not want to save in state
 						// saving in state would mean a diff that would force a re-create
@@ -284,10 +302,19 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	_, _, err = ns.Update(ctx, dcId, srvId, nicId, *nic.Properties)
+	_, _, err = ns.Update(ctx, dcID, srvID, nicID, *nic.Properties)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occurred while updating a nic: %w", err))
 		return diags
+	}
+	if d.HasChange("security_groups_ids") {
+		if v, ok := d.GetOk("security_groups_ids"); ok {
+			raw := v.(*schema.Set).List()
+			nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+			if diagnostic := nsgService.PutNICNSG(ctx, dcID, srvID, nicID, raw); diagnostic != nil {
+				return diagnostic
+			}
+		}
 	}
 
 	return resourceNicRead(ctx, d, meta)

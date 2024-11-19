@@ -10,6 +10,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -117,6 +118,17 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 			network["ips"] = *nic.Properties.Ips
 		}
 	}
+	nsgIDs := make([]string, 0)
+	if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
+		for _, group := range *nic.Entities.Securitygroups.Items {
+			if group.Id != nil {
+				id := *group.Id
+				nsgIDs = append(nsgIDs, id)
+			}
+		}
+	}
+	utils.SetPropWithNilCheck(network, "security_groups_ids", nsgIDs)
+
 	return network
 }
 
@@ -271,6 +283,11 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 		if nic.Properties.PciSlot != nil {
 			if err := d.Set("pci_slot", *nic.Properties.PciSlot); err != nil {
 				return fmt.Errorf("error setting pci_slot %w", err)
+			}
+		}
+		if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
+			if err := nsg.SetNSGInResourceData(d, nic.Entities.Securitygroups.Items); err != nil {
+				return err
 			}
 		}
 	}

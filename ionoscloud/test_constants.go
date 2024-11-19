@@ -271,6 +271,19 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   }
 }`
 
+const testSecurityGroups = `
+resource ` + constant.NSGResource + ` example_1 {
+  name          = "testing-name-1"
+  description   = "testing-description-1"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+resource ` + constant.NSGResource + ` example_2 {
+  name          = "testing-name-2"
+  description   = "testing-description-2"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
 const testAccCheckServerConfigBasic = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
@@ -288,6 +301,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
@@ -425,6 +439,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "updated"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
@@ -690,10 +705,10 @@ resource ` + constant.RandomPassword + ` "server_image_password_updated" {
 // Cube Server Constants
 const testAccCheckCubeServerConfigBasic = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-    name = "CUBES XS"
+    name = "Basic Cube XS"
     cores = 1
-    ram   = 1024
-    storage_size = 30
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
@@ -712,6 +727,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + ` {
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
   image_name ="ubuntu:latest"
@@ -745,10 +761,10 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
 
 const testAccCheckCubeServerEnableIpv6 = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -814,10 +830,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 `
 const testAccCheckCubeServerUpdateIpv6 = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -883,10 +899,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 `
 const testAccCheckCubeServerSuspend = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -945,10 +961,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 `
 const testAccCheckCubeServerResume = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -1008,10 +1024,10 @@ data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
 
 const testAccCheckCubeServerUpdateWhenSuspended = `
 data "ionoscloud_template" ` + constant.ServerTestResource + ` {
-  name = "CUBES XS"
-  cores = 1
-  ram   = 1024
-  storage_size = 30
+    name = "Basic Cube XS"
+    cores = 1
+    ram   = 2048
+    storage_size = 60
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
@@ -1130,6 +1146,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
@@ -1165,6 +1182,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
@@ -1409,6 +1427,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
@@ -1561,6 +1580,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
@@ -1593,6 +1613,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "updated"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
@@ -1627,6 +1648,7 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
 }
 resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   vm_state = "` + constant.VMStateStop + `"
   cores = 1
@@ -1686,6 +1708,7 @@ const testAccCheckCDNDistributionConfigOnlyRequired = `resource ` + constant.CDN
 			host             = "server.example.com"
 			caching          = true
 			waf              = true
+			sni_mode		 = "distribution"
 			rate_limit_class = "R100"
 		}
 	}
@@ -1700,6 +1723,7 @@ const testAccCheckCDNDistributionConfigBasic = `resource ` + constant.CDNDistrib
 			host             = "server.example.com"
 			caching          = true
 			waf              = true
+			sni_mode		 = "distribution"
 			rate_limit_class = "R100"
 			geo_restrictions {
 				allow_list = [ "RO"]
@@ -1718,6 +1742,7 @@ const testAccCheckCDNDistributionConfigBasicImport = `resource ` + constant.CDND
 			caching          = true
 			waf              = true
 			rate_limit_class = "R100"
+			sni_mode		 = "distribution"
 			geo_restrictions {
 				allow_list = [ "RO"]
 			}
@@ -1898,7 +1923,7 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
   name = "` + constant.WireGuardGatewayTestResource + `"
   location = "de/fra"
   description = "description"
-  private_key = "private"
+  private_key = "0HpE4BNwGHabeaC4aY/GFxB6fBSc0d49Db0qAzRVSVc="
 
   gateway_ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
   interface_ipv4_cidr =  "192.168.1.100/24"

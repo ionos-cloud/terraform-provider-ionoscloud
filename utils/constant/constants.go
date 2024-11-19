@@ -92,6 +92,20 @@ const (
 	FirewallDataSourceByName = "test_firewall_name"
 )
 
+// FirewallProtocolEnum values for firewall rule protocol
+var FirewallProtocolEnum = []string{"TCP", "UDP", "ICMP", "ICMPv6", "GRE", "VRRP", "ESP", "AH", "ANY"}
+
+// NSG Constants
+const (
+	NSGResource                 = "ionoscloud_nsg"
+	NSGTestResource             = "test_nsg"
+	NGDataSourceByID            = "test_nsg_id"
+	NSGDataSourceByName         = "test_nsg_name"
+	NSGFirewallRuleResource     = "ionoscloud_nsg_firewallrule"
+	NSGFirewallRuleTestResource = "test_nsg_firewallrule"
+	NSGSelectionResource        = "ionoscloud_datacenter_nsg_selection"
+)
+
 // Lan Constants
 const (
 	LanResource         = "ionoscloud_lan"
@@ -187,6 +201,7 @@ const (
 	ServerCubeResource     = "ionoscloud_cube_server"
 	ServerVCPUResource     = "ionoscloud_vcpu_server"
 	ServerTestResource     = "test_server"
+	ServerTestHostname     = "myhostname"
 	ServerDataSourceById   = "test_server_id"
 	ServerDataSourceByName = "test_server_name"
 )

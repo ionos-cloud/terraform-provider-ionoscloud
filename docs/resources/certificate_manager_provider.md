@@ -30,7 +30,7 @@ resource "ionoscloud_auto_certificate_provider" "example" {
 
 * `name` - (Required)[string] The name of the certificate provider.
 * `email` - (Required)[string] The email address of the certificate requester.
-* `location` - (Required)[string] The location of the provider.
+* `location` - (Optional)[string] The location of the provider.
 * `server` - (Required)[string] The URL of the certificate provider.
 * `external_account_binding` - (Optional)[list] External account binding details.
   * `key_id` - (Required)[string] The key ID of the external account binding.

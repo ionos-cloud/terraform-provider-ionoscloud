@@ -46,6 +46,7 @@ The following attributes are returned by the datasource:
 * `template_uuid` - The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
 * `id` - The id of that resource
 * `name` - The name of that resource
+* `hostname` - The hostname of the server
 * `type` - Server usages: CUBE
 * `vm_state`- Status of the virtual Machine
 * `datacenter_id` - The id of the datacenter
@@ -122,4 +123,4 @@ The following attributes are returned by the datasource:
     * `port_range_start` - Defines the start range of the allowed port (from 1 to 65534) if protocol TCP or UDP is chosen
     * `port_range_end` - Defines the end range of the allowed port (from 1 to 65534) if the protocol TCP or UDP is chosen
     * `type` - The type of firewall rule
-  
+* `security_groups_ids` - The list of Security Group IDs for the resource.

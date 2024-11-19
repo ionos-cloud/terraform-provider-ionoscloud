@@ -1,7 +1,8 @@
 name: Weekly k8s test run
-schedule:
-  # At 09:00:00 - UTC, every week on Monday.
-  - cron: '0 09 * * MON'
+on:
+  schedule:
+    # At 09:00:00 - UTC, every week on Monday.
+    - cron: '0 09 * * MON'
 
 jobs:
   test:

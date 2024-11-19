@@ -19,10 +19,6 @@ resource "ionoscloud_apigateway" "example" {
   name = "example"
   logs = false
   metrics = true
-  custom_domains {
-    name = "example.com"
-    certificate_id = "00000000-0000-0000-0000-000000000000"
-  }
 }
 `
 
@@ -31,10 +27,6 @@ resource "ionoscloud_apigateway" "example" {
   name = "example_updated"
   logs = false
   metrics = false
-  custom_domains {
-    name = "example-updated.com"
-    certificate_id = "00000000-0000-0000-0000-000000000000"
-  }
 }
 `
 
@@ -61,10 +53,6 @@ resource "ionoscloud_apigateway" "example_multiple" {
   name = "example"
   logs = false
   metrics = true
-  custom_domains {
-    name = "example.com"
-    certificate_id = "00000000-0000-0000-0000-000000000000"
-  }
 }
 
 data "ionoscloud_apigateway" "example_matching" {
@@ -95,8 +83,8 @@ func TestAccAPIGateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "name", "example"),
 					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "logs", "false"),
 					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "metrics", "true"),
-					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.name", "example.com"),
-					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.certificate_id", "00000000-0000-0000-0000-000000000000"),
+					// can't be used in tests, as it requires a reachable domain name
+					// resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.name", "example.com"),
 				),
 			},
 			{
@@ -106,8 +94,7 @@ func TestAccAPIGateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "name", "example_updated"),
 					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "logs", "false"),
 					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "metrics", "false"),
-					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.name", "example-updated.com"),
-					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.certificate_id", "00000000-0000-0000-0000-000000000000"),
+					//resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.name", "example-updated.com"),
 				),
 			},
 			{
@@ -116,8 +103,7 @@ func TestAccAPIGateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "name", "ionoscloud_apigateway.example", "name"),
 					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "logs", "ionoscloud_apigateway.example", "logs"),
 					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "metrics", "ionoscloud_apigateway.example", "metrics"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "custom_domains.0.name", "ionoscloud_apigateway.example", "custom_domains.0.name"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "custom_domains.0.certificate_id", "ionoscloud_apigateway.example", "custom_domains.0.certificate_id"),
+					//resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_id", "custom_domains.0.name", "ionoscloud_apigateway.example", "custom_domains.0.name"),
 				),
 			},
 			{
@@ -126,8 +112,7 @@ func TestAccAPIGateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_name", "name", "ionoscloud_apigateway.example", "name"),
 					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_name", "logs", "ionoscloud_apigateway.example", "logs"),
 					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_name", "metrics", "ionoscloud_apigateway.example", "metrics"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_name", "custom_domains.0.name", "ionoscloud_apigateway.example", "custom_domains.0.name"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_name", "custom_domains.0.certificate_id", "ionoscloud_apigateway.example", "custom_domains.0.certificate_id"),
+					//resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_by_name", "custom_domains.0.name", "ionoscloud_apigateway.example", "custom_domains.0.name"),
 				),
 			},
 			{
@@ -136,8 +121,7 @@ func TestAccAPIGateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_matching", "name", "ionoscloud_apigateway.example", "name"),
 					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_matching", "logs", "ionoscloud_apigateway.example", "logs"),
 					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_matching", "metrics", "ionoscloud_apigateway.example", "metrics"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_matching", "custom_domains.0.name", "ionoscloud_apigateway.example", "custom_domains.0.name"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_matching", "custom_domains.0.certificate_id", "ionoscloud_apigateway.example", "custom_domains.0.certificate_id"),
+					//resource.TestCheckResourceAttrPair("data.ionoscloud_apigateway.example_matching", "custom_domains.0.name", "ionoscloud_apigateway.example", "custom_domains.0.name"),
 				),
 			},
 			{

@@ -310,8 +310,8 @@ github.com/iancoleman/strcase
 # github.com/ionos-cloud/sdk-go-api-gateway v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-api-gateway
-# github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.0.1
-## explicit; go 1.21
+# github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
+## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 ## explicit; go 1.21
@@ -352,16 +352,16 @@ github.com/ionos-cloud/sdk-go-kafka
 # github.com/ionos-cloud/sdk-go-nfs v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-nfs
-# github.com/ionos-cloud/sdk-go-s3 v1.1.0
+# github.com/ionos-cloud/sdk-go-object-storage v1.1.0
 ## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-s3
+github.com/ionos-cloud/sdk-go-object-storage
 # github.com/ionos-cloud/sdk-go-s3-management v1.0.0 => /home/radu/work/sdk-go-s3-management
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-s3-management
 # github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-vm-autoscaling
-# github.com/ionos-cloud/sdk-go/v6 v6.2.1
+# github.com/ionos-cloud/sdk-go/v6 v6.3.0
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jmespath/go-jmespath v0.4.0

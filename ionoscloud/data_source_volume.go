@@ -28,10 +28,6 @@ func dataSourceVolume() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"image_alias": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"size": {
 				Type:     schema.TypeInt,
 				Computed: true,

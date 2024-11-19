@@ -37,6 +37,7 @@ func TestAccDistributionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.caching", "true"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.waf", "true"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.sni_mode", "distribution"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.rate_limit_class", "R100"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "certificate_id", ""),
 					resource.TestCheckNoResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.geo_restrictions.#"),
@@ -51,6 +52,7 @@ func TestAccDistributionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.caching", "true"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.sni_mode", "distribution"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.waf", "true"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.rate_limit_class", "R100"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.geo_restrictions.0.allow_list.0", "RO"),
@@ -60,11 +62,17 @@ func TestAccDistributionBasic(t *testing.T) {
 				Config: testAccDataSourceCDNDistributionMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
+
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByID, "public_endpoint_v4", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v4"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByID, "public_endpoint_v6", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByID, "resource_urn", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "resource_urn"),
+
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.caching", "true"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.waf", "true"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.sni_mode", "distribution"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.rate_limit_class", "R100"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.geo_restrictions.0.allow_list.0", "RO"),
 				),
@@ -72,6 +80,10 @@ func TestAccDistributionBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceCDNDistributionMatchDomain,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByDomain, "public_endpoint_v4", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v4"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByDomain, "public_endpoint_v6", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByDomain, "resource_urn", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "resource_urn"),
+
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
@@ -79,6 +91,7 @@ func TestAccDistributionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.caching", "true"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.waf", "true"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.rate_limit_class", "R100"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.sni_mode", "distribution"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.geo_restrictions.0.allow_list.0", "RO"),
 				),
 			},
@@ -95,6 +108,7 @@ func TestAccDistributionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api2"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.server.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.caching", "false"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.sni_mode", "origin"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.waf", "true"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.rate_limit_class", "R10"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.geo_restrictions.0.block_list.0", "RO"),
@@ -102,6 +116,7 @@ func TestAccDistributionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.prefix", "/api3"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.host", "server2.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.caching", "true"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.sni_mode", "origin"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.waf", "false"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.rate_limit_class", "R100"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.geo_restrictions.0.allow_list.0", "CN"),
@@ -213,6 +228,7 @@ EOT
 			caching          = false
 			waf              = true
 			rate_limit_class = "R10"
+			sni_mode 		 = "origin"
 			geo_restrictions {
 				block_list = [ "RO"]
 			}
@@ -226,6 +242,7 @@ EOT
 			caching          = true
 			waf              = false
 			rate_limit_class = "R100"
+			sni_mode 		 = "origin"
 			geo_restrictions {
 				allow_list = [ "CN", "RU"]
 			}

@@ -32,6 +32,21 @@ func resourceCDNDistribution() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"resource_urn": {
+				Type:        schema.TypeString,
+				Description: "Unique name of the resource.",
+				Computed:    true,
+			},
+			"public_endpoint_v4": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as A record.",
+				Computed:    true,
+			},
+			"public_endpoint_v6": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as AAAA record.",
+				Computed:    true,
+			},
 			"certificate_id": {
 				Type:        schema.TypeString,
 				Description: "The ID of the certificate to use for the distribution.",
@@ -74,6 +89,11 @@ func resourceCDNDistribution() *schema.Resource {
 									"waf": {
 										Type:        schema.TypeBool,
 										Description: "Enable or disable WAF to protect the upstream host.",
+										Required:    true,
+									},
+									"sni_mode": {
+										Type:        schema.TypeString,
+										Description: "The SNI (Server Name Indication) mode of the upstream host. It supports two modes: 'distribution' and 'origin', for more information about these modes please check the resource docs.",
 										Required:    true,
 									},
 									"geo_restrictions": {

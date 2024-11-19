@@ -23,6 +23,21 @@ func dataSourceCDNDistribution() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"resource_urn": {
+				Type:        schema.TypeString,
+				Description: "Unique name of the resource.",
+				Computed:    true,
+			},
+			"public_endpoint_v4": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as A record.",
+				Computed:    true,
+			},
+			"public_endpoint_v6": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as AAAA record.",
+				Computed:    true,
+			},
 			"partial_match": {
 				Type:        schema.TypeBool,
 				Description: "Whether partial matching is allowed or not when using domain argument.",
@@ -73,6 +88,11 @@ func dataSourceCDNDistribution() *schema.Resource {
 									"waf": {
 										Type:        schema.TypeBool,
 										Description: "Enable or disable WAF to protect the upstream host.",
+										Computed:    true,
+									},
+									"sni_mode": {
+										Type:        schema.TypeString,
+										Description: "The SNI (Server Name Indication) mode of the upstream host. It supports two modes: 'distribution' and 'origin', for more information about these modes please check the data source docs.",
 										Computed:    true,
 									},
 									"geo_restrictions": {

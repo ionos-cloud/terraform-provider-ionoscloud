@@ -245,8 +245,8 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property "))
 				return diags
 			} else {
-				backupUnitId := backupUnitId.(string)
-				volume.Properties.BackupunitId = &backupUnitId
+				backupUnitID := backupUnitId.(string)
+				volume.Properties.BackupunitId = &backupUnitID
 			}
 		} else {
 			diags := diag.FromErr(fmt.Errorf("the backup_unit_id that you specified is not a valid UUID"))
@@ -499,13 +499,6 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 		}
 	}
 
-	if volume.Properties.ImageAlias != nil {
-		err := d.Set("image_alias", *volume.Properties.ImageAlias)
-		if err != nil {
-			return fmt.Errorf("error while setting image_alias property for volume %s: %w", d.Id(), err)
-		}
-	}
-
 	if volume.Properties.AvailabilityZone != nil {
 		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
 		if err != nil {
@@ -654,6 +647,10 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 	if len(sshKeys) != 0 {
 		var publicKeys []string
 		for _, path := range sshKeys {
+			if path == nil {
+				return nil, fmt.Errorf("ssh_keys or ssh_key_path contains empty value")
+			}
+
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := utils.ReadPublicKey(path.(string))
 			if err != nil {

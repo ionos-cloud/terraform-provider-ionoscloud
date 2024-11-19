@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	s3 "github.com/ionos-cloud/sdk-go-s3"
+	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 )
 
 // KeyValueTags is a map of key-value tags.
 type KeyValueTags map[string]string
 
-// New creates a new KeyValueTags from a list of s3.Tag.
-func New(tags []s3.Tag) KeyValueTags {
+// New creates a new KeyValueTags from a list of objstorage.Tag.
+func New(tags []objstorage.Tag) KeyValueTags {
 	result := make(KeyValueTags)
 
 	for _, tag := range tags {
@@ -77,18 +77,18 @@ func (t KeyValueTags) Ignore(ignoreTags KeyValueTags) KeyValueTags {
 	return result
 }
 
-// ToList converts KeyValueTags to a list of s3.Tag.
-func (t KeyValueTags) ToList() []s3.Tag {
-	tags := make([]s3.Tag, 0, len(t))
+// ToList converts KeyValueTags to a list of objstorage.Tag.
+func (t KeyValueTags) ToList() []objstorage.Tag {
+	tags := make([]objstorage.Tag, 0, len(t))
 	for key, value := range t {
-		tags = append(tags, s3.Tag{Key: s3.PtrString(key), Value: s3.PtrString(value)})
+		tags = append(tags, objstorage.Tag{Key: objstorage.PtrString(key), Value: objstorage.PtrString(value)})
 	}
 
 	return tags
 }
 
-// ToListPointer converts KeyValueTags to a pointer to a list of s3.Tag.
-func (t KeyValueTags) ToListPointer() *[]s3.Tag {
+// ToListPointer converts KeyValueTags to a pointer to a list of objstorage.Tag.
+func (t KeyValueTags) ToListPointer() *[]objstorage.Tag {
 	tags := t.ToList()
 	return &tags
 }

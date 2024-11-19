@@ -35,7 +35,7 @@ type KubernetesClusterProperties struct {
 	NodeSubnet *string `json:"nodeSubnet,omitempty"`
 	// Access to the K8s API server is restricted to these CIDRs. Traffic, internal to the cluster, is not affected by this restriction. If no allowlist is specified, access is not restricted. If an IP without subnet mask is provided, the default value is used: 32 for IPv4 and 128 for IPv6.
 	ApiSubnetAllowList *[]string `json:"apiSubnetAllowList,omitempty"`
-	// List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs
+	// List of Object storage buckets configured for K8s usage. For now it contains only one bucket used to store K8s API audit logs
 	S3Buckets *[]S3Bucket `json:"s3Buckets,omitempty"`
 }
 

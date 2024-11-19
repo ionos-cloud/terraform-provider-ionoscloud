@@ -1,0 +1,106 @@
+package objectstorage
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+)
+
+type objectsDataSource struct {
+	client *objectstorage.Client
+}
+
+// NewObjectsDataSource creates a new data source for fetching objects from a bucket.
+func NewObjectsDataSource() datasource.DataSource {
+	return &objectsDataSource{}
+}
+
+func (d *objectsDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_s3_objects"
+}
+
+func (d *objectsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"bucket": schema.StringAttribute{
+				Required: true,
+			},
+			"delimiter": schema.StringAttribute{
+				Optional: true,
+			},
+			"encoding_type": schema.StringAttribute{
+				Optional: true,
+			},
+			"max_keys": schema.Int64Attribute{
+				Optional: true,
+			},
+			"prefix": schema.StringAttribute{
+				Optional:   true,
+				Validators: []validator.String{stringvalidator.LengthBetween(0, 1024)},
+			},
+			"fetch_owner": schema.BoolAttribute{
+				Optional: true,
+			},
+			"start_after": schema.StringAttribute{
+				Optional: true,
+			},
+			"common_prefixes": schema.ListAttribute{
+				ElementType: types.StringType,
+				Computed:    true,
+			},
+			"keys": schema.ListAttribute{
+				ElementType: types.StringType,
+				Computed:    true,
+			},
+			"owners": schema.ListAttribute{
+				ElementType: types.StringType,
+				Computed:    true,
+			},
+		},
+	}
+}
+
+func (d *objectsDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	// Add a nil check when handling ProviderData because Terraform
+	// sets that data after it calls the ConfigureProvider RPC.
+	if req.ProviderData == nil {
+		return
+	}
+
+	clientBundle, ok := req.ProviderData.(*services.SdkBundle)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *services.SdkBundle, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	d.client = clientBundle.S3Client
+}
+
+func (d *objectsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *objectstorage.ObjectsDataSourceModel
+	diags := req.Config.Get(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if err := d.client.ListObjects(ctx, data); err != nil {
+		resp.Diagnostics.AddError("error fetching objects", err.Error())
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}

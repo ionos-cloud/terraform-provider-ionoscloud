@@ -1,9 +1,83 @@
+## 6.6.3 - upcoming release
+### Documentation
+- Fix titles for mariadb docs data sources `https://docs.ionos.com/`
+- Add Network Security Group to `https://docs.ionos.com/`
+- Add bootvolume_selector to `https://docs.ionos.com/
+- Add servers to `https://docs.ionos.com/`
+- Add cube server and vcpu server to `https://docs.ionos.com/`
+## 6.6.2 
+### Features
+- Make `location` optional for `certificate_manager` resources and datasources
+- Make `location` optional for `vpn` resources and datasources
+- Make `location` optional for `nfs` resources and datasources
+- Make `location` optional for `kafka` resources and datasources
+- Add `IONOS_API_URL_NFS` to set a custom API URL for the NAS/NFS product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_API_URL_VPN` to set a custom API URL for the VPN product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_API_URL_CERT` to set a custom API URL for the Certificate Manager product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_API_URL_KAFKA` to set a custom API URL for the Event Streams product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_API_URL_MARIADB` to set a custom API URL for the MariaDB product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_API_URL_INMEMORYDB` to set a custom API URL for InMemoryDB product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_API_URL_OBJECT_STORAGE` to set a custom API URL for Object Storage product. `region` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+- Add `IONOS_ALLOW_INSECURE` env variable and `insecure` field to allow insecure connections to the API. This is useful for testing purposes only.
+- Add import tests for VPN Gateway resources
+- Add `security_groups_ids` to `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_nic`, `ionoscloud_vcpu_server` resources and data sources
+### New Product - **Network Security Groups**:
+- `Resources`:
+  - [ionoscloud_nsg](docs/resources/nsg.md)
+  - [ionoscloud_nsg_firewallrule](docs/resources/nsg_firewallrule.md)
+- `Data Sources`:
+  - [ionoscloud_nsg](docs/data-sources/nsg.md)
+### Documentation
+- Update documentation for `s3_region` and `IONOS_S3_REGION` variables
+
+## 6.6.2
+### Fixes
+- Fix empty `ssh_key` used as variable in `ssh_keys` field in `ionoscloud_server` resource
+- `hostname` needs to be computed as it gets the value of the server name if not set. Fix for `resource_server`, `resource_vcpu_server` and `resource_cube_server`
+- Add import tests for VPN Gateway resources
+
+## 6.6.1
+
+### Features
+- Add `hostname` to `ionoscloud_server` resource and data source
+- Add `hostname` to `ionoscloud_vcpu_server` resource and data source
+- Add `hostname` to `ionoscloud_cube_server` resource and data source
+
+## 6.6.0
+### Refactor
+- Rename `S3` occurrences to `Object Storage`
+
+## 6.5.9
+### Features
+  - Add new, required `sni_mode` attribute for `ionoscloud_cdn_distribution` resource and data source
+### Documentation
+  - Add `FAQ` section in `README.md`, add information about IP retrieval for `NIC`s
+
+## 6.5.8
+### Refactor
+  - Remove `image_alias` sets from `ionoscloud_volume` data source and resource
+### Documentation
+  - Remove `image_alias` from `ionocloud_volume` data source and resource docs
+### Fixes
+  - Allow empty `prefix` for bucket lifecycle configuration rules
+
+## 6.5.7
+### Fixes
+  - Fix documentation rendering of `autoscaling_group` resource and data source, `dbaas_mongo_template` data source and `server_boot_device_selection` resource in Terraform registry
+  - Fix `application_loadbalancer_forwardingrule` docs typo
+  - Fix for [#687](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/687) by setting `user_data` and `backupunit_id` in `ionoscloud_cube_server`
+
 ## 6.5.6
 ### Fixes
 - Fix `kafka` remove unavailable locations from resources and data sources
 - Fix update behavior for container registry property: `apiSubnetAllowList`
 - Fix `ionoscloud_certificate` data source
 - Fix `DBaaS` tests, change location for clusters creation, mark `connection_pooler` as computed
+- `certificate_id` should not be required for API Gateway resource, `custom_domains` field.
+- `cdn distribution` add metadata ipv4, ipv6 and resource_urn to resource and data source
+- set 'server_side_encryption' as computed for `ionoscloud_s3_object` resource
+### Documentation
+- Update documentation for `force_destroy` field in `ionoscloud_s3_bucket` resource
 
 ## 6.5.5
 ### Fixes

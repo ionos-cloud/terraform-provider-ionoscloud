@@ -19,7 +19,7 @@ This resource will create an operational server. After this section completes, t
 
 ```hcl
 data "ionoscloud_template" "example" {
-    name            = "CUBES XS"
+    name            = "Basic Cube XS"
 }
 
 resource "ionoscloud_datacenter" "example" {
@@ -62,7 +62,7 @@ resource "random_password" "server_image_password" {
 
 ```hcl
 data "ionoscloud_template" "example" {
-  name            = "CUBES XS"
+  name            = "Basic Cube XS"
 }
 resource "ionoscloud_datacenter" "example" {
 	name            = "Datacenter Example"
@@ -120,6 +120,7 @@ resource "random_password" "server_image_password" {
 - `template_uuid` - (Required)[string] The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
 - `name` - (Required)[string] The name of the server.
 - `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
+- `hostname` - (Optional)(Computed) The hostname of the resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters. If no value provided explicitly, it will be populated with the name of the server
 - `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
@@ -134,6 +135,7 @@ resource "random_password" "server_image_password" {
 - `firewallrule_id` - (Computed) The associated firewall rule.
 - `ssh_key_path` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
+- `security_groups_ids` - (Optional) The list of Security Group IDs for the resource.
 
 > **⚠ WARNING** 
 > 

@@ -20,6 +20,21 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) 
 	resourceName := "distribution"
 
 	d.SetId(distribution.Id)
+	if distribution.Metadata.ResourceURN != nil {
+		if err := d.Set("resource_urn", *distribution.Metadata.ResourceURN); err != nil {
+			return utils.GenerateSetError(resourceName, "resource_urn", err)
+		}
+	}
+	if distribution.Metadata.PublicEndpointIpv4 != nil {
+		if err := d.Set("public_endpoint_v4", *distribution.Metadata.PublicEndpointIpv4); err != nil {
+			return utils.GenerateSetError(resourceName, "public_endpoint_v4", err)
+		}
+	}
+	if distribution.Metadata.PublicEndpointIpv6 != nil {
+		if err := d.Set("public_endpoint_v6", *distribution.Metadata.PublicEndpointIpv6); err != nil {
+			return utils.GenerateSetError(resourceName, "public_endpoint_v6", err)
+		}
+	}
 
 	if err := d.Set("domain", distribution.Properties.Domain); err != nil {
 		return utils.GenerateSetError(resourceName, "domain", err)
@@ -41,6 +56,7 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) 
 			upstreamEntry["caching"] = rule.Upstream.Caching
 			upstreamEntry["waf"] = rule.Upstream.Waf
 			upstreamEntry["host"] = rule.Upstream.Host
+			upstreamEntry["sni_mode"] = rule.Upstream.SniMode
 			upstreamEntry["rate_limit_class"] = rule.Upstream.RateLimitClass
 			if rule.Upstream.GeoRestrictions != nil {
 				geoRestrictionsEntry := make(map[string]interface{})
@@ -95,7 +111,9 @@ func GetRoutingRulesData(d *schema.ResourceData) (*[]cdn.RoutingRule, error) {
 			if waf, wafOk := d.GetOkExists(fmt.Sprintf("routing_rules.%d.upstream.0.waf", routingRuleIndex)); wafOk { //nolint:staticcheck
 				routingRule.Upstream.Waf = waf.(bool)
 			}
-
+			if sniMode, sniModeOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.sni_mode", routingRuleIndex)); sniModeOk {
+				routingRule.Upstream.SniMode = sniMode.(string)
+			}
 			if _, geoRestrictionsOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions", routingRuleIndex)); geoRestrictionsOk {
 				routingRule.Upstream.GeoRestrictions = &cdn.UpstreamGeoRestrictions{}
 				if allowList, allowListOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions.0.allow_list", routingRuleIndex)); allowListOk {

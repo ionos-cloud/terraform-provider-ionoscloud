@@ -1,10 +1,10 @@
 ---
-subcategory: "S3"
+subcategory: "Object Storage"
 layout: "ionoscloud"
 page_title: "IonosCloud: s3_object"
 sidebar_current: "docs-ionoscloud-datasource-s3_object"
 description: |-
-  Get information about IonosCloud S3 Objects.
+  Get information about  IONOS Object Storage Objects.
 ---
 
 # ionoscloud_s3_object

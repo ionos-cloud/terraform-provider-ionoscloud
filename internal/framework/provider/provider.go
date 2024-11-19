@@ -3,9 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -17,7 +19,7 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/s3"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/s3management"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
@@ -33,7 +35,7 @@ import (
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
-	s3Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
+	objectStorageService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 	s3managementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -51,6 +53,7 @@ type ClientOptions struct {
 	S3AccessKey    types.String `tfsdk:"s3_access_key"`
 	S3Region       types.String `tfsdk:"s3_region"`
 	Retries        types.Int64  `tfsdk:"retries"`
+	Insecure       types.Bool   `tfsdk:"insecure"`
 }
 
 // IonosCloudProvider is the provider implementation.
@@ -97,15 +100,19 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 			},
 			"s3_secret_key": schema.StringAttribute{
 				Optional:    true,
-				Description: "Secret key for IONOS S3 operations.",
+				Description: "Secret key for IONOS Object Storage operations.",
 			},
 			"s3_access_key": schema.StringAttribute{
 				Optional:    true,
-				Description: "Access key for IONOS S3 operations.",
+				Description: "Access key for IONOS Object Storage operations.",
 			},
 			"s3_region": schema.StringAttribute{
 				Optional:    true,
-				Description: "Region for IONOS S3 operations.",
+				Description: "Region for IONOS Object Storage operations.",
+			},
+			"insecure": schema.BoolAttribute{
+				Optional:    true,
+				Description: "This field is to be set only for testing purposes. It is not recommended to set this field in production environments.",
 			},
 		},
 	}
@@ -149,6 +156,15 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	terraformVersion := req.TerraformVersion
 	version := ionoscloud.Version
 
+	insecureStr := os.Getenv("IONOS_ALLOW_INSECURE")
+	insecureBool := false
+	if insecureStr != "" {
+		boolValue, err := strconv.ParseBool(insecureStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		insecureBool = boolValue
+	}
 	if !clientOpts.Token.IsNull() {
 		token = clientOpts.Token.ValueString()
 	}
@@ -176,6 +192,9 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	if !clientOpts.Endpoint.IsNull() {
 		endpoint = clientOpts.Endpoint.ValueString()
 	}
+	if !clientOpts.Insecure.IsNull() {
+		insecureBool = clientOpts.Insecure.ValueBool()
+	}
 
 	if token == "" && (username == "" || password == "") {
 		resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
@@ -187,34 +206,38 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 
 	cleanedEndpoint := cleanURL(endpoint)
 
+	if insecureBool == true {
+		resp.Diagnostics.AddWarning("insecure mode enabled", "This is not recommended for production environments.")
+	}
+
 	client := &services.SdkBundle{
-		CDNClient:          cdnService.NewCDNClient(username, password, token, endpoint, version, terraformVersion),
-		AutoscalingClient:  autoscalingService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
-		CertManagerClient:  cert.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
-		CloudApiClient:     newCloudapiClient(username, password, token, endpoint, "DEV", terraformVersion),
-		ContainerClient:    crService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
-		DataplatformClient: dataplatformService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
-		DNSClient:          dnsService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
-		LoggingClient:      loggingService.NewClient(username, password, token, cleanedEndpoint, terraformVersion),
-		MariaDBClient:      mariadb.NewMariaDBClient(username, password, token, cleanedEndpoint, version, terraformVersion),
-		MongoClient:        dbaasService.NewMongoClient(username, password, token, cleanedEndpoint, version, terraformVersion),
-		NFSClient:          nfsService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
-		PsqlClient:         dbaasService.NewPsqlClient(username, password, token, cleanedEndpoint, version, terraformVersion),
-		KafkaClient:        kafkaService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		CDNClient:          cdnService.NewCDNClient(username, password, token, endpoint, version, terraformVersion, insecureBool),
+		AutoscalingClient:  autoscalingService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		CertManagerClient:  cert.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		CloudApiClient:     newCloudapiClient(username, password, token, endpoint, "DEV", terraformVersion, insecureBool),
+		ContainerClient:    crService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		DataplatformClient: dataplatformService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		DNSClient:          dnsService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		LoggingClient:      loggingService.NewClient(username, password, token, cleanedEndpoint, terraformVersion, insecureBool),
+		MariaDBClient:      mariadb.NewMariaDBClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		MongoClient:        dbaasService.NewMongoClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		NFSClient:          nfsService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		PsqlClient:         dbaasService.NewPsqlClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		KafkaClient:        kafkaService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		APIGatewayClient: apiGatewayService.NewClient(
-			username, password, token, cleanedEndpoint, version, terraformVersion,
+			username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool,
 		),
-		VPNClient:          vpn.NewClient(username, password, token, cleanedEndpoint, terraformVersion),
-		InMemoryDBClient:   inmemorydb.NewInMemoryDBClient(username, password, token, cleanedEndpoint, version, terraformVersion),
-		S3Client:           s3Service.NewClient(accessKey, secretKey, region),
-		S3ManagementClient: s3managementService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion),
+		VPNClient:          vpn.NewClient(username, password, token, cleanedEndpoint, terraformVersion, insecureBool),
+		InMemoryDBClient:   inmemorydb.NewInMemoryDBClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		S3Client:           objectStorageService.NewClient(accessKey, secretKey, region, endpoint, insecureBool),
+		S3ManagementClient: s3managementService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 	}
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
 
-func newCloudapiClient(username, password, token, endpoint, version, terraformVersion string) *ionoscloud.APIClient {
+func newCloudapiClient(username, password, token, endpoint, version, terraformVersion string, insecure bool) *ionoscloud.APIClient {
 	newConfig := ionoscloud.NewConfiguration(username, password, token, endpoint)
 	newConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
@@ -225,24 +248,25 @@ func newCloudapiClient(username, password, token, endpoint, version, terraformVe
 	}
 	newConfig.MaxRetries = constant.MaxRetries
 	newConfig.WaitTime = constant.MaxWaitTime
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
-	return ionoscloud.NewAPIClient(newConfig)
+	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+	client := ionoscloud.NewAPIClient(newConfig)
+	return client
 }
 
 // Resources returns the resources for the provider.
 func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		s3.NewBucketResource,
-		s3.NewBucketPolicyResource,
-		s3.NewObjectResource,
-		s3.NewObjectCopyResource,
-		s3.NewBucketPublicAccessBlockResource,
-		s3.NewBucketVersioningResource,
-		s3.NewObjectLockConfigurationResource,
-		s3.NewServerSideEncryptionConfigurationResource,
-		s3.NewBucketCorsConfigurationResource,
-		s3.NewBucketLifecycleConfigurationResource,
-		s3.NewBucketWebsiteConfigurationResource,
+		objectstorage.NewBucketResource,
+		objectstorage.NewBucketPolicyResource,
+		objectstorage.NewObjectResource,
+		objectstorage.NewObjectCopyResource,
+		objectstorage.NewBucketPublicAccessBlockResource,
+		objectstorage.NewBucketVersioningResource,
+		objectstorage.NewObjectLockConfigurationResource,
+		objectstorage.NewServerSideEncryptionConfigurationResource,
+		objectstorage.NewBucketCorsConfigurationResource,
+		objectstorage.NewBucketLifecycleConfigurationResource,
+		objectstorage.NewBucketWebsiteConfigurationResource,
 		s3management.NewAccesskeyResource,
 	}
 }
@@ -250,10 +274,10 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 // DataSources returns the data sources for the provider.
 func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		s3.NewBucketDataSource,
-		s3.NewObjectDataSource,
-		s3.NewBucketPolicyDataSource,
-		s3.NewObjectsDataSource,
+		objectstorage.NewBucketDataSource,
+		objectstorage.NewObjectDataSource,
+		objectstorage.NewBucketPolicyDataSource,
+		objectstorage.NewObjectsDataSource,
 		s3management.NewRegionDataSource,
 		s3management.NewAccesskeyDataSource,
 	}

@@ -16,7 +16,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 )
@@ -38,6 +38,6 @@ type SdkBundle struct {
 	CDNClient          *cdn.Client
 	APIGatewayClient   *apigateway.Client
 	VPNClient          *vpn.Client
-	S3Client           *s3.Client
+	S3Client           *objectstorage.Client
 	S3ManagementClient *s3management.Client
 }
