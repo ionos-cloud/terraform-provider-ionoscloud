@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccNFSCluster_basic(t *testing.T) {
@@ -72,7 +73,7 @@ func testAccCheckNFSClusterDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(services.SdkBundle).NFSClient
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_nfs_cluster" {
+		if rs.Type != constant.NFSClusterResource {
 			continue
 		}
 
