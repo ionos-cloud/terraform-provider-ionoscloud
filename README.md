@@ -249,3 +249,6 @@ now you can see the response body incl. api error message:
 
   ### How can I find out the IP for the added NIC on a K8s nodepool?
   Please check out this [module](https://github.com/ionos-cloud/terraform-ionoscloud-kube-lan-ip).
+  
+  ### For more complex examples on how to use the provider
+  Please check out the [examples](examples/) directory.
