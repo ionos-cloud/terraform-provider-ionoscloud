@@ -241,14 +241,6 @@ func (o *PipelineResponse) SetDestinations(v []Destination) {
 	o.Destinations = v
 }
 
-func (o PipelineResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o PipelineResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Public) {

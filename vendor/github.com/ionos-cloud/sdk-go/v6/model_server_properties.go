@@ -36,6 +36,8 @@ type ServerProperties struct {
 	CpuFamily *string `json:"cpuFamily,omitempty"`
 	// Server type: CUBE, ENTERPRISE or VCPU.
 	Type *string `json:"type,omitempty"`
+	// The placement group ID that belongs to this server; Requires system privileges, for internal usage only
+	PlacementGroupId *string `json:"placementGroupId,omitempty"`
 }
 
 // NewServerProperties instantiates a new ServerProperties object
@@ -474,6 +476,44 @@ func (o *ServerProperties) HasType() bool {
 	return false
 }
 
+// GetPlacementGroupId returns the PlacementGroupId field value
+// If the value is explicit nil, nil is returned
+func (o *ServerProperties) GetPlacementGroupId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.PlacementGroupId
+
+}
+
+// GetPlacementGroupIdOk returns a tuple with the PlacementGroupId field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ServerProperties) GetPlacementGroupIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.PlacementGroupId, true
+}
+
+// SetPlacementGroupId sets field value
+func (o *ServerProperties) SetPlacementGroupId(v string) {
+
+	o.PlacementGroupId = &v
+
+}
+
+// HasPlacementGroupId returns a boolean if a field has been set.
+func (o *ServerProperties) HasPlacementGroupId() bool {
+	if o != nil && o.PlacementGroupId != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o ServerProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.TemplateUuid != nil {
@@ -518,6 +558,10 @@ func (o ServerProperties) MarshalJSON() ([]byte, error) {
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
+	}
+
+	if o.PlacementGroupId != nil {
+		toSerialize["placementGroupId"] = o.PlacementGroupId
 	}
 
 	return json.Marshal(toSerialize)

@@ -55,11 +55,11 @@ func (r ApiUmUsersS3keysDeleteRequest) Execute() (*APIResponse, error) {
 }
 
 /*
- * UmUsersS3keysDelete Delete S3 keys
- * Delete the specified user S3 key.
+ * UmUsersS3keysDelete Delete Object storage keys
+ * Delete the specified user Object storage key.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param userId The unique ID of the user.
- * @param keyId The unique ID of the S3 key.
+ * @param keyId The unique ID of the Object storage key.
  * @return ApiUmUsersS3keysDeleteRequest
  */
 func (a *UserS3KeysApiService) UmUsersS3keysDelete(ctx _context.Context, userId string, keyId string) ApiUmUsersS3keysDeleteRequest {
@@ -220,11 +220,11 @@ func (r ApiUmUsersS3keysFindByKeyIdRequest) Execute() (S3Key, *APIResponse, erro
 }
 
 /*
- * UmUsersS3keysFindByKeyId Retrieve user S3 keys by key ID
- * Retrieve the specified user S3 key. The user ID is in the response body when the user is created, and in the list of the users, returned by GET. The key ID is in the response body when the S3 key is created, and in the list of all user S3 keys, returned by GET.
+ * UmUsersS3keysFindByKeyId Retrieve user Object storage keys by key ID
+ * Retrieve the specified user Object storage key. The user ID is in the response body when the user is created, and in the list of the users, returned by GET. The key ID is in the response body when the Object storage key is created, and in the list of all user Object storage keys, returned by GET.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param userId The unique ID of the user.
- * @param keyId The unique ID of the S3 key.
+ * @param keyId The unique ID of the Object storage key.
  * @return ApiUmUsersS3keysFindByKeyIdRequest
  */
 func (a *UserS3KeysApiService) UmUsersS3keysFindByKeyId(ctx _context.Context, userId string, keyId string) ApiUmUsersS3keysFindByKeyIdRequest {
@@ -418,8 +418,8 @@ func (r ApiUmUsersS3keysGetRequest) Execute() (S3Keys, *APIResponse, error) {
 }
 
 /*
- * UmUsersS3keysGet List user S3 keys
- * List S3 keys by user ID. The user ID is in the response body when the user is created, and in the list of the users, returned by GET.
+ * UmUsersS3keysGet List user Object storage keys
+ * List Object storage keys by user ID. The user ID is in the response body when the user is created, and in the list of the users, returned by GET.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param userId The unique ID of the user.
  * @return ApiUmUsersS3keysGetRequest
@@ -605,8 +605,8 @@ func (r ApiUmUsersS3keysPostRequest) Execute() (S3Key, *APIResponse, error) {
 }
 
 /*
- * UmUsersS3keysPost Create user S3 keys
- * Create an S3 key for the specified user. The user ID is in the response body when the user is created, and in the list of the users, returned by GET. A maximum of five keys per user can be generated.
+ * UmUsersS3keysPost Create user Object storage keys
+ * Create an Object storage key for the specified user. The user ID is in the response body when the user is created, and in the list of the users, returned by GET. A maximum of five keys per user can be generated.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param userId The unique ID of the user.
  * @return ApiUmUsersS3keysPostRequest
@@ -784,11 +784,11 @@ func (r ApiUmUsersS3keysPutRequest) Execute() (S3Key, *APIResponse, error) {
 }
 
 /*
- * UmUsersS3keysPut Modify a S3 Key by Key ID
- * Enables or disables the specified user S3 key.
+ * UmUsersS3keysPut Modify a Object storage Key by Key ID
+ * Enables or disables the specified user Object storage key.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param userId The unique ID of the user.
- * @param keyId The unique ID of the S3 key.
+ * @param keyId The unique ID of the Object storage key.
  * @return ApiUmUsersS3keysPutRequest
  */
 func (a *UserS3KeysApiService) UmUsersS3keysPut(ctx _context.Context, userId string, keyId string) ApiUmUsersS3keysPutRequest {
@@ -982,8 +982,8 @@ func (r ApiUmUsersS3ssourlGetRequest) Execute() (S3ObjectStorageSSO, *APIRespons
 }
 
 /*
- * UmUsersS3ssourlGet Retrieve S3 single sign-on URLs
- * Retrieve S3 Object Storage single sign-on URLs for the the specified user. The user ID is in the response body when the user is created, and in the list of the users, returned by GET.
+ * UmUsersS3ssourlGet Retrieve Object storage single sign-on URLs
+ * Retrieve Ionos Object Storage single sign-on URLs for the the specified user. The user ID is in the response body when the user is created, and in the list of the users, returned by GET.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param userId The unique ID of the user.
  * @return ApiUmUsersS3ssourlGetRequest

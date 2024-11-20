@@ -1,10 +1,10 @@
 ---
-subcategory: "S3"
+subcategory: "Object Storage"
 layout: "ionoscloud"
 page_title: "IonosCloud: s3_bucket_policy"
 sidebar_current: "docs-ionoscloud-datasource-s3_bucket_policy"
 description: |-
-    Get information about IonosCloud S3 Buckets policies.
+  Get information about IONOS Object Storage Buckets policies.
 ---
 
 # ionoscloud_s3_bucket_policy

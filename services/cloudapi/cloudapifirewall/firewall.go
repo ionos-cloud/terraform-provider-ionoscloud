@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -155,9 +156,9 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, ni
 		firewallRuleIds = slice.AnyToString(firewallRuleIdsIntf)
 
 		if nicId != "" {
-			//delete old rules
+			// delete old rules
 			for idx := range oldFirewalls {
-				//we need the id, but we can't get it from oldFirewalls because it's only the property
+				// we need the id, but we can't get it from oldFirewalls because it's only the property
 				oldId := onlyOld[idx].(map[string]interface{})["id"].(string)
 
 				if deleteRule := !utils.IsValueInSliceOfMap(onlyNew, "id", oldId); deleteRule {
@@ -184,7 +185,7 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, ni
 			var firewall *ionoscloud.FirewallRule
 			if nicId != "" {
 				if id, ok := onlyNew[idx].(map[string]interface{})["id"]; ok && id != "" {
-					//do not send protocol, it's an update
+					// do not send protocol, it's an update
 					*fwRule.Properties = SetNullableFields(*fwRule.Properties)
 					fwRule.Properties.Protocol = nil
 					firewall, _, err = fs.Update(ctx, dcId, serverId, nicId, id.(string), fwRule)
@@ -272,7 +273,7 @@ func ExtractOrderedFirewallIds(foundRules, sentRules []ionoscloud.FirewallRule) 
 		return []string{}
 	}
 
-	//keep order of ruleIds
+	// keep order of ruleIds
 	for _, rule := range sentRules {
 		for _, foundRule := range foundRules {
 			// computed, make equal for comparison
@@ -280,7 +281,7 @@ func ExtractOrderedFirewallIds(foundRules, sentRules []ionoscloud.FirewallRule) 
 				foundRule.Properties != nil && foundRule.Properties.IpVersion != nil {
 				rule.Properties.IpVersion = foundRule.Properties.IpVersion
 			}
-			//we need deepEqual here, because the structures contain pointers and cannot be compared using the stricter `==`
+			// we need deepEqual here, because the structures contain pointers and cannot be compared using the stricter `==`
 			if reflect.DeepEqual(rule.Properties, foundRule.Properties) {
 				ruleIds = append(ruleIds, *foundRule.Id)
 			}

@@ -72,14 +72,6 @@ func (o *PipelineResponseAllOf1) SetDestinations(v []Destination) {
 	o.Destinations = v
 }
 
-func (o PipelineResponseAllOf1) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o PipelineResponseAllOf1) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Destinations) {

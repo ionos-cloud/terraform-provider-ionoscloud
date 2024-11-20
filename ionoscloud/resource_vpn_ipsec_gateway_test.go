@@ -24,32 +24,33 @@ func TestVpnIPSecGatewayResource(t *testing.T) {
 				testAccPreCheck(t)
 			},
 			ProviderFactories: testAccProviderFactories,
+			ExternalProviders: randomProviderVersion343(),
 			CheckDestroy:      testCheckIPSecGatewayDestroy,
 			Steps: []resource.TestStep{
 				{
-					Config: configIPSecGatewayBasic(gatewayResourceName, gatewayAttributeNameValue),
-					Check:  checkIPSecGatewayResource(gatewayAttributeNameValue),
+					Config: configIPSecGatewayBasic(GatewayResourceName, GatewayAttributeNameValue),
+					Check:  checkIPSecGatewayResource(GatewayAttributeNameValue),
 				},
 				{
-					Config: configIPSecGatewayBasic(gatewayResourceName, fmt.Sprintf("%v_updated", gatewayAttributeNameValue)),
-					Check:  checkIPSecGatewayResource(fmt.Sprintf("%v_updated", gatewayAttributeNameValue)),
+					Config: configIPSecGatewayBasic(GatewayResourceName, fmt.Sprintf("%v_updated", GatewayAttributeNameValue)),
+					Check:  checkIPSecGatewayResource(fmt.Sprintf("%v_updated", GatewayAttributeNameValue)),
 				},
 				{
-					Config: configIPSecGatewayDataSourceGetByID(gatewayResourceName, gatewayDataName, constant.IPSecGatewayResource+"."+gatewayResourceName+".id"),
+					Config: configIPSecGatewayDataSourceGetByID(GatewayResourceName, gatewayDataName, constant.IPSecGatewayResource+"."+GatewayResourceName+".id"),
 					Check: checkIPSecGatewayResourceAttributesComparative(
-						constant.DataSource+"."+constant.IPSecGatewayResource+"."+gatewayDataName, constant.IPSecGatewayResource+"."+gatewayResourceName,
+						constant.DataSource+"."+constant.IPSecGatewayResource+"."+gatewayDataName, constant.IPSecGatewayResource+"."+GatewayResourceName,
 					),
 				},
 				{
 					Config: configIPSecGatewayDataSourceGetByName(
-						gatewayResourceName, gatewayDataName, constant.IPSecGatewayResource+"."+gatewayResourceName+"."+gatewayAttributeName,
+						GatewayResourceName, gatewayDataName, constant.IPSecGatewayResource+"."+GatewayResourceName+"."+gatewayAttributeName,
 					),
 					Check: checkIPSecGatewayResourceAttributesComparative(
-						constant.DataSource+"."+constant.IPSecGatewayResource+"."+gatewayDataName, constant.IPSecGatewayResource+"."+gatewayResourceName,
+						constant.DataSource+"."+constant.IPSecGatewayResource+"."+gatewayDataName, constant.IPSecGatewayResource+"."+GatewayResourceName,
 					),
 				},
 				{
-					Config:      configIPSecGatewayDataSourceGetByName(gatewayResourceName, gatewayDataName, `"willnotwork"`),
+					Config:      configIPSecGatewayDataSourceGetByName(GatewayResourceName, gatewayDataName, `"willnotwork"`),
 					ExpectError: regexp.MustCompile(`no VPN IPSec Gateway found with the specified name =`),
 				},
 			},
@@ -112,8 +113,8 @@ func testAccCheckIPSecGatewayExists(n string) resource.TestCheckFunc {
 
 func checkIPSecGatewayResource(attributeNameReferenceValue string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
-		testAccCheckIPSecGatewayExists(constant.IPSecGatewayResource+"."+gatewayResourceName),
-		checkIPSecGatewayResourceAttributes(constant.IPSecGatewayResource+"."+gatewayResourceName, attributeNameReferenceValue),
+		testAccCheckIPSecGatewayExists(constant.IPSecGatewayResource+"."+GatewayResourceName),
+		checkIPSecGatewayResourceAttributes(constant.IPSecGatewayResource+"."+GatewayResourceName, attributeNameReferenceValue),
 	)
 }
 
@@ -142,7 +143,7 @@ func checkIPSecGatewayResourceAttributesComparative(fullResourceName, fullRefere
 }
 
 func configIPSecGatewayBasic(resourceName, attributeName string) string {
-	gatewayBasicConfig := fmt.Sprintf(templateIPSecGatewayConfig, gatewayResourceName, attributeName, gatewayAttributeVersionValue, gatewayAttributeLocationValue)
+	gatewayBasicConfig := fmt.Sprintf(templateIPSecGatewayConfig, resourceName, attributeName, gatewayAttributeVersionValue, gatewayAttributeLocationValue)
 
 	return strings.Join([]string{defaultIPSecGatewayBaseConfig, gatewayBasicConfig}, "\n")
 }
@@ -151,7 +152,7 @@ func configIPSecGatewayDataSourceGetByID(resourceName, dataSourceName, dataSourc
 	dataSourceBasicConfig := fmt.Sprintf(
 		templateIPSecGatewayDataIDConfig, dataSourceName, dataSourceAttributeID, constant.IPSecGatewayResource+"."+resourceName+"."+gatewayAttributeLocation,
 	)
-	baseConfig := configIPSecGatewayBasic(resourceName, gatewayAttributeNameValue)
+	baseConfig := configIPSecGatewayBasic(resourceName, GatewayAttributeNameValue)
 
 	return strings.Join([]string{baseConfig, dataSourceBasicConfig}, "\n")
 }
@@ -160,17 +161,19 @@ func configIPSecGatewayDataSourceGetByName(resourceName, dataSourceName, dataSou
 	dataSourceBasicConfig := fmt.Sprintf(
 		templateIPSecGatewayDataNameConfig, dataSourceName, dataSourceAttributeName, constant.IPSecGatewayResource+"."+resourceName+"."+gatewayAttributeLocation,
 	)
-	baseConfig := configIPSecGatewayBasic(resourceName, gatewayAttributeNameValue)
+	baseConfig := configIPSecGatewayBasic(resourceName, GatewayAttributeNameValue)
 
 	return strings.Join([]string{baseConfig, dataSourceBasicConfig}, "\n")
 }
 
 const (
-	gatewayResourceName = "test_ipsec_gateway"
+	// GatewayResourceName represents the name of the gateway resource used in tests.
+	GatewayResourceName = "test_ipsec_gateway"
 	gatewayDataName     = "test_ipsec_gateway_ds"
 
-	gatewayAttributeName      = "name"
-	gatewayAttributeNameValue = "ipsec_gateway_test"
+	gatewayAttributeName = "name"
+	// GatewayAttributeNameValue represents the value used for the name attribute in tests.
+	GatewayAttributeNameValue = "ipsec_gateway_test"
 
 	gatewayAttributeVersion      = "version"
 	gatewayAttributeVersionValue = "IKEv2"
@@ -228,6 +231,7 @@ resource "ionoscloud_ipblock" "test_ipblock" {
 
 resource "ionoscloud_server" "test_server" {
 	name = "test_server"
+	hostname = "test-server"
 	datacenter_id = ionoscloud_datacenter.test_datacenter.id
 	cores = 1
 	ram = 2048
@@ -248,7 +252,6 @@ resource "ionoscloud_server" "test_server" {
 		disk_type    = "HDD"
 		size         = 10
 		licence_type = "OTHER"
-		ssh_key_path = null
 	}
 }
 

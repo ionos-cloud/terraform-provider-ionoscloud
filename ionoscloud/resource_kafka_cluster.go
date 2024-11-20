@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 	"time"
 
@@ -38,11 +39,10 @@ func resourceKafkaCluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      fmt.Sprintf("The location of your Kafka Cluster. Supported locations: %s", strings.Join(kafka.AvailableLocations, ", ")),
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(kafka.AvailableLocations, false)),
+				Type:        schema.TypeString,
+				Description: fmt.Sprintf("The location of your Kafka Cluster. Supported locations: %s", strings.Join(kafka.AvailableLocations, ", ")),
+				Optional:    true,
+				ForceNew:    true,
 			},
 			"version": {
 				Type:        schema.TypeString,
@@ -178,6 +178,11 @@ func resourceKafkaClusterImport(ctx context.Context, d *schema.ResourceData, met
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("expected ID in the format location:cluster_id")
+	}
+
+	location := parts[0]
+	if !slices.Contains(kafka.AvailableLocations, location) {
+		return nil, fmt.Errorf("invalid location: %v, location must be one of: %v", location, kafka.AvailableLocations)
 	}
 
 	if err := d.Set("location", parts[0]); err != nil {

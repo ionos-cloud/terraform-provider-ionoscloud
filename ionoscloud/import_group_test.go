@@ -29,7 +29,7 @@ func TestAccGroupImportBasic(t *testing.T) {
 				ImportStateIdFunc:       testAccGroupImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"user_id"},
+				ImportStateVerifyIgnore: []string{"user_id", "group_ids"},
 			},
 		},
 	})

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -44,7 +45,7 @@ func DiffBasedOnVersion(_, old, new string, _ *schema.ResourceData) bool {
 		}
 
 		if oldMajor == newMajor && oldMinor == newMinor {
-			//this is a downgrade of the patch version that we will ignore
+			// this is a downgrade of the patch version that we will ignore
 			// it may happen either manually, or after a maintenance window
 			if oldPatchInt > newPatchInt {
 				log.Printf("[WARN] Downgrade is not supported on k8s from %d to %d", oldPatchInt, newPatchInt)
@@ -175,6 +176,11 @@ var nicServerDSResource = &schema.Resource{
 			Type:     schema.TypeList,
 			Computed: true,
 			Elem:     firewallServerDSResource,
+		},
+		"security_groups_ids": {
+			Type:     schema.TypeList,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Computed: true,
 		},
 	},
 }

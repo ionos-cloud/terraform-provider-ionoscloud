@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
@@ -181,7 +182,7 @@ func dataSourceK8sNodePool() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			//"gateway_ip": {
+			// "gateway_ip": {
 			//	Type:        schema.TypeString,
 			//	Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
 			//	Computed:    true,

@@ -6,11 +6,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	mariadbSDK "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func dataSourceDBaaSMariaDBBackups() *schema.Resource {
@@ -28,10 +27,9 @@ func dataSourceDBaaSMariaDBBackups() *schema.Resource {
 				Optional:    true,
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      "The cluster location",
-				Optional:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
+				Type:        schema.TypeString,
+				Description: "The cluster location",
+				Optional:    true,
 			},
 			"backups": {
 				Type:        schema.TypeList,

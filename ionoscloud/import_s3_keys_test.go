@@ -12,11 +12,11 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-func TestAccS3KeyImportBasic(t *testing.T) {
+func TestAccKeyImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-		CheckDestroy:             testAccChecks3KeyDestroyCheck,
+		CheckDestroy:             testAccChecksKeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImportS3KeyConfigBasic,
@@ -25,14 +25,14 @@ func TestAccS3KeyImportBasic(t *testing.T) {
 				ResourceName:            constant.S3KeyResource + "." + constant.S3KeyTestResource,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateIdFunc:       testAccS3KeyImportStateID,
+				ImportStateIdFunc:       testAccKeyImportStateID,
 				ImportStateVerifyIgnore: []string{},
 			},
 		},
 	})
 }
 
-func testAccS3KeyImportStateID(s *terraform.State) (string, error) {
+func testAccKeyImportStateID(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {

@@ -289,37 +289,21 @@ func (o *WireguardGateway) SetListenPort(v int32) {
 	o.ListenPort = &v
 }
 
-func (o WireguardGateway) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o WireguardGateway) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Name) {
-		toSerialize["name"] = o.Name
-	}
+	toSerialize["name"] = o.Name
 	if !IsNil(o.Description) {
 		toSerialize["description"] = o.Description
 	}
-	if !IsZero(o.GatewayIP) {
-		toSerialize["gatewayIP"] = o.GatewayIP
-	}
+	toSerialize["gatewayIP"] = o.GatewayIP
 	if !IsNil(o.InterfaceIPv4CIDR) {
 		toSerialize["interfaceIPv4CIDR"] = o.InterfaceIPv4CIDR
 	}
 	if !IsNil(o.InterfaceIPv6CIDR) {
 		toSerialize["interfaceIPv6CIDR"] = o.InterfaceIPv6CIDR
 	}
-	if !IsZero(o.Connections) {
-		toSerialize["connections"] = o.Connections
-	}
-	if !IsZero(o.PrivateKey) {
-		toSerialize["privateKey"] = o.PrivateKey
-	}
+	toSerialize["connections"] = o.Connections
+	toSerialize["privateKey"] = o.PrivateKey
 	if !IsNil(o.ListenPort) {
 		toSerialize["listenPort"] = o.ListenPort
 	}

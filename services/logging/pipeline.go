@@ -16,54 +16,66 @@ import (
 
 var pipelineResourceName = "Logging Pipeline"
 
+// CreatePipeline creates a new pipeline
 func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.ProvisioningPipeline, utils.ApiResponseInfo, error) {
+	c.changeConfigURL(d.Get("location").(string))
 	request := setPipelinePostRequest(d)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPost(ctx).Pipeline(*request).Execute()
 	apiResponse.LogInfo()
 	return pipeline, apiResponse, err
 }
 
+// IsPipelineAvailable checks if the pipeline is available
 func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	pipelineId := d.Id()
-	pipeline, _, err := c.GetPipelineByID(ctx, pipelineId)
+	pipelineID := d.Id()
+	location := d.Get("location").(string)
+	pipeline, _, err := c.GetPipelineByID(ctx, location, pipelineID)
 	if err != nil {
 		return false, err
 	}
 	if pipeline.Metadata == nil || pipeline.Metadata.State == nil {
-		return false, fmt.Errorf("expected metadata, got empty for pipeline with ID: %s", pipelineId)
+		return false, fmt.Errorf("expected metadata, got empty for pipeline with ID: %s", pipelineID)
 	}
 	log.Printf("[DEBUG] pipeline status: %s", *pipeline.Metadata.State)
 	return strings.EqualFold(*pipeline.Metadata.State, constant.Available), nil
 }
 
+// UpdatePipeline updates a pipeline
 func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (logging.Pipeline, utils.ApiResponseInfo, error) {
+	c.changeConfigURL(d.Get("location").(string))
 	request := setPipelinePatchRequest(d)
 	pipelineResponse, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPatch(ctx, id).Pipeline(*request).Execute()
 	apiResponse.LogInfo()
 	return pipelineResponse, apiResponse, err
 }
 
-func (c *Client) DeletePipeline(ctx context.Context, id string) (utils.ApiResponseInfo, error) {
+// DeletePipeline deletes a pipeline
+func (c *Client) DeletePipeline(ctx context.Context, location, id string) (utils.ApiResponseInfo, error) {
+	c.changeConfigURL(location)
 	_, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
+// IsPipelineDeleted checks if the pipeline is deleted
 func (c *Client) IsPipelineDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	c.changeConfigURL(d.Get("location").(string))
 	_, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
 }
 
 // GetPipelineByID returns a pipeline by its ID
-func (c *Client) GetPipelineByID(ctx context.Context, id string) (logging.Pipeline, *shared.APIResponse, error) {
+func (c *Client) GetPipelineByID(ctx context.Context, location, id string) (logging.Pipeline, *shared.APIResponse, error) {
+	c.changeConfigURL(location)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return pipeline, apiResponse, err
 }
 
 // ListPipelines returns a list of all pipelines
-func (c *Client) ListPipelines(ctx context.Context) (logging.PipelineListResponse, *shared.APIResponse, error) {
+func (c *Client) ListPipelines(ctx context.Context, location string) (logging.PipelineListResponse, *shared.APIResponse, error) {
+	c.changeConfigURL(location)
 	pipelines, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return pipelines, apiResponse, err
@@ -157,6 +169,7 @@ func setPipelinePatchRequest(d *schema.ResourceData) *logging.PipelinePatch {
 	return &request
 }
 
+// SetPipelineData sets the pipeline data
 func (c *Client) SetPipelineData(d *schema.ResourceData, pipeline logging.Pipeline) error {
 	d.SetId(*pipeline.Id)
 

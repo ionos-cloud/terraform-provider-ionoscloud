@@ -22,6 +22,10 @@ func dataSourceVCPUServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"hostname": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"type": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -66,6 +70,11 @@ func dataSourceVCPUServer() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     cdromsServerDSResource,
+			},
+			"security_groups_ids": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
 			},
 			"volumes": {
 				Type:     schema.TypeList,

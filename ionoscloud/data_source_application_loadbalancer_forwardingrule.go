@@ -218,7 +218,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 
 			if applicationLoadBalancersForwardingRules.Items != nil {
 				for _, albFr := range *applicationLoadBalancersForwardingRules.Items {
-					if albFr.Properties != nil && albFr.Properties.Name != nil && strings.ToLower(*albFr.Properties.Name) == strings.ToLower(name) {
+					if albFr.Properties != nil && albFr.Properties.Name != nil && strings.EqualFold(*albFr.Properties.Name, name) {
 						tmpAlbFr, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, *albFr.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {

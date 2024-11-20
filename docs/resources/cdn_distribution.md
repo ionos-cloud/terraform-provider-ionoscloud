@@ -25,6 +25,7 @@ resource "ionoscloud_cdn_distribution" "example" {
       host                = "server.example.com"
       caching             = true
       waf                 = true
+      sni_mode            = "distribution"
       rate_limit_class    = "R500"
       geo_restrictions {
         allow_list = [ "CN", "RU"]
@@ -38,7 +39,8 @@ resource "ionoscloud_cdn_distribution" "example" {
       host                = "server2.example.com"
       caching             = false
       waf                 = false
-      rate_limit_class    = "10"
+      sni_mode            = "origin"
+      rate_limit_class    = "R10"
       geo_restrictions {
         block_list = [ "CN", "RU"]
       }
@@ -68,10 +70,16 @@ The following arguments are supported:
         * `host` - (Required)[string] The upstream host that handles the requests if not already cached. This host will be protected by the WAF if the option is enabled.
         * `caching` - (Required)[bool] Enable or disable caching. If enabled, the CDN will cache the responses from the upstream host. Subsequent requests for the same resource will be served from the cache.
         * `waf` - (Required)[bool] Enable or disable WAF to protect the upstream host.
+        * `sni_mode` - (Required)[string] The SNI (Server Name Indication) mode of the upstream. It supports two modes: 1) `distribution`: for outgoing connections to the upstream host, the CDN requires the upstream host to present a valid certificate that matches the configured domain of the CDN distribution; 2) `origin`: for outgoing connections to the upstream host, the CDN requires the upstream host to present a valid certificate that matches the configured upstream/origin hostname.
         * `rate_limit_class` - (Required)[string] Rate limit class that will be applied to limit the number of incoming requests per IP.
         * `geo_restrictions` - (Optional)[map] - A map of geo_restrictions
             * `allow_list` - (Optional)[string] List of allowed countries
             * `block_list` - (Optional)[string] List of blocked countries
+## Attributes Reference
+
+- `public_endpoint_v4` - IP of the distribution, it has to be included on the domain DNS Zone as A record.
+- `public_endpoint_v6` - IP of the distribution, it has to be included on the domain DNS Zone as AAAA record.
+- `resource_urn` - Unique resource indentifier.
 
 ## Import
 

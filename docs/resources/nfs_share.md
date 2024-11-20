@@ -14,8 +14,39 @@ Creates and manages Network File Storage (NFS) Share objects on IonosCloud.
 ## Example Usage
 
 ```hcl
+# Basic example
+
+resource "ionoscloud_datacenter" "nfs_dc" {
+  name                = "NFS Datacenter"
+  location            = "de/txl"
+  description         = "Datacenter Description"
+  sec_auth_protection = false
+}
+
+resource "ionoscloud_lan" "nfs_lan" {
+  datacenter_id = ionoscloud_datacenter.nfs_dc.id
+  public        = false
+  name          = "Lan for NFS"
+}
+
+resource "ionoscloud_nfs_cluster" "example" {
+  name = "test"
+  location = "de/txl"
+  size = 2
+
+  nfs {
+    min_version = "4.2"
+  }
+
+  connections {
+    datacenter_id = ionoscloud_datacenter.nfs_dc.id
+    ip_address    = "192.168.100.10/24"
+    lan           = ionoscloud_lan.nfs_lan.id
+  }
+}
+
 resource "ionoscloud_nfs_share" "example" {
-  location = ionoscloud_nfs_cluster.example.location
+  location = "de/txl"
   cluster_id = ionoscloud_nfs_cluster.example.id
 
   name = "example-share"
@@ -40,7 +71,7 @@ resource "ionoscloud_nfs_share" "example" {
 
 The following arguments are supported:
 
-- `location` - (Required) The location of the Network File Storage Cluster.
+- `location` - (Optional) The location of the Network File Storage Cluster.
 - `cluster_id` - (Required) The ID of the Network File Storage Cluster.
 - `name` - (Required) The directory being exported.
 - `quota` - (Optional) The quota in MiB for the export. The quota can restrict the amount of data that can be stored within the export. The quota can be disabled using `0`. Default is `0`.

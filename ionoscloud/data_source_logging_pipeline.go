@@ -11,12 +11,27 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
+
+	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 )
 
 func dataSourceLoggingPipeline() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourcePipelineRead,
 		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:        schema.TypeString,
+				Description: fmt.Sprintf("The location of your logging pipeline. Default: de/txl. Supported locations: %s", strings.Join(loggingService.AvailableLocations, ", ")),
+				Optional:    true,
+				Default:     "de/txl",
+				// no diff in case it moves from "" to de/txl since it's an upgrade from when we had no location
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					if old == "" && new == "de/txl" {
+						return true
+					}
+					return false
+				},
+			},
 			"id": {
 				Type:             schema.TypeString,
 				Description:      "The ID of the Logging pipeline",
@@ -87,6 +102,7 @@ func dataSourceLoggingPipeline() *schema.Resource {
 
 func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).LoggingClient
+	location := d.Get("location").(string)
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	id := idValue.(string)
@@ -102,13 +118,13 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta in
 	var pipeline logging.Pipeline
 	var err error
 	if idOk {
-		pipeline, _, err = client.GetPipelineByID(ctx, id)
+		pipeline, _, err = client.GetPipelineByID(ctx, location, id)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Logging pipeline with ID: %s, error: %w", id, err))
 		}
 	} else {
 		var results []logging.Pipeline
-		pipelines, _, err := client.ListPipelines(ctx)
+		pipelines, _, err := client.ListPipelines(ctx, location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching Logging pipelines: %w", err))
 		}

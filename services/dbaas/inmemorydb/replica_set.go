@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -23,11 +24,20 @@ var locationToURL = map[string]string{
 	"us/mci": "https://in-memory-db.us-mci.ionos.com",
 	"fr/par": "https://in-memory-db.fr-par.ionos.com",
 }
+var ionosAPIURLInMemoryDB = "IONOS_API_URL_INMEMORYDB"
 
 // modifyConfigURL modifies the URL inside the client configuration.
 // This function is required in order to make requests to different endpoints based on location.
 func (c *InMemoryDBClient) modifyConfigURL(location string) {
 	clientConfig := c.sdkClient.GetConfig()
+	if location == "" && os.Getenv(ionosAPIURLInMemoryDB) != "" {
+		clientConfig.Servers = inMemoryDB.ServerConfigurations{
+			{
+				URL: utils.CleanURL(os.Getenv(ionosAPIURLInMemoryDB)),
+			},
+		}
+		return
+	}
 	clientConfig.Servers = inMemoryDB.ServerConfigurations{
 		{
 			URL: locationToURL[location],

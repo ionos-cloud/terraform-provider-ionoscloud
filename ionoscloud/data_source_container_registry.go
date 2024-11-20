@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 )
@@ -193,12 +194,14 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 			}
 		}
 
-		if len(results) > 1 {
+		switch {
+		case len(results) == 0:
+			return diag.FromErr(fmt.Errorf("no registry found with the specified criteria: name = %s location = %s", name, location))
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one registry found with the specified criteria: name = %s location = %s", name, location))
+		default:
+			registry = results[0]
 		}
-
-		registry = results[0]
-
 	}
 
 	if err := crService.SetRegistryData(d, registry); err != nil {

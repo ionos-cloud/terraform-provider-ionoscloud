@@ -16,6 +16,21 @@ Manages an **API Gateway Route** on IonosCloud.
 This resource will create an operational API Gateway Route. After this section completes, the provisioner can be called.
 
 ```hcl
+resource "ionoscloud_apigateway" "example" {
+  name              = "example-gateway"
+  metrics           = true
+
+  custom_domains {
+    name           = "example.com"
+    certificate_id = "00000000-0000-0000-0000-000000000000"
+  }
+
+  custom_domains {
+    name           = "example.org"
+    certificate_id = "00000000-0000-0000-0000-000000000000"
+  }
+}
+
 resource "ionoscloud_apigateway_route" "apigateway_route" {
   name = "apigateway-route"
   type = "http"
@@ -30,12 +45,12 @@ resource "ionoscloud_apigateway_route" "apigateway_route" {
   websocket = false
   upstreams {
     scheme       = "http"
-    loadbalancer = "round-robin"
+    loadbalancer = "roundrobin"
     host         = "example.com"
     port         = 80
     weight       = 100
   }
-  gateway_id = <your_gateway_id>
+  gateway_id = ionoscloud_apigateway.example.id
 }
 ```
 
@@ -54,7 +69,7 @@ resource "ionoscloud_apigateway_route" "apigateway_route" {
     * `scheme` - (Optional)[string] The target URL of the upstream. Default value: `http`.
     * `host` -  (Required)[string] The host of the upstream.
     * `port` -  (Optional)[int] The port of the upstream. Default value: `80`.
-    * `loadbalancer` - (Optional)[string] The load balancer algorithm. Default value: `round-robin`.
+    * `loadbalancer` - (Optional)[string] The load balancer algorithm. Default value: `roundrobin`.
     * `weight` - (Optional)[int] Weight with which to split traffic to the upstream. Default value: `100`.
 
 ## Import

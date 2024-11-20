@@ -17,7 +17,7 @@ Manages **Users** and list users and groups associated with that user.
 resource "ionoscloud_user" "example" {
   first_name              = "example"
   last_name               = "example"
-  email                   = <unique_email>
+  email                   = "unique@email.com"
   password                = random_password.user_password.result
   administrator           = false
   force_sec_auth          = false
@@ -65,7 +65,7 @@ resource "random_password" "user_password" {
 * `last_name` - (Required)[string] A last name for the user.
 * `password` - (Required)[string] A password for the user.
 * `sec_auth_active` - (Optional)[Boolean] Indicates if secure authentication is active for the user or not. *it can not be used in create requests - can be used in update*
-* `s3_canonical_user_id` - (Computed) Canonical (S3) id of the user for a given identity
+* `s3_canonical_user_id` - (Computed) Canonical (IONOS Object Storage) id of the user for a given identity
 * `active` - (Optional)[Boolean] Indicates if the user is active
 * `group_ids` - (Optional)[Set] The groups that this user will be a member of
 

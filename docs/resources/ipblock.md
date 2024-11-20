@@ -16,7 +16,7 @@ Manages **IP Blocks** on IonosCloud. IP Blocks contain reserved public IP addres
 ```hcl
 resource "ionoscloud_ipblock" "example" {
   location  = "us/las"
-  size      = 3
+  size      = 1
   name      = "IP Block Example"
 }
 ```

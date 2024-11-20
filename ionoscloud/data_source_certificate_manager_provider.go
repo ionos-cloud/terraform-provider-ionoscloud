@@ -13,7 +13,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func dataSourceCertificateManagerProvider() *schema.Resource {
@@ -21,10 +20,9 @@ func dataSourceCertificateManagerProvider() *schema.Resource {
 		ReadContext: dataSourceProviderRead,
 		Schema: map[string]*schema.Schema{
 			"location": {
-				Type:             schema.TypeString,
-				Required:         true,
-				Description:      "The location of the auto-certificate provider",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.Locations, false)),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the auto-certificate provider",
 			},
 			"id": {
 				Type:             schema.TypeString,

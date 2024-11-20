@@ -64,6 +64,7 @@ The following attributes are returned by the datasource:
 * `pci_slot`- The PCI slot number of the Nic.
 * `flowlog` - Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination IP addresses, source and destination ports, number of packets, amount of bytes, the start and end time of the recording, and the type of protocol – and log the extent to which your instances are being accessed.
     - `action` - Specifies the action to be taken when the rule is matched. Possible values: ACCEPTED, REJECTED, ALL.
-    - `bucket` - Specifies the S3 IONOS bucket where the flow log data will be stored. The bucket must exist.
+    - `bucket` - Specifies the IONOS Object Storage bucket where the flow log data will be stored. The bucket must exist.
     - `direction` - Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL.
     - `name` - Specifies the name of the flow log.
+* `security_groups_ids` - The list of Security Group IDs for the resource.

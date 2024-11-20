@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -62,6 +63,26 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD", "SSD Premium", "SSD Standard"}, true)),
 			},
+			"connection_pooler": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Description: "Configuration options for the connection pooler",
+				Optional:    true,
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+						"pool_mode": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Represents different modes of connection pooling for the connection pooler",
+						},
+					},
+				},
+			},
 			"connections": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -98,7 +119,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 			},
 			"backup_location": {
 				Type:             schema.TypeString,
-				Description:      "The S3 location where the backups will be stored.",
+				Description:      "The Object Storage location where the backups will be stored.",
 				Optional:         true,
 				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"de", "eu-south-2", "eu-central-2"}, true)),
@@ -267,7 +288,6 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 	client := meta.(services.SdkBundle).PsqlClient
 
 	cluster, diags := dbaasService.GetPgSqlClusterDataUpdate(d)
-
 	if diags != nil {
 		return diags
 	}

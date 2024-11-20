@@ -13,21 +13,10 @@ An API gateway consists of the generic rules and configurations.
 
 ## Usage example
 
-```
+```hcl
 resource "ionoscloud_apigateway" "example" {
     name              = "example-gateway"
-    logs              = true
     metrics           = true
-    
-    custom_domains {
-        name           = "example.com"
-        certificate_id = "00000000-0000-0000-0000-000000000000"
-    }
-    
-    custom_domains {
-        name           = "example.org"
-        certificate_id = "00000000-0000-0000-0000-000000000000"
-    }
 }
 ```
 
@@ -38,8 +27,8 @@ resource "ionoscloud_apigateway" "example" {
 * `logs` - (Optional)[bool] Enable or disable logging. Defaults to `false`. **NOTE**: Central Logging must be enabled through the Logging API to enable this feature.
 * `metrics` - (Optional)[bool] Enable or disable metrics. Defaults to `false`.
 * `custom_domains` - (Optional)[list] Custom domains for the API Gateway, a list that contains elements with the following structure:
-    * `name` - (Required)[string] The domain name.
-    * `certificate_id` - (Required)[string] The certificate ID for the domain.
+    * `name` - (Required)[string] The domain name. Externally reachable.
+    * `certificate_id` - (Optional)[string] The certificate ID for the domain. Must be a valid certificate in UUID form.
 * `public_endpoint` - (Computed)[string] The public endpoint of the API Gateway.
 
 ## Import

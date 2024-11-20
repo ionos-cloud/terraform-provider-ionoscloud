@@ -1,8 +1,8 @@
 ---
 subcategory: "VPN"
 layout: "ionoscloud"
-page_title: "IonosCloud: vpn_wireguard_gateway - Data Source"
-sidebar_current: "docs-ionoscloud-data-source-vpn-wireguard-gateway"
+page_title: "IonosCloud: vpn_wireguard_gateway_peer"
+sidebar_current: "docs-ionoscloud-data-source-vpn-wireguard-peer"
 description: |-
   Provides information about a specific IonosCloud VPN WireGuard Gateway.
 ---
@@ -30,7 +30,7 @@ output "vpn_wireguard_peer_public_key" {
 The following arguments are supported:
 
 - `gateway_id` - (Required)[String] The ID of the WireGuard Gateway.
-- `location` - (Required)[String] The location of the WireGuard Gateway.
+- `location` - (Optional)[String] The location of the WireGuard Gateway.
 - `name` - (Optional)[String] The name of the WireGuard Peer.
 - `id` - (Optional)[String] The ID of the WireGuard Peer.
 

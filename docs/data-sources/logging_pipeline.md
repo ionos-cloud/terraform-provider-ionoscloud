@@ -19,6 +19,7 @@ If a single match is found, it will be returned. If your search results in multi
 ### By ID
 ```hcl
 data "ionoscloud_logging_pipeline" "example" {
+  location = "de/txl"
   id = <pipeline_id>
 }
 ```
@@ -26,11 +27,13 @@ data "ionoscloud_logging_pipeline" "example" {
 ### By name
 ```hcl
 data "ionoscloud_logging_pipeline" "example" {
-  name = <pipeline_name>
+  location = "de/txl"
+  name = "pipeline_name"
 }
 ```
 
 ## Argument reference
+* `location` - (Optional)[string] The location of the Logging pipeline. Default: `de/txl`. One of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`.
 * `id` - (Optional)[string] The ID of the Logging pipeline you want to search for.
 * `name` - (Optional)[string] The name of the Logging pipeline you want to search for.
 
@@ -42,7 +45,7 @@ The following attributes are returned by the datasource:
 
 * `id` - The UUID of the Logging pipeline.
 * `name` - The name of the Logging pipeline.
-* `grafana_address` - (Computed)[string] The address of the client's grafana instance.
+* `grafana_address` - The address of the client's grafana instance.
 * `log` - [list] Pipeline logs, a list that contains elements with the following structure:
   * `source` - [string] The source parser to be used.
   * `tag` - [string] The tag is used to distinguish different pipelines. Must be unique amongst the pipeline's array items.

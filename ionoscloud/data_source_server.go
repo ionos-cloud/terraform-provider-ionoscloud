@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
@@ -32,6 +33,10 @@ func dataSourceServer() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"hostname": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"type": {
 				Type:     schema.TypeString,
@@ -180,6 +185,11 @@ func dataSourceServer() *schema.Resource {
 				Computed: true,
 				Elem:     nicServerDSResource,
 			},
+			"security_groups_ids": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+			},
 			"labels": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -239,7 +249,11 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				return err
 			}
 		}
-
+		if server.Properties.Hostname != nil {
+			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
+				return err
+			}
+		}
 		if server.Properties.Cores != nil {
 			if err := d.Set("cores", *server.Properties.Cores); err != nil {
 				return err
@@ -405,10 +419,27 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				entry["firewall_rules"] = firewallRules
 			}
 
+			ids := make([]string, 0)
+			if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
+				for _, group := range *nic.Entities.Securitygroups.Items {
+					if group.Id != nil {
+						id := *group.Id
+						ids = append(ids, id)
+					}
+				}
+			}
+			entry["security_groups_ids"] = ids
+
 			nics = append(nics, entry)
 		}
 
 		if err := d.Set("nics", nics); err != nil {
+			return err
+		}
+	}
+
+	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
 			return err
 		}
 	}

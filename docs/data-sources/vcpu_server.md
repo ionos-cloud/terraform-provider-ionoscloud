@@ -45,6 +45,7 @@ The following attributes are returned by the datasource:
 
 * `id` - The id of that resource
 * `name` - The name of that resource
+* `hostname` - The hostname of the server
 * `type` - The type of the server, should always be `VCPU`
 * `vm_state`- Status of the virtual Machine
 * `datacenter_id` - The id of the datacenter
@@ -57,6 +58,7 @@ The following attributes are returned by the datasource:
 * `boot_volume`
 * `boot_image`
 * `token`
+- `security_groups_ids` - The list of Security Group IDs for the resource.
 * `cdroms` - list of
   * `id` - Id of the attached cdrom
   * `name` - The name of the attached cdrom

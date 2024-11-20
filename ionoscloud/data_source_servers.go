@@ -12,6 +12,7 @@ import (
 	"github.com/iancoleman/strcase"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -46,7 +47,10 @@ func dataSourceServers() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-
+						"hostname": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"cores": {
 							Type:     schema.TypeInt,
 							Computed: true,
@@ -367,6 +371,7 @@ func SetServerProperties(server ionoscloud.Server) map[string]interface{} {
 	if server.Properties != nil {
 		utils.SetPropWithNilCheck(serverMap, "template_uuid", server.Properties.TemplateUuid)
 		utils.SetPropWithNilCheck(serverMap, "name", server.Properties.Name)
+		utils.SetPropWithNilCheck(serverMap, "hostname", server.Properties.Hostname)
 		utils.SetPropWithNilCheck(serverMap, "cores", server.Properties.Cores)
 		utils.SetPropWithNilCheck(serverMap, "ram", server.Properties.Ram)
 		utils.SetPropWithNilCheck(serverMap, "availability_zone", server.Properties.AvailabilityZone)

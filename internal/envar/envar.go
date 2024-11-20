@@ -13,10 +13,11 @@ const (
 	IonosUsername = "IONOS_USERNAME"
 	// IonosPassword is the environment variable name for the Ionos Cloud API password.
 	IonosPassword = "IONOS_PASSWORD"
-	// IonosS3AccessKey is the environment variable name for the Ionos Cloud S3 access key.
+	// IonosS3AccessKey is the environment variable name for the IONOS Object Storage access key.
 	IonosS3AccessKey = "IONOS_S3_ACCESS_KEY"
-	// IonosS3SecretKey is the environment variable name for the Ionos Cloud S3 secret key.
+	// IonosS3SecretKey is the environment variable name for the IONOS Object Storage secret key.
 	IonosS3SecretKey = "IONOS_S3_SECRET_KEY"
+	IonosInsecure    = "IONOS_ALLOW_INSECURE"
 )
 
 // RequireOneOf verifies that at least one environment variable is non-empty or returns an error.

@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
@@ -46,7 +47,7 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 						},
 						"location": {
 							Type:        schema.TypeString,
-							Description: "The S3 location where the backups will be stored.",
+							Description: "The Object Storage location where the backups will be stored.",
 							Computed:    true,
 						},
 						"version": {

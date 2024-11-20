@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceDataCenter() *schema.Resource {

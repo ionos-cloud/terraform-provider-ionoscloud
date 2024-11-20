@@ -13,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -44,6 +45,13 @@ func resourceServer() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			"hostname": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "The hostname of the resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters. If no value provided explicitly, it will be populated with the name of the server",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringIsNotWhiteSpace, validation.StringLenBetween(1, 63))),
 			},
 			"cores": {
 				Type:     schema.TypeInt,
@@ -162,6 +170,12 @@ func resourceServer() *schema.Resource {
 				//
 				//	return false
 				// },
+			},
+			"security_groups_ids": {
+				Type:        schema.TypeSet,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "The list of Security Group IDs for the server",
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -391,6 +405,12 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"security_groups_ids": {
+							Type:        schema.TypeSet,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Description: "The list of Security Group IDs for the NIC",
+						},
 						"firewall": {
 							Description: "Firewall rules created in the server resource. The rules can also be created as separate resources outside the server resource",
 							Type:        schema.TypeList,
@@ -424,24 +444,14 @@ func resourceServer() *schema.Resource {
 										Optional: true,
 									},
 									"port_range_start": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
-											if v.(int) < 1 && v.(int) > 65534 {
-												errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
-											}
-											return
-										}),
+										Type:             schema.TypeInt,
+										Optional:         true,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
 									},
 									"port_range_end": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
-											if v.(int) < 1 && v.(int) > 65534 {
-												errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
-											}
-											return
-										}),
+										Type:             schema.TypeInt,
+										Optional:         true,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
 									},
 									"icmp_type": {
 										Type:     schema.TypeString,
@@ -658,6 +668,13 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 		return diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
 	}
+	if v, ok := d.GetOk("security_groups_ids"); ok {
+		raw := v.(*schema.Set).List()
+		nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+		if diagnostic := nsgService.PutServerNSG(ctx, d.Get("datacenter_id").(string), *postServer.Id, raw); diagnostic != nil {
+			return diagnostic
+		}
+	}
 
 	// Logic for labels creation
 	ls := LabelsService{ctx: ctx, client: client}
@@ -706,6 +723,15 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
 					return diags
+				}
+
+				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
+					raw := v.(*schema.Set).List()
+					nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+					if diagnostic := nsgService.PutNICNSG(ctx, d.Get("datacenter_id").(string),
+						d.Id(), *foundFirstNic.Id, raw); diagnostic != nil {
+						return diagnostic
+					}
 				}
 			}
 			foundNicProps := foundFirstNic.Properties
@@ -861,6 +887,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		nStr := n.(string)
 		request.Name = &nStr
 	}
+	if d.HasChange("hostname") {
+		_, n := d.GetChange("hostname")
+		nStr := n.(string)
+		request.Hostname = &nStr
+	}
 	if d.HasChange("cores") {
 		_, n := d.GetChange("cores")
 		nInt := int32(n.(int))
@@ -903,6 +934,15 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
+	}
+
+	if d.HasChange("security_groups_ids") {
+		_, v := d.GetChange("security_groups_ids")
+		raw := v.(*schema.Set).List()
+		nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+		if diagnostic := nsgService.PutServerNSG(ctx, d.Get("datacenter_id").(string), d.Id(), raw); diagnostic != nil {
+			return diagnostic
+		}
 	}
 
 	// Volume stuff
@@ -1049,11 +1089,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 			firstNicFirewallPath := "nic.0.firewall"
 			fs := cloudapifirewall.Service{Client: client, Meta: meta, D: d}
-			nicId := ""
+			nicID := ""
 			if nic != nil && nic.Id != nil {
-				nicId = *nic.Id
+				nicID = *nic.Id
 			}
-			firewallRules, fwRuleIds, diagResp := fs.GetAndUpdateFirewalls(ctx, dcId, *server.Id, nicId, firstNicFirewallPath)
+			firewallRules, fwRuleIds, diagResp := fs.GetAndUpdateFirewalls(ctx, dcId, *server.Id, nicID, firstNicFirewallPath)
 			if diagResp != nil {
 				return diagResp
 			}
@@ -1077,6 +1117,19 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("error nic (%w)", err))
 				return diags
+			}
+
+			if d.HasChange("nic.0.security_groups_ids") {
+				_, v := d.GetChange("nic.0.security_groups_ids")
+				raw := v.(*schema.Set).List()
+				if createNic {
+					nicID = *createdNic.Id
+				}
+				nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+				if diagnostic := nsgService.PutNICNSG(ctx, d.Get("datacenter_id").(string), *server.Id, nicID, raw); diagnostic != nil {
+					return diagnostic
+				}
+
 			}
 
 			if createNic {
@@ -1171,7 +1224,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	if strings.ToLower(*server.Properties.Type) != "cube" {
+	if !strings.EqualFold(*server.Properties.Type, "cube") {
 		diags := deleteInlineVolumes(ctx, d, meta, client)
 		if diags != nil {
 			return diags
@@ -1373,7 +1426,10 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 			server.Properties.CpuFamily = &vStr
 		}
 	}
-
+	if v, ok := d.GetOk("hostname"); ok {
+		vStr := v.(string)
+		server.Properties.Hostname = &vStr
+	}
 	if _, ok := d.GetOk("boot_cdrom"); ok {
 		bootCdrom := d.Get("boot_cdrom").(string)
 		if utils.IsValidUUID(bootCdrom) {
@@ -1419,7 +1475,11 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 				return fmt.Errorf("error setting name %w", err)
 			}
 		}
-
+		if server.Properties.Hostname != nil {
+			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
+				return fmt.Errorf("error setting hostname %w", err)
+			}
+		}
 		if server.Properties.Cores != nil {
 			if err := d.Set("cores", *server.Properties.Cores); err != nil {
 				return fmt.Errorf("error setting cores %w", err)
@@ -1471,11 +1531,17 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		} else {
 			d.Set("boot_volume", nil)
 		}
-
-		if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-			(*server.Entities.Volumes.Items)[0].Properties != nil && (*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-			if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
-				return fmt.Errorf("error setting boot_image %w", err)
+		if server.Entities != nil {
+			if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
+				(*server.Entities.Volumes.Items)[0].Properties != nil && (*server.Entities.Volumes.Items)[0].Properties.Image != nil {
+				if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
+					return fmt.Errorf("error setting boot_image %w", err)
+				}
+			}
+			if server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+				if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -1558,6 +1624,16 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 					fwRulesEntries = append(fwRulesEntries, firewallEntry)
 				}
 			}
+		}
+		if nic != nil && nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
+			nsgIDs := make([]string, 0)
+			for _, group := range *nic.Entities.Securitygroups.Items {
+				if group.Id != nil {
+					id := *group.Id
+					nsgIDs = append(nsgIDs, id)
+				}
+			}
+			utils.SetPropWithNilCheck(nicEntry, "security_groups_ids", nsgIDs)
 		}
 		nics := []map[string]interface{}{}
 		if fwRulesEntries != nil {

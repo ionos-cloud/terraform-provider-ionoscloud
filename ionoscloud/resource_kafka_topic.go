@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -44,11 +45,10 @@ func resourceKafkaTopic() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      fmt.Sprintf("The location of your Kafka Cluster Topic. Supported locations: %s", strings.Join(kafka.AvailableLocations, ", ")),
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(kafka.AvailableLocations, false)),
+				Type:        schema.TypeString,
+				Description: fmt.Sprintf("The location of your Kafka Cluster Topic. Supported locations: %s", strings.Join(kafka.AvailableLocations, ", ")),
+				Optional:    true,
+				ForceNew:    true,
 			},
 			"replication_factor": {
 				Type:        schema.TypeInt,
@@ -94,6 +94,9 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(*createdTopic.Id)
 	log.Printf("[INFO] Created Kafka Cluster Topic: %s", d.Id())
+
+	// Sleep for 5 second to avoid 500 error from the API
+	time.Sleep(5 * time.Second)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsTopicAvailable)
 	if err != nil {

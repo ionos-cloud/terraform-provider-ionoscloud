@@ -8,7 +8,8 @@ import (
 	"regexp"
 	"testing"
 
-	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-cdn"
+	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -27,14 +28,31 @@ func TestAccDistributionBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckCDNDistributionDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCDNDistributionConfigBasic,
+				Config: testAccCheckCDNDistributionConfigOnlyRequired,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCDNDistributionExists(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, &distribution),
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "ionossdk.terra.example.basic"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.caching", "true"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.waf", "true"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.sni_mode", "distribution"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.rate_limit_class", "R100"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "certificate_id", ""),
+					resource.TestCheckNoResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.geo_restrictions.#"),
+				),
+			},
+			{
+				Config: testAccCheckCDNDistributionConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCDNDistributionExists(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, &distribution),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.caching", "true"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.sni_mode", "distribution"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.waf", "true"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.rate_limit_class", "R100"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.geo_restrictions.0.allow_list.0", "RO"),
@@ -43,12 +61,18 @@ func TestAccDistributionBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceCDNDistributionMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "ionossdk.terra.example.basic"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
+
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByID, "public_endpoint_v4", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v4"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByID, "public_endpoint_v6", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByID, "resource_urn", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "resource_urn"),
+
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.caching", "true"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.waf", "true"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.sni_mode", "distribution"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.rate_limit_class", "R100"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.geo_restrictions.0.allow_list.0", "RO"),
 				),
@@ -56,13 +80,18 @@ func TestAccDistributionBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceCDNDistributionMatchDomain,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "ionossdk.terra.example.basic"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByDomain, "public_endpoint_v4", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v4"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByDomain, "public_endpoint_v6", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "public_endpoint_v6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.CDNDistributionResource+"."+constant.CDNDistributionDataSourceByDomain, "resource_urn", constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "resource_urn"),
+
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.caching", "true"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.waf", "true"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.rate_limit_class", "R100"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.sni_mode", "distribution"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.geo_restrictions.0.allow_list.0", "RO"),
 				),
 			},
@@ -74,11 +103,12 @@ func TestAccDistributionBasic(t *testing.T) {
 				Config: testAccCheckCDNDistributionConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCDNDistributionExists(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, &distribution),
-					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "ionossdk.terra.example.update"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.scheme", "http/https"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.prefix", "/api2"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.host", "server.server.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.caching", "false"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.sni_mode", "origin"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.waf", "true"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.rate_limit_class", "R10"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.0.upstream.0.geo_restrictions.0.block_list.0", "RO"),
@@ -86,6 +116,7 @@ func TestAccDistributionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.prefix", "/api3"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.host", "server2.example.com"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.caching", "true"),
+					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.sni_mode", "origin"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.waf", "false"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.rate_limit_class", "R100"),
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "routing_rules.1.upstream.0.geo_restrictions.0.allow_list.0", "CN"),
@@ -149,7 +180,7 @@ func testAccCheckCDNDistributionExists(n string, distribution *ionoscloud_cdn.Di
 		if err != nil {
 			return fmt.Errorf("error occurred while fetching distribution: %s", rs.Primary.ID)
 		}
-		if *foundDistribution.Id != rs.Primary.ID {
+		if foundDistribution.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
 		}
 		distribution = &foundDistribution
@@ -187,7 +218,7 @@ EOT
 EOT
 }
 ` + `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
-	domain         = "ionossdk.terra.example.update"
+	domain         = "unique.test.example.com"
 	certificate_id = ` + constant.CertificateResource + `.` + constant.TestCertName + `.id` + `
 	routing_rules {
 		scheme = "http/https"
@@ -197,6 +228,7 @@ EOT
 			caching          = false
 			waf              = true
 			rate_limit_class = "R10"
+			sni_mode 		 = "origin"
 			geo_restrictions {
 				block_list = [ "RO"]
 			}
@@ -210,6 +242,7 @@ EOT
 			caching          = true
 			waf              = false
 			rate_limit_class = "R100"
+			sni_mode 		 = "origin"
 			geo_restrictions {
 				allow_list = [ "CN", "RU"]
 			}

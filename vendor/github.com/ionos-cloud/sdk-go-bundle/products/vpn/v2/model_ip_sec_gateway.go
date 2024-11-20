@@ -194,28 +194,14 @@ func (o *IPSecGateway) SetVersion(v string) {
 	o.Version = &v
 }
 
-func (o IPSecGateway) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o IPSecGateway) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsZero(o.Name) {
-		toSerialize["name"] = o.Name
-	}
+	toSerialize["name"] = o.Name
 	if !IsNil(o.Description) {
 		toSerialize["description"] = o.Description
 	}
-	if !IsZero(o.GatewayIP) {
-		toSerialize["gatewayIP"] = o.GatewayIP
-	}
-	if !IsZero(o.Connections) {
-		toSerialize["connections"] = o.Connections
-	}
+	toSerialize["gatewayIP"] = o.GatewayIP
+	toSerialize["connections"] = o.Connections
 	if !IsNil(o.Version) {
 		toSerialize["version"] = o.Version
 	}

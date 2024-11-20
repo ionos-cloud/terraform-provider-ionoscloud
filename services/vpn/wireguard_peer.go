@@ -191,15 +191,19 @@ func SetWireguardPeerData(d *schema.ResourceData, wireguard vpn.WireguardPeerRea
 		return utils.GenerateSetError(resPeerName, "description", err)
 	}
 	if wireguard.Properties.Endpoint != nil {
-		var endpoiontSlice []any
 		endpointEntry, err := wireguard.Properties.Endpoint.ToMap()
 		if err != nil {
 			return err
 		}
-		endpoiontSlice = append(endpoiontSlice, endpointEntry)
-		if err := d.Set("endpoint", endpoiontSlice); err != nil {
-			return utils.GenerateSetError(resPeerName, "endpoint", err)
+
+		if len(endpointEntry) > 0 {
+			var endpoiontSlice []any
+			endpoiontSlice = append(endpoiontSlice, endpointEntry)
+			if err := d.Set("endpoint", endpoiontSlice); err != nil {
+				return utils.GenerateSetError(resPeerName, "endpoint", err)
+			}
 		}
+
 	}
 
 	if err := d.Set("allowed_ips", wireguard.Properties.AllowedIPs); err != nil {

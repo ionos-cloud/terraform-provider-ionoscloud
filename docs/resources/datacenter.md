@@ -22,6 +22,27 @@ resource "ionoscloud_datacenter" "example" {
 }
 ```
 
+## Attaching a NSG to a Datacenter
+
+#### A single Network Security Group can be attached at any time to a Datacenter. To do this, use the `ionoscloud_datacenter_nsg_selection` and provide the IDs of the NSG and Datacenter to link them. 
+#### Deleting the resource or setting the empty string for the `nsg_id` field will de-attach any previously linked NSG from the Datacenter.
+
+```hcl
+resource "ionoscloud_datacenter" "example" {
+  name            = "Datacenter NSG Example"
+  location        = "de/txl"
+}
+resource "ionoscloud_nsg" "example" {
+  name              = "Example NSG"
+  description       = "Example NSG Description"
+  datacenter_id     = ionoscloud_datacenter.example.id
+}
+resource "ionoscloud_datacenter_nsg_selection" "example"{
+  datacenter_id     = ionoscloud_datacenter.example.id
+  nsg_id            = ionoscloud_nsg.example.id
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:

@@ -22,8 +22,8 @@ type GroupCollection struct {
 	// The resource type.
 	Type *string `json:"type,omitempty"`
 	// The absolute URL to the resource's representation.
-	Href  *string          `json:"href,omitempty"`
-	Items *[]GroupResource `json:"items,omitempty"`
+	Href  *string  `json:"href,omitempty"`
+	Items *[]Group `json:"items,omitempty"`
 }
 
 // NewGroupCollection instantiates a new GroupCollection object
@@ -161,8 +161,8 @@ func (o *GroupCollection) HasHref() bool {
 }
 
 // GetItems returns the Items field value
-// If the value is explicit nil, the zero value for []GroupResource will be returned
-func (o *GroupCollection) GetItems() *[]GroupResource {
+// If the value is explicit nil, the zero value for []Group will be returned
+func (o *GroupCollection) GetItems() *[]Group {
 	if o == nil {
 		return nil
 	}
@@ -174,7 +174,7 @@ func (o *GroupCollection) GetItems() *[]GroupResource {
 // GetItemsOk returns a tuple with the Items field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GroupCollection) GetItemsOk() (*[]GroupResource, bool) {
+func (o *GroupCollection) GetItemsOk() (*[]Group, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -183,7 +183,7 @@ func (o *GroupCollection) GetItemsOk() (*[]GroupResource, bool) {
 }
 
 // SetItems sets field value
-func (o *GroupCollection) SetItems(v []GroupResource) {
+func (o *GroupCollection) SetItems(v []Group) {
 
 	o.Items = &v
 

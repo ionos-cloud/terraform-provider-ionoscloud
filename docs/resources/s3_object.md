@@ -1,22 +1,27 @@
 ---
-subcategory: "S3"
+subcategory: "Object Storage"
 layout: "ionoscloud"
 page_title: "IonosCloud: s3_object"
 sidebar_current: "docs-resource-s3_object"
 description: |-
-  Creates and manages IonosCloud S3 Objects.
+  Creates and manages IONOS Object Storage Objects.
 ---
 
 # ionoscloud_s3_object
 
-Manages **S3 Objects** on IonosCloud.
+Manages **IONOS Object Storage Objects** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
 
+resource "ionoscloud_s3_bucket" "example" {
+  name = "example"
+  object_lock_enabled = true
+}
+
 resource "ionoscloud_s3_object" "example" {
-  bucket = "example"
+  bucket = ionoscloud_s3_bucket.example.name
   key = "object"
   content = "body"
   content_type        = "text/plain"
@@ -27,6 +32,10 @@ resource "ionoscloud_s3_object" "example" {
   expires			 = "2024-10-07T12:34:56Z"
   website_redirect = "https://www.ionos.com"
   server_side_encryption = "AES256"
+  
+  object_lock_mode = "GOVERNANCE"
+  object_lock_retain_until_date = "2024-10-07T12:34:56Z"
+  object_lock_legal_hold = "ON"
 
   tags = {
     tk = "tv"
@@ -35,16 +44,16 @@ resource "ionoscloud_s3_object" "example" {
   metadata = {
     "mk" = "mv"
   }
+  
+  force_destroy = true
 }
 
+// Upload from file
 resource "ionoscloud_s3_object" "example" {
-  bucket = "example"
-  key = "object"
+  bucket = ionoscloud_s3_bucket.example.name
+  key = "file-object"
   source = "path/to/file"
 }
-
-
-
 ```
 
 ## Argument Reference
@@ -61,19 +70,23 @@ The following arguments are supported:
 - `content_language` - (Optional)[string] The natural language or languages of the intended audience for the object.
 - `content_type` - (Optional)[string] A standard MIME type describing the format of the contents.
 - `expires` - (Optional)[string] The date and time at which the object is no longer cacheable.
-- `server_side_encryption` - (Optional)[string] The server-side encryption algorithm used when storing this object in IONOS S3 Object Storage. Valid value is AES256.
+- `server_side_encryption` - (Optional)[string] The server-side encryption algorithm used when storing this object in IONOS Object Storage. Valid value is AES256.
 - `storage_class` - (Optional)[string] The storage class of the object. Valid value is STANDARD. Default is STANDARD.
 - `website_redirect` - (Optional)[string] Redirects requests for this object to another object in the same bucket or to an external URL.
 - `server_side_encryption_customer_algorithm` - (Optional)[string] Specifies the algorithm to use for encrypting the object. Valid value is AES256.
 - `server_side_encryption_customer_key` - (Optional)[string] Specifies the 256-bit, base64-encoded encryption key to use to encrypt and decrypt your data.
 - `server_side_encryption_customer_key_md5` - (Optional)[string] Specifies the 128-bit MD5 digest of the encryption key.
-- `server_side_encryption_context` - (Optional)[string] Specifies the IONOS S3 Object Storage Encryption Context for object encryption.
+- `server_side_encryption_context` - (Optional)[string] Specifies the IONOS Object Storage Encryption Context for object encryption.
 - `request_payer` - (Optional)[string] Confirms that the requester knows that they will be charged for the request.
-- `etag` - (Optional, Computed)[string] An entity tag (ETag) is an opaque identifier assigned by a web server to a specific version of a resource found at a URL.
-- `metadata` - (Optional)[map] A map of metadata to store with the object in IONOS S3 Object Storage. Metadata keys must be lowercase alphanumeric characters.
+- `object_lock_mode` - (Optional)[string] The object lock mode that you want to apply to the object. Valid values are `GOVERNANCE` and `COMPLIANCE`.
+- `object_lock_retain_until_date` - (Optional)[string] The date and time when the object lock retention expires.Must be in RFC3999 format
+- `object_lock_legal_hold` - (Optional)[string] Indicates whether a legal hold is in effect for the object. Valid values are `ON` and `OFF`.
+- `etag` - (Computed)[string] An entity tag (ETag) is an opaque identifier assigned by a web server to a specific version of a resource found at a URL.
+- `metadata` - (Optional)[map] A map of metadata to store with the object in IONOS Object Storage. Metadata keys must be lowercase alphanumeric characters.
 - `tags` - (Optional)[map] The tag-set for the object.
-- `version_id` - (Optional)[string] The version of the object.
+- `version_id` - (Computed)[string] The version of the object.
 - `mfa` - (Optional) [string]The concatenation of the authentication device's serial number, a space, and the value displayed on your authentication device.
+- `force_destroy` - (Optional)[bool] If true, the object will be destroyed if versioning is enabled then all versions will be destroyed. Default is `false`.
 
 ## Import
 

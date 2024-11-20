@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -161,7 +162,7 @@ func resourceVolume() *schema.Resource {
 
 func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 
-	//we do not want to check in case of resource creation
+	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
 	}
@@ -244,8 +245,8 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property "))
 				return diags
 			} else {
-				backupUnitId := backupUnitId.(string)
-				volume.Properties.BackupunitId = &backupUnitId
+				backupUnitID := backupUnitId.(string)
+				volume.Properties.BackupunitId = &backupUnitID
 			}
 		} else {
 			diags := diag.FromErr(fmt.Errorf("the backup_unit_id that you specified is not a valid UUID"))
@@ -498,13 +499,6 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 		}
 	}
 
-	if volume.Properties.ImageAlias != nil {
-		err := d.Set("image_alias", *volume.Properties.ImageAlias)
-		if err != nil {
-			return fmt.Errorf("error while setting image_alias property for volume %s: %w", d.Id(), err)
-		}
-	}
-
 	if volume.Properties.AvailabilityZone != nil {
 		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
 		if err != nil {
@@ -653,6 +647,10 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 	if len(sshKeys) != 0 {
 		var publicKeys []string
 		for _, path := range sshKeys {
+			if path == nil {
+				return nil, fmt.Errorf("ssh_keys or ssh_key_path contains empty value")
+			}
+
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := utils.ReadPublicKey(path.(string))
 			if err != nil {
@@ -720,7 +718,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 		} else {
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageName).Execute()
 			logApiRequestTime(apiResponse)
-			//here we search for snapshot if we do not find img based on imageName
+			// here we search for snapshot if we do not find img based on imageName
 			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 
 				snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageName).Execute()
@@ -763,7 +761,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					//we want to search for snapshot again, but we check for
+					// we want to search for snapshot again, but we check for
 					//image != "" to be sure we didn't find it when we searched above for it
 					if (apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404) && (image != "") {
 						snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageName).Execute()
@@ -856,7 +854,7 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 				alias = i
 			}
 
-			if alias != "" && strings.ToLower(alias) == strings.ToLower(imageAlias) {
+			if alias != "" && strings.EqualFold(alias, imageAlias) {
 				return i
 			}
 		}

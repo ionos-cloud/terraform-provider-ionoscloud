@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "6.2.0"
+	Version = "6.3.0"
 )
 
 // Constants for APIs
@@ -104,6 +104,8 @@ type APIClient struct {
 	PrivateCrossConnectsApi *PrivateCrossConnectsApiService
 
 	RequestsApi *RequestsApiService
+
+	SecurityGroupsApi *SecurityGroupsApiService
 
 	ServersApi *ServersApiService
 
@@ -162,6 +164,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.NetworkLoadBalancersApi = (*NetworkLoadBalancersApiService)(&c.common)
 	c.PrivateCrossConnectsApi = (*PrivateCrossConnectsApiService)(&c.common)
 	c.RequestsApi = (*RequestsApiService)(&c.common)
+	c.SecurityGroupsApi = (*SecurityGroupsApiService)(&c.common)
 	c.ServersApi = (*ServersApiService)(&c.common)
 	c.SnapshotsApi = (*SnapshotsApiService)(&c.common)
 	c.TargetGroupsApi = (*TargetGroupsApiService)(&c.common)
@@ -515,6 +518,10 @@ func (c *APIClient) prepareRequest(
 		body.WriteString(formParams.Encode())
 		// Set Content-Length
 		headerParams["Content-Length"] = fmt.Sprintf("%d", body.Len())
+	}
+
+	if queryParams == nil {
+		queryParams = make(url.Values)
 	}
 
 	// Setup path and query parameters

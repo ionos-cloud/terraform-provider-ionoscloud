@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-cdn"
+	ionoscloudcdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
@@ -31,6 +31,21 @@ func resourceCDNDistribution() *schema.Resource {
 				Description:      "The domain of the distribution.",
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			"resource_urn": {
+				Type:        schema.TypeString,
+				Description: "Unique name of the resource.",
+				Computed:    true,
+			},
+			"public_endpoint_v4": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as A record.",
+				Computed:    true,
+			},
+			"public_endpoint_v6": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as AAAA record.",
+				Computed:    true,
 			},
 			"certificate_id": {
 				Type:        schema.TypeString,
@@ -74,6 +89,11 @@ func resourceCDNDistribution() *schema.Resource {
 									"waf": {
 										Type:        schema.TypeBool,
 										Description: "Enable or disable WAF to protect the upstream host.",
+										Required:    true,
+									},
+									"sni_mode": {
+										Type:        schema.TypeString,
+										Description: "The SNI (Server Name Indication) mode of the upstream host. It supports two modes: 'distribution' and 'origin', for more information about these modes please check the resource docs.",
 										Required:    true,
 									},
 									"geo_restrictions": {
@@ -122,9 +142,9 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 
 	distributionDomain := d.Get("domain").(string)
 
-	distribution := ionoscloud_cdn.DistributionCreate{
-		Properties: &ionoscloud_cdn.DistributionProperties{
-			Domain: &distributionDomain,
+	distribution := ionoscloudcdn.DistributionCreate{
+		Properties: ionoscloudcdn.DistributionProperties{
+			Domain: distributionDomain,
 		},
 	}
 
@@ -134,7 +154,7 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if routingRules, err := cdnService.GetRoutingRulesData(d); err == nil {
-		distribution.Properties.RoutingRules = routingRules
+		distribution.Properties.RoutingRules = *routingRules
 	} else {
 		return diag.FromErr(err)
 	}
@@ -144,7 +164,7 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 		diags := diag.FromErr(fmt.Errorf("error creating CDN distribution (%s) (%w)", d.Id(), err))
 		return diags
 	}
-	d.SetId(*createdDistribution.Id)
+	d.SetId(createdDistribution.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsDistributionReady)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error occurred while checking the status for the CDN Distribution with ID: %v, error: %w", d.Id(), err))
@@ -183,10 +203,10 @@ func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	distributionDomain := d.Get("domain").(string)
 
-	request := ionoscloud_cdn.DistributionUpdate{
-		Id: ionoscloud_cdn.ToPtr(d.Id()),
-		Properties: &ionoscloud_cdn.DistributionProperties{
-			Domain: &distributionDomain,
+	request := ionoscloudcdn.DistributionUpdate{
+		Id: d.Id(),
+		Properties: ionoscloudcdn.DistributionProperties{
+			Domain: distributionDomain,
 		},
 	}
 
@@ -196,7 +216,7 @@ func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if routingRules, err := cdnService.GetRoutingRulesData(d); err == nil {
-		request.Properties.RoutingRules = routingRules
+		request.Properties.RoutingRules = *routingRules
 	} else {
 		return diag.FromErr(err)
 	}

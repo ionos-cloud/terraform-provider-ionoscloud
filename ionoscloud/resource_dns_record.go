@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dns "github.com/ionos-cloud/sdk-go-dns"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -78,7 +79,7 @@ func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.FromErr(fmt.Errorf("expected metadata in the response for the record with ID: %s, but received 'nil' instead", *recordResponse.Id))
 	}
 	if recordResponse.Metadata.State != nil {
-		if *recordResponse.Metadata.State == dns.FAILED {
+		if *recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 			// This is a temporary error message since right now the API is not returning errors that we can work with.
 			return diag.FromErr(fmt.Errorf("record creation has failed, this can happen if the data in the request is not correct, " +
 				"please check again the values defined in the plan"))
@@ -118,7 +119,7 @@ func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.FromErr(fmt.Errorf("an error occurred while updating the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err))
 	}
 	if recordResponse.Metadata.State != nil {
-		if *recordResponse.Metadata.State == dns.FAILED {
+		if *recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 			// This is a temporary error message since right now the API is not returning errors that we can work with.
 			return diag.FromErr(fmt.Errorf("record update has failed, this can happen if the data in the request is not correct, " +
 				"please check again the values defined in the plan"))

@@ -95,6 +95,7 @@ resource "random_password" "server_image_password" {
 
 - `name` - (Required)[string] The name of the server.
 - `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
+- `hostname` - (Optional)(Computed)[string] The hostname of the resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters. If no value provided explicitly, it will be populated with the name of the server
 - `cores` - (Optional)[integer] Number of server CPU cores.
 - `ram` - (Optional)[integer] The amount of memory for the server in MB.
 - `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
@@ -114,6 +115,7 @@ resource "random_password" "server_image_password" {
 - `image_password` - (Optional)[string] The password for the image.
 - `label` - (Optional) A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.
 - `inline_volume_ids` - (Computed) A list with the IDs for the volumes that are defined inside the server resource.
+- `security_groups_ids` - (Optional) The list of Security Group IDs for the resource.
 
 > **⚠ WARNING** 
 > 

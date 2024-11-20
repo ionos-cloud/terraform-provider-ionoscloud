@@ -1,13 +1,13 @@
 ---
 subcategory: "Application Load Balancer"
 layout: "ionoscloud"
-page_title: "IonosCloud: application_loadbalancer_forwarding_rule"
-sidebar_current: "docs-resource-application_loadbalancer_forwarding_rule"
+page_title: "IonosCloud: application_loadbalancer_forwardingrule"
+sidebar_current: "docs-resource-application_loadbalancer_forwardingrule"
 description: |-
   Creates and manages IonosCloud Application Load Balancer Forwarding Rule.
 ---
 
-# ionoscloud_application_loadbalancer_forwarding_rule
+# ionoscloud_application_loadbalancer_forwardingrule
 
 Manages an **Application Load Balancer Forwarding Rule** on IonosCloud.
 
@@ -124,5 +124,5 @@ The following arguments are supported:
 Resource Application Load Balancer Forwarding Rule can be imported using the `resource id`, `alb id` and `datacenter id`, e.g.
 
 ```shell
-terraform import ionoscloud_application_loadbalancer_forwarding_rule.myAlbRule {datacenter uuid}/{applicationLoadBalancer uuid}/{applicationLoadBalancerForwardingRule uuid}
+terraform import ionoscloud_application_loadbalancer_forwardingrule.my_application_loadbalancer_forwardingrule {datacenter uuid}/{application_loadbalancer uuid}/{application_loadbalancer_forwardingrule uuid}
 ```

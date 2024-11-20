@@ -73,14 +73,6 @@ func (o *DeletedMetadataAllOf) SetState(v string) {
 	o.State = &v
 }
 
-func (o DeletedMetadataAllOf) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
 func (o DeletedMetadataAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.State) {

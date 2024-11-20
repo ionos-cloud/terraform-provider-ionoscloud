@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
@@ -57,7 +58,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 			return diag.FromErr(err)
 		}
 	} else if resourceType != "" {
-		//items, err := client.ListResourcesByType(resource_type)
+		// items, err := client.ListResourcesByType(resource_type)
 		items, apiResponse, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
@@ -72,7 +73,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 	} else {
-		//items, err := client.ListResources()
+		// items, err := client.ListResources()
 		items, apiResponse, err := client.UserManagementApi.UmResourcesGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {

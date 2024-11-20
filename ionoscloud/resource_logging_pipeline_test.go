@@ -119,7 +119,7 @@ func testAccLoggingPipelineDestroyCheck(s *terraform.State) error {
 			continue
 		}
 		pipelineId := rs.Primary.ID
-		_, apiResponse, err := client.GetPipelineByID(ctx, pipelineId)
+		_, apiResponse, err := client.GetPipelineByID(ctx, rs.Primary.Attributes["location"], pipelineId)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
 				return fmt.Errorf("an error occurred while checking the destruction of Logging pipeline with ID: %s, error: %w", pipelineId, err)
@@ -145,9 +145,9 @@ func testAccLoggingPipelineExistenceCheck(path string, pipeline *logging.Pipelin
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
 		pipelineId := rs.Primary.ID
-		pipelineResponse, _, err := client.GetPipelineByID(ctx, pipelineId)
+		pipelineResponse, _, err := client.GetPipelineByID(ctx, rs.Primary.Attributes["location"], pipelineId)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching Logging pipeline with ID: %s, error: %w", pipelineId, err)
+			return fmt.Errorf("an error occurred while fetching Logging pipeline with ID: %s location %s, error: %w", pipelineId, rs.Primary.Attributes["location"], err)
 		}
 		pipeline = &pipelineResponse
 		return nil
@@ -157,12 +157,14 @@ func testAccLoggingPipelineExistenceCheck(path string, pipeline *logging.Pipelin
 const LoggingPipelineDataSourceMatchById = LoggingPipelineConfig + `
 ` + constant.DataSource + ` ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestDataSourceName + `{
 	id = ` + constant.LoggingPipelineResource + `.` + constant.LoggingPipelineTestResourceName + `.id
+	location = "es/vit"
 }
 `
 
 const LoggingPipelineDataSourceMatchByName = LoggingPipelineConfig + `
 ` + constant.DataSource + ` ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestDataSourceName + `{
 	name = ` + constant.LoggingPipelineResource + `.` + constant.LoggingPipelineTestResourceName + `.name
+	location = "es/vit"
 }
 `
 
@@ -170,23 +172,27 @@ const LoggingPipelineDataSourceInvalidBothIDAndName = LoggingPipelineConfig + `
 ` + constant.DataSource + ` ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestDataSourceName + `{
 	id = ` + constant.LoggingPipelineResource + `.` + constant.LoggingPipelineTestResourceName + `.id
 	name = ` + constant.LoggingPipelineResource + `.` + constant.LoggingPipelineTestResourceName + `.name
+	location = "es/vit"
 }
 `
 
 const LoggingPipelineDataSourceInvalidNoIDNoName = `
 ` + constant.DataSource + ` ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestDataSourceName + ` {
+	location = "es/vit"
 }
 `
 
 const LoggingPipelineDataSourceWrongNameError = `
 ` + constant.DataSource + ` ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestDataSourceName + ` {
 	name = "nonexistent"
+	location = "es/vit"
 }
 `
 
 const LoggingPipelineConfigUpdate = `
 resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestResourceName + ` {
 	` + nameAttribute + ` = "` + pipelineNameUpdatedValue + `"
+	location = "es/vit"
 	` + pipelineLogUpdated + `
 }
 `

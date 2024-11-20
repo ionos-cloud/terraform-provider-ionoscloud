@@ -26,7 +26,6 @@ import (
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/binary"
-	"fmt"
 	"hash"
 	"io"
 	"net"
@@ -52,6 +51,11 @@ func NewV1() (UUID, error) {
 	return DefaultGenerator.NewV1()
 }
 
+// NewV1 returns a UUID based on the provided timestamp and MAC address.
+func NewV1AtTime(atTime time.Time) (UUID, error) {
+	return DefaultGenerator.NewV1AtTime(atTime)
+}
+
 // NewV3 returns a UUID based on the MD5 hash of the namespace UUID and name.
 func NewV3(ns UUID, name string) UUID {
 	return DefaultGenerator.NewV3(ns, name)
@@ -67,43 +71,49 @@ func NewV5(ns UUID, name string) UUID {
 	return DefaultGenerator.NewV5(ns, name)
 }
 
-// NewV6 returns a k-sortable UUID based on a timestamp and 48 bits of
+// NewV6 returns a k-sortable UUID based on the current timestamp and 48 bits of
 // pseudorandom data. The timestamp in a V6 UUID is the same as V1, with the bit
 // order being adjusted to allow the UUID to be k-sortable.
-//
-// This is implemented based on revision 03 of the Peabody UUID draft, and may
-// be subject to change pending further revisions. Until the final specification
-// revision is finished, changes required to implement updates to the spec will
-// not be considered a breaking change. They will happen as a minor version
-// releases until the spec is final.
 func NewV6() (UUID, error) {
 	return DefaultGenerator.NewV6()
 }
 
-// NewV7 returns a k-sortable UUID based on the current millisecond precision
-// UNIX epoch and 74 bits of pseudorandom data. It supports single-node batch generation (multiple UUIDs in the same timestamp) with a Monotonic Random counter.
-//
-// This is implemented based on revision 04 of the Peabody UUID draft, and may
-// be subject to change pending further revisions. Until the final specification
-// revision is finished, changes required to implement updates to the spec will
-// not be considered a breaking change. They will happen as a minor version
-// releases until the spec is final.
+// NewV6 returns a k-sortable UUID based on the provided timestamp and 48 bits of
+// pseudorandom data. The timestamp in a V6 UUID is the same as V1, with the bit
+// order being adjusted to allow the UUID to be k-sortable.
+func NewV6AtTime(atTime time.Time) (UUID, error) {
+	return DefaultGenerator.NewV6AtTime(atTime)
+}
+
+// NewV7 returns a k-sortable UUID based on the current millisecond-precision
+// UNIX epoch and 74 bits of pseudorandom data. It supports single-node batch
+// generation (multiple UUIDs in the same timestamp) with a Monotonic Random counter.
 func NewV7() (UUID, error) {
 	return DefaultGenerator.NewV7()
+}
+
+// NewV7 returns a k-sortable UUID based on the provided millisecond-precision
+// UNIX epoch and 74 bits of pseudorandom data. It supports single-node batch
+// generation (multiple UUIDs in the same timestamp) with a Monotonic Random counter.
+func NewV7AtTime(atTime time.Time) (UUID, error) {
+	return DefaultGenerator.NewV7AtTime(atTime)
 }
 
 // Generator provides an interface for generating UUIDs.
 type Generator interface {
 	NewV1() (UUID, error)
+	NewV1AtTime(time.Time) (UUID, error)
 	NewV3(ns UUID, name string) UUID
 	NewV4() (UUID, error)
 	NewV5(ns UUID, name string) UUID
 	NewV6() (UUID, error)
+	NewV6AtTime(time.Time) (UUID, error)
 	NewV7() (UUID, error)
+	NewV7AtTime(time.Time) (UUID, error)
 }
 
 // Gen is a reference UUID generator based on the specifications laid out in
-// RFC-4122 and DCE 1.1: Authentication and Security Services. This type
+// RFC-9562 and DCE 1.1: Authentication and Security Services. This type
 // satisfies the Generator interface as defined in this package.
 //
 // For consumers who are generating V1 UUIDs, but don't want to expose the MAC
@@ -224,9 +234,14 @@ func WithRandomReader(reader io.Reader) GenOption {
 
 // NewV1 returns a UUID based on the current timestamp and MAC address.
 func (g *Gen) NewV1() (UUID, error) {
+	return g.NewV1AtTime(g.epochFunc())
+}
+
+// NewV1AtTime returns a UUID based on the provided timestamp and current MAC address.
+func (g *Gen) NewV1AtTime(atTime time.Time) (UUID, error) {
 	u := UUID{}
 
-	timeNow, clockSeq, err := g.getClockSequence(false)
+	timeNow, clockSeq, err := g.getClockSequence(false, atTime)
 	if err != nil {
 		return Nil, err
 	}
@@ -242,7 +257,7 @@ func (g *Gen) NewV1() (UUID, error) {
 	copy(u[10:], hardwareAddr)
 
 	u.SetVersion(V1)
-	u.SetVariant(VariantRFC4122)
+	u.SetVariant(VariantRFC9562)
 
 	return u, nil
 }
@@ -251,7 +266,7 @@ func (g *Gen) NewV1() (UUID, error) {
 func (g *Gen) NewV3(ns UUID, name string) UUID {
 	u := newFromHash(md5.New(), ns, name)
 	u.SetVersion(V3)
-	u.SetVariant(VariantRFC4122)
+	u.SetVariant(VariantRFC9562)
 
 	return u
 }
@@ -263,7 +278,7 @@ func (g *Gen) NewV4() (UUID, error) {
 		return Nil, err
 	}
 	u.SetVersion(V4)
-	u.SetVariant(VariantRFC4122)
+	u.SetVariant(VariantRFC9562)
 
 	return u, nil
 }
@@ -272,28 +287,37 @@ func (g *Gen) NewV4() (UUID, error) {
 func (g *Gen) NewV5(ns UUID, name string) UUID {
 	u := newFromHash(sha1.New(), ns, name)
 	u.SetVersion(V5)
-	u.SetVariant(VariantRFC4122)
+	u.SetVariant(VariantRFC9562)
 
 	return u
 }
 
-// NewV6 returns a k-sortable UUID based on a timestamp and 48 bits of
+// NewV6 returns a k-sortable UUID based on the current timestamp and 48 bits of
 // pseudorandom data. The timestamp in a V6 UUID is the same as V1, with the bit
 // order being adjusted to allow the UUID to be k-sortable.
-//
-// This is implemented based on revision 03 of the Peabody UUID draft, and may
-// be subject to change pending further revisions. Until the final specification
-// revision is finished, changes required to implement updates to the spec will
-// not be considered a breaking change. They will happen as a minor version
-// releases until the spec is final.
 func (g *Gen) NewV6() (UUID, error) {
+	return g.NewV6AtTime(g.epochFunc())
+}
+
+// NewV6 returns a k-sortable UUID based on the provided timestamp and 48 bits of
+// pseudorandom data. The timestamp in a V6 UUID is the same as V1, with the bit
+// order being adjusted to allow the UUID to be k-sortable.
+func (g *Gen) NewV6AtTime(atTime time.Time) (UUID, error) {
+	/* https://datatracker.ietf.org/doc/html/rfc9562#name-uuid-version-6
+	    0                   1                   2                   3
+	    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	   |                           time_high                           |
+	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	   |           time_mid            |  ver  |       time_low        |
+	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	   |var|         clock_seq         |             node              |
+	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	   |                              node                             |
+	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ */
 	var u UUID
 
-	if _, err := io.ReadFull(g.rand, u[10:]); err != nil {
-		return Nil, err
-	}
-
-	timeNow, clockSeq, err := g.getClockSequence(false)
+	timeNow, _, err := g.getClockSequence(false, atTime)
 	if err != nil {
 		return Nil, err
 	}
@@ -301,20 +325,84 @@ func (g *Gen) NewV6() (UUID, error) {
 	binary.BigEndian.PutUint32(u[0:], uint32(timeNow>>28))   // set time_high
 	binary.BigEndian.PutUint16(u[4:], uint16(timeNow>>12))   // set time_mid
 	binary.BigEndian.PutUint16(u[6:], uint16(timeNow&0xfff)) // set time_low (minus four version bits)
-	binary.BigEndian.PutUint16(u[8:], clockSeq&0x3fff)       // set clk_seq_hi_res (minus two variant bits)
+
+	// Based on the RFC 9562 recommendation that this data be fully random and not a monotonic counter,
+	//we do NOT support batching version 6 UUIDs.
+	//set clock_seq (14 bits) and node (48 bits) pseudo-random bits (first 2 bits will be overridden)
+	if _, err = io.ReadFull(g.rand, u[8:]); err != nil {
+		return Nil, err
+	}
 
 	u.SetVersion(V6)
-	u.SetVariant(VariantRFC4122)
+
+	//overwrite first 2 bits of byte[8] for the variant
+	u.SetVariant(VariantRFC9562)
 
 	return u, nil
 }
 
-// getClockSequence returns the epoch and clock sequence for V1,V6 and V7 UUIDs.
+// NewV7 returns a k-sortable UUID based on the current millisecond-precision
+// UNIX epoch and 74 bits of pseudorandom data.
+func (g *Gen) NewV7() (UUID, error) {
+	return g.NewV7AtTime(g.epochFunc())
+}
+
+// NewV7 returns a k-sortable UUID based on the provided millisecond-precision
+// UNIX epoch and 74 bits of pseudorandom data.
+func (g *Gen) NewV7AtTime(atTime time.Time) (UUID, error) {
+	var u UUID
+	/* https://datatracker.ietf.org/doc/html/rfc9562#name-uuid-version-7
+	    0                   1                   2                   3
+	    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	   |                           unix_ts_ms                          |
+	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	   |          unix_ts_ms           |  ver  |       rand_a          |
+	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	   |var|                        rand_b                             |
+	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	   |                            rand_b                             |
+	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ */
+
+	ms, clockSeq, err := g.getClockSequence(true, atTime)
+	if err != nil {
+		return Nil, err
+	}
+	//UUIDv7 features a 48 bit timestamp. First 32bit (4bytes) represents seconds since 1970, followed by 2 bytes for the ms granularity.
+	u[0] = byte(ms >> 40) //1-6 bytes: big-endian unsigned number of Unix epoch timestamp
+	u[1] = byte(ms >> 32)
+	u[2] = byte(ms >> 24)
+	u[3] = byte(ms >> 16)
+	u[4] = byte(ms >> 8)
+	u[5] = byte(ms)
+
+	//Support batching by using a monotonic pseudo-random sequence,
+	//as described in RFC 9562 section 6.2, Method 1.
+	//The 6th byte contains the version and partially rand_a data.
+	//We will lose the most significant bites from the clockSeq (with SetVersion), but it is ok,
+	//we need the least significant that contains the counter to ensure the monotonic property
+	binary.BigEndian.PutUint16(u[6:8], clockSeq) // set rand_a with clock seq which is random and monotonic
+
+	//override first 4bits of u[6].
+	u.SetVersion(V7)
+
+	//set rand_b 64bits of pseudo-random bits (first 2 will be overridden)
+	if _, err = io.ReadFull(g.rand, u[8:16]); err != nil {
+		return Nil, err
+	}
+	//override first 2 bits of byte[8] for the variant
+	u.SetVariant(VariantRFC9562)
+
+	return u, nil
+}
+
+// getClockSequence returns the epoch and clock sequence of the provided time,
+// used for generating V1,V6 and V7 UUIDs.
 //
-//	When useUnixTSMs is false, it uses the Coordinated Universal Time (UTC) as a count of 100-
-//
-// nanosecond intervals since 00:00:00.00, 15 October 1582 (the date of Gregorian reform to the Christian calendar).
-func (g *Gen) getClockSequence(useUnixTSMs bool) (uint64, uint16, error) {
+// When useUnixTSMs is false, it uses the Coordinated Universal Time (UTC) as a count of
+// 100-nanosecond intervals since 00:00:00.00, 15 October 1582 (the date of Gregorian
+// reform to the Christian calendar).
+func (g *Gen) getClockSequence(useUnixTSMs bool, atTime time.Time) (uint64, uint16, error) {
 	var err error
 	g.clockSequenceOnce.Do(func() {
 		buf := make([]byte, 2)
@@ -332,9 +420,9 @@ func (g *Gen) getClockSequence(useUnixTSMs bool) (uint64, uint16, error) {
 
 	var timeNow uint64
 	if useUnixTSMs {
-		timeNow = uint64(g.epochFunc().UnixMilli())
+		timeNow = uint64(atTime.UnixMilli())
 	} else {
-		timeNow = g.getEpoch()
+		timeNow = g.getEpoch(atTime)
 	}
 	// Clock didn't change since last UUID generation.
 	// Should increase clock sequence.
@@ -344,59 +432,6 @@ func (g *Gen) getClockSequence(useUnixTSMs bool) (uint64, uint16, error) {
 	g.lastTime = timeNow
 
 	return timeNow, g.clockSequence, nil
-}
-
-// NewV7 returns a k-sortable UUID based on the current millisecond precision
-// UNIX epoch and 74 bits of pseudorandom data.
-//
-// This is implemented based on revision 04 of the Peabody UUID draft, and may
-// be subject to change pending further revisions. Until the final specification
-// revision is finished, changes required to implement updates to the spec will
-// not be considered a breaking change. They will happen as a minor version
-// releases until the spec is final.
-func (g *Gen) NewV7() (UUID, error) {
-	var u UUID
-	/* https://www.ietf.org/archive/id/draft-peabody-dispatch-new-uuid-format-04.html#name-uuid-version-7
-		0                   1                   2                   3
-	    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-	   |                           unix_ts_ms                          |
-	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-	   |          unix_ts_ms           |  ver  |       rand_a          |
-	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-	   |var|                        rand_b                             |
-	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-	   |                            rand_b                             |
-	   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ */
-
-	ms, clockSeq, err := g.getClockSequence(true)
-	if err != nil {
-		return Nil, err
-	}
-	//UUIDv7 features a 48 bit timestamp. First 32bit (4bytes) represents seconds since 1970, followed by 2 bytes for the ms granularity.
-	u[0] = byte(ms >> 40) //1-6 bytes: big-endian unsigned number of Unix epoch timestamp
-	u[1] = byte(ms >> 32)
-	u[2] = byte(ms >> 24)
-	u[3] = byte(ms >> 16)
-	u[4] = byte(ms >> 8)
-	u[5] = byte(ms)
-
-	//support batching by using a monotonic pseudo-random sequence
-	//The 6th byte contains the version and partially rand_a data.
-	//We will lose the most significant bites from the clockSeq (with SetVersion), but it is ok, we need the least significant that contains the counter to ensure the monotonic property
-	binary.BigEndian.PutUint16(u[6:8], clockSeq) // set rand_a with clock seq which is random and monotonic
-
-	//override first 4bits of u[6].
-	u.SetVersion(V7)
-
-	//set rand_b 64bits of pseudo-random bits (first 2 will be overridden)
-	if _, err = io.ReadFull(g.rand, u[8:16]); err != nil {
-		return Nil, err
-	}
-	//override first 2 bits of byte[8] for the variant
-	u.SetVariant(VariantRFC4122)
-
-	return u, nil
 }
 
 // Returns the hardware address.
@@ -414,7 +449,7 @@ func (g *Gen) getHardwareAddr() ([]byte, error) {
 		if _, err = io.ReadFull(g.rand, g.hardwareAddr[:]); err != nil {
 			return
 		}
-		// Set multicast bit as recommended by RFC-4122
+		// Set multicast bit as recommended by RFC-9562
 		g.hardwareAddr[0] |= 0x01
 	})
 	if err != nil {
@@ -424,9 +459,9 @@ func (g *Gen) getHardwareAddr() ([]byte, error) {
 }
 
 // Returns the difference between UUID epoch (October 15, 1582)
-// and current time in 100-nanosecond intervals.
-func (g *Gen) getEpoch() uint64 {
-	return epochStart + uint64(g.epochFunc().UnixNano()/100)
+// and the provided time in 100-nanosecond intervals.
+func (g *Gen) getEpoch(atTime time.Time) uint64 {
+	return epochStart + uint64(atTime.UnixNano()/100)
 }
 
 // Returns the UUID based on the hashing of the namespace UUID and name.
@@ -452,5 +487,5 @@ func defaultHWAddrFunc() (net.HardwareAddr, error) {
 			return iface.HardwareAddr, nil
 		}
 	}
-	return []byte{}, fmt.Errorf("uuid: no HW address found")
+	return []byte{}, ErrNoHwAddressFound
 }

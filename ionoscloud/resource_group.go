@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
@@ -149,12 +150,12 @@ func resourceGroup() *schema.Resource {
 		//		Upgrade: resourceGroupUpgradeV0,
 		//		Version: 0,
 		//	},
-		//},
+		// },
 	}
 }
 
 //
-//func resourceGroup0() *schema.Resource {
+// func resourceGroup0() *schema.Resource {
 //	return &schema.Resource{
 //		Schema: map[string]*schema.Schema{
 //			"user_id": {
@@ -236,7 +237,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(errState)
 	}
 
-	//add users to group if any is provided
+	// add users to group if any is provided
 	if userVal, userOK := d.GetOk("user_id"); userOK {
 		userID := userVal.(string)
 		log.Printf("[INFO] Adding user %+v to group...", userID)
@@ -586,7 +587,7 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 
 func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
 	client := meta.(services.SdkBundle).CloudApiClient
-	userToAdd := ionoscloud.User{
+	userToAdd := ionoscloud.UserGroupPost{
 		Id: &userId,
 	}
 

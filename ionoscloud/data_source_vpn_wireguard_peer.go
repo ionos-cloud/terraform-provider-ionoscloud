@@ -21,7 +21,7 @@ func dataSourceVpnWireguardPeer() *schema.Resource {
 			"location": {
 				Type:        schema.TypeString,
 				Description: fmt.Sprintf("The location of the WireGuard Peer. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
-				Required:    true,
+				Optional:    true,
 			},
 			"id": {
 				Type:     schema.TypeString,

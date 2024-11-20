@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	cdn "github.com/ionos-cloud/sdk-go-cdn"
+	cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
@@ -22,6 +22,21 @@ func dataSourceCDNDistribution() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"resource_urn": {
+				Type:        schema.TypeString,
+				Description: "Unique name of the resource.",
+				Computed:    true,
+			},
+			"public_endpoint_v4": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as A record.",
+				Computed:    true,
+			},
+			"public_endpoint_v6": {
+				Type:        schema.TypeString,
+				Description: "IP of the distribution, it has to be included on the domain DNS Zone as AAAA record.",
+				Computed:    true,
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,
@@ -73,6 +88,11 @@ func dataSourceCDNDistribution() *schema.Resource {
 									"waf": {
 										Type:        schema.TypeBool,
 										Description: "Enable or disable WAF to protect the upstream host.",
+										Computed:    true,
+									},
+									"sni_mode": {
+										Type:        schema.TypeString,
+										Description: "The SNI (Server Name Indication) mode of the upstream host. It supports two modes: 'distribution' and 'origin', for more information about these modes please check the data source docs.",
 										Computed:    true,
 									},
 									"geo_restrictions": {
@@ -150,16 +170,16 @@ func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, 
 			return diags
 		}
 
-		results = *distributions.Items
+		results = distributions.Items
 		if domainOk {
 			partialMatch := d.Get("partial_match").(bool)
 
 			log.Printf("[INFO] Using data source for container registry by domain with partial_match %t and domain: %s", partialMatch, domain)
 
-			if distributions.Items != nil && len(*distributions.Items) > 0 {
+			if len(distributions.Items) > 0 {
 				var distributionsByDomain []cdn.Distribution
 
-				for _, distributionItem := range *distributions.Items {
+				for _, distributionItem := range distributions.Items {
 					if isValidDomain(distributionItem.Properties, domain, partialMatch) {
 						distributionsByDomain = append(distributionsByDomain, distributionItem)
 					}
@@ -190,12 +210,9 @@ func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, 
 
 }
 
-func isValidDomain(properties *cdn.DistributionProperties, domain string, partialMatch bool) bool {
-	if properties == nil || properties.Domain == nil {
-		return false
-	}
+func isValidDomain(properties cdn.DistributionProperties, domain string, partialMatch bool) bool {
 	if partialMatch {
-		return strings.Contains(*properties.Domain, domain)
+		return strings.Contains(properties.Domain, domain)
 	}
-	return strings.EqualFold(*properties.Domain, domain)
+	return strings.EqualFold(properties.Domain, domain)
 }
