@@ -7,6 +7,9 @@
 - Add servers to `https://docs.ionos.com/`
 - Add cube server and vcpu server to `https://docs.ionos.com/`
 
+### Tests
+- Add basic NFS tests
+
 ## 6.6.2 
 ### Features
 - Make `location` optional for `certificate_manager` resources and datasources
