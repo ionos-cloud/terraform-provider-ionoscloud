@@ -167,7 +167,7 @@ resource "ionoscloud_server" "nfs_server" {
 }
 `
 
-const testAccCheckNFSClusterConfig_basic = testAccCheckNFSClusterConfig + `
+const testAccCheckNFSClusterConfigBasic = testAccCheckNFSClusterConfig + `
 resource "ionoscloud_nfs_cluster" "example" {
   name = "example"
   location = "de/txl"
