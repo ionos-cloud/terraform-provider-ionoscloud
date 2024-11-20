@@ -7,7 +7,7 @@
 - Add servers to `https://docs.ionos.com/`
 - Add cube server and vcpu server to `https://docs.ionos.com/`
 ### Enhancement
-- Add `allow_replace` to node `ionoscloud_server` and `ionoscloud_cube_server` resources, which allows the update of immutable server fields will first destroy and then re-create the resource. This field should be used with care, understanding the risks.
+- Add `allow_replace` to `ionoscloud_server` and `ionoscloud_cube_server` resources, which allows the update of immutable server fields by destroying and then re-creating the resource. This field should be used with care, understanding the risks.
 
 ## 6.6.2 
 ### Features
