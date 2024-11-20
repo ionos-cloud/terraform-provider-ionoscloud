@@ -22,11 +22,13 @@ func dataSourceTargetGroup() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The name of the target group.",
+				Computed:    true,
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,

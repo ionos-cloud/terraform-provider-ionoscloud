@@ -51,7 +51,8 @@ func TestAccDataCenterBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceDatacenterMatchName,
 				Check: resource.ComposeTestCheckFunc(
-
+					testAccCheckDatacenterExists(constant.DatacenterResource+"."+constant.DatacenterTestResource, &datacenter),
+					resource.TestCheckResourceAttrSet(constant.DatacenterResource+"."+constant.DatacenterTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "name", constant.DatacenterResource+"."+constant.DatacenterTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "location", constant.DatacenterResource+"."+constant.DatacenterTestResource, "location"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceByName, "description", constant.DatacenterResource+"."+constant.DatacenterTestResource, "description"),

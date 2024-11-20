@@ -31,10 +31,12 @@ func dataSourceNIC() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"lan": {
 				Type:     schema.TypeInt,

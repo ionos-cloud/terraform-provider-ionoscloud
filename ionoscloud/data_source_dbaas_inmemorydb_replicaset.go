@@ -20,6 +20,7 @@ func dataSourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The ID of the InMemoryDB Replicaset.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -30,6 +31,7 @@ func dataSourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The display name of the InMemoryDB Replicaset.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"dns_name": {
 				Type:        schema.TypeString,

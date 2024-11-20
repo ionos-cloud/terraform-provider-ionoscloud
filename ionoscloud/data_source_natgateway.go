@@ -21,10 +21,12 @@ func dataSourceNatGateway() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"public_ips": {
 				Type:        schema.TypeList,

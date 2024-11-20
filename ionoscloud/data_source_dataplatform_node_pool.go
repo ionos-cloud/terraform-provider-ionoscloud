@@ -23,12 +23,14 @@ func dataSourceDataplatformNodePool() *schema.Resource {
 			"id": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of your node pool.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,

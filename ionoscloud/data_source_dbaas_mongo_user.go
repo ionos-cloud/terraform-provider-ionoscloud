@@ -23,6 +23,7 @@ func dataSourceDbaasMongoUser() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Id of the backup unit.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"cluster_id": {
 				Type:             schema.TypeString,
