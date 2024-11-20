@@ -32,7 +32,7 @@ func TestAccNFSCluster_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNFSClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckNFSClusterConfig_basic,
+				Config: testAccCheckNFSClusterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNFSClusterExists("ionoscloud_nfs_cluster.example"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "name", "example"),
@@ -42,7 +42,7 @@ func TestAccNFSCluster_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckNFSClusterConfig_update,
+				Config: testAccCheckNFSClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNFSClusterExists("ionoscloud_nfs_cluster.example"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "name", "example_updated"),

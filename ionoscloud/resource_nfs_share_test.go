@@ -12,7 +12,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
-func TestAccNFSShare_basic(t *testing.T) {
+func TestAccNFSShareBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -31,7 +31,7 @@ func TestAccNFSShare_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNFSShareDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckNFSShareConfig_basic,
+				Config: testAccCheckNFSShareConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNFSShareExists("ionoscloud_nfs_share.example"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_share.example", "name", "example-share"),
@@ -45,7 +45,7 @@ func TestAccNFSShare_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckNFSShareConfig_update,
+				Config: testAccCheckNFSShareConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNFSShareExists("ionoscloud_nfs_share.example"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_share.example", "name", "example-share-updated"),
