@@ -80,8 +80,8 @@ func testAccCheckNFSShareDestroy(s *terraform.State) error {
 		}
 
 		_, resp, err := client.GetNFSShareByID(context.Background(), rs.Primary.Attributes["cluster_id"], rs.Primary.ID, rs.Primary.Attributes["location"])
-		if resp != nil && resp.StatusCode != 404 {
-			return fmt.Errorf("NFS Share still exists: %s", rs.Primary.ID)
+		if !resp.HttpNotFound() {
+			return fmt.Errorf("NFS Share still exists: %s, clusterID %s", rs.Primary.ID, rs.Primary.Attributes["cluster_id"])
 		}
 		if err != nil {
 			return fmt.Errorf("error fetching NFS Share with ID %s: %v", rs.Primary.ID, err)
