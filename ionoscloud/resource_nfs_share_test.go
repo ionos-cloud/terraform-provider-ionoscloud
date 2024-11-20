@@ -140,7 +140,7 @@ resource "ionoscloud_nfs_share" "example" {
 }
 `
 
-const testAccCheckNFSShareConfig_update = testAccCheckNFSClusterConfig_basic + `
+const testAccCheckNFSShareConfigUpdate = testAccCheckNFSClusterConfig_basic + `
 resource "ionoscloud_nfs_share" "example" {
   location = ionoscloud_nfs_cluster.example.location
   cluster_id = ionoscloud_nfs_cluster.example.id
