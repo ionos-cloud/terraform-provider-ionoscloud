@@ -37,6 +37,7 @@ func dataSourceLoggingPipeline() *schema.Resource {
 				Description:      "The ID of the Logging pipeline",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				Optional:         true,
+				Computed:         true,
 			},
 			"name": {
 				Type:        schema.TypeString,
