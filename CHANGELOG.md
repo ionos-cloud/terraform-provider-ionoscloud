@@ -1,5 +1,6 @@
 ## 6.6.3 - upcoming release
 ### Documentation
+- Add additional infrastructure provisioning examples
 - Fix titles for mariadb docs data sources `https://docs.ionos.com/`
 - Add Network Security Group to `https://docs.ionos.com/`
 - Add bootvolume_selector to `https://docs.ionos.com/
