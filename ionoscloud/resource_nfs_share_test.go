@@ -12,7 +12,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
-func TestAccNFSShare_basic(t *testing.T) {
+func TestAccNFSShareBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
