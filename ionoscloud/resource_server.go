@@ -536,7 +536,7 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 		}
 
 		if diff.HasChange("volume.0.backup_unit_id") {
-			return fmt.Errorf("volume.0.disk_type %s", ImmutableError)
+			return fmt.Errorf("volume.0.backup_unit_id %s", ImmutableError)
 		}
 
 		if diff.HasChange("volume.0.disk_type") {
