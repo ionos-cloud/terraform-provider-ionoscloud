@@ -45,7 +45,7 @@ func TestAccNFSShare_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckNFSShareConfig_update,
+				Config: testAccCheckNFSShareConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNFSShareExists("ionoscloud_nfs_share.example"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_share.example", "name", "example-share-updated"),
