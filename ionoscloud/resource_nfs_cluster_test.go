@@ -13,7 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-func TestAccNFSCluster_basic(t *testing.T) {
+func TestAccNFSClusterBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
