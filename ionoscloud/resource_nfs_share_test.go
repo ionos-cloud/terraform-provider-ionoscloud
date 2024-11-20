@@ -118,7 +118,7 @@ func testAccCheckNFSShareExists(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccCheckNFSShareConfig_basic = testAccCheckNFSClusterConfig_basic + `
+const testAccCheckNFSShareConfigBasic = testAccCheckNFSClusterConfigBasic + `
 resource "ionoscloud_nfs_share" "example" {
   location = ionoscloud_nfs_cluster.example.location
   cluster_id = ionoscloud_nfs_cluster.example.id
@@ -140,7 +140,7 @@ resource "ionoscloud_nfs_share" "example" {
 }
 `
 
-const testAccCheckNFSShareConfigUpdate = testAccCheckNFSClusterConfig_basic + `
+const testAccCheckNFSShareConfigUpdate = testAccCheckNFSClusterConfigBasic + `
 resource "ionoscloud_nfs_share" "example" {
   location = ionoscloud_nfs_cluster.example.location
   cluster_id = ionoscloud_nfs_cluster.example.id
@@ -162,7 +162,7 @@ resource "ionoscloud_nfs_share" "example" {
 }
 `
 
-const testAccDataSourceNFSShareMatchId = testAccCheckNFSShareConfig_update + `
+const testAccDataSourceNFSShareMatchId = testAccCheckNFSShareConfigUpdate + `
 data "ionoscloud_nfs_share" "share_data_example" {
   location = ionoscloud_nfs_cluster.example.location
   cluster_id = ionoscloud_nfs_cluster.example.id

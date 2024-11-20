@@ -203,14 +203,14 @@ resource "ionoscloud_nfs_cluster" "example" {
 }
 `
 
-const testAccDataSourceNFSClusterMatchName = testAccCheckNFSClusterConfig_update + `
+const testAccDataSourceNFSClusterMatchName = testAccCheckNFSClusterConfigUpdate + `
 data "ionoscloud_nfs_cluster" "data_with_name" {
   location = ionoscloud_nfs_cluster.example.location
   name = "example_updated"
 }
 `
 
-const testAccDataSourceNFSClusterPartialMatchName = testAccCheckNFSClusterConfig_update + `
+const testAccDataSourceNFSClusterPartialMatchName = testAccCheckNFSClusterConfigUpdate + `
 data "ionoscloud_nfs_cluster" "data_with_name" {
   location = ionoscloud_nfs_cluster.example.location
   name = "example_"
