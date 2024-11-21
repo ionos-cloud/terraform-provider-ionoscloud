@@ -56,7 +56,7 @@ func (fs *Service) Delete(ctx context.Context, datacenterId, serverId, nicId, fi
 		return apiResponse, err
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutDelete); errState != nil {
-		return apiResponse, fmt.Errorf("an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterId, serverId, nicId, firewallId, errState)
+		return apiResponse, fmt.Errorf("on delete an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterId, serverId, nicId, firewallId, errState)
 	}
 	return apiResponse, nil
 }

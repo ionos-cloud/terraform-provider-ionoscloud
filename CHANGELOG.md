@@ -26,6 +26,8 @@
 
 ### Fixes
 - All `id` and `name` fields in data sources need to be computed, so value can be read on first apply.
+- Refactor `ionoscloud_share` and `ionoscloud_nic` data sources
+
 ### Testing 
 - Fix template test
 - Remove cpu_family from server test
