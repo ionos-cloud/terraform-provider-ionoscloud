@@ -1196,11 +1196,11 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 	dcId := d.Get("datacenter_id").(string)
 
 	volumeIds := d.Get("inline_volume_ids").([]interface{})
-	for _, volumeId := range volumeIds {
-		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, volumeId.(string)).Execute()
+	for _, volumeID := range volumeIds {
+		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, volumeID.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occurred while deleting volume with ID: %s of server ID %s %w", volumeId.(string), d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error occurred while deleting volume with ID: %s of server ID %s %w", volumeID.(string), d.Id(), err))
 			return diags
 		}
 
