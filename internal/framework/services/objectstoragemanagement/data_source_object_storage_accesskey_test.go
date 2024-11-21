@@ -1,7 +1,7 @@
-//go:build all || s3management
-// +build all s3management
+//go:build all || objectstoragemanagement
+// +build all objectstoragemanagement
 
-package s3management_test
+package objectstoragemanagement_test
 
 import (
 	"testing"
@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccS3AccesskeyDataSource(t *testing.T) {
-	name := "data.ionoscloud_s3_accesskey.testres"
+	name := "data.ionoscloud_object_storage_accesskey.testres"
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
@@ -36,8 +36,8 @@ func TestAccS3AccesskeyDataSource(t *testing.T) {
 
 func testAccAccesskeyDataSourceConfigBasic() string {
 	return utils.ConfigCompose(testAccAccesskeyConfigDescription("desc"), `
-data "ionoscloud_s3_accesskey" "testres" {
-	id = ionoscloud_s3_accesskey.test.id
+data "ionoscloud_object_storage_accesskey" "testres" {
+	id = ionoscloud_object_storage_accesskey.test.id
 }
 `)
 }

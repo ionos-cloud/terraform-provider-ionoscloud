@@ -1,28 +1,28 @@
 ---
-subcategory: "S3 management"
+subcategory: "Object storage management"
 layout: "ionoscloud"
-page_title: "IonosCloud : s3_region"
-sidebar_current: "docs-datasource-s3_region"
+page_title: "IonosCloud : object_storage_region"
+sidebar_current: "docs-datasource-object_storage_region"
 description: |-
-  Get information on a IonosCloud S3 Region
+  Get information on a IonosCloud Object Storage Region
 ---
 
-# ionoscloud\_s3\_region
+# ionoscloud_object_storage_region
 
-The **S3 region data source** can be used to search for and return an existing S3 Regions.
+The **Object storage region data source** can be used to search for and return an existing S3 Regions.
 
 ## Example Usage
 
 ### By ID 
 ```hcl
-data "ionoscloud_s3_region" "example" {
+data "ionoscloud_object_storage_region" "example" {
   id       = <region_id>
 }
 ```
 
 ## Argument Reference
 
- * `id` - (Required) Id of an existing S3 Region that you want to search for.
+ * `id` - (Required) Id of an existing object storage Region that you want to search for.
 
 ## Attributes Reference
 

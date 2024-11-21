@@ -1,7 +1,7 @@
-//go:build all || s3management
-// +build all s3management
+//go:build all || objectstoragemanagement
+// +build all objectstoragemanagement
 
-package s3management_test
+package objectstoragemanagement_test
 
 import (
 	"testing"
@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccS3RegionDataSource(t *testing.T) {
-	name := "data.ionoscloud_s3_region.testreg"
+	name := "data.ionoscloud_object_storage_region.testreg"
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
 		PreCheck: func() {
@@ -35,7 +35,7 @@ func TestAccS3RegionDataSource(t *testing.T) {
 
 func testAccRegionDataSourceConfigBasic() string {
 	return `
-data "ionoscloud_s3_region" "testreg" {
+data "ionoscloud_object_storage_region" "testreg" {
 	id = "de"
 }
 `

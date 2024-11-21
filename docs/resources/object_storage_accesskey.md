@@ -1,20 +1,20 @@
 ---
-subcategory: "S3 management"
+subcategory: "Object storage management"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_accesskey"
-sidebar_current: "docs-resource-s3_accesskey"
+page_title: "IonosCloud: object_storage_accesskey"
+sidebar_current: "docs-resource-object_storage_accesskey"
 description: |-
-  Creates and manages IonosCloud S3 Accesskeys.
+  Creates and manages IonosCloud Object Storage Accesskeys.
 ---
 
-# ionoscloud_s3_accesskey
+# ionoscloud_object_storage_accesskey
 
-Manages an **S3 Accesskey** on IonosCloud.
+Manages an **Object Storage Accesskey** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
-resource "ionoscloud_s3_accesskey" "example" {
+resource "ionoscloud_object_storage_accesskey" "example" {
     description = "my description"
 }
 ```
@@ -35,10 +35,10 @@ The following arguments are supported:
 
 ## Import
 
-An S3 accesskey resource can be imported using its `resource id`, e.g.
+An object storage accesskey resource can be imported using its `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_s3_accesskey.demo {s3AccesskeyId}
+terraform import ionoscloud_object_storage_accesskey.demo {objectStorageAccesskeyId}
 ```
 
-This can be helpful when you want to import S3 Accesskeys which you have already created manually or using other means, outside of terraform.
+This can be helpful when you want to import Object Storage Accesskeys which you have already created manually or using other means, outside of terraform.

@@ -17,27 +17,27 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 )
 
 type SdkBundle struct {
-	CloudApiClient     *ionoscloud.APIClient
-	InMemoryDBClient   *inmemorydb.InMemoryDBClient
-	PsqlClient         *dbaas.PsqlClient
-	MongoClient        *dbaas.MongoClient
-	MariaDBClient      *mariadb.MariaDBClient
-	NFSClient          *nfs.Client
-	CertManagerClient  *cert.Client
-	ContainerClient    *containerregistry.Client
-	DataplatformClient *dataplatform.Client
-	DNSClient          *dns.Client
-	LoggingClient      *logging.Client
-	AutoscalingClient  *autoscaling.Client
-	KafkaClient        *kafka.Client
-	CDNClient          *cdn.Client
-	APIGatewayClient   *apigateway.Client
-	VPNClient          *vpn.Client
-	S3Client           *objectstorage.Client
-	S3ManagementClient *s3management.Client
+	CloudApiClient                *ionoscloud.APIClient
+	InMemoryDBClient              *inmemorydb.InMemoryDBClient
+	PsqlClient                    *dbaas.PsqlClient
+	MongoClient                   *dbaas.MongoClient
+	MariaDBClient                 *mariadb.MariaDBClient
+	NFSClient                     *nfs.Client
+	CertManagerClient             *cert.Client
+	ContainerClient               *containerregistry.Client
+	DataplatformClient            *dataplatform.Client
+	DNSClient                     *dns.Client
+	LoggingClient                 *logging.Client
+	AutoscalingClient             *autoscaling.Client
+	KafkaClient                   *kafka.Client
+	CDNClient                     *cdn.Client
+	APIGatewayClient              *apigateway.Client
+	VPNClient                     *vpn.Client
+	S3Client                      *objectstorage.Client
+	ObjectStorageManagementClient *objectstoragemanagement.Client
 }

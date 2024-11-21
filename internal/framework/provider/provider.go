@@ -20,7 +20,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/s3management"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
@@ -36,7 +36,7 @@ import (
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 	objectStorageService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
-	s3managementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
+	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -227,10 +227,10 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		APIGatewayClient: apiGatewayService.NewClient(
 			username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool,
 		),
-		VPNClient:          vpn.NewClient(username, password, token, cleanedEndpoint, terraformVersion, insecureBool),
-		InMemoryDBClient:   inmemorydb.NewInMemoryDBClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
-		S3Client:           objectStorageService.NewClient(accessKey, secretKey, region, endpoint, insecureBool),
-		S3ManagementClient: s3managementService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		VPNClient:                     vpn.NewClient(username, password, token, cleanedEndpoint, terraformVersion, insecureBool),
+		InMemoryDBClient:              inmemorydb.NewInMemoryDBClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		S3Client:                      objectStorageService.NewClient(accessKey, secretKey, region, endpoint, insecureBool),
+		ObjectStorageManagementClient: objectStorageManagementService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 	}
 
 	resp.DataSourceData = client
@@ -267,7 +267,7 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		objectstorage.NewBucketCorsConfigurationResource,
 		objectstorage.NewBucketLifecycleConfigurationResource,
 		objectstorage.NewBucketWebsiteConfigurationResource,
-		s3management.NewAccesskeyResource,
+		objectstoragemanagement.NewAccesskeyResource,
 	}
 }
 
@@ -278,8 +278,8 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		objectstorage.NewObjectDataSource,
 		objectstorage.NewBucketPolicyDataSource,
 		objectstorage.NewObjectsDataSource,
-		s3management.NewRegionDataSource,
-		s3management.NewAccesskeyDataSource,
+		objectstoragemanagement.NewRegionDataSource,
+		objectstoragemanagement.NewAccesskeyDataSource,
 	}
 }
 

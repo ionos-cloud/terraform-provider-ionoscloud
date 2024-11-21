@@ -1,7 +1,7 @@
-//go:build all || s3management
-// +build all s3management
+//go:build all || objectstoragemanagement
+// +build all objectstoragemanagement
 
-package s3management_test
+package objectstoragemanagement_test
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 func TestAccACcesskeyResource(t *testing.T) {
 	description := acctest.GenerateRandomResourceName("description")
 	descriptionUpdated := acctest.GenerateRandomResourceName("description")
-	name := "ionoscloud_s3_accesskey.test"
+	name := "ionoscloud_object_storage_accesskey.test"
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
@@ -50,7 +50,7 @@ func TestAccACcesskeyResource(t *testing.T) {
 
 func testAccAccesskeyConfigDescription(description string) string {
 	return fmt.Sprintf(`
-resource "ionoscloud_s3_accesskey" "test" {
+resource "ionoscloud_object_storage_accesskey" "test" {
   description = %[1]q
 }
 `, description)

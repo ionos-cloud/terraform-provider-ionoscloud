@@ -1,11 +1,11 @@
-package s3management
+package objectstoragemanagement
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	s3managementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
+	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -20,12 +20,12 @@ func NewRegionDataSource() datasource.DataSource {
 }
 
 type regionDataSource struct {
-	client *s3managementService.Client
+	client *objectStorageManagementService.Client
 }
 
 // Metadata returns the metadata for the data source.
 func (d *regionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_s3_region"
+	resp.TypeName = req.ProviderTypeName + "_object_storage_region"
 }
 
 // Configure configures the data source.
@@ -46,7 +46,7 @@ func (d *regionDataSource) Configure(ctx context.Context, req datasource.Configu
 		return
 	}
 
-	d.client = clientbundle.S3ManagementClient
+	d.client = clientbundle.ObjectStorageManagementClient
 }
 
 // Schema returns the schema for the data source.
@@ -99,11 +99,11 @@ func (d *regionDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 // Read reads the data source.
 func (d *regionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	if d.client == nil {
-		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("api client not configured", "The provider client is not configured")
 		return
 	}
 
-	var data *s3managementService.RegionDataSourceModel
+	var data *objectStorageManagementService.RegionDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -120,5 +120,5 @@ func (d *regionDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, s3managementService.BuildRegionModelFromAPIResponse(&region))...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, objectStorageManagementService.BuildRegionModelFromAPIResponse(&region))...)
 }

@@ -1,10 +1,10 @@
-package s3management
+package objectstoragemanagement
 
 import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	s3management "github.com/ionos-cloud/sdk-go-s3-management"
+	objectstoragemanagement "github.com/ionos-cloud/sdk-go-object-storage-management"
 )
 
 // RegionDataSourceModel is used to represent an region for a data source.
@@ -24,21 +24,21 @@ type capability struct {
 }
 
 // GetRegion retrieves a region
-func (c *Client) GetRegion(ctx context.Context, regionID string, depth float32) (s3management.RegionRead, *s3management.APIResponse, error) {
+func (c *Client) GetRegion(ctx context.Context, regionID string, depth float32) (objectstoragemanagement.RegionRead, *objectstoragemanagement.APIResponse, error) {
 	region, apiResponse, err := c.client.RegionsApi.RegionsFindByRegion(ctx, regionID).Execute()
 	apiResponse.LogInfo()
 	return region, apiResponse, err
 }
 
 // ListRegions lists all regions
-func (c *Client) ListRegions(ctx context.Context) (s3management.RegionReadList, *s3management.APIResponse, error) {
+func (c *Client) ListRegions(ctx context.Context) (objectstoragemanagement.RegionReadList, *objectstoragemanagement.APIResponse, error) {
 	regions, apiResponse, err := c.client.RegionsApi.RegionsGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return regions, apiResponse, err
 }
 
 // BuildRegionModelFromAPIResponse builds an RegionDataSourceModel from a region SDK object
-func BuildRegionModelFromAPIResponse(output *s3management.RegionRead) *RegionDataSourceModel {
+func BuildRegionModelFromAPIResponse(output *objectstoragemanagement.RegionRead) *RegionDataSourceModel {
 	built := &RegionDataSourceModel{}
 
 	if output.Id != nil {

@@ -31,7 +31,7 @@ require (
 	github.com/ionos-cloud/sdk-go-kafka v1.0.0
 	github.com/ionos-cloud/sdk-go-nfs v1.0.0
 	github.com/ionos-cloud/sdk-go-object-storage v1.1.0
-	github.com/ionos-cloud/sdk-go-s3-management v1.0.0
+	github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1
 	github.com/ionos-cloud/sdk-go/v6 v6.3.0
 	github.com/mitchellh/go-homedir v1.1.0
@@ -39,7 +39,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-replace github.com/ionos-cloud/sdk-go-s3-management v1.0.0 => /home/radu/work/sdk-go-s3-management
+replace github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0 => /home/radu/work/rubygeneration/sdk-go-object-storage-management
 
 require (
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect

@@ -1,28 +1,28 @@
 ---
-subcategory: "S3 management"
+subcategory: "Object storage management"
 layout: "ionoscloud"
-page_title: "IonosCloud : s3_accesskey"
-sidebar_current: "docs-datasource-s3_accesskey"
+page_title: "IonosCloud : object_storage_accesskey"
+sidebar_current: "docs-datasource-object_storage_accesskey"
 description: |-
-  Get information on a IonosCloud S3 Accesskeys
+  Get information on a IonosCloud Object storage Accesskey
 ---
 
-# ionoscloud\_s3\_accesskey
+# ionoscloud_object_storage_accesskey
 
-The **S3 Accesskey data source** can be used to search for and return an existing S3 Accesskeys.
+The **Object Storage Accesskey data source** can be used to search for and return an existing Object Storage Accesskeys.
 
 ## Example Usage
 
 ### By ID 
 ```hcl
-data "ionoscloud_s3_accesskey" "example" {
+data "ionoscloud_object_storage_accesskey" "example" {
   id       = <accesskey_id>
 }
 ```
 
 ## Argument Reference
 
- * `id` - (Required) Id of an existing S3 accesskey that you want to search for.
+ * `id` - (Required) Id of an existing object storage accesskey that you want to search for.
 
 ## Attributes Reference
 

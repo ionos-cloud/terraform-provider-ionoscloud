@@ -1,4 +1,4 @@
-package s3management
+package objectstoragemanagement
 
 import (
 	"context"
@@ -10,10 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	s3management "github.com/ionos-cloud/sdk-go-s3-management"
+	objectStorageManagement "github.com/ionos-cloud/sdk-go-object-storage-management"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	s3managementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
+	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -28,12 +28,12 @@ func NewAccesskeyResource() resource.Resource {
 }
 
 type accesskeyResource struct {
-	client *s3managementService.Client
+	client *objectStorageManagementService.Client
 }
 
 // Metadata returns the metadata for the accesskey resource.
 func (r *accesskeyResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_s3_accesskey"
+	resp.TypeName = req.ProviderTypeName + "_object_storage_accesskey"
 }
 
 // Schema returns the schema for the accesskey resource.
@@ -92,17 +92,17 @@ func (r *accesskeyResource) Configure(_ context.Context, req resource.ConfigureR
 		return
 	}
 
-	r.client = clientBundle.S3ManagementClient
+	r.client = clientBundle.ObjectStorageManagementClient
 }
 
 // Create creates the accesskey.
 func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage management api client not configured", "The provider client is not configured")
 		return
 	}
 
-	var data *s3managementService.AccesskeyResourceModel
+	var data *objectStorageManagementService.AccesskeyResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -113,8 +113,8 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	ctx, cancel := context.WithTimeout(ctx, createTimeout)
 	defer cancel()
 
-	var accessKey = s3management.AccessKeyCreate{
-		Properties: &s3management.AccessKey{
+	var accessKey = objectStorageManagement.AccessKeyCreate{
+		Properties: &objectStorageManagement.AccessKey{
 			Description: data.Description.ValueStringPointer(),
 		},
 	}
@@ -124,7 +124,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 	// we need this because secretkey is only available on create response
-	s3managementService.SetAccessKeyPropertiesToPlan(data, accessKeyResponse)
+	objectStorageManagementService.SetAccessKeyPropertiesToPlan(data, accessKeyResponse)
 
 	accessKeyRead, _, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
@@ -133,18 +133,18 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	// we need this because canonical_user_id not available on create response
-	s3managementService.SetAccessKeyPropertiesToPlan(data, accessKeyRead)
+	objectStorageManagementService.SetAccessKeyPropertiesToPlan(data, accessKeyRead)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 // Read reads the accesskey.
 func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage management api client not configured", "The provider client is not configured")
 		return
 	}
 
-	var data s3managementService.AccesskeyResourceModel
+	var data objectStorageManagementService.AccesskeyResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -156,7 +156,7 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	s3managementService.SetAccessKeyPropertiesToPlan(&data, accessKey)
+	objectStorageManagementService.SetAccessKeyPropertiesToPlan(&data, accessKey)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -167,7 +167,7 @@ func (r *accesskeyResource) ImportState(ctx context.Context, req resource.Import
 
 // Update updates the accesskey.
 func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state *s3managementService.AccesskeyResourceModel
+	var plan, state *objectStorageManagementService.AccesskeyResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -181,8 +181,8 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 	ctx, cancel := context.WithTimeout(ctx, updateTimeout)
 	defer cancel()
 
-	var accessKey = s3management.AccessKeyEnsure{
-		Properties: &s3management.AccessKey{
+	var accessKey = objectStorageManagement.AccessKeyEnsure{
+		Properties: &objectStorageManagement.AccessKey{
 			Description: plan.Description.ValueStringPointer(),
 		},
 	}
@@ -201,18 +201,18 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	s3managementService.SetAccessKeyPropertiesToPlan(state, accessKeyRead)
+	objectStorageManagementService.SetAccessKeyPropertiesToPlan(state, accessKeyRead)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 // Delete deletes the accessKey.
 func (r *accesskeyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.client == nil {
-		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage management api client not configured", "The provider client is not configured")
 		return
 	}
 
-	var data *s3managementService.AccesskeyResourceModel
+	var data *objectStorageManagementService.AccesskeyResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return

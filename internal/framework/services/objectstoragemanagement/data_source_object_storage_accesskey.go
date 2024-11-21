@@ -1,12 +1,12 @@
-package s3management
+package objectstoragemanagement
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
-	s3managementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/s3management"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
+	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -20,12 +20,12 @@ func NewAccesskeyDataSource() datasource.DataSource {
 }
 
 type accessKeyDataSource struct {
-	client *s3managementService.Client
+	client *objectStorageManagementService.Client
 }
 
 // Metadata returns the metadata for the data source.
 func (d *accessKeyDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_s3_accesskey"
+	resp.TypeName = req.ProviderTypeName + "_object_storage_accesskey"
 }
 
 // Configure configures the data source.
@@ -46,7 +46,7 @@ func (d *accessKeyDataSource) Configure(ctx context.Context, req datasource.Conf
 		return
 	}
 
-	d.client = clientBundle.S3ManagementClient
+	d.client = clientBundle.ObjectStorageManagementClient
 }
 
 // Schema returns the schema for the data source.
@@ -80,11 +80,11 @@ func (d *accessKeyDataSource) Schema(ctx context.Context, req datasource.SchemaR
 // Read reads the data source.
 func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	if d.client == nil {
-		resp.Diagnostics.AddError("s3 api client not configured", "The provider client is not configured")
+		resp.Diagnostics.AddError("object storage management api client not configured", "The provider client is not configured")
 		return
 	}
 
-	var data *s3management.AccessKeyDataSourceModel
+	var data *objectstoragemanagement.AccessKeyDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -103,6 +103,6 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	s3managementService.SetAccessKeyPropertiesToDataSourcePlan(data, accessKey)
+	objectStorageManagementService.SetAccessKeyPropertiesToDataSourcePlan(data, accessKey)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
