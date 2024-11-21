@@ -92,7 +92,7 @@ and log the extent to which your instances are being accessed.`,
 }
 
 func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	applicationLoadBalancer := ionoscloud.ApplicationLoadBalancer{
 		Properties: &ionoscloud.ApplicationLoadBalancerProperties{},
@@ -207,7 +207,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 }
 
 func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -240,7 +240,7 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 }
 
 func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.ApplicationLoadBalancer{
 		Properties: &ionoscloud.ApplicationLoadBalancerProperties{},
@@ -347,7 +347,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 }
 
 func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -369,7 +369,7 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 }
 
 func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 

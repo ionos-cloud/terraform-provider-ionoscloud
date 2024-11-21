@@ -47,7 +47,7 @@ func dataSourceIpFailover() *schema.Resource {
 }
 
 func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)

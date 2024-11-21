@@ -249,7 +249,7 @@ func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 }
 
 func testAccCheckK8sNodePoolDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -280,7 +280,7 @@ func testAccCheckK8sNodePoolDestroyCheck(s *terraform.State) error {
 
 func testAccCheckK8sNodePoolExists(n string, k8sNodepool *ionoscloud.KubernetesNodePool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 

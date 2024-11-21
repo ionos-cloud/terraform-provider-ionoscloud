@@ -76,7 +76,7 @@ func resourceNatGateway() *schema.Resource {
 }
 
 func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	name := d.Get("name").(string)
 
@@ -167,7 +167,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -193,7 +193,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	request := ionoscloud.NatGateway{
 		Properties: &ionoscloud.NatGatewayProperties{},
 	}
@@ -275,7 +275,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -297,7 +297,7 @@ func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {

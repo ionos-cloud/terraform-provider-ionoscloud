@@ -104,7 +104,7 @@ func TestAccDataCenterBasic(t *testing.T) {
 }
 
 func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -134,7 +134,7 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 
 func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 

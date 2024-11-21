@@ -51,7 +51,7 @@ func resourceNSG() *schema.Resource {
 }
 
 func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
 	sgName := d.Get("name").(string)
@@ -78,7 +78,7 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 }
 
 func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	datacenterID := d.Get("datacenter_id").(string)
 
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, d.Id()).Depth(2).Execute()
@@ -94,7 +94,7 @@ func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
 	sgName := d.Get("name").(string)
@@ -122,7 +122,7 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
 
@@ -141,7 +141,7 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 

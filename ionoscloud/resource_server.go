@@ -535,7 +535,7 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 }
 
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	datacenterId := d.Get("datacenter_id").(string)
 
 	serverReq, err := initializeCreateRequests(d)
@@ -794,7 +794,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Id()
@@ -852,7 +852,7 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 }
 
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -919,7 +919,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		bootCdrom := n.(string)
 
 		if utils.IsValidUUID(bootCdrom) {
-			ss := cloudapiserver.Service{Client: meta.(services.SdkBundle).CloudAPIClient, Meta: meta, D: d}
+			ss := cloudapiserver.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
 			ss.UpdateBootDevice(ctx, dcId, d.Id(), bootCdrom)
 		}
 	}
@@ -1196,11 +1196,11 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 	dcId := d.Get("datacenter_id").(string)
 
 	volumeIds := d.Get("inline_volume_ids").([]interface{})
-	for _, volumeID := range volumeIds {
-		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, volumeID.(string)).Execute()
+	for _, volumeId := range volumeIds {
+		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, volumeId.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occurred while deleting volume with ID: %s of server ID %s %w", volumeID.(string), d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error occurred while deleting volume with ID: %s of server ID %s %w", volumeId.(string), d.Id(), err))
 			return diags
 		}
 
@@ -1213,7 +1213,7 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 	// A bigger depth is required since we need all volumes items.
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Depth(2).Execute()
@@ -1258,7 +1258,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	datacenterId := parts[0]
 	serverId := parts[1]
 
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Depth(3).Execute()
 	logApiRequestTime(apiResponse)

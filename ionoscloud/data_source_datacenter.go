@@ -82,7 +82,7 @@ func dataSourceDataCenter() *schema.Resource {
 }
 
 func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	var name, location string
 	id, idOk := d.GetOk("id")

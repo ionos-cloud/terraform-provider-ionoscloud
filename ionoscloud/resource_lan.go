@@ -84,7 +84,7 @@ func resourceLan() *schema.Resource {
 }
 
 func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	public := d.Get("public").(bool)
 	request := ionoscloud.Lan{
 		Properties: &ionoscloud.LanProperties{
@@ -164,7 +164,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 
@@ -192,7 +192,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	properties := &ionoscloud.LanProperties{}
 	newValue := d.Get("public")
 	public := newValue.(bool)
@@ -243,7 +243,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 
 	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
@@ -268,7 +268,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 

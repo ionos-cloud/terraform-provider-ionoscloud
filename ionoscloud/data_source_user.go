@@ -77,7 +77,7 @@ func dataSourceUser() *schema.Resource {
 }
 
 func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	idValue, idOk := d.GetOk("id")
 	emailValue, emailOk := d.GetOk("email")

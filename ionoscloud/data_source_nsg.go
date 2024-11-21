@@ -102,7 +102,7 @@ func dataSourceNSG() *schema.Resource {
 }
 
 func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
 	id, idOk := d.GetOk("id")

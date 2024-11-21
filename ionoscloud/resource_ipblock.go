@@ -98,7 +98,7 @@ func resourceIPBlock() *schema.Resource {
 }
 
 func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	size := d.Get("size").(int)
 	sizeConverted := int32(size)
@@ -132,7 +132,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -155,7 +155,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.IpBlockProperties{}
 
@@ -178,7 +178,7 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -196,7 +196,7 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	ipBlockId := d.Id()
 

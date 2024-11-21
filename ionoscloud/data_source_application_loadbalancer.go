@@ -89,7 +89,7 @@ and log the extent to which your instances are being accessed.`,
 }
 
 func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterId := d.Get("datacenter_id").(string)
 

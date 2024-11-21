@@ -61,7 +61,7 @@ func resourceBackupUnit() *schema.Resource {
 }
 
 func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	backupUnitName := d.Get("name").(string)
 	backupUnitPassword := d.Get("password").(string)
@@ -96,7 +96,7 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	backupUnit, apiResponse, err := BackupUnitFindByID(ctx, d.Id(), client)
 	logApiRequestTime(apiResponse)
@@ -130,7 +130,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.BackupUnit{}
 	request.Properties = &ionoscloud.BackupUnitProperties{}
@@ -206,7 +206,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 }
 
 func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.BackupUnitsApi.BackupunitsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -249,7 +249,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	buId := d.Id()
 

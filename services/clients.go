@@ -22,7 +22,7 @@ import (
 )
 
 type SdkBundle struct {
-	CloudAPIClient                *ionoscloud.APIClient
+	CloudApiClient                *ionoscloud.APIClient
 	InMemoryDBClient              *inmemorydb.InMemoryDBClient
 	PsqlClient                    *dbaas.PsqlClient
 	MongoClient                   *dbaas.MongoClient

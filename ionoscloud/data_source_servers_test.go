@@ -105,7 +105,7 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 }
 
 func testAccCheckServersDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 

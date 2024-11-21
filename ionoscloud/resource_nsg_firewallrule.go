@@ -89,7 +89,7 @@ func resourceNSGFirewallRule() *schema.Resource {
 }
 
 func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	firewall, diags := getFirewallData(d, "", false)
 	if diags != nil {
@@ -115,7 +115,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	fw, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, d.Get("datacenter_id").(string),
 		d.Get("nsg_id").(string), d.Id()).Execute()
@@ -140,7 +140,7 @@ func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	firewall, diags := getFirewallData(d, "", true)
 	if diags != nil {
@@ -164,7 +164,7 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	dcID := d.Get("datacenter_id").(string)
 	nsgID := d.Get("nsg_id").(string)
 	apiResponse, err := client.SecurityGroupsApi.
@@ -189,7 +189,7 @@ func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta
 
 func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {

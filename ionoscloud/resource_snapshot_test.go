@@ -131,7 +131,7 @@ func TestAccSnapshotBasic(t *testing.T) {
 }
 
 func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -160,7 +160,7 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 
 func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 

@@ -161,7 +161,7 @@ func dataSourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 }
 
 func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterId := d.Get("datacenter_id").(string)
 	albId := d.Get("application_loadbalancer_id").(string)

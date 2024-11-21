@@ -171,7 +171,7 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 }
 
 func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	networkLoadBalancerForwardingRule := ionoscloud.NetworkLoadBalancerForwardingRule{
 		Properties: &ionoscloud.NetworkLoadBalancerForwardingRuleProperties{},
@@ -347,7 +347,7 @@ func getTargetsData(targets interface{}) ([]ionoscloud.NetworkLoadBalancerForwar
 
 func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -374,7 +374,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 }
 
 func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.NetworkLoadBalancerForwardingRule{
 		Properties: &ionoscloud.NetworkLoadBalancerForwardingRuleProperties{},
@@ -481,7 +481,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 }
 
 func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	nlbID := d.Get("networkloadbalancer_id").(string)
@@ -504,7 +504,7 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *sch
 }
 
 func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {

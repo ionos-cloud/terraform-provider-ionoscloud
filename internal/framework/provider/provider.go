@@ -214,7 +214,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		CDNClient:          cdnService.NewCDNClient(username, password, token, endpoint, version, terraformVersion, insecureBool),
 		AutoscalingClient:  autoscalingService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		CertManagerClient:  cert.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
-		CloudAPIClient:     newCloudapiClient(username, password, token, endpoint, "DEV", terraformVersion, insecureBool),
+		CloudApiClient:     newCloudapiClient(username, password, token, endpoint, "DEV", terraformVersion, insecureBool),
 		ContainerClient:    crService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		DataplatformClient: dataplatformService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		DNSClient:          dnsService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),

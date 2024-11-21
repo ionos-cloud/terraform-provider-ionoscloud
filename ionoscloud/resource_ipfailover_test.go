@@ -76,7 +76,7 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 
 func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -112,7 +112,7 @@ func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 }
 
 func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	defer cancel()

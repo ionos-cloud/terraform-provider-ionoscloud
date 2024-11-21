@@ -60,7 +60,7 @@ func resourceLoadbalancer() *schema.Resource {
 }
 
 func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	rawIds := d.Get("nic_ids").([]interface{})
 	var nicIds []ionoscloud.Nic
@@ -105,7 +105,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	lb, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -143,7 +143,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	properties := &ionoscloud.LoadbalancerProperties{}
 
@@ -223,7 +223,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 	apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
@@ -251,7 +251,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	dcId := parts[0]
 	lbId := parts[1]
 
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
 	logApiRequestTime(apiResponse)

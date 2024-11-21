@@ -325,7 +325,7 @@ func NewSDKBundleClient(clientOpts ClientOptions) interface{} {
 		CDNClient:          NewClientByType(clientOpts, cdnClient).(*cdnService.Client),
 		AutoscalingClient:  NewClientByType(clientOpts, autoscalingClient).(*autoscalingService.Client),
 		CertManagerClient:  NewClientByType(clientOpts, certManagerClient).(*cert.Client),
-		CloudAPIClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
+		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
 		ContainerClient:    NewClientByType(clientOpts, containerRegistryClient).(*crService.Client),
 		DataplatformClient: NewClientByType(clientOpts, dataplatformClient).(*dataplatformService.Client),
 		DNSClient:          NewClientByType(clientOpts, dnsClient).(*dnsService.Client),

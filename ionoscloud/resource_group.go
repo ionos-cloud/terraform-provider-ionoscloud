@@ -181,7 +181,7 @@ func resourceGroup() *schema.Resource {
 //}
 
 func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.Group{
 		Properties: &ionoscloud.GroupProperties{},
@@ -262,7 +262,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -284,7 +284,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	tempCreateDataCenter := d.Get("create_datacenter").(bool)
 	tempCreateSnapshot := d.Get("create_snapshot").(bool)
@@ -386,7 +386,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -404,7 +404,7 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	grpId := d.Id()
 
@@ -586,7 +586,7 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 }
 
 func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	userToAdd := ionoscloud.UserGroupPost{
 		Id: &userId,
 	}
@@ -608,7 +608,7 @@ func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.Resou
 }
 
 func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, groupId, userId).Execute()
 	logApiRequestTime(apiResponse)

@@ -226,7 +226,7 @@ func TestAccNSGFirewallRules(t *testing.T) {
 }
 
 func testAccCheckNSGDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -255,7 +255,7 @@ func testAccCheckNSGDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNSGExists(n string, nsg *ionoscloud.SecurityGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -287,7 +287,7 @@ func testAccCheckNSGExists(n string, nsg *ionoscloud.SecurityGroup) resource.Tes
 }
 
 func testAccCheckNSGRuleDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -316,7 +316,7 @@ func testAccCheckNSGRuleDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNSGFirewallRuleExists(n string, rule *ionoscloud.FirewallRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 

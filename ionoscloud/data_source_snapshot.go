@@ -99,7 +99,7 @@ func dataSourceSnapshot() *schema.Resource {
 }
 
 func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")

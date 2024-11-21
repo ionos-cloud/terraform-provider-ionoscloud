@@ -193,7 +193,7 @@ func dataSourceK8sNodePool() *schema.Resource {
 }
 
 func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudAPIClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	clusterId := d.Get("k8s_cluster_id")
 	id, idOk := d.GetOk("id")
