@@ -63,6 +63,4 @@ func dataSourceShareRead(ctx context.Context, d *schema.ResourceData, meta inter
 		return diags
 	}
 	return nil
-
-	return nil
 }
