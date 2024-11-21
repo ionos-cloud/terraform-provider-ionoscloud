@@ -1911,6 +1911,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     dhcp = true
     firewall_active = true
 	firewall_type = "INGRESS"
+    mac = "00:0a:95:9d:68:16"
   }
 }
 

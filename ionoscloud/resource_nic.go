@@ -95,7 +95,9 @@ func resourceNic() *schema.Resource {
 			},
 			"mac": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"device_number": {
 				Type:     schema.TypeInt,
@@ -183,6 +185,11 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occurred while getting nic from schema: %w", err))
 		return diags
+	}
+
+	if v, ok := d.GetOk("mac"); ok {
+		vStr := v.(string)
+		nic.Properties.Mac = &vStr
 	}
 
 	dcid := d.Get("datacenter_id").(string)

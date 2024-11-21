@@ -35,6 +35,7 @@ func TestAccNicBasic(t *testing.T) {
 					testAccCheckNICExists(constant.FullNicResourceName, &nic),
 					resource.TestCheckResourceAttrSet(constant.FullNicResourceName, "pci_slot"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "name", name),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "mac", "00:0a:95:9d:68:16"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcp", "true"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcpv6", "true"),
 					resource.TestCheckResourceAttrSet(constant.FullNicResourceName, "ipv6_cidr_block"),
@@ -55,6 +56,7 @@ func TestAccNicBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "name", constant.FullNicResourceName, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcp", constant.FullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "mac", constant.FullNicResourceName, "mac"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcpv6", constant.FullNicResourceName, "dhcpv6"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_active", constant.FullNicResourceName, "firewall_active"),
@@ -106,6 +108,7 @@ func TestAccNicBasic(t *testing.T) {
 				Config: testAccCheckNicConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "name", "updated"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "mac", "00:0a:95:9d:68:16"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcp", "false"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcpv6", "false"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_active", "false"),
@@ -244,6 +247,7 @@ const testAccCheckNicConfigBasic = testCreateDataCenterAndServer + `
 resource ` + constant.NicResource + ` "database_nic" {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  mac = "00:0a:95:9d:68:16"
   lan = "${ionoscloud_lan.test_lan_2.id}"
   dhcpv6 = true
   firewall_active = true
@@ -264,6 +268,7 @@ const testAccCheckNicConfigUpdate = testCreateDataCenterAndServer + `
 resource ` + constant.NicResource + ` "database_nic" {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  mac = "00:0a:95:9d:68:16"
   lan = "${ionoscloud_lan.test_lan_2.id}"
   dhcp = false
   dhcpv6 = false

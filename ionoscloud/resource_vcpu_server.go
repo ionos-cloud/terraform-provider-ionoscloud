@@ -239,6 +239,7 @@ func resourceVCPUServer() *schema.Resource {
 						},
 						"mac": {
 							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
 						},
 						"lan": {

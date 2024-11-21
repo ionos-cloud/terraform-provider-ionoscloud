@@ -346,7 +346,9 @@ func resourceServer() *schema.Resource {
 						},
 						"mac": {
 							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
+							ForceNew: true,
 						},
 						"lan": {
 							Type:     schema.TypeInt,
@@ -507,6 +509,10 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 	if diff.HasChange("image_name") {
 		return fmt.Errorf("image_name %s", ImmutableError)
 	}
+	// todo test, this should not work
+	if diff.HasChange("nic.#.mac") {
+		return fmt.Errorf("nic mac %s", ImmutableError)
+	}
 	if diff.HasChange("template_uuid") {
 		return fmt.Errorf("template_uuid %s", ImmutableError)
 	}
@@ -617,6 +623,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("create error occurred while getting nic from schema: %w", err))
 					return diags
+				}
+				if v, ok := d.GetOk("mac"); ok {
+					vStr := v.(string)
+					nic.Properties.Mac = &vStr
 				}
 				*serverReq.Entities.Nics.Items = append(*serverReq.Entities.Nics.Items, nic)
 				fwRulesPath := nicPath + "firewall"

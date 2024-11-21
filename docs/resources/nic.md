@@ -175,7 +175,7 @@ This will configure flowlog for accepted ingress traffic and will log it into an
 - `firewall_active` - (Optional)[Boolean] If this resource is set to true and is nested under a server resource firewall, with open SSH port, resource must be nested under the NIC.
 - `firewall_type` - (Optional) [String] The type of firewall rules that will be allowed on the NIC. If it is not specified it will take the default value INGRESS
 - `id` - (Computed) The ID of the NIC.
-- `mac` - (Computed) The MAC address of the NIC.
+- `mac` - (Optional) The MAC address of the NIC. Can be set on creation only. Immutable, update forces re-creation.
 * `device_number`- (Computed) The Logical Unit Number (LUN) of the storage volume. Null if this NIC was created from CloudAPI and no DCD changes were done on the Datacenter.
 * `pci_slot`- (Computed) The PCI slot number of the Nic.
 * `flowlog` - (Optional) Only 1 flow log can be configured. Only the name field can change as part of an update. Flow logs holistically capture network information such as source and destination IP addresses, source and destination ports, number of packets, amount of bytes, the start and end time of the recording, and the type of protocol – and log the extent to which your instances are being accessed.

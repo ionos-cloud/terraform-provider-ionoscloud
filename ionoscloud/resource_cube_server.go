@@ -249,6 +249,7 @@ func resourceCubeServer() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"mac": {
 							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
 						},
 						"lan": {
@@ -487,6 +488,10 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("cube error occurred while getting nic from schema: %w", err))
 			return diags
+		}
+		if v, ok := d.GetOk("nic.0.mac"); ok {
+			vStr := v.(string)
+			nic.Properties.Mac = &vStr
 		}
 	}
 
