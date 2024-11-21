@@ -22,37 +22,31 @@ func TestAccDataSourceTemplate(t *testing.T) {
 			{
 				Config: testAccDataSourceTemplateName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(templateName, "name", "CUBES S"),
-					resource.TestCheckResourceAttr(templateName, "cores", "1"),
-					resource.TestCheckResourceAttr(templateName, "ram", "2048"),
-					resource.TestCheckResourceAttr(templateName, "storage_size", "50"),
-				),
-			},
-			{
-				Config: testAccDataSourceTemplateCores,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(templateName, "name", "CUBES XL"),
-					resource.TestCheckResourceAttr(templateName, "cores", "6"),
-					resource.TestCheckResourceAttr(templateName, "ram", "16384"),
-					resource.TestCheckResourceAttr(templateName, "storage_size", "320"),
-				),
-			},
-			{
-				Config: testAccDataSourceTemplateRam,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(templateName, "name", "CUBES 3XL"),
-					resource.TestCheckResourceAttr(templateName, "cores", "12"),
-					resource.TestCheckResourceAttr(templateName, "ram", "49152"),
-					resource.TestCheckResourceAttr(templateName, "storage_size", "960"),
-				),
-			},
-			{
-				Config: testAccDataSourceTemplateStorageSize,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(templateName, "name", "CUBES M"),
+					resource.TestCheckResourceAttr(templateName, "name", "Basic Cube S"),
 					resource.TestCheckResourceAttr(templateName, "cores", "2"),
 					resource.TestCheckResourceAttr(templateName, "ram", "4096"),
-					resource.TestCheckResourceAttr(templateName, "storage_size", "80"),
+					resource.TestCheckResourceAttr(templateName, "storage_size", "120"),
+				),
+			},
+			{
+				Config: testAccDataSourceTemplateCoresRam,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(templateName, "name", "Basic Cube XL"),
+				),
+			},
+			{
+				Config: testAccDataSourceTemplateRamStorage,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(templateName, "name", "Memory Cube S"),
+				),
+			},
+			{
+				Config: testAccDataSourceTemplateStorageSizeRam,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(templateName, "name", "Basic Cube M"),
+					resource.TestCheckResourceAttr(templateName, "cores", "4"),
+					resource.TestCheckResourceAttr(templateName, "ram", "8192"),
+					resource.TestCheckResourceAttr(templateName, "storage_size", "240"),
 				),
 			},
 			{
@@ -78,22 +72,25 @@ func TestAccDataSourceTemplate(t *testing.T) {
 
 const testAccDataSourceTemplateName = `
 data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
-	name = "CUBES S"
+	name = "Basic Cube S"
 }`
 
-const testAccDataSourceTemplateCores = `
+const testAccDataSourceTemplateCoresRam = `
 data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
-	cores = 6
+	cores = 16
+	ram = 32768
 }`
 
-const testAccDataSourceTemplateRam = `
+const testAccDataSourceTemplateRamStorage = `
 data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
-	ram = 49152
+	ram = 8192
+	storage_size = 120
 }`
 
-const testAccDataSourceTemplateStorageSize = `
+const testAccDataSourceTemplateStorageSizeRam = `
 data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
-	storage_size = 80
+	storage_size = 240
+	ram = 8192
 }`
 
 const testAccDataSourceTemplateStorageWrongNameError = `
