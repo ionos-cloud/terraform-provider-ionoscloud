@@ -26,6 +26,9 @@
 
 ### Fixes
 - All `id` and `name` fields in data sources need to be computed, so value can be read on first apply.
+### Testing 
+- Fix template test
+- Remove cpu_family from server test
 
 ### New Product - **Network Security Groups**:
 - `Resources`:
