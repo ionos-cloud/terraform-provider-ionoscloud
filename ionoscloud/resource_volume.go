@@ -196,7 +196,7 @@ func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 
 func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	var image, imageAlias string
 
@@ -300,7 +300,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	dcId := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
@@ -335,7 +335,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	properties := ionoscloud.VolumeProperties{}
 	dcId := d.Get("datacenter_id").(string)
@@ -397,7 +397,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -423,7 +423,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
 	}
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	dcId := parts[0]
 	srvId := parts[1]

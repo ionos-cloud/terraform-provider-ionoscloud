@@ -111,7 +111,7 @@ func dataSourceImage() *schema.Resource {
 }
 
 func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)

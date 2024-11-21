@@ -16,7 +16,7 @@ The **Object Storage Accesskey data source** can be used to search for and retur
 ### By ID 
 ```hcl
 data "ionoscloud_object_storage_accesskey" "example" {
-  id       = <accesskey_id>
+  id       = "accesskey_id"
 }
 ```
 

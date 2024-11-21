@@ -204,7 +204,7 @@ func TestAccK8sClusters(t *testing.T) {
 }
 
 func testAccCheckK8sClusterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -235,7 +235,7 @@ func testAccCheckK8sClusterDestroyCheck(s *terraform.State) error {
 
 func testAccCheckK8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesCluster) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 		rs, ok := s.RootModule().Resources[n]
 

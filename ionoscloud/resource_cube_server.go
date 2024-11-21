@@ -381,7 +381,7 @@ func resourceCubeServer() *schema.Resource {
 }
 
 func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	server := ionoscloud.Server{
 		Properties: &ionoscloud.ServerProperties{},
@@ -631,7 +631,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Id()
@@ -791,7 +791,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -838,7 +838,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		bootCdrom := n.(string)
 
 		if utils.IsValidUUID(bootCdrom) {
-			ss := cloudapiserver.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
+			ss := cloudapiserver.Service{Client: meta.(services.SdkBundle).CloudAPIClient, Meta: meta, D: d}
 			ss.UpdateBootDevice(ctx, dcId, d.Id(), bootCdrom)
 		}
 	}
@@ -1094,7 +1094,7 @@ func SetCubeVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 }
 
 func resourceCubeServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 	dcId := d.Get("datacenter_id").(string)
 
 	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
@@ -1123,7 +1123,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 	datacenterId := parts[0]
 	serverId := parts[1]
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Depth(3).Execute()
 	logApiRequestTime(apiResponse)

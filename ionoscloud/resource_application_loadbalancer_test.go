@@ -115,7 +115,7 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 }
 
 func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
@@ -147,7 +147,7 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 
 func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.ApplicationLoadBalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {

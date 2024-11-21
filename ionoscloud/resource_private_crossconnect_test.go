@@ -73,7 +73,7 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 }
 
 func testAccCheckPrivateCrossConnectDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -102,7 +102,7 @@ func testAccCheckPrivateCrossConnectDestroyCheck(s *terraform.State) error {
 
 func testAccCheckPrivateCrossConnectExists(n string, privateCrossConnect *ionoscloud.PrivateCrossConnect) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 		rs, ok := s.RootModule().Resources[n]
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)

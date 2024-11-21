@@ -34,7 +34,7 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, location strin
 // resourceStateRefreshFunc tracks progress of a request
 func resourceStateRefreshFunc(meta interface{}, path string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client := meta.(services.SdkBundle).CloudApiClient
+		client := meta.(services.SdkBundle).CloudAPIClient
 
 		log.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {

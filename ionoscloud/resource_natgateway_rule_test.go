@@ -92,7 +92,7 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 }
 
 func testAccCheckNatGatewayRuleDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
@@ -122,7 +122,7 @@ func testAccCheckNatGatewayRuleDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNatGatewayRuleExists(n string, natGateway *ionoscloud.NatGatewayRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {

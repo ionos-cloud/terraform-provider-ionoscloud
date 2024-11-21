@@ -46,7 +46,7 @@ func dataSourceTemplate() *schema.Resource {
 }
 
 func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	templates, apiResponse, err := client.TemplatesApi.TemplatesGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)

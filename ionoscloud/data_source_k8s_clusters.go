@@ -43,7 +43,7 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 		"k8s_version": "k8sVersion",
 	}
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 	req := client.KubernetesApi.K8sGet(ctx).Depth(1)
 
 	filters, filtersOk := d.GetOk("filter")

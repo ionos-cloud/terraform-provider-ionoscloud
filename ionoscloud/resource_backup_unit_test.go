@@ -79,7 +79,7 @@ func TestAccBackupUnitBasic(t *testing.T) {
 }
 
 func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -111,7 +111,7 @@ func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 
 func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 		rs, ok := s.RootModule().Resources[n]
 

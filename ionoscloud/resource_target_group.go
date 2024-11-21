@@ -171,7 +171,7 @@ func resourceTargetGroup() *schema.Resource {
 }
 
 func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	targetGroup := ionoscloud.TargetGroup{
 		Properties: &ionoscloud.TargetGroupProperties{},
@@ -227,7 +227,7 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	rsp, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -249,7 +249,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	targetGroup := ionoscloud.TargetGroupPut{
 		Properties: &ionoscloud.TargetGroupProperties{},
@@ -303,7 +303,7 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	apiResponse, err := client.TargetGroupsApi.TargetGroupsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -323,7 +323,7 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	groupIp := d.Id()
 

@@ -204,7 +204,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	cleanedEndpoint := cleanURL(endpoint)
+	cleanedEndpoint := utils.CleanURL(endpoint)
 
 	if insecureBool == true {
 		resp.Diagnostics.AddWarning("insecure mode enabled", "This is not recommended for production environments.")
@@ -214,7 +214,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		CDNClient:          cdnService.NewCDNClient(username, password, token, endpoint, version, terraformVersion, insecureBool),
 		AutoscalingClient:  autoscalingService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		CertManagerClient:  cert.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
-		CloudApiClient:     newCloudapiClient(username, password, token, endpoint, "DEV", terraformVersion, insecureBool),
+		CloudAPIClient:     newCloudapiClient(username, password, token, endpoint, "DEV", terraformVersion, insecureBool),
 		ContainerClient:    crService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		DataplatformClient: dataplatformService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		DNSClient:          dnsService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
@@ -281,13 +281,4 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		objectstoragemanagement.NewRegionDataSource,
 		objectstoragemanagement.NewAccesskeyDataSource,
 	}
-}
-
-func cleanURL(url string) string {
-	length := len(url)
-	if length > 1 && url[length-1] == '/' {
-		url = url[:length-1]
-	}
-
-	return url
 }

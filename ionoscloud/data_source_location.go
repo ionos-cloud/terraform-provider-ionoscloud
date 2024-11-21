@@ -61,7 +61,7 @@ func dataSourceLocation() *schema.Resource {
 }
 
 func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	name, nameOk := d.GetOk("name")
 	feature, featureOk := d.GetOk("feature")

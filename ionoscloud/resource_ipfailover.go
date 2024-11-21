@@ -63,7 +63,7 @@ func resourceLanIPFailover() *schema.Resource {
 }
 
 func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -104,7 +104,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -149,7 +149,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -198,7 +198,7 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -246,7 +246,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	lanId := parts[1]
 	ip := parts[2]
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 	apiResponse.LogInfo()

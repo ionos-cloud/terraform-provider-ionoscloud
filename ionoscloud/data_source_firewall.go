@@ -81,7 +81,7 @@ func dataSourceFirewall() *schema.Resource {
 }
 
 func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	datacenterId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)

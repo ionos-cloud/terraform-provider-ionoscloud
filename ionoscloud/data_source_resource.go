@@ -29,7 +29,7 @@ func dataSourceResource() *schema.Resource {
 }
 
 func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	var results []ionoscloud.Resource
 

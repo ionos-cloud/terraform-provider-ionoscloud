@@ -870,7 +870,7 @@ func TestAccServerBootDeviceSelection(t *testing.T) {
 }
 
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -903,7 +903,7 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 
 func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
@@ -946,7 +946,7 @@ func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc
 
 func testAccCheckServerExists(serverName string, server *ionoscloud.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 		rs, ok := s.RootModule().Resources[serverName]
 

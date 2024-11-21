@@ -160,7 +160,7 @@ func checkClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _
 
 }
 func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	clusterName := d.Get("name").(string)
 	cluster := ionoscloud.KubernetesClusterForPost{
@@ -291,7 +291,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -316,7 +316,7 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	request := ionoscloud.KubernetesClusterForPut{}
 
@@ -460,7 +460,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	apiResponse, err := client.KubernetesApi.K8sDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -504,7 +504,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	clusterId := d.Id()
 

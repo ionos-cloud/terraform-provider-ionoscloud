@@ -35,7 +35,7 @@ func getMockedClient(jsonResponse string) interface{} {
 	cfg.HTTPClient = ts.Client()
 
 	return services.SdkBundle{
-		CloudApiClient: ionoscloud.NewAPIClient(cfg),
+		CloudAPIClient: ionoscloud.NewAPIClient(cfg),
 	}
 }
 

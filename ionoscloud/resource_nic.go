@@ -176,7 +176,7 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ inte
 	return nil
 }
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
 	nic, err := cloudapinic.GetNicFromSchema(d, "")
@@ -237,7 +237,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
@@ -261,7 +261,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcID := d.Get("datacenter_id").(string)
 	srvID := d.Get("server_id").(string)
@@ -321,7 +321,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
@@ -344,7 +344,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	sId := parts[1]
 	nicId := parts[2]
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, sId, nicId).Execute()
 	logApiRequestTime(apiResponse)

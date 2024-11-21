@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -358,7 +359,7 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 }
 
 func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {

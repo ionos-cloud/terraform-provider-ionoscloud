@@ -338,7 +338,7 @@ func TestAccCubeServerWithICMP(t *testing.T) {
 }
 
 func testAccCheckCubeServerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -371,7 +371,7 @@ func testAccCheckCubeServerDestroyCheck(s *terraform.State) error {
 
 func testAccCheckCubeServerExists(n string, server *ionoscloud.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudAPIClient
 
 		rs, ok := s.RootModule().Resources[n]
 

@@ -154,7 +154,7 @@ func dataSourceTargetGroup() *schema.Resource {
 }
 
 func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")

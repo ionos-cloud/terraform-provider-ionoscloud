@@ -122,7 +122,7 @@ func resourceSnapshot() *schema.Resource {
 }
 
 func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	dcId := d.Get("datacenter_id").(string)
 	volumeId := d.Get("volume_id").(string)
@@ -159,7 +159,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -181,7 +181,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	name := d.Get("name").(string)
 	input := ionoscloud.NewSnapshotProperties()
@@ -229,7 +229,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	apiResponse, err := client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -247,7 +247,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	snapshotId := d.Id()
 	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()

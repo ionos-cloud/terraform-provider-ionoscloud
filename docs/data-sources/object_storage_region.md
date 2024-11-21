@@ -16,7 +16,7 @@ The **Object storage region data source** can be used to search for and return a
 ### By ID 
 ```hcl
 data "ionoscloud_object_storage_region" "example" {
-  id       = <region_id>
+  id       = "region_id"
 }
 ```
 

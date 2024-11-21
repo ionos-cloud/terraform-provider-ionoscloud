@@ -158,7 +158,7 @@ func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnec
 }
 
 func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudAPIClient
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
