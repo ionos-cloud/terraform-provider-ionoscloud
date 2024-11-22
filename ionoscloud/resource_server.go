@@ -527,7 +527,7 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 		return fmt.Errorf("image_name %s", ImmutableError)
 	}
 	// todo test, this should not work
-	if diff.HasChange("nic.#.mac") {
+	if diff.HasChange("nic.0.mac") {
 		return fmt.Errorf("nic mac %s", ImmutableError)
 	}
 	if diff.HasChange("template_uuid") {
@@ -636,14 +636,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if nics.([]interface{}) != nil {
 			for nicIndex := range nics.([]interface{}) {
 				nicPath := fmt.Sprintf("nic.%d.", nicIndex)
-				nic, err := cloudapinic.GetNicFromSchema(d, nicPath)
+				nic, err := cloudapinic.GetNicFromSchemaCreate(d, nicPath)
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("create error occurred while getting nic from schema: %w", err))
 					return diags
-				}
-				if v, ok := d.GetOk("mac"); ok {
-					vStr := v.(string)
-					nic.Properties.Mac = &vStr
 				}
 				*serverReq.Entities.Nics.Items = append(*serverReq.Entities.Nics.Items, nic)
 				fwRulesPath := nicPath + "firewall"

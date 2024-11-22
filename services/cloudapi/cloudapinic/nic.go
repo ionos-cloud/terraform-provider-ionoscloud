@@ -211,6 +211,19 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 	return nic, nil
 }
 
+func GetNicFromSchemaCreate(d *schema.ResourceData, path string) (ionoscloud.Nic, error) {
+	nic, err := GetNicFromSchema(d, path)
+	if err != nil {
+		return nic, err
+	}
+	if v, ok := d.GetOk(path + "mac"); ok {
+		vStr := v.(string)
+		nic.Properties.Mac = &vStr
+	}
+
+	return nic, nil
+}
+
 func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 	if nic == nil {
 		return fmt.Errorf("nic is empty")

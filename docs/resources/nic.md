@@ -58,7 +58,6 @@ resource "ionoscloud_nic" "example" {
   server_id             = ionoscloud_server.example.id
   lan                   = ionoscloud_lan.example.id
   name                  = "NIC"
-  lan                   = 2
   dhcp                  = true
   firewall_active       = true
   firewall_type         = "INGRESS"

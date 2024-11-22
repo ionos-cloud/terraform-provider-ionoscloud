@@ -497,14 +497,10 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		Properties: &ionoscloud.NicProperties{},
 	}
 	if _, ok := d.GetOk("nic"); ok {
-		nic, err = cloudapinic.GetNicFromSchema(d, "nic.0.")
+		nic, err = cloudapinic.GetNicFromSchemaCreate(d, "nic.0.")
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("cube error occurred while getting nic from schema: %w", err))
 			return diags
-		}
-		if v, ok := d.GetOk("nic.0.mac"); ok {
-			vStr := v.(string)
-			nic.Properties.Mac = &vStr
 		}
 	}
 

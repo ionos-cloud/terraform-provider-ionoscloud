@@ -181,15 +181,10 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	client := meta.(services.SdkBundle).CloudApiClient
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
-	nic, err := cloudapinic.GetNicFromSchema(d, "")
+	nic, err := cloudapinic.GetNicFromSchemaCreate(d, "")
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occurred while getting nic from schema: %w", err))
 		return diags
-	}
-
-	if v, ok := d.GetOk("mac"); ok {
-		vStr := v.(string)
-		nic.Properties.Mac = &vStr
 	}
 
 	dcid := d.Get("datacenter_id").(string)
