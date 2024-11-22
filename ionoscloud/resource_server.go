@@ -40,6 +40,7 @@ func resourceServer() *schema.Resource {
 			"template_uuid": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"name": {
 				Type:             schema.TypeString,
@@ -67,6 +68,7 @@ func resourceServer() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
 			},
 			"boot_volume": {
@@ -138,6 +140,7 @@ func resourceServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"ssh_key_path": {
 				Type:          schema.TypeList,
@@ -192,6 +195,7 @@ func resourceServer() *schema.Resource {
 						"disk_type": {
 							Type:             schema.TypeString,
 							Required:         true,
+							ForceNew:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"image_password": {
@@ -273,6 +277,7 @@ func resourceServer() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
+							ForceNew:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 						},
 						"cpu_hot_plug": {
@@ -308,12 +313,14 @@ func resourceServer() *schema.Resource {
 							Description: "The uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.",
 							Optional:    true,
 							Computed:    true,
+							ForceNew:    true,
 						},
 						"user_data": {
 							Type:        schema.TypeString,
 							Description: "The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' that has cloud-init compatibility in conjunction with this property.",
 							Optional:    true,
 							Computed:    true,
+							ForceNew:    true,
 						},
 						"pci_slot": {
 							Type:     schema.TypeInt,
@@ -493,13 +500,23 @@ func resourceServer() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"allow_replace": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When set to true, allows the update of immutable fields by destroying and re-creating the resource.",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-
+	allowReplace := diff.Get("allow_replace").(bool)
+	// allows the immutable fields to be updated
+	if allowReplace {
+		return nil
+	}
 	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil

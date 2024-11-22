@@ -6,6 +6,15 @@
 - Add bootvolume_selector to `https://docs.ionos.com/
 - Add servers to `https://docs.ionos.com/`
 - Add cube server and vcpu server to `https://docs.ionos.com/`
+### Enhancement
+- Add `allow_replace` to `ionoscloud_server` and `ionoscloud_cube_server` resources, which allows the update of immutable server fields by destroying and then re-creating the resource. This field should be used with care, understanding the risks.
+### Fixes
+- All `id` and `name` fields in data sources need to be computed, so value can be read on first apply.
+- Refactor `ionoscloud_share` and `ionoscloud_nic` data sources
+### Testing
+- Fix template test
+- Remove cpu_family from server test
+- Add basic NFS tests
 
 ## 6.6.2 
 ### Features
@@ -23,14 +32,6 @@
 - Add `IONOS_ALLOW_INSECURE` env variable and `insecure` field to allow insecure connections to the API. This is useful for testing purposes only.
 - Add import tests for VPN Gateway resources
 - Add `security_groups_ids` to `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_nic`, `ionoscloud_vcpu_server` resources and data sources
-
-### Fixes
-- All `id` and `name` fields in data sources need to be computed, so value can be read on first apply.
-- Refactor `ionoscloud_share` and `ionoscloud_nic` data sources
-
-### Testing 
-- Fix template test
-- Remove cpu_family from server test
 
 ### New Product - **Network Security Groups**:
 - `Resources`:
