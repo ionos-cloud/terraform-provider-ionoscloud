@@ -102,6 +102,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.name", "system"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.mac", constant.NicMac),
 					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.id", constant.ServerVCPUResource+"."+constant.ServerTestResource, "primary_nic"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall_type", "BIDIRECTIONAL"),
 				),
