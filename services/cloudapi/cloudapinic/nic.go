@@ -211,6 +211,7 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 	return nic, nil
 }
 
+// GetNicFromSchemaCreate - creates a nic object for create operations from the schema
 func GetNicFromSchemaCreate(d *schema.ResourceData, path string) (ionoscloud.Nic, error) {
 	nic, err := GetNicFromSchema(d, path)
 	if err != nil {
