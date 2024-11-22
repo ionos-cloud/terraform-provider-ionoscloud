@@ -288,6 +288,9 @@ resource "ionoscloud_server" "test" {
     - `value` - (Required)[string] The value of the label.
 - `inline_volume_ids` - (Computed) A list with the IDs for the volumes that are defined inside the server resource.
 - `security_groups_ids` - (Optional) The list of Security Group IDs for the
+- `allow_replace` - (Optional)[bool] When set to true, allows the update of immutable fields by first destroying and then re-creating the server.
+
+⚠️ **_Warning: `allow_replace` - lets you update immutable fields, but it first destroys and then re-creates the server in order to do it. This field should be used with care, understanding the risks._**
 
 > **⚠ WARNING** 
 > 
