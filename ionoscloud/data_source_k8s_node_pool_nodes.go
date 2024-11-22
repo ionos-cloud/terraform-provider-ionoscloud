@@ -37,22 +37,22 @@ func dataSourceK8sNodePoolNodes() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 						"name": {
 							Type:        schema.TypeString,
 							Description: "The kubernetes node name",
-							Optional:    true,
+							Computed:    true,
 						},
 						"public_ip": {
 							Type:        schema.TypeString,
 							Description: "A valid public IP",
-							Optional:    true,
+							Computed:    true,
 						},
 						"private_ip": {
 							Type:        schema.TypeString,
 							Description: "A valid private IP",
-							Optional:    true,
+							Computed:    true,
 						},
 						"k8s_version": {
 							Type:        schema.TypeString,

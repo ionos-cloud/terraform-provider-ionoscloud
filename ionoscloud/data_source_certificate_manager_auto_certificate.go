@@ -28,12 +28,14 @@ func dataSourceCertificateManagerAutoCertificate() *schema.Resource {
 			"id": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				Description:      "The ID of the auto-certificate",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The name of the auto-certificate",
 			},
 			"common_name": {

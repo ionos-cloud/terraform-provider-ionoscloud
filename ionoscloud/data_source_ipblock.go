@@ -21,21 +21,23 @@ func dataSourceIpBlock() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"location": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				ForceNew:         true,
+				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"size": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"ips": {
 				Type:     schema.TypeList,
@@ -45,7 +47,6 @@ func dataSourceIpBlock() *schema.Resource {
 			"ip_consumers": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {

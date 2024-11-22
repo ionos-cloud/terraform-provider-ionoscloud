@@ -47,10 +47,12 @@ func dataSourceK8sClusterSchema() map[string]*schema.Schema {
 		"id": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 		},
 		"name": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 		},
 		"state": {
 			Type:     schema.TypeString,

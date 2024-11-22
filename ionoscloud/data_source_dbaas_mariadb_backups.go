@@ -20,11 +20,13 @@ func dataSourceDBaaSMariaDBBackups() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The unique ID of the cluster that was backed up",
 				Optional:    true,
+				Computed:    true,
 			},
 			"backup_id": {
 				Type:        schema.TypeString,
 				Description: "The unique ID of the backup",
 				Optional:    true,
+				Computed:    true,
 			},
 			"location": {
 				Type:        schema.TypeString,

@@ -33,10 +33,12 @@ func dataSourceCubeServer() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"hostname": {
 				Type:     schema.TypeString,

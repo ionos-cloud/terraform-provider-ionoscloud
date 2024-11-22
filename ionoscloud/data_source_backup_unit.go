@@ -20,11 +20,13 @@ func dataSourceBackupUnit() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Id of the backup unit.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "Alphanumeric name you want assigned to the backup unit.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"email": {
 				Type:        schema.TypeString,

@@ -19,10 +19,12 @@ func dataSourceVolume() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"image": {
 				Type:     schema.TypeString,

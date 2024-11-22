@@ -25,6 +25,7 @@ func DataSourceAutoscalingGroup() *schema.Resource {
 			"id": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				Description:      "UUID of the Autoscaling Group.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
@@ -32,6 +33,7 @@ func DataSourceAutoscalingGroup() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "User-defined name for the Autoscaling Group.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"max_replica_count": {
 				Type:        schema.TypeInt,
