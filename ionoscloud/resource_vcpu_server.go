@@ -241,6 +241,7 @@ func resourceVCPUServer() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
+							ForceNew: true,
 						},
 						"lan": {
 							Type:     schema.TypeInt,

@@ -526,7 +526,6 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 	if diff.HasChange("image_name") {
 		return fmt.Errorf("image_name %s", ImmutableError)
 	}
-	// todo test, this should not work
 	if diff.HasChange("nic.0.mac") {
 		return fmt.Errorf("nic mac %s", ImmutableError)
 	}
