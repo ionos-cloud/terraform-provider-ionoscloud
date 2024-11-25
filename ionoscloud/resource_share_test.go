@@ -168,6 +168,5 @@ var testAccDataSourceShareConfigBasic = testAccCheckShareConfigBasic + `
 data ` + constant.ShareResource + " " + constant.SourceShareName + `{
   group_id    = "${ionoscloud_group.group.id}"
   resource_id = "${ionoscloud_datacenter.foobar.id}"
-  id		  = ` + constant.ShareResourceFullName + `.id
 }
 `

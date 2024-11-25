@@ -5,16 +5,14 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 )
 
 func resourceShare() *schema.Resource {
@@ -38,7 +36,7 @@ func resourceShare() *schema.Resource {
 			"group_id": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"resource_id": {
 				Type:             schema.TypeString,
@@ -64,7 +62,6 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a share: %w", err))
 		return diags
@@ -143,23 +140,10 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		if httpNotFound(apiResponse) {
-			diags := diag.FromErr(err)
-			return diags
-		}
-		// try again in 20 seconds
-		// todo: get rid of this retry
-		time.Sleep(20 * time.Second)
-		apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			if !httpNotFound(apiResponse) {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a share %s %w", d.Id(), err))
-				return diags
-			}
+		if !httpNotFound(apiResponse) {
+			return diag.FromErr(err)
 		}
 	}
-
 	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return diag.FromErr(errState)
 	}
@@ -181,7 +165,6 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 
 	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
