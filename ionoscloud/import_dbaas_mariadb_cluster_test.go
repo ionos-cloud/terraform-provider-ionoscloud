@@ -3,9 +3,11 @@
 package ionoscloud
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -33,9 +35,24 @@ func TestAccDbaasMariaDBClusterImportBasic(t *testing.T) {
 			{
 				ResourceName:            constant.DBaaSMariaDBClusterResource + "." + constant.DBaaSClusterTestResource,
 				ImportState:             true,
+				ImportStateIdFunc:       testAccDBaaSMariaDBImportStateID,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"credentials"},
 			},
 		},
 	})
+}
+
+func testAccDBaaSMariaDBImportStateID(s *terraform.State) (string, error) {
+	var importID = ""
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != constant.DBaaSMariaDBClusterResource {
+			continue
+		}
+
+		importID = fmt.Sprintf("%s:%s", rs.Primary.Attributes["location"], rs.Primary.Attributes["id"])
+	}
+
+	return importID, nil
 }
