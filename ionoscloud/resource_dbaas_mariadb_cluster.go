@@ -254,5 +254,25 @@ func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func mariaDBClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).MariaDBClient
+
+	clusterID := d.Id()
+	cluster, err := mariadb.GetMariaDBClusterDataUpdate(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	response, _, err := client.UpdateCluster(ctx, *cluster, clusterID, d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("an error occurred while updating DBaaS MariaDB cluster with ID: %v, error: %w", clusterID, err))
+	}
+
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v, error: %w", clusterID, err))
+	}
+	if err := client.SetMariaDBClusterData(d, response); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }

@@ -3,6 +3,7 @@ package mariadb
 import (
 	"context"
 	"fmt"
+	goVersion "github.com/hashicorp/go-version"
 	"log"
 	"os"
 	"strings"
@@ -70,6 +71,14 @@ func (c *MariaDBClient) ListClusters(ctx context.Context, filterName, location s
 func (c *MariaDBClient) CreateCluster(ctx context.Context, cluster mariadb.CreateClusterRequest, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
 	c.modifyConfigURL(location)
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
+	apiResponse.LogInfo()
+	return clusterResponse, apiResponse, err
+}
+
+// UpdateCluster updates a cluster by its ID and the location in which the cluster is created.
+func (c *MariaDBClient) UpdateCluster(ctx context.Context, cluster mariadb.PatchClusterRequest, clusterID, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
+	c.modifyConfigURL(location)
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterID).PatchClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
@@ -155,6 +164,65 @@ func GetMariaDBClusterDataCreate(d *schema.ResourceData) (*mariadb.CreateCluster
 		cluster.Properties.MaintenanceWindow = GetMariaClusterMaintenanceWindowData(d)
 	}
 
+	return &cluster, nil
+}
+
+func GetMariaDBClusterDataUpdate(d *schema.ResourceData) (*mariadb.PatchClusterRequest, error) {
+	cluster := mariadb.PatchClusterRequest{
+		Properties: &mariadb.PatchClusterProperties{},
+	}
+
+	if d.HasChange("mariadb_version") {
+		oldValue, newValue := d.GetChange("mariadb_version")
+		oldValueString := oldValue.(string)
+		newValueString := newValue.(string)
+		oldVersion, err := goVersion.NewVersion(oldValueString)
+		if err != nil {
+			return nil, err
+		}
+		newVersion, err := goVersion.NewVersion(newValueString)
+		if err != nil {
+			return nil, err
+		}
+		if newVersion.LessThan(oldVersion) {
+			return nil, fmt.Errorf("downgrading MariaDB version is not allowed")
+		}
+		cluster.Properties.MariadbVersion = (*mariadb.MariadbVersion)(&newValueString)
+	}
+
+	if d.HasChange("instances") {
+		_, n := d.GetChange("instances")
+		nInt := int32(n.(int))
+		cluster.Properties.Instances = &nInt
+	}
+
+	if d.HasChange("cores") {
+		_, n := d.GetChange("cores")
+		nInt := int32(n.(int))
+		cluster.Properties.Cores = &nInt
+	}
+
+	if d.HasChange("ram") {
+		_, n := d.GetChange("ram")
+		nInt := int32(n.(int))
+		cluster.Properties.Ram = &nInt
+	}
+
+	if d.HasChange("storage_size") {
+		_, n := d.GetChange("storage_size")
+		nInt := int32(n.(int))
+		cluster.Properties.StorageSize = &nInt
+	}
+
+	if d.HasChange("display_name") {
+		_, n := d.GetChange("display_name")
+		nString := n.(string)
+		cluster.Properties.DisplayName = &nString
+	}
+
+	if d.HasChange("maintenance_window") {
+		cluster.Properties.MaintenanceWindow = GetMariaClusterMaintenanceWindowData(d)
+	}
 	return &cluster, nil
 }
 

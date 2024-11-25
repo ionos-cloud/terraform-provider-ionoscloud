@@ -105,6 +105,25 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 				Config:      mariaDBClusterDataSourceWrongId,
 				ExpectError: regexp.MustCompile("an error occurred while fetching the MariaDB cluster with ID"),
 			},
+			{
+				Config: mariaDBClusterUpdateConfig,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDBaaSMariaDBClusterExists(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, &cluster),
+					// TODO -- Check for update version here
+					//resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterVersionAttribute, clusterVersionValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterInstancesAttribute, clusterInstancesUpdatedValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCoresAttribute, clusterCoresUpdatedValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterRamAttribute, clusterRamUpdatedValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterStorageSizeAttribute, clusterStorageSizeUpdatedValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterDisplayNameAttribute, clusterDisplayNameUpdatedValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekUpdateValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeUpdateValue),
+				),
+			},
+			{
+				Config:      mariaDBClusterInvalidUpdateConfig,
+				ExpectError: regexp.MustCompile("downgrading MariaDB version is not allowed"),
+			},
 		},
 	})
 }
@@ -156,7 +175,7 @@ func testAccCheckDBaaSMariaDBClusterExists(n string, cluster *mariadb.ClusterRes
 	}
 }
 
-const mariaDBClusterConfigBasic = `
+const mariaDBTestInfraConfig = `
 resource ` + constant.DatacenterResource + ` ` + datacenterResourceName + ` {
   name        = "mariadb_datacenter_example"
   location    = "fr/par"
@@ -196,6 +215,14 @@ locals {
  database_ip_cidr         = format("%s/%s", local.database_ip, "24")
 }
 
+resource ` + constant.RandomPassword + ` "cluster_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+` + ServerImagePassword
+
+const mariaDBClusterConfigBasic = mariaDBTestInfraConfig + `
 resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   ` + clusterVersionAttribute + ` = "` + clusterVersionValue + `"
   ` + clusterInstancesAttribute + ` = "` + clusterInstancesValue + `"
@@ -214,13 +241,39 @@ resource "time_sleep" "wait_30_seconds" {
   depends_on = [` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `]
   create_duration = "30s"
 }
+`
 
-resource ` + constant.RandomPassword + ` "cluster_password" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+const mariaDBClusterUpdateConfig = mariaDBTestInfraConfig + `
+resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
+  ` + clusterVersionAttribute + ` = "` + clusterVersionValue + `"
+  ` + clusterInstancesAttribute + ` = "` + clusterInstancesUpdatedValue + `"
+  ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
+  ` + clusterCoresAttribute + ` = "` + clusterCoresUpdatedValue + `"
+  ` + clusterRamAttribute + ` = "` + clusterRamUpdatedValue + `"
+  ` + clusterStorageSizeAttribute + ` = "` + clusterStorageSizeUpdatedValue + `"
+  ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameUpdatedValue + `"
+  ` + connections + `
+  ` + maintenanceWindowUpdated + `
+  ` + credentials + `
 }
-` + ServerImagePassword
+`
+
+// This update is invalid because version downgrade is not allowed.
+const mariaDBClusterInvalidUpdateConfig = mariaDBTestInfraConfig + `
+resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
+  
+  ` + clusterVersionAttribute + ` = "10.1"
+  ` + clusterInstancesAttribute + ` = "` + clusterInstancesUpdatedValue + `"
+  ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
+  ` + clusterCoresAttribute + ` = "` + clusterCoresUpdatedValue + `"
+  ` + clusterRamAttribute + ` = "` + clusterRamUpdatedValue + `"
+  ` + clusterStorageSizeAttribute + ` = "` + clusterStorageSizeUpdatedValue + `"
+  ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameUpdatedValue + `"
+  ` + connections + `
+  ` + maintenanceWindowUpdated + `
+  ` + credentials + `
+}
+`
 
 const mariaDBClusterDataSourceMatchId = mariaDBClusterConfigBasic + `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
@@ -271,6 +324,11 @@ const maintenanceWindow = clusterMaintenanceWindowAttribute + `{
 	` + clusterMaintenanceWindowTimeAttribute + ` = "` + clusterMaintenanceWindowTimeValue + `"
 }`
 
+const maintenanceWindowUpdated = clusterMaintenanceWindowAttribute + `{
+	` + clusterMaintenanceWindowDayOfTheWeekAttribute + ` = "` + clusterMaintenanceWindowDayOfTheWeekUpdateValue + `"
+	` + clusterMaintenanceWindowTimeAttribute + ` = "` + clusterMaintenanceWindowTimeUpdateValue + `"
+}`
+
 const credentials = clusterCredentialsAttribute + `{
 	` + clusterCredentialsUsernameAttribute + ` = "` + clusterCredentialsUsernameValue + `"
 	` + clusterCredentialsPasswordAttribute + ` = ` + constant.RandomPassword + `.cluster_password.result
@@ -281,14 +339,21 @@ const clusterVersionAttribute = "mariadb_version"
 
 // Values
 const (
-	clusterVersionValue             = "10.6"
+	clusterVersionValue = "10.6"
+	// TODO -- Use this field when the API is updated
+	//clusterVersionUpdatedValue      = "10.11"
 	clusterInstancesValue           = "1"
+	clusterInstancesUpdatedValue    = "2"
 	clusterLocationValue            = "fr/par"
 	clusterCoresValue               = "4"
+	clusterCoresUpdatedValue        = "5"
 	clusterRamValue                 = "4"
+	clusterRamUpdatedValue          = "5"
 	clusterStorageSizeValue         = "10"
+	clusterStorageSizeUpdatedValue  = "11"
 	clusterConnectionsCidrValue     = "local.database_ip_cidr"
 	clusterDisplayNameValue         = constant.DBaaSClusterTestResource
+	clusterDisplayNameUpdatedValue  = "updatedDisplayName"
 	clusterCredentialsUsernameValue = "username"
 	datacenterResourceName          = "datacenter_example"
 	lanResourceName                 = "lan_example"

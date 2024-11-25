@@ -2,6 +2,8 @@ module github.com/ionos-cloud/terraform-provider-ionoscloud/v6
 
 go 1.22.0
 
+replace github.com/ionos-cloud/sdk-go-dbaas-mariadb => ./../sdks/generated_locally/sdk-go-mariadb
+
 require (
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/cenkalti/backoff/v4 v4.3.0

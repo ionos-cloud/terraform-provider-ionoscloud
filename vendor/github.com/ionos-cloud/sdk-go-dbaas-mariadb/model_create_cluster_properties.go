@@ -31,6 +31,7 @@ type CreateClusterProperties struct {
 	DisplayName       *string            `json:"displayName"`
 	MaintenanceWindow *MaintenanceWindow `json:"maintenanceWindow,omitempty"`
 	Credentials       *DBUser            `json:"credentials"`
+	FromBackup        *RestoreRequest    `json:"fromBackup,omitempty"`
 }
 
 // NewCreateClusterProperties instantiates a new CreateClusterProperties object
@@ -402,6 +403,44 @@ func (o *CreateClusterProperties) HasCredentials() bool {
 	return false
 }
 
+// GetFromBackup returns the FromBackup field value
+// If the value is explicit nil, the zero value for RestoreRequest will be returned
+func (o *CreateClusterProperties) GetFromBackup() *RestoreRequest {
+	if o == nil {
+		return nil
+	}
+
+	return o.FromBackup
+
+}
+
+// GetFromBackupOk returns a tuple with the FromBackup field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *CreateClusterProperties) GetFromBackupOk() (*RestoreRequest, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.FromBackup, true
+}
+
+// SetFromBackup sets field value
+func (o *CreateClusterProperties) SetFromBackup(v RestoreRequest) {
+
+	o.FromBackup = &v
+
+}
+
+// HasFromBackup returns a boolean if a field has been set.
+func (o *CreateClusterProperties) HasFromBackup() bool {
+	if o != nil && o.FromBackup != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o CreateClusterProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.MariadbVersion != nil {
@@ -438,6 +477,10 @@ func (o CreateClusterProperties) MarshalJSON() ([]byte, error) {
 
 	if o.Credentials != nil {
 		toSerialize["credentials"] = o.Credentials
+	}
+
+	if o.FromBackup != nil {
+		toSerialize["fromBackup"] = o.FromBackup
 	}
 
 	return json.Marshal(toSerialize)
