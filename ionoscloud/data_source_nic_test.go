@@ -8,8 +8,87 @@ import (
 	"log"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
+
+func testGetNicDataSourceSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"server_id": {
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+		},
+		"datacenter_id": {
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+		},
+		"id": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
+		"lan": {
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"dhcp": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		"dhcpv6": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"ipv6_cidr_block": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
+		"ips": {
+			Type:     schema.TypeList,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Computed: true,
+			Optional: true,
+		},
+		"ipv6_ips": {
+			Type:     schema.TypeList,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Computed: true,
+		},
+		"firewall_active": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"firewall_type": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
+		"mac": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"device_number": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"pci_slot": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+	}
+}
 
 // unit test
 func Test_dataSourceNicRead(t *testing.T) {
@@ -47,7 +126,7 @@ func Test_dataSourceNicRead(t *testing.T) {
 		t.Fatalf("error marshalling nic %+v", nic)
 	}
 	var ctx = context.TODO()
-	data := getEmptyTestResourceData(t, getNicDataSourceSchema())
+	data := getEmptyTestResourceData(t, testGetNicDataSourceSchema())
 	meta := getMockedClient(string(jsonNic))
 
 	err = data.Set("datacenter_id", "testValueDatacenter")
