@@ -1,4 +1,12 @@
-## 6.6.3 - upcoming release
+## 6.6.4 - upcoming release
+### Fixes 
+- Refactor `ionoscloud_share` and `ionoscloud_nic` data sources
+- Remove sleep and delete from `ionoscloud_share` resource
+### Testing
+- Fix template test
+- Remove cpu_family from server test
+
+## 6.6.3 
 ### Documentation
 - Add additional infrastructure provisioning examples
 - Fix titles for mariadb docs data sources `https://docs.ionos.com/`
@@ -10,12 +18,7 @@
 - Add `allow_replace` to `ionoscloud_server` and `ionoscloud_cube_server` resources, which allows the update of immutable server fields by destroying and then re-creating the resource. This field should be used with care, understanding the risks.
 ### Fixes
 - All `id` and `name` fields in data sources need to be computed, so value can be read on first apply.
-- Refactor `ionoscloud_share` and `ionoscloud_nic` data sources
-- Remove sleep and delete from `ionoscloud_share` resource
-
 ### Testing
-- Fix template test
-- Remove cpu_family from server test
 - Add basic NFS tests
 
 ## 6.6.2 
