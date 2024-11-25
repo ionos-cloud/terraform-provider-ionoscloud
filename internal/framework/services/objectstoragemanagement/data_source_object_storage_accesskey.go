@@ -95,15 +95,15 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 	}
 
 	id := data.ID.ValueString()
-	accessKeyId := data.AccessKey.ValueString()
+	accessKeyID := data.AccessKey.ValueString()
 	description := data.Description.ValueString()
 
 	var accessKey objectstoragemanagementApi.AccessKeyRead
 	var accessKeys objectstoragemanagementApi.AccessKeyReadList
 	var apiResponse *objectstoragemanagementApi.APIResponse
 	var err error
-
-	if !data.ID.IsNull() {
+	switch {
+	case !data.ID.IsNull():
 		accessKey, apiResponse, err = d.client.GetAccessKey(ctx, id)
 
 		if apiResponse.HttpNotFound() {
@@ -114,19 +114,19 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			resp.Diagnostics.AddError("an error occurred while fetching the accesskey with", err.Error())
 			return
 		}
-		if !data.AccessKey.IsNull() && *accessKey.Properties.AccessKey != accessKeyId {
+		if !data.AccessKey.IsNull() && *accessKey.Properties.AccessKey != accessKeyID {
 			resp.Diagnostics.AddError(
-				"accesskeyId does not match",
+				"accesskeyID does not match",
 				fmt.Sprintf(
 					"accesskey property of Accesskey (UUID=%s, accesskey=%s) does not match expected accesskey: %s",
-					*accessKey.Id, *accessKey.Properties.AccessKey, accessKeyId,
+					*accessKey.Id, *accessKey.Properties.AccessKey, accessKeyID,
 				),
 			)
 			return
 		}
 		if !data.Description.IsNull() && *accessKey.Properties.Description != description {
 			resp.Diagnostics.AddError(
-				"accesskeyId does not match",
+				"accesskeyID does not match",
 				fmt.Sprintf(
 					"description of Accesskey (UUID=%s, description=%s) does not match expected description: %s",
 					*accessKey.Id, *accessKey.Properties.Description, description,
@@ -134,8 +134,12 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			)
 			return
 		}
-	} else if !data.AccessKey.IsNull() {
-		accessKeys, apiResponse, err = d.client.ListAccessKeysFilter(ctx, accessKeyId)
+	case !data.AccessKey.IsNull():
+		accessKeys, _, err = d.client.ListAccessKeysFilter(ctx, accessKeyID)
+		if err != nil {
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", err.Error())
+			return
+		}
 		if len(*accessKeys.Items) != 0 {
 			accessKey = (*accessKeys.Items)[0]
 		} else {
@@ -144,7 +148,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 		if !data.Description.IsNull() && *accessKey.Properties.Description != description {
 			resp.Diagnostics.AddError(
-				"accesskeyId does not match",
+				"accesskeyID does not match",
 				fmt.Sprintf(
 					"description of Accesskey (UUID=%s, description=%s) does not match expected description: %s",
 					*accessKey.Id, *accessKey.Properties.Description, description,
@@ -152,8 +156,12 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			)
 			return
 		}
-	} else if !data.Description.IsNull() {
-		accessKeys, apiResponse, err = d.client.ListAccessKeys(ctx)
+	case !data.Description.IsNull():
+		accessKeys, _, err = d.client.ListAccessKeys(ctx)
+		if err != nil {
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", err.Error())
+			return
+		}
 		found := false
 		for _, item := range *accessKeys.Items {
 			if *item.Properties.Description == description {
@@ -166,6 +174,9 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			resp.Diagnostics.AddError("accesskey not found", "The accesskey was not found")
 			return
 		}
+	default:
+		resp.Diagnostics.AddError("ID, accesskeyId or description must be set", "ID, accesskeyId or description must be set")
+		return
 	}
 
 	objectStorageManagementService.SetAccessKeyPropertiesToDataSourcePlan(data, accessKey)
