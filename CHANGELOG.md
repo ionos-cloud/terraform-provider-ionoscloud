@@ -1,4 +1,8 @@
-## 6.6.3 - upcoming release
+## 6.6.4 - upcoming release
+### Enhancement
+- make `mac` optional on `ionoscloud_nic`, `ionoscloud_server`, `ionoscloud_cube_server` and `ionoscloud_vcpu_server`
+
+## 6.6.3
 ### Documentation
 - Add additional infrastructure provisioning examples
 - Fix titles for mariadb docs data sources `https://docs.ionos.com/`
