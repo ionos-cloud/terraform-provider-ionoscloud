@@ -23,6 +23,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "The id of your cluster",
 				Optional:         true,
+				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"maintenance_window": {
@@ -56,6 +57,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The friendly name of your cluster",
 				Optional:    true,
+				Computed:    true,
 			},
 			"location": {
 				Type: schema.TypeString,

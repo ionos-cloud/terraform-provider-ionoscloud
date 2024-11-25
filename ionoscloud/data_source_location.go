@@ -19,10 +19,12 @@ func dataSourceLocation() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"feature": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"cpu_architecture": {
 				Type:     schema.TypeList,

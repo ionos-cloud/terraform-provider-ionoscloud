@@ -22,11 +22,13 @@ func dataSourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the Application Load Balancer forwarding rule.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,

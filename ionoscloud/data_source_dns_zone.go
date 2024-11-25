@@ -23,11 +23,13 @@ func dataSourceDNSZone() *schema.Resource {
 				Description:      "The ID of your DNS Zone.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				Optional:         true,
+				Computed:         true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of your DNS Zone.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,
