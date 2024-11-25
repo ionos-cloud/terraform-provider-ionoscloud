@@ -50,7 +50,7 @@ func TestAccServerWithLabelsImport(t *testing.T) {
 				ImportStateIdFunc:       testAccServerImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids", "primary_ip"},
+				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids", "primary_ip", "allow_replace"},
 			},
 		},
 	})
