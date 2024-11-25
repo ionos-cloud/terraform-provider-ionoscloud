@@ -5,6 +5,7 @@
 ### Testing
 - Fix template test
 - Remove cpu_family from server test
+- Fix server and vcpu server tests with multiple firewall rules
 
 ## 6.6.3 
 ### Documentation

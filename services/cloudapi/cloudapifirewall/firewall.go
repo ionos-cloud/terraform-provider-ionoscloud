@@ -68,7 +68,7 @@ func (fs *Service) Create(ctx context.Context, datacenterId, serverId, nicId str
 		return nil, apiResponse, fmt.Errorf("an error occurred while creating firewall rule for dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, err)
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutCreate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
+		return nil, apiResponse, fmt.Errorf("on create an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
 	return &firewall, apiResponse, nil
 }
@@ -80,7 +80,7 @@ func (fs *Service) Update(ctx context.Context, datacenterId, serverId, nicId, id
 		return nil, apiResponse, fmt.Errorf("an error occurred while updating firewall rule for dcId: %s, server_id: %s, nic_id: %s, id %s, Response: (%w)", datacenterId, serverId, nicId, id, err)
 	}
 	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
+		return nil, apiResponse, fmt.Errorf("on update an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
 	return &firewall, apiResponse, nil
 }
