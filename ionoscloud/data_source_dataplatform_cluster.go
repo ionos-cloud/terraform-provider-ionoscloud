@@ -28,12 +28,14 @@ func dataSourceDataplatformCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "The id of your cluster.",
 				Optional:         true,
+				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of your cluster.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,

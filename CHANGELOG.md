@@ -1,10 +1,26 @@
-## 6.6.3 - upcoming release
+## 6.6.4 - upcoming release
+### Fixes 
+- Refactor `ionoscloud_share` and `ionoscloud_nic` data sources
+- Remove sleep and delete from `ionoscloud_share` resource
+### Testing
+- Fix template test
+- Remove cpu_family from server test
+
+## 6.6.3 
 ### Documentation
+- Add additional infrastructure provisioning examples
 - Fix titles for mariadb docs data sources `https://docs.ionos.com/`
 - Add Network Security Group to `https://docs.ionos.com/`
 - Add bootvolume_selector to `https://docs.ionos.com/
 - Add servers to `https://docs.ionos.com/`
 - Add cube server and vcpu server to `https://docs.ionos.com/`
+### Enhancement
+- Add `allow_replace` to `ionoscloud_server` and `ionoscloud_cube_server` resources, which allows the update of immutable server fields by destroying and then re-creating the resource. This field should be used with care, understanding the risks.
+### Fixes
+- All `id` and `name` fields in data sources need to be computed, so value can be read on first apply.
+### Testing
+- Add basic NFS tests
+
 ## 6.6.2 
 ### Features
 - Make `location` optional for `certificate_manager` resources and datasources
@@ -21,6 +37,7 @@
 - Add `IONOS_ALLOW_INSECURE` env variable and `insecure` field to allow insecure connections to the API. This is useful for testing purposes only.
 - Add import tests for VPN Gateway resources
 - Add `security_groups_ids` to `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_nic`, `ionoscloud_vcpu_server` resources and data sources
+
 ### New Product - **Network Security Groups**:
 - `Resources`:
   - [ionoscloud_nsg](docs/resources/nsg.md)
@@ -158,7 +175,7 @@
 - Add s3 bucket, object, policy resources with base functionality
 ### Enhancements
 - Move to `sdk-go-bundle` for logging sdk
-### Fixes 
+### Fixes
 - Fixes #607. Container registry should wait until the resource is ready before returning the ID.
 - Move tests from AMD_OPTERON to INTEL_XEON
 - Data source `ionoscloud_mongo_template` should have id `computed` and `optional`
@@ -196,7 +213,7 @@
 - Fix documentation for `ionoscloud_server`, `ionoscloud_volume`, `ionoscloud_lan` resources and `ionoscloud_image` data sources
 
 ### Enhancements
-- Add configurable fields to `ionoscloud_share` resource. Fields that can be set on creation: `description`, `sec_auth_protection`, `licence_type`. 
+- Add configurable fields to `ionoscloud_share` resource. Fields that can be set on creation: `description`, `sec_auth_protection`, `licence_type`.
 Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug`, `disc_virtio_hot_unplug`, `ram_hot_plug`.
 - Allow MariaDB cluster creation in other zones than `de/txl` by adding `location` parameter to resources and data sources
 
@@ -294,7 +311,7 @@ Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`,
 - #412 add support to set power state of Enterprise and Cube servers, by adding the new field `vm_state` in `ionoscloud_server`, `ionoscloud_cube_server` and `ionoscloud_vcpu_server `resources
 ### Fixes
 - #467 removing an inline `nic` of the `server` resource from dcd should not throw 404 when running plan or apply after
-- #432 Now it is possible to create and delete multiple `ionoscloud_ipfailover` resources at the same time. The UUID is generated based on the IP of the 
+- #432 Now it is possible to create and delete multiple `ionoscloud_ipfailover` resources at the same time. The UUID is generated based on the IP of the
 failover group. The resources that are created using Terraform cannot be modified/deleted outside Terraform.
 - Fix `nil` deref error on list for nic datasource
 - #470 fix image name searching in `ionoscloud_image` and `ionoscloud_volume`. Exact matches are returned correctly now if they exist.
@@ -364,7 +381,7 @@ failover group. The resources that are created using Terraform cannot be modifie
 
 ## 6.4.2
 ### Fixes
-- Fix `ssh_keys` field upgrade `ionoscloud_server` from `6.3.3` to higher versions should not replace server. `ssh_keys` and `ssh_key_path` fields no longer forceNew. 
+- Fix `ssh_keys` field upgrade `ionoscloud_server` from `6.3.3` to higher versions should not replace server. `ssh_keys` and `ssh_key_path` fields no longer forceNew.
 `ssh_keys` is no longer computed.
 - Fix `ssh_keys` suppress diff on upgrade for `ionoscloud_server` when having `volume.0.ssh_keys`
 - Add validation to `label` `key` and `value` fields for `ionoscloud_server` resource
@@ -478,7 +495,7 @@ Please contact your sales representative or support for more information.
     - [ionoscloud_container_registry](docs/data-sources/container_registry.md)
     - [ionoscloud_container_registry_token](docs/data-sources/container_registry_token.md)
     - [ionoscloud_container_registry_locations](docs/data-sources/container_registry_locations.md)
-     
+
 ⚠️ **Note:** Container Registry is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications.
 Please contact your sales representative or support for more information.
 ### Fixes
@@ -513,7 +530,7 @@ Please contact your sales representative or support for more information.
 - `ssh_key_path` will now allow the keys to be passed directly also. In the future, will be renamed to `ssh_keys`.
 
 ### Fixes
-- Reproduces rarely: sometimes the `nic` resource is not found after creation. As a fix we added a retry for 5 minutes to be able to get the NIC. The retry will keep trying if the response 
+- Reproduces rarely: sometimes the `nic` resource is not found after creation. As a fix we added a retry for 5 minutes to be able to get the NIC. The retry will keep trying if the response
 is `not found`(404)
 - Fix cube server creation. Some attributes were not populated - name, boot_cdrom, availability_zone
 - Crash on update of k8s version when we have a value without `.`
@@ -549,12 +566,12 @@ is `not found`(404)
 
 ## 6.2.5
 ### Enhancement
-- Update sdk-go dependency to v6.0.3. 
+- Update sdk-go dependency to v6.0.3.
   * enable certificate pinning, by setting IONOS_PINNED_CERT env variable
 - Temporarily removed `gateway_ip` and `public` fields for k8s
 - Introduced error when trying to set `max_node_count` equal to `min_node_count` in `k8s_node_pool`
 
-### Fixes 
+### Fixes
 - Crash when trying to disable `autoscaling` on `k8s_node_pool`
 
 ## 6.2.4
@@ -587,7 +604,7 @@ is `not found`(404)
 ## 6.2.1
 
 ### Documentation
-- Improved all the examples to be ready to use 
+- Improved all the examples to be ready to use
 - Added units where missing
 - Added example for adding a secondary NIC to an IP Failover
 - Updated provider version to the latest release in main registry page
@@ -601,17 +618,17 @@ is `not found`(404)
 - Update terraform-plugin-sdk to v2.12.0
 - Token and username+password does not conflict anymore, all three can be set, the token having priority
 
-### Features 
+### Features
 - Added `backup_location` property for `ionoscloud_pg_cluster`. For more details refer to the [documentation](docs/resources/dbaas_pgsql_cluster.md)
 
 ### Fixes
 - Fixed image data-source bug when `name` not provided - data-source returned 0 results
-- When you try to change an immutable field, you get an error, but before that the tf state is changed. 
-Before applying a real change you need to `apply` it back with an error again. 
+- When you try to change an immutable field, you get an error, but before that the tf state is changed.
+Before applying a real change you need to `apply` it back with an error again.
 To fix, when you try to change immutable fields they will throw an error in the plan phase.
 - Reintroduced in group resource the `user_id` argument, as deprecated, to provide a period of transition
 - Check slice length to prevent crash
-- Fixed k8s_cluster data_source bug when searching by name 
+- Fixed k8s_cluster data_source bug when searching by name
 - Fix lan deletion error, when trying to delete it immediately after the deletion of the DBaaS cluster that contained it
 
 ## 6.2.0
@@ -641,16 +658,16 @@ To fix, when you try to change immutable fields they will throw an error in the 
 
 ### Enhancements:
 - Improved lookup in data_sources by using filters
-- Improved tests duration by moving steps from data_source test files in the corresponding resource test files 
-- Added workflow to run tests from GitHub actions 
+- Improved tests duration by moving steps from data_source test files in the corresponding resource test files
+- Added workflow to run tests from GitHub actions
 - Split tests with build tags
 - Improve http client performance and timeouts
 
-### Documentations: 
+### Documentations:
 - A more accurate example on how can the cidr be set automatically on a DBaaS Cluster
 - Update doc of how to dump kube_config into a file in yaml format.
 
-### Fixes: 
+### Fixes:
 - Fix on creating a DBaaS Cluster without specifying the maintenance window
 - Solve #204 - targets in nlb forwarding rule(switched to Set instead of List), lb_private_ips(set to computed), features in datacenter resources(switched to Set instead of List)
 - Fix of plugin crash when updating k8s_node_pool node_count
@@ -680,13 +697,13 @@ To fix, when you try to change immutable fields they will throw an error in the 
 ## 6.1.1
 
 ### Docs:
-- Fix documentation in terraform registry 
+- Fix documentation in terraform registry
 
 ## 6.1.0
 
 ### Features:
-- New Product: **Database as a Service**: 
-  - Resources: 
+- New Product: **Database as a Service**:
+  - Resources:
     - resource_dbaas_pgsql_cluster
   - Data Sources:
     - data_source_dbaas_pgsql_backups
@@ -722,7 +739,7 @@ To fix, when you try to change immutable fields they will throw an error in the 
 
 ## 6.0.1
 
-### Fixes: 
+### Fixes:
 - Fixed rebuild k8 nodes with the same lan - order of lans is ignored now at diff
 - Fixed conversion coming from a v5 state - added nil check in lans interface conversion
 
@@ -780,7 +797,7 @@ To fix, when you try to change immutable fields they will throw an error in the 
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source and resource files (set parameters)
-  
+
 ## 6.0.0-beta.12
 ### Fixes:
 - `server`: can not create cube server, firewall not updated
@@ -852,7 +869,7 @@ To fix, when you try to change immutable fields they will throw an error in the 
 
 ## 6.0.0-beta.2
 
-- Updated dependencies 
+- Updated dependencies
 - Updated server, nic and volume resources with the missing arguments
 
 ## 6.0.0-beta.1
@@ -898,21 +915,21 @@ To fix, when you try to change immutable fields they will throw an error in the 
 
 ## 5.1.4
 
-- Error handling improvements 
+- Error handling improvements
 - Always displaying the full response body from the API in case of an error
 
 ## 5.1.3
 
-- Bug fix: correctly checking for nil the image volume 
+- Bug fix: correctly checking for nil the image volume
 
 ## 5.1.2
 
-- Bug fix: avoid sending an empty image password to the API if 
+- Bug fix: avoid sending an empty image password to the API if
   no image password is set
 
 ## 5.1.1
 
-- Bug fix: nil check for image password when creating a server 
+- Bug fix: nil check for image password when creating a server
 
 ## 5.1.0
 
@@ -933,7 +950,7 @@ FEATURES:
 
 BUG FIXES:
 
-- Correctly updating ips on a nic embedded in a server config 
+- Correctly updating ips on a nic embedded in a server config
 
 ## 5.0.1
 

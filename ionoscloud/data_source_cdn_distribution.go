@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
@@ -22,6 +22,7 @@ func dataSourceCDNDistribution() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"resource_urn": {
 				Type:        schema.TypeString,

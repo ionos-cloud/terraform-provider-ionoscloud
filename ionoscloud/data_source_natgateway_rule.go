@@ -20,10 +20,12 @@ func dataSourceNatGatewayRule() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"type": {
 				Type:        schema.TypeString,

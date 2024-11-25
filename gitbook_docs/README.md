@@ -86,3 +86,6 @@ now you can see the response body incl. api error message:
   }]
 }
 ```
+
+### For more complex examples on how to use the provider
+Please check out the [examples](examples/) directory.

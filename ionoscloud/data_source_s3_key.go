@@ -16,13 +16,13 @@ func dataSourceObjectStorageKey() *schema.Resource {
 			"id": {
 				Type:        schema.TypeString,
 				Description: "Id of the key.",
-				Optional:    true,
+				Required:    true,
 			},
 			"user_id": {
 				Type:             schema.TypeString,
 				Description:      "The ID of the user that owns the key.",
-				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Required:         true,
 			},
 			"secret_key": {
 				Type:        schema.TypeString,
@@ -32,8 +32,7 @@ func dataSourceObjectStorageKey() *schema.Resource {
 			"active": {
 				Type:        schema.TypeBool,
 				Description: "Whether this key should be active or not.",
-				Optional:    true,
-				Default:     true,
+				Computed:    true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

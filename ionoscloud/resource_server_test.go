@@ -350,7 +350,6 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -373,7 +372,6 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -403,7 +401,6 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -430,7 +427,6 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -453,7 +449,6 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -1088,7 +1083,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   boot_cdrom = "` + bootCdromImageId + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -1143,7 +1137,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   boot_cdrom = "` + bootCdromImageId + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -1190,7 +1183,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   boot_cdrom = "` + bootCdromImageId + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -1240,7 +1232,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   boot_cdrom = "` + bootCdromImageId + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
@@ -1277,7 +1268,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   boot_cdrom = "` + bootCdromImageId + `" 
   volume {
     name = "` + constant.ServerTestResource + `"

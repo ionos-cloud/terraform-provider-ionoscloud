@@ -26,11 +26,13 @@ func dataSourceK8sNodePool() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The desired name for the node pool",
 				Optional:    true,
+				Computed:    true,
 			},
 			"datacenter_id": {
 				Type:        schema.TypeString,

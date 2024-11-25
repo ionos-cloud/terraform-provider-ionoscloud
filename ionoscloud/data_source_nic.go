@@ -31,48 +31,45 @@ func dataSourceNIC() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"lan": {
 				Type:     schema.TypeInt,
-				Optional: true,
+				Computed: true,
 			},
 			"dhcp": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
+				Computed: true,
 			},
 			"dhcpv6": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"ips": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
-				Optional: true,
 			},
 			"ipv6_ips": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
 				Computed: true,
 			},
 			"firewall_active": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"firewall_type": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"mac": {
@@ -105,79 +102,7 @@ func dataSourceNIC() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-func getNicDataSourceSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"server_id": {
-			Type:             schema.TypeString,
-			Required:         true,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-		},
-		"datacenter_id": {
-			Type:             schema.TypeString,
-			Required:         true,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-		},
-		"id": {
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"name": {
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"lan": {
-			Type:     schema.TypeInt,
-			Optional: true,
-		},
-		"dhcp": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
-		},
-		"dhcpv6": {
-			Type:     schema.TypeBool,
-			Optional: true,
-		},
-		"ipv6_cidr_block": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Computed: true,
-		},
-		"ips": {
-			Type:     schema.TypeList,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Computed: true,
-			Optional: true,
-		},
-		"ipv6_ips": {
-			Type:     schema.TypeList,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Computed: true,
-		},
-		"firewall_active": {
-			Type:     schema.TypeBool,
-			Optional: true,
-		},
-		"firewall_type": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Computed: true,
-		},
-		"mac": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"device_number": {
-			Type:     schema.TypeInt,
-			Computed: true,
-		},
-		"pci_slot": {
-			Type:     schema.TypeInt,
-			Computed: true,
-		},
-	}
-}
+
 func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 

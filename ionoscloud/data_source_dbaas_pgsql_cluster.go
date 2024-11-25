@@ -23,12 +23,14 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "The id of your cluster.",
 				Optional:         true,
+				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The name of your cluster.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"postgres_version": {
 				Type:        schema.TypeString,
