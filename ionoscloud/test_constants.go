@@ -1500,7 +1500,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     name = "system"
     dhcp = true
     firewall_active = true
-    mac = ` + constant.NicMac + `
+    mac = "` + constant.NicMac + `"
 	  firewall_type = "BIDIRECTIONAL"
     ips            = [""]
     firewall {

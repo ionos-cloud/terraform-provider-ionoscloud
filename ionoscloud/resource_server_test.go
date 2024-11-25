@@ -1096,7 +1096,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     dhcp = true
     firewall_active = true 
-    mac = ` + constant.NicMac + `
+    mac = "` + constant.NicMac + `"
 	firewall {
       protocol = "TCP"
       type = "EGRESS"
@@ -1904,7 +1904,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     dhcp = true
     firewall_active = true
 	firewall_type = "INGRESS"
-    mac = ` + constant.NicMac + `
+    mac = "` + constant.NicMac + `"
   }
 }
 

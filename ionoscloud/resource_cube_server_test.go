@@ -557,7 +557,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
     lan             = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     dhcp            = true
     firewall_active = true
-    mac = ` + constant.NicMac + `
+    mac = "` + constant.NicMac + `"
     firewall {
       protocol         = "TCP"
       name             = "` + constant.ServerTestResource + `"
