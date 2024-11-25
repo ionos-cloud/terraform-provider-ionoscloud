@@ -22,7 +22,9 @@ data "ionoscloud_object_storage_accesskey" "example" {
 
 ## Argument Reference
 
- * `id` - (Required) Id of an existing object storage accesskey that you want to search for.
+ * `id` - (Optional) Id of an existing object storage accesskey that you want to search for.
+ * `accesskey` - (Optional) Access key metadata is a string of 92 characters.
+ * `description` - (Optional) Description of the Access key.
 
 ## Attributes Reference
 

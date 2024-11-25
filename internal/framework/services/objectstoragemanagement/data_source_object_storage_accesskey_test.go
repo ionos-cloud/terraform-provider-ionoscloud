@@ -30,6 +30,46 @@ func TestAccS3AccesskeyDataSource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(name, "contract_user_id"),
 				),
 			},
+			{
+				Config: testAccAccesskeyDataSourceConfigBasicDescription(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(name, "description", "desc"),
+					resource.TestCheckResourceAttrSet(name, "id"),
+					resource.TestCheckResourceAttrSet(name, "accesskey"),
+					resource.TestCheckResourceAttrSet(name, "canonical_user_id"),
+					resource.TestCheckResourceAttrSet(name, "contract_user_id"),
+				),
+			},
+			{
+				Config: testAccAccesskeyDataSourceConfigBasicAccesskey(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(name, "description", "desc"),
+					resource.TestCheckResourceAttrSet(name, "id"),
+					resource.TestCheckResourceAttrSet(name, "accesskey"),
+					resource.TestCheckResourceAttrSet(name, "canonical_user_id"),
+					resource.TestCheckResourceAttrSet(name, "contract_user_id"),
+				),
+			},
+			{
+				Config: testAccAccesskeyDataSourceConfigBasicAccesskeyAndDesc(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(name, "description", "desc"),
+					resource.TestCheckResourceAttrSet(name, "id"),
+					resource.TestCheckResourceAttrSet(name, "accesskey"),
+					resource.TestCheckResourceAttrSet(name, "canonical_user_id"),
+					resource.TestCheckResourceAttrSet(name, "contract_user_id"),
+				),
+			},
+			{
+				Config: testAccAccesskeyDataSourceConfigBasicAll(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(name, "description", "desc"),
+					resource.TestCheckResourceAttrSet(name, "id"),
+					resource.TestCheckResourceAttrSet(name, "accesskey"),
+					resource.TestCheckResourceAttrSet(name, "canonical_user_id"),
+					resource.TestCheckResourceAttrSet(name, "contract_user_id"),
+				),
+			},
 		},
 	})
 }
@@ -38,6 +78,41 @@ func testAccAccesskeyDataSourceConfigBasic() string {
 	return utils.ConfigCompose(testAccAccesskeyConfigDescription("desc"), `
 data "ionoscloud_object_storage_accesskey" "testres" {
 	id = ionoscloud_object_storage_accesskey.test.id
+}
+`)
+}
+
+func testAccAccesskeyDataSourceConfigBasicDescription() string {
+	return utils.ConfigCompose(testAccAccesskeyConfigDescription("desc"), `
+data "ionoscloud_object_storage_accesskey" "testres" {
+	description = "desc"
+}
+`)
+}
+
+func testAccAccesskeyDataSourceConfigBasicAccesskey() string {
+	return utils.ConfigCompose(testAccAccesskeyConfigDescription("desc"), `
+data "ionoscloud_object_storage_accesskey" "testres" {
+	accesskey = ionoscloud_object_storage_accesskey.test.accesskey
+}
+`)
+}
+
+func testAccAccesskeyDataSourceConfigBasicAccesskeyAndDesc() string {
+	return utils.ConfigCompose(testAccAccesskeyConfigDescription("desc"), `
+data "ionoscloud_object_storage_accesskey" "testres" {
+	accesskey = ionoscloud_object_storage_accesskey.test.accesskey
+	description = "desc"
+}
+`)
+}
+
+func testAccAccesskeyDataSourceConfigBasicAll() string {
+	return utils.ConfigCompose(testAccAccesskeyConfigDescription("desc"), `
+data "ionoscloud_object_storage_accesskey" "testres" {
+	id = ionoscloud_object_storage_accesskey.test.id
+	accesskey = ionoscloud_object_storage_accesskey.test.accesskey
+	description = "desc"
 }
 `)
 }

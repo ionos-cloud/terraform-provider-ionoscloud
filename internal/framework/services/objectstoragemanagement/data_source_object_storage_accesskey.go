@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	objectstoragemanagementApi "github.com/ionos-cloud/sdk-go-object-storage-management"
 )
 
 var _ datasource.DataSourceWithConfigure = (*accessKeyDataSource)(nil)
@@ -54,14 +55,17 @@ func (d *accessKeyDataSource) Schema(ctx context.Context, req datasource.SchemaR
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Description: "The ID (UUID) of the AccessKey.",
+				Computed:    true,
 			},
 			"description": schema.StringAttribute{
+				Optional:    true,
 				Description: "Description of the Access key.",
 				Computed:    true,
 			},
 			"accesskey": schema.StringAttribute{
+				Optional:    true,
 				Description: "Access key metadata is a string of 92 characters.",
 				Computed:    true,
 			},
@@ -90,17 +94,78 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	id := data.ID.String()
+	id := data.ID.ValueString()
+	accessKeyId := data.AccessKey.ValueString()
+	description := data.Description.ValueString()
 
-	accessKey, apiResponse, err := d.client.GetAccessKey(ctx, id)
+	var accessKey objectstoragemanagementApi.AccessKeyRead
+	var accessKeys objectstoragemanagementApi.AccessKeyReadList
+	var apiResponse *objectstoragemanagementApi.APIResponse
+	var err error
 
-	if apiResponse.HttpNotFound() {
-		resp.Diagnostics.AddError("accesskey not found", "The accesskey was not found")
-		return
-	}
-	if err != nil {
-		resp.Diagnostics.AddError("an error occurred while fetching the accesskey with", err.Error())
-		return
+	if !data.ID.IsNull() {
+		accessKey, apiResponse, err = d.client.GetAccessKey(ctx, id)
+
+		if apiResponse.HttpNotFound() {
+			resp.Diagnostics.AddError("accesskey not found", "The accesskey was not found")
+			return
+		}
+		if err != nil {
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskey with", err.Error())
+			return
+		}
+		if !data.AccessKey.IsNull() && *accessKey.Properties.AccessKey != accessKeyId {
+			resp.Diagnostics.AddError(
+				"accesskeyId does not match",
+				fmt.Sprintf(
+					"accesskey property of Accesskey (UUID=%s, accesskey=%s) does not match expected accesskey: %s",
+					*accessKey.Id, *accessKey.Properties.AccessKey, accessKeyId,
+				),
+			)
+			return
+		}
+		if !data.Description.IsNull() && *accessKey.Properties.Description != description {
+			resp.Diagnostics.AddError(
+				"accesskeyId does not match",
+				fmt.Sprintf(
+					"description of Accesskey (UUID=%s, description=%s) does not match expected description: %s",
+					*accessKey.Id, *accessKey.Properties.Description, description,
+				),
+			)
+			return
+		}
+	} else if !data.AccessKey.IsNull() {
+		accessKeys, apiResponse, err = d.client.ListAccessKeysFilter(ctx, accessKeyId)
+		if len(*accessKeys.Items) != 0 {
+			accessKey = (*accessKeys.Items)[0]
+		} else {
+			resp.Diagnostics.AddError("accesskey not found", "The accesskey was not found")
+			return
+		}
+		if !data.Description.IsNull() && *accessKey.Properties.Description != description {
+			resp.Diagnostics.AddError(
+				"accesskeyId does not match",
+				fmt.Sprintf(
+					"description of Accesskey (UUID=%s, description=%s) does not match expected description: %s",
+					*accessKey.Id, *accessKey.Properties.Description, description,
+				),
+			)
+			return
+		}
+	} else if !data.Description.IsNull() {
+		accessKeys, apiResponse, err = d.client.ListAccessKeys(ctx)
+		found := false
+		for _, item := range *accessKeys.Items {
+			if *item.Properties.Description == description {
+				accessKey = item
+				found = true
+				break
+			}
+		}
+		if !found {
+			resp.Diagnostics.AddError("accesskey not found", "The accesskey was not found")
+			return
+		}
 	}
 
 	objectStorageManagementService.SetAccessKeyPropertiesToDataSourcePlan(data, accessKey)

@@ -46,6 +46,13 @@ func (c *Client) ListAccessKeys(ctx context.Context) (objectstoragemanagement.Ac
 	return accessKeys, apiResponse, err
 }
 
+// ListAccessKeys retrieves accesskeys using the accessKeyId filter
+func (c *Client) ListAccessKeysFilter(ctx context.Context, accessKeyId string) (objectstoragemanagement.AccessKeyReadList, *objectstoragemanagement.APIResponse, error) {
+	accessKeys, apiResponse, err := c.client.AccesskeysApi.AccesskeysGet(ctx).FilterAccesskeyId(accessKeyId).Execute()
+	apiResponse.LogInfo()
+	return accessKeys, apiResponse, err
+}
+
 // CreateAccessKey creates an accesskey
 func (c *Client) CreateAccessKey(ctx context.Context, accessKey objectstoragemanagement.AccessKeyCreate, timeout time.Duration) (objectstoragemanagement.AccessKeyRead, *objectstoragemanagement.APIResponse, error) {
 	accessKeyResponse, apiResponse, err := c.client.AccesskeysApi.AccesskeysPost(ctx).AccessKeyCreate(accessKey).Execute()
