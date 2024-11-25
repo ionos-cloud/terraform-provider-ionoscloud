@@ -554,14 +554,14 @@ func TestAccServerVCPUResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.4.name", "test_server5"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.icmp_code", "5"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.icmp_type", "6"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.1.port_range_start", "24"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.1.port_range_end", "24"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.2.port_range_start", "25"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.2.port_range_end", "25"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.3.port_range_start", "26"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.3.port_range_end", "26"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.4.port_range_start", "27"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.4.port_range_end", "27"),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.1.port_range_start", "204"),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.1.port_range_end", "204"),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.2.port_range_start", "205"),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.2.port_range_end", "205"),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.3.port_range_start", "206"),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.3.port_range_end", "206"),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.4.port_range_start", "207"),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.4.port_range_end", "207"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type", "INGRESS"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.1.type", "INGRESS"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.2.type", "INGRESS"),
@@ -1348,29 +1348,29 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
       protocol         = "TCP"
       name             = "` + constant.ServerTestResource + `2"
       type             = "INGRESS"
-      port_range_start = 24
-      port_range_end   = 24
+      port_range_start = 204
+      port_range_end   = 204
     }
     firewall {
       protocol         = "TCP"
       name             = "` + constant.ServerTestResource + `3"
       type             = "INGRESS"
-      port_range_start = 25
-      port_range_end   = 25
+      port_range_start = 205
+      port_range_end   = 205
     }
     firewall {
       protocol         = "TCP"
       name             = "` + constant.ServerTestResource + `4"
       type             = "INGRESS"
-      port_range_start = 26
-      port_range_end   = 26
+      port_range_start = 206
+      port_range_end   = 206
     }
 	firewall {
       protocol         = "TCP"
       name             = "` + constant.ServerTestResource + `5"
       type             = "EGRESS"
-      port_range_start = 27
-      port_range_end   = 27
+      port_range_start = 207
+      port_range_end   = 207
     }
   }
 }
