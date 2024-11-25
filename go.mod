@@ -39,8 +39,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-replace github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0 => /home/radu/work/sdk-go-object-storage-management
-
 require (
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
