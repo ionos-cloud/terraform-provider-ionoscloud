@@ -1,4 +1,10 @@
 ## 6.6.4 - upcoming release
+### New Product - **Object Storage Management**:
+- `Resources`:
+  - [ionoscloud_object_storage_accesskey](docs/resources/object_storage_accesskey.md)
+- `Data Sources`:
+  - [ionoscloud_object_storage_accesskey](docs/data-sources/object_storage_accesskey.md)
+  - [ionoscloud_object_storage_region](docs/data-sources/object_storage_region.md)
 ### Fixes 
 - Refactor `ionoscloud_share` and `ionoscloud_nic` data sources
 - Remove sleep and delete from `ionoscloud_share` resource

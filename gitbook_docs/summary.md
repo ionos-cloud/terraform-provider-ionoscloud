@@ -216,6 +216,13 @@
     * [Bucket Policy](../docs/data-sources/s3_bucket_policy.md)
     * [Object](../docs/data-sources/s3_object.md)
     * [Objects](../docs/data-sources/s3_objects.md)
+
+* Object Storage Management
+  * Resources
+    * [Access Key](../docs/resources/object_storage_accesskey.md)
+  * Data Sources
+    * [Access Key](../docs/data-sources/object_storage_accesskey.md)
+    * [Region](../docs/data-sources/object_storage_region.md)
   
 * CDN
   * Resources
