@@ -1,4 +1,4 @@
-## 6.6.4 - upcoming release
+## 6.6.4
 ### New Product - **Object Storage Management**:
 - `Resources`:
   - [ionoscloud_object_storage_accesskey](docs/resources/object_storage_accesskey.md)
