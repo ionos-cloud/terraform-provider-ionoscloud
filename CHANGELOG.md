@@ -1,4 +1,10 @@
 ## 6.6.4 - upcoming release
+### New Product - **Object Storage Management**:
+- `Resources`:
+  - [ionoscloud_object_storage_accesskey](docs/resources/object_storage_accesskey.md)
+- `Data Sources`:
+  - [ionoscloud_object_storage_accesskey](docs/data-sources/object_storage_accesskey.md)
+  - [ionoscloud_object_storage_region](docs/data-sources/object_storage_region.md)
 ### Enhancement
 - make `mac` optional on `ionoscloud_nic`, `ionoscloud_server`, `ionoscloud_cube_server` and `ionoscloud_vcpu_server`
 ### Fixes 
@@ -7,6 +13,7 @@
 ### Testing
 - Fix template test
 - Remove cpu_family from server test
+- Fix server and vcpu server tests with multiple firewall rules
 
 ## 6.6.3 
 ### Documentation

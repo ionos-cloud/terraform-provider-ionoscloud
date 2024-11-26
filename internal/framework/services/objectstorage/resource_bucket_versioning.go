@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -75,17 +76,17 @@ func (r *bucketVersioningResource) Configure(_ context.Context, req resource.Con
 		return
 	}
 
-	client, ok := req.ProviderData.(*objectstorage.Client)
+	clientBundle, ok := req.ProviderData.(*services.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *objectstorage.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *services.SdkBundle, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
 	}
 
-	r.client = client
+	r.client = clientBundle.S3Client
 }
 
 // Create creates the bucket versioning resource.
