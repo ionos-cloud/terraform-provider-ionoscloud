@@ -246,6 +246,7 @@ const (
 	NicResource         = "ionoscloud_nic"
 	FullNicResourceName = NicResource + "." + NicTestResourceName
 	NicTestResourceName = "database_nic"
+	NicMac              = "00:0a:95:9d:68:16"
 )
 
 const (

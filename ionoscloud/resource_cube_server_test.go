@@ -253,6 +253,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.mac", constant.NicMac),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.port_range_start", "22"),
@@ -556,6 +557,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
     lan             = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     dhcp            = true
     firewall_active = true
+    mac = "` + constant.NicMac + `"
     firewall {
       protocol         = "TCP"
       name             = "` + constant.ServerTestResource + `"

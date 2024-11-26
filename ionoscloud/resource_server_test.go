@@ -317,6 +317,7 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.name", "system"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.mac", constant.NicMac),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.id", constant.ServerResource+"."+constant.ServerTestResource, "primary_nic"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall_type", "INGRESS"),
 				),
@@ -356,6 +357,7 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.licence_type", "OTHER"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.mac", constant.NicMac),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.name", constant.ServerTestResource),
@@ -1094,6 +1096,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     dhcp = true
     firewall_active = true 
+    mac = "` + constant.NicMac + `"
 	firewall {
       protocol = "TCP"
       type = "EGRESS"
@@ -1901,6 +1904,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     dhcp = true
     firewall_active = true
 	firewall_type = "INGRESS"
+    mac = "` + constant.NicMac + `"
   }
 }
 

@@ -353,7 +353,9 @@ func resourceServer() *schema.Resource {
 						},
 						"mac": {
 							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
+							ForceNew: true,
 						},
 						"lan": {
 							Type:     schema.TypeInt,
@@ -524,6 +526,9 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 	if diff.HasChange("image_name") {
 		return fmt.Errorf("image_name %s", ImmutableError)
 	}
+	if diff.HasChange("nic.0.mac") {
+		return fmt.Errorf("nic mac %s", ImmutableError)
+	}
 	if diff.HasChange("template_uuid") {
 		return fmt.Errorf("template_uuid %s", ImmutableError)
 	}
@@ -630,7 +635,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if nics.([]interface{}) != nil {
 			for nicIndex := range nics.([]interface{}) {
 				nicPath := fmt.Sprintf("nic.%d.", nicIndex)
-				nic, err := cloudapinic.GetNicFromSchema(d, nicPath)
+				nic, err := cloudapinic.GetNicFromSchemaCreate(d, nicPath)
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("create error occurred while getting nic from schema: %w", err))
 					return diags

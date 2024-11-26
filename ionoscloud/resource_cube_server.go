@@ -256,7 +256,9 @@ func resourceCubeServer() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"mac": {
 							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
+							ForceNew: true,
 						},
 						"lan": {
 							Type:     schema.TypeInt,
@@ -496,7 +498,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		Properties: &ionoscloud.NicProperties{},
 	}
 	if _, ok := d.GetOk("nic"); ok {
-		nic, err = cloudapinic.GetNicFromSchema(d, "nic.0.")
+		nic, err = cloudapinic.GetNicFromSchemaCreate(d, "nic.0.")
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("cube error occurred while getting nic from schema: %w", err))
 			return diags
