@@ -109,13 +109,11 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 				Config: mariaDBClusterUpdateConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDBaaSMariaDBClusterExists(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, &cluster),
-					// TODO -- Check for update version here
-					//resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterVersionAttribute, clusterVersionValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterVersionAttribute, clusterVersionUpdatedValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterInstancesAttribute, clusterInstancesUpdatedValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCoresAttribute, clusterCoresUpdatedValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterRamAttribute, clusterRamUpdatedValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterStorageSizeAttribute, clusterStorageSizeUpdatedValue),
-					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterDisplayNameAttribute, clusterDisplayNameUpdatedValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekUpdateValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeUpdateValue),
 				),
@@ -245,13 +243,13 @@ resource "time_sleep" "wait_30_seconds" {
 
 const mariaDBClusterUpdateConfig = mariaDBTestInfraConfig + `
 resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
-  ` + clusterVersionAttribute + ` = "` + clusterVersionValue + `"
+  ` + clusterVersionAttribute + ` = "` + clusterVersionUpdatedValue + `"
   ` + clusterInstancesAttribute + ` = "` + clusterInstancesUpdatedValue + `"
   ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
   ` + clusterCoresAttribute + ` = "` + clusterCoresUpdatedValue + `"
   ` + clusterRamAttribute + ` = "` + clusterRamUpdatedValue + `"
   ` + clusterStorageSizeAttribute + ` = "` + clusterStorageSizeUpdatedValue + `"
-  ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameUpdatedValue + `"
+  ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameValue + `"
   ` + connections + `
   ` + maintenanceWindowUpdated + `
   ` + credentials + `
@@ -268,7 +266,7 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
   ` + clusterCoresAttribute + ` = "` + clusterCoresUpdatedValue + `"
   ` + clusterRamAttribute + ` = "` + clusterRamUpdatedValue + `"
   ` + clusterStorageSizeAttribute + ` = "` + clusterStorageSizeUpdatedValue + `"
-  ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameUpdatedValue + `"
+  ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameValue + `"
   ` + connections + `
   ` + maintenanceWindowUpdated + `
   ` + credentials + `
@@ -339,9 +337,8 @@ const clusterVersionAttribute = "mariadb_version"
 
 // Values
 const (
-	clusterVersionValue = "10.6"
-	// TODO -- Use this field when the API is updated
-	//clusterVersionUpdatedValue      = "10.11"
+	clusterVersionValue             = "10.6"
+	clusterVersionUpdatedValue      = "10.11"
 	clusterInstancesValue           = "1"
 	clusterInstancesUpdatedValue    = "2"
 	clusterLocationValue            = "fr/par"
@@ -353,7 +350,6 @@ const (
 	clusterStorageSizeUpdatedValue  = "11"
 	clusterConnectionsCidrValue     = "local.database_ip_cidr"
 	clusterDisplayNameValue         = constant.DBaaSClusterTestResource
-	clusterDisplayNameUpdatedValue  = "updatedDisplayName"
 	clusterCredentialsUsernameValue = "username"
 	datacenterResourceName          = "datacenter_example"
 	lanResourceName                 = "lan_example"

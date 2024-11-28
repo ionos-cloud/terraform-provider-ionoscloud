@@ -27,7 +27,7 @@ const (
 	IonosApiUrlEnvVar     = "IONOS_API_URL"
 	IonosPinnedCertEnvVar = "IONOS_PINNED_CERT"
 	IonosLogLevelEnvVar   = "IONOS_LOG_LEVEL"
-	DefaultIonosServerUrl = "https://mariadb.de-fra.ionos.com"
+	DefaultIonosServerUrl = "https://mariadb.de-txl.ionos.com"
 	DefaultIonosBasePath  = ""
 	defaultMaxRetries     = 3
 	defaultWaitTime       = time.Duration(100) * time.Millisecond
@@ -36,8 +36,8 @@ const (
 
 var (
 	IonosServerUrls = []string{
-		"https://mariadb.de-fra.ionos.com",
 		"https://mariadb.de-txl.ionos.com",
+		"https://mariadb.de-fra.ionos.com",
 		"https://mariadb.es-vit.ionos.com",
 		"https://mariadb.fr-par.ionos.com",
 		"https://mariadb.gb-lhr.ionos.com",
@@ -141,7 +141,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-mariadb/v1.0.0",
+		UserAgent:          "ionos-cloud-sdk-go-dbaas-mariadb/v1.1.1",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -154,11 +154,11 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		Servers: ServerConfigurations{
 			{
 				URL:         getServerUrl(hostUrl),
-				Description: "Frankfurt, Germany",
+				Description: "Berlin, Germany",
 			},
 			{
 				URL:         getServerUrl(hostUrl),
-				Description: "Berlin, Germany",
+				Description: "Frankfurt, Germany",
 			},
 			{
 				URL:         getServerUrl(hostUrl),

@@ -2,8 +2,6 @@ module github.com/ionos-cloud/terraform-provider-ionoscloud/v6
 
 go 1.22.0
 
-replace github.com/ionos-cloud/sdk-go-dbaas-mariadb => ./../sdks/generated_locally/sdk-go-mariadb
-
 require (
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/cenkalti/backoff/v4 v4.3.0
@@ -26,7 +24,7 @@ require (
 	github.com/ionos-cloud/sdk-go-container-registry v1.2.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.0.3
 	github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1
-	github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.0.1
+	github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.1
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3
 	github.com/ionos-cloud/sdk-go-dns v1.2.1
@@ -71,7 +69,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-plugin v1.6.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3
-	github.com/hashicorp/go-version v1.7.0 // indirect
+	github.com/hashicorp/go-version v1.7.0
 	github.com/hashicorp/hc-install v0.8.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.22.0 // indirect
 	github.com/hashicorp/logutils v1.0.0 // indirect
