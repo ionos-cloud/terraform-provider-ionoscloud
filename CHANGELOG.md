@@ -23,11 +23,19 @@
 
 ## 6.6.3 
 ### Documentation
+- Add additional infrastructure provisioning examples
 - Fix titles for mariadb docs data sources `https://docs.ionos.com/`
 - Add Network Security Group to `https://docs.ionos.com/`
 - Add bootvolume_selector to `https://docs.ionos.com/
 - Add servers to `https://docs.ionos.com/`
 - Add cube server and vcpu server to `https://docs.ionos.com/`
+### Enhancement
+- Add `allow_replace` to `ionoscloud_server` and `ionoscloud_cube_server` resources, which allows the update of immutable server fields by destroying and then re-creating the resource. This field should be used with care, understanding the risks.
+### Fixes
+- All `id` and `name` fields in data sources need to be computed, so value can be read on first apply.
+### Testing
+- Add basic NFS tests
+
 ## 6.6.2 
 ### Features
 - Make `location` optional for `certificate_manager` resources and datasources
