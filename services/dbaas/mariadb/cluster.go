@@ -3,7 +3,6 @@ package mariadb
 import (
 	"context"
 	"fmt"
-	goVersion "github.com/hashicorp/go-version"
 	"log"
 	"os"
 	"strings"
@@ -167,27 +166,16 @@ func GetMariaDBClusterDataCreate(d *schema.ResourceData) (*mariadb.CreateCluster
 	return &cluster, nil
 }
 
+// GetMariaDBClusterDataUpdate retrieves the data from the terraform resource and sets it in the MariaDB cluster struct.
 func GetMariaDBClusterDataUpdate(d *schema.ResourceData) (*mariadb.PatchClusterRequest, error) {
 	cluster := mariadb.PatchClusterRequest{
 		Properties: &mariadb.PatchClusterProperties{},
 	}
 
 	if d.HasChange("mariadb_version") {
-		oldValue, newValue := d.GetChange("mariadb_version")
-		oldValueString := oldValue.(string)
-		newValueString := newValue.(string)
-		oldVersion, err := goVersion.NewVersion(oldValueString)
-		if err != nil {
-			return nil, err
-		}
-		newVersion, err := goVersion.NewVersion(newValueString)
-		if err != nil {
-			return nil, err
-		}
-		if newVersion.LessThan(oldVersion) {
-			return nil, fmt.Errorf("downgrading MariaDB version is not allowed")
-		}
-		cluster.Properties.MariadbVersion = (*mariadb.MariadbVersion)(&newValueString)
+		_, newValue := d.GetChange("mariadb_version")
+		newVersion := newValue.(string)
+		cluster.Properties.MariadbVersion = (*mariadb.MariadbVersion)(&newVersion)
 	}
 
 	if d.HasChange("instances") {

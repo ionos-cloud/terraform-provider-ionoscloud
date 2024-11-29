@@ -84,7 +84,7 @@ resource "random_password" "cluster_password" {
 
 ## Argument reference
 
-* `mariadb_version` - (Required)[string] The MariaDB version of your cluster.
+* `mariadb_version` - (Required)[string] The MariaDB version of your cluster. Cannot be downgraded.
 * `instances` - (Required)[int] The total number of instances in the cluster (one primary and n-1 secondary).
 * `location`- (Optional)[string] The location in which the cluster will be created. Different service endpoints are used based on location, possible options are: "de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci". If not set, the endpoint will be the one corresponding to "de/txl".
 * `cores` - (Required)[int] The number of CPU cores per instance.

@@ -120,7 +120,7 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 			},
 			{
 				Config:      mariaDBClusterInvalidUpdateConfig,
-				ExpectError: regexp.MustCompile("downgrading MariaDB version is not allowed"),
+				ExpectError: regexp.MustCompile("downgrade is not supported from"),
 			},
 		},
 	})
