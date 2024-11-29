@@ -74,6 +74,14 @@ func (c *MariaDBClient) CreateCluster(ctx context.Context, cluster mariadb.Creat
 	return clusterResponse, apiResponse, err
 }
 
+// UpdateCluster updates a cluster by its ID and the location in which the cluster is created.
+func (c *MariaDBClient) UpdateCluster(ctx context.Context, cluster mariadb.PatchClusterRequest, clusterID, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
+	c.modifyConfigURL(location)
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterID).PatchClusterRequest(cluster).Execute()
+	apiResponse.LogInfo()
+	return clusterResponse, apiResponse, err
+}
+
 // DeleteCluster deletes a cluster by its ID and the location in which the cluster is created.
 func (c *MariaDBClient) DeleteCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
 	c.modifyConfigURL(location)
@@ -155,6 +163,54 @@ func GetMariaDBClusterDataCreate(d *schema.ResourceData) (*mariadb.CreateCluster
 		cluster.Properties.MaintenanceWindow = GetMariaClusterMaintenanceWindowData(d)
 	}
 
+	return &cluster, nil
+}
+
+// GetMariaDBClusterDataUpdate retrieves the data from the terraform resource and sets it in the MariaDB cluster struct.
+func GetMariaDBClusterDataUpdate(d *schema.ResourceData) (*mariadb.PatchClusterRequest, error) {
+	cluster := mariadb.PatchClusterRequest{
+		Properties: &mariadb.PatchClusterProperties{},
+	}
+
+	if d.HasChange("mariadb_version") {
+		_, newValue := d.GetChange("mariadb_version")
+		newVersion := newValue.(string)
+		cluster.Properties.MariadbVersion = (*mariadb.MariadbVersion)(&newVersion)
+	}
+
+	if d.HasChange("instances") {
+		_, n := d.GetChange("instances")
+		nInt := int32(n.(int))
+		cluster.Properties.Instances = &nInt
+	}
+
+	if d.HasChange("cores") {
+		_, n := d.GetChange("cores")
+		nInt := int32(n.(int))
+		cluster.Properties.Cores = &nInt
+	}
+
+	if d.HasChange("ram") {
+		_, n := d.GetChange("ram")
+		nInt := int32(n.(int))
+		cluster.Properties.Ram = &nInt
+	}
+
+	if d.HasChange("storage_size") {
+		_, n := d.GetChange("storage_size")
+		nInt := int32(n.(int))
+		cluster.Properties.StorageSize = &nInt
+	}
+
+	if d.HasChange("display_name") {
+		_, n := d.GetChange("display_name")
+		nString := n.(string)
+		cluster.Properties.DisplayName = &nString
+	}
+
+	if d.HasChange("maintenance_window") {
+		cluster.Properties.MaintenanceWindow = GetMariaClusterMaintenanceWindowData(d)
+	}
 	return &cluster, nil
 }
 

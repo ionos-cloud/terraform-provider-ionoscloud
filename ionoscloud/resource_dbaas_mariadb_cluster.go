@@ -8,8 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
+	semversion "github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -17,6 +16,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceDBaaSMariaDBCluster() *schema.Resource {
@@ -28,11 +28,13 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: mariaDBClusterImport,
 		},
+		CustomizeDiff: errorOnVersionDowngrade,
 		Schema: map[string]*schema.Schema{
 			"mariadb_version": {
-				Type:        schema.TypeString,
-				Description: "The MariaDB version of your cluster.",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "The MariaDB version of your cluster. Cannot be downgraded.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -153,6 +155,30 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 	}
 }
 
+func errorOnVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	// we do not want to check in case of resource creation
+	if diff.Id() == "" {
+		return nil
+	}
+	if diff.HasChange("mariadb_version") {
+		oldValue, newValue := diff.GetChange("mariadb_version")
+		oldVersionStr := oldValue.(string)
+		newVersionStr := newValue.(string)
+		oldVersion, err := semversion.NewVersion(oldVersionStr)
+		if err != nil {
+			return err
+		}
+		newVersion, err := semversion.NewVersion(newVersionStr)
+		if err != nil {
+			return err
+		}
+		if newVersion.LessThan(oldVersion) {
+			return fmt.Errorf("downgrade is not supported from %s to %s", oldVersionStr, newVersionStr)
+		}
+	}
+	return nil
+}
+
 func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).MariaDBClient
 
@@ -254,5 +280,25 @@ func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func mariaDBClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(services.SdkBundle).MariaDBClient
+
+	clusterID := d.Id()
+	cluster, err := mariadb.GetMariaDBClusterDataUpdate(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	location := d.Get("location").(string)
+	response, _, err := client.UpdateCluster(ctx, *cluster, clusterID, location)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("an error occurred while updating DBaaS MariaDB cluster with ID: %v in location %s, error: %w", clusterID, location, err))
+	}
+
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v in location %s, error: %w", clusterID, location, err))
+	}
+	if err := client.SetMariaDBClusterData(d, response); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
