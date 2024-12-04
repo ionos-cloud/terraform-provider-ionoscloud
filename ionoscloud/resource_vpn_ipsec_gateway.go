@@ -37,7 +37,7 @@ func resourceVpnIPSecGateway() *schema.Resource {
 			"location": {
 				Type:             schema.TypeString,
 				Description:      fmt.Sprintf("The location of the IPSec Gateway. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
-				Required:         true,
+				Optional:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.AvailableLocations, false)),
 			},
