@@ -1,6 +1,8 @@
-## 6.6.6 -- upcoming release
+## 6.6.6
 ### Features
 - Add `maintenance_window`, `tier` and regional endpoints for VPN resources
+### Chores
+- Replace `paultyng/ghaction-import-gpg` with `crazy-max/ghaction-import-gpg`
 
 ## 6.6.5
 ### Features
