@@ -108,7 +108,7 @@ resource "random_password" "cluster_password" {
     * `datacenter_id` - (Required)[string] The datacenter to connect your cluster to.
     * `lan_id` - (Required)[string] The LAN to connect your cluster to.
     * `cidr_list` - (Required)[List] The list of IPs and subnet for your cluster. Note the following unavailable IP ranges:10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24. example: [192.168.1.100/24, 192.168.1.101/24]. See [Private IPs](https://www.ionos.com/help/server-cloud-infrastructure/private-network/private-ip-address-ranges/) and [Cluster Setup - Preparing the network](https://docs.ionos.com/cloud/databases/mongodb/api-howtos/create-a-cluster#preparing-the-network).
-* `maintenance_window` - (Optional)(Computed)[string] A weekly 4 hour-long window, during which maintenance might occur.  Updates to the value of the field force the cluster to be re-created.
+* `maintenance_window` - (Optional)(Computed) A weekly 4 hour-long window, during which maintenance might occur.  Updates to the value of the field force the cluster to be re-created.
     * `time` - (Required)[string]
     * `day_of_the_week` - (Required)[string]
 * `connection_string` - (Computed)[string] The physical location where the cluster will be created. This will be where all of your instances live. Updates to the value of the field force the cluster to be re-created. Available locations: de/txl, gb/lhr, es/vit

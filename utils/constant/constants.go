@@ -25,6 +25,11 @@ const (
 	DatetimeTZOffsetLayout = "2006-01-02 15:04:05 -0700 MST"
 )
 
+// VPN Constants
+
+// DefaultTier is the default tier value for Wireguard & IPSec gateways
+const DefaultTier = "STANDARD"
+
 // ApplicationLoadBalancer Constants
 const (
 	ALBResource         = "ionoscloud_application_loadbalancer"

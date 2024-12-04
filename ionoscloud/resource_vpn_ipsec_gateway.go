@@ -13,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceVpnIPSecGateway() *schema.Resource {
@@ -36,7 +37,7 @@ func resourceVpnIPSecGateway() *schema.Resource {
 			"location": {
 				Type:             schema.TypeString,
 				Description:      fmt.Sprintf("The location of the IPSec Gateway. Supported locations: %s", strings.Join(vpn.AvailableLocations, ", ")),
-				Required:         true,
+				Optional:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(vpn.AvailableLocations, false)),
 			},
@@ -50,7 +51,6 @@ func resourceVpnIPSecGateway() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "The network connection for your gateway. Note: all connections must belong to the same datacenter.",
 				MinItems:    1,
-				MaxItems:    10,
 				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -86,6 +86,33 @@ func resourceVpnIPSecGateway() *schema.Resource {
 				Description:      "The IKE version that is permitted for the VPN tunnels.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"IKEv2"}, false)),
 				Default:          "IKEv2",
+			},
+			"maintenance_window": {
+				Type:        schema.TypeList,
+				Description: "A weekly 4 hour-long window, during which maintenance might occur",
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"time": {
+							Type:        schema.TypeString,
+							Description: "Start of the maintenance window in UTC time.",
+							Required:    true,
+						},
+						"day_of_the_week": {
+							Type:        schema.TypeString,
+							Description: "The name of the week day",
+							Required:    true,
+						},
+					},
+				},
+			},
+			"tier": {
+				Type:        schema.TypeString,
+				Description: "Gateway performance options. See the documentation for the available options",
+				Default:     constant.DefaultTier,
+				Optional:    true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

@@ -1,6 +1,6 @@
 # Go API client for vpn
 
-POC Docs for VPN gateway as service
+The Managed VPN Gateway service provides secure and scalable connectivity, enabling encrypted communication between your IONOS cloud resources in a VDC and remote networks (on-premises, multi-cloud, private LANs in other VDCs etc).
 
 ## Overview
 The IONOS Cloud SDK for GO provides you with access to the IONOS Cloud API. The client library supports both simple and complex requests.
@@ -37,13 +37,29 @@ go get github.com/ionos-cloud/sdk-go-bundle/products/vpn@latest
 | `IONOS_LOG_LEVEL`    | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace |
 | `IONOS_PINNED_CERT`  | Specify the SHA-256 public fingerprint here, enables certificate pinning                                                                                                                                                       |
 
-⚠️ **_Note: To overwrite the api endpoint - `api.ionos.com`, the environment variable `$IONOS_API_URL` can be set, and used with `NewConfigurationFromEnv()` function._**
+⚠️ **_Note: To overwrite the api endpoint - `api.ionos.com`, the environment variable `IONOS_API_URL` can be set, and used with `NewConfigurationFromEnv()` function._**
 
 ## Examples
 
 Examples for creating resources using the Go SDK can be found [here](examples/)
 
 ## Authentication
+
+All available server URLs are:
+
+- *https://vpn.de-fra.ionos.com* - Production de-fra
+- *https://vpn.de-txl.ionos.com* - Production de-txl
+- *https://vpn.es-vit.ionos.com* - Production es-vit
+- *https://vpn.gb-bhx.ionos.com* - Production gb-bhx
+- *https://vpn.gb-lhr.ionos.com* - Production gb-lhr
+- *https://vpn.us-ewr.ionos.com* - Production us-ewr
+- *https://vpn.us-las.ionos.com* - Production us-las
+- *https://vpn.us-mci.ionos.com* - Production us-mci
+- *https://vpn.fr-par.ionos.com* - Production fr-par
+
+By default, *https://vpn.de-fra.ionos.com* is used, however this can be overriden at authentication, either
+by setting the `IONOS_API_URL` environment variable or by specifying the `hostUrl` parameter when
+initializing the sdk client.
 
 ### Basic Authentication
 
@@ -61,7 +77,7 @@ import (
 )
 
 func basicAuthExample() error {
-	cfg := shared.NewConfiguration("username_here", "pwd_here", "", "")
+	cfg := shared.NewConfiguration("username_here", "pwd_here", "", "hostUrl_here")
 	cfg.LogLevel = Trace
 	apiClient := vpn.NewAPIClient(cfg)
 	return nil
@@ -91,7 +107,7 @@ There are 2 ways to generate your token:
         if !jwt.HasToken() {
             return fmt.Errorf("could not generate token")
         }
-        cfg := shared.NewConfiguration("", "", *jwt.GetToken(), "")
+        cfg := shared.NewConfiguration("", "", *jwt.GetToken(), "hostUrl_here")
         cfg.LogLevel = Trace
         apiClient := vpn.NewAPIClient(cfg)
         return nil
@@ -226,6 +242,7 @@ All URIs are relative to *https://vpn.de-fra.ionos.com*
 <summary title="Click to toggle">API models list</summary>
 
  - [Connection](docs/models/Connection)
+ - [DayOfTheWeek](docs/models/DayOfTheWeek)
  - [ESPEncryption](docs/models/ESPEncryption)
  - [Error](docs/models/Error)
  - [ErrorMessages](docs/models/ErrorMessages)
@@ -247,6 +264,7 @@ All URIs are relative to *https://vpn.de-fra.ionos.com*
  - [IPSecTunnelReadList](docs/models/IPSecTunnelReadList)
  - [IPSecTunnelReadListAllOf](docs/models/IPSecTunnelReadListAllOf)
  - [Links](docs/models/Links)
+ - [MaintenanceWindow](docs/models/MaintenanceWindow)
  - [Metadata](docs/models/Metadata)
  - [Pagination](docs/models/Pagination)
  - [ResourceStatus](docs/models/ResourceStatus)

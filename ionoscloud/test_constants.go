@@ -1933,4 +1933,9 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
     lan_id          =  ionoscloud_lan.lan_example.id
     ipv4_cidr       =  "192.168.1.108/24"
   }
+  maintenance_window {
+    day_of_the_week       = "Monday"
+    time                  = "09:00:00"
+  }
+  tier = "STANDARD"
 }` // nolint:unused

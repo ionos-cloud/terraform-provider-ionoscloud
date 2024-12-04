@@ -47,3 +47,7 @@ In addition to all arguments above, the following attributes are exported:
     - `lan_id` - The ID of the LAN where the WireGuard Gateway is connected.
     - `ipv4_cidr` - The IPv4 CIDR for the WireGuard Gateway connection.
     - `ipv6_cidr` - The IPv6 CIDR for the WireGuard Gateway connection.
+- `maintenance_window` - A weekly 4 hour-long window, during which maintenance might occur.
+  - `time` - Start of the maintenance window in UTC time.
+  - `day_of_the_week` - The name of the week day.
+- `tier` - Gateway performance options.
