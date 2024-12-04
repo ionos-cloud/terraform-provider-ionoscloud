@@ -157,7 +157,7 @@ resource "random_password" "cluster_password" {
 * `location` - (Required)[string] The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation. Possible values are: `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `us/ewr`, `us/las`. This attribute is immutable(disallowed in update requests).
 * `backup_location` - (Optional)(Computed)[string] The IONOS Object Storage location where the backups will be stored. Possible values are: `de`, `eu-south-2`, `eu-central-2`. This attribute is immutable (disallowed in update requests).
 * `display_name` - (Required)[string] The friendly name of your cluster.
-* `maintenance_window` - (Optional)(Computed)[string] A weekly 4 hour-long window, during which maintenance might occur
+* `maintenance_window` - (Optional)(Computed) A weekly 4 hour-long window, during which maintenance might occur
   * `time` - (Required)[string]
   * `day_of_the_week` - (Required)[string]
 * `credentials` - (Required)[string] Credentials for the database user to be created. This attribute is immutable(disallowed in update requests).

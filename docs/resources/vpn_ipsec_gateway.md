@@ -122,6 +122,11 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
 		ipv4_cidr = local.ipv4_cidr_block
 		ipv6_cidr = local.ipv6_cidr_block
 	}
+    maintenance_window {
+        day_of_the_week       = "Monday"
+        time                  = "09:00:00"
+    }
+    tier = "STANDARD"
 }
 ```
 
@@ -129,7 +134,7 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
 
 * `name` - (Required)[string] The name of the IPSec Gateway.
 * `location` - (Optional)[string] The location of the IPSec Gateway. Supported locations: de/fra, de/txl, es/vit,
-  gb/lhr, us/ewr, us/las, us/mci, fr/par
+  gb/bhx, gb/lhr, us/ewr, us/las, us/mci, fr/par.
 * `gateway_ip` - (Required)[string] Public IP address to be assigned to the gateway. Note: This must be an IP address in
   the same datacenter as the connections.
 * `description` - (Optional)[string] The human-readable description of the IPSec Gateway.
@@ -143,6 +148,10 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
       Gateway. **Note**: this should be the subnet already assigned to the LAN
 * `version` - (Required)[string] The IKE version that is permitted for the VPN tunnels. Default: `IKEv2`. Possible
   values: `IKEv2`.
+* `maintenance_window` - (Optional)(Computed) A weekly 4 hour-long window, during which maintenance might occur.
+  * `time` - (Required)[string] Start of the maintenance window in UTC time.
+  * `day_of_the_week` - (Required)[string] The name of the week day.
+* `tier` - (Optional)(Computed)[string] Gateway performance options.  See product documentation for full details. Options: STANDARD, STANDARD_HA, ENHANCED, ENHANCED_HA, PREMIUM, PREMIUM_HA.
 
 ## Import
 

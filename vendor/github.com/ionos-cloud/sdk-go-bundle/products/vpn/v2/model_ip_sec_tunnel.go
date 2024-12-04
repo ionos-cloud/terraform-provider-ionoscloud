@@ -1,9 +1,9 @@
 /*
- * VPN Gateways
+ * IONOS Cloud VPN Gateway API
  *
- * POC Docs for VPN gateway as service
+ * The Managed VPN Gateway service provides secure and scalable connectivity, enabling encrypted communication between your IONOS cloud resources in a VDC and remote networks (on-premises, multi-cloud, private LANs in other VDCs etc).
  *
- * API version: 0.0.1
+ * API version: 1.0.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -18,7 +18,7 @@ import (
 // checks if the IPSecTunnel type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &IPSecTunnel{}
 
-// IPSecTunnel Properties with all data needed to create a new IPSec Gateway Tunnel.\\ __Note__: there is a limit of 20 tunnels per IPSec Gateway.
+// IPSecTunnel Properties with all data needed to create a new IPSec Gateway Tunnel.\\ __Note__: there is a limit to the total number of tunnels.  Please refer to product documentation.
 type IPSecTunnel struct {
 	// The human readable name of your IPSec Gateway Tunnel.
 	Name string `json:"name"`

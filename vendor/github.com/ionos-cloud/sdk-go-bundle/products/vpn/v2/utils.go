@@ -1,9 +1,9 @@
 /*
- * VPN Gateways
+ * IONOS Cloud VPN Gateway API
  *
- * POC Docs for VPN gateway as service
+ * The Managed VPN Gateway service provides secure and scalable connectivity, enabling encrypted communication between your IONOS cloud resources in a VDC and remote networks (on-premises, multi-cloud, private LANs in other VDCs etc).
  *
- * API version: 0.0.1
+ * API version: 1.0.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -21,6 +21,10 @@ import (
 
 type IonosTime struct {
 	time.Time
+}
+
+type NullableIonosTime struct {
+	NullableTime
 }
 
 func (t *IonosTime) UnmarshalJSON(data []byte) error {

@@ -50,7 +50,7 @@ resource "ionoscloud_dataplatform_cluster" "example" {
 * `datacenter_id` - (Required)[string] The UUID of the virtual data center (VDC) the cluster is provisioned.
 * `name` - (Required)[string] The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]). It can contain dashes (-), underscores (_), dots (.), and alphanumerics in-between.
 * `version` - (Optional)[int] The version of the Data Platform.
-* `maintenance_window` - (Optional)[string] Starting time of a weekly 4 hour-long window, during which maintenance might occur in hh:mm:ss format
+* `maintenance_window` - (Optional) Starting time of a weekly 4 hour-long window, during which maintenance might occur in hh:mm:ss format
   * `time` - (Required)[string] Time at which the maintenance should start. Must conform to the 'HH:MM:SS' 24-hour format. This pattern matches the "HH:MM:SS 24-hour format with leading 0" format. For more information take a look at [this link](https://stackoverflow.com/questions/7536755/regular-expression-for-matching-hhmm-time-format).
   * `day_of_the_week` - (Required)[string] Must be set with one the values `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday` or `Sunday`.
 * `lans` - (Optional)[list] A list of LANs you want this node pool to be part of.

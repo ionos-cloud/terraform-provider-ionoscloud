@@ -58,3 +58,7 @@ The following attributes are returned by the datasource:
       VPN Gateway.
     * `ipv6_cidr` - Describes the ipv6 subnet in your LAN that should be accessible by the VPN Gateway.
 * `version` - The IKE version that is permitted for the VPN tunnels.
+* `maintenance_window` - A weekly 4 hour-long window, during which maintenance might occur.
+  * `time` - Start of the maintenance window in UTC time.
+  * `day_of_the_week` - The name of the week day.
+* `tier` - Gateway performance options.
