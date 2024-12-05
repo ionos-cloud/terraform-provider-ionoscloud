@@ -18,7 +18,7 @@ Manages a **Managed Kubernetes Cluster** on IonosCloud.
 ```hcl
 resource "ionoscloud_k8s_cluster" "example" {
   name                  = "k8sClusterExample"
-  k8s_version           = "1.28.6"
+  k8s_version           = "1.31.2"
   maintenance_window {
     day_of_the_week     = "Sunday"
     time                = "09:00:00Z"
@@ -47,7 +47,7 @@ resource "ionoscloud_ipblock" "k8sip" {
 
 resource "ionoscloud_k8s_cluster" "example" {
   name                  = "k8sClusterExample"
-  k8s_version           = "1.28.6"
+  k8s_version           = "1.31.2"
   maintenance_window {
     day_of_the_week     = "Sunday"
     time                = "09:00:00Z"
