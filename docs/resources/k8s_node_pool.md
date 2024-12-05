@@ -38,7 +38,7 @@ resource "ionoscloud_ipblock" "example" {
 
 resource "ionoscloud_k8s_cluster" "example" {
   name                  = "k8sClusterExample"
-  k8s_version           = "1.28.6"
+  k8s_version           = "1.31.2"
   maintenance_window {
     day_of_the_week     = "Sunday"
     time                = "09:00:00Z"
@@ -97,7 +97,7 @@ The following arguments are supported:
 
 - `name` - (Required)[string] The name of the Kubernetes Cluster. *This attribute is immutable*.
 - `k8s_version` - (Optional)[string] The desired Kubernetes Version. For supported values, please check the API documentation. Downgrades are not supported. The provider will ignore downgrades of patch level.
-- `auto_scaling` - (Optional)[string] Wether the Node Pool should autoscale. For more details, please check the API documentation
+- `auto_scaling` - (Optional)[string] Whether the Node Pool should autoscale. For more details, please check the API documentation
     - `min_node_count` - (Optional)[int] The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count
     - `max_node_count` - (Optional)[int] The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count
 - `lans` - (Optional)[list] A list of numeric LAN id's you want this node pool to be part of. For more details, please check the API documentation, as well as the example above
