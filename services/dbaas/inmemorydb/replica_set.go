@@ -15,6 +15,7 @@ import (
 )
 
 var locationToURL = map[string]string{
+	"":       "https://in-memory-db.de-fra.ionos.com",
 	"de/fra": "https://in-memory-db.de-fra.ionos.com",
 	"de/txl": "https://in-memory-db.de-txl.ionos.com",
 	"es/vit": "https://in-memory-db.es-vit.ionos.com",
