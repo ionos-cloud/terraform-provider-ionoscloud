@@ -33,11 +33,10 @@ func dataSourceKafkaTopic() *schema.Resource {
 				Computed:    true,
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      fmt.Sprintf("The location of your Kafka Cluster Topic. Supported locations: %s", strings.Join(kafka.AvailableLocations, ", ")),
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(kafka.AvailableLocations, false)),
+				Type:        schema.TypeString,
+				Description: fmt.Sprintf("The location of your Kafka Cluster Topic. Supported locations: %s", strings.Join(kafka.AvailableLocations, ", ")),
+				Required:    true,
+				ForceNew:    true,
 			},
 			"cluster_id": {
 				Type:        schema.TypeString,

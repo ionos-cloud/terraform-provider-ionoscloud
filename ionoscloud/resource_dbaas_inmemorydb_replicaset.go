@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"slices"
 	"strings"
 	"time"
 
@@ -284,9 +283,6 @@ func replicaSetImport(ctx context.Context, d *schema.ResourceData, meta interfac
 		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<replica_set_id>'", d.Id())
 	}
 	location := parts[0]
-	if !slices.Contains(constant.Locations, location) {
-		return nil, fmt.Errorf("invalid import ID: %q, location must be one of %v", d.Id(), constant.Locations)
-	}
 	replicaSetID := parts[1]
 	replicaSet, apiResponse, err := client.GetReplicaSet(ctx, replicaSetID, location)
 	if err != nil {

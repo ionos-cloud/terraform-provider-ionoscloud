@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -13,7 +12,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceCertificateManagerProvider() *schema.Resource {
@@ -163,9 +161,6 @@ func providerImport(ctx context.Context, d *schema.ResourceData, meta interface{
 		return nil, fmt.Errorf("invalid import ID: %v, expected ID in the format: '<location>:<provider_id>'", d.Id())
 	}
 	location := parts[0]
-	if !slices.Contains(constant.Locations, location) {
-		return nil, fmt.Errorf("invalid location: %v, location must be one of: %v", location, constant.Locations)
-	}
 	providerID := parts[1]
 	provider, apiResponse, err := client.GetProvider(ctx, providerID, location)
 	if err != nil {

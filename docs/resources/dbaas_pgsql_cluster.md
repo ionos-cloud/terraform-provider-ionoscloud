@@ -7,7 +7,7 @@ description: |-
   Creates and manages DbaaS Postgres Cluster objects.
 ---
 
-# ionoscloud\_pg_cluster
+# ionoscloud_pg_cluster
 
 Manages a **DbaaS PgSql Cluster**.
 

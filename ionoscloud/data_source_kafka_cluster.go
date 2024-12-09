@@ -33,11 +33,10 @@ func dataSourceKafkaCluster() *schema.Resource {
 				Optional:    true,
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      fmt.Sprintf("The location of your Kafka Cluster. Supported locations: %s", strings.Join(kafka.AvailableLocations, ", ")),
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(kafka.AvailableLocations, false)),
+				Type:        schema.TypeString,
+				Description: fmt.Sprintf("The location of your Kafka Cluster. Supported locations: %s", strings.Join(kafka.AvailableLocations, ", ")),
+				Required:    true,
+				ForceNew:    true,
 			},
 			"version": {
 				Type:        schema.TypeString,

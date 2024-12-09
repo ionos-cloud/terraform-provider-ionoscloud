@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"slices"
 	"strings"
 	"time"
 
@@ -181,11 +180,7 @@ func resourceKafkaClusterImport(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	location := parts[0]
-	if !slices.Contains(kafka.AvailableLocations, location) {
-		return nil, fmt.Errorf("invalid location: %v, location must be one of: %v", location, kafka.AvailableLocations)
-	}
-
-	if err := d.Set("location", parts[0]); err != nil {
+	if err := d.Set("location", location); err != nil {
 		return nil, fmt.Errorf("failed to set location Kafka Cluster for import: %w", err)
 	}
 	d.SetId(parts[1])
