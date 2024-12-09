@@ -1,7 +1,11 @@
 ## 6.6.7
 ### Fix 
-- Remove location validations for `backup_location` in `ionoscloud_pg_cluster` resource, `location` in `ionoscloud_mongo_cluster` resource and `location` fields in kafa and nfs data sources
-- Remove location validations for `ionoscloud_datacenter` resource, `location` in `ionoscloud_vpn_ipsec_gateway` resource
+- Remove location validations for `backup_location` in `ionoscloud_pg_cluster` resource
+- Remove location validations for `ionoscloud_mongo_cluster` resource
+- Remove location validations for `ionoscloud_datacenter` resource 
+- Remove location validations for `ionoscloud_vpn_ipsec_gateway` resource
+- Remove location validations for `ionoscloud_vpn_wireguard_gateway` resource
+- Remove location validations for kafa, auto_certificate, inmemorydb and nfs data sources
 
 ## 6.6.6
 ### Features
