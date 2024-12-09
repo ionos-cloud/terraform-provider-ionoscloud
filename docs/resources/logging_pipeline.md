@@ -106,7 +106,7 @@ terraform apply -var-file="vars.tfvars"
 
 ## Argument reference
 
-* `location` - (Optional)[string] The location of the Logging pipeline. Default: `de/txl` One of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`.
+* `location` - (Optional)[string] The location of the Logging pipeline. Default: `de/txl` One of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`. If this is not set and if no value is provided for the `IONOS_API_URL` env var, the default `location` will be: `de/fra`.
 * `name` - (Required)[string] The name of the Logging pipeline.
 * `grafana_address` - (Computed)[string] The address of the client's grafana instance.
 * `log` - (Required)[list] Pipeline logs, a list that contains elements with the following structure:
