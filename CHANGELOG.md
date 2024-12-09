@@ -1,3 +1,7 @@
+## 6.6.7
+### Fix 
+- Remove location validations for `backup_location` in `ionoscloud_pg_cluster` resource, `location` in `ionoscloud_mongo_cluster` resource and `location` fields in kafa and nfs data sources
+
 ## 6.6.6
 ### Features
 - Add `maintenance_window`, `tier` and regional endpoints for VPN resources

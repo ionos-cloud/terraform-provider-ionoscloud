@@ -118,11 +118,10 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"backup_location": {
-				Type:             schema.TypeString,
-				Description:      "The Object Storage location where the backups will be stored.",
-				Optional:         true,
-				Computed:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"de", "eu-south-2", "eu-central-2"}, true)),
+				Type:        schema.TypeString,
+				Description: "The Object Storage location where the backups will be stored.",
+				Optional:    true,
+				Computed:    true,
 			},
 			"display_name": {
 				Type:        schema.TypeString,

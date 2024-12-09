@@ -72,9 +72,8 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				Type: schema.TypeString,
 				Description: "The physical location where the cluster will be created. This will be where all of your instances live. " +
 					"Property cannot be modified after datacenter creation (disallowed in update requests). Available locations: de/txl, gb/lhr, es/vit. Update forces cluster re-creation.",
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Required: true,
+				ForceNew: true,
 			},
 			"connections": {
 				Type:        schema.TypeList,

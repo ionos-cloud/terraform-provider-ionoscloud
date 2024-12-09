@@ -7,8 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
 	nfs2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
@@ -25,9 +23,8 @@ func dataSourceNFSCluster() *schema.Resource {
 				Type: schema.TypeString,
 				Description: fmt.Sprintf("The location of the Network File Storage Cluster. "+
 					"Available locations: '%s'", strings.Join(nfs2.ValidNFSLocations, ", '")),
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(nfs2.ValidNFSLocations, false)),
+				Required: true,
+				ForceNew: true,
 			},
 			"id": {
 				Type:        schema.TypeString,
