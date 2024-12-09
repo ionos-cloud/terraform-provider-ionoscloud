@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -189,11 +188,7 @@ func pipelineImport(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	location := parts[0]
-	if !slices.Contains(logging.AvailableLocations, location) {
-		return nil, fmt.Errorf("invalid location: %v, location must be one of: %v", location, logging.AvailableLocations)
-	}
-
-	if err := d.Set("location", parts[0]); err != nil {
+	if err := d.Set("location", location); err != nil {
 		return nil, fmt.Errorf("failed to set location for Logging Pipeline import: %w", err)
 	}
 	d.SetId(parts[1])

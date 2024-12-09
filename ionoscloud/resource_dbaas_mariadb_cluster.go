@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"slices"
 	"strings"
 	"time"
 
@@ -233,9 +232,6 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<cluster_id>'", d.Id())
 	}
 	location := parts[0]
-	if !slices.Contains(constant.Locations, location) {
-		return nil, fmt.Errorf("invalid import ID: %q, location must be one of %v", d.Id(), constant.Locations)
-	}
 	clusterID := parts[1]
 
 	cluster, apiResponse, err := client.GetCluster(ctx, clusterID, location)

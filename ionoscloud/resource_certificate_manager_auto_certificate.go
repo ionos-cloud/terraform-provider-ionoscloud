@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -13,7 +12,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceCertificateManagerAutoCertificate() *schema.Resource {
@@ -159,9 +157,6 @@ func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta int
 		return nil, fmt.Errorf("invalid import ID: %v, expected ID in the format: '<location>:<auto_certificate_ID>", d.Id())
 	}
 	location := parts[0]
-	if !slices.Contains(constant.Locations, location) {
-		return nil, fmt.Errorf("invalid location: %v, location must be one of %v", location, constant.Locations)
-	}
 	autoCertificateID := parts[1]
 	autoCertificate, apiResponse, err := client.GetAutoCertificate(ctx, autoCertificateID, location)
 	if err != nil {

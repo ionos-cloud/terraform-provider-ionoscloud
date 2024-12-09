@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -151,9 +150,6 @@ func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<replica_set_id>'", d.Id())
 	}
 	location := parts[0]
-	if !slices.Contains(nfs.ValidNFSLocations, location) {
-		return nil, fmt.Errorf("invalid import ID: %q, location must be one of '%s'", d.Id(), strings.Join(nfs.ValidNFSLocations, ", '"))
-	}
 	id := parts[1]
 
 	err := d.Set("location", location)
