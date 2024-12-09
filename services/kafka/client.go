@@ -24,6 +24,7 @@ var (
 	AvailableLocations = []string{"de/fra", "de/txl" /*, "es/vit", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par"*/}
 
 	locationToURL = map[string]string{
+		"":       "https://kafka.de-fra.ionos.com",
 		"de/fra": "https://kafka.de-fra.ionos.com",
 		"de/txl": "https://kafka.de-txl.ionos.com",
 		// other locations not yet available. will be added in the future.

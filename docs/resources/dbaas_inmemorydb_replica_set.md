@@ -82,7 +82,7 @@ resource "ionoscloud_inmemorydb_replicaset" "example" {
 
 ## Argument Reference
 * `display_name` - (Required)[string] The human-readable name of your replica set.
-* `location` - (Optional)[string] The location of your replica set. Updates to the value of the field force the replica set to be re-created.
+* `location` - (Optional)[string] The location of your replica set. Updates to the value of the field force the replica set to be re-created. If this is not set and if no value is provided for the `IONOS_API_URL` env var, the default `location` will be: `de/fra`.
 * `version` - (Required)[string] The InMemoryDB version of your replica set.
 * `replicas` - (Required)[int] The total number of replicas in the replica set (one active and n-1 passive). In case of a standalone instance, the value is 1. In all other cases, the value is > 1. The replicas will not be available as read replicas, they are only standby for a failure of the active instance.
 * `resources` - (Required)[object] The resources of the individual replicas.
