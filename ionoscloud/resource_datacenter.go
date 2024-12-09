@@ -33,9 +33,8 @@ func resourceDatacenter() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"description": {
 				Type:        schema.TypeString,
