@@ -1,3 +1,7 @@
+## 6.6.8 -- upcoming release
+### Fixes
+- Omitting the `location` attribute for some resources no longer generates an error
+
 ## 6.6.7
 ### Fix 
 - Remove location validations for `backup_location` in `ionoscloud_pg_cluster` resource

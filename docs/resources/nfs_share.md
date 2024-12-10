@@ -71,7 +71,7 @@ resource "ionoscloud_nfs_share" "example" {
 
 The following arguments are supported:
 
-- `location` - (Optional) The location of the Network File Storage Cluster.
+- `location` - (Optional) The location of the Network File Storage Cluster. If this is not set and if no value is provided for the `IONOS_API_URL` env var, the default `location` will be: `de/fra`.
 - `cluster_id` - (Required) The ID of the Network File Storage Cluster.
 - `name` - (Required) The directory being exported.
 - `quota` - (Optional) The quota in MiB for the export. The quota can restrict the amount of data that can be stored within the export. The quota can be disabled using `0`. Default is `0`.

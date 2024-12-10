@@ -61,6 +61,7 @@ var (
 	DefaultLocation = "de/txl"
 
 	locationToURL = map[string]string{
+		"":       "https://logging.de-fra.ionos.com",
 		"de/fra": "https://logging.de-fra.ionos.com",
 		"de/txl": "https://logging.de-txl.ionos.com",
 		"es/vit": "https://logging.es-vit.ionos.com",

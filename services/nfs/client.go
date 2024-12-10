@@ -48,6 +48,7 @@ func (c *Client) Location(location string) *Client {
 		return c
 	}
 	var locationToURL = map[string]string{
+		"":       "https://nfs.de-fra.ionos.com",
 		"de/fra": "https://nfs.de-fra.ionos.com",
 		"de/txl": "https://nfs.de-txl.ionos.com",
 	}
