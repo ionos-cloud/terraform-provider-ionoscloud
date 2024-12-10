@@ -1,4 +1,6 @@
-## 6.6.8 -- upcoming release
+## 6.6.8
+### Features
+- Add `auto_scaling` attribute to `ionoscloud_dataplatform_node_pool` resource.
 ### Fixes
 - Omitting the `location` attribute for some resources no longer generates an error
 

@@ -44,6 +44,8 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.color", "green"),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann1", "value1"),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann2", "value2"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "auto_scaling.0.min_node_count", "1"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "auto_scaling.0.max_node_count", "2"),
 				),
 			},
 			{
@@ -63,6 +65,8 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "labels.color", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.color"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "annotations.ann1", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann1"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "annotations.ann2", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann2"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "auto_scaling.0.min_node_count", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "auto_scaling.0.min_node_count"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "auto_scaling.0.max_node_count", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "auto_scaling.0.max_node_count"),
 				),
 			},
 			{
@@ -152,6 +156,8 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.foo", "bar"),
 					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann1", "value1"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "auto_scaling.0.min_node_count", "1"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "auto_scaling.0.max_node_count", "3"),
 				),
 			},
 		},
@@ -266,6 +272,10 @@ resource ` + constant.DataplatformNodePoolResource + ` ` + constant.Dataplatform
     ann1 			= "value1"
     ann2 			= "value2"
   }
+  auto_scaling {
+    min_node_count = 1
+    max_node_count = 2
+  }
 }
 `
 
@@ -305,6 +315,10 @@ resource ` + constant.DataplatformNodePoolResource + ` ` + constant.Dataplatform
   }
   annotations = {
     ann1 = "value1"
+  }
+  auto_scaling {
+    min_node_count = 1
+    max_node_count = 3
   }
 }
 `

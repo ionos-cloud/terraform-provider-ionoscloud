@@ -43,14 +43,20 @@ func (c *Client) ListNodePools(ctx context.Context, clusterId string) (dataplatf
 }
 
 func (c *Client) CreateNodePool(ctx context.Context, clusterId string, d *schema.ResourceData) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
-	dataplatformNodePool := GetDataplatformNodePoolDataCreate(d)
+	dataplatformNodePool, err := GetDataplatformNodePoolDataCreate(d)
+	if err != nil {
+		return dataplatform.NodePoolResponseData{}, nil, err
+	}
 	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.ClustersNodepoolsPost(ctx, clusterId).CreateNodePoolRequest(*dataplatformNodePool).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
 func (c *Client) UpdateNodePool(ctx context.Context, clusterId, nodePoolId string, d *schema.ResourceData) (dataplatform.NodePoolResponseData, utils.ApiResponseInfo, error) {
-	dataplatformNodePool := GetDataplatformNodePoolDataUpdate(d)
+	dataplatformNodePool, err := GetDataplatformNodePoolDataUpdate(d)
+	if err != nil {
+		return dataplatform.NodePoolResponseData{}, nil, err
+	}
 	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.ClustersNodepoolsPatch(ctx, clusterId, nodePoolId).PatchNodePoolRequest(*dataplatformNodePool).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
@@ -83,7 +89,7 @@ func (c *Client) IsNodePoolReady(ctx context.Context, d *schema.ResourceData) (b
 	return strings.EqualFold(*subjectNodePool.Metadata.State, constant.Available), nil
 }
 
-func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) *dataplatform.CreateNodePoolRequest {
+func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) (*dataplatform.CreateNodePoolRequest, error) {
 
 	dataplatformNodePool := dataplatform.CreateNodePoolRequest{
 		Properties: &dataplatform.CreateNodePoolProperties{},
@@ -149,10 +155,16 @@ func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) *dataplatform.Cre
 		dataplatformNodePool.Properties.Annotations = &annotations
 	}
 
-	return &dataplatformNodePool
+	if autoscaling, err := getAutoscalingData(d); err != nil {
+		return &dataplatformNodePool, err
+	} else {
+		dataplatformNodePool.Properties.AutoScaling = autoscaling
+	}
+
+	return &dataplatformNodePool, nil
 }
 
-func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) *dataplatform.PatchNodePoolRequest {
+func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) (*dataplatform.PatchNodePoolRequest, error) {
 
 	dataplatformNodePool := dataplatform.PatchNodePoolRequest{
 		Properties: &dataplatform.PatchNodePoolProperties{},
@@ -183,7 +195,22 @@ func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) *dataplatform.Pat
 		dataplatformNodePool.Properties.Annotations = &annotations
 	}
 
-	return &dataplatformNodePool
+	if d.HasChange("auto_scaling.0.min_node_count") {
+		oldMinNodes, newMinNodes := d.GetChange("auto_scaling.0.min_node_count")
+		log.Printf("[INFO] dataplatform node pool autoscaling min # of nodes changed from %+v to %+v", oldMinNodes, newMinNodes)
+	}
+
+	if d.HasChange("auto_scaling.0.max_node_count") {
+		oldMaxNodes, newMaxNodes := d.GetChange("auto_scaling.0.max_node_count")
+		log.Printf("[INFO] dataplatform node pool autoscaling max # of nodes changed from %+v to %+v", oldMaxNodes, newMaxNodes)
+	}
+	var autoscaling *dataplatform.AutoScaling
+	var err error
+	if autoscaling, err = getAutoscalingData(d); err != nil {
+		return &dataplatformNodePool, err
+	}
+	dataplatformNodePool.Properties.AutoScaling = autoscaling
+	return &dataplatformNodePool, nil
 }
 
 func SetDataplatformNodePoolData(d *schema.ResourceData, nodePool dataplatform.NodePoolResponseData) error {
@@ -276,6 +303,19 @@ func SetDataplatformNodePoolData(d *schema.ResourceData, nodePool dataplatform.N
 			return utils.GenerateSetError(nodePoolResourceName, "annotations", err)
 		}
 	}
+
+	if nodePool.Properties.AutoScaling != nil && nodePool.Properties.AutoScaling.MinNodeCount != nil &&
+		nodePool.Properties.AutoScaling.MaxNodeCount != nil && (*nodePool.Properties.AutoScaling.MinNodeCount != 0 &&
+		*nodePool.Properties.AutoScaling.MaxNodeCount != 0) {
+		if err := d.Set("auto_scaling", []map[string]uint32{
+			{
+				"min_node_count": uint32(*nodePool.Properties.AutoScaling.MinNodeCount),
+				"max_node_count": uint32(*nodePool.Properties.AutoScaling.MaxNodeCount),
+			},
+		}); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -322,4 +362,31 @@ func SetNodePoolsData(d *schema.ResourceData, results []dataplatform.NodePoolRes
 		}
 	}
 	return nil
+}
+
+func getAutoscalingData(d *schema.ResourceData) (*dataplatform.AutoScaling, error) {
+	var autoscaling dataplatform.AutoScaling
+
+	minNodeCount, asmnOk := d.GetOk("auto_scaling.0.min_node_count")
+	maxNodeCount, asmxnOk := d.GetOk("auto_scaling.0.max_node_count")
+	if !asmnOk && !asmxnOk {
+		return nil, nil
+	}
+
+	asmnVal := int32(minNodeCount.(int))
+	asmxnVal := int32(maxNodeCount.(int))
+	if asmnVal == asmxnVal {
+		return &autoscaling, fmt.Errorf("error creating dataplatform node pool: max_node_count cannot be equal to min_node_count")
+	}
+
+	if asmxnVal < asmnVal {
+		return &autoscaling, fmt.Errorf("error creating dataplatform node pool: max_node_count cannot be lower than min_node_count")
+	}
+
+	log.Printf("[INFO] Setting Autoscaling minimum node count to : %d", asmnVal)
+	autoscaling.MinNodeCount = &asmnVal
+	log.Printf("[INFO] Setting Autoscaling maximum node count to : %d", asmxnVal)
+	autoscaling.MaxNodeCount = &asmxnVal
+
+	return &autoscaling, nil
 }

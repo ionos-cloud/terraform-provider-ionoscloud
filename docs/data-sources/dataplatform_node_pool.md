@@ -72,3 +72,6 @@ The following attributes are returned by the datasource:
   * `day_of_the_week` 
 * `labels` - Key-value pairs attached to the node pool resource as [Kubernetes labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/).
 * `annotations` - Key-value pairs attached to node pool resource as [Kubernetes annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/).
+* `auto_scaling` - Whether the Node Pool should autoscale. For more details, please check the API documentation
+  - `min_node_count` - The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count
+  - `max_node_count` - The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count
