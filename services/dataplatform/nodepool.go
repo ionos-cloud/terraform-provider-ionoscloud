@@ -89,6 +89,7 @@ func (c *Client) IsNodePoolReady(ctx context.Context, d *schema.ResourceData) (b
 	return strings.EqualFold(*subjectNodePool.Metadata.State, constant.Available), nil
 }
 
+// GetDataplatformNodePoolDataCreate gets the node pool data from the schema and creates a CreateNodePoolRequest
 func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) (*dataplatform.CreateNodePoolRequest, error) {
 
 	dataplatformNodePool := dataplatform.CreateNodePoolRequest{
@@ -154,16 +155,17 @@ func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) (*dataplatform.Cr
 		}
 		dataplatformNodePool.Properties.Annotations = &annotations
 	}
-
-	if autoscaling, err := getAutoscalingData(d); err != nil {
+	var autoscaling *dataplatform.AutoScaling
+	var err error
+	if autoscaling, err = getAutoscalingData(d); err != nil {
 		return &dataplatformNodePool, err
-	} else {
-		dataplatformNodePool.Properties.AutoScaling = autoscaling
 	}
+	dataplatformNodePool.Properties.AutoScaling = autoscaling
 
 	return &dataplatformNodePool, nil
 }
 
+// GetDataplatformNodePoolDataUpdate gets the node pool data from the schema and creates a PatchNodePoolRequest
 func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) (*dataplatform.PatchNodePoolRequest, error) {
 
 	dataplatformNodePool := dataplatform.PatchNodePoolRequest{
