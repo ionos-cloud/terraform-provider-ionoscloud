@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
@@ -262,7 +263,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	log.Printf("[INFO] Created k8s cluster: %s", d.Id())
 
 	for {
-		log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
+		log.Printf("[INFO] Waiting for cluster %s to be ACTIVE ...", d.Id())
 
 		clusterReady, rsErr := k8sClusterReady(ctx, client, d)
 
@@ -632,7 +633,9 @@ func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schem
 	if utils.IsStateFailed(*resource.Metadata.State) {
 		return false, fmt.Errorf("error while checking if k8s cluster is ready %s, state %s", *resource.Id, *resource.Metadata.State)
 	}
-	return *resource.Metadata.State == "ACTIVE", nil
+	log.Printf("[INFO] k8sClusterReady k8s cluster state: %s", *resource.Metadata.State)
+	// k8s is the only resource that has a state of ACTIVE when it is ready
+	return strings.EqualFold(*resource.Metadata.State, ionoscloud.Active), nil
 }
 
 func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
