@@ -113,6 +113,25 @@ func dataSourceDataplatformNodePool() *schema.Resource {
 				Computed:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"auto_scaling": {
+				Type:        schema.TypeList,
+				Description: "The range defining the minimum and maximum number of worker nodes that the managed node group can scale in",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"min_node_count": {
+							Type:        schema.TypeInt,
+							Description: "The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count",
+							Computed:    true,
+						},
+						"max_node_count": {
+							Type:        schema.TypeInt,
+							Description: "The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count",
+							Computed:    true,
+						},
+					},
+				},
+			},
 			"cluster_id": {
 				Type:             schema.TypeString,
 				Required:         true,

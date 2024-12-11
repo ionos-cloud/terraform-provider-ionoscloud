@@ -11,70 +11,159 @@
 package ionoscloud
 
 import (
-	"log"
-	"os"
-	"strings"
+	"encoding/json"
 )
 
-type LogLevel uint
-
-func (l *LogLevel) Get() LogLevel {
-	if l != nil {
-		return *l
-	}
-	return Off
+// AutoScalingBase Auto scaling configuration for the Node Pool
+type AutoScalingBase struct {
+	// The minimum number of nodes in a Node Pool
+	MinNodeCount *int32 `json:"minNodeCount"`
+	// The maximum number of nodes in a Node Pool
+	MaxNodeCount *int32 `json:"maxNodeCount"`
 }
 
-// Satisfies returns true if this LogLevel is at least high enough for v
-func (l *LogLevel) Satisfies(v LogLevel) bool {
-	return l.Get() >= v
+// NewAutoScalingBase instantiates a new AutoScalingBase object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewAutoScalingBase(minNodeCount int32, maxNodeCount int32) *AutoScalingBase {
+	this := AutoScalingBase{}
+
+	this.MinNodeCount = &minNodeCount
+	this.MaxNodeCount = &maxNodeCount
+
+	return &this
 }
 
-const (
-	Off LogLevel = 0x100 * iota
-	Debug
-	// Trace We recommend you only set this field for debugging purposes.
-	// Disable it in your production environments because it can log sensitive data.
-	// It logs the full request and response without encryption, even for an HTTPS call.
-	// Verbose request and response logging can also significantly impact your application's performance.
-	Trace
-)
-
-var LogLevelMap = map[string]LogLevel{
-	"off":   Off,
-	"debug": Debug,
-	"trace": Trace,
+// NewAutoScalingBaseWithDefaults instantiates a new AutoScalingBase object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewAutoScalingBaseWithDefaults() *AutoScalingBase {
+	this := AutoScalingBase{}
+	return &this
 }
 
-// getLogLevelFromEnv - gets LogLevel type from env variable IONOS_LOG_LEVEL
-// returns Off if an invalid log level is encountered
-func getLogLevelFromEnv() LogLevel {
-	strLogLevel := "off"
-	if os.Getenv(IonosLogLevelEnvVar) != "" {
-		strLogLevel = os.Getenv(IonosLogLevelEnvVar)
+// GetMinNodeCount returns the MinNodeCount field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *AutoScalingBase) GetMinNodeCount() *int32 {
+	if o == nil {
+		return nil
 	}
 
-	logLevel, ok := LogLevelMap[strings.ToLower(strLogLevel)]
-	if !ok {
-		log.Printf("Cannot set logLevel for value: %s, setting loglevel to Off", strLogLevel)
+	return o.MinNodeCount
+
+}
+
+// GetMinNodeCountOk returns a tuple with the MinNodeCount field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *AutoScalingBase) GetMinNodeCountOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
 	}
-	return logLevel
+
+	return o.MinNodeCount, true
 }
 
-type Logger interface {
-	Printf(format string, args ...interface{})
+// SetMinNodeCount sets field value
+func (o *AutoScalingBase) SetMinNodeCount(v int32) {
+
+	o.MinNodeCount = &v
+
 }
 
-func NewDefaultLogger() Logger {
-	return &defaultLogger{
-		logger: log.New(os.Stderr, "IONOSLOG ", log.LstdFlags),
+// HasMinNodeCount returns a boolean if a field has been set.
+func (o *AutoScalingBase) HasMinNodeCount() bool {
+	if o != nil && o.MinNodeCount != nil {
+		return true
 	}
+
+	return false
 }
 
-type defaultLogger struct {
-	logger *log.Logger
+// GetMaxNodeCount returns the MaxNodeCount field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *AutoScalingBase) GetMaxNodeCount() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.MaxNodeCount
+
 }
 
-func (l defaultLogger) Printf(format string, args ...interface{}) {
-	l.logger.Printf(format, args...)
+// GetMaxNodeCountOk returns a tuple with the MaxNodeCount field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *AutoScalingBase) GetMaxNodeCountOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.MaxNodeCount, true
+}
+
+// SetMaxNodeCount sets field value
+func (o *AutoScalingBase) SetMaxNodeCount(v int32) {
+
+	o.MaxNodeCount = &v
+
+}
+
+// HasMaxNodeCount returns a boolean if a field has been set.
+func (o *AutoScalingBase) HasMaxNodeCount() bool {
+	if o != nil && o.MaxNodeCount != nil {
+		return true
+	}
+
+	return false
+}
+
+func (o AutoScalingBase) MarshalJSON() ([]byte, error) {
+	toSerialize := map[string]interface{}{}
+	if o.MinNodeCount != nil {
+		toSerialize["minNodeCount"] = o.MinNodeCount
+	}
+
+	if o.MaxNodeCount != nil {
+		toSerialize["maxNodeCount"] = o.MaxNodeCount
+	}
+
+	return json.Marshal(toSerialize)
+}
+
+type NullableAutoScalingBase struct {
+	value *AutoScalingBase
+	isSet bool
+}
+
+func (v NullableAutoScalingBase) Get() *AutoScalingBase {
+	return v.value
+}
+
+func (v *NullableAutoScalingBase) Set(val *AutoScalingBase) {
+	v.value = val
+	v.isSet = true
+}
+
+func (v NullableAutoScalingBase) IsSet() bool {
+	return v.isSet
+}
+
+func (v *NullableAutoScalingBase) Unset() {
+	v.value = nil
+	v.isSet = false
+}
+
+func NewNullableAutoScalingBase(val *AutoScalingBase) *NullableAutoScalingBase {
+	return &NullableAutoScalingBase{value: val, isSet: true}
+}
+
+func (v NullableAutoScalingBase) MarshalJSON() ([]byte, error) {
+	return json.Marshal(v.value)
+}
+
+func (v *NullableAutoScalingBase) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
 }
