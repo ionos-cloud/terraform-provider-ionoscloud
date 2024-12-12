@@ -633,7 +633,7 @@ func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schem
 	if utils.IsStateFailed(*resource.Metadata.State) {
 		return false, fmt.Errorf("error while checking if k8s cluster is ready %s, state %s", *resource.Id, *resource.Metadata.State)
 	}
-	log.Printf("[INFO] k8sClusterReady k8s cluster state: %s", *resource.Metadata.State)
+	log.Printf("[INFO] k8s cluster state: %s", *resource.Metadata.State)
 	// k8s is the only resource that has a state of ACTIVE when it is ready
 	return strings.EqualFold(*resource.Metadata.State, ionoscloud.Active), nil
 }
