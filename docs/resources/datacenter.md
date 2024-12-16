@@ -7,7 +7,7 @@ description: |-
   Creates and manages IonosCloud Virtual Data Center.
 ---
 
-# ionoscloud\_datacenter
+# ionoscloud_datacenter
 
 Manages a Virtual **Data Center** on IonosCloud.
 

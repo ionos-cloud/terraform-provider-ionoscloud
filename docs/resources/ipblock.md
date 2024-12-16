@@ -7,7 +7,7 @@ description: |-
   Creates and manages IP Block objects.
 ---
 
-# ionoscloud\_ipblock
+# ionoscloud_ipblock
 
 Manages **IP Blocks** on IonosCloud. IP Blocks contain reserved public IP addresses that can be assigned servers or other resources.
 

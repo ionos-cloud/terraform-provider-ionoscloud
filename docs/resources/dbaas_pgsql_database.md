@@ -7,7 +7,7 @@ description: |-
   Creates and manages DbaaS Postgres Database objects.
 ---
 
-# ionoscloud\_pg_database
+# ionoscloud_pg_database
 
 Manages a **DbaaS PgSql Database**.
 

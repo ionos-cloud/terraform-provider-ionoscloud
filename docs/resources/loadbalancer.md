@@ -7,7 +7,7 @@ description: |-
   Creates and manages Load Balancers
 ---
 
-# ionoscloud\_loadbalancer
+# ionoscloud_loadbalancer
 
 Manages a Load Balancer on IonosCloud.
 

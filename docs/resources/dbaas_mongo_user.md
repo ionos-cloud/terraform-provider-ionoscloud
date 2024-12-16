@@ -7,7 +7,7 @@ description: |-
   Creates and manages DbaaS MongoDB users.
 ---
 
-# ionoscloud\_mongo_user
+# ionoscloud_mongo_user
 
 Manages a **DbaaS Mongo User**. .
 

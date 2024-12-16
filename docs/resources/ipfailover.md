@@ -7,7 +7,7 @@ description: |-
   Creates and manages ipfailover objects.
 ---
 
-# ionoscloud\_ipfailover
+# ionoscloud_ipfailover
 
 Manages **IP Failover** groups on IonosCloud.
 

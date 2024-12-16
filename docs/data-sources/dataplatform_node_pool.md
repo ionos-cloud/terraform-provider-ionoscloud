@@ -7,7 +7,7 @@ description: |-
   Get information on a Dataplatform Node Pool.
 ---
 
-# ionoscloud\_dataplatform_node_pool
+# ionoscloud_dataplatform_node_pool
 
 The **Dataplatform Node Pool Data Source** can be used to search for and return an existing Dataplatform Node Pool under a Dataplatform Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.

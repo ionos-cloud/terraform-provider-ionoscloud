@@ -7,7 +7,7 @@ description: |-
   Creates and manages DbaaS MongoDB users.
 ---
 
-# ionoscloud\_mongo_user
+# ionoscloud_mongo_user
 
 The **DbaaS Mongo User data source** can be used to search for and return an existing DbaaS MongoDB User.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.

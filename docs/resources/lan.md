@@ -7,7 +7,7 @@ description: |-
   Creates and manages LAN objects.
 ---
 
-# ionoscloud\_lan
+# ionoscloud_lan
 
 Manages a **LAN** on IonosCloud.
 

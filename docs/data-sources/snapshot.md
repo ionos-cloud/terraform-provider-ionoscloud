@@ -7,7 +7,7 @@ description: |-
   Get information on a IonosCloud Snapshots
 ---
 
-# ionoscloud\_snapshot
+# ionoscloud_snapshot
 
 The **Snapshot data source** can be used to search for and return an existing snapshot which can then be used to provision a server. If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. When this happens, please refine your search string so that it is specific enough to return only one result.
 

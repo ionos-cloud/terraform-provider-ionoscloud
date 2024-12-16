@@ -7,7 +7,7 @@ description: |-
   Get Information on ipfailover objects.
 ---
 
-# ionoscloud\_ipfailover
+# ionoscloud_ipfailover
 
 The **IP Failover data source** can be used to search for and return an existing IP Failover object.
 You need to provide the datacenter_id and the id of the lan to get the ip failover object for the provided datacenter.

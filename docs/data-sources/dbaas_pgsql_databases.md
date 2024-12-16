@@ -7,7 +7,7 @@ description: |-
   Get information on DBaaS PgSql Databases.
 ---
 
-# ionoscloud\_pg_databases
+# ionoscloud_pg_databases
 
 The **PgSql Databases data source** can be used to search for and return multiple existing PgSql databases.
 

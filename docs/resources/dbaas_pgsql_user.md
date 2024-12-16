@@ -7,7 +7,7 @@ description: |-
   Creates and manages DbaaS Postgres User objects.
 ---
 
-# ionoscloud\_pg_user
+# ionoscloud_pg_user
 
 Manages a **DbaaS PgSql User**.
 

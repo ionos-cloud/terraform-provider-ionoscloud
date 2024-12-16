@@ -7,7 +7,7 @@ description: |-
   Creates and manages share objects.
 ---
 
-# ionoscloud\_share
+# ionoscloud_share
 
 Manages **Shares** and list shares permissions granted to the group members for each shared resource.
 

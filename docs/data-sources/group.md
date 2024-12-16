@@ -7,7 +7,7 @@ description: |-
   Get information on a Ionos Cloud Groups
 ---
 
-# ionoscloud\_group
+# ionoscloud_group
 
 The **Group data source** can be used to search for and return existing groups.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. 

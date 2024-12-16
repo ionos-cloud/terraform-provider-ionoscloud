@@ -7,7 +7,7 @@ description: |-
   Creates and manages Firewall Rules.
 ---
 
-# ionoscloud\_firewall
+# ionoscloud_firewall
 
 Manages a set of **Firewall Rules** on IonosCloud.
 

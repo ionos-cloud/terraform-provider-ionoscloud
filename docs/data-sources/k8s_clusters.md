@@ -7,7 +7,7 @@ description: |-
   Retrieves a list of Ionos Cloud Kubernetes Clusters
 ---
 
-# ionoscloud\_servers
+# ionoscloud_servers
 
 The **k8s_clusters data source** can be used to search for and return existing kubernetes clusters based on filters used.
 

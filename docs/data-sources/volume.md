@@ -7,7 +7,7 @@ description: |-
   Get information on a Ionos Cloud Volume
 ---
 
-# ionoscloud\_volume
+# ionoscloud_volume
 
 The volume data source can be used to search for and return existing volumes.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.

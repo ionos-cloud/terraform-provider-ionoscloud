@@ -7,7 +7,7 @@ description: |-
   Get information on DBaaS PgSql User.
 ---
 
-# ionoscloud\_pg_user
+# ionoscloud_pg_user
 
 The **PgSql User data source** can be used to search for and return an existing PgSql user.
 

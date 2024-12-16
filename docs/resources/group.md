@@ -7,7 +7,7 @@ description: |-
   Creates and manages group objects.
 ---
 
-# ionoscloud\_group
+# ionoscloud_group
 
 Manages **Groups** and **Group Privileges** on IonosCloud.
 

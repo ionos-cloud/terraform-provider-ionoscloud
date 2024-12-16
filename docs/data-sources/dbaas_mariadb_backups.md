@@ -7,7 +7,7 @@ description: |-
   Get information on DBaaS MariaDB Backups
 ---
 
-# ionoscloud\_mariadb_backups
+# ionoscloud_mariadb_backups
 
 The **DBaaS MariaDB Backups data source** can be used to search for and return existing DBaaS MariaDB Backups for a specific cluster.
 

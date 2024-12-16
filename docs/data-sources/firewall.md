@@ -7,7 +7,7 @@ description: |-
   Get Information on a IonosCloud Firewall
 ---
 
-# ionoscloud\_firewall
+# ionoscloud_firewall
 
 The **Firewall data source** can be used to search for and return an existing FirewallRules. 
 You can provide a string for either id or name parameters which will be compared with provisioned Firewall Rules.

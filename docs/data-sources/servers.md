@@ -7,7 +7,7 @@ description: |-
   Retrieves a list of Ionos Cloud Servers
 ---
 
-# ionoscloud\_servers
+# ionoscloud_servers
 
 The **Servers data source** can be used to search for and return existing servers based on filters used.
 

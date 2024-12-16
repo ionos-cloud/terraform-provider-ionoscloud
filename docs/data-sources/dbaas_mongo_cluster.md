@@ -7,7 +7,7 @@ description: |-
   Get information on DbaaS MongoDB Cluster objects.
 ---
 
-# ionoscloud\_mongo_cluster
+# ionoscloud_mongo_cluster
 
 The **DbaaS Mongo Cluster data source** can be used to search for and return an existing DbaaS MongoDB Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.

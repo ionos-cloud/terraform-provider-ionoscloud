@@ -7,7 +7,7 @@ description: |-
   Get information on a IonosCloud Resource
 ---
 
-# ionoscloud\_resource
+# ionoscloud_resource
 
 The **Resource data source** can be used to search for and return any existing IonosCloud resource and optionally their group associations.
 You can provide a string for the resource type (datacenter,image,snapshot,ipblock) and/or resource id parameters which will be queries against available resources.

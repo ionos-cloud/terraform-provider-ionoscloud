@@ -7,7 +7,7 @@ description: |-
   Creates and manages DbaaS MongoDB Cluster objects.
 ---
 
-# ionoscloud\_mongo_cluster
+# ionoscloud_mongo_cluster
 
 Manages a **DbaaS Mongo Cluster**.
 

@@ -7,7 +7,7 @@ description: |-
   Get information on the list of IonosCloud K8s Nodes that make a nodepool
 ---
 
-# ionoscloud\_k8s\_node\_pool\_nodes
+# ionoscloud_k8s_node_pool_nodes
 
 The **k8s Node Pool Nodes** data source can be used to search for and return a list of existing k8s Node Pool nodes.
 ## Example Usage

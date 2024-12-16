@@ -7,7 +7,7 @@ description: |-
   Get information on a Ionos Cloud Cube Servers
 ---
 
-# ionoscloud\_cube\_server
+# ionoscloud_cube_server
 
 The **Cube Server data source** can be used to search for and return existing servers. 
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.

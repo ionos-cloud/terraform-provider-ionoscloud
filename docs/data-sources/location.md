@@ -7,7 +7,7 @@ description: |-
   Get information on a IonosCloud Locations
 ---
 
-# ionoscloud\_location
+# ionoscloud_location
 
 The **Location data source** can be used to search for and return an existing location which can then be used elsewhere in the configuration.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.

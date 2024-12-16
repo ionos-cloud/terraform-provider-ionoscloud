@@ -7,7 +7,7 @@ description: |-
   Get Information on share permission objects
 ---
 
-# ionoscloud\_share
+# ionoscloud_share
 
 The **Share data source** can be used to search for and return an existing share object.
 You need to provide the group_id and resource_id to get the group resources for the shared resource.

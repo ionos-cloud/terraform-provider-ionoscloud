@@ -7,7 +7,7 @@ description: |-
   Get Information on a IonosCloud Backup Unit
 ---
 
-# ionoscloud\_backup_unit
+# ionoscloud_backup_unit
 
 The **Backup Unit data source** can be used to search for and return an existing Backup Unit.
 You can provide a string for either id or name parameters which will be compared with provisioned Backup Units. 

@@ -7,7 +7,7 @@ description: |-
   Get information on a Ionos Cloud Servers
 ---
 
-# ionoscloud\_server
+# ionoscloud_server
 
 The **Server data source** can be used to search for and return existing servers. 
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.

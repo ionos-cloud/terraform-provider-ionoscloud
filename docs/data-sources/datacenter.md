@@ -7,7 +7,7 @@ description: |-
   Get information on a IonosCloud Data Centers
 ---
 
-# ionoscloud\_datacenter
+# ionoscloud_datacenter
 
 The **Datacenter data source** can be used to search for and return an existing Virtual Data Center.
 You can provide a string for the name and location parameters which will be compared with provisioned Virtual Data Centers.

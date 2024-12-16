@@ -7,7 +7,7 @@ description: |-
   Creates and manages user objects.
 ---
 
-# ionoscloud\_user
+# ionoscloud_user
 
 Manages **Users** and list users and groups associated with that user.
 

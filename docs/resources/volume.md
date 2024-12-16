@@ -7,7 +7,7 @@ description: |-
   Creates and manages IonosCloud Volume objects.
 ---
 
-# ionoscloud\_volume
+# ionoscloud_volume
 
 Manages a **Volume** on IonosCloud.
 

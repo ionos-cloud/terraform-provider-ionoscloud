@@ -7,7 +7,7 @@ description: |-
   Get information on a IonosCloud K8s Cluster
 ---
 
-# ionoscloud\_k8s\_cluster
+# ionoscloud_k8s_cluster
 
 The **k8s Cluster data source** can be used to search for and return existing k8s clusters.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.

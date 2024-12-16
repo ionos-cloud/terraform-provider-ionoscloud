@@ -7,7 +7,7 @@ description: |-
   Creates and manages snapshot objects.
 ---
 
-# ionoscloud\_snapshot
+# ionoscloud_snapshot
 
 Manages **Snapshots** on IonosCloud.
 

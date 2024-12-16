@@ -7,7 +7,7 @@ description: |-
   Get information on a IonosCloud Autoscaling Group
 ---
 
-# ionoscloud\_autoscaling_group
+# ionoscloud_autoscaling_group
 
 The autoscaling group data source can be used to search for and return an existing Autoscaling Group. You can provide a string for the name or id parameters which will be compared with provisioned Autoscaling Groups. If a single match is found, it will be returned.
 
