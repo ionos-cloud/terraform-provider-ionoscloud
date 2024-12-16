@@ -39,7 +39,7 @@ The following arguments are supported:
 Resource Server can be imported using the `resource id` and the `datacenter id`, e.g.
 
 ```shell
-terraform import ionoscloud_nsg.mynsg {datacenter uuid}/{nsg uuid}
+terraform import ionoscloud_nsg.mynsg datacenter uuid/nsg uuid
 ```
 
 Or by using an `import` block. Here is an example that allows you to import the default created nsg into terraform.
@@ -51,7 +51,7 @@ resource "ionoscloud_datacenter" "example" {
 
 import {
   to = ionoscloud_nsg.imported
-  id = "{datacenter uuid}/{default nsg uuid}" 
+  id = "datacenter uuid/default nsg uuid" 
 }
   
 resource "ionoscloud_nsg" "imported_default" {  # Imported here

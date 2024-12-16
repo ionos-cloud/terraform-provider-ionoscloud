@@ -86,5 +86,5 @@ The following arguments are supported:
 Resource Distribution can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_cdn_distribution.myDistribution {distribution uuid}
+terraform import ionoscloud_cdn_distribution.myDistribution distribution uuid
 ```

@@ -42,7 +42,7 @@ The following arguments are supported:
 An IONOS Object Storage Unit resource can be imported using its user id as well as its `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_s3_key.demo {userId}/{s3KeyId}
+terraform import ionoscloud_s3_key.demo userid/s3Keyid
 ```
 
 This can be helpful when you want to import IONOS Object Storage Keys which you have already created manually or using other means, outside of terraform.

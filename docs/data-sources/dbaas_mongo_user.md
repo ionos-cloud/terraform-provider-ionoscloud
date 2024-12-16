@@ -40,5 +40,5 @@ data "ionoscloud_mongo_user" "example" {
 Resource DbaaS MongoDb User can be imported using the `cluster_id`, the `database` and the `username` e.g.
 
 ```shell
-terraform import ionoscloud_mongo_cluster.mycluser {cluster uuid} {database} {username}
+terraform import ionoscloud_mongo_cluster.mycluser cluster uuid database username
 ```

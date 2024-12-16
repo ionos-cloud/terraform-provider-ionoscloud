@@ -73,7 +73,7 @@ The following arguments are supported:
 A Cross Connect resource can be imported using its `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_private_crossconnect.demo {ionoscloud_private_crossconnect_uuid}
+terraform import ionoscloud_private_crossconnect.demo ionoscloud_private_crossconnect_uuid
 ```
 
 This can be helpful when you want to import cross-connects which you have already created manually or using other means, outside of terraform.

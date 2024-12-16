@@ -68,7 +68,7 @@ resource "ionoscloud_lan" "example" {
 Resource Lan can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_lan.mylan {datacenter uuid}/{lan id}
+terraform import ionoscloud_lan.mylandatacenter uuid/lan id
 ```
 
 ## Important Notes

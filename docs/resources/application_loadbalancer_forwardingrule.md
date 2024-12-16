@@ -124,5 +124,5 @@ The following arguments are supported:
 Resource Application Load Balancer Forwarding Rule can be imported using the `resource id`, `alb id` and `datacenter id`, e.g.
 
 ```shell
-terraform import ionoscloud_application_loadbalancer_forwardingrule.my_application_loadbalancer_forwardingrule {datacenter uuid}/{application_loadbalancer uuid}/{application_loadbalancer_forwardingrule uuid}
+terraform import ionoscloud_application_loadbalancer_forwardingrule.my_application_loadbalancer_forwardingrule datacenter uuid/application_loadbalancer uuid/application_loadbalancer_forwardingrule uuid
 ```

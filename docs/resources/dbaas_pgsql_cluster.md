@@ -174,5 +174,5 @@ resource "random_password" "cluster_password" {
 Resource DbaaS Postgres Cluster can be imported using the `cluster_id`, e.g.
 
 ```shell
-terraform import ionoscloud_pg_cluster.mycluser {cluster uuid}
+terraform import ionoscloud_pg_cluster.mycluser cluster uuid
 ```

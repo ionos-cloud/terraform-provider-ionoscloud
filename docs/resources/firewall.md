@@ -97,5 +97,5 @@ resource "random_password" "server_image_password" {
 Resource Firewall can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_firewall.myfwrule {datacenter uuid}/{server uuid}/{nic uuid}/{firewall uuid}
+terraform import ionoscloud_firewall.myfwruledatacenter uuid/server uuid/nic uuid/firewall uuid
 ```

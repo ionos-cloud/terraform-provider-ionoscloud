@@ -45,5 +45,5 @@ The following arguments are supported:
 Resource Container Registry can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_container_registry.mycr {container_registry uuid}
+terraform import ionoscloud_container_registry.mycr container_registry uuid
 ```

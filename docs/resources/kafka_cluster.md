@@ -130,5 +130,5 @@ resource "ionoscloud_kafka_cluster" "example" {
 Kafka Cluster can be imported using the `location` and `kafka cluster id`:
 
 ```shell
-terraform import ionoscloud_kafka_cluster.mycluster {location}:{kafka cluster uuid}
+terraform import ionoscloud_kafka_cluster.mycluster location:kafka cluster uuid
 ```

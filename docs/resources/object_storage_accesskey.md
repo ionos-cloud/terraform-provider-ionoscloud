@@ -38,7 +38,7 @@ The following arguments are supported:
 An object storage accesskey resource can be imported using its `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_object_storage_accesskey.demo {objectStorageAccesskeyId}
+terraform import ionoscloud_object_storage_accesskey.demo objectStorageAccesskeyid
 ```
 
 This can be helpful when you want to import Object Storage Accesskeys which you have already created manually or using other means, outside of terraform.

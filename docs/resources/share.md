@@ -59,5 +59,5 @@ attributes inside the `ionoscloud_share` resource to enforce the sequential crea
 Resource Share can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_share.myshare {group uuid}/{resource uuid}
+terraform import ionoscloud_share.myshare group uuid/resource uuid
 ```

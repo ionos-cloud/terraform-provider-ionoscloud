@@ -74,7 +74,7 @@ resource "random_password" "server_image_password" {
 Resource Load Balancer can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_loadbalancer.myloadbalancer {datacenter uuid}/{loadbalancer uuid}
+terraform import ionoscloud_loadbalancer.myloadbalancer datacenter uuid/loadbalancer uuid
 ```
 
 ## A note on nics

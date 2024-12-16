@@ -83,5 +83,5 @@ The following arguments are supported:
 Resource Target Group can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_target_group.myTargetGroup {target group uuid}
+terraform import ionoscloud_target_group.myTargetGroup target group uuid
 ```

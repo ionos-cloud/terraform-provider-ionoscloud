@@ -50,5 +50,5 @@ resource "ionoscloud_auto_certificate" "example" {
 The resource can be imported using the `auto_certificate_id` and the `location`, separated by `:`, e.g.
 
 ```shell
-terraform import ionoscloud_auto_certificate.example {location}:{auto_certificate_id}
+terraform import ionoscloud_auto_certificate.example location:auto_certificate_id
 ```

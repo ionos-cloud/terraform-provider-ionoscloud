@@ -111,7 +111,7 @@ terraform apply -parallelism=1
 Resource IpFailover can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_ipfailover.myipfailover {datacenter uuid}/{lan uuid}
+terraform import ionoscloud_ipfailover.myipfailover datacenter uuid/lan uuid
 ```
 
 

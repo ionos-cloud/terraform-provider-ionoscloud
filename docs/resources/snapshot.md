@@ -97,5 +97,5 @@ Beside the configurable arguments, the resource returns the following additional
 Resource Snapshot can be imported using the `snapshot id`, e.g.
 
 ```shell
-terraform import ionoscloud_snapshot.mysnapshot {snapshot uuid}
+terraform import ionoscloud_snapshot.mysnapshot snapshot uuid
 ```

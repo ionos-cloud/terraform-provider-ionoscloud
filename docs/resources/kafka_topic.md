@@ -153,5 +153,5 @@ resource "ionoscloud_kafka_cluster_topic" "example" {
 Kafka Cluster Topic can be imported using the `location`, `kafka cluster id` and the `kafka cluster topic id`:
 
 ```shell
-terraform import ionoscloud_kafka_cluster_topic.my_topic {location}:{kafka cluster uuid}:{kafka cluster topic uuid}
+terraform import ionoscloud_kafka_cluster_topic.my_topic location:kafka cluster uuid:kafka cluster topic uuid
 ```

@@ -126,5 +126,5 @@ resource "ionoscloud_inmemorydb_replicaset" "example" {
 Resource DBaaS InMemoryDB Replica Set can be imported using the `replicaset_id` and the `location`, separated by `:`, e.g:
 
 ```shell
-terraform import ionoscloud_inmemorydb_replicaset.example {location}:{replicaSet UUID}
+terraform import ionoscloud_inmemorydb_replicaset.example location:replicaSet uuid
 ```

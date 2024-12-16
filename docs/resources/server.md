@@ -310,11 +310,11 @@ resource "ionoscloud_server" "test" {
 Resource Server can be imported using the `resource id` and the `datacenter id`, e.g.. Passing only resource id and datacenter id means that the first nic found linked to the server will be attached to it.
 
 ```shell
-terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}
+terraform import ionoscloud_server.myserver datacenter uuid/server uuid
 ```
 Optionally, you can pass `primary_nic` and `firewallrule_id` so terraform will know to import also the first nic and firewall rule (if it exists on the server):
 ```shell
-terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary nic id}/{firewall rule id}
+terraform import ionoscloud_server.myserver datacenter uuid/server uuid/primary nic id/firewall rule id
 ```
 
 ## Notes

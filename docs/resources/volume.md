@@ -153,5 +153,5 @@ resource "random_password" "volume_image_password" {
 Resource Volume can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_volume.myvolume {datacenter uuid}/{server uuid}/{volume uuid}
+terraform import ionoscloud_volume.myvolume datacenter uuid/server uuid/volume uuid
 ```

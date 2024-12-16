@@ -191,7 +191,7 @@ This will configure flowlog for accepted ingress traffic and will log it into an
 Resource **Nic** can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_nic.mynic {datacenter uuid}/{server uuid}/{nic uuid}
+terraform import ionoscloud_nic.mynic datacenter uuid/server uuid/nic uuid
 ```
 ## Working with load balancers
 Please be aware that when using a NIC in a load balancer, the load balancer will

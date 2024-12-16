@@ -142,5 +142,5 @@ resource "ionoscloud_mongo_user" "importeduser" {
 ```
 Then you can import the user using the following command:
 ```shell
-terraform import ionoscloud_mongo_user.mycluser {clusterId}/{username}
+terraform import ionoscloud_mongo_user.mycluser clusterid/username
 ```

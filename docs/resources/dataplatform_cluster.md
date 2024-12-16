@@ -65,5 +65,5 @@ resource "ionoscloud_dataplatform_cluster" "example" {
 Resource Dataplatform Cluster can be imported using the `cluster_id`, e.g.
 
 ```shell
-terraform import ionoscloud_dataplatform_cluster.mycluser {cluster uuid}
+terraform import ionoscloud_dataplatform_cluster.mycluser cluster uuid
 ```
