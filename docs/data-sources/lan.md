@@ -18,16 +18,16 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_lan" "example" {
-  datacenter_id = <datacenter_id>
-  id			= <lan_id>
+  datacenter_id = "datacenter_id"
+  id			= "lan_id"
 }
 ```
 
 ### By Name
 ```hcl
 data "ionoscloud_lan" "example" {
-  datacenter_id = <datacenter_id>
-  name			= <Lan Example>
+  datacenter_id = "datacenter_id"
+  name			= "Lan Example"
 }
 ```
 

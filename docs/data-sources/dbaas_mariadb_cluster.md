@@ -16,7 +16,7 @@ The **DBaaS MariaDB Cluster data source** can be used to search for and return a
 ### By ID 
 ```hcl
 data "ionoscloud_mariadb_cluster" "example" {
-  id       = <cluster_id>
+  id       = "cluster_id"
   location = "de/txl"
 }
 ```

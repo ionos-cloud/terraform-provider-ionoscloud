@@ -20,9 +20,9 @@ When this happens, please refine your search string so that it is specific enoug
 
 ```hcl
 data "ionoscloud_vpn_ipsec_tunnel" "example" {
-  id = <tunnel_id>
-  gateway_id = <gateway_id>
-  location = <gateway_location>
+  id = "tunnel_id"
+  gateway_id = "gateway_id"
+  location = "gateway_location"
 }
 ```
 
@@ -34,8 +34,8 @@ this data source is called.
 ```hcl
 data "ionoscloud_vpn_ipsec_gateway" "example" {
   name     = "ipsec-tunnel"
-  gateway_id = <gateway_id>
-  location = <gateway_location>
+  gateway_id = "gateway_id"
+  location = "gateway_location"
 }
 ```
 

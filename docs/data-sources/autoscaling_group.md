@@ -16,7 +16,7 @@ The autoscaling group data source can be used to search for and return an existi
 ### By Id
 ```hcl
 data "ionoscloud_autoscaling_group" "autoscaling_group" {
-  id = <autoscaling_group_uuid>
+  id = "autoscaling_group_uuid"
 }
 ```
 

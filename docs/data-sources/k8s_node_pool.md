@@ -18,8 +18,8 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_k8s_node_pool" "example" {
-  id                = <k8s_nodepool_id>
-  k8s_cluster_id 	= <k8s_cluster_id>
+  id                = "k8s_nodepool_id"
+  k8s_cluster_id 	= "k8s_cluster_id"
 }
 ```
 
@@ -27,7 +27,7 @@ data "ionoscloud_k8s_node_pool" "example" {
 ```hcl
 data "ionoscloud_k8s_node_pool" "example" {
   name              = "k8s NodePool Example"
-  k8s_cluster_id 	= <k8s_cluster_id>
+  k8s_cluster_id 	= "k8s_cluster_id"
 }
 ```
 

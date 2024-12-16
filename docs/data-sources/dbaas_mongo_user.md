@@ -18,8 +18,8 @@ When this happens, please refine your search string so that it is specific enoug
 ### By display_name
 ```hcl
 data "ionoscloud_mongo_user" "example" {
-  cluster_id	= <cluster_id>
-  display_name	= <display_name>
+  cluster_id	= "cluster_id"
+  display_name	= "display_name"
 }
 ```
 

@@ -17,7 +17,7 @@ When this happens, please refine your search string so that it is specific enoug
 
 ```hcl
 data "ionoscloud_pg_backups" "example" {
-	cluster_id = <cluster_id>
+	cluster_id = "cluster_id"
 }
 ```
 

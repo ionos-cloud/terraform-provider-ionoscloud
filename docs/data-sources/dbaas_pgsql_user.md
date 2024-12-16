@@ -15,8 +15,8 @@ The **PgSql User data source** can be used to search for and return an existing 
 
 ```hcl
 data "ionoscloud_pg_user" "example" {
-   cluster_id = <cluster_id>
-   username   = <username>
+   cluster_id = "cluster_id"
+   username   = "username"
 }
 ```
 

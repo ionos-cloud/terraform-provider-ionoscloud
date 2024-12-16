@@ -130,5 +130,5 @@ resource "ionoscloud_logging_pipeline" "example" {
 The resource can be imported using the `location` and `pipeline_id`, for example:
 
 ```shell
-terraform import ionoscloud_logging_pipeline.example {location}:{pipeline_id}
+terraform import ionoscloud_logging_pipeline.example location:pipeline_id
 ```

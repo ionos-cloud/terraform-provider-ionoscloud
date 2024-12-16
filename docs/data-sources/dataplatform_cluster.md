@@ -18,7 +18,7 @@ When this happens, please refine your search and make sure that your resources h
 ### By ID
 ```hcl
 data "ionoscloud_dataplatform_cluster" "example" {
-  id	= <cluster_id>
+  id	= "cluster_id"
 }
 ```
 

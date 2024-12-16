@@ -18,19 +18,19 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_firewall" "example" {
-  datacenter_id = <datacenter_id>
-  server_id     = <server_id>
-  nic_id        = <nic_id>
-  id            = <firewall_id>
+  datacenter_id = "datacenter_id"
+  server_id     = "server_id"
+  nic_id        = "nic_id"
+  id            = "firewall_id"
 }
 ```
 
 ### By Name
 ```hcl
 data "ionoscloud_firewall" "example" {
-  datacenter_id   = <datacenter_id>
-  server_id       = <server_id>
-  nic_id          = <nic_id>
+  datacenter_id   = "datacenter_id"
+  server_id       = "server_id"
+  nic_id          = "nic_id"
   name            = "test_ds_firewall_rule"
 }
 ```

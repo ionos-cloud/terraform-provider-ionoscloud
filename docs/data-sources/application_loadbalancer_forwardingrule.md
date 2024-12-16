@@ -21,7 +21,7 @@ When this happens, please refine your search and make sure that your resources h
 data "ionoscloud_application_loadbalancer_forwardingrule" "example" {
   datacenter_id = ionoscloud_datacenter.example.id
   application_loadbalancer_id = ionoscloud_application_loadbalancer.example.id
-  id    		= <alb_fwr_id>
+  id    		= "alb_fwr_id"
 }
 ```
 

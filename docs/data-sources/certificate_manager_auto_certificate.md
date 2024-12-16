@@ -19,8 +19,8 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_auto_certificate" "example" {
-  id			= <auto_certificate_id>
-  location      = <auto_certificate_location>
+  id			= "auto_certificate_id"
+  location      = "auto_certificate_location"
 }
 ```
 
@@ -28,7 +28,7 @@ data "ionoscloud_auto_certificate" "example" {
 ```hcl
 data "ionoscloud_auto_certificate" "example" {
   name			= "AutoCertificate Name Example"
-  location      = <auto_certificate_location>
+  location      = "auto_certificate_location"
 }
 ```
 

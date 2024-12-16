@@ -20,8 +20,8 @@ When this happens, please refine your search string so that it is specific enoug
 
 ```hcl
 data "ionoscloud_apigateway_route" "example" {
-  id = <your_apigateway_route_id>
-  gateway_id = <your_gateway_id>
+  id = "your_apigateway_route_id"
+  gateway_id = "your_gateway_id"
 }
 ```
 
@@ -33,7 +33,7 @@ this data source is called.
 ```hcl
 data "ionoscloud_apigateway_route" "example" {
   name       = "apigateway-route"
-  gateway_id = <your_gateway_id>
+  gateway_id = "your_gateway_id"
 }
 ```
 

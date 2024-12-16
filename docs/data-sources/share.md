@@ -18,9 +18,9 @@ When this happens, please refine your search string so that it is specific enoug
 
 ```hcl
 data "ionoscloud_share" "example" {
-  group_id      = <group_id>
-  resource_id   = <resource_id>
-  id			= <share_id>
+  group_id      = "group_id"
+  resource_id   = "resource_id"
+  id			= "share_id"
 }
 ```
 

@@ -86,18 +86,18 @@ resource "random_password" "server_image_password" {
 of creation, for example:
 ```example
 resource "ionoscloud_ipfailover" "firstexample" {
-  datacenter_id         = <datacenter ID>
-  lan_id                = <LAN ID>
-  ip                    = <IP address>
-  nicuuid               = <NIC UUID>
+  datacenter_id         = "datacenter ID"
+  lan_id                = "LAN ID"
+  ip                    = "IP address"
+  nicuuid               = "NIC UUID"
 }
 
  resource "ionoscloud_ipfailover" "secondexample" {
    depends_on = [ ionoscloud_ipfailover.firstexample ]
-   datacenter_id         = <datacenter ID>
-   lan_id                = <LAN ID>
-   ip                    = <IP address>
-   nicuuid               = <NIC UUID>
+   datacenter_id         = "datacenter ID"
+   lan_id                = "LAN ID"
+   ip                    = "IP address"
+   nicuuid               = "NIC UUID"
  }
 ```
 2. Define the resources as presented above, but without using the `depends_on` meta-argument and run the apply command using

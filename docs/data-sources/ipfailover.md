@@ -17,8 +17,8 @@ If a single match is found, it will be returned. If your search results in multi
 
 ```hcl
 data "ionoscloud_ipfailover" "example" {
-  datacenter_id   = <datacenter_id>
-  id              = <lan_id>
+  datacenter_id   = "datacenter_id"
+  id              = "lan_id"
 }
 ```
 

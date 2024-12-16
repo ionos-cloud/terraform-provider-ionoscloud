@@ -18,14 +18,14 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_mongo_cluster" "example" {
-  id	= <cluster_id>
+  id	= "cluster_id"
 }
 ```
 ### By display_name
 
 ```hcl
 data "ionoscloud_mongo_cluster" "example" {
-  display_name	= <display_name>
+  display_name	= "display_name"
 }
 ```
 

@@ -19,7 +19,7 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID 
 ```hcl
 data "ionoscloud_resource" "example" {
-  resource_id   = <resource_id>
+  resource_id   = "resource_id"
 }
 ```
 
@@ -34,7 +34,7 @@ data "ionoscloud_resource" "example" {
 ```hcl
 data "ionoscloud_resource" "example" {
   resource_type = "datacenter"
-  resource_id   = <resource_id>
+  resource_id   = "resource_id"
 }
 ```
 

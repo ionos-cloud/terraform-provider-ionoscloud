@@ -1,3 +1,7 @@
+## 6.6.9
+### Docs
+- Replace < and > with " in the docs
+
 ## 6.6.8
 ### Features
 - Add `auto_scaling` attribute to `ionoscloud_dataplatform_node_pool` resource.

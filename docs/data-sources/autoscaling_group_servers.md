@@ -15,7 +15,7 @@ The autoscaling group servers data source can be used to search for and return e
 
 ```hcl
 data "ionoscloud_autoscaling_group_servers" "autoscaling_group_servers" {
-	group_id = <autoscaling_group_uuid>
+	group_id = "autoscaling_group_uuid"
 }
 ```
 

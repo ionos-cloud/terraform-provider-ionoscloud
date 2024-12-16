@@ -16,16 +16,16 @@ Returns information about clusters of Network File Storage (NFS) on IonosCloud.
 ## By ID
 ```hcl
 data "ionoscloud_nfs_cluster" "example" {
-  location = <location>
-  id = <cluster-id>
+  location = "location"
+  id = "cluster-id"
 }
 ```
 
 ## By Name
 ```hcl
 data "ionoscloud_nfs_cluster" "example" {
-  location = <location>
-  name = <partial-name>
+  location = "location"
+  name = "partial-name"
   partial_match = true
 }
 

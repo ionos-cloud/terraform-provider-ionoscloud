@@ -18,7 +18,7 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_group" "example" {
-  id			= <group_id>
+  id			= "group_id"
 }
 ```
 

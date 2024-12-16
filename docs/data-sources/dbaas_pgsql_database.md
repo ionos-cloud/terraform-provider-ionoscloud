@@ -15,8 +15,8 @@ The **PgSql Database data source** can be used to search for and return an exist
 
 ```hcl
 data "ionoscloud_pg_database" "example" {
-   cluster_id = <cluster_id>
-   name   = <databasename>
+   cluster_id = "cluster_id"
+   name   = "databasename"
 }
 ```
 

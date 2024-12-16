@@ -20,7 +20,7 @@ When this happens, please refine your search string so that it is specific enoug
 
 ```
 data "ionoscloud_apigateway" "example" {
-    id = <your_apigateway_id>
+    id = "your_apigateway_id"
 }
 ```
 

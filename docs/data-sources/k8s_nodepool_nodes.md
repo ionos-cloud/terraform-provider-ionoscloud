@@ -15,8 +15,8 @@ The **k8s Node Pool Nodes** data source can be used to search for and return a l
 ### By IDs
 ```hcl
 data "ionoscloud_k8s_node_pool_nodes" "example" {
-  node_pool_id      = <k8s_nodepool_id>
-  k8s_cluster_id 	= <k8s_cluster_id>
+  node_pool_id      = "k8s_nodepool_id"
+  k8s_cluster_id 	= "k8s_cluster_id"
 }
 ```
 

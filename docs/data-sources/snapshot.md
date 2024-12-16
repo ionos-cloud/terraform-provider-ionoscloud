@@ -16,7 +16,7 @@ The **Snapshot data source** can be used to search for and return an existing sn
 ### By ID
 ```hcl
 data "ionoscloud_snapshot" "example" {
-  id = <snapshot_id>
+  id = "snapshot_id"
 }
 ```
 

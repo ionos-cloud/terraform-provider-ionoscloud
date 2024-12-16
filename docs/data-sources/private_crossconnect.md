@@ -18,7 +18,7 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_private_crossconnect" "example" {
-  id       = <private_crossconnect_id>
+  id       = "private_crossconnect_id"
 }
 ```
 

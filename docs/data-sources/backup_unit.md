@@ -19,7 +19,7 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_backup_unit" "example" {
-  id			= <backup_unit_id>
+  id			= "backup_unit_id"
 }
 ```
 

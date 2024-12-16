@@ -21,7 +21,7 @@ When this happens, please refine your search and make sure that your resources h
 
 ```hcl
 data "ionoscloud_dns_zone" "example" {
-  id = <zone_id>
+  id = "zone_id"
 }
 ```
 

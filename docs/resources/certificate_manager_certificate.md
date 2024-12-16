@@ -27,7 +27,7 @@ resource "ionoscloud_certificate" "cert" {
 ```hcl
 resource "ionoscloud_certificate" "cert" {
   name = "add_name_here"
-  certificate = <<EOT
+  certificate = "<EOT
 -----BEGIN CERTIFICATE-----
 cert_body_here
 -----END CERTIFICATE-----

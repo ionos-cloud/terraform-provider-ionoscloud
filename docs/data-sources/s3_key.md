@@ -18,8 +18,8 @@ When this happens, please refine your search string so that it is specific enoug
 
 ```hcl
 data "ionoscloud_s3_key" "example" {
-  id         = <key_id>
-  user_id    = <user-uuid>
+  id         = "key_id"
+  user_id    = "user-uuid"
 }
 ```
 
