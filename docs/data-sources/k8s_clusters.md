@@ -1,5 +1,5 @@
 ---
-subcategory: "Compute Engine"
+subcategory: "Managed Kubernetes"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_k8s_clusters"
 sidebar_current: "docs-ionoscloud-datasource-clusters"
@@ -7,7 +7,7 @@ description: |-
   Retrieves a list of Ionos Cloud Kubernetes Clusters
 ---
 
-# ionoscloud_servers
+# ionoscloud_k8s_clusters
 
 The **k8s_clusters data source** can be used to search for and return existing kubernetes clusters based on filters used.
 
