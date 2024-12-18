@@ -147,7 +147,7 @@ You can read more details about the `ignore_changes` attribute [here](https://de
 A Kubernetes Node Pool resource can be imported using its Kubernetes cluster's uuid as well as its own UUID, both of which you can retrieve from the cloud API: `resource id`, e.g.:
 
 ```shell
-terraform import ionoscloud_k8s_node_pool.demo {k8s_cluster_uuid}/{k8s_nodepool_id}
+terraform import ionoscloud_k8s_node_pool.demo k8s_cluster_uuid/k8s_nodepool_id
 ```
 
 This can be helpful when you want to import kubernetes node pools which you have already created manually or using other means, outside of terraform, towards the goal of managing them via Terraform

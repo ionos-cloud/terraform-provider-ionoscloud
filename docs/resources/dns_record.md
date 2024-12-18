@@ -54,5 +54,5 @@ resource "ionoscloud_dns_record" "example" {
 The resource can be imported using the `zone_id` and the `record_id`, for example:
 
 ```shell
-terraform import ionoscloud_dns_record.example {zone_id}/{record_id}
+terraform import ionoscloud_dns_record.example zone_id/record_id
 ```

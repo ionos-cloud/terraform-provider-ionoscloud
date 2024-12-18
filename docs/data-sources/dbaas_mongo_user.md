@@ -7,7 +7,7 @@ description: |-
   Creates and manages DbaaS MongoDB users.
 ---
 
-# ionoscloud\_mongo_user
+# ionoscloud_mongo_user
 
 The **DbaaS Mongo User data source** can be used to search for and return an existing DbaaS MongoDB User.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
@@ -18,8 +18,8 @@ When this happens, please refine your search string so that it is specific enoug
 ### By display_name
 ```hcl
 data "ionoscloud_mongo_user" "example" {
-  cluster_id	= <cluster_id>
-  display_name	= <display_name>
+  cluster_id	= "cluster_id"
+  display_name	= "display_name"
 }
 ```
 
@@ -40,5 +40,5 @@ data "ionoscloud_mongo_user" "example" {
 Resource DbaaS MongoDb User can be imported using the `cluster_id`, the `database` and the `username` e.g.
 
 ```shell
-terraform import ionoscloud_mongo_cluster.mycluser {cluster uuid} {database} {username}
+terraform import ionoscloud_mongo_cluster.mycluser cluster uuid database username
 ```

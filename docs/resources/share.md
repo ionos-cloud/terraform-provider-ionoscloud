@@ -7,7 +7,7 @@ description: |-
   Creates and manages share objects.
 ---
 
-# ionoscloud\_share
+# ionoscloud_share
 
 Manages **Shares** and list shares permissions granted to the group members for each shared resource.
 
@@ -59,5 +59,5 @@ attributes inside the `ionoscloud_share` resource to enforce the sequential crea
 Resource Share can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_share.myshare {group uuid}/{resource uuid}
+terraform import ionoscloud_share.myshare group uuid/resource uuid
 ```

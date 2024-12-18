@@ -7,7 +7,7 @@ description: |-
   Get information on DbaaS PgSql Backups
 ---
 
-# ionoscloud\_pg_backups
+# ionoscloud_pg_backups
 
 The **DbaaS Postgres Backups data source** can be used to search for and return existing DbaaS Postgres Backups for a specific Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
@@ -17,7 +17,7 @@ When this happens, please refine your search string so that it is specific enoug
 
 ```hcl
 data "ionoscloud_pg_backups" "example" {
-	cluster_id = <cluster_id>
+	cluster_id = "cluster_id"
 }
 ```
 

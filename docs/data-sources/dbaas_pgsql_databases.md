@@ -7,7 +7,7 @@ description: |-
   Get information on DBaaS PgSql Databases.
 ---
 
-# ionoscloud\_pg_databases
+# ionoscloud_pg_databases
 
 The **PgSql Databases data source** can be used to search for and return multiple existing PgSql databases.
 
@@ -16,15 +16,15 @@ The **PgSql Databases data source** can be used to search for and return multipl
 ### All databases from a specific cluster
 ```hcl
 data "ionoscloud_pg_databases" "example" {
-   cluster_id = <cluster_id>
+   cluster_id = "cluster_id"
 }
 ```
 
 ### Filter by owner
 ```hcl
 data "ionoscloud_pg_databases" "example" {
-   cluster_id = <cluster_id>
-   owner = <owner>
+   cluster_id = "cluster_id"
+   owner = "owner"
 }
 ```
 

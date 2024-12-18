@@ -88,7 +88,7 @@ The following arguments are supported:
 A Kubernetes Cluster resource can be imported using its `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_k8s_cluster.demo {k8s_cluster uuid}
+terraform import ionoscloud_k8s_cluster.demo k8s_cluster uuid
 ```
 
 This can be helpful when you want to import kubernetes clusters which you have already created manually or using other means, outside of terraform.

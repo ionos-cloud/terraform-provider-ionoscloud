@@ -155,7 +155,7 @@ resource "random_password" "server_image_password" {
 Resource Server can be imported using the `resource id` and the `datacenter id`, e.g.
 
 ```shell
-terraform import ionoscloud_cube_server.myserver {datacenter uuid}/{server uuid}
+terraform import ionoscloud_cube_server.myserver datacenter uuid/server uuid
 ```
 
 ## Notes

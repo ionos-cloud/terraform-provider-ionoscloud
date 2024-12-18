@@ -54,8 +54,8 @@ provider "ionoscloud" {
 #  contract_number = "contract_number_here"
 #  optional, does not need to be configured in most cases
 #  endpoint = "custom_cloud_api_url"
-#  s3_access_key     =  <your_access_key>
-#  s3_secret_key     =  <your_secret_key>
+#  s3_access_key     =  "your_access_key"
+#  s3_secret_key     =  "your_secret_key"
 ```
 
 ⚠️ **Note:** It's NOT usually necessary to set `endpoint` field. The SDKs the terraform uses know how to route requests to the correct endpoints in the API. 
@@ -94,9 +94,9 @@ provider "ionoscloud" {
   #  contract_number = "contract_number_here"
   #  optional, does not need to be configured in most cases
   #  endpoint = "custom_cloud_api_url"
-  #  s3_access_key     =  <your_access_key>
-  #  s3_secret_key     =  <your_secret_key>
-  #  s3_region     =  <your_bucket_region>
+  #  s3_access_key     =  "your_access_key"
+  #  s3_secret_key     =  "your_secret_key"
+  #  s3_region     =  "your_bucket_region"
 }
 
 resource "ionoscloud_datacenter" "main" {

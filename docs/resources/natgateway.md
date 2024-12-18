@@ -59,5 +59,5 @@ resource "ionoscloud_natgateway" "example" {
 A Nat Gateway resource can be imported using its `resource id` and the `datacenter id`, e.g.
 
 ```shell
-terraform import ionoscloud_natgateway.my_natgateway {datacenter uuid}/{nat gateway uuid}
+terraform import ionoscloud_natgateway.my_natgateway datacenter uuid/nat gateway uuid
 ```

@@ -7,7 +7,7 @@ description: |-
   Get information on a Ionos Cloud Groups
 ---
 
-# ionoscloud\_group
+# ionoscloud_group
 
 The **Group data source** can be used to search for and return existing groups.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. 
@@ -18,7 +18,7 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_group" "example" {
-  id			= <group_id>
+  id			= "group_id"
 }
 ```
 

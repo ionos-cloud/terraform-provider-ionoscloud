@@ -20,7 +20,7 @@ When this happens, please refine your search and make sure that your resources h
 ```hcl
 data "ionoscloud_application_loadbalancer" "example" {
   datacenter_id = ionoscloud_datacenter.example.id
-  id            = <alb_id>
+  id            = "alb_id"
 }
 ```
 

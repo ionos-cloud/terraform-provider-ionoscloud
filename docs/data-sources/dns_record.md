@@ -21,8 +21,8 @@ When this happens, please refine your search and make sure that your resources h
 
 ```hcl
 data "ionoscloud_dns_record" "example" {
-  id = <record_id>
-  zone_id = <zone_id>
+  id = "record_id"
+  zone_id = "zone_id"
 }
 ```
 
@@ -30,7 +30,7 @@ data "ionoscloud_dns_record" "example" {
 ```hcl
 data "ionoscloud_dns_record" "example" {
   name = "recordexample"
-  zone_id = <zone_id>
+  zone_id = "zone_id"
 }
 ```
 
@@ -39,7 +39,7 @@ data "ionoscloud_dns_record" "example" {
 data "ionoscloud_dns_record" "example" {
   name = "record"
   partial_match = true
-  zone_id = <zone_id>
+  zone_id = "zone_id"
 }
 ```
 

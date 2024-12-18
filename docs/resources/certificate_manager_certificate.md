@@ -51,5 +51,5 @@ The following arguments are supported:
 Resource certificate can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_certificate.mycert {certificate uuid}
+terraform import ionoscloud_certificate.mycert certificate uuid
 ```

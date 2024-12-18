@@ -1,3 +1,8 @@
+## 6.6.9
+### Docs
+- Replace < and > with " in the docs
+- Remove { and } from terraform imports
+- Replace \_ with _ in resource names
 ## 6.6.8
 ### Features
 - Add `auto_scaling` attribute to `ionoscloud_dataplatform_node_pool` resource.
@@ -511,7 +516,7 @@ Please contact your sales representative or support for more information.
  - Defining a separate firewall rule for server should not set firewall_id inside server resource, as it moves the firewall resource inside the server on re-apply
  - Fixes creating share resource edit and share privileges mix up
  - `viable_node_pool_versions`  in k8s cluster is no longer optional, is only computed
- - Allow server import with nic and firewallId : `terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary nic id}/{firewall rule id}`
+ - Allow server import with nic and firewallId : `terraform import ionoscloud_server.myserver datacenter uuid/server uuid/primary nic id/firewall rule id`
  - Mongo tests update mongo version
  - Change the way in which we set the NIC data
  - Allow server import with nic and firewall ids

@@ -7,7 +7,7 @@ description: |-
   Get information on DbaaS PgSql Versions
 ---
 
-# ionoscloud\_pg_versions
+# ionoscloud_pg_versions
 
 The **DbaaS Postgres Versions data source** can be used to search for and retrieve list of available postgres versions for a specific cluster or for all clusters.
 
@@ -16,7 +16,7 @@ The **DbaaS Postgres Versions data source** can be used to search for and retrie
 ### Retrieve list of postgres versions for a specific cluster
 ```hcl
 data "ionoscloud_pg_versions" "example" {
-	cluster_id = <cluster_id>
+	cluster_id = "cluster_id"
 }
 ```
 

@@ -7,7 +7,7 @@ description: |-
   Creates and manages IP Block objects.
 ---
 
-# ionoscloud\_ipblock
+# ionoscloud_ipblock
 
 Manages **IP Blocks** on IonosCloud. IP Blocks contain reserved public IP addresses that can be assigned servers or other resources.
 
@@ -43,5 +43,5 @@ resource "ionoscloud_ipblock" "example" {
 Resource Ipblock can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_ipblock.myipblock {ipblock uuid}
+terraform import ionoscloud_ipblock.myipblock ipblock uuid
 ```

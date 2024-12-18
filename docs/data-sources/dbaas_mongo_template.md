@@ -18,14 +18,14 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_mongo_template" "example" {
-  id = <template_id>
+  id = "template_id"
 }
 ```
 ### By name
 
 ```hcl
 data "ionoscloud_mongo_template" "example" {
-  name = <name>
+  name = "name"
 }
 ```
 
@@ -33,7 +33,7 @@ data "ionoscloud_mongo_template" "example" {
 
 ```hcl
 data "ionoscloud_mongo_template" "example" {
-  name = <name>
+  name = "name"
   partial_match = true
 }
 ```

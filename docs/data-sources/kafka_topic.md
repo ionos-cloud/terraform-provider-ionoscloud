@@ -20,9 +20,9 @@ When this happens, please refine your search string so that it is specific enoug
 
 ```hcl
 data "ionoscloud_kafka_cluster_topic" "example" {
-  id = <your_kafka_cluster_topic_id>
-  cluster_id = <your_kafka_cluster_id>
-  location = <your_kafka_cluster_location>
+  id = "your_kafka_cluster_topic_id"
+  cluster_id = "your_kafka_cluster_id"
+  location = "your_kafka_cluster_location"
 }
 ```
 
@@ -34,8 +34,8 @@ this data source is called.
 ```hcl
 data "ionoscloud_kafka_cluster_topic" "example" {
   name       = "kafka-cluster-topic"
-  cluster_id = <your_kafka_cluster_id>
-  location = <location_of_kafka_cluster>
+  cluster_id = "your_kafka_cluster_id"
+  location = "location_of_kafka_cluster"
 }
 ```
 

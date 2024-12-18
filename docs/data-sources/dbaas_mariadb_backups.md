@@ -7,7 +7,7 @@ description: |-
   Get information on DBaaS MariaDB Backups
 ---
 
-# ionoscloud\_mariadb_backups
+# ionoscloud_mariadb_backups
 
 The **DBaaS MariaDB Backups data source** can be used to search for and return existing DBaaS MariaDB Backups for a specific cluster.
 
@@ -16,7 +16,7 @@ The **DBaaS MariaDB Backups data source** can be used to search for and return e
 ### Get all backups for a specific cluster
 ```hcl
 data "ionoscloud_mariadb_backups" "example" { 
-    cluster_id = <cluster_id>
+    cluster_id = "cluster_id"
     location   = "de/txl"
 }
 ```
@@ -24,7 +24,7 @@ data "ionoscloud_mariadb_backups" "example" {
 ### Get a specific backup
 ```hcl
 data "ionoscloud_mariadb_backups" "example" {
-    backup_id = <backup_id>
+    backup_id = "backup_id"
     location   = "de/txl"
 }
 ```

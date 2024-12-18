@@ -19,7 +19,7 @@ When this happens, please refine your search and make sure that your resources h
 ### By Id
 ```hcl
 data "ionoscloud_container_registry" "example" {
-  id  = <registry_id>
+  id  = "registry_id"
 }
 ```
 

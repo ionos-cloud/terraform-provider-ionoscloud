@@ -7,7 +7,7 @@ description: |-
   Get information on a Ionos Cloud Lans
 ---
 
-# ionoscloud\_lan
+# ionoscloud_lan
 
 The **LAN data source** can be used to search for and return existing lans.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
@@ -18,16 +18,16 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_lan" "example" {
-  datacenter_id = <datacenter_id>
-  id			= <lan_id>
+  datacenter_id = "datacenter_id"
+  id			= "lan_id"
 }
 ```
 
 ### By Name
 ```hcl
 data "ionoscloud_lan" "example" {
-  datacenter_id = <datacenter_id>
-  name			= <Lan Example>
+  datacenter_id = "datacenter_id"
+  name			= "Lan Example"
 }
 ```
 

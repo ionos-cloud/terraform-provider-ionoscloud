@@ -7,7 +7,7 @@ description: |-
   Get information on a IonosCloud Ip Block
 ---
 
-# ionoscloud\_ipblock
+# ionoscloud_ipblock
 
 The **IP Block data source** can be used to search for and return an existing Ip Block.
 You can provide a string for the id, the name or the location parameters which will be compared with the provisioned Ip Blocks.
@@ -19,7 +19,7 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_ipblock" "example" {
-  id = <ipblock_id>
+  id = "ipblock_id"
 }
 ``` 
 

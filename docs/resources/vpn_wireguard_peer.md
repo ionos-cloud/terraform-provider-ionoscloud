@@ -54,5 +54,5 @@ In addition to all arguments above, the following attributes are exported:
 WireGuard Peers can be imported using the `gateway_id` and `id`, e.g.,
 
 ```shell
-terraform import ionoscloud_vpn_wireguard_peer.example <gateway_id>:<peer_id>
+terraform import ionoscloud_vpn_wireguard_peer.example gateway_id:peer_id
 ```

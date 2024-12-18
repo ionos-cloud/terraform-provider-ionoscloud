@@ -7,7 +7,7 @@ description: |-
   Get information on a Ionos Cloud Crossconnects
 ---
 
-# ionoscloud\_private_crossconnect
+# ionoscloud_private_crossconnect
 
 The **Cross Connect data source** can be used to search for and return existing cross connects.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
@@ -18,7 +18,7 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_private_crossconnect" "example" {
-  id       = <private_crossconnect_id>
+  id       = "private_crossconnect_id"
 }
 ```
 

@@ -7,7 +7,7 @@ description: |-
   Get information on a IonosCloud Resource
 ---
 
-# ionoscloud\_resource
+# ionoscloud_resource
 
 The **Resource data source** can be used to search for and return any existing IonosCloud resource and optionally their group associations.
 You can provide a string for the resource type (datacenter,image,snapshot,ipblock) and/or resource id parameters which will be queries against available resources.
@@ -19,7 +19,7 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID 
 ```hcl
 data "ionoscloud_resource" "example" {
-  resource_id   = <resource_id>
+  resource_id   = "resource_id"
 }
 ```
 
@@ -34,7 +34,7 @@ data "ionoscloud_resource" "example" {
 ```hcl
 data "ionoscloud_resource" "example" {
   resource_type = "datacenter"
-  resource_id   = <resource_id>
+  resource_id   = "resource_id"
 }
 ```
 

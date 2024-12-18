@@ -16,18 +16,18 @@ Returns information about shares of Network File Storage (NFS) on IonosCloud.
 ## By ID
 ```hcl
 data "ionoscloud_nfs_share" "example" {
-  location = <location>
-  cluster_id = <cluster-id>
-  id = <share-id>
+  location = "location"
+  cluster_id = "cluster-id"
+  id = "share-id"
 }
 ```
 
 ## By Name
 ```hcl
 data "ionoscloud_nfs_share" "example" {
-  location = <location>
-  cluster_id = <cluster-id>
-  name = <partial-name>
+  location = "location"
+  cluster_id = "cluster-id"
+  name = "partial-name"
   partial_match = true
 }
 

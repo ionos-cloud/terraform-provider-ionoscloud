@@ -7,7 +7,7 @@ description: |-
   Get information on a Dataplatform Node Pool list under a Dataplatform Cluster.
 ---
 
-# ionoscloud\_dataplatform_node_pools
+# ionoscloud_dataplatform_node_pools
 
 The **Dataplatform Node Pools Data Source** can be used to search for and return a list of existing Dataplatform Node Pools under a Dataplatform Cluster.
 
@@ -16,7 +16,7 @@ The **Dataplatform Node Pools Data Source** can be used to search for and return
 ### All Node Pools under a Cluster ID
 ```hcl
 data "ionoscloud_dataplatform_node_pools" "example" {
-  cluster_id  = <cluster_id>
+  cluster_id  = "cluster_id"
 }
 ```
 
@@ -24,7 +24,7 @@ data "ionoscloud_dataplatform_node_pools" "example" {
 
 ```hcl
 data "ionoscloud_dataplatform_node_pools" "example" {
-  cluster_id    = <cluster_id>
+  cluster_id    = "cluster_id"
   name      	= "Dataplatform_Node_Pool_Example"
 }
 ```
@@ -33,7 +33,7 @@ data "ionoscloud_dataplatform_node_pools" "example" {
 
 ```hcl
 data "ionoscloud_dataplatform_node_pools" "example" {
-  cluster_id    = <cluster_id>
+  cluster_id    = "cluster_id"
   name    	    = "_Example"
   partial_match = true
 }

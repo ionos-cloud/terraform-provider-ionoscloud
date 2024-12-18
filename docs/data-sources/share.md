@@ -7,7 +7,7 @@ description: |-
   Get Information on share permission objects
 ---
 
-# ionoscloud\_share
+# ionoscloud_share
 
 The **Share data source** can be used to search for and return an existing share object.
 You need to provide the group_id and resource_id to get the group resources for the shared resource.
@@ -18,9 +18,9 @@ When this happens, please refine your search string so that it is specific enoug
 
 ```hcl
 data "ionoscloud_share" "example" {
-  group_id      = <group_id>
-  resource_id   = <resource_id>
-  id			= <share_id>
+  group_id      = "group_id"
+  resource_id   = "resource_id"
+  id			= "share_id"
 }
 ```
 

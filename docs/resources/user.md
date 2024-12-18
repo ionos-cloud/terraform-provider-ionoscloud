@@ -7,7 +7,7 @@ description: |-
   Creates and manages user objects.
 ---
 
-# ionoscloud\_user
+# ionoscloud_user
 
 Manages **Users** and list users and groups associated with that user.
 
@@ -76,5 +76,5 @@ resource "random_password" "user_password" {
 Resource User can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_user.myuser {user uuid}
+terraform import ionoscloud_user.myuser user uuid
 ```

@@ -7,7 +7,7 @@ description: |-
   Get information on Managed Dataplatform API versions.
 ---
 
-# ionoscloud\_dataplatform_versions
+# ionoscloud_dataplatform_versions
 
 The **Dataplatform Versions Data Source** can be used to search for and retrieve list of available Managed Dataplatform API versions.
 

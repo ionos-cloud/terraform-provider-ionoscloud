@@ -20,7 +20,7 @@ If a single match is found, it will be returned. If your search results in multi
 ```hcl
 data "ionoscloud_logging_pipeline" "example" {
   location = "de/txl"
-  id = <pipeline_id>
+  id = "pipeline_id"
 }
 ```
 

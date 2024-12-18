@@ -110,5 +110,5 @@ resource "random_password" "cluster_password" {
 Resource DBaaS MariaDB Cluster can be imported using the `cluster_id` and the `location`, separated by `:`, e.g.
 
 ```shell
-terraform import ionoscloud_mariadb_cluster.mycluster {location}:{cluster UUID}
+terraform import ionoscloud_mariadb_cluster.mycluster location:cluster uuid
 ```

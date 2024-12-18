@@ -7,7 +7,7 @@ description: |-
   Get information on a Ionos Cloud Users
 ---
 
-# ionoscloud\_user
+# ionoscloud_user
 
 The **User data source** can be used to search for and return existing users.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
@@ -18,7 +18,7 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_user" "example" {
-  id			= <user_id>
+  id			= "user_id"
 }
 ```
 

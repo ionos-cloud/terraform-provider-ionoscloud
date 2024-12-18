@@ -7,7 +7,7 @@ description: |-
   Creates and manages DbaaS Postgres Database objects.
 ---
 
-# ionoscloud\_pg_database
+# ionoscloud_pg_database
 
 Manages a **DbaaS PgSql Database**.
 
@@ -43,5 +43,5 @@ resource "ionoscloud_pg_database" "example" {
 The resource can be imported using the `clusterId` and the `name`, for example:
 
 ```shell
-terraform import ionoscloud_pg_database.example {clusterId}/{name}
+terraform import ionoscloud_pg_database.example clusterid/name
 ```

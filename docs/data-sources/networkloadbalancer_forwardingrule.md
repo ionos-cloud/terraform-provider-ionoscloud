@@ -18,9 +18,9 @@ When this happens, please refine your search string so that it is specific enoug
 ## By ID
 ```hcl
 data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
-    datacenter_id               = <datacenter_id>
-    networkloadbalancer_id      = <networkloadbalancer_id>
-    id  			            = <networkloadbalancer_forwardingrule_id>
+    datacenter_id               = "datacenter_id"
+    networkloadbalancer_id      = "networkloadbalancer_id"
+    id  			            = "networkloadbalancer_forwardingrule_id"
 }
 ```
 
@@ -28,8 +28,8 @@ data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
 ## By Name
 ```hcl
 data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
-    datacenter_id               = <datacenter_id>
-    networkloadbalancer_id      = <networkloadbalancer_id>
+    datacenter_id               = "datacenter_id"
+    networkloadbalancer_id      = "networkloadbalancer_id"
     name                        = "Network Load Balancer Forwarding Rule Example"
 }
 ```

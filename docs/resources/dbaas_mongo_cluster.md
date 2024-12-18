@@ -7,7 +7,7 @@ description: |-
   Creates and manages DbaaS MongoDB Cluster objects.
 ---
 
-# ionoscloud\_mongo_cluster
+# ionoscloud_mongo_cluster
 
 Manages a **DbaaS Mongo Cluster**.
 
@@ -131,5 +131,5 @@ resource "random_password" "cluster_password" {
 Resource DbaaS MongoDb Cluster can be imported using the `cluster_id`, e.g.
 
 ```shell
-terraform import ionoscloud_mongo_cluster.mycluser {cluster uuid}
+terraform import ionoscloud_mongo_cluster.mycluser cluster uuid
 ```

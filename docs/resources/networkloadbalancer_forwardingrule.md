@@ -152,5 +152,5 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
 A Network Load Balancer Forwarding Rule resource can be imported using its `resource id`, the `datacenter id` and the `networkloadbalancer id` e.g.
 
 ```shell
-terraform import ionoscloud_networkloadbalancer_forwardingrule.my_networkloadbalancer_forwardingrule {datacenter uuid}/{networkloadbalancer uuid}/{networkloadbalancer_forwardingrule uuid}
+terraform import ionoscloud_networkloadbalancer_forwardingrule.my_networkloadbalancer_forwardingrule datacenter uuid/networkloadbalancer uuid/networkloadbalancer_forwardingrule uuid
 ```

@@ -58,5 +58,5 @@ The following arguments are supported:
 Resource Container Registry Token can be imported using the `container registry id` and `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_container_registry_token.mycrtoken {container_registry uuid}/{container_registry_token uuid}
+terraform import ionoscloud_container_registry_token.mycrtoken container_registry uuid/container_registry_token uuid
 ```

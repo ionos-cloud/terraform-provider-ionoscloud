@@ -7,7 +7,7 @@ description: |-
   Get information on a IonosCloud Image
 ---
 
-# ionoscloud\_image
+# ionoscloud_image
 
 The **Image data source** can be used to search for and return an existing image which can then be used to provision a server.  
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. 

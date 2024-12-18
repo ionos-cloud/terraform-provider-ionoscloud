@@ -7,7 +7,7 @@ description: |-
   Creates and manages DbaaS Postgres User objects.
 ---
 
-# ionoscloud\_pg_user
+# ionoscloud_pg_user
 
 Manages a **DbaaS PgSql User**.
 
@@ -50,5 +50,5 @@ resource "ionoscloud_pg_user" "example" {
 The resource can be imported using the `clusterId` and the `username`, for example:
 
 ```shell
-terraform import ionoscloud_pg_user.example {clusterId}/{username}
+terraform import ionoscloud_pg_user.example clusterid/username
 ```

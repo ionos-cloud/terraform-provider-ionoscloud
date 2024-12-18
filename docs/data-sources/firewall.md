@@ -7,7 +7,7 @@ description: |-
   Get Information on a IonosCloud Firewall
 ---
 
-# ionoscloud\_firewall
+# ionoscloud_firewall
 
 The **Firewall data source** can be used to search for and return an existing FirewallRules. 
 You can provide a string for either id or name parameters which will be compared with provisioned Firewall Rules.
@@ -18,19 +18,19 @@ When this happens, please refine your search string so that it is specific enoug
 ### By ID
 ```hcl
 data "ionoscloud_firewall" "example" {
-  datacenter_id = <datacenter_id>
-  server_id     = <server_id>
-  nic_id        = <nic_id>
-  id            = <firewall_id>
+  datacenter_id = "datacenter_id"
+  server_id     = "server_id"
+  nic_id        = "nic_id"
+  id            = "firewall_id"
 }
 ```
 
 ### By Name
 ```hcl
 data "ionoscloud_firewall" "example" {
-  datacenter_id   = <datacenter_id>
-  server_id       = <server_id>
-  nic_id          = <nic_id>
+  datacenter_id   = "datacenter_id"
+  server_id       = "server_id"
+  nic_id          = "nic_id"
   name            = "test_ds_firewall_rule"
 }
 ```

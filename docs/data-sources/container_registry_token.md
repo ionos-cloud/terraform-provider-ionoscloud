@@ -20,7 +20,7 @@ When this happens, please refine your search and make sure that your resources h
 ```hcl
 data "ionoscloud_container_registry_token" "example" {
   registry_id = ionoscloud_container_registry.example.id
-  id          = <token_id>
+  id          = "token_id"
 }
 ```
 

@@ -7,7 +7,7 @@ description: |-
   Get information on DBaaS PgSql Database.
 ---
 
-# ionoscloud\_pg_database
+# ionoscloud_pg_database
 
 The **PgSql Database data source** can be used to search for and return an existing PgSql database.
 
@@ -15,8 +15,8 @@ The **PgSql Database data source** can be used to search for and return an exist
 
 ```hcl
 data "ionoscloud_pg_database" "example" {
-   cluster_id = <cluster_id>
-   name   = <databasename>
+   cluster_id = "cluster_id"
+   name   = "databasename"
 }
 ```
 

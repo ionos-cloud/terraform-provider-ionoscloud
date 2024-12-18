@@ -244,5 +244,5 @@ resource "ionoscloud_vpn_ipsec_tunnel" "example" {
 The resource can be imported using the `location`, `gateway_id` and `tunnel_id`, for example:
 
 ```
-terraform import ionoscloud_vpn_ipsec_tunnel.example {location}:{gateway_id}:{tunnel_id}
+terraform import ionoscloud_vpn_ipsec_tunnel.example location:gateway_id:tunnel_id
 ```

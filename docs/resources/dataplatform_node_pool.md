@@ -78,5 +78,5 @@ resource "ionoscloud_dataplatform_node_pool" "example" {
 A Dataplatform Node Pool resource can be imported using its cluster's UUID as well as its own UUID, e.g.:
 
 ```shell
-terraform import ionoscloud_dataplatform_node_pool.mynodepool {dataplatform_cluster_uuid}/{dataplatform_nodepool_id}
+terraform import ionoscloud_dataplatform_node_pool.mynodepool dataplatform_cluster_uuid/dataplatform_nodepool_id
 ```

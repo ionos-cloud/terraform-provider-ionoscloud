@@ -7,7 +7,7 @@ description: |-
   Creates and manages ipfailover objects.
 ---
 
-# ionoscloud\_ipfailover
+# ionoscloud_ipfailover
 
 Manages **IP Failover** groups on IonosCloud.
 
@@ -86,18 +86,18 @@ resource "random_password" "server_image_password" {
 of creation, for example:
 ```example
 resource "ionoscloud_ipfailover" "firstexample" {
-  datacenter_id         = <datacenter ID>
-  lan_id                = <LAN ID>
-  ip                    = <IP address>
-  nicuuid               = <NIC UUID>
+  datacenter_id         = "datacenter ID"
+  lan_id                = "LAN ID"
+  ip                    = "IP address"
+  nicuuid               = "NIC UUID"
 }
 
  resource "ionoscloud_ipfailover" "secondexample" {
    depends_on = [ ionoscloud_ipfailover.firstexample ]
-   datacenter_id         = <datacenter ID>
-   lan_id                = <LAN ID>
-   ip                    = <IP address>
-   nicuuid               = <NIC UUID>
+   datacenter_id         = "datacenter ID"
+   lan_id                = "LAN ID"
+   ip                    = "IP address"
+   nicuuid               = "NIC UUID"
  }
 ```
 2. Define the resources as presented above, but without using the `depends_on` meta-argument and run the apply command using
@@ -111,7 +111,7 @@ terraform apply -parallelism=1
 Resource IpFailover can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_ipfailover.myipfailover {datacenter uuid}/{lan uuid}
+terraform import ionoscloud_ipfailover.myipfailover datacenter uuid/lan uuid
 ```
 
 

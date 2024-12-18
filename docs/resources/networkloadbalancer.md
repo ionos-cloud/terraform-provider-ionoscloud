@@ -91,5 +91,5 @@ This will configure flowlog for ALL(rejected and accepted) ingress traffic and w
 A Network Load Balancer resource can be imported using its `resource id` and the `datacenter id` e.g.
 
 ```shell
-terraform import ionoscloud_networkloadbalancer.my_networkloadbalancer {datacenter uuid}/{networkloadbalancer uuid}
+terraform import ionoscloud_networkloadbalancer.my_networkloadbalancer datacenter uuid/networkloadbalancer uuid
 ```
