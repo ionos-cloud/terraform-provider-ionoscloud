@@ -1,4 +1,4 @@
-# Go API client for ionoscloud
+# Go API client for monitoring
 
 The monitoring service offers a centralized platform to collect and store metrics.
 
@@ -12,11 +12,11 @@ The API can be accessed within an instance running in IONOS Cloud or directly ov
 
 ### Use go get to retrieve the SDK to add it to your GOPATH workspace, or project's Go module dependencies.
 ```bash
-go get github.com/ionos-cloud/monitoring/ionoscloud.git
+go get github.com/ionos-cloud/sdk-go-bundle/products/monitoring.git
 ```
 To update the SDK use go get -u to retrieve the latest version of the SDK.
 ```bash
-go get -u github.com/ionos-cloud/monitoring/ionoscloud.git
+go get -u github.com/ionos-cloud/sdk-go-bundle/products/monitoring.git
 ```
 ### Go Modules
 
@@ -24,7 +24,7 @@ If you are using Go modules, your go get will default to the latest tagged relea
 
 To get the latest SDK repository, use @latest.
 ```bash
-go get github.com/ionos-cloud/monitoring/ionoscloud@latest
+go get github.com/ionos-cloud/sdk-go-bundle/products/monitoring@latest
 ```
 
 ## Environment Variables
@@ -69,14 +69,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	ionoscloud "github.com/ionos-cloud/monitoring/ionoscloud"
+	monitoring "github.com/ionos-cloud/sdk-go-bundle/products/monitoring"
 	"log"
 )
 
 func basicAuthExample() error {
 	cfg := shared.NewConfiguration("username_here", "pwd_here", "", "hostUrl_here")
 	cfg.LogLevel = Trace
-	apiClient := ionoscloud.NewAPIClient(cfg)
+	apiClient := monitoring.NewAPIClient(cfg)
 	return nil
 }
 ```
@@ -90,7 +90,7 @@ There are 2 ways to generate your token:
         "fmt"
         "github.com/ionos-cloud/sdk-go-bundle/products/auth"
         "github.com/ionos-cloud/sdk-go-bundle/shared"
-        ionoscloud "github.com/ionos-cloud/monitoring/ionoscloud"
+        monitoring "github.com/ionos-cloud/sdk-go-bundle/products/monitoring"
         "log"
     )
 
@@ -106,7 +106,7 @@ There are 2 ways to generate your token:
         }
         cfg := shared.NewConfiguration("", "", *jwt.GetToken(), "hostUrl_here")
         cfg.LogLevel = Trace
-        apiClient := ionoscloud.NewAPIClient(cfg)
+        apiClient := monitoring.NewAPIClient(cfg)
         return nil
     }
 ```
@@ -124,7 +124,7 @@ There are 2 ways to generate your token:
         "context"
         "fmt"
         "github.com/ionos-cloud/sdk-go-bundle/products/auth"
-         ionoscloud "github.com/ionos-cloud/monitoring/ionoscloud"
+         monitoring "github.com/ionos-cloud/sdk-go-bundle/products/monitoring"
         "log"
     )
 
@@ -132,7 +132,7 @@ There are 2 ways to generate your token:
         //note: to use NewConfigurationFromEnv(), you need to previously set IONOS_TOKEN as env variables
         authClient := auth.NewAPIClient(authApi.NewConfigurationFromEnv())
         cfg.LogLevel = Trace
-        apiClient := ionoscloud.NewAPIClient(cfg)
+        apiClient := monitoring.NewAPIClient(cfg)
         return nil
     }
 ```
@@ -182,7 +182,7 @@ There are log levels that you can set: `Off`, `Debug` and `Trace`.
 package main
 
     import (
-        ionoscloud "github.com/ionos-cloud/monitoring/ionoscloud"
+        monitoring "github.com/ionos-cloud/sdk-go-bundle/products/monitoring"
         "github.com/ionos-cloud/sdk-go-bundle/shared"
         "github.com/sirupsen/logrus"
     )
@@ -196,7 +196,7 @@ func main() {
     // inject your own logger that implements Printf
     shared.SdkLogger = logrus.New()
     // create you api client with the configuration
-    apiClient := ionoscloud.NewAPIClient(cfg)
+    apiClient := monitoring.NewAPIClient(cfg)
 }
 ```
 
@@ -226,7 +226,6 @@ All URIs are relative to *https://monitoring.de-fra.ionos.com*
 
  - [Error](docs/models/Error)
  - [ErrorMessages](docs/models/ErrorMessages)
- - [KeyCreate](docs/models/KeyCreate)
  - [KeyRead](docs/models/KeyRead)
  - [Links](docs/models/Links)
  - [Metadata](docs/models/Metadata)

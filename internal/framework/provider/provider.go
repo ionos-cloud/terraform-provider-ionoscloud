@@ -233,7 +233,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		InMemoryDBClient:              inmemorydb.NewInMemoryDBClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		S3Client:                      objectStorageService.NewClient(accessKey, secretKey, region, endpoint, insecureBool),
 		ObjectStorageManagementClient: objectStorageManagementService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
-		MonitoringClient:              monitoringService.NewClient(username, password, token, cleanedEndpoint, terraformVersion, insecureBool),
+		MonitoringClient:              monitoringService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 	}
 
 	resp.DataSourceData = client

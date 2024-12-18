@@ -466,12 +466,3 @@ func CleanURL(url string) string {
 
 	return url
 }
-
-// ConcatenateLists concatenates multiple lists into one list.
-func ConcatenateLists(lists ...[]any) []any {
-	var result []any
-	for _, list := range lists {
-		result = append(result, list...)
-	}
-	return result
-}
