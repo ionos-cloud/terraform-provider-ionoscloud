@@ -6,6 +6,7 @@ package monitoring_test
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -28,6 +29,7 @@ func TestAccPipeline(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_monitoring_pipeline.test", "name", "TFTestPipeline"),
 					resource.TestCheckResourceAttrSet("ionoscloud_monitoring_pipeline.test", "grafana_endpoint"),
 					resource.TestCheckResourceAttrSet("ionoscloud_monitoring_pipeline.test", "http_endpoint"),
+					resource.TestCheckResourceAttrSet("ionoscloud_monitoring_pipeline.test", "key"),
 				),
 			},
 			{
@@ -48,6 +50,36 @@ func TestAccPipeline(t *testing.T) {
 					resource.TestCheckResourceAttrSet("data.ionoscloud_monitoring_pipeline.test", "http_endpoint"),
 				),
 			},
+			{
+				Config:      invalidDSConfigBothNameID,
+				ExpectError: regexp.MustCompile("Invalid Attribute Combination"),
+			},
+			{
+				Config:      invalidDSConfigNoNameNoID,
+				ExpectError: regexp.MustCompile("Missing Attribute Configuration"),
+			},
+			{
+				Config:      invalidDSConfigMultipleOccurrences,
+				ExpectError: regexp.MustCompile("multiple Monitoring pipelines found with the same name"),
+			},
+			{
+				Config:      invalidDSConfigInvalidName,
+				ExpectError: regexp.MustCompile("no Monitoring pipeline found with the specified name"),
+			},
+			{
+				Config:      invalidDSConfigInvalidID,
+				ExpectError: regexp.MustCompile("failed to get Monitoring pipeline"),
+			},
+			{
+				Config: pipelineBasicUpdateConfig,
+				Check: resource.ComposeTestCheckFunc(
+					checkPipelineExists(context.Background(), "ionoscloud_monitoring_pipeline.test"),
+					resource.TestCheckResourceAttr("ionoscloud_monitoring_pipeline.test", "name", "updatedTestName"),
+					resource.TestCheckResourceAttrSet("ionoscloud_monitoring_pipeline.test", "grafana_endpoint"),
+					resource.TestCheckResourceAttrSet("ionoscloud_monitoring_pipeline.test", "http_endpoint"),
+					resource.TestCheckResourceAttrSet("ionoscloud_monitoring_pipeline.test", "key"),
+				),
+			},
 		},
 	})
 }
@@ -56,6 +88,12 @@ const (
 	pipelineBasicConfig = `
 	resource "ionoscloud_monitoring_pipeline" "test" {
 		name = "TFTestPipeline"
+	}
+`
+
+	pipelineBasicUpdateConfig = `
+	resource "ionoscloud_monitoring_pipeline" "test" {
+		name = "updatedTestName"
 	}
 `
 
@@ -68,6 +106,42 @@ const (
 	dataSourceByID = pipelineBasicConfig + `
 	data "ionoscloud_monitoring_pipeline" "test" {
 		id = ionoscloud_monitoring_pipeline.test.id
+	}
+`
+
+	invalidDSConfigBothNameID = pipelineBasicConfig + `
+	data "ionoscloud_monitoring_pipeline" "test" {
+		id = ionoscloud_monitoring_pipeline.test.id
+		name = ionoscloud_monitoring_pipeline.test.name
+	}
+`
+
+	invalidDSConfigNoNameNoID = pipelineBasicConfig + `
+	data "ionoscloud_monitoring_pipeline" "test" {
+
+	}
+`
+
+	// This works because we can create two pipelines with the same name
+	invalidDSConfigMultipleOccurrences = pipelineBasicConfig + `
+	resource "ionoscloud_monitoring_pipeline" "secondPipeline" {
+		name = "TFTestPipeline"
+	}
+
+	data "ionoscloud_monitoring_pipeline" "test" {
+		name = ionoscloud_monitoring_pipeline.test.name
+	}
+`
+
+	invalidDSConfigInvalidName = pipelineBasicConfig + `
+	data "ionoscloud_monitoring_pipeline" "test" {
+		name = "itdoesntexist"
+	}
+`
+
+	invalidDSConfigInvalidID = pipelineBasicConfig + `
+	data "ionoscloud_monitoring_pipeline" "test" {
+		id = "itdoesntexist"
 	}
 `
 )
