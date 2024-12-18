@@ -19,6 +19,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/envar"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/provider"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud"
+	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 	objstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 )
 
@@ -111,4 +112,22 @@ func ObjectStorageClient() (*objstorage.APIClient, error) {
 	}
 
 	return objstorageservice.NewClient(accessKey, secretKey, "", "", insecureBool).GetBaseClient(), nil
+}
+
+func MonitoringClient() *monitoringService.MonitoringClient {
+	token := os.Getenv(envar.IonosToken)
+	username := os.Getenv(envar.IonosUsername)
+	password := os.Getenv(envar.IonosPassword)
+	insecureStr := os.Getenv(envar.IonosInsecure)
+
+	insecureBool := false
+	if insecureStr != "" {
+		boolValue, err := strconv.ParseBool(insecureStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		insecureBool = boolValue
+	}
+
+	return monitoringService.NewClient(username, password, token, "", "", insecureBool)
 }

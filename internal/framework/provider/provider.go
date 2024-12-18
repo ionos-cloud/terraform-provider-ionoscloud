@@ -19,6 +19,7 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
@@ -34,6 +35,7 @@ import (
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
+	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 	objectStorageService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
@@ -231,6 +233,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		InMemoryDBClient:              inmemorydb.NewInMemoryDBClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		S3Client:                      objectStorageService.NewClient(accessKey, secretKey, region, endpoint, insecureBool),
 		ObjectStorageManagementClient: objectStorageManagementService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
+		MonitoringClient:              monitoringService.NewClient(username, password, token, cleanedEndpoint, terraformVersion, insecureBool),
 	}
 
 	resp.DataSourceData = client
@@ -255,30 +258,32 @@ func newCloudapiClient(username, password, token, endpoint, version, terraformVe
 
 // Resources returns the resources for the provider.
 func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-		objectstorage.NewBucketResource,
-		objectstorage.NewBucketPolicyResource,
-		objectstorage.NewObjectResource,
-		objectstorage.NewObjectCopyResource,
-		objectstorage.NewBucketPublicAccessBlockResource,
-		objectstorage.NewBucketVersioningResource,
-		objectstorage.NewObjectLockConfigurationResource,
-		objectstorage.NewServerSideEncryptionConfigurationResource,
-		objectstorage.NewBucketCorsConfigurationResource,
-		objectstorage.NewBucketLifecycleConfigurationResource,
-		objectstorage.NewBucketWebsiteConfigurationResource,
-		objectstoragemanagement.NewAccesskeyResource,
+	var finalResult []func() resource.Resource
+	resources := [][]func() resource.Resource{
+		objectstorage.Resources(),
+		objectstoragemanagement.Resources(),
+		monitoring.Resources(),
 	}
+
+	for _, r := range resources {
+		finalResult = append(finalResult, r...)
+	}
+
+	return finalResult
 }
 
 // DataSources returns the data sources for the provider.
 func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		objectstorage.NewBucketDataSource,
-		objectstorage.NewObjectDataSource,
-		objectstorage.NewBucketPolicyDataSource,
-		objectstorage.NewObjectsDataSource,
-		objectstoragemanagement.NewRegionDataSource,
-		objectstoragemanagement.NewAccesskeyDataSource,
+	var finalResult []func() datasource.DataSource
+	dataSources := [][]func() datasource.DataSource{
+		objectstorage.DataSources(),
+		objectstoragemanagement.DataSources(),
+		monitoring.DataSources(),
 	}
+
+	for _, r := range dataSources {
+		finalResult = append(finalResult, r...)
+	}
+
+	return finalResult
 }
