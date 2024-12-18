@@ -117,7 +117,7 @@ func (r *bucketResource) Configure(_ context.Context, req resource.ConfigureRequ
 	clientBundle, ok := req.ProviderData.(*services.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected *services.SdkBundle, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
