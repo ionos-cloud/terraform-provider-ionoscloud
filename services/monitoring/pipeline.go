@@ -3,7 +3,6 @@ package monitoring
 import (
 	"context"
 	"fmt"
-	"github.com/cenkalti/backoff/v4"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -84,29 +83,24 @@ func (c *MonitoringClient) GetPipelines(ctx context.Context, location string) ([
 }
 
 // IsPipelineReady checks if the pipeline is ready.
-// backoff.Permanent is used to stop the retry.
-func (c *MonitoringClient) IsPipelineReady(ctx context.Context, pipelineID, location string) error {
+func (c *MonitoringClient) IsPipelineReady(ctx context.Context, pipelineID, location string) (bool, error) {
 	pipeline, _, err := c.GetPipelineByID(ctx, pipelineID, location)
 	if err != nil {
-		return backoff.Permanent(err)
+		return false, err
 	}
 	log.Printf("[DEBUG] Monitoring pipeline state: %s", pipeline.Metadata.Status)
 
-	if strings.EqualFold(pipeline.Metadata.Status, constant.Available) {
-		return nil
-	}
-	return fmt.Errorf("pipeline is not ready, current state: %s", pipeline.Metadata.Status)
+	return strings.EqualFold(pipeline.Metadata.Status, constant.Available), nil
 }
 
 // IsPipelineDeleted checks if the pipeline is deleted.
-// backoff.Permanent is used to stop the retry.
-func (c *MonitoringClient) IsPipelineDeleted(ctx context.Context, pipelineID, location string) error {
+func (c *MonitoringClient) IsPipelineDeleted(ctx context.Context, pipelineID, location string) (bool, error) {
 	_, apiResponse, err := c.GetPipelineByID(ctx, pipelineID, location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			return nil
+			return true, nil
 		}
-		return backoff.Permanent(fmt.Errorf("check failed for Monitoring pipeline with ID: %v, error: %w", pipelineID, err))
+		return false, fmt.Errorf("check failed for Monitoring pipeline with ID: %v, error: %w", pipelineID, err)
 	}
-	return fmt.Errorf("resource not yet deleted %s, location %s", pipelineID, location)
+	return false, nil
 }

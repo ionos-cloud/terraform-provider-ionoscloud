@@ -113,6 +113,7 @@ func MonitoringClient() *monitoringService.MonitoringClient {
 	username := os.Getenv(envar.IonosUsername)
 	password := os.Getenv(envar.IonosPassword)
 	insecureStr := os.Getenv(envar.IonosInsecure)
+	version := ionoscloud.Version
 
 	insecureBool := false
 	if insecureStr != "" {
@@ -123,5 +124,5 @@ func MonitoringClient() *monitoringService.MonitoringClient {
 		insecureBool = boolValue
 	}
 
-	return monitoringService.NewClient(username, password, token, "", "", insecureBool)
+	return monitoringService.NewClient(username, password, token, "", version, "", insecureBool)
 }
