@@ -22,17 +22,17 @@ resource "ionoscloud_monitoring_pipeline" "example" {
 }
 ```
 
-**NOTE:** The default timeout for all operations is 20 minutes. If you want to change the default value, you can use `timeouts` attribute inside the resource:
+**NOTE:** The default timeout for all operations is 60 minutes. If you want to change the default value, you can use `timeouts` attribute inside the resource:
 
 ```hcl
 resource "ionoscloud_monitoring_pipeline" "example" {
   location = "es/vit"
   name = "pipelineExample"
   timeouts {
-    create = "10m"
+    create = "20m"
     read = "30s"
-    update = "5m"
-    delete = "1m"
+    update = "10m"
+    delete = "10m"
   }
 }
 ```
@@ -40,9 +40,12 @@ resource "ionoscloud_monitoring_pipeline" "example" {
 ## Argument reference
 
 * `name` - (Required)[string] The name of the Monitoring pipeline.
-* `location` - (Optional)[string] The location of the Monitoring pipeline. Default is `de/fra`. It can be one of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`. If this is not set and if no value is provided for the `IONOS_API_URL` env var, the default `location` will be: `de/fra`.
+* `location` - (Optional)[string] The location of the Monitoring pipeline. Default is `de/fra`. It can be one of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`. If this is not set and if no value is provided for the `IONOS_API_URL_MONITORING` env var, the default `location` will be: `de/fra`.
 * `grafana_endpoint` - (Computed)[string] The endpoint of the Grafana instance.
 * `http_endpoint` - (Computed)[string] The HTTP endpoint of the monitoring instance.
+* `key` - (Computed)(Sensitive)[string] The key used to connect to the monitoring pipeline.
+
+> **⚠ NOTE:** `IONOS_API_URL_MONITORING` can be used to set a custom API URL for the resource. `location` field needs to be empty, otherwise it will override the custom API URL.
 
 ## Import
 
@@ -56,5 +59,5 @@ resource "ionoscloud_monitoring_pipeline" "example" {
 The resource can be imported using the `location` and `pipeline_id`, for example:
 
 ```shell
-terraform import ionoscloud_monitoring_pipeline.example {location}:{pipeline_id}
+terraform import ionoscloud_monitoring_pipeline.example location:pipeline_id
 ```

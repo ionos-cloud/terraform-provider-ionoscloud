@@ -84,12 +84,6 @@ func PreCheck(t *testing.T) {
 				t.Fatalf("%s/%s or %s must be set for acceptance tests", envar.IonosUsername, envar.IonosPassword, envar.IonosToken)
 			}
 		}
-
-		accessKey := os.Getenv(envar.IonosS3AccessKey)
-		secretKey := os.Getenv(envar.IonosS3SecretKey)
-		if accessKey == "" || secretKey == "" {
-			t.Fatalf("%s and %s must be set for acceptance tests", envar.IonosS3AccessKey, envar.IonosS3SecretKey)
-		}
 	})
 }
 

@@ -3,6 +3,7 @@ package monitoring
 import (
 	"context"
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -15,7 +16,6 @@ import (
 	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"strings"
-	"time"
 )
 
 var (
@@ -69,6 +69,7 @@ func (r *pipelineResource) Schema(ctx context.Context, req resource.SchemaReques
 			},
 			"key": schema.StringAttribute{
 				Computed:    true,
+				Sensitive:   true,
 				Description: "The authentication key of the monitoring instance",
 			},
 			"location": schema.StringAttribute{
@@ -123,8 +124,7 @@ func (r *pipelineResource) Create(ctx context.Context, req resource.CreateReques
 		},
 	}
 	location := data.Location.ValueString()
-
-	createTimeout, diags := data.Timeouts.Create(ctx, 20*time.Minute)
+	createTimeout, diags := data.Timeouts.Create(ctx, utils.DefaultTimeout)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -135,19 +135,18 @@ func (r *pipelineResource) Create(ctx context.Context, req resource.CreateReques
 		resp.Diagnostics.AddError("failed to create Monitoring pipeline", err.Error())
 		return
 	}
-
 	pipelineID := pipelineResponse.Id
 	key := pipelineResponse.Metadata.Key
 
-	err = utils.WaitForResourceToBeReadyV2(ctx, createTimeout, pipelineID, location, r.client.IsPipelineReady)
+	err = backoff.Retry(func() error {
+		return r.client.IsPipelineReady(ctx, pipelineID, location)
+	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(createTimeout)))
 	if err != nil {
 		resp.Diagnostics.AddError("error occurred while waiting for the Monitoring pipeline to become available", err.Error())
-		return
 	}
 
 	// Make another `GET` request after the pipeline becomes 'AVAILABLE' in order to retrieve some
 	// attributes that are not set in the `POST` response.
-
 	retrievedPipeline, _, err := r.client.GetPipelineByID(ctx, pipelineID, location)
 	if err != nil {
 		resp.Diagnostics.AddError("error while fetching Monitoring pipeline after creation", (fmt.Errorf("pipeline ID: %v, error: %w", pipelineID, err)).Error())
@@ -205,7 +204,7 @@ func (r *pipelineResource) Delete(ctx context.Context, req resource.DeleteReques
 	pipelineID := data.ID.ValueString()
 	location := data.Location.ValueString()
 
-	deleteTimeout, diags := data.Timeouts.Delete(ctx, 20*time.Minute)
+	deleteTimeout, diags := data.Timeouts.Delete(ctx, utils.DefaultTimeout)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -217,7 +216,9 @@ func (r *pipelineResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	err = utils.WaitForResourceToBeDeletedV2(ctx, deleteTimeout, pipelineID, location, r.client.IsPipelineDeleted)
+	err = backoff.Retry(func() error {
+		return r.client.IsPipelineDeleted(ctx, pipelineID, location)
+	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(deleteTimeout)))
 	if err != nil {
 		resp.Diagnostics.AddError("error occurred while waiting for the Monitoring pipeline to be deleted", (fmt.Errorf("pipeline ID: %v, error: %w", pipelineID, err)).Error())
 		return
@@ -241,7 +242,7 @@ func (r *pipelineResource) Update(ctx context.Context, req resource.UpdateReques
 		},
 	}
 
-	updateTimeout, diags := plan.Timeouts.Update(ctx, 20*time.Minute)
+	updateTimeout, diags := plan.Timeouts.Update(ctx, utils.DefaultTimeout)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -252,10 +253,11 @@ func (r *pipelineResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.AddError("error while updating Monitoring pipeline", (fmt.Errorf("pipeline ID: %v, error: %w", pipelineID, err)).Error())
 		return
 	}
-
-	err = utils.WaitForResourceToBeReadyV2(ctx, updateTimeout, pipelineID, location, r.client.IsPipelineReady)
+	err = backoff.Retry(func() error {
+		return r.client.IsPipelineReady(ctx, pipelineID, location)
+	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(updateTimeout)))
 	if err != nil {
-		resp.Diagnostics.AddError("error while waiting for the Monitoring pipeline to become available after update", (fmt.Errorf("pipeline ID: %v, error: %w", pipelineID, err)).Error())
+		resp.Diagnostics.AddError("error while waiting for the Monitoring pipeline to become AVAILABLE after update", (fmt.Errorf("pipeline ID: %v, error: %w", pipelineID, err)).Error())
 		return
 	}
 

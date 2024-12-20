@@ -240,10 +240,6 @@ type ApiResponseInfo interface {
 // ResourceReadyFunc polls api to see if resource exists based on id
 type ResourceReadyFunc func(ctx context.Context, d *schema.ResourceData) (bool, error)
 
-// ResourceReadyFuncV2 polls api to see if resource exists based on id
-// V2 signature is different because it is written for the terraform-plugin-framework
-type ResourceReadyFuncV2 func(ctx context.Context, resourceID, location string) (bool, error)
-
 // WaitForResourceToBeReady - keeps retrying until resource is ready(true is returned), or until err is thrown, or ctx is cancelled
 func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn ResourceReadyFunc) error {
 	if d.Id() == "" {
@@ -263,43 +259,8 @@ func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn Re
 	})
 }
 
-// WaitForResourceToBeReadyV2 - keeps retrying until resource is ready (true is returned), or until err is thrown, or ctx is cancelled
-// V2 signature is different because it is written for the terraform-plugin-framework
-func WaitForResourceToBeReadyV2(ctx context.Context, timeout time.Duration, resourceID, location string, fn ResourceReadyFuncV2) error {
-	return retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		isReady, err := fn(ctx, resourceID, location)
-		if isReady {
-			return nil
-		}
-		if err != nil {
-			return retry.NonRetryableError(err)
-		}
-		log.Printf("[DEBUG] resource with id %s not ready, still trying ", resourceID)
-		return retry.RetryableError(fmt.Errorf("resource with id %s not ready, still trying ", resourceID))
-	})
-}
-
 // IsResourceDeletedFunc polls api to see if resource exists based on id
 type IsResourceDeletedFunc func(ctx context.Context, d *schema.ResourceData) (bool, error)
-
-// IsResourceDeletedFuncV2 polls api to see if resource exists based on id
-// V2 signature is different because it is written for the terraform-plugin-framework
-type IsResourceDeletedFuncV2 func(ctx context.Context, resourceID, location string) (bool, error)
-
-// WaitForResourceToBeDeletedV2 - keeps retrying until the resource is not found, or until err is thrown, or until ctx is cancelled
-// V2 signature is different because it is written for the terraform-plugin-framework
-func WaitForResourceToBeDeletedV2(ctx context.Context, timeout time.Duration, resourceID, location string, fn IsResourceDeletedFuncV2) error {
-	return retry.RetryContext(ctx, timeout, func() *retry.RetryError {
-		isDeleted, err := fn(ctx, resourceID, location)
-		if isDeleted {
-			return nil
-		}
-		if err != nil {
-			return retry.NonRetryableError(err)
-		}
-		return retry.RetryableError(fmt.Errorf("resource with ID %s not deleted yet, still trying ", resourceID))
-	})
-}
 
 // WaitForResourceToBeDeleted - keeps retrying until resource is not found(404), or until ctx is cancelled
 func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn IsResourceDeletedFunc) error {
