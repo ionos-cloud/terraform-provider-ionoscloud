@@ -33,6 +33,13 @@ func TestAccPipeline(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:            "ionoscloud_monitoring_pipeline.test",
+				ImportState:             true,
+				ImportStateIdFunc:       monitoringImportStateID,
+				ImportStateVerifyIgnore: []string{"key", "location"},
+				ImportStateVerify:       true,
+			},
+			{
 				Config: dataSourceByName,
 				Check: resource.ComposeTestCheckFunc(
 					checkPipelineExists(context.Background(), "ionoscloud_monitoring_pipeline.test"),
@@ -178,4 +185,18 @@ func checkPipelineDestroy(s *terraform.State) error {
 		}
 	}
 	return nil
+}
+
+func monitoringImportStateID(s *terraform.State) (string, error) {
+	var importID = ""
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "ionoscloud_monitoring_pipeline" {
+			continue
+		}
+
+		importID = fmt.Sprintf("%s:%s", rs.Primary.Attributes["location"], rs.Primary.Attributes["id"])
+	}
+
+	return importID, nil
 }
