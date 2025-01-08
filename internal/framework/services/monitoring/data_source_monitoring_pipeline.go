@@ -27,7 +27,7 @@ type pipelineDataSourceModel struct {
 	ID              types.String `tfsdk:"id"`
 	Name            types.String `tfsdk:"name"`
 	GrafanaEndpoint types.String `tfsdk:"grafana_endpoint"`
-	HttpEndpoint    types.String `tfsdk:"http_endpoint"`
+	HTTPEndpoint    types.String `tfsdk:"http_endpoint"`
 	Location        types.String `tfsdk:"location"`
 }
 
@@ -162,7 +162,7 @@ func (d *pipelineDataSource) Read(ctx context.Context, req datasource.ReadReques
 	data.ID = types.StringValue(pipeline.Id)
 	data.Name = types.StringValue(pipeline.Properties.Name)
 	data.GrafanaEndpoint = types.StringValue(pipeline.Metadata.GrafanaEndpoint)
-	data.HttpEndpoint = types.StringValue(pipeline.Metadata.HttpEndpoint)
+	data.HTTPEndpoint = types.StringValue(pipeline.Metadata.HttpEndpoint)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

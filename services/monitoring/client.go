@@ -13,8 +13,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-// Client is a wrapper for the Monitoring SDK
-type MonitoringClient struct {
+// MonitoringClient is a wrapper for the Monitoring SDK
+type MonitoringClient struct { //nolint:golint
 	Client monitoring.APIClient
 }
 

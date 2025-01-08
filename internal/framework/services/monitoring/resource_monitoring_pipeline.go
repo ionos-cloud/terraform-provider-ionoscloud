@@ -3,6 +3,8 @@ package monitoring
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -12,10 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	monitoringSDK "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"strings"
 )
 
 var (
@@ -31,7 +33,7 @@ type pipelineResourceModel struct {
 	ID              types.String   `tfsdk:"id"`
 	Name            types.String   `tfsdk:"name"`
 	GrafanaEndpoint types.String   `tfsdk:"grafana_endpoint"`
-	HttpEndpoint    types.String   `tfsdk:"http_endpoint"`
+	HTTPEndpoint    types.String   `tfsdk:"http_endpoint"`
 	Key             types.String   `tfsdk:"key"`
 	Location        types.String   `tfsdk:"location"`
 	Timeouts        timeouts.Value `tfsdk:"timeouts"`
@@ -157,7 +159,7 @@ func (r *pipelineResource) Create(ctx context.Context, req resource.CreateReques
 	data.Key = types.StringValue(key)
 	data.Name = types.StringValue(retrievedPipeline.Properties.Name)
 	data.GrafanaEndpoint = types.StringValue(retrievedPipeline.Metadata.GrafanaEndpoint)
-	data.HttpEndpoint = types.StringValue(retrievedPipeline.Metadata.HttpEndpoint)
+	data.HTTPEndpoint = types.StringValue(retrievedPipeline.Metadata.HttpEndpoint)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -189,7 +191,7 @@ func (r *pipelineResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	data.Name = types.StringValue(pipeline.Properties.Name)
 	data.GrafanaEndpoint = types.StringValue(pipeline.Metadata.GrafanaEndpoint)
-	data.HttpEndpoint = types.StringValue(pipeline.Metadata.HttpEndpoint)
+	data.HTTPEndpoint = types.StringValue(pipeline.Metadata.HttpEndpoint)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

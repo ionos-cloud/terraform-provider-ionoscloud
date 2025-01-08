@@ -108,6 +108,7 @@ func ObjectStorageClient() (*objstorage.APIClient, error) {
 	return objstorageservice.NewClient(accessKey, secretKey, "", "", insecureBool).GetBaseClient(), nil
 }
 
+// MonitoringClient returns a new Monitoring client for acceptance testing
 func MonitoringClient() *monitoringService.MonitoringClient {
 	token := os.Getenv(envar.IonosToken)
 	username := os.Getenv(envar.IonosUsername)
