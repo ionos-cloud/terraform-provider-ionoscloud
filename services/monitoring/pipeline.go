@@ -108,5 +108,5 @@ func (c *MonitoringClient) IsPipelineDeleted(ctx context.Context, pipelineID, lo
 		}
 		return backoff.Permanent(fmt.Errorf("check failed for Monitoring pipeline with ID: %v, error: %w", pipelineID, err))
 	}
-	return fmt.Errorf("resource not yet deleted %s, location %s", pipelineID, location)
+	return fmt.Errorf("Monitoring pipeline with ID: %s is not deleted yet, pipeline location: %s", pipelineID, location)
 }

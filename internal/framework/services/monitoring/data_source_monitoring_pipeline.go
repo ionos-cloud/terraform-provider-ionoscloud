@@ -135,7 +135,7 @@ func (d *pipelineDataSource) Read(ctx context.Context, req datasource.ReadReques
 		// Retrieve ALL pipelines.
 		retrievedPipelines, _, err := d.client.GetPipelines(ctx, location)
 		if err != nil {
-			resp.Diagnostics.AddError(fmt.Sprintf("failed to get Monitoring pipelines location %s", location), err.Error())
+			resp.Diagnostics.AddError(fmt.Sprintf("failed to get Monitoring pipelines from location: %s", location), err.Error())
 			return
 		}
 
@@ -152,7 +152,7 @@ func (d *pipelineDataSource) Read(ctx context.Context, req datasource.ReadReques
 		}
 
 		if len(pipelines) == 0 {
-			resp.Diagnostics.AddError(fmt.Sprintf("no Monitoring pipeline found with the specified name %s in location %s ", pipelineName, location), "Please make sure that the name and location are correct, or search using the pipeline ID instead")
+			resp.Diagnostics.AddError(fmt.Sprintf("no Monitoring pipeline found with the specified name: %s in location: %s ", pipelineName, location), "Please make sure that the name and location are correct, or search using the pipeline ID instead")
 			return
 		}
 
