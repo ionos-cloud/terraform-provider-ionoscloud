@@ -40,6 +40,7 @@ func dataSourceImage() *schema.Resource {
 			"location": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"version": {
 				Type:     schema.TypeString,
@@ -95,6 +96,10 @@ func dataSourceImage() *schema.Resource {
 				Computed: true,
 			},
 			"public": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"expose_serial": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
@@ -338,6 +343,12 @@ func ImageSetData(d *schema.ResourceData, image *ionoscloud.Image) error {
 
 		if image.Properties.Public != nil {
 			if err := d.Set("public", *image.Properties.Public); err != nil {
+				return err
+			}
+		}
+
+		if image.Properties.ExposeSerial != nil {
+			if err := d.Set("expose_serial", *image.Properties.ExposeSerial); err != nil {
 				return err
 			}
 		}
