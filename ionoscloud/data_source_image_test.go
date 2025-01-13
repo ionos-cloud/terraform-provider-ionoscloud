@@ -26,6 +26,7 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(imageTestName, "cloud_init", "V1"),
 					resource.TestCheckResourceAttr(imageTestName, "location", "de/txl"),
 					resource.TestCheckResourceAttr(imageTestName, "type", "HDD"),
+					resource.TestCheckResourceAttrSet(imageTestName, "expose_serial"),
 				),
 			},
 			{
@@ -43,6 +44,7 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(imageTestName, "location", "de/fkb"),
 					resource.TestCheckResourceAttr(imageTestName, "name", "ubuntu-22.04-live-server-amd64.iso"),
 					resource.TestCheckResourceAttr(imageTestName, "type", "CDROM"),
+					resource.TestCheckResourceAttrSet(imageTestName, "expose_serial"),
 				),
 			},
 			{
@@ -76,7 +78,7 @@ const testDataSourceImageAliasLocation = `data ` + constant.ImageResource + ` ` 
 }`
 
 const testDataSourceImageAliasMultipleError = `data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
-  image_alias           = "centos:latest"
+  image_alias           = "ubuntu:22.04_iso"
 }`
 
 const testAccDataSourceWrongAliasError = `data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {

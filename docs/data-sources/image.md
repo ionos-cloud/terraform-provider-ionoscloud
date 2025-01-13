@@ -75,6 +75,7 @@ The resulting string will be used to search for an exact match. An error will be
  * `disc_scsi_hot_unplug` - Is capable of SCSI drive hot unplug (no reboot required)
  * `licence_type` - OS type of this Image
  * `public` - Indicates if the image is part of the public repository or not
+ * `expose_serial` - Indicates if the serial ID of the disk attached to the server will be exposed or not.
  * `image_aliases` - List of image aliases mapped for this Image
  * `cloud_init` - Cloud init compatibility
  * `type` - This indicates the type of image

@@ -1,6 +1,10 @@
 ## 6.6.9 -- upcoming release
 ### Features
+<<<<<<< HEAD
 - Add support for Monitoring Service: `ionoscloud_monitoring_pipeline` resource and data source.
+=======
+- Add `expose_serial` attribute for image data source
+>>>>>>> 5a0f846c (feat: Add 'expose_serial' attribute for image DS)
 ### Docs
 - Replace < and > with " in the docs
 - Remove { and } from terraform imports
