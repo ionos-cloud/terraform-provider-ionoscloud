@@ -1,8 +1,11 @@
-## 6.6.9
+## 6.6.9 -- upcoming release
+### Features
+- Add support for Monitoring Service: `ionoscloud_monitoring_pipeline` resource and data source.
 ### Docs
 - Replace < and > with " in the docs
 - Remove { and } from terraform imports
 - Replace \_ with _ in resource names
+
 ## 6.6.8
 ### Features
 - Add `auto_scaling` attribute to `ionoscloud_dataplatform_node_pool` resource.

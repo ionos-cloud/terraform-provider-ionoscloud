@@ -19,6 +19,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/envar"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/provider"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud"
+	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 	objstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 )
 
@@ -83,12 +84,6 @@ func PreCheck(t *testing.T) {
 				t.Fatalf("%s/%s or %s must be set for acceptance tests", envar.IonosUsername, envar.IonosPassword, envar.IonosToken)
 			}
 		}
-
-		accessKey := os.Getenv(envar.IonosS3AccessKey)
-		secretKey := os.Getenv(envar.IonosS3SecretKey)
-		if accessKey == "" || secretKey == "" {
-			t.Fatalf("%s and %s must be set for acceptance tests", envar.IonosS3AccessKey, envar.IonosS3SecretKey)
-		}
 	})
 }
 
@@ -111,4 +106,24 @@ func ObjectStorageClient() (*objstorage.APIClient, error) {
 	}
 
 	return objstorageservice.NewClient(accessKey, secretKey, "", "", insecureBool).GetBaseClient(), nil
+}
+
+// MonitoringClient returns a new Monitoring client for acceptance testing
+func MonitoringClient() *monitoringService.MonitoringClient {
+	token := os.Getenv(envar.IonosToken)
+	username := os.Getenv(envar.IonosUsername)
+	password := os.Getenv(envar.IonosPassword)
+	insecureStr := os.Getenv(envar.IonosInsecure)
+	version := ionoscloud.Version
+
+	insecureBool := false
+	if insecureStr != "" {
+		boolValue, err := strconv.ParseBool(insecureStr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		insecureBool = boolValue
+	}
+
+	return monitoringService.NewClient(username, password, token, "", version, "", insecureBool)
 }

@@ -43,6 +43,7 @@ See the [IonosCloud Provider documentation](https://registry.terraform.io/provid
 | `IONOS_API_URL_KAFKA`          | Sets a custom API URL for the Event Streams product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect. |
 | `IONOS_API_URL_VPN`            | Sets a custom API URL for the VPN product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.           |
 | `IONOS_API_URL_OBJECT_STORAGE` | Sets a custom API URL for the Object Storage product. `region` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.  |
+| `IONOS_API_URL_MONITORING`     | Sets a custom API URL for the Monitoring product. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.     |
 
 ### Certificate pinning:
 
