@@ -122,7 +122,7 @@ resource "ionoscloud_kafka_cluster" "example" {
       unavailable IP range: 10.224.0.0/11
 * `broker_addresses` - (Computed)[list] IP address and port of cluster brokers.
 
-> **⚠ NOTE:** `IONOS_API_URL_KAFKA` can be used to set a custom API URL for the kafka resource. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+> **⚠ NOTE:** `IONOS_API_URL_KAFKA` can be used to set a custom API URL for the kafka resource. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `endpoint` or `IONOS_API_URL` does not have any effect.
 
 
 ## Import
