@@ -998,7 +998,9 @@ func k8sNodepoolReady(ctx context.Context, client *ionoscloud.APIClient, d *sche
 	if utils.IsStateFailed(*resource.Metadata.State) {
 		return false, fmt.Errorf("error while checking if k8s nodepool is ready %s, state %s", *resource.Id, *resource.Metadata.State)
 	}
-	return *resource.Metadata.State == "ACTIVE", nil
+	log.Printf("[INFO] k8s nodepool state: %s", *resource.Metadata.State)
+	// k8s is the only resource that has a state of ACTIVE when it is ready
+	return strings.EqualFold(*resource.Metadata.State, ionoscloud.Active), nil
 }
 
 func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {

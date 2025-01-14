@@ -12,6 +12,7 @@
 - Add `auto_scaling` attribute to `ionoscloud_dataplatform_node_pool` resource.
 ### Fixes
 - Omitting the `location` attribute for some resources no longer generates an error
+- Better check and log for k8s resources polling
 
 ## 6.6.7
 ### Fix 
