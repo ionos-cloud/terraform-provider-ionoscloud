@@ -1,4 +1,4 @@
-## 6.6.9 -- upcoming release
+## 6.6.9
 ### Features
 - Add support for Monitoring Service: `ionoscloud_monitoring_pipeline` resource and data source.
 - Add `expose_serial` attribute for image data source
