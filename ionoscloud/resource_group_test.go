@@ -45,13 +45,22 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_flow_log", "true"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_monitoring", "true"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_certificates", "true"),
-					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_dbaas", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_logging", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_cdn", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_vpn", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_api_gateway", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_kaas", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_network_file_storage", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_ai_model_hub", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_iam_resources", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_network_security_groups", "true"),
 					utils.TestNotEmptySlice(constant.GroupResource, "users")),
 			},
 			{
 				Config: testAccDataSourceGroupMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "name", constant.GroupResource+"."+constant.GroupTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "name",
+						constant.GroupResource+"."+constant.GroupTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_datacenter", constant.GroupResource+"."+constant.GroupTestResource, "create_datacenter"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_snapshot", constant.GroupResource+"."+constant.GroupTestResource, "create_snapshot"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "reserve_ip", constant.GroupResource+"."+constant.GroupTestResource, "reserve_ip"),
@@ -61,6 +70,15 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_backup_unit", constant.GroupResource+"."+constant.GroupTestResource, "create_backup_unit"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_internet_access", constant.GroupResource+"."+constant.GroupTestResource, "create_internet_access"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_k8s_cluster", constant.GroupResource+"."+constant.GroupTestResource, "create_k8s_cluster"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_logging", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_logging"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_cdn", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_cdn"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_vpn", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_vpn"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_api_gateway", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_api_gateway"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_kaas", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_kaas"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_network_file_storage", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_network_file_storage"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_ai_model_hub", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_ai_model_hub"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_iam_resources", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_iam_resources"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_network_security_groups", constant.GroupResource+"."+constant.GroupTestResource, "create_network_security_groups"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "manage_dbaas", constant.GroupResource+"."+constant.GroupTestResource, "manage_dbaas"),
 
 					utils.TestNotEmptySlice(constant.DataSource+"."+constant.GroupResource, "users"),
@@ -82,24 +100,8 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_flow_log", constant.GroupResource+"."+constant.GroupTestResource, "create_flow_log"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_and_manage_monitoring", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_monitoring"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_and_manage_certificates", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_certificates"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_and_manage_logging", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_logging"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "manage_dbaas", constant.GroupResource+"."+constant.GroupTestResource, "manage_dbaas"),
-
-					utils.TestNotEmptySlice(constant.DataSource+"."+constant.GroupResource, "users"),
-				),
-			},
-			{
-				Config: testAccDataSourceGroupMatchName,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "name", constant.GroupResource+"."+constant.GroupTestResource, "name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_datacenter", constant.GroupResource+"."+constant.GroupTestResource, "create_datacenter"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_snapshot", constant.GroupResource+"."+constant.GroupTestResource, "create_snapshot"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "reserve_ip", constant.GroupResource+"."+constant.GroupTestResource, "reserve_ip"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_activity_log", constant.GroupResource+"."+constant.GroupTestResource, "access_activity_log"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_pcc", constant.GroupResource+"."+constant.GroupTestResource, "create_pcc"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "s3_privilege", constant.GroupResource+"."+constant.GroupTestResource, "s3_privilege"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_backup_unit", constant.GroupResource+"."+constant.GroupTestResource, "create_backup_unit"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_internet_access", constant.GroupResource+"."+constant.GroupTestResource, "create_internet_access"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_k8s_cluster", constant.GroupResource+"."+constant.GroupTestResource, "create_k8s_cluster"),
 					utils.TestNotEmptySlice(constant.DataSource+"."+constant.GroupResource, "users"),
 				),
 			},
@@ -128,6 +130,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_flow_log", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_monitoring", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_certificates", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_logging", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_dbaas", "false"),
 					resource.TestCheckResourceAttrPair(constant.GroupResource+".test_user_id", "users.0.id", constant.UserResource+"."+constant.UserTestResource+"3", "id"),
 					utils.TestNotEmptySlice(constant.GroupResource, "users")),
@@ -149,6 +152,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_flow_log", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_monitoring", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_certificates", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_certificates_logging", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_dbaas", "false"),
 					resource.TestCheckResourceAttrPair(constant.GroupResource+".test_user_id", "users.0.id", constant.UserResource+"."+constant.UserTestResource+"3", "id"),
 					utils.TestNotEmptySlice(constant.GroupResource, "users")),
@@ -275,7 +279,17 @@ resource ` + constant.GroupResource + ` ` + constant.GroupTestResource + ` {
   create_flow_log = true
   access_and_manage_monitoring = true
   access_and_manage_certificates = true
+  access_and_manage_logging = true
+  access_and_manage_cdn = true
+  access_and_manage_vpn = true
+  access_and_manage_api_gateway = true
+  access_and_manage_kaas = true
+  access_and_manage_network_file_storage = true
+  access_and_manage_ai_model_hub = true
+  create_network_security_groups = true
   manage_dbaas = true
+
+
   user_ids = [` + constant.UserResource + `.` + constant.UserTestResource + `.id, ` + constant.UserResource + `.` + constant.UserTestResource + `2.id]
 }
 `
@@ -354,6 +368,14 @@ resource ` + constant.GroupResource + ` "test_user_id" {
   create_flow_log = false
   access_and_manage_monitoring = false
   access_and_manage_certificates = false
+  access_and_manage_logging = false
+  access_and_manage_cdn = false
+  access_and_manage_vpn = false
+  access_and_manage_api_gateway = false
+  access_and_manage_kaas = false
+  access_and_manage_network_file_storage = false
+  access_and_manage_ai_model_hub = false
+  create_network_security_groups = false
   manage_dbaas = false
   user_id = ` + constant.UserResource + `.` + constant.UserTestResource + `3.id
 }

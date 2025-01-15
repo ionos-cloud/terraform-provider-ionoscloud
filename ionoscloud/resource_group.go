@@ -75,6 +75,11 @@ func resourceGroup() *schema.Resource {
 				Description: "Create Flow Logs privilege.",
 				Optional:    true,
 			},
+			"create_network_security_groups": {
+				Type:        schema.TypeBool,
+				Description: "Create Network Security groups.",
+				Optional:    true,
+			},
 			"access_and_manage_monitoring": {
 				Type: schema.TypeBool,
 				Description: "Privilege for a group to access and manage monitoring related functionality " +
@@ -84,6 +89,46 @@ func resourceGroup() *schema.Resource {
 			"access_and_manage_certificates": {
 				Type:        schema.TypeBool,
 				Description: "Privilege for a group to access and manage certificates.",
+				Optional:    true,
+			},
+			"access_and_manage_logging": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage logging.",
+				Optional:    true,
+			},
+			"access_and_manage_cdn": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage Cdn.",
+				Optional:    true,
+			},
+			"access_and_manage_vpn": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage Vpn.",
+				Optional:    true,
+			},
+			"access_and_manage_api_gateway": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage ApiGateway.",
+				Optional:    true,
+			},
+			"access_and_manage_kaas": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage Kaas.",
+				Optional:    true,
+			},
+			"access_and_manage_network_file_storage": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage NetworkFileStorage.",
+				Optional:    true,
+			},
+			"access_and_manage_ai_model_hub": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage AiModelHub.",
+				Optional:    true,
+			},
+			"access_and_manage_iam_resources": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage IamResources.",
 				Optional:    true,
 			},
 			"manage_dbaas": {
@@ -212,12 +257,30 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	request.Properties.CreateK8sCluster = &tempCreateK8sCluster
 	tempCreateFlowLog := d.Get("create_flow_log").(bool)
 	request.Properties.CreateFlowLog = &tempCreateFlowLog
+	tempCreateNetworkSecurityGroups := d.Get("create_network_security_groups").(bool)
+	request.Properties.CreateNetworkSecurityGroups = &tempCreateNetworkSecurityGroups
 	tempAccessAndManageMonitoring := d.Get("access_and_manage_monitoring").(bool)
 	request.Properties.AccessAndManageMonitoring = &tempAccessAndManageMonitoring
 	tempAccessAndManageCertificates := d.Get("access_and_manage_certificates").(bool)
 	manageDbaas := d.Get("manage_dbaas").(bool)
 	request.Properties.AccessAndManageCertificates = &tempAccessAndManageCertificates
 	request.Properties.ManageDBaaS = &manageDbaas
+	tempAccessAndManageLogging := d.Get("access_and_manage_logging").(bool)
+	request.Properties.AccessAndManageLogging = &tempAccessAndManageLogging
+	tempAccessAndManageCdn := d.Get("access_and_manage_cdn").(bool)
+	request.Properties.AccessAndManageCdn = &tempAccessAndManageCdn
+	tempAccessAndManageVpn := d.Get("access_and_manage_vpn").(bool)
+	request.Properties.AccessAndManageVpn = &tempAccessAndManageVpn
+	tempAccessAndManageApiGateway := d.Get("access_and_manage_api_gateway").(bool)
+	request.Properties.AccessAndManageApiGateway = &tempAccessAndManageApiGateway
+	tempAccessAndManageKaas := d.Get("access_and_manage_kaas").(bool)
+	request.Properties.AccessAndManageKaas = &tempAccessAndManageKaas
+	tempAccessAndManageNetworkFileStorage := d.Get("access_and_manage_network_file_storage").(bool)
+	request.Properties.AccessAndManageNetworkFileStorage = &tempAccessAndManageNetworkFileStorage
+	tempAccessAndManageAiModelHub := d.Get("access_and_manage_ai_model_hub").(bool)
+	request.Properties.AccessAndManageAiModelHub = &tempAccessAndManageAiModelHub
+	tempAccessAndManageIamResources := d.Get("access_and_manage_iam_resources").(bool)
+	request.Properties.AccessAndManageIamResources = &tempAccessAndManageIamResources
 	group, apiResponse, err := client.UserManagementApi.UmGroupsPost(ctx).Group(request).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -296,25 +359,44 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	tempCreateInternetAccess := d.Get("create_internet_access").(bool)
 	tempCreateK8sCluster := d.Get("create_k8s_cluster").(bool)
 	tempCreateFlowLog := d.Get("create_flow_log").(bool)
+	tempCreateNetworkSecurityGroups := d.Get("create_network_security_groups").(bool)
 	tempAccessAndManageMonitoring := d.Get("access_and_manage_monitoring").(bool)
 	tempAccessAndManageCertificates := d.Get("access_and_manage_certificates").(bool)
+	tempAccessAndManageLogging := d.Get("access_and_manage_logging").(bool)
+	tempAccessAndManageCdn := d.Get("access_and_manage_cdn").(bool)
+	tempAccessAndManageVpn := d.Get("access_and_manage_vpn").(bool)
+	tempAccessAndManageApiGateway := d.Get("access_and_manage_api_gateway").(bool)
+	tempAccessAndManageKaas := d.Get("access_and_manage_kaas").(bool)
+	tempAccessAndManageNetworkFileStorage := d.Get("access_and_manage_network_file_storage").(bool)
+	tempAccessAndManageAiModelHub := d.Get("access_and_manage_ai_model_hub").(bool)
+	tempAccessAndManageIamResources := d.Get("access_and_manage_iam_resources").(bool)
+
 	tempManageDBaaS := d.Get("manage_dbaas").(bool)
 
 	groupReq := ionoscloud.Group{
 		Properties: &ionoscloud.GroupProperties{
-			CreateDataCenter:            &tempCreateDataCenter,
-			CreateSnapshot:              &tempCreateSnapshot,
-			ReserveIp:                   &tempReserveIp,
-			AccessActivityLog:           &tempAccessActivityLog,
-			CreatePcc:                   &tempCreatePcc,
-			S3Privilege:                 &tempS3Privilege,
-			CreateBackupUnit:            &tempCreateBackupUnit,
-			CreateInternetAccess:        &tempCreateInternetAccess,
-			CreateK8sCluster:            &tempCreateK8sCluster,
-			CreateFlowLog:               &tempCreateFlowLog,
-			AccessAndManageMonitoring:   &tempAccessAndManageMonitoring,
-			AccessAndManageCertificates: &tempAccessAndManageCertificates,
-			ManageDBaaS:                 &tempManageDBaaS,
+			CreateDataCenter:                  &tempCreateDataCenter,
+			CreateSnapshot:                    &tempCreateSnapshot,
+			ReserveIp:                         &tempReserveIp,
+			AccessActivityLog:                 &tempAccessActivityLog,
+			CreatePcc:                         &tempCreatePcc,
+			S3Privilege:                       &tempS3Privilege,
+			CreateBackupUnit:                  &tempCreateBackupUnit,
+			CreateInternetAccess:              &tempCreateInternetAccess,
+			CreateK8sCluster:                  &tempCreateK8sCluster,
+			CreateFlowLog:                     &tempCreateFlowLog,
+			CreateNetworkSecurityGroups:       &tempCreateNetworkSecurityGroups,
+			AccessAndManageMonitoring:         &tempAccessAndManageMonitoring,
+			AccessAndManageCertificates:       &tempAccessAndManageCertificates,
+			ManageDBaaS:                       &tempManageDBaaS,
+			AccessAndManageLogging:            &tempAccessAndManageLogging,
+			AccessAndManageCdn:                &tempAccessAndManageCdn,
+			AccessAndManageVpn:                &tempAccessAndManageVpn,
+			AccessAndManageApiGateway:         &tempAccessAndManageApiGateway,
+			AccessAndManageKaas:               &tempAccessAndManageKaas,
+			AccessAndManageNetworkFileStorage: &tempAccessAndManageNetworkFileStorage,
+			AccessAndManageAiModelHub:         &tempAccessAndManageAiModelHub,
+			AccessAndManageIamResources:       &tempAccessAndManageIamResources,
 		},
 	}
 
@@ -513,6 +595,13 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			}
 		}
 
+		if group.Properties.CreateNetworkSecurityGroups != nil {
+			err := d.Set("create_network_security_groups", *group.Properties.CreateNetworkSecurityGroups)
+			if err != nil {
+				return fmt.Errorf("error while setting create_network_security_groups property for group %s: %w", d.Id(), err)
+			}
+		}
+
 		if group.Properties.AccessAndManageMonitoring != nil {
 			err := d.Set("access_and_manage_monitoring", *group.Properties.AccessAndManageMonitoring)
 			if err != nil {
@@ -524,6 +613,62 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			err := d.Set("access_and_manage_certificates", *group.Properties.AccessAndManageCertificates)
 			if err != nil {
 				return fmt.Errorf("error while setting access_and_manage_certificates property for group %s: %w", d.Id(), err)
+			}
+		}
+
+		if group.Properties.AccessAndManageLogging != nil {
+			err := d.Set("access_and_manage_logging", *group.Properties.AccessAndManageLogging)
+			if err != nil {
+				return fmt.Errorf("error while setting access_and_manage_logging property for group %s: %w", d.Id(), err)
+			}
+		}
+
+		if group.Properties.AccessAndManageCdn != nil {
+			err := d.Set("access_and_manage_cdn", *group.Properties.AccessAndManageCdn)
+			if err != nil {
+				return fmt.Errorf("error while setting access_and_manage_cdn property for group %s: %w", d.Id(), err)
+			}
+		}
+
+		if group.Properties.AccessAndManageVpn != nil {
+			err := d.Set("access_and_manage_vpn", *group.Properties.AccessAndManageVpn)
+			if err != nil {
+				return fmt.Errorf("error while setting access_and_manage_vpn property for group %s: %w", d.Id(), err)
+			}
+		}
+
+		if group.Properties.AccessAndManageApiGateway != nil {
+			err := d.Set("access_and_manage_api_gateway", *group.Properties.AccessAndManageApiGateway)
+			if err != nil {
+				return fmt.Errorf("error while setting access_and_manage_api_gateway property for group %s: %w", d.Id(), err)
+			}
+		}
+
+		if group.Properties.AccessAndManageKaas != nil {
+			err := d.Set("access_and_manage_kaas", *group.Properties.AccessAndManageKaas)
+			if err != nil {
+				return fmt.Errorf("error while setting access_and_manage_kaas property for group %s: %w", d.Id(), err)
+			}
+		}
+
+		if group.Properties.AccessAndManageNetworkFileStorage != nil {
+			err := d.Set("access_and_manage_network_file_storage", *group.Properties.AccessAndManageNetworkFileStorage)
+			if err != nil {
+				return fmt.Errorf("error while setting access_and_manage_network_file_storage property for group %s: %w", d.Id(), err)
+			}
+		}
+
+		if group.Properties.AccessAndManageAiModelHub != nil {
+			err := d.Set("access_and_manage_ai_model_hub", *group.Properties.AccessAndManageAiModelHub)
+			if err != nil {
+				return fmt.Errorf("error while setting access_and_manage_ai_model_hub property for group %s: %w", d.Id(), err)
+			}
+		}
+
+		if group.Properties.AccessAndManageIamResources != nil {
+			err := d.Set("access_and_manage_iam_resources", *group.Properties.AccessAndManageAiModelHub)
+			if err != nil {
+				return fmt.Errorf("error while setting access_and_manage_iam_resources property for group %s: %w", d.Id(), err)
 			}
 		}
 

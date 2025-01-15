@@ -67,6 +67,11 @@ func dataSourceGroup() *schema.Resource {
 				Description: "Create Flow Logs privilege.",
 				Computed:    true,
 			},
+			"create_network_security_groups": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to create NetworkSecurityGroups.",
+				Computed:    true,
+			},
 			"access_and_manage_monitoring": {
 				Type: schema.TypeBool,
 				Description: "Privilege for a group to access and manage monitoring related functionality " +
@@ -76,6 +81,46 @@ func dataSourceGroup() *schema.Resource {
 			"access_and_manage_certificates": {
 				Type:        schema.TypeBool,
 				Description: "Privilege for a group to access and manage certificates.",
+				Computed:    true,
+			},
+			"access_and_manage_logging": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage Logging.",
+				Computed:    true,
+			},
+			"access_and_manage_cdn": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage Cdn.",
+				Computed:    true,
+			},
+			"access_and_manage_vpn": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage Vpn.",
+				Computed:    true,
+			},
+			"access_and_manage_api_gateway": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage ApiGateway.",
+				Computed:    true,
+			},
+			"access_and_manage_kaas": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage Kaas.",
+				Computed:    true,
+			},
+			"access_and_manage_network_file_storage": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage NetworkFileStorage.",
+				Computed:    true,
+			},
+			"access_and_manage_ai_model_hub": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage AiModelHub.",
+				Computed:    true,
+			},
+			"access_and_manage_iam_resources": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage IamResources.",
 				Computed:    true,
 			},
 			"manage_dbaas": {
