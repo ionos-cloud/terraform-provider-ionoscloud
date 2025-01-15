@@ -600,7 +600,12 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 				apiSubnetAllowLists[i] = apiSubnetAllowList
 			}
 			if err := d.Set("api_subnet_allow_list", apiSubnetAllowLists); err != nil {
-				return fmt.Errorf("error while setting api_subnet_allow_list property for cluser %s: %w", d.Id(), err)
+				return fmt.Errorf("error while setting api_subnet_allow_list property for cluster with ID: %s, error: %w", d.Id(), err)
+			}
+		} else {
+			var emptySlice []interface{}
+			if err := d.Set("api_subnet_allow_list", emptySlice); err != nil {
+				return fmt.Errorf("error while setting api_subnet_allow_list property for cluster with ID: %s, error: %w", d.Id(), err)
 			}
 		}
 

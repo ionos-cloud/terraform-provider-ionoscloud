@@ -1,3 +1,7 @@
+## 6.7.0 -- upcoming release
+### Fixes
+- Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nill values.
+
 ## 6.6.9
 ### Features
 - Add support for Monitoring Service: `ionoscloud_monitoring_pipeline` resource and data source.
