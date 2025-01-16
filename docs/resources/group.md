@@ -33,21 +33,30 @@ resource "ionoscloud_user" "example2" {
 }
 
 resource "ionoscloud_group" "example" {
-  name                           = "Group Example"
-  create_datacenter              = true
-  create_snapshot                = true
-  reserve_ip                     = true
-  access_activity_log            = true
-  create_pcc                     = true
-  s3_privilege                   = true
-  create_backup_unit             = true
-  create_internet_access         = true
-  create_k8s_cluster             = true
-  create_flow_log                = true
-  access_and_manage_monitoring   = true
-  access_and_manage_certificates = true
-  manage_dbaas                   = true
-  user_ids                = [ ionoscloud_user.example1.id, ionoscloud_user.example2.id ] 
+  name                                   = "Group Example"
+  create_datacenter                      = true
+  create_snapshot                        = true
+  reserve_ip                             = true
+  access_activity_log                    = true
+  create_pcc                             = true
+  s3_privilege                           = true
+  create_backup_unit                     = true
+  create_internet_access                 = true
+  create_k8s_cluster                     = true
+  create_flow_log                        = true
+  access_and_manage_monitoring           = true
+  access_and_manage_certificates         = true
+  access_and_manage_logging              = true
+  access_and_manage_cdn                  = true
+  access_and_manage_vpn                  = true
+  access_and_manage_api_gateway          = true
+  access_and_manage_kaas                 = true
+  access_and_manage_network_file_storage = true
+  access_and_manage_ai_model_hub         = true
+  access_and_manage_iam_resources        = true
+  create_network_security_groups         = true
+  manage_dbaas                           = true
+  user_ids                               = [ ionoscloud_user.example1.id, ionoscloud_user.example2.id ] 
 }
 
 resource "random_password" "user1_password" {
@@ -78,6 +87,15 @@ resource "random_password" "user2_password" {
 * `create_flow_log` - (Optional) [Boolean]  The group will be allowed to create flow log.
 * `access_and_manage_monitoring` - (Optional) [Boolean]  The group will be allowed to access and manage monitoring.
 * `access_and_manage_certificates` - (Optional) [Boolean]  The group will be allowed to access and manage certificates.
+* `access_and_manage_logging` - (Optional) [Boolean]  The group will be allowed to access and manage logging.
+* `access_and_manage_cdn` - (Optional) [Boolean]  The group will be allowed to access and manage cdn.
+* `access_and_manage_vpn` - (Optional) [Boolean]  The group will be allowed to access and manage vpn.
+* `access_and_manage_api_gateway` - (Optional) [Boolean]  The group will be allowed to access and manage api gateway.
+* `access_and_manage_kaas` - (Optional) [Boolean]  The group will be allowed to access and manage kaas.
+* `access_and_manage_network_file_storage` - (Optional) [Boolean]  The group will be allowed to access and manage network file storage.
+* `access_and_manage_ai_model_hub` - (Optional) [Boolean]  The group will be allowed to access and manage ai model hub.
+* `access_and_manage_iam_resources` - (Optional) [Boolean]  The group will be allowed to access and manage iam resources.
+* `create_network_security_groups` - (Optional) [Boolean]  The group will be allowed to create network security groups.
 * `manage_dbaas` - (Optional) [Boolean]  Privilege for a group to manage DBaaS related functionality.
 * `user_ids` - (Optional) [list] A list of users to add to the group.
 * `user_id` - (Optional) [string] The ID of the specific user to add to the group. Please use user_ids argument since this is **DEPRECATED**
