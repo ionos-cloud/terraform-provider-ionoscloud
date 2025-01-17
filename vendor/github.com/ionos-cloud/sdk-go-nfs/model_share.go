@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.1
+ * API version: 0.1.3
  * Contact: support@cloud.ionos.com
  */
 
@@ -21,9 +21,9 @@ type Share struct {
 	Name *string `json:"name"`
 	// The quota in MiB for the export. The quota can restrict the amount of data that can be stored within the export. The quota can be disabled using `0`.
 	Quota *int32 `json:"quota,omitempty"`
-	// The group ID that will own the exported directory. If not set, **anonymous** (`512`) will be used.
+	// The group ID that will own the exported directory and be used as anongid in squash modes root-anonymous and all-anonymous.
 	Gid *int32 `json:"gid,omitempty"`
-	// The user ID that will own the exported directory. If not set, **anonymous** (`512`) will be used.
+	// The user ID that will own the exported directory and be used as anonuid in squash modes root-anonymous and all-anonymous.
 	Uid *int32 `json:"uid,omitempty"`
 	// The groups of clients are the systems connecting to the Network File Storage cluster.
 	ClientGroups *[]ShareClientGroups `json:"clientGroups"`
@@ -39,9 +39,9 @@ func NewShare(name string, clientGroups []ShareClientGroups) *Share {
 	this.Name = &name
 	var quota int32 = 0
 	this.Quota = &quota
-	var gid int32 = 512
+	var gid int32 = 65534
 	this.Gid = &gid
-	var uid int32 = 512
+	var uid int32 = 65534
 	this.Uid = &uid
 	this.ClientGroups = &clientGroups
 
@@ -55,9 +55,9 @@ func NewShareWithDefaults() *Share {
 	this := Share{}
 	var quota int32 = 0
 	this.Quota = &quota
-	var gid int32 = 512
+	var gid int32 = 65534
 	this.Gid = &gid
-	var uid int32 = 512
+	var uid int32 = 65534
 	this.Uid = &uid
 	return &this
 }

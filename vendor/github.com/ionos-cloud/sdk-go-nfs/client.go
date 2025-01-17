@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.1
+ * API version: 0.1.3
  * Contact: support@cloud.ionos.com
  */
 
@@ -51,10 +51,10 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.0.0"
+	Version = "1.1.1"
 )
 
-// APIClient manages communication with the IONOS Cloud - Network File Storage API API v0.1.1
+// APIClient manages communication with the IONOS Cloud - Network File Storage API API v0.1.3
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration
