@@ -45,7 +45,6 @@ func (c *Client) UpdateNFSCluster(ctx context.Context, d *schema.ResourceData) (
 func (c *Client) CreateNFSCluster(ctx context.Context, d *schema.ResourceData) (sdk.ClusterRead, *sdk.APIResponse, error) {
 	cluster, apiResponse, err := c.Location(d.Get("location").(string)).sdkClient.ClustersApi.ClustersPost(ctx).
 		ClusterCreate(*setClusterPostRequest(d)).Execute()
-	log.Println(d.Get("location").(string))
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
