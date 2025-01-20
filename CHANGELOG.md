@@ -1021,3 +1021,5 @@ FEATURES:
   https://nfs.us-ewr.ionos.com (Newark, USA)
   https://nfs.us-mci.ionos.com (Lenexa, USA)
 
+### Fixes:
+- Changed Dead link in MongoDB cluster docs
