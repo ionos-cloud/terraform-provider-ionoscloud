@@ -56,6 +56,11 @@ func dataSourceLan() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"ipv4_cidr_block": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "For public LANs this property is null, for private LANs it contains the private IPv4 CIDR range.",
+			},
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
 				Computed: true,

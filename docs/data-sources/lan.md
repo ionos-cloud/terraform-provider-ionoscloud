@@ -51,3 +51,5 @@ The following attributes are returned by the datasource:
     * `ip`
 * `pcc` - The unique id of a `ionoscloud_private_crossconnect` resource, in order.
 * `public` - Indicates if the LAN faces the public Internet (true) or not (false).
+* `ipv4_cidr_block` - For public LANs this property is null, for private LANs it contains the private IPv4 CIDR range.
+* `ipv6_cidr_block` - Contains the LAN's /64 IPv6 CIDR block if this LAN is IPv6 enabled.

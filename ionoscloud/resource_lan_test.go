@@ -18,6 +18,7 @@ import (
 
 func TestAccLanBasic(t *testing.T) {
 	var lan ionoscloud.Lan
+	var privateLAN ionoscloud.Lan
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -37,12 +38,12 @@ func TestAccLanBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceLanMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "name", constant.LanResource+"."+constant.LanTestResource, "name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "ip_failover.nic_uuid", constant.LanResource+"."+constant.LanTestResource, "ip_failover.nic_uuid"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "ip_failover.ip", constant.LanResource+"."+constant.LanTestResource, "ip_failover.ip"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "pcc", constant.LanResource+"."+constant.LanTestResource, "pcc"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "public", constant.LanResource+"."+constant.LanTestResource, "public"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "ipv6_cidr_block", constant.LanResource+"."+constant.LanTestResource, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByID, "name", constant.LanResource+"."+constant.LanTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByID, "ip_failover.nic_uuid", constant.LanResource+"."+constant.LanTestResource, "ip_failover.nic_uuid"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByID, "ip_failover.ip", constant.LanResource+"."+constant.LanTestResource, "ip_failover.ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByID, "pcc", constant.LanResource+"."+constant.LanTestResource, "pcc"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByID, "public", constant.LanResource+"."+constant.LanTestResource, "public"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByID, "ipv6_cidr_block", constant.LanResource+"."+constant.LanTestResource, "ipv6_cidr_block"),
 				),
 			},
 			{
@@ -70,7 +71,28 @@ func TestAccLanBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.LanResource+"."+constant.LanTestResource, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(constant.LanResource+"."+constant.LanTestResource, "public", "false"),
 					resource.TestCheckResourceAttrPair(constant.LanResource+"."+constant.LanTestResource, "pcc", constant.PCCResource+"."+constant.PCCTestResource, "id"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceById, "ipv6_cidr_block", constant.LanResource+"."+constant.LanTestResource, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByID, "ipv6_cidr_block", constant.LanResource+"."+constant.LanTestResource, "ipv6_cidr_block"),
+				),
+			},
+			{
+				Config: privateLANConfig,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLanExists(constant.LanResource+"."+constant.PrivateLANTestResource, &privateLAN),
+					resource.TestCheckResourceAttr(constant.LanResource+"."+constant.PrivateLANTestResource, "name", constant.PrivateLANTestResource),
+					resource.TestCheckResourceAttr(constant.LanResource+"."+constant.PrivateLANTestResource, "public", "false"),
+					resource.TestCheckResourceAttrSet(constant.LanResource+"."+constant.PrivateLANTestResource, "ipv4_cidr_block"),
+				),
+			},
+			{
+				Config: dataSourcePrivateLANMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.PrivateLANDataSourceByName, "name", constant.LanResource+"."+constant.PrivateLANTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.PrivateLANDataSourceByName, "ip_failover.nic_uuid", constant.LanResource+"."+constant.PrivateLANTestResource, "ip_failover.nic_uuid"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.PrivateLANDataSourceByName, "ip_failover.ip", constant.LanResource+"."+constant.PrivateLANTestResource, "ip_failover.ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.PrivateLANDataSourceByName, "pcc", constant.LanResource+"."+constant.PrivateLANTestResource, "pcc"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.PrivateLANDataSourceByName, "public", constant.LanResource+"."+constant.PrivateLANTestResource, "public"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.PrivateLANDataSourceByName, "ipv4_cidr_block", constant.LanResource+"."+constant.PrivateLANTestResource, "ipv4_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.PrivateLANDataSourceByName, "ipv6_cidr_block", constant.LanResource+"."+constant.PrivateLANTestResource, "ipv6_cidr_block"),
 				),
 			},
 		},
@@ -148,14 +170,14 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   pcc = ` + constant.PCCResource + `.` + constant.PCCTestResource + `.id
   ipv6_cidr_block = cidrsubnet(` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.ipv6_cidr_block` + `,8,2)
 }
-data ` + constant.LanResource + ` ` + constant.LanDataSourceById + ` {
+data ` + constant.LanResource + ` ` + constant.LanDataSourceByID + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   id = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
 }
 `
 
 const testAccDataSourceLanMatchId = testAccCheckLanConfigBasic + `
-data ` + constant.LanResource + ` ` + constant.LanDataSourceById + ` {
+data ` + constant.LanResource + ` ` + constant.LanDataSourceByID + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   id			= ` + constant.LanResource + `.` + constant.LanTestResource + `.id
 }
@@ -165,6 +187,13 @@ const testAccDataSourceLanMatchName = testAccCheckLanConfigBasic + `
 data ` + constant.LanResource + ` ` + constant.LanDataSourceByName + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   name			= "` + constant.LanTestResource + `"
+}
+`
+
+const dataSourcePrivateLANMatchName = privateLANConfig + `
+data ` + constant.LanResource + ` ` + constant.PrivateLANDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name			= "` + constant.PrivateLANTestResource + `"
 }
 `
 
