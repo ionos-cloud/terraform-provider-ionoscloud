@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.1
+ * API version: 0.1.3
  * Contact: support@cloud.ionos.com
  */
 
@@ -39,6 +39,12 @@ var (
 	IonosServerUrls = []string{
 		"https://nfs.de-fra.ionos.com",
 		"https://nfs.de-txl.ionos.com",
+		"https://nfs.fr-par.ionos.com",
+		"https://nfs.gb-lhr.ionos.com",
+		"https://nfs.es-vit.ionos.com",
+		"https://nfs.us-las.ionos.com",
+		"https://nfs.us-ewr.ionos.com",
+		"https://nfs.us-mci.ionos.com",
 	}
 )
 
@@ -136,7 +142,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go-nfs/v1.0.0",
+		UserAgent:          "ionos-cloud-sdk-go-nfs/v1.1.1",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -154,6 +160,30 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 			{
 				URL:         getServerUrl(hostUrl),
 				Description: "Berlin, Germany",
+			},
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "Paris, France",
+			},
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "London, Great Britain",
+			},
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "Logroño, Spain",
+			},
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "Las Vegas, USA",
+			},
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "Newark, USA",
+			},
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "Lenexa, USA",
 			},
 		},
 		OperationServers: map[string]ServerConfigurations{},

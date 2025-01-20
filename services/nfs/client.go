@@ -51,6 +51,12 @@ func (c *Client) Location(location string) *Client {
 		"":       "https://nfs.de-fra.ionos.com",
 		"de/fra": "https://nfs.de-fra.ionos.com",
 		"de/txl": "https://nfs.de-txl.ionos.com",
+		"fr/par": "https://nfs.fr-par.ionos.com",
+		"gb/lhr": "https://nfs.gb-lhr.ionos.com",
+		"es/vit": "https://nfs.es-vit.ionos.com",
+		"us/las": "https://nfs.us-las.ionos.com",
+		"us/ewr": "https://nfs.us-ewr.ionos.com",
+		"us/mci": "https://nfs.us-mci.ionos.com",
 	}
 	c.sdkClient.GetConfig().Servers = sdk.ServerConfigurations{
 		{
@@ -62,7 +68,7 @@ func (c *Client) Location(location string) *Client {
 }
 
 // ValidNFSLocations is a list of valid locations for the Network File Storage Cluster.
-var ValidNFSLocations = []string{"de/fra", "de/txl"}
+var ValidNFSLocations = []string{"de/fra", "de/txl", "fr-par", "gb-lhr", "es/vit", "us/las", "us/ewr", "us/mci"}
 
 // ionosAPIURLNFS is the environment variable key for the NFS API URL.
 var ionosAPIURLNFS = "IONOS_API_URL_NFS"

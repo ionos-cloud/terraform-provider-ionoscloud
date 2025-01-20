@@ -144,6 +144,8 @@ github.com/ionos-cloud/sdk-go-kafka v1.0.0 h1:S0Tfy/KlYW7UJW6DoU43fF0/iNPc1YKC+A
 github.com/ionos-cloud/sdk-go-kafka v1.0.0/go.mod h1:yIq1FjRtdcbwmybb42puagpLjmD2wbWAew8UMHO5wqU=
 github.com/ionos-cloud/sdk-go-nfs v1.0.0 h1:CyiemTDPg2jAjtTT4JHzvOpjq6lqe7YbXx2iq2gx98s=
 github.com/ionos-cloud/sdk-go-nfs v1.0.0/go.mod h1:ffyMIPVknZ7dpi/+RomWXNNYV7ZjtK8KYSsGjVlbqgA=
+github.com/ionos-cloud/sdk-go-nfs v1.1.1 h1:tMMUPGKRQm2z5FTIMFoE/DJ8Xw3522T0jVutCGmsyMw=
+github.com/ionos-cloud/sdk-go-nfs v1.1.1/go.mod h1:jgNAKLmjzBP6RzPnjydleZzVlAL8KnYKPcBjWgLVxJk=
 github.com/ionos-cloud/sdk-go-object-storage v1.1.0 h1:4JTsxrbzFltF9liAHZ2I9f53rpkrXm8642UwQoQ+pMc=
 github.com/ionos-cloud/sdk-go-object-storage v1.1.0/go.mod h1:GMNkyZp5B70QInLTS79LWbZ7hoEy4F8TWL82zeInwBo=
 github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0 h1:pHRKSNT+cCcr5ghWMkCgY2ErxrcQCAjlCJu/VrdexUw=
@@ -237,6 +239,8 @@ golang.org/x/net v0.28.0 h1:a9JDOJc5GMUJ0+UDqmLT86WiEy7iWyIhz8gz8E4e5hE=
 golang.org/x/net v0.28.0/go.mod h1:yqtgsTWOOnlGLG9GFRrK3++bGOUEkNBoHZc8MEDWPNg=
 golang.org/x/oauth2 v0.22.0 h1:BzDx2FehcG7jJwgWLELCdmLuxk2i+x9UDpSiss2u0ZA=
 golang.org/x/oauth2 v0.22.0/go.mod h1:XYTD2NtWslqkgxebSiOHnXEap4TF09sJSc7H1sXbhtI=
+golang.org/x/oauth2 v0.25.0 h1:CY4y7XT9v0cRI9oupztF8AgiIu99L/ksR/Xp/6jrZ70=
+golang.org/x/oauth2 v0.25.0/go.mod h1:XYTD2NtWslqkgxebSiOHnXEap4TF09sJSc7H1sXbhtI=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=

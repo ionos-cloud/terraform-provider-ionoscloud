@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.1
+ * API version: 0.1.3
  * Contact: support@cloud.ionos.com
  */
 
@@ -17,7 +17,7 @@ import (
 
 // ShareClientGroupsNfs NFS specific configurations.
 type ShareClientGroupsNfs struct {
-	// The squash mode for the export. The squash mode can be: * `none` - No squash mode. no mapping * `root-anonymous` - Map root user to anonymous uid. * `all-anonymous` - Map all users to anonymous uid.
+	// The squash mode for the export. The squash mode can be: * `none` - No squash mode. no mapping (no_all_squash,no_root_squash). * `root-anonymous` - Map root user to anonymous uid (root_squash,anonuid=<uid>,anongid=<gid>). * `all-anonymous` - Map all users to anonymous uid (all_squash,anonuid=<uid>,anongid=<gid>).
 	Squash *string `json:"squash,omitempty"`
 }
 
