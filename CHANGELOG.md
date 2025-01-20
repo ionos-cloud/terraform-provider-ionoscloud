@@ -1011,3 +1011,13 @@ FEATURES:
 
 FEATURES:
 - Terraform-provider-profitbricks rebranding to terraform-provider-ionoscloud
+
+### Features:
+- Update the NFS API's supported location list to include the following locations:
+  https://nfs.fr-par.ionos.com (Paris, France)
+  https://nfs.gb-lhr.ionos.com (London, Great Britain)
+  https://nfs.es-vit.ionos.com (Logroño, Spain)
+  https://nfs.us-las.ionos.com (Las Vegas, USA)
+  https://nfs.us-ewr.ionos.com (Newark, USA)
+  https://nfs.us-mci.ionos.com (Lenexa, USA)
+
