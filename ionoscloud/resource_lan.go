@@ -29,7 +29,6 @@ func resourceLan() *schema.Resource {
 			StateContext: resourceLanImport,
 		},
 		Schema: map[string]*schema.Schema{
-
 			"public": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -65,6 +64,11 @@ func resourceLan() *schema.Resource {
 					},
 				},
 			},
+			"ipv4_cidr_block": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "For public LANs this property is null, for private LANs it contains the private IPv4 CIDR range. This property is a read only property.",
+			},
 			"ipv6_cidr_block": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -92,9 +96,8 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		},
 	}
 
-	name := d.Get("name").(string)
-	log.Printf("[DEBUG] NAME %s", d.Get("name"))
 	if d.Get("name") != nil {
+		name := d.Get("name").(string)
 		request.Properties.Name = &name
 	}
 
@@ -138,14 +141,14 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	for {
 		log.Printf("[INFO] Waiting for LAN %s to be available...", *rsp.Id)
 
-		clusterReady, rsErr := lanAvailable(ctx, client, d)
+		lanReady, rsErr := lanAvailable(ctx, client, d)
 
 		if rsErr != nil {
 			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of LAN %s: %w", *rsp.Id, rsErr))
 			return diags
 		}
 
-		if clusterReady {
+		if lanReady {
 			log.Printf("[INFO] LAN ready: %s", d.Id())
 			break
 		}
@@ -326,6 +329,13 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 				return err
 			}
 		}
+
+		if lan.Properties.Ipv4CidrBlock != nil {
+			if err := d.Set("ipv4_cidr_block", *lan.Properties.Ipv4CidrBlock); err != nil {
+				return utils.GenerateSetError("lan", "ipv4_cidr_block", err)
+			}
+		}
+
 		if lan.Properties.Ipv6CidrBlock != nil {
 			if err := d.Set("ipv6_cidr_block", *lan.Properties.Ipv6CidrBlock); err != nil {
 				return utils.GenerateSetError("lan", "ipv6_cidr_block", err)

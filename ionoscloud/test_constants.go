@@ -39,6 +39,13 @@ resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   public = true
   name = "` + constant.LanTestResource + `"
 }`
+
+	privateLANConfig = testAccCheckDatacenterConfigBasic + `
+resource ` + constant.LanResource + ` ` + constant.PrivateLANTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = false
+  name = "` + constant.PrivateLANTestResource + `"
+}`
 )
 
 // Private Crossconnect Constants

@@ -113,10 +113,12 @@ const (
 
 // Lan Constants
 const (
-	LanResource         = "ionoscloud_lan"
-	LanTestResource     = "test_lan"
-	LanDataSourceById   = "test_lan_id"
-	LanDataSourceByName = "test_lan_name"
+	LanResource                = "ionoscloud_lan"
+	LanTestResource            = "test_lan"
+	PrivateLANTestResource     = "private_lan"
+	LanDataSourceByID          = "test_lan_id"
+	LanDataSourceByName        = "test_lan_name"
+	PrivateLANDataSourceByName = "private_lan_name"
 )
 
 // Group Constants

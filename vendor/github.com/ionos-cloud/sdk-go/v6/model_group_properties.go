@@ -50,6 +50,24 @@ type GroupProperties struct {
 	ManageRegistry *bool `json:"manageRegistry,omitempty"`
 	// Privilege for a group to access and manage the Data Platform.
 	ManageDataplatform *bool `json:"manageDataplatform,omitempty"`
+	// Privilege for a group to access and manage Logs.
+	AccessAndManageLogging *bool `json:"accessAndManageLogging,omitempty"`
+	// Privilege for a group to access and manage CDN.
+	AccessAndManageCdn *bool `json:"accessAndManageCdn,omitempty"`
+	// Privilege for a group to access and manage VPN.
+	AccessAndManageVpn *bool `json:"accessAndManageVpn,omitempty"`
+	// Privilege for a group to access and manage API Gateway.
+	AccessAndManageApiGateway *bool `json:"accessAndManageApiGateway,omitempty"`
+	// Privilege for a group to access and manage KaaS.
+	AccessAndManageKaas *bool `json:"accessAndManageKaas,omitempty"`
+	// Privilege for a group to access and manage Network File Storage.
+	AccessAndManageNetworkFileStorage *bool `json:"accessAndManageNetworkFileStorage,omitempty"`
+	// Privilege for a group to access and manage AI Model Hub.
+	AccessAndManageAiModelHub *bool `json:"accessAndManageAiModelHub,omitempty"`
+	// Privilege for a group to access and manage Password Policies.
+	AccessAndManageIamResources *bool `json:"accessAndManageIamResources,omitempty"`
+	// Privilege for a group to access and manage Network Security Groups.
+	CreateNetworkSecurityGroups *bool `json:"createNetworkSecurityGroups,omitempty"`
 }
 
 // NewGroupProperties instantiates a new GroupProperties object
@@ -716,6 +734,348 @@ func (o *GroupProperties) HasManageDataplatform() bool {
 	return false
 }
 
+// GetAccessAndManageLogging returns the AccessAndManageLogging field value
+// If the value is explicit nil, nil is returned
+func (o *GroupProperties) GetAccessAndManageLogging() *bool {
+	if o == nil {
+		return nil
+	}
+
+	return o.AccessAndManageLogging
+
+}
+
+// GetAccessAndManageLoggingOk returns a tuple with the AccessAndManageLogging field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *GroupProperties) GetAccessAndManageLoggingOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.AccessAndManageLogging, true
+}
+
+// SetAccessAndManageLogging sets field value
+func (o *GroupProperties) SetAccessAndManageLogging(v bool) {
+
+	o.AccessAndManageLogging = &v
+
+}
+
+// HasAccessAndManageLogging returns a boolean if a field has been set.
+func (o *GroupProperties) HasAccessAndManageLogging() bool {
+	if o != nil && o.AccessAndManageLogging != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetAccessAndManageCdn returns the AccessAndManageCdn field value
+// If the value is explicit nil, nil is returned
+func (o *GroupProperties) GetAccessAndManageCdn() *bool {
+	if o == nil {
+		return nil
+	}
+
+	return o.AccessAndManageCdn
+
+}
+
+// GetAccessAndManageCdnOk returns a tuple with the AccessAndManageCdn field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *GroupProperties) GetAccessAndManageCdnOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.AccessAndManageCdn, true
+}
+
+// SetAccessAndManageCdn sets field value
+func (o *GroupProperties) SetAccessAndManageCdn(v bool) {
+
+	o.AccessAndManageCdn = &v
+
+}
+
+// HasAccessAndManageCdn returns a boolean if a field has been set.
+func (o *GroupProperties) HasAccessAndManageCdn() bool {
+	if o != nil && o.AccessAndManageCdn != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetAccessAndManageVpn returns the AccessAndManageVpn field value
+// If the value is explicit nil, nil is returned
+func (o *GroupProperties) GetAccessAndManageVpn() *bool {
+	if o == nil {
+		return nil
+	}
+
+	return o.AccessAndManageVpn
+
+}
+
+// GetAccessAndManageVpnOk returns a tuple with the AccessAndManageVpn field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *GroupProperties) GetAccessAndManageVpnOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.AccessAndManageVpn, true
+}
+
+// SetAccessAndManageVpn sets field value
+func (o *GroupProperties) SetAccessAndManageVpn(v bool) {
+
+	o.AccessAndManageVpn = &v
+
+}
+
+// HasAccessAndManageVpn returns a boolean if a field has been set.
+func (o *GroupProperties) HasAccessAndManageVpn() bool {
+	if o != nil && o.AccessAndManageVpn != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetAccessAndManageApiGateway returns the AccessAndManageApiGateway field value
+// If the value is explicit nil, nil is returned
+func (o *GroupProperties) GetAccessAndManageApiGateway() *bool {
+	if o == nil {
+		return nil
+	}
+
+	return o.AccessAndManageApiGateway
+
+}
+
+// GetAccessAndManageApiGatewayOk returns a tuple with the AccessAndManageApiGateway field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *GroupProperties) GetAccessAndManageApiGatewayOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.AccessAndManageApiGateway, true
+}
+
+// SetAccessAndManageApiGateway sets field value
+func (o *GroupProperties) SetAccessAndManageApiGateway(v bool) {
+
+	o.AccessAndManageApiGateway = &v
+
+}
+
+// HasAccessAndManageApiGateway returns a boolean if a field has been set.
+func (o *GroupProperties) HasAccessAndManageApiGateway() bool {
+	if o != nil && o.AccessAndManageApiGateway != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetAccessAndManageKaas returns the AccessAndManageKaas field value
+// If the value is explicit nil, nil is returned
+func (o *GroupProperties) GetAccessAndManageKaas() *bool {
+	if o == nil {
+		return nil
+	}
+
+	return o.AccessAndManageKaas
+
+}
+
+// GetAccessAndManageKaasOk returns a tuple with the AccessAndManageKaas field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *GroupProperties) GetAccessAndManageKaasOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.AccessAndManageKaas, true
+}
+
+// SetAccessAndManageKaas sets field value
+func (o *GroupProperties) SetAccessAndManageKaas(v bool) {
+
+	o.AccessAndManageKaas = &v
+
+}
+
+// HasAccessAndManageKaas returns a boolean if a field has been set.
+func (o *GroupProperties) HasAccessAndManageKaas() bool {
+	if o != nil && o.AccessAndManageKaas != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetAccessAndManageNetworkFileStorage returns the AccessAndManageNetworkFileStorage field value
+// If the value is explicit nil, nil is returned
+func (o *GroupProperties) GetAccessAndManageNetworkFileStorage() *bool {
+	if o == nil {
+		return nil
+	}
+
+	return o.AccessAndManageNetworkFileStorage
+
+}
+
+// GetAccessAndManageNetworkFileStorageOk returns a tuple with the AccessAndManageNetworkFileStorage field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *GroupProperties) GetAccessAndManageNetworkFileStorageOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.AccessAndManageNetworkFileStorage, true
+}
+
+// SetAccessAndManageNetworkFileStorage sets field value
+func (o *GroupProperties) SetAccessAndManageNetworkFileStorage(v bool) {
+
+	o.AccessAndManageNetworkFileStorage = &v
+
+}
+
+// HasAccessAndManageNetworkFileStorage returns a boolean if a field has been set.
+func (o *GroupProperties) HasAccessAndManageNetworkFileStorage() bool {
+	if o != nil && o.AccessAndManageNetworkFileStorage != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetAccessAndManageAiModelHub returns the AccessAndManageAiModelHub field value
+// If the value is explicit nil, nil is returned
+func (o *GroupProperties) GetAccessAndManageAiModelHub() *bool {
+	if o == nil {
+		return nil
+	}
+
+	return o.AccessAndManageAiModelHub
+
+}
+
+// GetAccessAndManageAiModelHubOk returns a tuple with the AccessAndManageAiModelHub field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *GroupProperties) GetAccessAndManageAiModelHubOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.AccessAndManageAiModelHub, true
+}
+
+// SetAccessAndManageAiModelHub sets field value
+func (o *GroupProperties) SetAccessAndManageAiModelHub(v bool) {
+
+	o.AccessAndManageAiModelHub = &v
+
+}
+
+// HasAccessAndManageAiModelHub returns a boolean if a field has been set.
+func (o *GroupProperties) HasAccessAndManageAiModelHub() bool {
+	if o != nil && o.AccessAndManageAiModelHub != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetAccessAndManageIamResources returns the AccessAndManageIamResources field value
+// If the value is explicit nil, nil is returned
+func (o *GroupProperties) GetAccessAndManageIamResources() *bool {
+	if o == nil {
+		return nil
+	}
+
+	return o.AccessAndManageIamResources
+
+}
+
+// GetAccessAndManageIamResourcesOk returns a tuple with the AccessAndManageIamResources field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *GroupProperties) GetAccessAndManageIamResourcesOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.AccessAndManageIamResources, true
+}
+
+// SetAccessAndManageIamResources sets field value
+func (o *GroupProperties) SetAccessAndManageIamResources(v bool) {
+
+	o.AccessAndManageIamResources = &v
+
+}
+
+// HasAccessAndManageIamResources returns a boolean if a field has been set.
+func (o *GroupProperties) HasAccessAndManageIamResources() bool {
+	if o != nil && o.AccessAndManageIamResources != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetCreateNetworkSecurityGroups returns the CreateNetworkSecurityGroups field value
+// If the value is explicit nil, nil is returned
+func (o *GroupProperties) GetCreateNetworkSecurityGroups() *bool {
+	if o == nil {
+		return nil
+	}
+
+	return o.CreateNetworkSecurityGroups
+
+}
+
+// GetCreateNetworkSecurityGroupsOk returns a tuple with the CreateNetworkSecurityGroups field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *GroupProperties) GetCreateNetworkSecurityGroupsOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.CreateNetworkSecurityGroups, true
+}
+
+// SetCreateNetworkSecurityGroups sets field value
+func (o *GroupProperties) SetCreateNetworkSecurityGroups(v bool) {
+
+	o.CreateNetworkSecurityGroups = &v
+
+}
+
+// HasCreateNetworkSecurityGroups returns a boolean if a field has been set.
+func (o *GroupProperties) HasCreateNetworkSecurityGroups() bool {
+	if o != nil && o.CreateNetworkSecurityGroups != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o GroupProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Name != nil {
@@ -784,6 +1144,42 @@ func (o GroupProperties) MarshalJSON() ([]byte, error) {
 
 	if o.ManageDataplatform != nil {
 		toSerialize["manageDataplatform"] = o.ManageDataplatform
+	}
+
+	if o.AccessAndManageLogging != nil {
+		toSerialize["accessAndManageLogging"] = o.AccessAndManageLogging
+	}
+
+	if o.AccessAndManageCdn != nil {
+		toSerialize["accessAndManageCdn"] = o.AccessAndManageCdn
+	}
+
+	if o.AccessAndManageVpn != nil {
+		toSerialize["accessAndManageVpn"] = o.AccessAndManageVpn
+	}
+
+	if o.AccessAndManageApiGateway != nil {
+		toSerialize["accessAndManageApiGateway"] = o.AccessAndManageApiGateway
+	}
+
+	if o.AccessAndManageKaas != nil {
+		toSerialize["accessAndManageKaas"] = o.AccessAndManageKaas
+	}
+
+	if o.AccessAndManageNetworkFileStorage != nil {
+		toSerialize["accessAndManageNetworkFileStorage"] = o.AccessAndManageNetworkFileStorage
+	}
+
+	if o.AccessAndManageAiModelHub != nil {
+		toSerialize["accessAndManageAiModelHub"] = o.AccessAndManageAiModelHub
+	}
+
+	if o.AccessAndManageIamResources != nil {
+		toSerialize["accessAndManageIamResources"] = o.AccessAndManageIamResources
+	}
+
+	if o.CreateNetworkSecurityGroups != nil {
+		toSerialize["createNetworkSecurityGroups"] = o.CreateNetworkSecurityGroups
 	}
 
 	return json.Marshal(toSerialize)
