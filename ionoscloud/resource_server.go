@@ -583,26 +583,24 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		// add remaining properties in volume (dependent in image and imageAlias)
+		volume.ImageAlias = nil
 		if imageAlias != "" {
 			volume.ImageAlias = &imageAlias
-		} else {
-			volume.ImageAlias = nil
 		}
 
+		volume.Image = nil
 		if image != "" {
 			volume.Image = &image
-		} else {
-			volume.Image = nil
 		}
-		if backupUnitId, ok := d.GetOk("volume.0.backup_unit_id"); ok {
-			if utils.IsValidUUID(backupUnitId.(string)) {
+
+		if backupUnitID, ok := d.GetOk("volume.0.backup_unit_id"); ok {
+			if utils.IsValidUUID(backupUnitID.(string)) {
 				if image == "" && imageAlias == "" {
 					diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property"))
 					return diags
-				} else {
-					backupUnitId := backupUnitId.(string)
-					volume.BackupunitId = &backupUnitId
 				}
+				backupUnitID := backupUnitID.(string)
+				volume.BackupunitId = &backupUnitID
 			}
 		}
 
@@ -610,10 +608,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			if image == "" && imageAlias == "" {
 				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property "))
 				return diags
-			} else {
-				userData := userData.(string)
-				volume.UserData = &userData
 			}
+			userData := userData.(string)
+			volume.UserData = &userData
+
 		}
 		// add volume object to serverReq
 		serverReq.Entities = &ionoscloud.ServerEntities{
