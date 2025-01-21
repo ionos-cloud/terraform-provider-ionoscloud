@@ -119,6 +119,12 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"allow_replace": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When set to true, allows the update of immutable fields by destroying and re-creating the cluster.",
+			},
 			"backup_location": {
 				Type:        schema.TypeString,
 				Description: "The Object Storage location where the backups will be stored.",
