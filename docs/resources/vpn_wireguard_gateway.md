@@ -84,7 +84,7 @@ In addition to all arguments above, the following attributes are exported:
 - `status` - (Computed)[String] The current status of the WireGuard Gateway.
 - `public_key` - (Computed)[String] The public key for the WireGuard Gateway.
 - 
-> **⚠ NOTE:** `IONOS_API_URL_VPN` can be used to set a custom API URL for the resource. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `token` or `IONOS_API_URL` does not have any effect.
+> **⚠ NOTE:** `IONOS_API_URL_VPN` can be used to set a custom API URL for the resource. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `endpoint` or `IONOS_API_URL` does not have any effect.
 
 ## Import
 
