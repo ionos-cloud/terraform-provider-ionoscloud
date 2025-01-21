@@ -23,7 +23,7 @@ type AutoCertificate struct {
 	// The key algorithm used to generate the certificate.
 	KeyAlgorithm *string `json:"keyAlgorithm"`
 	// A certificate name used for management purposes.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name"`
 	// Optional additional names to be added to the issued certificate. The additional names needs to be part of a zone in IONOS Cloud DNS.
 	SubjectAlternativeNames *[]string `json:"subjectAlternativeNames,omitempty"`
 }
@@ -32,12 +32,13 @@ type AutoCertificate struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAutoCertificate(provider string, commonName string, keyAlgorithm string) *AutoCertificate {
+func NewAutoCertificate(provider string, commonName string, keyAlgorithm string, name string) *AutoCertificate {
 	this := AutoCertificate{}
 
 	this.Provider = &provider
 	this.CommonName = &commonName
 	this.KeyAlgorithm = &keyAlgorithm
+	this.Name = &name
 
 	return &this
 }
