@@ -1,8 +1,9 @@
-## 6.7.0 -- upcoming release
+## 6.6.10 -- upcoming release
 ### Fixes
 - Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nill values.
 ### Features
 - Add new read-only attribute: `ipv4_cidr_block` to `ionoscloud_lan` resource and data source.
+- Make `volume` optional for `ionoscloud_server` resource
 
 ## 6.6.9
 ### Features
