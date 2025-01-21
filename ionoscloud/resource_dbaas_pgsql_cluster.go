@@ -61,6 +61,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "The storage type used in your cluster.",
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD", "SSD Premium", "SSD Standard"}, true)),
 			},
 			"connection_pooler": {
@@ -115,6 +116,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"backup_location": {
@@ -122,6 +124,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Description: "The Object Storage location where the backups will be stored.",
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 			},
 			"display_name": {
 				Type:        schema.TypeString,
@@ -154,6 +157,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				MaxItems:    1,
 				Description: "Credentials for the database user to be created.",
 				Required:    true,
+				ForceNew:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"username": {
@@ -175,6 +179,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "Represents different modes of replication.",
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ASYNCHRONOUS", "SYNCHRONOUS", "STRICTLY_SYNCHRONOUS"}, false)),
 			},
 			"from_backup": {
@@ -182,6 +187,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				MaxItems:    1,
 				Description: "Creates the cluster based on the existing backup.",
 				Optional:    true,
+				ForceNew:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"backup_id": {
