@@ -208,6 +208,11 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 	}
 }
 func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+
+	allowReplace := diff.Get("allow_replace").(bool)
+	if allowReplace {
+		return nil
+	}
 	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
