@@ -614,12 +614,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 		}
 		// add volume object to serverReq
-		serverReq.Entities = &ionoscloud.ServerEntities{
-			Volumes: &ionoscloud.AttachedVolumes{
-				Items: &[]ionoscloud.Volume{
-					{
-						Properties: volume,
-					},
+		serverReq.Entities.Volumes = &ionoscloud.AttachedVolumes{
+			Items: &[]ionoscloud.Volume{
+				{
+					Properties: volume,
 				},
 			},
 		}
@@ -768,9 +766,12 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				var firstVolumeItem ionoscloud.Volume
 				if serverReq.Entities.Volumes != nil {
 					volumeItems = serverReq.Entities.Volumes.Items
-					firstVolumeItem = (*volumeItems)[0]
+					if volumeItems != nil && len(*volumeItems) > 0 {
+						firstVolumeItem = (*volumeItems)[0]
+					}
 				}
 				if foundNicProps.Ips != nil &&
+					firstNicIps != nil &&
 					len(*firstNicIps) > 0 &&
 					volumeItems != nil &&
 					len(*volumeItems) > 0 &&
