@@ -182,7 +182,7 @@ func resourceServer() *schema.Resource {
 			},
 			"volume": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -568,65 +568,60 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	serverType := d.Get("type").(string)
 
+	serverReq.Entities = ionoscloud.NewServerEntities()
+
 	// create volume object with data to be used for image
 	volume, err := getVolumeData(d, "volume.0.", serverType)
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	if volume.Type != nil && *volume.Type != "" {
+		// get image and imageAlias
+		image, imageAlias, err := getImage(ctx, client, d, *volume)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-	// get image and imageAlias
-	image, imageAlias, err := getImage(ctx, client, d, *volume)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	// add remaining properties in volume (dependent in image and imageAlias)
-	if imageAlias != "" {
-		volume.ImageAlias = &imageAlias
-	} else {
+		// add remaining properties in volume (dependent in image and imageAlias)
 		volume.ImageAlias = nil
-	}
+		if imageAlias != "" {
+			volume.ImageAlias = &imageAlias
+		}
 
-	if image != "" {
-		volume.Image = &image
-	} else {
 		volume.Image = nil
-	}
+		if image != "" {
+			volume.Image = &image
+		}
 
-	if backupUnitId, ok := d.GetOk("volume.0.backup_unit_id"); ok {
-		if utils.IsValidUUID(backupUnitId.(string)) {
-			if image == "" && imageAlias == "" {
-				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property"))
-				return diags
-			} else {
-				backupUnitId := backupUnitId.(string)
-				volume.BackupunitId = &backupUnitId
+		if backupUnitID, ok := d.GetOk("volume.0.backup_unit_id"); ok {
+			if utils.IsValidUUID(backupUnitID.(string)) {
+				if image == "" && imageAlias == "" {
+					diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property"))
+					return diags
+				}
+				backupUnitID := backupUnitID.(string)
+				volume.BackupunitId = &backupUnitID
 			}
 		}
-	}
 
-	if userData, ok := d.GetOk("volume.0.user_data"); ok {
-		if image == "" && imageAlias == "" {
-			diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property "))
-			return diags
-		} else {
+		if userData, ok := d.GetOk("volume.0.user_data"); ok {
+			if image == "" && imageAlias == "" {
+				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property "))
+				return diags
+			}
 			userData := userData.(string)
 			volume.UserData = &userData
-		}
-	}
 
-	// add volume object to serverReq
-	serverReq.Entities = &ionoscloud.ServerEntities{
-		Volumes: &ionoscloud.AttachedVolumes{
+		}
+		// add volume object to serverReq
+		serverReq.Entities.Volumes = &ionoscloud.AttachedVolumes{
 			Items: &[]ionoscloud.Volume{
 				{
 					Properties: volume,
 				},
 			},
-		},
+		}
 	}
-
 	// get nic data and add object to serverReq
 	if nics, ok := d.GetOk("nic"); ok {
 		serverReq.Entities.Nics = &ionoscloud.Nics{
@@ -767,10 +762,16 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 						return diags
 					}
 				}
-
-				volumeItems := serverReq.Entities.Volumes.Items
-				firstVolumeItem := (*volumeItems)[0]
+				var volumeItems *[]ionoscloud.Volume
+				var firstVolumeItem ionoscloud.Volume
+				if serverReq.Entities.Volumes != nil {
+					volumeItems = serverReq.Entities.Volumes.Items
+					if volumeItems != nil && len(*volumeItems) > 0 {
+						firstVolumeItem = (*volumeItems)[0]
+					}
+				}
 				if foundNicProps.Ips != nil &&
+					firstNicIps != nil &&
 					len(*firstNicIps) > 0 &&
 					volumeItems != nil &&
 					len(*volumeItems) > 0 &&
@@ -1422,10 +1423,6 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 			server.Properties.Ram = &vInt
 		} else {
 			return *server, fmt.Errorf("ram argument is required for %s type of servers\n", serverType)
-		}
-
-		if _, ok := d.GetOk("volume.0.size"); !ok {
-			return *server, fmt.Errorf("volume.0.size argument is required for %s type of servers\n", serverType)
 		}
 	}
 	return *server, nil

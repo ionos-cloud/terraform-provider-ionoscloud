@@ -61,8 +61,6 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "hostname", constant.ServerTestHostname),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "1024"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
 				),
 			},
 			{
@@ -285,7 +283,7 @@ func TestAccServerBasic(t *testing.T) {
 	})
 }
 
-// issue #379
+// issue #379 - also tests if a server can be created without a volume
 func TestAccServerNoBootVolumeBasic(t *testing.T) {
 	var server ionoscloud.Server
 
@@ -298,14 +296,30 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckServerConfigNoBootVolume,
+				Config: testAccCheckServerNoInlineVolumeConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(constant.ServerResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "2048"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "type", "ENTERPRISE"),
+					resource.TestCheckNoResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.#"),
+					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.name", "system"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.mac", constant.NicMac),
+					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.id", constant.ServerResource+"."+constant.ServerTestResource, "primary_nic"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall_type", "INGRESS"),
+				),
+			},
+			{
+				Config: testAccCheckServerConfigInlineVolumeUnknownLicense,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(constant.ServerResource+"."+constant.ServerTestResource, &server),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "2"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "type", "ENTERPRISE"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.size", "6"),
@@ -323,7 +337,25 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckServerConfigNoBootVolumeRemoveServer,
+				Config: testAccCheckServerNoInlineVolumeConfig, // checks if removing the volume works
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(constant.ServerResource+"."+constant.ServerTestResource, &server),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "cores", "2"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "ram", "2048"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "type", "ENTERPRISE"),
+					resource.TestCheckNoResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.#"),
+					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.name", "system"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.mac", constant.NicMac),
+					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.id", constant.ServerResource+"."+constant.ServerTestResource, "primary_nic"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall_type", "INGRESS"),
+				),
+			},
+			{
+				Config: testAccCheckServerConfigRemoveServer,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerAndVolumesDestroyed(constant.DatacenterResource + "." + constant.DatacenterTestResource),
 				),
@@ -1868,8 +1900,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     firewall_active = false
   }
 }`
-
-const testAccCheckServerConfigNoBootVolume = `
+const testAccCheckServerNoInlineVolumeConfig = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
@@ -1886,10 +1917,48 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
-  availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   type = "ENTERPRISE"
-  
+  allow_replace = true
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+	firewall_type = "INGRESS"
+    mac = "` + constant.NicMac + `"
+  }
+}
+
+resource "ionoscloud_volume" "exampleVol1" {
+  datacenter_id           = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id               = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  name                    = "Another Volume Example"
+  availability_zone       = "ZONE_1"
+  size                    = 5
+  disk_type               = "SSD Standard"
+  bus                     = "VIRTIO"
+  licence_type            = "OTHER"
+}
+`
+const testAccCheckServerConfigInlineVolumeUnknownLicense = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores = 2
+  ram = 2048
+  type = "ENTERPRISE"
+  allow_replace = true
   volume {
     name = "system"
     size = 6
@@ -1919,7 +1988,7 @@ resource "ionoscloud_volume" "exampleVol1" {
   licence_type            = "OTHER"
 }
 `
-const testAccCheckServerConfigNoBootVolumeRemoveServer = `
+const testAccCheckServerConfigRemoveServer = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
