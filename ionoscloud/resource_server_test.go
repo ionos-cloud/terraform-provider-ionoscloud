@@ -296,7 +296,7 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckServerConfigNoVolume,
+				Config: testAccCheckServerNoInlineVolumeConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(constant.ServerResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
@@ -337,7 +337,7 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckServerConfigNoVolume, // checks if removing the volume works
+				Config: testAccCheckServerNoInlineVolumeConfig, // checks if removing the volume works
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(constant.ServerResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
@@ -355,7 +355,7 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckServerConfigemoveServer,
+				Config: testAccCheckServerConfigRemoveServer,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerAndVolumesDestroyed(constant.DatacenterResource + "." + constant.DatacenterTestResource),
 				),
@@ -1900,7 +1900,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     firewall_active = false
   }
 }`
-const testAccCheckServerConfigNoVolume = `
+const testAccCheckServerNoInlineVolumeConfig = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
@@ -1988,7 +1988,7 @@ resource "ionoscloud_volume" "exampleVol1" {
   licence_type            = "OTHER"
 }
 `
-const testAccCheckServerConfigemoveServer = `
+const testAccCheckServerConfigRemoveServer = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
