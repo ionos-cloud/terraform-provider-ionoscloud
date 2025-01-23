@@ -50,7 +50,7 @@ func resourceCertificateManagerAutoCertificate() *schema.Resource {
 			},
 			"name": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "A certificate name used for management purposes",
 			},
 			"subject_alternative_names": {
