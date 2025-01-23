@@ -168,6 +168,10 @@ resource "random_password" "cluster_password" {
   * `backup_id` - (Required)[string] The unique ID of the backup you want to restore.
   * `recovery_target_time` - (Optional)[string] If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
 * `dns_name` - (Computed)[string] The DNS name pointing to your cluster.
+* `allow_replace` - (Optional)[bool] When set to true, allows the update of immutable fields by destroying and re-creating the cluster."
+
+   **_Warning: `allow_replace` - lets you update immutable fields, but it first destroys and then re-creates the cluster in order to do it. Set the field to true only if you know what you are doing._**
+
 
 ## Import
 

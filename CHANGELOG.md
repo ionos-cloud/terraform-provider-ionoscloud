@@ -1027,3 +1027,6 @@ FEATURES:
 
 ### Fixes:
 - Changed Dead link in MongoDB cluster docs
+
+### Features:
+- Add `allow_replace` field to `ionoscloud_pg_cluster` resource. 
