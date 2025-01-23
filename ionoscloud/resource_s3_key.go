@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -102,7 +103,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if httpNotFound(apiResponse) {
+		if httpNotFound(apiResponse) || isS3KeyNotFound(err) {
 			d.SetId("")
 			return nil
 		}
@@ -141,7 +142,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if httpNotFound(apiResponse) {
+		if httpNotFound(apiResponse) || isS3KeyNotFound(err) {
 			d.SetId("")
 			return nil
 		}
@@ -164,7 +165,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if httpNotFound(apiResponse) {
+		if httpNotFound(apiResponse) || isS3KeyNotFound(err) {
 			d.SetId("")
 			return nil
 		}
@@ -178,6 +179,10 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		s3KeyDeleted, dsErr := s3KeyDeleted(ctx, client, d)
 
 		if dsErr != nil {
+			if isS3KeyNotFound(dsErr) {
+				log.Printf("[INFO] Successfully deleted Object Storage key: %s", d.Id())
+				return nil
+			}
 			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of Object Storage key %s: %w", d.Id(), dsErr))
 			return diags
 		}
@@ -198,6 +203,15 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	return nil
+}
+
+// isS3KeyNotFound needed because api returns 422 instead of 404 on key being not found. will be removed once API issue is fixed
+func isS3KeyNotFound(err error) bool {
+	var genericOpenAPIError ionoscloud.GenericOpenAPIError
+	if !errors.As(err, &genericOpenAPIError) {
+		return false
+	}
+	return genericOpenAPIError.StatusCode() == 422 && strings.Contains(genericOpenAPIError.Error(), "[VDC-21-2] The access key cannot be found, please double-check the key id and try again.")
 }
 
 func s3KeyDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
@@ -242,7 +256,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if httpNotFound(apiResponse) {
+		if httpNotFound(apiResponse) || isS3KeyNotFound(err) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find Object Storage key %q", keyId)
 		}
