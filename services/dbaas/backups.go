@@ -3,34 +3,35 @@ package dbaas
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 )
 
-func (c *PsqlClient) GetClusterBackups(ctx context.Context, clusterId string) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
+func (c *PsqlClient) GetClusterBackups(ctx context.Context, clusterId string) (psql.ClusterBackupList, *shared.APIResponse, error) {
 	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err
 
 }
 
-func (c *PsqlClient) GetAllBackups(ctx context.Context) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
+func (c *PsqlClient) GetAllBackups(ctx context.Context) (psql.ClusterBackupList, *shared.APIResponse, error) {
 	backups, apiResponse, err := c.sdkClient.BackupsApi.ClustersBackupsGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err
 }
 
-func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.ClusterBackupList) diag.Diagnostics {
+func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *psql.ClusterBackupList) diag.Diagnostics {
 
 	resourceId := uuid.New()
 	d.SetId(resourceId.String())
 
 	if clusterBackups.Items != nil {
 		var backups []interface{}
-		for _, backup := range *clusterBackups.Items {
+		for _, backup := range clusterBackups.Items {
 
 			backupEntry := make(map[string]interface{})
 			if backup.Id != nil {

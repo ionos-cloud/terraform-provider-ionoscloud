@@ -2,10 +2,8 @@ package dbaas
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	pgsql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -36,17 +34,15 @@ func (c *PsqlClient) GetDatabases(ctx context.Context, clusterId string) (pgsql.
 
 func SetDatabasePgSqlData(d *schema.ResourceData, database *pgsql.DatabaseResource) error {
 	resourceName := "PgSQL database"
-	d.SetId(*database.Id)
-	if database.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the PgSql database with ID: %s, but received 'nil' instead", *database.Id)
-	}
-	if database.Properties.Name != nil {
-		if err := d.Set("name", *database.Properties.Name); err != nil {
+	d.SetId(database.Id)
+
+	if database.Properties.Name != "" {
+		if err := d.Set("name", database.Properties.Name); err != nil {
 			return utils.GenerateSetError(resourceName, "name", err)
 		}
 	}
-	if database.Properties.Owner != nil {
-		if err := d.Set("owner", *database.Properties.Owner); err != nil {
+	if database.Properties.Owner != "" {
+		if err := d.Set("owner", database.Properties.Owner); err != nil {
 			return utils.GenerateSetError(resourceName, "owner", err)
 		}
 	}
