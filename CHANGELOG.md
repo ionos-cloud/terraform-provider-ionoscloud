@@ -3,8 +3,11 @@
 - Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nill values.
 ### Features
 - Add new read-only attribute: `ipv4_cidr_block` to `ionoscloud_lan` resource and data source.
-- Make `volume` optional for `ionoscloud_server` resource
+- Make `volume` optional for `ionoscloud_server` resource.
 - `name` attribute for `ionoscloud_auto_certificate` resource is now required.
+- Add `allow_replace` field to `ionoscloud_pg_cluster` resource. 
+### Docs
+- Changed dead link in MongoDB cluster docs.
 
 ## 6.6.9
 ### Features
@@ -1024,9 +1027,3 @@ FEATURES:
   https://nfs.us-las.ionos.com (Las Vegas, USA)
   https://nfs.us-ewr.ionos.com (Newark, USA)
   https://nfs.us-mci.ionos.com (Lenexa, USA)
-
-### Fixes:
-- Changed Dead link in MongoDB cluster docs
-
-### Features:
-- Add `allow_replace` field to `ionoscloud_pg_cluster` resource. 
