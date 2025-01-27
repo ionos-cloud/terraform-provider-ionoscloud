@@ -3,8 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -67,18 +65,14 @@ func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("expected a list of PgSql databases, but received 'nil' instead, cluster ID: %s", clusterId))
 	}
 	var databases []interface{}
-	for _, retrievedDatabase := range *retrievedDatabases.Items {
-		if retrievedDatabase.Properties == nil {
-			log.Printf("[INFO] 'nil' values in the response for the database with ID: %s, cluster ID: %s, skipping this database since there is not enough information to set in the state", *retrievedDatabase.Id, clusterId)
-			continue
-		}
+	for _, retrievedDatabase := range retrievedDatabases.Items {
 		database := make(map[string]interface{})
 		utils.SetPropWithNilCheck(database, "name", retrievedDatabase.Properties.Name)
 		utils.SetPropWithNilCheck(database, "owner", retrievedDatabase.Properties.Owner)
 		utils.SetPropWithNilCheck(database, "id", retrievedDatabase.Id)
 		// Filter using the owner
 		if ownerOk {
-			if *retrievedDatabase.Properties.Owner == owner.(string) {
+			if retrievedDatabase.Properties.Owner == owner.(string) {
 				databases = append(databases, database)
 			}
 		} else {
