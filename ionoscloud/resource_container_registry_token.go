@@ -117,17 +117,13 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 
 	d.SetId(*registryTokenResponse.Id)
 
-	if registryTokenResponse.Properties == nil {
-		return diag.FromErr(fmt.Errorf("no token properties found with the specified id = %s", *registryTokenResponse.Id))
-	}
-
 	if fileStr != "" {
-		if err := utils.WriteToFile(fileStr, *registryTokenResponse.Properties.Credentials.Password); err != nil {
+		if err := utils.WriteToFile(fileStr, registryTokenResponse.Properties.Credentials.Password); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
-	if err = crService.SetTokenData(d, *registryTokenResponse.Properties); err != nil {
+	if err = crService.SetTokenData(d, registryTokenResponse.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
@@ -152,11 +148,7 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 
 	log.Printf("[INFO] Successfully retrieved registry token %s: %+v", d.Id(), registryToken)
 
-	if registryToken.Properties == nil {
-		return diag.FromErr(fmt.Errorf("no token properties found with the specified id = %s", *registryToken.Id))
-	}
-
-	if err := crService.SetTokenData(d, *registryToken.Properties); err != nil {
+	if err := crService.SetTokenData(d, registryToken.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -223,11 +215,8 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 	if registryToken.Id != nil {
 		d.SetId(*registryToken.Id)
 	}
-	if registryToken.Properties == nil {
-		return nil, fmt.Errorf("no token properties found with the specified id = %s", *registryToken.Id)
-	}
 
-	if err := crService.SetTokenData(d, *registryToken.Properties); err != nil {
+	if err := crService.SetTokenData(d, registryToken.Properties); err != nil {
 		return nil, err
 	}
 

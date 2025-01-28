@@ -16,7 +16,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	cr "github.com/ionos-cloud/sdk-go-container-registry"
+	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 )
 
 func TestAccContainerRegistryTokenBasic(t *testing.T) {
