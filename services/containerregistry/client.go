@@ -36,7 +36,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/_ionos-cloud-sdk-go-container-cr/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		cr.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
+		cr.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 	return &Client{
 		sdkClient: cr.NewAPIClient(config),
 	}

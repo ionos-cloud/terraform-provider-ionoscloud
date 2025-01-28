@@ -120,7 +120,6 @@ func dataSourceContainerRegistry() *schema.Resource {
 	}
 }
 
-//nolint:gocyclo
 func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).ContainerClient
 

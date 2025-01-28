@@ -363,7 +363,7 @@ func GetScopes(d *schema.ResourceData) *[]cr.Scope {
 				if actions, ok := scopeContent["actions"]; ok {
 					actions := actions.([]interface{})
 					var actionsToAdd []string
-					if len(actions) > 0 {
+					if actions != nil && len(actions) > 0 {
 						for _, action := range actions {
 							actionsToAdd = append(actionsToAdd, action.(string))
 						}
@@ -444,7 +444,7 @@ func SetCredentials(credentials cr.Credentials) map[string]interface{} {
 
 func SetScopes(scopes []cr.Scope) []interface{} {
 
-	var tokenScopes []interface{} //nolint:prealloc
+	var tokenScopes []interface{}
 	for _, scope := range scopes {
 		scopeEntry := make(map[string]interface{})
 
