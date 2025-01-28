@@ -25,7 +25,7 @@ func NewClient(username, password, token, url, version, terraformVersion string,
 	newConfigRegistry.MaxWaitTime = constant.MaxWaitTime
 	newConfigRegistry.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-container-cr/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, cr.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		version, cr.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 	client := &Client{
 		sdkClient: *cr.NewAPIClient(newConfigRegistry),
 	}
