@@ -116,6 +116,8 @@ github.com/ionos-cloud/sdk-go-api-gateway v1.0.0 h1:T+JzarV1Iw7NjWQfEuv5bESnHoCL
 github.com/ionos-cloud/sdk-go-api-gateway v1.0.0/go.mod h1:TkSlamP+qKRT8cgBaZEN8rawanVluOR0dXbXXdmmwTY=
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0 h1:8fRICa4i+GJHrCgnLe8t3uwfahkg7pcDDwoLkH3B2Xc=
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0/go.mod h1:BF6R+j1GdJEMImxkeh32qjIVWqsBfgi6VgyfsY5ezIA=
+github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.1.0 h1:nZbFVqm+nfMsp2HxBFQVsF5qDNKjtCjYWteJHZf4c/k=
+github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.1.0/go.mod h1:7ONrlRb2n7qjLR5O7oCQzOJAiRhj/D4ywvpJUPQr1q0=
 github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.0 h1:LsRmU3eb6MeI+t3OP3kEVvP0TSp0UzPRmw1GWLRbu/0=
 github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.0/go.mod h1:S8SBfF2bJkW902JKSQ/O6zn3sXPgeLvaa8hUG/oycNg=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1 h1:GXxdNKl7haQnHO1QewZeXazur5+LDCpHqvP+nNObGaA=
@@ -128,8 +130,6 @@ github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2 h1:qR/ul88v/3ZF+ZLFF
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2/go.mod h1:V6WHbWsQDlZsLtHqgsXO81Z9eJBsczE3Q6VY8J+rutc=
 github.com/ionos-cloud/sdk-go-bundle/shared v0.1.3 h1:4SbhbE56lGQPXa0WfabKu8BxxmmjitcPZSAGSn9dV2g=
 github.com/ionos-cloud/sdk-go-bundle/shared v0.1.3/go.mod h1:pegcRdbZYXLhkMy+mbzDzkLHQpGSPyDsmTa1nIbKAOE=
-github.com/ionos-cloud/sdk-go-cert-manager v1.3.0 h1:VMbD/XgLmMV2d7uI1+xf/uzRZWKJd8Ayan9IZ6gH1pM=
-github.com/ionos-cloud/sdk-go-cert-manager v1.3.0/go.mod h1:8CPWJBuryfrUpiPNrVIPry6qQjZWfIhmRpFkqKiaO2w=
 github.com/ionos-cloud/sdk-go-container-registry v1.2.0 h1:C5r2XleKLbSFw9kmb4N8ImqJ/HtLus3yh/R5BHy/6sg=
 github.com/ionos-cloud/sdk-go-container-registry v1.2.0/go.mod h1:woBP1+A4N0KXiRj9jG4y/hEXgrVjJv0CUlAvc24mCeo=
 github.com/ionos-cloud/sdk-go-dataplatform v1.1.1 h1:Wu9TAiphRyMEweUcQlMblhVCl9qVxQlOYEOw+jJS+Ss=

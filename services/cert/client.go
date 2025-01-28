@@ -2,14 +2,14 @@ package cert
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"net/http"
-	"os"
 	"runtime"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	certmanager "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -17,7 +17,7 @@ import (
 )
 
 type Client struct {
-	sdkClient  *certmanager.APIClient
+	sdkClient  certmanager.APIClient
 	fileConfig *fileconfiguration.FileConfig
 }
 
@@ -27,29 +27,23 @@ func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 }
 
 // GetConfig - returns the configuration
-func (c *Client) GetConfig() *certmanager.Configuration {
+func (c *Client) GetConfig() *shared.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
 // NewClient todo cert has both location(auto-cert) and no location on certificate. How do we override?
 func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Cert)
-	config := certmanager.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
-
-	if os.Getenv(constant.IonosDebug) != "" {
-		config.Debug = true
-	}
+	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
-	config.HTTPClient = http.DefaultClient
-	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
-
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/_ionos-cloud-sdk-go-cert-manager/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		certmanager.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
-	return &Client{
-		sdkClient:  certmanager.NewAPIClient(config),
-		fileConfig: fileConfig,
+	client := &Client{
+		sdkClient: *certmanager.NewAPIClient(config),
 	}
+	client.sdkClient.GetConfig().HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
+
+	return client
 }
