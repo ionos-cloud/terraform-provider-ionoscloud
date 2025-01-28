@@ -2,10 +2,11 @@ package containerregistry
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"net/http"
 	"os"
 	"runtime"
+
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
@@ -35,8 +36,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/_ionos-cloud-sdk-go-container-cr/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		cr.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
+		cr.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 	return &Client{
 		sdkClient: cr.NewAPIClient(config),
 	}
