@@ -84,7 +84,7 @@ func providerCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while creating an auto-certificate provider: %w", err))
 	}
-	providerID := *response.Id
+	providerID := response.Id
 	d.SetId(providerID)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsProviderReady)
