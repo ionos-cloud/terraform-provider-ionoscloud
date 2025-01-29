@@ -25,7 +25,7 @@ type PatchClusterProperties struct {
 	Ram *int32 `json:"ram,omitempty"`
 	// The amount of storage per instance in megabytes.
 	StorageSize *int32       `json:"storageSize,omitempty"`
-	Connections []Connection `json:"connections,omitempty"`
+	Connections []Connection `json:"connections"`
 	// The friendly name of your cluster.
 	DisplayName       *string            `json:"displayName,omitempty"`
 	MaintenanceWindow *MaintenanceWindow `json:"maintenanceWindow,omitempty"`
@@ -40,8 +40,10 @@ type PatchClusterProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPatchClusterProperties() *PatchClusterProperties {
+func NewPatchClusterProperties(connections []Connection) *PatchClusterProperties {
 	this := PatchClusterProperties{}
+
+	this.Connections = connections
 
 	return &this
 }
@@ -150,34 +152,26 @@ func (o *PatchClusterProperties) SetStorageSize(v int32) {
 	o.StorageSize = &v
 }
 
-// GetConnections returns the Connections field value if set, zero value otherwise.
+// GetConnections returns the Connections field value
 func (o *PatchClusterProperties) GetConnections() []Connection {
-	if o == nil || IsNil(o.Connections) {
+	if o == nil {
 		var ret []Connection
 		return ret
 	}
+
 	return o.Connections
 }
 
-// GetConnectionsOk returns a tuple with the Connections field value if set, nil otherwise
+// GetConnectionsOk returns a tuple with the Connections field value
 // and a boolean to check if the value has been set.
 func (o *PatchClusterProperties) GetConnectionsOk() ([]Connection, bool) {
-	if o == nil || IsNil(o.Connections) {
+	if o == nil {
 		return nil, false
 	}
 	return o.Connections, true
 }
 
-// HasConnections returns a boolean if a field has been set.
-func (o *PatchClusterProperties) HasConnections() bool {
-	if o != nil && !IsNil(o.Connections) {
-		return true
-	}
-
-	return false
-}
-
-// SetConnections gets a reference to the given []Connection and assigns it to the Connections field.
+// SetConnections sets field value
 func (o *PatchClusterProperties) SetConnections(v []Connection) {
 	o.Connections = v
 }
@@ -353,9 +347,7 @@ func (o PatchClusterProperties) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.StorageSize) {
 		toSerialize["storageSize"] = o.StorageSize
 	}
-	if !IsNil(o.Connections) {
-		toSerialize["connections"] = o.Connections
-	}
+	toSerialize["connections"] = o.Connections
 	if !IsNil(o.DisplayName) {
 		toSerialize["displayName"] = o.DisplayName
 	}

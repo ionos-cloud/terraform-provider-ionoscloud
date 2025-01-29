@@ -118,6 +118,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0 h1:8fRICa4i+GJHrCgnL
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0/go.mod h1:BF6R+j1GdJEMImxkeh32qjIVWqsBfgi6VgyfsY5ezIA=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.2 h1:798tViGFFHoqYirqIB62y1bYZYZsBYZvRiT9WLx/hJY=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.2/go.mod h1:z5x+V5elUPH09d1iX8pdriq3cNqMSsE9dtCy6RRBfYw=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.3 h1:8XAGHfdf4i/jhWtenMWWDwcRztd/LEVpNoKYWzwnxLw=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.3/go.mod h1:z5x+V5elUPH09d1iX8pdriq3cNqMSsE9dtCy6RRBfYw=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1 h1:GXxdNKl7haQnHO1QewZeXazur5+LDCpHqvP+nNObGaA=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1/go.mod h1:N0ifRq3ENqGg6qht1WPrVgSkcavPS5SRWlNfkHUZbfQ=
 github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0 h1:gVh+jd0o8ROtJLWqUB6/VU8vSLdj/kRYAz/qbMO7z7I=
