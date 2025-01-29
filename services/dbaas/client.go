@@ -9,7 +9,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -24,11 +25,8 @@ type PsqlClient struct {
 }
 
 func NewMongoClient(username, password, token, url, version, terraformVersion string, insecure bool) *MongoClient {
-	newConfigDbaas := mongo.NewConfiguration(username, password, token, url)
+	newConfigDbaas := shared.NewConfiguration(username, password, token, url)
 
-	if os.Getenv(constant.IonosDebug) != "" {
-		newConfigDbaas.Debug = true
-	}
 	newConfigDbaas.MaxRetries = constant.MaxRetries
 	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
 
@@ -36,10 +34,12 @@ func NewMongoClient(username, password, token, url, version, terraformVersion st
 	newConfigDbaas.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, mongo.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
-	return &MongoClient{
+	client := &MongoClient{
 		sdkClient: mongo.NewAPIClient(newConfigDbaas),
 	}
+	client.sdkClient.GetConfig().HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+
+	return client
 }
 
 func NewPsqlClient(username, password, token, url, version, terraformVersion string, insecure bool) *PsqlClient {

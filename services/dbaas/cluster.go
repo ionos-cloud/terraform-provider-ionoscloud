@@ -11,7 +11,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -23,7 +24,7 @@ func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.Clu
 	return cluster, apiResponse, err
 }
 
-func (c *MongoClient) GetCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error) {
+func (c *MongoClient) GetCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *shared.APIResponse, error) {
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
@@ -39,7 +40,7 @@ func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.
 	return clusters, apiResponse, err
 }
 
-func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mongo.ClusterList, *mongo.APIResponse, error) {
+func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mongo.ClusterList, *shared.APIResponse, error) {
 	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)
@@ -49,7 +50,7 @@ func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mong
 	return clusters, apiResponse, err
 }
 
-func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *mongo.APIResponse, error) {
+func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *shared.APIResponse, error) {
 	templates, apiResponse, err := c.sdkClient.TemplatesApi.TemplatesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return templates, apiResponse, err
@@ -61,13 +62,13 @@ func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClust
 	return clusterResponse, apiResponse, err
 }
 
-func (c *MongoClient) CreateCluster(ctx context.Context, cluster mongo.CreateClusterRequest) (mongo.ClusterResponse, *mongo.APIResponse, error) {
+func (c *MongoClient) CreateCluster(ctx context.Context, cluster mongo.CreateClusterRequest) (mongo.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
-func (c *MongoClient) UpdateCluster(ctx context.Context, clusterId string, cluster mongo.PatchClusterRequest) (mongo.ClusterResponse, *mongo.APIResponse, error) {
+func (c *MongoClient) UpdateCluster(ctx context.Context, clusterId string, cluster mongo.PatchClusterRequest) (mongo.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
@@ -85,7 +86,7 @@ func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.
 	return clusterResponse, apiResponse, err
 }
 
-func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error) {
+func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
@@ -252,7 +253,7 @@ func SetMongoClusterCreateProperties(d *schema.ResourceData) (*mongo.CreateClust
 	if instances, ok := d.GetOk("instances"); ok {
 		instances := instances.(int)
 		mongoInstances := int32(instances)
-		mongoCluster.Properties.Instances = &mongoInstances
+		mongoCluster.Properties.Instances = mongoInstances
 	}
 
 	connections, err := GetMongoClusterConnectionsData(d)
@@ -263,12 +264,12 @@ func SetMongoClusterCreateProperties(d *schema.ResourceData) (*mongo.CreateClust
 
 	if location, ok := d.GetOk("location"); ok {
 		location := location.(string)
-		mongoCluster.Properties.Location = &location
+		mongoCluster.Properties.Location = location
 	}
 
 	if displayName, ok := d.GetOk("display_name"); ok {
 		displayName := displayName.(string)
-		mongoCluster.Properties.DisplayName = &displayName
+		mongoCluster.Properties.DisplayName = displayName
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {
@@ -514,7 +515,7 @@ func GetPsqlClusterConnectionsData(d *schema.ResourceData) *[]psql.Connection {
 	return &connections
 }
 
-func GetMongoClusterConnectionsData(d *schema.ResourceData) (*[]mongo.Connection, error) {
+func GetMongoClusterConnectionsData(d *schema.ResourceData) ([]mongo.Connection, error) {
 	connections := make([]mongo.Connection, 0)
 
 	if vdcValue, ok := d.GetOk("connections"); ok {
@@ -525,12 +526,12 @@ func GetMongoClusterConnectionsData(d *schema.ResourceData) (*[]mongo.Connection
 				connection := mongo.Connection{}
 				if datacenterId, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", vdcIndex)); ok {
 					datacenterId := datacenterId.(string)
-					connection.DatacenterId = &datacenterId
+					connection.DatacenterId = datacenterId
 				}
 
 				if lanId, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", vdcIndex)); ok {
 					lanId := lanId.(string)
-					connection.LanId = &lanId
+					connection.LanId = lanId
 				}
 
 				if cidrList, ok := d.GetOk(fmt.Sprintf("connections.%d.cidr_list", vdcIndex)); ok {
@@ -539,7 +540,7 @@ func GetMongoClusterConnectionsData(d *schema.ResourceData) (*[]mongo.Connection
 					for _, cidr := range cidrList {
 						list = append(list, cidr.(string))
 					}
-					connection.CidrList = &list
+					connection.CidrList = list
 				}
 
 				// if val, ok := d.GetOk(fmt.Sprintf("connections.%d.whitelist", vdcIndex)); ok {
@@ -561,7 +562,7 @@ func GetMongoClusterConnectionsData(d *schema.ResourceData) (*[]mongo.Connection
 		}
 	}
 
-	return &connections, nil
+	return connections, nil
 }
 
 func GetPsqlClusterMaintenanceWindowData(d *schema.ResourceData) *psql.MaintenanceWindow {
@@ -585,12 +586,12 @@ func GetMongoClusterMaintenanceWindowData(d *schema.ResourceData) *mongo.Mainten
 
 	if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
 		timeV := timeV.(string)
-		maintenanceWindow.Time = &timeV
+		maintenanceWindow.Time = timeV
 	}
 
 	if dayOfTheWeek, ok := d.GetOk("maintenance_window.0.day_of_the_week"); ok {
 		dayOfTheWeek := mongo.DayOfTheWeek(dayOfTheWeek.(string))
-		maintenanceWindow.DayOfTheWeek = &dayOfTheWeek
+		maintenanceWindow.DayOfTheWeek = dayOfTheWeek
 	}
 
 	return &maintenanceWindow
@@ -868,9 +869,9 @@ func SetMongoDBClusterData(d *schema.ResourceData, cluster mongo.ClusterResponse
 				return utils.GenerateSetError(resourceName, "instances", err)
 			}
 		}
-		if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
+		if cluster.Properties.Connections != nil && len(cluster.Properties.Connections) > 0 {
 			var connections []interface{}
-			for _, connection := range *cluster.Properties.Connections {
+			for _, connection := range cluster.Properties.Connections {
 				connectionEntry := SetMongoConnectionProperties(connection)
 				connections = append(connections, connectionEntry)
 			}

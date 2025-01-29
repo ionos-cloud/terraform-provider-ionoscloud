@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -281,8 +281,8 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 
 		var results []mongo.ClusterResponse
 
-		if clusters.Items != nil && len(*clusters.Items) > 0 {
-			for _, clusterItem := range *clusters.Items {
+		if clusters.Items != nil && len(clusters.Items) > 0 {
+			for _, clusterItem := range clusters.Items {
 				if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, name.(string)) {
 					results = append(results, clusterItem)
 				}

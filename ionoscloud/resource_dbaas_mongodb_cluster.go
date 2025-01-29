@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
