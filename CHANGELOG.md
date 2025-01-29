@@ -2,6 +2,7 @@
 ### Fixes
 - Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nill values.
 - Fix [#748](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/748) by removing unecessary error check
+- S3 key creation fails with 422 if s3 key not found. Add function to check for that specific response from the API.
 ### Features
 - Add new read-only attribute: `ipv4_cidr_block` to `ionoscloud_lan` resource and data source.
 - Make `volume` optional for `ionoscloud_server` resource.
