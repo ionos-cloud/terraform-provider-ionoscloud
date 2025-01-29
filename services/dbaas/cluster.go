@@ -25,8 +25,8 @@ func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.Clu
 }
 
 // GetCluster Retrieves a Mongo cluster
-func (c *MongoClient) GetCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *shared.APIResponse, error) {
-	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+func (c *MongoClient) GetCluster(ctx context.Context, clusterID string) (mongo.ClusterResponse, *shared.APIResponse, error) {
+	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
@@ -72,13 +72,13 @@ func (c *MongoClient) CreateCluster(ctx context.Context, cluster mongo.CreateClu
 	return clusterResponse, apiResponse, err
 }
 
-func (c *MongoClient) UpdateCluster(ctx context.Context, clusterId string, cluster mongo.PatchClusterRequest) (mongo.ClusterResponse, *shared.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
+// UpdateCluster Updates a Mongo cluster
+func (c *MongoClient) UpdateCluster(ctx context.Context, clusterID string, cluster mongo.PatchClusterRequest) (mongo.ClusterResponse, *shared.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterID).PatchClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
-// UpdateCluster Updates a Mongo cluster
 func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
@@ -92,8 +92,8 @@ func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.
 }
 
 // DeleteCluster Deletes a Mongo cluster
-func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *shared.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
+func (c *MongoClient) DeleteCluster(ctx context.Context, clusterID string) (mongo.ClusterResponse, *shared.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
