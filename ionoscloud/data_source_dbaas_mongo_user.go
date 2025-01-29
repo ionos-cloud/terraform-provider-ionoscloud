@@ -94,7 +94,7 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 
 	var results []mongo.User
 
-	if users.Items != nil && len(users.Items) > 0 {
+	if len(users.Items) > 0 {
 		for _, userItem := range users.Items {
 			if userItem.Properties != nil && strings.EqualFold(userItem.Properties.Username, username) {
 				results = append(results, userItem)
@@ -102,7 +102,7 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if results == nil || len(results) == 0 {
+	if len(results) == 0 {
 		return diag.FromErr(fmt.Errorf("no DBaaS mongo user found with the specified username = %s and cluster_id = %s", username, clusterId))
 	} else if len(results) > 1 {
 		return diag.FromErr(fmt.Errorf("more than one DBaaS mongo user found with the specified criteria username = %s and cluster_id = %s", username, clusterId))

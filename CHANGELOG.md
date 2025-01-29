@@ -1,5 +1,5 @@
 ## 6.7.1 (future release)
-### Changes
+### Refactor
 - Use SDK Bundle instead of the Mongo SDK
 
 ## 6.7.0

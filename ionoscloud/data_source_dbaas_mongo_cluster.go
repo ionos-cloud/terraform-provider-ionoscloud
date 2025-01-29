@@ -281,7 +281,7 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 
 		var results []mongo.ClusterResponse
 
-		if clusters.Items != nil && len(clusters.Items) > 0 {
+		if len(clusters.Items) > 0 {
 			for _, clusterItem := range clusters.Items {
 				if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, name.(string)) {
 					results = append(results, clusterItem)
@@ -289,7 +289,7 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no DBaaS mongo cluster found with the specified name = %s", name))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one DBaaS mongo cluster found with the specified criteria name = %s", name))

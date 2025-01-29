@@ -876,7 +876,7 @@ func SetMongoDBClusterData(d *schema.ResourceData, cluster mongo.ClusterResponse
 				return utils.GenerateSetError(resourceName, "instances", err)
 			}
 		}
-		if cluster.Properties.Connections != nil && len(cluster.Properties.Connections) > 0 {
+		if len(cluster.Properties.Connections) > 0 {
 			var connections []interface{}
 			for _, connection := range cluster.Properties.Connections {
 				connectionEntry := SetMongoConnectionProperties(connection)
