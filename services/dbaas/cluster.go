@@ -24,6 +24,7 @@ func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.Clu
 	return cluster, apiResponse, err
 }
 
+// GetCluster Retrieves a Mongo cluster
 func (c *MongoClient) GetCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *shared.APIResponse, error) {
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
@@ -40,6 +41,7 @@ func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.
 	return clusters, apiResponse, err
 }
 
+// ListClusters Lists Mongo clusters
 func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mongo.ClusterList, *shared.APIResponse, error) {
 	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
 	if filterName != "" {
@@ -50,6 +52,7 @@ func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mong
 	return clusters, apiResponse, err
 }
 
+// GetTemplates Lists Mongo templates
 func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *shared.APIResponse, error) {
 	templates, apiResponse, err := c.sdkClient.TemplatesApi.TemplatesGet(ctx).Execute()
 	apiResponse.LogInfo()
@@ -62,6 +65,7 @@ func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClust
 	return clusterResponse, apiResponse, err
 }
 
+// CreateCluster Creates a Mongo cluster
 func (c *MongoClient) CreateCluster(ctx context.Context, cluster mongo.CreateClusterRequest) (mongo.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
@@ -74,6 +78,7 @@ func (c *MongoClient) UpdateCluster(ctx context.Context, clusterId string, clust
 	return clusterResponse, apiResponse, err
 }
 
+// UpdateCluster Updates a Mongo cluster
 func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
@@ -86,6 +91,7 @@ func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.
 	return clusterResponse, apiResponse, err
 }
 
+// DeleteCluster Deletes a Mongo cluster
 func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
@@ -515,6 +521,7 @@ func GetPsqlClusterConnectionsData(d *schema.ResourceData) *[]psql.Connection {
 	return &connections
 }
 
+// GetMongoClusterConnectionsData creates an sdk object for the Mongo connection list from the plan
 func GetMongoClusterConnectionsData(d *schema.ResourceData) ([]mongo.Connection, error) {
 	connections := make([]mongo.Connection, 0)
 
