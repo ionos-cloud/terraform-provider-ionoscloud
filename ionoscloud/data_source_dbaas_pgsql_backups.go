@@ -110,7 +110,7 @@ func dataSourceDbaasPgSqlReadBackups(ctx context.Context, d *schema.ResourceData
 		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching backup for cluster with ID %s: %w", idStr, err))
 		return diags
 	}
-	if len(*clusterBackups.Items) == 0 {
+	if len(clusterBackups.Items) == 0 {
 		diags := diag.FromErr(fmt.Errorf("could not find backups for cluster with ID %s: %w", idStr, err))
 		return diags
 	}

@@ -116,6 +116,10 @@ github.com/ionos-cloud/sdk-go-api-gateway v1.0.0 h1:T+JzarV1Iw7NjWQfEuv5bESnHoCL
 github.com/ionos-cloud/sdk-go-api-gateway v1.0.0/go.mod h1:TkSlamP+qKRT8cgBaZEN8rawanVluOR0dXbXXdmmwTY=
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0 h1:8fRICa4i+GJHrCgnLe8t3uwfahkg7pcDDwoLkH3B2Xc=
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0/go.mod h1:BF6R+j1GdJEMImxkeh32qjIVWqsBfgi6VgyfsY5ezIA=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.2 h1:798tViGFFHoqYirqIB62y1bYZYZsBYZvRiT9WLx/hJY=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.2/go.mod h1:z5x+V5elUPH09d1iX8pdriq3cNqMSsE9dtCy6RRBfYw=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.3 h1:8XAGHfdf4i/jhWtenMWWDwcRztd/LEVpNoKYWzwnxLw=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.3/go.mod h1:z5x+V5elUPH09d1iX8pdriq3cNqMSsE9dtCy6RRBfYw=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1 h1:GXxdNKl7haQnHO1QewZeXazur5+LDCpHqvP+nNObGaA=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1/go.mod h1:N0ifRq3ENqGg6qht1WPrVgSkcavPS5SRWlNfkHUZbfQ=
 github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0 h1:gVh+jd0o8ROtJLWqUB6/VU8vSLdj/kRYAz/qbMO7z7I=
@@ -136,8 +140,6 @@ github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.1 h1:dZLxaH2n0nxCOKMkt49TibOiY1
 github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.1/go.mod h1:NuUqBA9DyP4PB3MtKy/R9XRHY1RZcwVP6E3tP4FwI7I=
 github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1 h1:+tDoZ8IEPxYwJd6fDIpWksNJs9Zzw7Pu5A39jTew058=
 github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1/go.mod h1:rxOAeyAU6BTfghJibSRDdRNrKm2cIXMpSMe7JIWewJ8=
-github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3 h1:T05nbKqBIw2zmPwaV2pWyFcUVjblLMoShPM9nAYQjLM=
-github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3/go.mod h1:5cKJUIcXfMbG5vVkz6cYjnToZvaQylkLsIuhOW7PhEI=
 github.com/ionos-cloud/sdk-go-dns v1.2.1 h1:Sy7Jg5trzObad9VPvEh7BgeJrIhaxdGlBEvG2aHJZH8=
 github.com/ionos-cloud/sdk-go-dns v1.2.1/go.mod h1:l9gYdwtUshlBOiIi4nHn3RCX81XlV3VoNvLJrO2VfHg=
 github.com/ionos-cloud/sdk-go-kafka v1.0.0 h1:S0Tfy/KlYW7UJW6DoU43fF0/iNPc1YKC+AC56G9wfA4=
