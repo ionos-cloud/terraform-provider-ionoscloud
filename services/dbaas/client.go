@@ -30,7 +30,6 @@ func NewMongoClient(username, password, token, url, version, terraformVersion st
 	newConfigDbaas.MaxRetries = constant.MaxRetries
 	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
 
-	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	newConfigDbaas.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, mongo.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
