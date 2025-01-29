@@ -5,8 +5,8 @@
 - Use MariaDB bundle product instead of sdk-go-dbaas-mariadb
 - Use Mongo bundle product instead of sdk-go-dbaas-mongo
 - Use Dataplatform bundle product instead of sdk-go-dataplatform
-- Update `sdk-go-dbaas-postgres` to version `v1.1.4` and use the new sdk methods for PG versions
-### Documentation 
+- Use PostgreSQL bundle product instead of sdk-go-dbaas-postgres
+- Update `sdk-go-dbaas-postgres` to version `v1.1.4` and use the new sdk methods for PG versions (done before bundle integration)
 - Add better documentation for dedicated core for servers
 ## 6.7.6
 ### Features
