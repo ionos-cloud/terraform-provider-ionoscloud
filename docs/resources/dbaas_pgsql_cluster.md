@@ -80,7 +80,7 @@ resource "ionoscloud_server" "example" {
   ram                     = 2048
   availability_zone       = "ZONE_1"
   cpu_family              = "INTEL_SKYLAKE"
-  image_name              = "rockylinux-8-GenericCloud-20230518"
+  image_name              = "ubuntu:latest"
   image_password          = "password"
   volume {
     name                  = "example"

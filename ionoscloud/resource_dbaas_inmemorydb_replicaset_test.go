@@ -245,7 +245,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   ram                     = 2048
   availability_zone       = "ZONE_1"
   cpu_family              = "INTEL_SKYLAKE"
-  image_name              = "rockylinux-8-GenericCloud-20230518"
+  image_name              = "ubuntu:latest"
   image_password          = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name                  = "example"
