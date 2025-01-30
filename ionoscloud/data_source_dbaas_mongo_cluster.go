@@ -289,11 +289,12 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 			}
 		}
 
-		if len(results) == 0 {
+		switch {
+		case len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no DBaaS mongo cluster found with the specified name = %s", name))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one DBaaS mongo cluster found with the specified criteria name = %s", name))
-		} else {
+		default:
 			cluster = results[0]
 		}
 
