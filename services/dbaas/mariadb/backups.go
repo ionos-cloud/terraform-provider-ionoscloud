@@ -7,11 +7,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
+	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
+	shared "github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 // GetClusterBackups retrieves a list of backups for a given cluster ID and the location in which the cluster is created.
-func (c *MariaDBClient) GetClusterBackups(ctx context.Context, clusterID, location string) (mariadb.BackupList, *mariadb.APIResponse, error) {
+func (c *MariaDBClient) GetClusterBackups(ctx context.Context, clusterID, location string) (mariadb.BackupList, *shared.APIResponse, error) {
 	c.modifyConfigURL(location)
 	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
@@ -19,7 +20,7 @@ func (c *MariaDBClient) GetClusterBackups(ctx context.Context, clusterID, locati
 }
 
 // FindBackupByID retrieves a backup by its ID and the location in which the cluster is created.
-func (c *MariaDBClient) FindBackupByID(ctx context.Context, backupID, location string) (mariadb.BackupResponse, *mariadb.APIResponse, error) {
+func (c *MariaDBClient) FindBackupByID(ctx context.Context, backupID, location string) (mariadb.BackupResponse, *shared.APIResponse, error) {
 	c.modifyConfigURL(location)
 	backups, apiResponse, err := c.sdkClient.BackupsApi.BackupsFindById(ctx, backupID).Execute()
 	apiResponse.LogInfo()
@@ -47,7 +48,7 @@ func SetMariaDBClusterBackupsData(d *schema.ResourceData, retrievedBackups []mar
 			backupEntry["size"] = *retrievedBackup.Properties.Size
 		}
 		var baseBackupsToBeSet []interface{}
-		for _, baseBackup := range *retrievedBackup.Properties.BaseBackups {
+		for _, baseBackup := range retrievedBackup.Properties.BaseBackups {
 			baseBackupEntry := make(map[string]interface{})
 			if baseBackup.Size != nil {
 				baseBackupEntry["size"] = *baseBackup.Size

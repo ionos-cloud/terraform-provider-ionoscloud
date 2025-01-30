@@ -317,6 +317,9 @@ github.com/ionos-cloud/sdk-go-api-gateway
 # github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.0.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2
@@ -341,9 +344,6 @@ github.com/ionos-cloud/sdk-go-dataplatform
 # github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dbaas-in-memory-db
-# github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.1
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-dbaas-mariadb
 # github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dbaas-mongo
