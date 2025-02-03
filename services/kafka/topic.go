@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 
@@ -73,11 +72,8 @@ func (c *Client) IsTopicAvailable(ctx context.Context, d *schema.ResourceData) (
 	if err != nil {
 		return false, err
 	}
-	if topic.Metadata == nil || topic.Metadata.State == nil {
-		return false, fmt.Errorf("expected metadata, got empty for Topic with ID: %s", clusterID)
-	}
-	log.Printf("[DEBUG] Topic status: %s", *topic.Metadata.State)
-	return strings.EqualFold(*topic.Metadata.State, constant.Available), nil
+	log.Printf("[DEBUG] Topic status: %s", topic.Metadata.State)
+	return strings.EqualFold(topic.Metadata.State, constant.Available), nil
 }
 
 // IsTopicDeleted checks if a Kafka Cluster Topic has been deleted
@@ -96,18 +92,10 @@ func (c *Client) IsTopicDeleted(ctx context.Context, d *schema.ResourceData) (bo
 
 // SetKafkaTopicData sets the Kafka Cluster Topic data to the Terraform Resource Data
 func (c *Client) SetKafkaTopicData(d *schema.ResourceData, topic *kafka.TopicRead) error {
-	if topic.Id != nil {
-		d.SetId(*topic.Id)
-	}
+	d.SetId(topic.Id)
 
-	if topic.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the Kafka Cluster Topic with ID: %s, but received 'nil' instead", *topic.Id)
-	}
-
-	if topic.Properties.Name != nil {
-		if err := d.Set("name", *topic.Properties.Name); err != nil {
-			return err
-		}
+	if err := d.Set("name", topic.Properties.Name); err != nil {
+		return err
 	}
 	if topic.Properties.NumberOfPartitions != nil {
 		if err := d.Set("number_of_partitions", *topic.Properties.NumberOfPartitions); err != nil {
@@ -146,7 +134,7 @@ func setTopicPostRequest(d *schema.ResourceData) *kafka.TopicCreate {
 
 	return kafka.NewTopicCreate(
 		kafka.Topic{
-			Name:               &topicName,
+			Name:               topicName,
 			NumberOfPartitions: &partitionCount,
 			ReplicationFactor:  &replicationFactor,
 			LogRetention: &kafka.TopicLogRetention{

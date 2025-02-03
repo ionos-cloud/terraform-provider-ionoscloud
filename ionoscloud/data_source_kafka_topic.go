@@ -107,8 +107,8 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching Kafka Cluster Topics: %w", err))
 		}
 
-		for _, t := range *topics.Items {
-			if t.Properties != nil && t.Properties.Name != nil && utils.NameMatches(*t.Properties.Name, name, partialMatch) {
+		for _, t := range topics.Items {
+			if utils.NameMatches(t.Properties.Name, name, partialMatch) {
 				results = append(results, t)
 			}
 		}

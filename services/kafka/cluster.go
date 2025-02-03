@@ -2,12 +2,12 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	kafka "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -33,11 +33,8 @@ func (c *Client) IsClusterAvailable(ctx context.Context, d *schema.ResourceData)
 	if err != nil {
 		return false, err
 	}
-	if cluster.Metadata == nil || cluster.Metadata.State == nil {
-		return false, fmt.Errorf("expected metadata, got empty for Cluster with ID: %s", clusterID)
-	}
-	log.Printf("[DEBUG] Cluster status: %s", *cluster.Metadata.State)
-	return strings.EqualFold(*cluster.Metadata.State, constant.Available), nil
+	log.Printf("[DEBUG] Cluster status: %s", cluster.Metadata.State)
+	return strings.EqualFold(cluster.Metadata.State, constant.Available), nil
 }
 
 // DeleteCluster deletes a Kafka Cluster
@@ -70,7 +67,7 @@ func (c *Client) GetClusterByID(ctx context.Context, id string, location string)
 }
 
 // ListClusters retrieves a list of Kafka Clusters
-func (c *Client) ListClusters(ctx context.Context, location string) (kafka.ClusterReadList, *kafka.APIResponse, error) {
+func (c *Client) ListClusters(ctx context.Context, location string) (kafka.ClusterReadList, *shared.APIResponse, error) {
 	c.changeConfigURL(location)
 
 	Clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGet(ctx).Execute()
@@ -92,9 +89,9 @@ func setClusterPostRequest(d *schema.ResourceData) *kafka.ClusterCreate {
 	}
 
 	connection := kafka.KafkaClusterConnection{
-		DatacenterId:    &datacenterID,
-		LanId:           &lanID,
-		BrokerAddresses: &brokerAddresses,
+		DatacenterId:    datacenterID,
+		LanId:           lanID,
+		BrokerAddresses: brokerAddresses,
 	}
 
 	return kafka.NewClusterCreate(*kafka.NewCluster(clusterName, version, size, []kafka.KafkaClusterConnection{connection}))
@@ -102,34 +99,22 @@ func setClusterPostRequest(d *schema.ResourceData) *kafka.ClusterCreate {
 
 // SetKafkaClusterData sets the Kafka Cluster data to the Terraform Resource Data
 func (c *Client) SetKafkaClusterData(d *schema.ResourceData, cluster *kafka.ClusterRead) error {
-	if cluster.Id != nil {
-		d.SetId(*cluster.Id)
+	d.SetId(cluster.Id)
+
+	if err := d.Set("name", cluster.Properties.Name); err != nil {
+		return err
+	}
+	if err := d.Set("version", cluster.Properties.Version); err != nil {
+		return err
+	}
+	if err := d.Set("size", cluster.Properties.Size); err != nil {
+		return err
 	}
 
-	if cluster.Properties == nil || cluster.Metadata == nil {
-		return fmt.Errorf("expected properties and metadata in the response for the Kafka Cluster with ID: %s, but received 'nil' instead", *cluster.Id)
-	}
-
-	if cluster.Properties.Name != nil {
-		if err := d.Set("name", *cluster.Properties.Name); err != nil {
-			return err
-		}
-	}
-	if cluster.Properties.Version != nil {
-		if err := d.Set("version", *cluster.Properties.Version); err != nil {
-			return err
-		}
-	}
-	if cluster.Properties.Size != nil {
-		if err := d.Set("size", *cluster.Properties.Size); err != nil {
-			return err
-		}
-	}
-
-	if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
+	if len(cluster.Properties.Connections) > 0 {
 		var connections []interface{}
 
-		for _, connection := range *cluster.Properties.Connections {
+		for _, connection := range cluster.Properties.Connections {
 			connectionEntry := c.setConnectionProperties(connection)
 			connections = append(connections, connectionEntry)
 		}
@@ -139,10 +124,8 @@ func (c *Client) SetKafkaClusterData(d *schema.ResourceData, cluster *kafka.Clus
 		}
 	}
 
-	if cluster.Metadata.BrokerAddresses != nil {
-		if err := d.Set("broker_addresses", *cluster.Metadata.BrokerAddresses); err != nil {
-			return err
-		}
+	if err := d.Set("broker_addresses", cluster.Metadata.BrokerAddresses); err != nil {
+		return err
 	}
 
 	return nil

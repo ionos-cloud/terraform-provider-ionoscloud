@@ -124,8 +124,8 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching Kafka Cluster: %w", err))
 		}
 
-		for _, cluster := range *clusters.Items {
-			if cluster.Properties != nil && cluster.Properties.Name != nil && utils.NameMatches(*cluster.Properties.Name, name, partialMatch) {
+		for _, cluster := range clusters.Items {
+			if utils.NameMatches(cluster.Properties.Name, name, partialMatch) {
 				results = append(results, cluster)
 			}
 		}
