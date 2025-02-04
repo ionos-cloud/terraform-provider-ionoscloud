@@ -37,3 +37,5 @@ The following attributes are returned by the datasource:
 - `capability` - The capabilities of the region
   * `iam` - Indicates if IAM policy based access is supported
   * `s3select` - Indicates if S3 Select is supported
+
+> **⚠ WARNING:** `IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT` can be used to set a custom API URL for the Object Storage Management SDK. Setting `endpoint` or `IONOS_API_URL` does not have any effect
