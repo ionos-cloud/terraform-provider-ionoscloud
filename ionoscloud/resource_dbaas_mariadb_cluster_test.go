@@ -235,9 +235,9 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
 }
 
 # Wait few seconds after cluster creation so the backups can be properly retrieved
-resource "time_sleep" "wait_30_seconds" {
+resource "time_sleep" "wait_10_minutes" {
   depends_on = [` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `]
-  create_duration = "30s"
+  create_duration = "600s"
 }
 `
 
@@ -292,7 +292,7 @@ data ` + constant.DBaaSMariaDBBackupsDataSource + ` ` + constant.DBaasMariaDBBac
 	cluster_id = ` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 	` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
     # Use the previously created 'time' resource to delay information retrieval for the data source
-	depends_on = [time_sleep.wait_30_seconds]
+	depends_on = [time_sleep.wait_10_minutes]
 }
 `
 const mariaDBClusterDataSourceWrongName = `
