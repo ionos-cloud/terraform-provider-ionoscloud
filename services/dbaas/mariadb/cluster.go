@@ -215,6 +215,7 @@ func GetMariaDBClusterDataUpdate(d *schema.ResourceData) (*mariadb.PatchClusterR
 	return &cluster, nil
 }
 
+// GetMariaClusterConnectionsData retrieves the data from the terraform resource and sets it in the MariaDB connection struct.
 func GetMariaClusterConnectionsData(d *schema.ResourceData) []mariadb.Connection {
 	connections := make([]mariadb.Connection, 0)
 
@@ -243,6 +244,7 @@ func GetMariaClusterConnectionsData(d *schema.ResourceData) []mariadb.Connection
 	return connections
 }
 
+// GetMariaClusterMaintenanceWindowData retrieves the data from the terraform resource and sets it in the MariaDB Maintenance Window struct.
 func GetMariaClusterMaintenanceWindowData(d *schema.ResourceData) *mariadb.MaintenanceWindow {
 	var maintenanceWindow mariadb.MaintenanceWindow
 
