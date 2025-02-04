@@ -92,7 +92,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
-	d.SetId(*createdTopic.Id)
+	d.SetId(createdTopic.Id)
 	log.Printf("[INFO] Created Kafka Cluster Topic: %s", d.Id())
 
 	// Sleep for 5 second to avoid 500 error from the API

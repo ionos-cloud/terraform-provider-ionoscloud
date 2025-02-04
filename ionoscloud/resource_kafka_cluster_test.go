@@ -106,7 +106,7 @@ func testAccCheckKafkaClusterExists(n string) resource.TestCheckFunc {
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching Kafka Cluster with ID: %v, error: %w", rs.Primary.ID, err)
 		}
-		if *foundCluster.Id != rs.Primary.ID {
+		if foundCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("resource not found")
 		}
 
