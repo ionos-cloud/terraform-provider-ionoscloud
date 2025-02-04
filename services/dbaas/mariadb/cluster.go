@@ -244,7 +244,7 @@ func GetMariaClusterConnectionsData(d *schema.ResourceData) []mariadb.Connection
 	return connections
 }
 
-// GetMariaClusterMaintenanceWindowData retrieves the data from the terraform resource and sets it in the MariaDB Maintenance Window struct.
+// GetMariaClusterMaintenanceWindowData retrieves the data from the terraform resource and sets it in the MariaDB MaintenanceWindow struct.
 func GetMariaClusterMaintenanceWindowData(d *schema.ResourceData) *mariadb.MaintenanceWindow {
 	var maintenanceWindow mariadb.MaintenanceWindow
 
@@ -261,6 +261,7 @@ func GetMariaClusterMaintenanceWindowData(d *schema.ResourceData) *mariadb.Maint
 	return &maintenanceWindow
 }
 
+// GetMariaClusterCredentialsData retrieves the data from the terraform resource and sets it in the MariaDB DBUser struct.
 func GetMariaClusterCredentialsData(d *schema.ResourceData) mariadb.DBUser {
 	var user mariadb.DBUser
 
