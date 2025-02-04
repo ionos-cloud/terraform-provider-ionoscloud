@@ -1,4 +1,8 @@
-## 6.6.10 -- upcoming release
+## 6.7.1
+### Fixes
+- Remove cpu_family and availability_zone from the tests
+
+## 6.6.10
 ### Fixes
 - Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nill values.
 ### Features
