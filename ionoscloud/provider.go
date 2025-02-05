@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"runtime/debug"
 
 	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
@@ -314,13 +315,16 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	if insecureSet {
 		clientOpts.Insecure = insecure.(bool)
 	}
+	info, ok := debug.ReadBuildInfo()
+	if ok {
+		clientOpts.Version = info.Main.Version
+	}
 
 	return NewSDKBundleClient(clientOpts), nil
 }
 
 // NewSDKBundleClient returns a new SDK bundle client
 func NewSDKBundleClient(clientOpts ClientOptions) interface{} {
-	clientOpts.Version = ionoscloud.Version
 	return services.SdkBundle{
 		CDNClient:          NewClientByType(clientOpts, cdnClient).(*cdnService.Client),
 		AutoscalingClient:  NewClientByType(clientOpts, autoscalingClient).(*autoscalingService.Client),

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"runtime/debug"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -156,7 +157,11 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	region := os.Getenv("IONOS_S3_REGION")
 	endpoint := os.Getenv("IONOS_API_URL")
 	terraformVersion := req.TerraformVersion
-	version := ionoscloud.Version
+	version := "DEV"
+	info, ok := debug.ReadBuildInfo()
+	if ok {
+		version = info.Main.Version
+	}
 
 	insecureStr := os.Getenv("IONOS_ALLOW_INSECURE")
 	insecureBool := false
@@ -216,7 +221,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		CDNClient:          cdnService.NewCDNClient(username, password, token, endpoint, version, terraformVersion, insecureBool),
 		AutoscalingClient:  autoscalingService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		CertManagerClient:  cert.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
-		CloudApiClient:     newCloudapiClient(username, password, token, endpoint, "DEV", terraformVersion, insecureBool),
+		CloudApiClient:     newCloudapiClient(username, password, token, endpoint, version, terraformVersion, insecureBool),
 		ContainerClient:    crService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		DataplatformClient: dataplatformService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
 		DNSClient:          dnsService.NewClient(username, password, token, cleanedEndpoint, version, terraformVersion, insecureBool),
