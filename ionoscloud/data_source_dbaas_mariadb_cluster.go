@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dbaas "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
+	dbaas "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -143,7 +143,7 @@ func dataSourceMariaDBClusterRead(ctx context.Context, d *schema.ResourceData, m
 		var results []dbaas.ClusterResponse
 
 		if clusters.Items != nil {
-			for _, clusterItem := range *clusters.Items {
+			for _, clusterItem := range clusters.Items {
 				if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, name.(string)) {
 					results = append(results, clusterItem)
 				}

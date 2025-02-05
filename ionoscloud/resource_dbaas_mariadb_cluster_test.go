@@ -13,7 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
+	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -193,7 +193,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   ram                     = 2048
   availability_zone       = "ZONE_1"
   cpu_family              = "INTEL_SKYLAKE"
-  image_name              = "rockylinux-8-GenericCloud-20230518"
+  image_name              = "rockylinux-8-GenericCloud-20240528"
   image_password          = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name                  = "example"
@@ -235,9 +235,9 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
 }
 
 # Wait few seconds after cluster creation so the backups can be properly retrieved
-resource "time_sleep" "wait_30_seconds" {
+resource "time_sleep" "wait_5_minutes" {
   depends_on = [` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `]
-  create_duration = "30s"
+  create_duration = "300s"
 }
 `
 
@@ -292,7 +292,7 @@ data ` + constant.DBaaSMariaDBBackupsDataSource + ` ` + constant.DBaasMariaDBBac
 	cluster_id = ` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 	` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
     # Use the previously created 'time' resource to delay information retrieval for the data source
-	depends_on = [time_sleep.wait_30_seconds]
+	depends_on = [time_sleep.wait_5_minutes]
 }
 `
 const mariaDBClusterDataSourceWrongName = `
