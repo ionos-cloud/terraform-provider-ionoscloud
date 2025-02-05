@@ -1,3 +1,7 @@
+## 6.7.1 (Upcoming)
+### Features
+- Add `IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT` to set a custom API URL for the Object Storage Management Product. Setting `endpoint` or `IONOS_API_URL` does not have any effect
+
 ## 6.7.0
 ### Fixes
 - Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nill values.
