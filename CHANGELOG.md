@@ -1,4 +1,4 @@
-## 6.7.0
+## 6.7.1 (Upcoming)
 ### Features
 - Add `IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT` to set a custom API URL for the Object Storage Management Product. Setting `endpoint` or `IONOS_API_URL` does not have any effect
 
