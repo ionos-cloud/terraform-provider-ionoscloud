@@ -67,11 +67,6 @@ func dataSourceGroup() *schema.Resource {
 				Description: "Create Flow Logs privilege.",
 				Computed:    true,
 			},
-			"create_network_security_groups": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to create NetworkSecurityGroups.",
-				Computed:    true,
-			},
 			"access_and_manage_monitoring": {
 				Type: schema.TypeBool,
 				Description: "Privilege for a group to access and manage monitoring related functionality " +
@@ -81,6 +76,26 @@ func dataSourceGroup() *schema.Resource {
 			"access_and_manage_certificates": {
 				Type:        schema.TypeBool,
 				Description: "Privilege for a group to access and manage certificates.",
+				Computed:    true,
+			},
+			"manage_dbaas": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to manage DBaaS related functionality",
+				Computed:    true,
+			},
+			"access_and_manage_dns": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage dns records.",
+				Computed:    true,
+			},
+			"manage_registry": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for group accessing container registry related functionality.",
+				Computed:    true,
+			},
+			"manage_dataplatform": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage the Data Platform.",
 				Computed:    true,
 			},
 			"access_and_manage_logging": {
@@ -123,9 +138,9 @@ func dataSourceGroup() *schema.Resource {
 				Description: "Privilege for a group to access and manage IamResources.",
 				Computed:    true,
 			},
-			"manage_dbaas": {
+			"create_network_security_groups": {
 				Type:        schema.TypeBool,
-				Description: "Privilege for a group to manage DBaaS related functionality",
+				Description: "Privilege for a group to create NetworkSecurityGroups.",
 				Computed:    true,
 			},
 			"users": {

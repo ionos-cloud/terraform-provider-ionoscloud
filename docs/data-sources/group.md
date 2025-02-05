@@ -54,6 +54,9 @@ The following attributes are returned by the datasource:
 * `create_flow_log` -  The group will be allowed to create flow log.
 * `access_and_manage_monitoring`  The group will be allowed to access and manage monitoring.
 * `access_and_manage_certificates` - The group will be allowed to access and manage certificates.
+* `access_and_manage_dns` - The group will be allowed to access and manage dns records.
+* `manage_registry` - The group will be allowed to access container registry related functionality.
+* `manage_dataplatform` - The group will be allowed to access and manage the Data Platform.
 * `access_and_manage_logging` - The group will be allowed to access and manage logging.
 * `access_and_manage_cdn` - The group will be allowed to access and manage cdn.
 * `access_and_manage_vpn` - The group will be allowed to access and manage vpn.

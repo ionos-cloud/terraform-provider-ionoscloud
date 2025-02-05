@@ -87,6 +87,9 @@ resource "random_password" "user2_password" {
 * `create_flow_log` - (Optional) [Boolean]  The group will be allowed to create flow log.
 * `access_and_manage_monitoring` - (Optional) [Boolean]  The group will be allowed to access and manage monitoring.
 * `access_and_manage_certificates` - (Optional) [Boolean]  The group will be allowed to access and manage certificates.
+* `access_and_manage_dns` - (Optional) [Boolean]  The group will be allowed to access and manage dns records.
+* `manage_registry` - (Optional) [Boolean]  The group will be allowed to access container registry related functionality.
+* `manage_dataplatform` - (Optional) [Boolean]  The group will be allowed to access and manage the Data Platform.
 * `access_and_manage_logging` - (Optional) [Boolean]  The group will be allowed to access and manage logging.
 * `access_and_manage_cdn` - (Optional) [Boolean]  The group will be allowed to access and manage cdn.
 * `access_and_manage_vpn` - (Optional) [Boolean]  The group will be allowed to access and manage vpn.

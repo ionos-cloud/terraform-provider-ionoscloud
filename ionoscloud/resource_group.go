@@ -75,11 +75,6 @@ func resourceGroup() *schema.Resource {
 				Description: "Create Flow Logs privilege.",
 				Optional:    true,
 			},
-			"create_network_security_groups": {
-				Type:        schema.TypeBool,
-				Description: "Create Network Security groups.",
-				Optional:    true,
-			},
 			"access_and_manage_monitoring": {
 				Type: schema.TypeBool,
 				Description: "Privilege for a group to access and manage monitoring related functionality " +
@@ -89,6 +84,26 @@ func resourceGroup() *schema.Resource {
 			"access_and_manage_certificates": {
 				Type:        schema.TypeBool,
 				Description: "Privilege for a group to access and manage certificates.",
+				Optional:    true,
+			},
+			"manage_dbaas": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to manage DBaaS related functionality",
+				Optional:    true,
+			},
+			"access_and_manage_dns": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage dns records.",
+				Optional:    true,
+			},
+			"manage_registry": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for group accessing container registry related functionality.",
+				Optional:    true,
+			},
+			"manage_dataplatform": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage the Data Platform.",
 				Optional:    true,
 			},
 			"access_and_manage_logging": {
@@ -131,9 +146,9 @@ func resourceGroup() *schema.Resource {
 				Description: "Privilege for a group to access and manage IamResources.",
 				Optional:    true,
 			},
-			"manage_dbaas": {
+			"create_network_security_groups": {
 				Type:        schema.TypeBool,
-				Description: "Privilege for a group to manage DBaaS related functionality",
+				Description: "Create Network Security groups.",
 				Optional:    true,
 			},
 			"user_id": {
@@ -265,6 +280,12 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	manageDbaas := d.Get("manage_dbaas").(bool)
 	request.Properties.AccessAndManageCertificates = &tempAccessAndManageCertificates
 	request.Properties.ManageDBaaS = &manageDbaas
+	accessAndManageDns := d.Get("access_and_manage_dns").(bool)
+	request.Properties.AccessAndManageDns = &accessAndManageDns
+	manageRegistry := d.Get("manage_registry").(bool)
+	request.Properties.ManageRegistry = &manageRegistry
+	manageDataplatform := d.Get("manage_dataplatform").(bool)
+	request.Properties.ManageDataplatform = &manageDataplatform
 	tempAccessAndManageLogging := d.Get("access_and_manage_logging").(bool)
 	request.Properties.AccessAndManageLogging = &tempAccessAndManageLogging
 	tempAccessAndManageCdn := d.Get("access_and_manage_cdn").(bool)
@@ -362,6 +383,9 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	tempCreateNetworkSecurityGroups := d.Get("create_network_security_groups").(bool)
 	tempAccessAndManageMonitoring := d.Get("access_and_manage_monitoring").(bool)
 	tempAccessAndManageCertificates := d.Get("access_and_manage_certificates").(bool)
+	tempAccessAndManageDns := d.Get("access_and_manage_dns").(bool)
+	tempManageRegistry := d.Get("manage_registry").(bool)
+	tempManageDataplatform := d.Get("manage_dataplatform").(bool)
 	tempAccessAndManageLogging := d.Get("access_and_manage_logging").(bool)
 	tempAccessAndManageCdn := d.Get("access_and_manage_cdn").(bool)
 	tempAccessAndManageVpn := d.Get("access_and_manage_vpn").(bool)
@@ -390,6 +414,9 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			AccessAndManageCertificates:       &tempAccessAndManageCertificates,
 			ManageDBaaS:                       &tempManageDBaaS,
 			AccessAndManageLogging:            &tempAccessAndManageLogging,
+			AccessAndManageDns:                &tempAccessAndManageDns,
+			ManageRegistry:                    &tempManageRegistry,
+			ManageDataplatform:                &tempManageDataplatform,
 			AccessAndManageCdn:                &tempAccessAndManageCdn,
 			AccessAndManageVpn:                &tempAccessAndManageVpn,
 			AccessAndManageApiGateway:         &tempAccessAndManageApiGateway,
@@ -613,6 +640,25 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			err := d.Set("access_and_manage_certificates", *group.Properties.AccessAndManageCertificates)
 			if err != nil {
 				return fmt.Errorf("error while setting access_and_manage_certificates property for group %s: %w", d.Id(), err)
+			}
+		}
+
+		if group.Properties.AccessAndManageDns != nil {
+			err := d.Set("access_and_manage_dns", *group.Properties.AccessAndManageDns)
+			if err != nil {
+				return fmt.Errorf("error while setting access_and_manage_dns property for group %s: %w", d.Id(), err)
+			}
+		}
+		if group.Properties.ManageRegistry != nil {
+			err := d.Set("manage_registry", *group.Properties.ManageRegistry)
+			if err != nil {
+				return fmt.Errorf("error while setting manage_registry property for group %s: %w", d.Id(), err)
+			}
+		}
+		if group.Properties.ManageDataplatform != nil {
+			err := d.Set("manage_dataplatform", *group.Properties.ManageDataplatform)
+			if err != nil {
+				return fmt.Errorf("error while setting manage_dataplatform property for group %s: %w", d.Id(), err)
 			}
 		}
 
