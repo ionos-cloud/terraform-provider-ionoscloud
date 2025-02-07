@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
@@ -95,12 +95,12 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	applicationLoadBalancer := ionoscloud.ApplicationLoadBalancer{
-		Properties: &ionoscloud.ApplicationLoadBalancerProperties{},
+		Properties: ionoscloud.ApplicationLoadBalancerProperties{},
 	}
 
 	if name, nameOk := d.GetOk("name"); nameOk {
 		name := name.(string)
-		applicationLoadBalancer.Properties.Name = &name
+		applicationLoadBalancer.Properties.Name = name
 	} else {
 		diags := diag.FromErr(fmt.Errorf("name must be provided for application loadbalancer"))
 		return diags
@@ -108,7 +108,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 
 	if listenerLan, listenerLanOk := d.GetOk("listener_lan"); listenerLanOk {
 		listener := int32(listenerLan.(int))
-		applicationLoadBalancer.Properties.ListenerLan = &listener
+		applicationLoadBalancer.Properties.ListenerLan = listener
 	} else {
 		diags := diag.FromErr(fmt.Errorf("listener_lan must be provided for application loadbalancer"))
 		return diags
@@ -132,14 +132,14 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 				ips = append(ips, value.(string))
 			}
 			if len(ips) > 0 {
-				applicationLoadBalancer.Properties.Ips = &ips
+				applicationLoadBalancer.Properties.Ips = ips
 			}
 		}
 	}
 
 	if targetLan, targetLanOk := d.GetOk("target_lan"); targetLanOk {
 		targetLan := int32(targetLan.(int))
-		applicationLoadBalancer.Properties.TargetLan = &targetLan
+		applicationLoadBalancer.Properties.TargetLan = targetLan
 	} else {
 		diags := diag.FromErr(fmt.Errorf("target_lan must be provided for application loadbalancer"))
 		return diags
@@ -153,7 +153,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 				privateIps = append(privateIps, value.(string))
 			}
 			if len(privateIps) > 0 {
-				applicationLoadBalancer.Properties.LbPrivateIps = &privateIps
+				applicationLoadBalancer.Properties.LbPrivateIps = privateIps
 			}
 		}
 	}
@@ -243,7 +243,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.ApplicationLoadBalancer{
-		Properties: &ionoscloud.ApplicationLoadBalancerProperties{},
+		Properties: ionoscloud.ApplicationLoadBalancerProperties{},
 	}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -251,13 +251,13 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
 		vStr := v.(string)
-		request.Properties.Name = &vStr
+		request.Properties.Name = vStr
 	}
 
 	if d.HasChange("listener_lan") {
 		_, v := d.GetChange("listener_lan")
 		vInt := int32(v.(int))
-		request.Properties.ListenerLan = &vInt
+		request.Properties.ListenerLan = vInt
 	}
 
 	if d.HasChange("ips") {
@@ -269,7 +269,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 				ips = append(ips, value.(string))
 			}
 		}
-		request.Properties.Ips = &ips
+		request.Properties.Ips = ips
 	}
 
 	if d.HasChange("central_logging") {
@@ -287,7 +287,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	if d.HasChange("target_lan") {
 		_, v := d.GetChange("target_lan")
 		vInt := int32(v.(int))
-		request.Properties.TargetLan = &vInt
+		request.Properties.TargetLan = vInt
 	}
 
 	if d.HasChange("lb_private_ips") {
@@ -300,7 +300,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 				privateIps = append(privateIps, value.(string))
 			}
 		}
-		request.Properties.LbPrivateIps = &privateIps
+		request.Properties.LbPrivateIps = privateIps
 	}
 
 	if d.HasChange("flowlog") {
@@ -331,7 +331,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 			}
 		}
 	}
-	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersPatch(ctx, dcId, d.Id()).ApplicationLoadBalancerProperties(*request.Properties).Execute()
+	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersPatch(ctx, dcId, d.Id()).ApplicationLoadBalancerProperties(request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -416,54 +416,46 @@ func setApplicationLoadBalancerData(d *schema.ResourceData, applicationLoadBalan
 		d.SetId(*applicationLoadBalancer.Id)
 	}
 
-	if applicationLoadBalancer.Properties != nil {
-		if applicationLoadBalancer.Properties.Name != nil {
-			err := d.Set("name", *applicationLoadBalancer.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for application loadbalancer %s: %w", d.Id(), err)
-			}
-		}
+	err := d.Set("name", applicationLoadBalancer.Properties.Name)
+	if err != nil {
+		return fmt.Errorf("error while setting name property for application loadbalancer %s: %w", d.Id(), err)
+	}
 
-		if applicationLoadBalancer.Properties.ListenerLan != nil {
-			err := d.Set("listener_lan", *applicationLoadBalancer.Properties.ListenerLan)
-			if err != nil {
-				return fmt.Errorf("error while setting listener_lan property for application loadbalancer %s: %w", d.Id(), err)
-			}
-		}
+	err = d.Set("listener_lan", applicationLoadBalancer.Properties.ListenerLan)
+	if err != nil {
+		return fmt.Errorf("error while setting listener_lan property for application loadbalancer %s: %w", d.Id(), err)
+	}
 
-		if applicationLoadBalancer.Properties.Ips != nil {
-			err := d.Set("ips", *applicationLoadBalancer.Properties.Ips)
-			if err != nil {
-				return fmt.Errorf("error while setting ips property for application loadbalancer %s: %w", d.Id(), err)
-			}
+	if applicationLoadBalancer.Properties.Ips != nil {
+		err := d.Set("ips", applicationLoadBalancer.Properties.Ips)
+		if err != nil {
+			return fmt.Errorf("error while setting ips property for application loadbalancer %s: %w", d.Id(), err)
 		}
+	}
 
-		if applicationLoadBalancer.Properties.TargetLan != nil {
-			err := d.Set("target_lan", *applicationLoadBalancer.Properties.TargetLan)
-			if err != nil {
-				return fmt.Errorf("error while setting target_lan property for application loadbalancer %s: %w", d.Id(), err)
-			}
+	err = d.Set("target_lan", applicationLoadBalancer.Properties.TargetLan)
+	if err != nil {
+		return fmt.Errorf("error while setting target_lan property for application loadbalancer %s: %w", d.Id(), err)
+	}
+
+	if applicationLoadBalancer.Properties.LbPrivateIps != nil {
+		err := d.Set("lb_private_ips", applicationLoadBalancer.Properties.LbPrivateIps)
+		if err != nil {
+			return fmt.Errorf("error while setting lb_private_ips property for application loadbalancer %s: %w", d.Id(), err)
 		}
+	}
 
-		if applicationLoadBalancer.Properties.LbPrivateIps != nil {
-			err := d.Set("lb_private_ips", *applicationLoadBalancer.Properties.LbPrivateIps)
-			if err != nil {
-				return fmt.Errorf("error while setting lb_private_ips property for application loadbalancer %s: %w", d.Id(), err)
-			}
+	if applicationLoadBalancer.Properties.CentralLogging != nil {
+		err := d.Set("central_logging", *applicationLoadBalancer.Properties.CentralLogging)
+		if err != nil {
+			return fmt.Errorf("error while setting central_logging property for network load balancer %s: %w", d.Id(), err)
 		}
+	}
 
-		if applicationLoadBalancer.Properties.CentralLogging != nil {
-			err := d.Set("central_logging", *applicationLoadBalancer.Properties.CentralLogging)
-			if err != nil {
-				return fmt.Errorf("error while setting central_logging property for network load balancer %s: %w", d.Id(), err)
-			}
-		}
-
-		if applicationLoadBalancer.Properties.LoggingFormat != nil {
-			err := d.Set("logging_format", *applicationLoadBalancer.Properties.LoggingFormat)
-			if err != nil {
-				return fmt.Errorf("error while setting logging_format property for network load balancer %s: %w", d.Id(), err)
-			}
+	if applicationLoadBalancer.Properties.LoggingFormat != nil {
+		err := d.Set("logging_format", *applicationLoadBalancer.Properties.LoggingFormat)
+		if err != nil {
+			return fmt.Errorf("error while setting logging_format property for network load balancer %s: %w", d.Id(), err)
 		}
 	}
 

@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func testGetNicDataSourceSchema() map[string]*schema.Schema {
@@ -97,23 +97,26 @@ func Test_dataSourceNicRead(t *testing.T) {
 	testName := "testname"
 	dhcp := true
 	dhcpv6 := false
+	dhcpv6NulBool := ionoscloud.NullableBool{}
+	dhcpv6NulBool.Set(&dhcpv6)
 	firewallActive := true
 	firewallType := "Bidirectional"
 	ipv6CidrBlock := "AUTO"
+	ipv6CidrBlockNulStr := ionoscloud.NullableString{}
+	ipv6CidrBlockNulStr.Set(&ipv6CidrBlock)
 	nic := ionoscloud.Nic{
 		Id:       &id,
 		Type:     nil,
 		Href:     nil,
 		Metadata: nil,
-		Properties: &ionoscloud.NicProperties{
+		Properties: ionoscloud.NicProperties{
 			Name:           &testName,
 			Mac:            &mac,
 			Ips:            nil,
 			Ipv6Ips:        nil,
 			Dhcp:           &dhcp,
-			Dhcpv6:         &dhcpv6,
-			Ipv6CidrBlock:  &ipv6CidrBlock,
-			Lan:            nil,
+			Dhcpv6:         dhcpv6NulBool,
+			Ipv6CidrBlock:  ipv6CidrBlockNulStr,
 			FirewallActive: &firewallActive,
 			FirewallType:   &firewallType,
 			DeviceNumber:   nil,
@@ -156,11 +159,11 @@ func Test_dataSourceNicRead(t *testing.T) {
 	if *nic.Properties.Dhcp != data.Get("dhcp").(bool) {
 		t.Fatalf("expected '%t', got '%s'", *nic.Properties.Dhcp, data.Get("dhcp"))
 	}
-	if *nic.Properties.Dhcpv6 != data.Get("dhcpv6").(bool) {
-		t.Fatalf("expected '%t', got '%s'", *nic.Properties.Dhcpv6, data.Get("dhcpv6"))
+	if *nic.Properties.Dhcpv6.Get() != data.Get("dhcpv6").(bool) {
+		t.Fatalf("expected '%t', got '%s'", *nic.Properties.Dhcpv6.Get(), data.Get("dhcpv6"))
 	}
-	if *nic.Properties.Ipv6CidrBlock != data.Get("ipv6_cidr_block").(string) {
-		t.Fatalf("expected '%s', got '%s'", *nic.Properties.Ipv6CidrBlock, data.Get("ipv6CidrBlock"))
+	if *nic.Properties.Ipv6CidrBlock.Get() != data.Get("ipv6_cidr_block").(string) {
+		t.Fatalf("expected '%s', got '%s'", *nic.Properties.Ipv6CidrBlock.Get(), data.Get("ipv6CidrBlock"))
 	}
 	if *nic.Properties.FirewallActive != data.Get("firewall_active").(bool) {
 		t.Fatalf("expected '%t', got '%s'", *nic.Properties.FirewallActive, data.Get("firewallActive"))

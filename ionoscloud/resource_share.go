@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 )
@@ -52,7 +52,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.GroupShare{
-		Properties: &ionoscloud.GroupShareProperties{},
+		Properties: ionoscloud.GroupShareProperties{},
 	}
 
 	tempSharePrivilege := d.Get("share_privilege").(bool)
@@ -110,7 +110,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	tempEditPrivilege := d.Get("edit_privilege").(bool)
 
 	shareReq := ionoscloud.GroupShare{
-		Properties: &ionoscloud.GroupShareProperties{
+		Properties: ionoscloud.GroupShareProperties{
 			EditPrivilege:  &tempEditPrivilege,
 			SharePrivilege: &tempSharePrivilege,
 		},

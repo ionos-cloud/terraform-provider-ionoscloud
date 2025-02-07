@@ -7,12 +7,13 @@ import (
 	"log"
 	"strings"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func dataSourceApplicationLoadBalancerForwardingRule() *schema.Resource {
@@ -183,7 +184,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 
 	var applicationLoadBalancerForwardingRule ionoscloud.ApplicationLoadBalancerForwardingRule
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -209,7 +210,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching application loadbalancer forwarding rules: %w", err))
 			}
 
-			results = *applicationLoadBalancersForwardingRules.Items
+			results = applicationLoadBalancersForwardingRules.Items
 		} else {
 			applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId, albId).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
@@ -219,8 +220,8 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 			}
 
 			if applicationLoadBalancersForwardingRules.Items != nil {
-				for _, albFr := range *applicationLoadBalancersForwardingRules.Items {
-					if albFr.Properties != nil && albFr.Properties.Name != nil && strings.EqualFold(*albFr.Properties.Name, name) {
+				for _, albFr := range applicationLoadBalancersForwardingRules.Items {
+					if strings.EqualFold(albFr.Properties.Name, name) {
 						tmpAlbFr, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, *albFr.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {

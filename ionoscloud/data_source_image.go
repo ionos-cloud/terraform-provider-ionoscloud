@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func dataSourceImage() *schema.Resource {
@@ -150,8 +150,8 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if versionOk && nameOk && version != "" && name != "" {
 		nameVer := fmt.Sprintf("%s-%s", name, version)
 		if images.Items != nil {
-			for _, img := range *images.Items {
-				if img.Properties != nil && img.Properties.Name != nil && strings.EqualFold(*img.Properties.Name, nameVer) {
+			for _, img := range images.Items {
+				if img.Properties.Name != nil && strings.EqualFold(*img.Properties.Name, nameVer) {
 					results = append(results, img)
 				}
 			}
@@ -162,8 +162,8 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	} else if nameOk && name != "" {
 		var exactMatches []ionoscloud.Image
 		if images.Items != nil {
-			for _, img := range *images.Items {
-				if img.Properties != nil && img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
+			for _, img := range images.Items {
+				if img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
 					results = append(results, img)
 					// if the image name is an exact match, store it in a separate list of exact matches
 					if strings.EqualFold(*img.Properties.Name, name) {
@@ -180,13 +180,13 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s", name))
 		}
 	} else {
-		results = *images.Items
+		results = images.Items
 	}
 
 	if imageTypeOk && imageType != "" {
 		var imageTypeResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.ImageType != nil && strings.EqualFold(*img.Properties.ImageType, imageType) {
+			if img.Properties.ImageType != nil && strings.EqualFold(*img.Properties.ImageType, imageType) {
 				imageTypeResults = append(imageTypeResults, img)
 			}
 
@@ -196,11 +196,9 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if imgAliasOk && imgAlias != "" {
 		var imageAliasResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil {
-				for _, imgAliasIdx := range *img.Properties.ImageAliases {
-					if strings.EqualFold(imgAliasIdx, imgAlias) {
-						imageAliasResults = append(imageAliasResults, img)
-					}
+			for _, imgAliasIdx := range img.Properties.ImageAliases {
+				if strings.EqualFold(imgAliasIdx, imgAlias) {
+					imageAliasResults = append(imageAliasResults, img)
 				}
 			}
 		}
@@ -210,7 +208,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if locationOk && location != "" {
 		var locationResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.Location != nil && strings.EqualFold(*img.Properties.Location, location) {
+			if img.Properties.Location != nil && strings.EqualFold(*img.Properties.Location, location) {
 				locationResults = append(locationResults, img)
 			}
 		}
@@ -220,7 +218,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if cloudInitOk && cloudInit != "" {
 		var cloudInitResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.CloudInit != nil && strings.EqualFold(*img.Properties.CloudInit, cloudInit) {
+			if img.Properties.CloudInit != nil && strings.EqualFold(*img.Properties.CloudInit, cloudInit) {
 				cloudInitResults = append(cloudInitResults, img)
 			}
 		}
@@ -233,9 +231,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias))
 	} else if len(results) > 1 {
 		for _, result := range results {
-			if result.Properties != nil {
-				log.Printf("[DEBUG] found image %s in location %s", *result.Properties.Name, *result.Properties.Location)
-			}
+			log.Printf("[DEBUG] found image %s in location %s", *result.Properties.Name, *result.Properties.Location)
 		}
 		return diag.FromErr(fmt.Errorf("more than one image found, enable debug to learn more. Criteria used name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias))
 	} else {
@@ -254,129 +250,124 @@ func ImageSetData(d *schema.ResourceData, image *ionoscloud.Image) error {
 		d.SetId(*image.Id)
 	}
 
-	if image.Properties != nil {
-
-		if image.Properties.Name != nil {
-			err := d.Set("name", *image.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for image %s: %w", d.Id(), err)
-			}
+	if image.Properties.Name != nil {
+		err := d.Set("name", *image.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("error while setting name property for image %s: %w", d.Id(), err)
 		}
+	}
 
-		if image.Properties.Description != nil {
-			if err := d.Set("description", *image.Properties.Description); err != nil {
-				return err
-			}
+	if image.Properties.Description != nil {
+		if err := d.Set("description", *image.Properties.Description); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.Size != nil {
-			if err := d.Set("size", *image.Properties.Size); err != nil {
-				return err
-			}
+	if image.Properties.Size != nil {
+		if err := d.Set("size", *image.Properties.Size); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.CpuHotPlug != nil {
-			if err := d.Set("cpu_hot_plug", *image.Properties.CpuHotPlug); err != nil {
-				return err
-			}
+	if image.Properties.CpuHotPlug != nil {
+		if err := d.Set("cpu_hot_plug", *image.Properties.CpuHotPlug); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.CpuHotUnplug != nil {
-			if err := d.Set("cpu_hot_unplug", *image.Properties.CpuHotUnplug); err != nil {
-				return err
-			}
+	if image.Properties.CpuHotUnplug != nil {
+		if err := d.Set("cpu_hot_unplug", *image.Properties.CpuHotUnplug); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.RamHotPlug != nil {
-			if err := d.Set("ram_hot_plug", *image.Properties.RamHotPlug); err != nil {
-				return err
-			}
+	if image.Properties.RamHotPlug != nil {
+		if err := d.Set("ram_hot_plug", *image.Properties.RamHotPlug); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.RamHotUnplug != nil {
-			if err := d.Set("ram_hot_unplug", *image.Properties.RamHotUnplug); err != nil {
-				return err
-			}
+	if image.Properties.RamHotUnplug != nil {
+		if err := d.Set("ram_hot_unplug", *image.Properties.RamHotUnplug); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.NicHotPlug != nil {
-			if err := d.Set("nic_hot_plug", *image.Properties.NicHotPlug); err != nil {
-				return err
-			}
+	if image.Properties.NicHotPlug != nil {
+		if err := d.Set("nic_hot_plug", *image.Properties.NicHotPlug); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.NicHotUnplug != nil {
-			if err := d.Set("nic_hot_unplug", *image.Properties.NicHotUnplug); err != nil {
-				return err
-			}
+	if image.Properties.NicHotUnplug != nil {
+		if err := d.Set("nic_hot_unplug", *image.Properties.NicHotUnplug); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.DiscVirtioHotPlug != nil {
-			if err := d.Set("disc_virtio_hot_plug", *image.Properties.DiscVirtioHotPlug); err != nil {
-				return err
-			}
+	if image.Properties.DiscVirtioHotPlug != nil {
+		if err := d.Set("disc_virtio_hot_plug", *image.Properties.DiscVirtioHotPlug); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.DiscVirtioHotUnplug != nil {
-			if err := d.Set("disc_virtio_hot_unplug", *image.Properties.DiscVirtioHotUnplug); err != nil {
-				return err
-			}
+	if image.Properties.DiscVirtioHotUnplug != nil {
+		if err := d.Set("disc_virtio_hot_unplug", *image.Properties.DiscVirtioHotUnplug); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.DiscScsiHotPlug != nil {
-			if err := d.Set("disc_scsi_hot_plug", *image.Properties.DiscScsiHotPlug); err != nil {
-				return err
-			}
+	if image.Properties.DiscScsiHotPlug != nil {
+		if err := d.Set("disc_scsi_hot_plug", *image.Properties.DiscScsiHotPlug); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.DiscScsiHotUnplug != nil {
-			if err := d.Set("disc_scsi_hot_unplug", *image.Properties.DiscScsiHotUnplug); err != nil {
-				return err
-			}
+	if image.Properties.DiscScsiHotUnplug != nil {
+		if err := d.Set("disc_scsi_hot_unplug", *image.Properties.DiscScsiHotUnplug); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.LicenceType != nil {
-			if err := d.Set("licence_type", *image.Properties.LicenceType); err != nil {
-				return err
-			}
+	if err := d.Set("licence_type", image.Properties.LicenceType); err != nil {
+		return err
+	}
+
+	if image.Properties.Public != nil {
+		if err := d.Set("public", *image.Properties.Public); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.Public != nil {
-			if err := d.Set("public", *image.Properties.Public); err != nil {
-				return err
-			}
+	if image.Properties.ExposeSerial != nil {
+		if err := d.Set("expose_serial", *image.Properties.ExposeSerial); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.ExposeSerial != nil {
-			if err := d.Set("expose_serial", *image.Properties.ExposeSerial); err != nil {
-				return err
-			}
+	if len(image.Properties.ImageAliases) > 0 {
+		if err := d.Set("image_aliases", image.Properties.ImageAliases); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.ImageAliases != nil && len(*image.Properties.ImageAliases) > 0 {
-			if err := d.Set("image_aliases", *image.Properties.ImageAliases); err != nil {
-				return err
-			}
+	if image.Properties.CloudInit != nil {
+		if err := d.Set("cloud_init", *image.Properties.CloudInit); err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.CloudInit != nil {
-			if err := d.Set("cloud_init", *image.Properties.CloudInit); err != nil {
-				return err
-			}
+	if image.Properties.ImageType != nil {
+		err := d.Set("type", *image.Properties.ImageType)
+		if err != nil {
+			return err
 		}
+	}
 
-		if image.Properties.ImageType != nil {
-			err := d.Set("type", *image.Properties.ImageType)
-			if err != nil {
-				return err
-			}
-		}
-
-		if image.Properties.Location != nil {
-			err := d.Set("location", *image.Properties.Location)
-			if err != nil {
-				return err
-			}
+	if image.Properties.Location != nil {
+		err := d.Set("location", *image.Properties.Location)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

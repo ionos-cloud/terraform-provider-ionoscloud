@@ -61,14 +61,14 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		return diag.FromErr(fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanId, dcId, err))
 	}
-	if lan.Properties == nil || lan.Properties.IpFailover == nil {
+	if lan.Properties.IpFailover == nil {
 		return diag.FromErr(fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"))
 	}
 
 	ipFailoverGroups := lan.Properties.IpFailover
 	ipFailoverGroupFound := false
-	if lan.Properties != nil && ipFailoverGroups != nil && len(*ipFailoverGroups) > 0 {
-		for _, ipFailoverGroup := range *ipFailoverGroups {
+	if len(ipFailoverGroups) > 0 {
+		for _, ipFailoverGroup := range ipFailoverGroups {
 			// Search for the appropriate IP Failover Group using the provided IP
 			if *ipFailoverGroup.Ip == ip {
 				// Set the information only if the IP Failover Group exists

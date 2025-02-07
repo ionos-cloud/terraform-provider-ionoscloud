@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
@@ -180,27 +180,27 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	applicationLoadBalancerForwardingRule := ionoscloud.ApplicationLoadBalancerForwardingRule{
-		Properties: &ionoscloud.ApplicationLoadBalancerForwardingRuleProperties{},
+		Properties: ionoscloud.ApplicationLoadBalancerForwardingRuleProperties{},
 	}
 
 	if name, nameOk := d.GetOk("name"); nameOk {
 		name := name.(string)
-		applicationLoadBalancerForwardingRule.Properties.Name = &name
+		applicationLoadBalancerForwardingRule.Properties.Name = name
 	}
 
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
 		protocol := protocol.(string)
-		applicationLoadBalancerForwardingRule.Properties.Protocol = &protocol
+		applicationLoadBalancerForwardingRule.Properties.Protocol = protocol
 	}
 
 	if listenerIp, listenerIpOk := d.GetOk("listener_ip"); listenerIpOk {
 		listenerIp := listenerIp.(string)
-		applicationLoadBalancerForwardingRule.Properties.ListenerIp = &listenerIp
+		applicationLoadBalancerForwardingRule.Properties.ListenerIp = listenerIp
 	}
 
 	if listenerPort, listenerPortOk := d.GetOk("listener_port"); listenerPortOk {
 		listenerPort := int32(listenerPort.(int))
-		applicationLoadBalancerForwardingRule.Properties.ListenerPort = &listenerPort
+		applicationLoadBalancerForwardingRule.Properties.ListenerPort = listenerPort
 	}
 
 	if clientTimeout, clientTimeoutOk := d.GetOk("client_timeout"); clientTimeoutOk {
@@ -216,14 +216,14 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 				serverCertificates = append(serverCertificates, value.(string))
 			}
 			if len(serverCertificates) > 0 {
-				applicationLoadBalancerForwardingRule.Properties.ServerCertificates = &serverCertificates
+				applicationLoadBalancerForwardingRule.Properties.ServerCertificates = serverCertificates
 			}
 		}
 	}
 
 	if _, httpRulesOk := d.GetOk("http_rules"); httpRulesOk {
 		if httpRules, err := getAlbHttpRulesData(d); err == nil {
-			applicationLoadBalancerForwardingRule.Properties.HttpRules = httpRules
+			applicationLoadBalancerForwardingRule.Properties.HttpRules = *httpRules
 		} else {
 			return diag.FromErr(err)
 		}
@@ -283,7 +283,7 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.ApplicationLoadBalancerForwardingRule{
-		Properties: &ionoscloud.ApplicationLoadBalancerForwardingRuleProperties{},
+		Properties: ionoscloud.ApplicationLoadBalancerForwardingRuleProperties{},
 	}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -292,25 +292,25 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
 		vStr := v.(string)
-		request.Properties.Name = &vStr
+		request.Properties.Name = vStr
 	}
 
 	if d.HasChange("protocol") {
 		_, v := d.GetChange("protocol")
 		vStr := v.(string)
-		request.Properties.Protocol = &vStr
+		request.Properties.Protocol = vStr
 	}
 
 	if d.HasChange("listener_ip") {
 		_, v := d.GetChange("listener_ip")
 		vStr := v.(string)
-		request.Properties.ListenerIp = &vStr
+		request.Properties.ListenerIp = vStr
 	}
 
 	if d.HasChange("listener_port") {
 		_, v := d.GetChange("listener_port")
 		vStr := int32(v.(int))
-		request.Properties.ListenerPort = &vStr
+		request.Properties.ListenerPort = vStr
 	}
 
 	if d.HasChange("client_timeout") {
@@ -328,18 +328,18 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 				serverCertificates = append(serverCertificates, value.(string))
 			}
 		}
-		request.Properties.ServerCertificates = &serverCertificates
+		request.Properties.ServerCertificates = serverCertificates
 	}
 
 	if d.HasChange("http_rules") {
 		if httpRules, err := getAlbHttpRulesData(d); err == nil {
-			request.Properties.HttpRules = httpRules
+			request.Properties.HttpRules = *httpRules
 		} else {
 			return diag.FromErr(err)
 		}
 	}
 
-	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesPatch(ctx, dcId, albId, d.Id()).ApplicationLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
+	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesPatch(ctx, dcId, albId, d.Id()).ApplicationLoadBalancerForwardingRuleProperties(request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -421,128 +421,110 @@ func setApplicationLoadBalancerForwardingRuleData(d *schema.ResourceData, applic
 		d.SetId(*applicationLoadBalancerForwardingRule.Id)
 	}
 
-	if applicationLoadBalancerForwardingRule.Properties != nil {
-		if applicationLoadBalancerForwardingRule.Properties.Name != nil {
-			err := d.Set("name", *applicationLoadBalancerForwardingRule.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for application load balancer forwarding rule %s: %w", d.Id(), err)
-			}
-		}
+	err := d.Set("name", applicationLoadBalancerForwardingRule.Properties.Name)
+	if err != nil {
+		return fmt.Errorf("error while setting name property for application load balancer forwarding rule %s: %w", d.Id(), err)
+	}
 
-		if applicationLoadBalancerForwardingRule.Properties.Protocol != nil {
-			err := d.Set("protocol", *applicationLoadBalancerForwardingRule.Properties.Protocol)
-			if err != nil {
-				return fmt.Errorf("error while setting protocol property for application load balancer forwarding rule %s: %w", d.Id(), err)
-			}
-		}
+	err = d.Set("protocol", applicationLoadBalancerForwardingRule.Properties.Protocol)
+	if err != nil {
+		return fmt.Errorf("error while setting protocol property for application load balancer forwarding rule %s: %w", d.Id(), err)
+	}
 
-		if applicationLoadBalancerForwardingRule.Properties.ListenerIp != nil {
-			err := d.Set("listener_ip", *applicationLoadBalancerForwardingRule.Properties.ListenerIp)
-			if err != nil {
-				return fmt.Errorf("error while setting listener_ip property for application load balancer forwarding rule %s: %w", d.Id(), err)
-			}
-		}
+	err = d.Set("listener_ip", applicationLoadBalancerForwardingRule.Properties.ListenerIp)
+	if err != nil {
+		return fmt.Errorf("error while setting listener_ip property for application load balancer forwarding rule %s: %w", d.Id(), err)
+	}
 
-		if applicationLoadBalancerForwardingRule.Properties.ListenerPort != nil {
-			err := d.Set("listener_port", *applicationLoadBalancerForwardingRule.Properties.ListenerPort)
-			if err != nil {
-				return fmt.Errorf("error while setting listener_port property for application load balancer forwarding rule %s: %w", d.Id(), err)
-			}
-		}
+	err = d.Set("listener_port", applicationLoadBalancerForwardingRule.Properties.ListenerPort)
+	if err != nil {
+		return fmt.Errorf("error while setting listener_port property for application load balancer forwarding rule %s: %w", d.Id(), err)
+	}
 
-		if applicationLoadBalancerForwardingRule.Properties.ClientTimeout != nil {
-			err := d.Set("client_timeout", *applicationLoadBalancerForwardingRule.Properties.ClientTimeout)
-			if err != nil {
-				return fmt.Errorf("error while setting client_timeout property for application load balancer forwarding rule %s: %w", d.Id(), err)
-			}
-		}
-
-		if applicationLoadBalancerForwardingRule.Properties.ServerCertificates != nil {
-			err := d.Set("server_certificates", *applicationLoadBalancerForwardingRule.Properties.ServerCertificates)
-			if err != nil {
-				return fmt.Errorf("error while setting server_certificates property for application load balancer forwarding rule %s: %w", d.Id(), err)
-			}
-		}
-
-		httpRules := make([]interface{}, 0)
-		if applicationLoadBalancerForwardingRule.Properties.HttpRules != nil && len(*applicationLoadBalancerForwardingRule.Properties.HttpRules) > 0 {
-			httpRules = make([]interface{}, 0)
-			for _, rule := range *applicationLoadBalancerForwardingRule.Properties.HttpRules {
-				ruleEntry := make(map[string]interface{})
-
-				if rule.Name != nil {
-					ruleEntry["name"] = *rule.Name
-				}
-
-				if rule.Type != nil {
-					ruleEntry["type"] = *rule.Type
-				}
-
-				if rule.TargetGroup != nil {
-					ruleEntry["target_group"] = *rule.TargetGroup
-				}
-
-				if rule.DropQuery != nil {
-					ruleEntry["drop_query"] = *rule.DropQuery
-				}
-
-				if rule.Location != nil {
-					ruleEntry["location"] = *rule.Location
-				}
-
-				if rule.StatusCode != nil {
-					ruleEntry["status_code"] = *rule.StatusCode
-				}
-
-				if rule.ResponseMessage != nil {
-					ruleEntry["response_message"] = *rule.ResponseMessage
-				}
-
-				if rule.ContentType != nil {
-					ruleEntry["content_type"] = *rule.ContentType
-				}
-
-				if rule.Conditions != nil {
-					conditions := make([]interface{}, 0)
-					for _, condition := range *rule.Conditions {
-						conditionEntry := make(map[string]interface{})
-
-						if condition.Type != nil {
-							conditionEntry["type"] = *condition.Type
-						}
-
-						if condition.Condition != nil {
-							conditionEntry["condition"] = *condition.Condition
-						}
-
-						if condition.Negate != nil {
-							conditionEntry["negate"] = *condition.Negate
-						}
-
-						if condition.Key != nil {
-							conditionEntry["key"] = *condition.Key
-						}
-
-						if condition.Value != nil {
-							conditionEntry["value"] = *condition.Value
-						}
-
-						conditions = append(conditions, conditionEntry)
-					}
-
-					ruleEntry["conditions"] = conditions
-				}
-
-				httpRules = append(httpRules, ruleEntry)
-			}
-		}
-
-		if len(httpRules) > 0 {
-			if err := d.Set("http_rules", httpRules); err != nil {
-				return fmt.Errorf("error while setting http_rules property for application load balancer forwarding rule  %s: %w", d.Id(), err)
-			}
+	if applicationLoadBalancerForwardingRule.Properties.ClientTimeout != nil {
+		err := d.Set("client_timeout", *applicationLoadBalancerForwardingRule.Properties.ClientTimeout)
+		if err != nil {
+			return fmt.Errorf("error while setting client_timeout property for application load balancer forwarding rule %s: %w", d.Id(), err)
 		}
 	}
+
+	if applicationLoadBalancerForwardingRule.Properties.ServerCertificates != nil {
+		err := d.Set("server_certificates", applicationLoadBalancerForwardingRule.Properties.ServerCertificates)
+		if err != nil {
+			return fmt.Errorf("error while setting server_certificates property for application load balancer forwarding rule %s: %w", d.Id(), err)
+		}
+	}
+
+	httpRules := make([]interface{}, 0)
+	if len(applicationLoadBalancerForwardingRule.Properties.HttpRules) > 0 {
+		httpRules = make([]interface{}, 0)
+		for _, rule := range applicationLoadBalancerForwardingRule.Properties.HttpRules {
+			ruleEntry := make(map[string]interface{})
+
+			ruleEntry["name"] = rule.Name
+			ruleEntry["type"] = rule.Type
+
+			if rule.TargetGroup != nil {
+				ruleEntry["target_group"] = *rule.TargetGroup
+			}
+
+			if rule.DropQuery != nil {
+				ruleEntry["drop_query"] = *rule.DropQuery
+			}
+
+			if rule.Location != nil {
+				ruleEntry["location"] = *rule.Location
+			}
+
+			if rule.StatusCode != nil {
+				ruleEntry["status_code"] = *rule.StatusCode
+			}
+
+			if rule.ResponseMessage != nil {
+				ruleEntry["response_message"] = *rule.ResponseMessage
+			}
+
+			if rule.ContentType != nil {
+				ruleEntry["content_type"] = *rule.ContentType
+			}
+
+			if rule.Conditions != nil {
+				conditions := make([]interface{}, 0)
+				for _, condition := range rule.Conditions {
+					conditionEntry := make(map[string]interface{})
+
+					conditionEntry["type"] = condition.Type
+
+					conditionEntry["condition"] = condition.Condition
+
+					if condition.Negate != nil {
+						conditionEntry["negate"] = *condition.Negate
+					}
+
+					if condition.Key != nil {
+						conditionEntry["key"] = *condition.Key
+					}
+
+					if condition.Value != nil {
+						conditionEntry["value"] = *condition.Value
+					}
+
+					conditions = append(conditions, conditionEntry)
+				}
+
+				ruleEntry["conditions"] = conditions
+			}
+
+			httpRules = append(httpRules, ruleEntry)
+		}
+	}
+
+	if len(httpRules) > 0 {
+		if err := d.Set("http_rules", httpRules); err != nil {
+			return fmt.Errorf("error while setting http_rules property for application load balancer forwarding rule  %s: %w", d.Id(), err)
+		}
+	}
+
 	return nil
 }
 
@@ -557,12 +539,12 @@ func getAlbHttpRulesData(d *schema.ResourceData) (*[]ionoscloud.ApplicationLoadB
 
 		if name, nameOk := d.GetOk(fmt.Sprintf("http_rules.%d.name", httpRuleIndex)); nameOk {
 			name := name.(string)
-			httpRule.Name = &name
+			httpRule.Name = name
 		}
 
 		if typeVal, typeOk := d.GetOk(fmt.Sprintf("http_rules.%d.type", httpRuleIndex)); typeOk {
 			typeVal := typeVal.(string)
-			httpRule.Type = &typeVal
+			httpRule.Type = typeVal
 		}
 
 		if targetGroup, targetGroupOk := d.GetOk(fmt.Sprintf("http_rules.%d.target_group", httpRuleIndex)); targetGroupOk {
@@ -605,11 +587,11 @@ func getAlbHttpRulesData(d *schema.ResourceData) (*[]ionoscloud.ApplicationLoadB
 					condition := ionoscloud.ApplicationLoadBalancerHttpRuleCondition{}
 
 					typeVal := d.Get(fmt.Sprintf("http_rules.%d.conditions.%d.type", httpRuleIndex, conditionIndex)).(string)
-					condition.Type = &typeVal
+					condition.Type = typeVal
 
 					if conditionVal, conditionOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.condition", httpRuleIndex, conditionIndex)); conditionOk {
 						conditionVal := conditionVal.(string)
-						condition.Condition = &conditionVal
+						condition.Condition = conditionVal
 					} else if !strings.EqualFold(typeVal, "SOURCE_IP") {
 						return nil, fmt.Errorf("condition must be provided for application loadbalancer forwarding rule http rule condition")
 					}
@@ -632,7 +614,7 @@ func getAlbHttpRulesData(d *schema.ResourceData) (*[]ionoscloud.ApplicationLoadB
 					conditions = append(conditions, condition)
 				}
 
-				httpRule.Conditions = &conditions
+				httpRule.Conditions = conditions
 			}
 
 		}

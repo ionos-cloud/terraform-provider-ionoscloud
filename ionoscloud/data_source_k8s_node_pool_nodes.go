@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -81,12 +81,12 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 	if nodesList.Items == nil {
 		return diag.FromErr(fmt.Errorf("no nodes found for nodepool with id %s", nodePoolIdStr))
 	}
-	if len(*nodesList.Items) == 0 {
+	if len(nodesList.Items) == 0 {
 		return diag.FromErr(fmt.Errorf("nodes list is empty for of nodepool with id %s", nodePoolIdStr))
 	}
-	if len(*nodesList.Items) > 0 {
+	if len(nodesList.Items) > 0 {
 		var nodes []interface{}
-		for _, node := range *nodesList.Items {
+		for _, node := range nodesList.Items {
 			nodeMap := setK8sNodesDataToMap(node)
 			nodes = append(nodes, nodeMap)
 		}
@@ -104,11 +104,9 @@ func setK8sNodesDataToMap(node ionoscloud.KubernetesNode) map[string]interface{}
 	if node.Id != nil {
 		nodeEntry["id"] = mongo.ToValueDefault(node.Id)
 	}
-	if node.Properties != nil {
-		nodeEntry["name"] = mongo.ToValueDefault(node.Properties.Name)
-		nodeEntry["public_ip"] = mongo.ToValueDefault(node.Properties.PublicIP)
-		nodeEntry["private_ip"] = mongo.ToValueDefault(node.Properties.PrivateIP)
-		nodeEntry["k8s_version"] = mongo.ToValueDefault(node.Properties.K8sVersion)
-	}
+	nodeEntry["name"] = mongo.ToValueDefault(&node.Properties.Name)
+	nodeEntry["public_ip"] = mongo.ToValueDefault(node.Properties.PublicIP)
+	nodeEntry["private_ip"] = mongo.ToValueDefault(node.Properties.PrivateIP)
+	nodeEntry["k8s_version"] = mongo.ToValueDefault(&node.Properties.K8sVersion)
 	return nodeEntry
 }

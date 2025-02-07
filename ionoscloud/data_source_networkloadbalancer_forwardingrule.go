@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
@@ -177,7 +178,7 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 	}
 	var networkLoadBalancerForwardingRule ionoscloud.NetworkLoadBalancerForwardingRule
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -198,8 +199,8 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 
 		var results []ionoscloud.NetworkLoadBalancerForwardingRule
 		if networkLoadBalancerForwardingRules.Items != nil {
-			for _, nlbfr := range *networkLoadBalancerForwardingRules.Items {
-				if nlbfr.Properties != nil && nlbfr.Properties.Name != nil && strings.EqualFold(*nlbfr.Properties.Name, name.(string)) {
+			for _, nlbfr := range networkLoadBalancerForwardingRules.Items {
+				if strings.EqualFold(nlbfr.Properties.Name, name.(string)) {
 					tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), *nlbfr.Id).Depth(1).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

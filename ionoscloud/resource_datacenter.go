@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourceDatacenter() *schema.Resource {
@@ -99,9 +99,9 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	datacenterLocation := d.Get("location").(string)
 
 	datacenter := ionoscloud.DatacenterPost{
-		Properties: &ionoscloud.DatacenterPropertiesPost{
+		Properties: ionoscloud.DatacenterPropertiesPost{
 			Name:     &datacenterName,
-			Location: &datacenterLocation,
+			Location: datacenterLocation,
 		},
 	}
 	if attr, ok := d.GetOk("description"); ok {
@@ -252,87 +252,82 @@ func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter
 		d.SetId(*datacenter.Id)
 	}
 
-	if datacenter.Properties != nil {
-		if datacenter.Properties.Location != nil {
-			err := d.Set("location", *datacenter.Properties.Location)
-			if err != nil {
-				return fmt.Errorf("error while setting location property for datacenter %s: %w", d.Id(), err)
-			}
+	err := d.Set("location", datacenter.Properties.Location)
+	if err != nil {
+		return fmt.Errorf("error while setting location property for datacenter %s: %w", d.Id(), err)
+	}
+
+	if datacenter.Properties.Description != nil {
+		err := d.Set("description", *datacenter.Properties.Description)
+		if err != nil {
+			return fmt.Errorf("error while setting description property for datacenter %s: %w", d.Id(), err)
 		}
+	}
 
-		if datacenter.Properties.Description != nil {
-			err := d.Set("description", *datacenter.Properties.Description)
-			if err != nil {
-				return fmt.Errorf("error while setting description property for datacenter %s: %w", d.Id(), err)
-			}
+	if datacenter.Properties.Name != nil {
+		err := d.Set("name", *datacenter.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("error while setting name property for datacenter %s: %w", d.Id(), err)
 		}
+	}
 
-		if datacenter.Properties.Name != nil {
-			err := d.Set("name", *datacenter.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for datacenter %s: %w", d.Id(), err)
-			}
+	if datacenter.Properties.Version != nil {
+		err := d.Set("version", *datacenter.Properties.Version)
+		if err != nil {
+			return fmt.Errorf("error while setting version property for datacenter %s: %w", d.Id(), err)
 		}
+	}
 
-		if datacenter.Properties.Version != nil {
-			err := d.Set("version", *datacenter.Properties.Version)
-			if err != nil {
-				return fmt.Errorf("error while setting version property for datacenter %s: %w", d.Id(), err)
-			}
+	if len(datacenter.Properties.Features) > 0 {
+		err := d.Set("features", datacenter.Properties.Features)
+		if err != nil {
+			return fmt.Errorf("error while setting features property for datacenter %s: %w", d.Id(), err)
 		}
+	}
 
-		if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
-			err := d.Set("features", *datacenter.Properties.Features)
-			if err != nil {
-				return fmt.Errorf("error while setting features property for datacenter %s: %w", d.Id(), err)
-			}
+	if datacenter.Properties.SecAuthProtection != nil {
+		err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
+		if err != nil {
+			return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %w", d.Id(), err)
 		}
+	}
 
-		if datacenter.Properties.SecAuthProtection != nil {
-			err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
-			if err != nil {
-				return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %w", d.Id(), err)
+	if len(datacenter.Properties.CpuArchitecture) > 0 {
+		var cpuArchitectures []interface{}
+		for _, cpuArchitecture := range datacenter.Properties.CpuArchitecture {
+			architectureEntry := make(map[string]interface{})
+
+			if cpuArchitecture.CpuFamily != nil {
+				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
 			}
-		}
 
-		if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
-			var cpuArchitectures []interface{}
-			for _, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
-				architectureEntry := make(map[string]interface{})
+			if cpuArchitecture.MaxCores != nil {
+				architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
+			}
 
-				if cpuArchitecture.CpuFamily != nil {
-					architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
-				}
+			if cpuArchitecture.MaxRam != nil {
+				architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
+			}
 
-				if cpuArchitecture.MaxCores != nil {
-					architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
-				}
+			if cpuArchitecture.Vendor != nil {
+				architectureEntry["vendor"] = *cpuArchitecture.Vendor
+			}
 
-				if cpuArchitecture.MaxRam != nil {
-					architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
-				}
+			cpuArchitectures = append(cpuArchitectures, architectureEntry)
 
-				if cpuArchitecture.Vendor != nil {
-					architectureEntry["vendor"] = *cpuArchitecture.Vendor
-				}
-
-				cpuArchitectures = append(cpuArchitectures, architectureEntry)
-
-				if len(cpuArchitectures) > 0 {
-					if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-						return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %w", d.Id(), err)
-					}
+			if len(cpuArchitectures) > 0 {
+				if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+					return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %w", d.Id(), err)
 				}
 			}
 		}
+	}
 
-		if datacenter.Properties.Ipv6CidrBlock != nil {
-			err := d.Set("ipv6_cidr_block", *datacenter.Properties.Ipv6CidrBlock)
-			if err != nil {
-				return fmt.Errorf("error while setting ipv6_cidr_block property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
+	if datacenter.Properties.Ipv6CidrBlock.IsSet() && datacenter.Properties.Ipv6CidrBlock.Get() != nil {
+		err = d.Set("ipv6_cidr_block", *datacenter.Properties.Ipv6CidrBlock.Get())
+	}
+	if err != nil {
+		return fmt.Errorf("error while setting ipv6_cidr_block property for datacenter %s: %w", d.Id(), err)
 	}
 
 	return nil

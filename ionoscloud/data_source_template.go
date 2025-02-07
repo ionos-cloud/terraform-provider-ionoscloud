@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func dataSourceTemplate() *schema.Resource {
@@ -64,13 +64,13 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 	var results []ionoscloud.Template
 
 	if nameOk && templates.Items != nil {
-		for _, tmp := range *templates.Items {
-			if strings.Contains(strings.ToLower(*tmp.Properties.Name), strings.ToLower(name.(string))) {
+		for _, tmp := range templates.Items {
+			if strings.Contains(strings.ToLower(tmp.Properties.Name), strings.ToLower(name.(string))) {
 				results = append(results, tmp)
 			}
 		}
 	} else if templates.Items != nil {
-		results = *templates.Items
+		results = templates.Items
 	}
 
 	if coresOk {
@@ -78,7 +78,7 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 		if results != nil {
 			var coresResults []ionoscloud.Template
 			for _, tmp := range results {
-				if tmp.Properties.Cores != nil && *tmp.Properties.Cores == cores {
+				if tmp.Properties.Cores == cores {
 					coresResults = append(coresResults, tmp)
 				}
 			}
@@ -91,7 +91,7 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 		if results != nil {
 			var ramResults []ionoscloud.Template
 			for _, tmp := range results {
-				if tmp.Properties.Ram != nil && *tmp.Properties.Ram == ram {
+				if tmp.Properties.Ram == ram {
 					ramResults = append(ramResults, tmp)
 				}
 			}
@@ -104,7 +104,7 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 		if results != nil {
 			var storageSizeResults []ionoscloud.Template
 			for _, tmp := range results {
-				if tmp.Properties != nil && tmp.Properties.StorageSize != nil && *tmp.Properties.StorageSize == storageSize {
+				if tmp.Properties.StorageSize == storageSize {
 					storageSizeResults = append(storageSizeResults, tmp)
 				}
 			}
@@ -132,30 +132,19 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 func setTemplateData(d *schema.ResourceData, template *ionoscloud.Template) error {
 	d.SetId(*template.Id)
 
-	if template.Properties != nil {
-		if template.Properties.Name != nil {
-			err := d.Set("name", *template.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for image %s: %w", d.Id(), err)
-			}
-		}
+	err := d.Set("name", template.Properties.Name)
+	if err != nil {
+		return fmt.Errorf("error while setting name property for image %s: %w", d.Id(), err)
+	}
 
-		if template.Properties.Cores != nil {
-			if err := d.Set("cores", *template.Properties.Cores); err != nil {
-				return err
-			}
-		}
-		if template.Properties.Ram != nil {
-			if err := d.Set("ram", *template.Properties.Ram); err != nil {
-				return err
-			}
-		}
-		if template.Properties.StorageSize != nil {
-			if err := d.Set("storage_size", *template.Properties.StorageSize); err != nil {
-				return err
-			}
-		}
-
+	if err := d.Set("cores", template.Properties.Cores); err != nil {
+		return err
+	}
+	if err := d.Set("ram", template.Properties.Ram); err != nil {
+		return err
+	}
+	if err := d.Set("storage_size", template.Properties.StorageSize); err != nil {
+		return err
 	}
 
 	return nil

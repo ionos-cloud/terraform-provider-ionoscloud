@@ -53,9 +53,6 @@ func dataSourceShareRead(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 		return diag.FromErr(fmt.Errorf("an error occurred while fetching a share with group_id %s resource_id %s %w", groupID, resourceID, err))
 	}
-	if rsp.Properties == nil {
-		return diag.FromErr(fmt.Errorf("no properties found in the response"))
-	}
 	d.SetId(*rsp.Id)
 	if err := d.Set("edit_privilege", *rsp.Properties.EditPrivilege); err != nil {
 		return diag.FromErr(utils.GenerateSetError("share", "edit_privilege", err))

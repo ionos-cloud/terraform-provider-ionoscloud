@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -85,7 +85,7 @@ func testAccCheckPrivateCrossConnectDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		_, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.CrossConnectsApi.PccsFindById(ctx, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -118,7 +118,7 @@ func testAccCheckPrivateCrossConnectExists(n string, privateCrossConnect *ionosc
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		foundPrivateCrossConnect, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, rs.Primary.ID).Execute()
+		foundPrivateCrossConnect, apiResponse, err := client.CrossConnectsApi.PccsFindById(ctx, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {

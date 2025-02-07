@@ -8,11 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -33,7 +34,7 @@ var (
 // In this case, the Service will not be 'bound' to the state of the Server resource
 // The methods of this interface must not write to the state, since the Service will use a placeholder ResourceData reference
 type UnboundService interface {
-	Update(context.Context, string, string, ionoscloud.ServerProperties) (*ionoscloud.Server, *ionoscloud.APIResponse, error)
+	Update(context.Context, string, string, ionoscloud.ServerProperties) (*ionoscloud.Server, *shared.APIResponse, error)
 	GetDefaultBootVolume(ctx context.Context, datacenterID, serverID string) (*ionoscloud.Volume, error)
 	UpdateBootDevice(ctx context.Context, datacenterID, serverID, newBootDeviceID string) error
 	PxeBoot(ctx context.Context, datacenterID, serverID string) error
@@ -69,7 +70,7 @@ func (ss *Service) FindById(ctx context.Context, datacenterID, serverID string, 
 	return &server, nil
 }
 
-func (ss *Service) Delete(ctx context.Context, datacenterID, serverID, ID string) (*ionoscloud.APIResponse, error) {
+func (ss *Service) Delete(ctx context.Context, datacenterID, serverID, ID string) (*shared.APIResponse, error) {
 	apiResponse, err := ss.Client.ServersApi.DatacentersServersDelete(ctx, datacenterID, serverID).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -81,7 +82,7 @@ func (ss *Service) Delete(ctx context.Context, datacenterID, serverID, ID string
 	return apiResponse, nil
 }
 
-func (ss *Service) Create(ctx context.Context, datacenterID string) (*ionoscloud.Server, *ionoscloud.APIResponse, error) {
+func (ss *Service) Create(ctx context.Context, datacenterID string) (*ionoscloud.Server, *shared.APIResponse, error) {
 	server, apiResponse, err := ss.Client.ServersApi.DatacentersServersPost(ctx, datacenterID).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -96,7 +97,7 @@ func (ss *Service) Create(ctx context.Context, datacenterID string) (*ionoscloud
 	return &server, apiResponse, nil
 }
 
-func (ss *Service) Update(ctx context.Context, datacenterID, serverID string, serverProperties ionoscloud.ServerProperties) (*ionoscloud.Server, *ionoscloud.APIResponse, error) {
+func (ss *Service) Update(ctx context.Context, datacenterID, serverID string, serverProperties ionoscloud.ServerProperties) (*ionoscloud.Server, *shared.APIResponse, error) {
 	updatedServer, apiResponse, err := ss.Client.ServersApi.DatacentersServersPatch(ctx, datacenterID, serverID).Server(serverProperties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -108,7 +109,7 @@ func (ss *Service) Update(ctx context.Context, datacenterID, serverID string, se
 	return &updatedServer, apiResponse, nil
 }
 
-func (ss *Service) GetAttachedVolumes(ctx context.Context, datacenterID, serverID string) ([]*ionoscloud.Volume, *ionoscloud.APIResponse, error) {
+func (ss *Service) GetAttachedVolumes(ctx context.Context, datacenterID, serverID string) ([]*ionoscloud.Volume, *shared.APIResponse, error) {
 
 	attachedVolumeIds, apiResponse, err := ss.Client.ServersApi.DatacentersServersVolumesGet(ctx, datacenterID, serverID).Execute()
 	apiResponse.LogInfo()
@@ -116,7 +117,7 @@ func (ss *Service) GetAttachedVolumes(ctx context.Context, datacenterID, serverI
 		return nil, apiResponse, fmt.Errorf("an error occurred while fetching attached volumes for server, dcId: %s, serverId: %s, Response: (%w)", datacenterID, serverID, err)
 	}
 	attachedVolumes := []*ionoscloud.Volume{}
-	for _, v := range *attachedVolumeIds.Items {
+	for _, v := range attachedVolumeIds.Items {
 		volume, apiResponse, err := ss.Client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterID, serverID, *v.Id).Execute()
 		if err != nil {
 			return nil, apiResponse, err
@@ -149,14 +150,11 @@ func (ss *Service) GetCurrentBootDeviceID(ctx context.Context, datacenterId, ser
 	if err != nil {
 		return "", "", err
 	}
-	if server.Properties == nil {
-		return "", "", fmt.Errorf("server has no boot device because properties object was nil")
-	}
 	if server.Properties.BootCdrom != nil {
-		return *server.Properties.BootCdrom.Id, constant.BootDeviceTypeCDROM, nil
+		return server.Properties.BootCdrom.Id, constant.BootDeviceTypeCDROM, nil
 	}
 	if server.Properties.BootVolume != nil {
-		return *server.Properties.BootVolume.Id, constant.BootDeviceTypeVolume, nil
+		return server.Properties.BootVolume.Id, constant.BootDeviceTypeVolume, nil
 	}
 	return "", "", ErrNoBootDevice
 }
@@ -282,9 +280,6 @@ func (ss *Service) GetVmState(ctx context.Context, datacenterID, serverID string
 	if err != nil {
 		return "", err
 	}
-	if server.Properties == nil {
-		return "", fmt.Errorf("got empty properties for datacenterID %s serverID %s", datacenterID, serverID)
-	}
 	return *server.Properties.VmState, nil
 }
 
@@ -292,9 +287,6 @@ func (ss *Service) GetServerType(ctx context.Context, datacenterID, serverID str
 	server, err := ss.FindById(ctx, datacenterID, serverID, 0)
 	if err != nil {
 		return "", err
-	}
-	if server.Properties == nil {
-		return "", fmt.Errorf("got empty properties for datacenterID %s serverID %s", datacenterID, serverID)
 	}
 	return *server.Properties.Type, nil
 }
