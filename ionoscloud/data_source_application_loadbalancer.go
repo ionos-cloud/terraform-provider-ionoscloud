@@ -7,12 +7,13 @@ import (
 	"log"
 	"strings"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func dataSourceApplicationLoadBalancer() *schema.Resource {
@@ -110,7 +111,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 
 	var applicationLoadBalancer ionoscloud.ApplicationLoadBalancer
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -136,7 +137,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancers: %w", err))
 			}
 
-			results = *applicationLoadBalancers.Items
+			results = applicationLoadBalancers.Items
 		} else {
 			applicationLoadBalancers, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersGet(ctx, datacenterId).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
@@ -146,8 +147,8 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 			}
 
 			if applicationLoadBalancers.Items != nil {
-				for _, alb := range *applicationLoadBalancers.Items {
-					if alb.Properties != nil && alb.Properties.Name != nil && strings.EqualFold(*alb.Properties.Name, name) {
+				for _, alb := range applicationLoadBalancers.Items {
+					if strings.EqualFold(alb.Properties.Name, name) {
 						tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, *alb.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {

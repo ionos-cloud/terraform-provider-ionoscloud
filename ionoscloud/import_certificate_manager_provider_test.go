@@ -1,4 +1,4 @@
-//go:build compute || all || cert
+//go:build all || cert
 
 package ionoscloud
 

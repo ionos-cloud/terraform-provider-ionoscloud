@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourcePrivateCrossConnect() *schema.Resource {
@@ -107,7 +107,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 
 	name := d.Get("name").(string)
 	pcc := ionoscloud.PrivateCrossConnect{
-		Properties: &ionoscloud.PrivateCrossConnectProperties{
+		Properties: ionoscloud.PrivateCrossConnectProperties{
 			Name: &name,
 		},
 	}
@@ -164,7 +164,7 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 
 	request := ionoscloud.PrivateCrossConnect{}
 	name := d.Get("name").(string)
-	request.Properties = &ionoscloud.PrivateCrossConnectProperties{
+	request.Properties = ionoscloud.PrivateCrossConnectProperties{
 		Name: &name,
 	}
 
@@ -186,7 +186,7 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
-	_, apiResponse, err := client.PrivateCrossConnectsApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
+	_, apiResponse, err := client.PrivateCrossConnectsApi.PccsPatch(ctx, d.Id()).Pcc(request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {

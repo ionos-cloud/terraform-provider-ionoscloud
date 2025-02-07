@@ -7,7 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -89,13 +90,13 @@ func dataSourcePcc() *schema.Resource {
 	}
 }
 
-func convertPccPeers(peers *[]ionoscloud.Peer) []interface{} {
+func convertPccPeers(peers []ionoscloud.Peer) []interface{} {
 	if peers == nil {
 		return make([]interface{}, 0)
 	}
 
-	ret := make([]interface{}, len(*peers), len(*peers))
-	for i, peer := range *peers {
+	ret := make([]interface{}, len(peers), len(peers))
+	for i, peer := range peers {
 		entry := make(map[string]interface{})
 
 		entry["lan_id"] = peer.Id
@@ -110,13 +111,13 @@ func convertPccPeers(peers *[]ionoscloud.Peer) []interface{} {
 	return ret
 }
 
-func convertConnectableDatacenters(dcs *[]ionoscloud.ConnectableDatacenter) []interface{} {
+func convertConnectableDatacenters(dcs []ionoscloud.ConnectableDatacenter) []interface{} {
 	if dcs == nil {
 		return make([]interface{}, 0)
 	}
 
-	ret := make([]interface{}, len(*dcs), len(*dcs))
-	for i, dc := range *dcs {
+	ret := make([]interface{}, len(dcs), len(dcs))
+	for i, dc := range dcs {
 		entry := make(map[string]interface{})
 
 		entry["id"] = dc.Id
@@ -135,26 +136,24 @@ func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnec
 		d.SetId(*pcc.Id)
 	}
 
-	if pcc.Properties != nil {
-		if pcc.Properties.Name != nil {
-			if err := d.Set("name", *pcc.Properties.Name); err != nil {
-				return err
-			}
+	if pcc.Properties.Name != nil {
+		if err := d.Set("name", *pcc.Properties.Name); err != nil {
+			return err
 		}
-		if pcc.Properties.Description != nil {
-			if err := d.Set("description", *pcc.Properties.Description); err != nil {
-				return err
-			}
+	}
+	if pcc.Properties.Description != nil {
+		if err := d.Set("description", *pcc.Properties.Description); err != nil {
+			return err
 		}
-		if pcc.Properties.Peers != nil {
-			if err := d.Set("peers", convertPccPeers(pcc.Properties.Peers)); err != nil {
-				return err
-			}
+	}
+	if pcc.Properties.Peers != nil {
+		if err := d.Set("peers", convertPccPeers(pcc.Properties.Peers)); err != nil {
+			return err
 		}
-		if pcc.Properties.ConnectableDatacenters != nil && len(*pcc.Properties.ConnectableDatacenters) > 0 {
-			if err := d.Set("connectable_datacenters", convertConnectableDatacenters(pcc.Properties.ConnectableDatacenters)); err != nil {
-				return err
-			}
+	}
+	if len(pcc.Properties.ConnectableDatacenters) > 0 {
+		if err := d.Set("connectable_datacenters", convertConnectableDatacenters(pcc.Properties.ConnectableDatacenters)); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -175,7 +174,7 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	var pcc ionoscloud.PrivateCrossConnect
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -197,8 +196,8 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		var results []ionoscloud.PrivateCrossConnect
 
 		if pccs.Items != nil {
-			for _, p := range *pccs.Items {
-				if p.Properties != nil && p.Properties.Name != nil && *p.Properties.Name == name.(string) {
+			for _, p := range pccs.Items {
+				if p.Properties.Name != nil && *p.Properties.Name == name.(string) {
 					pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -100,7 +101,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 	var firewall ionoscloud.FirewallRule
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -123,8 +124,8 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		var results []ionoscloud.FirewallRule
 
 		if firewalls.Items != nil {
-			for _, fr := range *firewalls.Items {
-				if fr.Properties != nil && fr.Properties.Name != nil && *fr.Properties.Name == name.(string) {
+			for _, fr := range firewalls.Items {
+				if fr.Properties.Name != nil && *fr.Properties.Name == name.(string) {
 					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

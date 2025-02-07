@@ -10,9 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/yaml.v3"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 type KubeConfig struct {
@@ -281,7 +282,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	var cluster ionoscloud.KubernetesCluster
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -303,8 +304,8 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		if clusters.Items != nil {
 			var results []ionoscloud.KubernetesCluster
 
-			for _, c := range *clusters.Items {
-				if c.Properties != nil && c.Properties.Name != nil && *c.Properties.Name == name.(string) {
+			for _, c := range clusters.Items {
+				if c.Properties.Name == name.(string) {
 					tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
@@ -451,9 +452,9 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 			return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %w", *cluster.Id, err)
 		}
 
-		if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {
+		if len(clusterNodePools.Items) > 0 {
 			var nodePools []interface{}
-			for _, nodePool := range *clusterNodePools.Items {
+			for _, nodePool := range clusterNodePools.Items {
 				nodePools = append(nodePools, *nodePool.Id)
 			}
 			if err := d.Set("node_pools", nodePools); err != nil {
@@ -461,9 +462,9 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 			}
 		}
 
-		if cluster.Properties != nil && cluster.Properties.AvailableUpgradeVersions != nil {
-			availableUpgradeVersions := make([]interface{}, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
-			for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
+		if cluster.Properties.AvailableUpgradeVersions != nil {
+			availableUpgradeVersions := make([]interface{}, len(cluster.Properties.AvailableUpgradeVersions), len(cluster.Properties.AvailableUpgradeVersions))
+			for i, availableUpgradeVersion := range cluster.Properties.AvailableUpgradeVersions {
 				availableUpgradeVersions[i] = availableUpgradeVersion
 			}
 			if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {

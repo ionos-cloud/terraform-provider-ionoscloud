@@ -11,7 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -149,14 +149,14 @@ func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.Reso
 func setServerBootDeviceSelectionData(d *schema.ResourceData, server *ionoscloud.Server) error {
 
 	if server.Properties.BootCdrom != nil {
-		if err := d.Set("boot_device_id", *server.Properties.BootCdrom.Id); err != nil {
+		if err := d.Set("boot_device_id", server.Properties.BootCdrom.Id); err != nil {
 			return err
 		}
 		return nil
 	}
 
 	if server.Properties.BootVolume != nil {
-		if err := d.Set("boot_device_id", *server.Properties.BootVolume.Id); err != nil {
+		if err := d.Set("boot_device_id", server.Properties.BootVolume.Id); err != nil {
 			return err
 		}
 	}

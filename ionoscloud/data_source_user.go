@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func dataSourceUser() *schema.Resource {
@@ -102,7 +103,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 	var user ionoscloud.User
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -120,12 +121,12 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching users: %w", err))
 			return diags
 		}
-		if users.Items == nil || len(*users.Items) == 0 {
+		if len(users.Items) == 0 {
 			return diag.FromErr(fmt.Errorf("no user found with the specified criteria: email = %s", email))
-		} else if len(*users.Items) > 1 {
+		} else if len(users.Items) > 1 {
 			return diag.FromErr(fmt.Errorf("multiple users found with the specified criteria: email = %s", email))
 		}
-		user = (*users.Items)[0]
+		user = (users.Items)[0]
 	}
 	if err = setUsersForGroup(ctx, d, &user, *client); err != nil {
 		return diag.FromErr(err)
@@ -150,9 +151,9 @@ func setUsersForGroup(ctx context.Context, d *schema.ResourceData, user *ionoscl
 	}
 
 	groupEntries := make([]interface{}, 0)
-	if groups.Items != nil && len(*groups.Items) > 0 {
-		groupEntries = make([]interface{}, len(*groups.Items))
-		for groupIndex, group := range *groups.Items {
+	if len(groups.Items) > 0 {
+		groupEntries = make([]interface{}, len(groups.Items))
+		for groupIndex, group := range groups.Items {
 			groupEntry := make(map[string]interface{})
 
 			if group.Id != nil {

@@ -17,7 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
@@ -241,18 +242,16 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 }
 
 func newCloudapiClient(username, password, token, endpoint, version, terraformVersion string, insecure bool) *ionoscloud.APIClient {
-	newConfig := ionoscloud.NewConfiguration(username, password, token, endpoint)
+	newConfig := shared.NewConfiguration(username, password, token, endpoint)
 	newConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
-	if os.Getenv(constant.IonosDebug) != "" {
-		newConfig.Debug = true
-	}
 	newConfig.MaxRetries = constant.MaxRetries
 	newConfig.WaitTime = constant.MaxWaitTime
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	client := ionoscloud.NewAPIClient(newConfig)
+	client.GetConfig().HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+
 	return client
 }
 

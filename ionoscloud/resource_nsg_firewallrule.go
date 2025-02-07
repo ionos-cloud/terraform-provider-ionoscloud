@@ -148,7 +148,7 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 	nsgID := d.Get("nsg_id").(string)
 	dcID := d.Get("datacenter_id").(string)
-	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesPatch(ctx, dcID, nsgID, d.Id()).Rule(*firewall.Properties).Execute()
+	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesPatch(ctx, dcID, nsgID, d.Id()).Rule(firewall.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {

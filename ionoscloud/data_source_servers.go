@@ -10,8 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/iancoleman/strcase"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
@@ -250,7 +251,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 		}
 	}
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	/* search by whatever filter is set above */
 	servers, apiResponse, err := req.Execute()
@@ -264,16 +265,16 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	if d.Id() == "" {
 		d.SetId(datacenterId.(string))
 	}
-	for _, server := range *servers.Items {
+	for _, server := range servers.Items {
 		serverEntry = SetServerProperties(server)
 		utils.SetPropWithNilCheck(serverEntry, "id", server.Id)
 		// todo: Add token?
 		if server.Entities != nil {
 			if server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
 				nicItems := server.Entities.Nics.Items
-				if nicItems != nil && len(*nicItems) > 0 {
+				if len(nicItems) > 0 {
 					var nics []interface{}
-					for _, nic := range *server.Entities.Nics.Items {
+					for _, nic := range server.Entities.Nics.Items {
 						nicMap := cloudapinic.SetNetworkProperties(nic)
 						fw := setFirewallRules(nic)
 						nicMap["firewall_rules"] = fw
@@ -286,14 +287,14 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 				}
 			}
 			if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil {
-				volumes := setVolumePropertiesToSlice(*server.Entities.Volumes.Items)
+				volumes := setVolumePropertiesToSlice(server.Entities.Volumes.Items)
 				if volumes != nil && len(volumes) > 0 {
 					serverEntry["volumes"] = volumes
 				}
 			}
 			if server.Entities.Cdroms != nil {
-				if server.Entities.Cdroms.Items != nil && len(*server.Entities.Cdroms.Items) > 0 {
-					cdroms := setServerCDRoms(server.Entities.Cdroms.Items)
+				if server.Entities.Cdroms.Items != nil && len(server.Entities.Cdroms.Items) > 0 {
+					cdroms := setServerCDRoms(&server.Entities.Cdroms.Items)
 					if cdroms != nil && len(cdroms) > 0 {
 						serverEntry["cdroms"] = cdroms
 					}
@@ -340,7 +341,7 @@ func setVolumePropertiesToSlice(volumesList []ionoscloud.Volume) []interface{} {
 func setFirewallRules(nic ionoscloud.Nic) []interface{} {
 	var firewallRules []interface{}
 	if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
-		for _, rule := range *nic.Entities.Firewallrules.Items {
+		for _, rule := range nic.Entities.Firewallrules.Items {
 			ruleEntry := setFirewallRuleProperties(rule)
 			firewallRules = append(firewallRules, ruleEntry)
 		}
@@ -350,45 +351,41 @@ func setFirewallRules(nic ionoscloud.Nic) []interface{} {
 
 func setFirewallRuleProperties(rule ionoscloud.FirewallRule) map[string]interface{} {
 	ruleEntry := make(map[string]interface{})
-	ruleEntry["id"] = mongo.ToValueDefault(rule.Id)
-	if rule.Properties != nil {
-		ruleEntry["name"] = mongo.ToValueDefault(rule.Properties.Name)
-		ruleEntry["protocol"] = mongo.ToValueDefault(rule.Properties.Protocol)
-		ruleEntry["source_mac"] = mongo.ToValueDefault(rule.Properties.SourceMac)
-		ruleEntry["source_ip"] = mongo.ToValueDefault(rule.Properties.SourceIp)
-		ruleEntry["target_ip"] = mongo.ToValueDefault(rule.Properties.TargetIp)
-		ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
-		ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
-		ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
-		ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
-		ruleEntry["type"] = mongo.ToValueDefault(rule.Properties.Type)
-	}
+	ruleEntry["id"] = shared.ToValueDefault(rule.Id)
+	ruleEntry["name"] = shared.ToValueDefault(rule.Properties.Name)
+	ruleEntry["protocol"] = shared.ToValueDefault(rule.Properties.Protocol)
+	ruleEntry["source_mac"] = shared.ToValueDefault(rule.Properties.SourceMac.Get())
+	ruleEntry["source_ip"] = shared.ToValueDefault(rule.Properties.SourceIp.Get())
+	ruleEntry["target_ip"] = shared.ToValueDefault(rule.Properties.TargetIp.Get())
+	ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode.Get(), 0)
+	ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType.Get(), 0)
+	ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
+	ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
+	ruleEntry["type"] = shared.ToValueDefault(rule.Properties.Type)
 	return ruleEntry
 }
 
 func SetServerProperties(server ionoscloud.Server) map[string]interface{} {
 	serverMap := map[string]interface{}{}
-	if server.Properties != nil {
-		utils.SetPropWithNilCheck(serverMap, "template_uuid", server.Properties.TemplateUuid)
-		utils.SetPropWithNilCheck(serverMap, "name", server.Properties.Name)
-		utils.SetPropWithNilCheck(serverMap, "hostname", server.Properties.Hostname)
-		utils.SetPropWithNilCheck(serverMap, "cores", server.Properties.Cores)
-		utils.SetPropWithNilCheck(serverMap, "ram", server.Properties.Ram)
-		utils.SetPropWithNilCheck(serverMap, "availability_zone", server.Properties.AvailabilityZone)
-		utils.SetPropWithNilCheck(serverMap, "cpu_family", server.Properties.CpuFamily)
-		utils.SetPropWithNilCheck(serverMap, "type", server.Properties.Type)
-		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
-			utils.SetPropWithNilCheck(serverMap, "boot_cdrom", *server.Properties.BootCdrom.Id)
-		}
+	utils.SetPropWithNilCheck(serverMap, "template_uuid", server.Properties.TemplateUuid)
+	utils.SetPropWithNilCheck(serverMap, "name", server.Properties.Name)
+	utils.SetPropWithNilCheck(serverMap, "hostname", server.Properties.Hostname)
+	utils.SetPropWithNilCheck(serverMap, "cores", server.Properties.Cores)
+	utils.SetPropWithNilCheck(serverMap, "ram", server.Properties.Ram)
+	utils.SetPropWithNilCheck(serverMap, "availability_zone", server.Properties.AvailabilityZone)
+	utils.SetPropWithNilCheck(serverMap, "cpu_family", server.Properties.CpuFamily)
+	utils.SetPropWithNilCheck(serverMap, "type", server.Properties.Type)
+	if server.Properties.BootCdrom != nil {
+		utils.SetPropWithNilCheck(serverMap, "boot_cdrom", server.Properties.BootCdrom.Id)
+	}
 
-		if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
-			utils.SetPropWithNilCheck(serverMap, "boot_volume", *server.Properties.BootVolume.Id)
+	if server.Properties.BootVolume != nil {
+		utils.SetPropWithNilCheck(serverMap, "boot_volume", server.Properties.BootVolume.Id)
 
-		}
-		if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-			(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-			utils.SetPropWithNilCheck(serverMap, "boot_image", (*server.Entities.Volumes.Items)[0].Properties.Image)
-		}
+	}
+	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(server.Entities.Volumes.Items) > 0 &&
+		(server.Entities.Volumes.Items)[0].Properties.Image != nil {
+		utils.SetPropWithNilCheck(serverMap, "boot_image", (server.Entities.Volumes.Items)[0].Properties.Image)
 	}
 	return serverMap
 }
@@ -413,13 +410,13 @@ func setServerCDRoms(images *[]ionoscloud.Image) []interface{} {
 		entry["disc_virtio_hot_unplug"] = boolOrDefault(image.Properties.DiscVirtioHotUnplug, true)
 		entry["disc_scsi_hot_plug"] = boolOrDefault(image.Properties.DiscScsiHotPlug, true)
 		entry["disc_scsi_hot_unplug"] = boolOrDefault(image.Properties.DiscScsiHotUnplug, true)
-		entry["licence_type"] = mongo.ToValueDefault(image.Properties.LicenceType)
+		entry["licence_type"] = mongo.ToValueDefault(&image.Properties.LicenceType)
 		entry["image_type"] = mongo.ToValueDefault(image.Properties.ImageType)
 		entry["public"] = boolOrDefault(image.Properties.Public, false)
 
 		if image.Properties.ImageAliases != nil {
 			var imageAliases []interface{}
-			for _, imageAlias := range *image.Properties.ImageAliases {
+			for _, imageAlias := range image.Properties.ImageAliases {
 				imageAliases = append(imageAliases, imageAlias)
 			}
 			entry["image_aliases"] = imageAliases

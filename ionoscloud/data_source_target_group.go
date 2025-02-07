@@ -7,12 +7,13 @@ import (
 	"log"
 	"strings"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func dataSourceTargetGroup() *schema.Resource {
@@ -172,7 +173,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 	var targetGroup ionoscloud.TargetGroup
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -199,7 +200,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching target groups: %w", err))
 			}
 
-			results = *targetGroups.Items
+			results = targetGroups.Items
 		} else {
 			targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(1).Limit(constant.TargetGroupLimit).Execute()
 			logApiRequestTime(apiResponse)
@@ -209,8 +210,8 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 			}
 
 			if targetGroups.Items != nil {
-				for _, t := range *targetGroups.Items {
-					if t.Properties.Name != nil && strings.EqualFold(*t.Properties.Name, name) {
+				for _, t := range targetGroups.Items {
+					if strings.EqualFold(t.Properties.Name, name) {
 						tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {

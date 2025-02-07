@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"time"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -80,7 +80,7 @@ func resourceStateRefreshFunc(meta interface{}, path string) retry.StateRefreshF
 }
 
 // WaitForStateChange tracks state change progress of a resource
-func WaitForStateChange(ctx context.Context, meta interface{}, d *schema.ResourceData, apiResponse *ionoscloud.APIResponse, opTimeout string) error {
+func WaitForStateChange(ctx context.Context, meta interface{}, d *schema.ResourceData, apiResponse *shared.APIResponse, opTimeout string) error {
 	var err error
 	var loc *url.URL
 

@@ -8,12 +8,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
@@ -68,8 +69,8 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 	backupUnitEmail := d.Get("email").(string)
 
 	backupUnit := ionoscloud.BackupUnit{
-		Properties: &ionoscloud.BackupUnitProperties{
-			Name:     &backupUnitName,
+		Properties: ionoscloud.BackupUnitProperties{
+			Name:     backupUnitName,
 			Password: &backupUnitPassword,
 			Email:    &backupUnitEmail,
 		},
@@ -133,7 +134,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.BackupUnit{}
-	request.Properties = &ionoscloud.BackupUnitProperties{}
+	request.Properties = ionoscloud.BackupUnitProperties{}
 
 	log.Printf("[INFO] Attempting update backup unit %s", d.Id())
 	oldEmail, newEmail := d.GetChange("email")
@@ -309,41 +310,33 @@ func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit
 		d.SetId(*backupUnit.Id)
 	}
 
-	if backupUnit.Properties != nil {
+	epErr := d.Set("name", backupUnit.Properties.Name)
+	if epErr != nil {
+		return fmt.Errorf("error while setting name property for backup unit %s: %w", d.Id(), epErr)
+	}
 
-		if backupUnit.Properties.Name != nil {
-			epErr := d.Set("name", *backupUnit.Properties.Name)
-			if epErr != nil {
-				return fmt.Errorf("error while setting name property for backup unit %s: %w", d.Id(), epErr)
-			}
+	if backupUnit.Properties.Email != nil {
+		epErr := d.Set("email", *backupUnit.Properties.Email)
+		if epErr != nil {
+			return fmt.Errorf("error while setting email property for backup unit %s: %w", d.Id(), epErr)
+		}
+	}
+
+	if len(contractResources.Items) > 0 &&
+		(contractResources.Items)[0].Properties.ContractNumber != nil {
+		err := d.Set("login", fmt.Sprintf("%s-%d", backupUnit.Properties.Name, *(contractResources.Items)[0].Properties.ContractNumber))
+		if err != nil {
+			return fmt.Errorf("error while setting login property for backup unit %s: %w", d.Id(), err)
+		}
+	} else {
+		if len(contractResources.Items) == 0 {
+			return fmt.Errorf("no contracts found for user")
 		}
 
-		if backupUnit.Properties.Email != nil {
-			epErr := d.Set("email", *backupUnit.Properties.Email)
-			if epErr != nil {
-				return fmt.Errorf("error while setting email property for backup unit %s: %w", d.Id(), epErr)
-			}
-		}
+		props := (contractResources.Items)[0].Properties
 
-		if backupUnit.Properties.Name != nil && contractResources.Items != nil && len(*contractResources.Items) > 0 &&
-			(*contractResources.Items)[0].Properties.ContractNumber != nil {
-			err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *(*contractResources.Items)[0].Properties.ContractNumber))
-			if err != nil {
-				return fmt.Errorf("error while setting login property for backup unit %s: %w", d.Id(), err)
-			}
-		} else {
-			if contractResources.Items == nil || len(*contractResources.Items) == 0 {
-				return fmt.Errorf("no contracts found for user")
-			}
-
-			props := (*contractResources.Items)[0].Properties
-			if props == nil {
-				return fmt.Errorf("could not get first contract properties")
-			}
-
-			if props.ContractNumber == nil {
-				return fmt.Errorf("contract number not set")
-			}
+		if props.ContractNumber == nil {
+			return fmt.Errorf("contract number not set")
 		}
 	}
 	return nil
@@ -352,7 +345,7 @@ func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit
 // BackupUnitFindByID simulates a FindByID function by filtering backup units from BackupunitsGet using the given ID.
 // This is done because of a temporary bug in the API with the regular FindByID function.
 // This is a temporary fix, this function should be replaced after the API bug is fixed.
-func BackupUnitFindByID(ctx context.Context, backupUnitID string, client *ionoscloud.APIClient) (ionoscloud.BackupUnit, *ionoscloud.APIResponse, error) {
+func BackupUnitFindByID(ctx context.Context, backupUnitID string, client *ionoscloud.APIClient) (ionoscloud.BackupUnit, *shared.APIResponse, error) {
 	backupUnits, apiResponse, err := client.BackupUnitsApi.BackupunitsGet(ctx).Depth(2).Execute()
 	var backupUnit ionoscloud.BackupUnit
 	logApiRequestTime(apiResponse)
@@ -362,7 +355,7 @@ func BackupUnitFindByID(ctx context.Context, backupUnitID string, client *ionosc
 	if backupUnits.Items == nil {
 		return backupUnit, apiResponse, fmt.Errorf("expected a list of backup units in the response but received 'nil' instead")
 	}
-	for _, backupUnit := range *backupUnits.Items {
+	for _, backupUnit := range backupUnits.Items {
 		if backupUnit.Id == nil {
 			return backupUnit, apiResponse, fmt.Errorf("expected a backup unit with a valid ID but received 'nil' instead")
 		}

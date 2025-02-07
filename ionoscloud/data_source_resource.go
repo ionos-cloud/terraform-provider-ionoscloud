@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -64,7 +64,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching resources by type %w", err))
 		}
-		results = *items.Items
+		results = items.Items
 		if len(results) > 0 && results[0].Type != nil {
 			err = d.Set("resource_type", results[0].Type)
 			if err != nil {
@@ -79,7 +79,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching resources %w", err))
 		}
-		results = *items.Items
+		results = items.Items
 	}
 
 	if len(results) == 0 {

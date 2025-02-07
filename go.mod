@@ -2,6 +2,8 @@ module github.com/ionos-cloud/terraform-provider-ionoscloud/v6
 
 go 1.22.0
 
+replace github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2 => ./../sdks/generated_locally/cloud-bundle
+
 require (
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/cenkalti/backoff/v4 v4.3.0
@@ -17,6 +19,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/ionos-cloud/sdk-go-api-gateway v1.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
+	github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2 v2.0.0-00010101000000-000000000000
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 	github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
@@ -34,7 +37,6 @@ require (
 	github.com/ionos-cloud/sdk-go-object-storage v1.1.0
 	github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1
-	github.com/ionos-cloud/sdk-go/v6 v6.3.2
 	github.com/mitchellh/go-homedir v1.1.0
 	golang.org/x/crypto v0.26.0
 	gopkg.in/yaml.v3 v3.0.1

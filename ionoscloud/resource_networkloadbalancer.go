@@ -15,7 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourceNetworkLoadBalancer() *schema.Resource {
@@ -103,12 +103,12 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	networkLoadBalancer := ionoscloud.NetworkLoadBalancer{
-		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
+		Properties: ionoscloud.NetworkLoadBalancerProperties{},
 	}
 
 	if name, nameOk := d.GetOk("name"); nameOk {
 		name := name.(string)
-		networkLoadBalancer.Properties.Name = &name
+		networkLoadBalancer.Properties.Name = name
 	} else {
 		diags := diag.FromErr(fmt.Errorf("name must be provided for network loadbalancer"))
 		return diags
@@ -116,7 +116,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 
 	if listenerLan, listenerLanOk := d.GetOk("listener_lan"); listenerLanOk {
 		listenerLan := int32(listenerLan.(int))
-		networkLoadBalancer.Properties.ListenerLan = &listenerLan
+		networkLoadBalancer.Properties.ListenerLan = listenerLan
 	} else {
 		diags := diag.FromErr(fmt.Errorf("listener lan must be provided for network loadbalancer"))
 		return diags
@@ -124,7 +124,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 
 	if targetLan, targetLanOk := d.GetOk("target_lan"); targetLanOk {
 		targetLan := int32(targetLan.(int))
-		networkLoadBalancer.Properties.TargetLan = &targetLan
+		networkLoadBalancer.Properties.TargetLan = targetLan
 	} else {
 		diags := diag.FromErr(fmt.Errorf("target lan must be provided for network loadbalancer"))
 		return diags
@@ -147,7 +147,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 			for idx := range ipsVal {
 				ips[idx] = fmt.Sprint(ipsVal[idx])
 			}
-			networkLoadBalancer.Properties.Ips = &ips
+			networkLoadBalancer.Properties.Ips = ips
 		}
 	}
 
@@ -158,20 +158,20 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 			for idx := range lbPrivateIpsVal {
 				lbPrivateIps[idx] = fmt.Sprint(lbPrivateIpsVal[idx])
 			}
-			networkLoadBalancer.Properties.LbPrivateIps = &lbPrivateIps
+			networkLoadBalancer.Properties.LbPrivateIps = lbPrivateIps
 		}
 	}
 
 	if flowLogs, ok := d.GetOk("flowlog"); ok {
 		networkLoadBalancer.Entities = &ionoscloud.NetworkLoadBalancerEntities{
 			Flowlogs: &ionoscloud.FlowLogs{
-				Items: &[]ionoscloud.FlowLog{},
+				Items: []ionoscloud.FlowLog{},
 			},
 		}
 		if flowLogList, ok := flowLogs.([]any); ok {
 			for _, flowLogData := range flowLogList {
 				if flowLog, ok := flowLogData.(map[string]interface{}); ok {
-					*networkLoadBalancer.Entities.Flowlogs.Items = append(*networkLoadBalancer.Entities.Flowlogs.Items, cloudapiflowlog.GetFlowlogFromMap(flowLog))
+					networkLoadBalancer.Entities.Flowlogs.Items = append(networkLoadBalancer.Entities.Flowlogs.Items, cloudapiflowlog.GetFlowlogFromMap(flowLog))
 				}
 			}
 		}
@@ -227,7 +227,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 	request := ionoscloud.NetworkLoadBalancer{
-		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
+		Properties: ionoscloud.NetworkLoadBalancerProperties{},
 	}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -235,19 +235,19 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
 		vStr := v.(string)
-		request.Properties.Name = &vStr
+		request.Properties.Name = vStr
 	}
 
 	if d.HasChange("listener_lan") {
 		_, v := d.GetChange("listener_lan")
 		vInt := int32(v.(int))
-		request.Properties.ListenerLan = &vInt
+		request.Properties.ListenerLan = vInt
 	}
 
 	if d.HasChange("target_lan") {
 		_, v := d.GetChange("target_lan")
 		vInt := int32(v.(int))
-		request.Properties.TargetLan = &vInt
+		request.Properties.TargetLan = vInt
 	}
 
 	if d.HasChange("central_logging") {
@@ -273,7 +273,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 			}
 		}
 		if len(ips) > 0 {
-			request.Properties.Ips = &ips
+			request.Properties.Ips = ips
 		} else {
 			diags := diag.FromErr(fmt.Errorf("you can not empty the ips field for networkloadbalancer %s", d.Id()))
 			return diags
@@ -294,7 +294,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 			diags := diag.FromErr(fmt.Errorf("you can not empty the lbPrivateIps field for networkloadbalancer %s", d.Id()))
 			return diags
 		}
-		request.Properties.LbPrivateIps = &lbPrivateIps
+		request.Properties.LbPrivateIps = lbPrivateIps
 	}
 
 	if d.HasChange("flowlog") {
@@ -326,7 +326,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
-	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPatch(ctx, dcId, d.Id()).NetworkLoadBalancerProperties(*request.Properties).Execute()
+	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPatch(ctx, dcId, d.Id()).NetworkLoadBalancerProperties(request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -403,70 +403,61 @@ func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ion
 		d.SetId(*networkLoadBalancer.Id)
 	}
 
-	if networkLoadBalancer.Properties != nil {
-		if networkLoadBalancer.Properties.Name != nil {
-			err := d.Set("name", *networkLoadBalancer.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for network load balancer %s: %w", d.Id(), err)
-			}
-		}
+	err := d.Set("name", networkLoadBalancer.Properties.Name)
+	if err != nil {
+		return fmt.Errorf("error while setting name property for network load balancer %s: %w", d.Id(), err)
+	}
 
-		if networkLoadBalancer.Properties.ListenerLan != nil {
-			err := d.Set("listener_lan", *networkLoadBalancer.Properties.ListenerLan)
-			if err != nil {
-				return fmt.Errorf("error while setting listener_lan property for network load balancer %s: %w", d.Id(), err)
-			}
-		}
+	err = d.Set("listener_lan", networkLoadBalancer.Properties.ListenerLan)
+	if err != nil {
+		return fmt.Errorf("error while setting listener_lan property for network load balancer %s: %w", d.Id(), err)
+	}
 
-		if networkLoadBalancer.Properties.TargetLan != nil {
-			err := d.Set("target_lan", *networkLoadBalancer.Properties.TargetLan)
-			if err != nil {
-				return fmt.Errorf("error while setting target_lan property for network load balancer %s: %w", d.Id(), err)
-			}
-		}
+	err = d.Set("target_lan", networkLoadBalancer.Properties.TargetLan)
+	if err != nil {
+		return fmt.Errorf("error while setting target_lan property for network load balancer %s: %w", d.Id(), err)
+	}
 
-		if networkLoadBalancer.Properties.Ips != nil {
-			err := d.Set("ips", *networkLoadBalancer.Properties.Ips)
-			if err != nil {
-				return fmt.Errorf("error while setting ips property for network load balancer %s: %w", d.Id(), err)
-			}
+	if networkLoadBalancer.Properties.Ips != nil {
+		err := d.Set("ips", networkLoadBalancer.Properties.Ips)
+		if err != nil {
+			return fmt.Errorf("error while setting ips property for network load balancer %s: %w", d.Id(), err)
 		}
+	}
 
-		if networkLoadBalancer.Properties.CentralLogging != nil {
-			err := d.Set("central_logging", *networkLoadBalancer.Properties.CentralLogging)
-			if err != nil {
-				return fmt.Errorf("error while setting central_logging property for network load balancer %s: %w", d.Id(), err)
-			}
+	if networkLoadBalancer.Properties.CentralLogging != nil {
+		err := d.Set("central_logging", *networkLoadBalancer.Properties.CentralLogging)
+		if err != nil {
+			return fmt.Errorf("error while setting central_logging property for network load balancer %s: %w", d.Id(), err)
 		}
+	}
 
-		if networkLoadBalancer.Properties.LoggingFormat != nil {
-			err := d.Set("logging_format", *networkLoadBalancer.Properties.LoggingFormat)
-			if err != nil {
-				return fmt.Errorf("error while setting logging_format property for network load balancer %s: %w", d.Id(), err)
-			}
+	if networkLoadBalancer.Properties.LoggingFormat != nil {
+		err := d.Set("logging_format", *networkLoadBalancer.Properties.LoggingFormat)
+		if err != nil {
+			return fmt.Errorf("error while setting logging_format property for network load balancer %s: %w", d.Id(), err)
 		}
+	}
 
-		if networkLoadBalancer.Properties.LbPrivateIps != nil {
-			err := d.Set("lb_private_ips", *networkLoadBalancer.Properties.LbPrivateIps)
-			if err != nil {
-				return fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %w", d.Id(), err)
-			}
+	if networkLoadBalancer.Properties.LbPrivateIps != nil {
+		err := d.Set("lb_private_ips", networkLoadBalancer.Properties.LbPrivateIps)
+		if err != nil {
+			return fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %w", d.Id(), err)
 		}
-		if networkLoadBalancer.Entities != nil && networkLoadBalancer.Entities.Flowlogs != nil &&
-			networkLoadBalancer.Entities.Flowlogs.Items != nil && len(*networkLoadBalancer.Entities.Flowlogs.Items) > 0 {
-			var flowlogs []map[string]any
-			for _, flowLog := range *networkLoadBalancer.Entities.Flowlogs.Items {
-				result := map[string]any{}
-				result, err := utils.DecodeStructToMap(flowLog.Properties)
-				if err != nil {
-					return err
-				}
-				result["id"] = *flowLog.Id
-				flowlogs = append(flowlogs, result)
+	}
+	if networkLoadBalancer.Entities != nil && networkLoadBalancer.Entities.Flowlogs != nil && len(networkLoadBalancer.Entities.Flowlogs.Items) > 0 {
+		var flowlogs []map[string]any
+		for _, flowLog := range networkLoadBalancer.Entities.Flowlogs.Items {
+			result := map[string]any{}
+			result, err := utils.DecodeStructToMap(flowLog.Properties)
+			if err != nil {
+				return err
 			}
-			if err := d.Set("flowlog", flowlogs); err != nil {
-				return fmt.Errorf("error setting flowlog %w", err)
-			}
+			result["id"] = *flowLog.Id
+			flowlogs = append(flowlogs, result)
+		}
+		if err := d.Set("flowlog", flowlogs); err != nil {
+			return fmt.Errorf("error setting flowlog %w", err)
 		}
 	}
 	return nil

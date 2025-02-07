@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -310,10 +310,55 @@ func IsSnakeEqualToCamelCase(a, b string) bool {
 }
 
 func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
-	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
-		if f.Kind() == reflect.String && data == "" {
-			return nil, nil
+	return func(from reflect.Type, to reflect.Type, data interface{}) (interface{}, error) {
+		var b ionoscloud.NullableBool
+		var i ionoscloud.NullableInt32
+		var s ionoscloud.NullableString
+
+		if from.Kind() == reflect.String {
+			if to == reflect.TypeOf(s) {
+				if data == "" {
+					s.Set(nil)
+					return s, nil
+				}
+
+				dataToSet := data.(string)
+				s.Set(&dataToSet)
+				return s, nil
+				// Some strings may represent numbers.
+			} else if to == reflect.TypeOf(i) {
+				if data == "" {
+					i.Set(nil)
+					return i, nil
+				}
+
+				dataInt, _ := strconv.Atoi(data.(string))
+				dataToSet := int32(dataInt)
+				i.Set(&dataToSet)
+				return i, nil
+			}
+
+			if data == "" {
+				return nil, nil
+			}
 		}
+
+		if from.Kind() == reflect.Bool {
+			if to == reflect.TypeOf(b) {
+				dataToSet := data.(bool)
+				b.Set(&dataToSet)
+				return b, nil
+			}
+		}
+
+		if from.Kind() == reflect.Int32 {
+			if to == reflect.TypeOf(i) {
+				dataToSet := data.(int32)
+				i.Set(&dataToSet)
+				return i, nil
+			}
+		}
+
 		return data, nil
 	}
 }

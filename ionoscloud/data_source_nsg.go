@@ -12,7 +12,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func dataSourceNSGFirewallRuleSchema() map[string]*schema.Schema {
@@ -133,8 +133,8 @@ func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 	var results []ionoscloud.SecurityGroup
 	if securityGroups.Items != nil {
-		for _, sg := range *securityGroups.Items {
-			if sg.Properties != nil && sg.Properties.Name != nil && strings.EqualFold(*sg.Properties.Name, name.(string)) {
+		for _, sg := range securityGroups.Items {
+			if strings.EqualFold(sg.Properties.Name, name.(string)) {
 				results = append(results, sg)
 			}
 		}
@@ -159,24 +159,24 @@ func setNSGDataSource(d *schema.ResourceData, securityGroup *ionoscloud.Security
 	}
 	if securityGroup.Entities != nil {
 		if securityGroup.Entities.Rules != nil && securityGroup.Entities.Rules.Items != nil {
-			rulesData := make([]map[string]any, 0, len(*securityGroup.Entities.Rules.Items))
-			for _, rule := range *securityGroup.Entities.Rules.Items {
+			rulesData := make([]map[string]any, 0, len(securityGroup.Entities.Rules.Items))
+			for _, rule := range securityGroup.Entities.Rules.Items {
 				ruleData := make(map[string]any)
-				if rule.Id == nil || rule.Properties == nil {
+				if rule.Id == nil {
 					continue
 				}
 				ruleData["id"] = *rule.Id
 				if rule.Properties.Name != nil {
 					ruleData["name"] = *rule.Properties.Name
 				}
-				if rule.Properties.SourceMac != nil {
-					ruleData["source_mac"] = *rule.Properties.SourceMac
+				if rule.Properties.SourceMac.IsSet() && rule.Properties.SourceMac.Get() != nil {
+					ruleData["source_mac"] = *rule.Properties.SourceMac.Get()
 				}
-				if rule.Properties.SourceIp != nil {
-					ruleData["source_ip"] = *rule.Properties.SourceIp
+				if rule.Properties.SourceIp.IsSet() && rule.Properties.SourceIp.Get() != nil {
+					ruleData["source_ip"] = *rule.Properties.SourceIp.Get()
 				}
-				if rule.Properties.TargetIp != nil {
-					ruleData["target_ip"] = *rule.Properties.TargetIp
+				if rule.Properties.TargetIp.IsSet() && rule.Properties.TargetIp.Get() != nil {
+					ruleData["target_ip"] = *rule.Properties.TargetIp.Get()
 				}
 				if rule.Properties.Protocol != nil {
 					ruleData["protocol"] = *rule.Properties.Protocol
@@ -190,11 +190,11 @@ func setNSGDataSource(d *schema.ResourceData, securityGroup *ionoscloud.Security
 				if rule.Properties.PortRangeEnd != nil {
 					ruleData["port_range_end"] = *rule.Properties.PortRangeEnd
 				}
-				if rule.Properties.IcmpType != nil {
-					ruleData["icmp_type"] = strconv.Itoa(int(*rule.Properties.IcmpType))
+				if rule.Properties.IcmpType.IsSet() && rule.Properties.IcmpType.Get() != nil {
+					ruleData["icmp_type"] = strconv.Itoa(int(*rule.Properties.IcmpType.Get()))
 				}
-				if rule.Properties.IcmpCode != nil {
-					ruleData["icmp_code"] = strconv.Itoa(int(*rule.Properties.IcmpCode))
+				if rule.Properties.IcmpCode.IsSet() && rule.Properties.IcmpType.Get() != nil {
+					ruleData["icmp_code"] = strconv.Itoa(int(*rule.Properties.IcmpCode.Get()))
 				}
 				rulesData = append(rulesData, ruleData)
 			}

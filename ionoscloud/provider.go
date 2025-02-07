@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 
@@ -55,25 +56,25 @@ func Provider() *schema.Provider {
 			"username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosUsernameEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosUsernameEnvVar, nil),
 				Description: "IonosCloud username for API operations. If token is provided, token is preferred",
 			},
 			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosPasswordEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosPasswordEnvVar, nil),
 				Description: "IonosCloud password for API operations. If token is provided, token is preferred",
 			},
 			"token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosTokenEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosTokenEnvVar, nil),
 				Description: "IonosCloud bearer token for API operations.",
 			},
 			"endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosApiUrlEnvVar, ""),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosApiUrlEnvVar, ""),
 				Description: "IonosCloud REST API URL. Usually not necessary to be set, SDKs know internally how to route requests to the API.",
 			},
 			"retries": {
@@ -300,7 +301,8 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
 		// will inject x-contract-number to sdks
-		if err := os.Setenv(ionoscloud.IonosContractNumber, contractNumber.(string)); err != nil {
+		// TODO - Use constant here
+		if err := os.Setenv("IONOS_CONTRACT_NUMBER", contractNumber.(string)); err != nil {
 			return nil, diag.FromErr(err)
 		}
 	}
@@ -368,18 +370,15 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	switch clientType {
 	case ionosClient:
 		{
-			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
+			newConfig := shared.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
 			newConfig.UserAgent = fmt.Sprintf(
 				"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 			)
-			if os.Getenv(constant.IonosDebug) != "" {
-				newConfig.Debug = true
-			}
 			newConfig.MaxRetries = constant.MaxRetries
 			newConfig.WaitTime = constant.MaxWaitTime
-			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOpts.Insecure)}
 			client := ionoscloud.NewAPIClient(newConfig)
+			client.GetConfig().HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOpts.Insecure)}
 			return client
 		}
 	case cdnClient:
