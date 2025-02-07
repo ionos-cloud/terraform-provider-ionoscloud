@@ -1,4 +1,8 @@
-## 6.7.1 (Upcoming)
+## 6.7.2 (Upcoming)
+### Fixes
+- Trying to get Ionoscloud provider version for user agent
+
+## 6.7.1
 ### Features
 - Add `IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT` to set a custom API URL for the Object Storage Management Product. Setting `endpoint` or `IONOS_API_URL` does not have any effect
 
