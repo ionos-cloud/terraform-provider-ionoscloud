@@ -14,7 +14,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourceIPBlock() *schema.Resource {
@@ -105,9 +105,9 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 	location := d.Get("location").(string)
 	name := d.Get("name").(string)
 	ipblock := ionoscloud.IpBlock{
-		Properties: &ionoscloud.IpBlockProperties{
-			Size:     &sizeConverted,
-			Location: &location,
+		Properties: ionoscloud.IpBlockProperties{
+			Size:     sizeConverted,
+			Location: location,
 			Name:     &name,
 		},
 	}
@@ -146,7 +146,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 		return diags
 	}
 
-	log.Printf("[INFO] IPS: %s", strings.Join(*ipBlock.Properties.Ips, ","))
+	log.Printf("[INFO] IPS: %s", strings.Join(ipBlock.Properties.Ips, ","))
 
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
 		return diag.FromErr(err)
@@ -232,22 +232,18 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
 		d.SetId(*ipBlock.Id)
 	}
 
-	if ipBlock.Properties.Ips != nil && len(*ipBlock.Properties.Ips) > 0 {
-		if err := d.Set("ips", *ipBlock.Properties.Ips); err != nil {
+	if len(ipBlock.Properties.Ips) > 0 {
+		if err := d.Set("ips", ipBlock.Properties.Ips); err != nil {
 			return err
 		}
 	}
 
-	if ipBlock.Properties.Location != nil {
-		if err := d.Set("location", *ipBlock.Properties.Location); err != nil {
-			return err
-		}
+	if err := d.Set("location", ipBlock.Properties.Location); err != nil {
+		return err
 	}
 
-	if ipBlock.Properties.Size != nil {
-		if err := d.Set("size", *ipBlock.Properties.Size); err != nil {
-			return err
-		}
+	if err := d.Set("size", ipBlock.Properties.Size); err != nil {
+		return err
 	}
 
 	if ipBlock.Properties.Name != nil {
@@ -256,9 +252,9 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
 		}
 	}
 
-	if ipBlock.Properties.IpConsumers != nil && len(*ipBlock.Properties.IpConsumers) > 0 {
+	if len(ipBlock.Properties.IpConsumers) > 0 {
 		var ipConsumers []interface{}
-		for _, ipConsumer := range *ipBlock.Properties.IpConsumers {
+		for _, ipConsumer := range ipBlock.Properties.IpConsumers {
 			ipConsumerEntry := make(map[string]interface{})
 			utils.SetPropWithNilCheck(ipConsumerEntry, "ip", ipConsumer.Ip)
 			utils.SetPropWithNilCheck(ipConsumerEntry, "mac", ipConsumer.Mac)

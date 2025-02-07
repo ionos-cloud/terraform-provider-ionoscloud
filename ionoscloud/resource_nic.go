@@ -11,7 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
@@ -213,7 +214,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	// Probably a read write consistency issue.
 	// We're retrying for 5 minutes. 404 - means we keep on trying.
 	var foundNic = &ionoscloud.Nic{}
-	var apiResponse = &ionoscloud.APIResponse{}
+	var apiResponse = &shared.APIResponse{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error
 		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 3)
@@ -304,7 +305,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	_, _, err = ns.Update(ctx, dcID, srvID, nicID, *nic.Properties)
+	_, _, err = ns.Update(ctx, dcID, srvID, nicID, nic.Properties)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occurred while updating a nic: %w", err))
 		return diags

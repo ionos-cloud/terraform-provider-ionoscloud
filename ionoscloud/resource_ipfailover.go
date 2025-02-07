@@ -19,7 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourceLanIPFailover() *schema.Resource {
@@ -77,18 +77,18 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 		}
 		return diag.FromErr(err)
 	}
-	if lan.Properties == nil || lan.Properties.IpFailover == nil {
+	if lan.Properties.IpFailover == nil {
 		return diag.FromErr(fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"))
 	}
 
 	// Add the new IP failover group to the list
-	*lan.Properties.IpFailover = append(*lan.Properties.IpFailover, ionoscloud.IPFailover{
+	lan.Properties.IpFailover = append(lan.Properties.IpFailover, ionoscloud.IPFailover{
 		Ip:      &ip,
 		NicUuid: &nicUuid,
 	})
 
 	// Modify the LAN using the new list
-	lan, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
+	lan, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(lan.Properties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while patching a lans IP failover group, LAN ID: %s, error: %w", lanId, err))
@@ -118,7 +118,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 		}
 		return diag.FromErr(err)
 	}
-	if lan.Properties == nil || lan.Properties.IpFailover == nil {
+	if lan.Properties.IpFailover == nil {
 		return diag.FromErr(fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"))
 	}
 
@@ -126,8 +126,8 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	// an identifier) and then set the data accordingly.
 	ipFailoverGroups := lan.Properties.IpFailover
 	ipFailoverGroupFound := false
-	if lan.Properties != nil && ipFailoverGroups != nil && len(*ipFailoverGroups) > 0 {
-		for _, ipFailoverGroup := range *ipFailoverGroups {
+	if len(ipFailoverGroups) > 0 {
+		for _, ipFailoverGroup := range ipFailoverGroups {
 			if *ipFailoverGroup.Ip == ip {
 				if err := d.Set("nicuuid", *ipFailoverGroup.NicUuid); err != nil {
 					return diag.FromErr(utils.GenerateSetError(constant.ResourceIpFailover, "nicuuid", err))
@@ -167,23 +167,23 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 			}
 			return diag.FromErr(err)
 		}
-		if lan.Properties == nil || lan.Properties.IpFailover == nil {
+		if lan.Properties.IpFailover == nil {
 			return diag.FromErr(fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"))
 		}
 
 		// Add the new IP failover group to the list
-		*lan.Properties.IpFailover = append(*lan.Properties.IpFailover, ionoscloud.IPFailover{
+		lan.Properties.IpFailover = append(lan.Properties.IpFailover, ionoscloud.IPFailover{
 			Ip:      &ip,
 			NicUuid: &newNicUuid,
 		})
 
 		// Remove the old IP failover group from the list
-		*lan.Properties.IpFailover = slice.DeleteFrom(*lan.Properties.IpFailover, ionoscloud.IPFailover{
+		lan.Properties.IpFailover = slice.DeleteFrom(lan.Properties.IpFailover, ionoscloud.IPFailover{
 			Ip:      &ip,
 			NicUuid: &oldNicUuid,
 		})
 
-		_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
+		_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(lan.Properties).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while patching the lan with ID: %s, error: %w", lanId, err))
@@ -212,17 +212,17 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 		}
 		return diag.FromErr(err)
 	}
-	if lan.Properties == nil || lan.Properties.IpFailover == nil {
+	if lan.Properties.IpFailover == nil {
 		return diag.FromErr(fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"))
 	}
 
 	// Remove the failover group from the list
-	*lan.Properties.IpFailover = slice.DeleteFrom(*lan.Properties.IpFailover, ionoscloud.IPFailover{
+	lan.Properties.IpFailover = slice.DeleteFrom(lan.Properties.IpFailover, ionoscloud.IPFailover{
 		Ip:      &ip,
 		NicUuid: &nicUuid,
 	})
 
-	_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
+	_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(lan.Properties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while removing an IP failover group with IP: %s for the LAN with ID: %s, datacenter ID: %s, error: %w", ip, lanId, dcId, err))
@@ -262,8 +262,8 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	log.Printf("[INFO] lan found: %+v", lan)
 
 	ipFailoverGroups := lan.Properties.IpFailover
-	if lan.Properties != nil && ipFailoverGroups != nil && len(*ipFailoverGroups) > 0 {
-		for _, ipFailoverGroup := range *ipFailoverGroups {
+	if len(ipFailoverGroups) > 0 {
+		for _, ipFailoverGroup := range ipFailoverGroups {
 			// Search for the appropriate IP Failover Group using the provided IP
 			if *ipFailoverGroup.Ip == ip {
 				// Set all the information only if the IP Failover Group exists

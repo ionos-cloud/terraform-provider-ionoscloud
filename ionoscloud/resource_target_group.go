@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
@@ -174,22 +174,22 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	targetGroup := ionoscloud.TargetGroup{
-		Properties: &ionoscloud.TargetGroupProperties{},
+		Properties: ionoscloud.TargetGroupProperties{},
 	}
 
 	if name, nameOk := d.GetOk("name"); nameOk {
 		name := name.(string)
-		targetGroup.Properties.Name = &name
+		targetGroup.Properties.Name = name
 	}
 
 	if algorithm, algorithmOk := d.GetOk("algorithm"); algorithmOk {
 		algorithm := algorithm.(string)
-		targetGroup.Properties.Algorithm = &algorithm
+		targetGroup.Properties.Algorithm = algorithm
 	}
 
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
 		protocol := protocol.(string)
-		targetGroup.Properties.Protocol = &protocol
+		targetGroup.Properties.Protocol = protocol
 	}
 
 	if protocolVersion, protocolVersionOk := d.GetOk("protocol_version"); protocolVersionOk {
@@ -197,7 +197,7 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 		targetGroup.Properties.ProtocolVersion = &protocolVersion
 	}
 
-	targetGroup.Properties.Targets = getTargetGroupTargetData(d)
+	targetGroup.Properties.Targets = *getTargetGroupTargetData(d)
 
 	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
 		targetGroup.Properties.HealthCheck = getTargetGroupHealthCheckData(d)
@@ -252,22 +252,22 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	targetGroup := ionoscloud.TargetGroupPut{
-		Properties: &ionoscloud.TargetGroupProperties{},
+		Properties: ionoscloud.TargetGroupProperties{},
 	}
 
 	if name, nameOk := d.GetOk("name"); nameOk {
 		name := name.(string)
-		targetGroup.Properties.Name = &name
+		targetGroup.Properties.Name = name
 	}
 
 	if algorithm, algorithmOk := d.GetOk("algorithm"); algorithmOk {
 		algorithm := algorithm.(string)
-		targetGroup.Properties.Algorithm = &algorithm
+		targetGroup.Properties.Algorithm = algorithm
 	}
 
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
 		protocol := protocol.(string)
-		targetGroup.Properties.Protocol = &protocol
+		targetGroup.Properties.Protocol = protocol
 	}
 
 	if protocolVersion, protocolVersionOk := d.GetOk("protocol_version"); protocolVersionOk {
@@ -275,7 +275,7 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 		targetGroup.Properties.ProtocolVersion = &protocolVersion
 	}
 
-	targetGroup.Properties.Targets = getTargetGroupTargetData(d)
+	targetGroup.Properties.Targets = *getTargetGroupTargetData(d)
 
 	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
 		targetGroup.Properties.HealthCheck = getTargetGroupHealthCheckData(d)
@@ -350,137 +350,116 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 		d.SetId(*targetGroup.Id)
 	}
 
-	if targetGroup.Properties != nil {
-
-		if targetGroup.Properties.Name != nil {
-			err := d.Set("name", *targetGroup.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for target group %s: %w", d.Id(), err)
-			}
-		}
-
-		if targetGroup.Properties.Algorithm != nil {
-			err := d.Set("algorithm", *targetGroup.Properties.Algorithm)
-			if err != nil {
-				return fmt.Errorf("error while setting algorithm property for target group %s: %w", d.Id(), err)
-			}
-		}
-
-		if targetGroup.Properties.Protocol != nil {
-			err := d.Set("protocol", *targetGroup.Properties.Protocol)
-			if err != nil {
-				return fmt.Errorf("error while setting protocol property for target group %s: %w", d.Id(), err)
-			}
-		}
-
-		if targetGroup.Properties.ProtocolVersion != nil {
-			err := d.Set("protocol_version", *targetGroup.Properties.ProtocolVersion)
-			if err != nil {
-				return fmt.Errorf("error while setting protocol_version property for target group %s: %w", d.Id(), err)
-			}
-		}
-
-		forwardingRuleTargets := make([]interface{}, 0)
-		if targetGroup.Properties.Targets != nil && len(*targetGroup.Properties.Targets) > 0 {
-			forwardingRuleTargets = make([]interface{}, 0)
-			for _, target := range *targetGroup.Properties.Targets {
-				targetEntry := make(map[string]interface{})
-
-				if target.Ip != nil {
-					targetEntry["ip"] = *target.Ip
-				}
-
-				if target.Port != nil {
-					targetEntry["port"] = *target.Port
-				}
-
-				if target.Weight != nil {
-					targetEntry["weight"] = *target.Weight
-				}
-
-				if target.ProxyProtocol != nil {
-					targetEntry["proxy_protocol"] = *target.ProxyProtocol
-				}
-
-				if target.HealthCheckEnabled != nil {
-					targetEntry["health_check_enabled"] = *target.HealthCheckEnabled
-				}
-
-				if target.MaintenanceEnabled != nil {
-					targetEntry["maintenance_enabled"] = *target.MaintenanceEnabled
-				}
-
-				forwardingRuleTargets = append(forwardingRuleTargets, targetEntry)
-			}
-		}
-
-		if len(forwardingRuleTargets) > 0 {
-			if err := d.Set("targets", forwardingRuleTargets); err != nil {
-				return fmt.Errorf("error while setting targets property for target group  %s: %w", d.Id(), err)
-			}
-		}
-
-		if targetGroup.Properties.HealthCheck != nil {
-			healthCheck := make([]interface{}, 1)
-
-			healthCheckEntry := make(map[string]interface{})
-
-			if targetGroup.Properties.HealthCheck.CheckTimeout != nil {
-				healthCheckEntry["check_timeout"] = *targetGroup.Properties.HealthCheck.CheckTimeout
-			}
-
-			if targetGroup.Properties.HealthCheck.CheckInterval != nil {
-				healthCheckEntry["check_interval"] = *targetGroup.Properties.HealthCheck.CheckInterval
-			}
-
-			if targetGroup.Properties.HealthCheck.Retries != nil {
-				healthCheckEntry["retries"] = *targetGroup.Properties.HealthCheck.Retries
-			}
-
-			healthCheck[0] = healthCheckEntry
-			err := d.Set("health_check", healthCheck)
-			if err != nil {
-				return fmt.Errorf("error while setting health_check property for target group %s: %w", d.Id(), err)
-			}
-		}
-
-		if targetGroup.Properties.HttpHealthCheck != nil {
-			httpHealthCheck := make([]interface{}, 1)
-
-			httpHealthCheckEntry := make(map[string]interface{})
-
-			if targetGroup.Properties.HttpHealthCheck.Path != nil {
-				httpHealthCheckEntry["path"] = *targetGroup.Properties.HttpHealthCheck.Path
-			}
-
-			if targetGroup.Properties.HttpHealthCheck.Method != nil {
-				httpHealthCheckEntry["method"] = *targetGroup.Properties.HttpHealthCheck.Method
-			}
-
-			if targetGroup.Properties.HttpHealthCheck.MatchType != nil {
-				httpHealthCheckEntry["match_type"] = *targetGroup.Properties.HttpHealthCheck.MatchType
-			}
-
-			if targetGroup.Properties.HttpHealthCheck.Response != nil {
-				httpHealthCheckEntry["response"] = *targetGroup.Properties.HttpHealthCheck.Response
-			}
-
-			if targetGroup.Properties.HttpHealthCheck.Regex != nil {
-				httpHealthCheckEntry["regex"] = *targetGroup.Properties.HttpHealthCheck.Regex
-			}
-
-			if targetGroup.Properties.HttpHealthCheck.Negate != nil {
-				httpHealthCheckEntry["negate"] = *targetGroup.Properties.HttpHealthCheck.Negate
-			}
-
-			httpHealthCheck[0] = httpHealthCheckEntry
-			err := d.Set("http_health_check", httpHealthCheck)
-			if err != nil {
-				return fmt.Errorf("error while setting http_health_check property for target group %s: %w", d.Id(), err)
-			}
-		}
-
+	err := d.Set("name", targetGroup.Properties.Name)
+	if err != nil {
+		return fmt.Errorf("error while setting name property for target group %s: %w", d.Id(), err)
 	}
+
+	err = d.Set("algorithm", targetGroup.Properties.Algorithm)
+	if err != nil {
+		return fmt.Errorf("error while setting algorithm property for target group %s: %w", d.Id(), err)
+	}
+
+	err = d.Set("protocol", targetGroup.Properties.Protocol)
+	if err != nil {
+		return fmt.Errorf("error while setting protocol property for target group %s: %w", d.Id(), err)
+	}
+
+	if targetGroup.Properties.ProtocolVersion != nil {
+		err := d.Set("protocol_version", *targetGroup.Properties.ProtocolVersion)
+		if err != nil {
+			return fmt.Errorf("error while setting protocol_version property for target group %s: %w", d.Id(), err)
+		}
+	}
+
+	forwardingRuleTargets := make([]interface{}, 0)
+	if len(targetGroup.Properties.Targets) > 0 {
+		forwardingRuleTargets = make([]interface{}, 0)
+		for _, target := range targetGroup.Properties.Targets {
+			targetEntry := make(map[string]interface{})
+
+			targetEntry["ip"] = target.Ip
+			targetEntry["port"] = target.Port
+			targetEntry["weight"] = target.Weight
+
+			if target.ProxyProtocol != nil {
+				targetEntry["proxy_protocol"] = *target.ProxyProtocol
+			}
+
+			if target.HealthCheckEnabled != nil {
+				targetEntry["health_check_enabled"] = *target.HealthCheckEnabled
+			}
+
+			if target.MaintenanceEnabled != nil {
+				targetEntry["maintenance_enabled"] = *target.MaintenanceEnabled
+			}
+
+			forwardingRuleTargets = append(forwardingRuleTargets, targetEntry)
+		}
+	}
+
+	if len(forwardingRuleTargets) > 0 {
+		if err := d.Set("targets", forwardingRuleTargets); err != nil {
+			return fmt.Errorf("error while setting targets property for target group  %s: %w", d.Id(), err)
+		}
+	}
+
+	if targetGroup.Properties.HealthCheck != nil {
+		healthCheck := make([]interface{}, 1)
+
+		healthCheckEntry := make(map[string]interface{})
+
+		if targetGroup.Properties.HealthCheck.CheckTimeout != nil {
+			healthCheckEntry["check_timeout"] = *targetGroup.Properties.HealthCheck.CheckTimeout
+		}
+
+		if targetGroup.Properties.HealthCheck.CheckInterval != nil {
+			healthCheckEntry["check_interval"] = *targetGroup.Properties.HealthCheck.CheckInterval
+		}
+
+		if targetGroup.Properties.HealthCheck.Retries != nil {
+			healthCheckEntry["retries"] = *targetGroup.Properties.HealthCheck.Retries
+		}
+
+		healthCheck[0] = healthCheckEntry
+		err := d.Set("health_check", healthCheck)
+		if err != nil {
+			return fmt.Errorf("error while setting health_check property for target group %s: %w", d.Id(), err)
+		}
+	}
+
+	if targetGroup.Properties.HttpHealthCheck != nil {
+		httpHealthCheck := make([]interface{}, 1)
+
+		httpHealthCheckEntry := make(map[string]interface{})
+
+		if targetGroup.Properties.HttpHealthCheck.Path != nil {
+			httpHealthCheckEntry["path"] = *targetGroup.Properties.HttpHealthCheck.Path
+		}
+
+		if targetGroup.Properties.HttpHealthCheck.Method != nil {
+			httpHealthCheckEntry["method"] = *targetGroup.Properties.HttpHealthCheck.Method
+		}
+
+		httpHealthCheckEntry["match_type"] = targetGroup.Properties.HttpHealthCheck.MatchType
+
+		httpHealthCheckEntry["response"] = targetGroup.Properties.HttpHealthCheck.Response
+
+		if targetGroup.Properties.HttpHealthCheck.Regex != nil {
+			httpHealthCheckEntry["regex"] = *targetGroup.Properties.HttpHealthCheck.Regex
+		}
+
+		if targetGroup.Properties.HttpHealthCheck.Negate != nil {
+			httpHealthCheckEntry["negate"] = *targetGroup.Properties.HttpHealthCheck.Negate
+		}
+
+		httpHealthCheck[0] = httpHealthCheckEntry
+		err := d.Set("http_health_check", httpHealthCheck)
+		if err != nil {
+			return fmt.Errorf("error while setting http_health_check property for target group %s: %w", d.Id(), err)
+		}
+	}
+
 	return nil
 }
 
@@ -495,17 +474,17 @@ func getTargetGroupTargetData(d *schema.ResourceData) *[]ionoscloud.TargetGroupT
 				target := ionoscloud.TargetGroupTarget{}
 				if ip, ipOk := d.GetOk(fmt.Sprintf("targets.%d.ip", targetIndex)); ipOk {
 					ip := ip.(string)
-					target.Ip = &ip
+					target.Ip = ip
 				}
 
 				if port, portOk := d.GetOk(fmt.Sprintf("targets.%d.port", targetIndex)); portOk {
 					port := int32(port.(int))
-					target.Port = &port
+					target.Port = port
 				}
 
 				if weight, weightOk := d.GetOk(fmt.Sprintf("targets.%d.weight", targetIndex)); weightOk {
 					weight := int32(weight.(int))
-					target.Weight = &weight
+					target.Weight = weight
 				}
 
 				if proxy, proxyOk := d.GetOk(fmt.Sprintf("targets.%d.proxy_protocol", targetIndex)); proxyOk {
@@ -562,12 +541,12 @@ func getTargetGroupHttpHealthCheckData(d *schema.ResourceData) *ionoscloud.Targe
 
 	if matchType, matchTypeOk := d.GetOk("http_health_check.0.match_type"); matchTypeOk {
 		matchType := matchType.(string)
-		httpHealthCheck.MatchType = &matchType
+		httpHealthCheck.MatchType = matchType
 	}
 
 	if response, responseOk := d.GetOk("http_health_check.0.response"); responseOk {
 		response := response.(string)
-		httpHealthCheck.Response = &response
+		httpHealthCheck.Response = response
 	}
 
 	if regex, regexOk := d.GetOk("http_health_check.0.regex"); regexOk {

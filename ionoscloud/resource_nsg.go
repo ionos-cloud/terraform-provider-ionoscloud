@@ -13,7 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourceNSG() *schema.Resource {
@@ -58,8 +58,8 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	sgDescription := d.Get("description").(string)
 
 	sg := ionoscloud.SecurityGroupRequest{
-		Properties: &ionoscloud.SecurityGroupProperties{
-			Name:        &sgName,
+		Properties: ionoscloud.SecurityGroupProperties{
+			Name:        sgName,
 			Description: &sgDescription,
 		},
 	}
@@ -101,8 +101,8 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	sgDescription := d.Get("description").(string)
 
 	sg := ionoscloud.SecurityGroupRequest{
-		Properties: &ionoscloud.SecurityGroupProperties{
-			Name:        &sgName,
+		Properties: ionoscloud.SecurityGroupProperties{
+			Name:        sgName,
 			Description: &sgDescription,
 		},
 	}
@@ -180,25 +180,21 @@ func setNSGData(d *schema.ResourceData, securityGroup *ionoscloud.SecurityGroup)
 		d.SetId(*securityGroup.Id)
 	}
 
-	if securityGroup.Properties != nil {
-		if securityGroup.Properties.Name != nil {
-			err := d.Set("name", *securityGroup.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting Network Security Group name  %s: %w", d.Id(), err)
-			}
-		}
-		if securityGroup.Properties.Description != nil {
-			err := d.Set("description", *securityGroup.Properties.Description)
-			if err != nil {
-				return fmt.Errorf("error while setting Network Security Group description  %s: %w", d.Id(), err)
-			}
+	err := d.Set("name", securityGroup.Properties.Name)
+	if err != nil {
+		return fmt.Errorf("error while setting Network Security Group name  %s: %w", d.Id(), err)
+	}
+	if securityGroup.Properties.Description != nil {
+		err := d.Set("description", *securityGroup.Properties.Description)
+		if err != nil {
+			return fmt.Errorf("error while setting Network Security Group description  %s: %w", d.Id(), err)
 		}
 	}
 	var ruleIDs []string
 	if securityGroup.Entities != nil {
 		if securityGroup.Entities.Rules != nil && securityGroup.Entities.Rules.Items != nil {
-			ruleIDs = make([]string, 0, len(*securityGroup.Entities.Rules.Items))
-			for _, rule := range *securityGroup.Entities.Rules.Items {
+			ruleIDs = make([]string, 0, len(securityGroup.Entities.Rules.Items))
+			for _, rule := range securityGroup.Entities.Rules.Items {
 				ruleIDs = append(ruleIDs, *rule.Id)
 			}
 		}

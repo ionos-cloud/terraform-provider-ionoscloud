@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourcePrivateCrossConnect() *schema.Resource {
@@ -107,7 +107,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 
 	name := d.Get("name").(string)
 	pcc := ionoscloud.PrivateCrossConnect{
-		Properties: &ionoscloud.PrivateCrossConnectProperties{
+		Properties: ionoscloud.PrivateCrossConnectProperties{
 			Name: &name,
 		},
 	}
@@ -118,7 +118,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 		pcc.Properties.Description = &description
 	}
 
-	rsp, apiResponse, err := client.PrivateCrossConnectsApi.PccsPost(ctx).Pcc(pcc).Execute()
+	rsp, apiResponse, err := client.CrossConnectsApi.PccsPost(ctx).Pcc(pcc).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -139,7 +139,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 
-	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
+	pcc, apiResponse, err := client.CrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -164,7 +164,7 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 
 	request := ionoscloud.PrivateCrossConnect{}
 	name := d.Get("name").(string)
-	request.Properties = &ionoscloud.PrivateCrossConnectProperties{
+	request.Properties = ionoscloud.PrivateCrossConnectProperties{
 		Name: &name,
 	}
 
@@ -186,7 +186,7 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
-	_, apiResponse, err := client.PrivateCrossConnectsApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
+	_, apiResponse, err := client.CrossConnectsApi.PccsPatch(ctx, d.Id()).Pcc(request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -207,7 +207,7 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 
-	apiResponse, err := client.PrivateCrossConnectsApi.PccsDelete(ctx, d.Id()).Execute()
+	apiResponse, err := client.CrossConnectsApi.PccsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -252,7 +252,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 
 	pccId := d.Id()
 
-	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
+	pcc, apiResponse, err := client.CrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -283,7 +283,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 }
 
 func privateCrossConnectReady(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	rsp, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
+	rsp, apiResponse, err := client.CrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -293,7 +293,7 @@ func privateCrossConnectReady(ctx context.Context, client *ionoscloud.APIClient,
 }
 
 func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	_, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
+	_, apiResponse, err := client.CrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {

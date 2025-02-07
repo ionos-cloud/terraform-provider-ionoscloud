@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourceLoadbalancer() *schema.Resource {
@@ -72,12 +72,12 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 
 	name := d.Get("name").(string)
 	lb := &ionoscloud.Loadbalancer{
-		Properties: &ionoscloud.LoadbalancerProperties{
+		Properties: ionoscloud.LoadbalancerProperties{
 			Name: &name,
 		},
 		Entities: &ionoscloud.LoadbalancerEntities{
 			Balancednics: &ionoscloud.BalancedNics{
-				Items: &nicIds,
+				Items: nicIds,
 			},
 		},
 	}
@@ -125,8 +125,8 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	if lb.Properties.Ip != nil {
-		if err := d.Set("ip", *lb.Properties.Ip); err != nil {
+	if lb.Properties.Ip.IsSet() && lb.Properties.Ip.Get() != nil {
+		if err := d.Set("ip", *lb.Properties.Ip.Get()); err != nil {
 			diags := diag.FromErr(fmt.Errorf(""))
 			return diags
 		}
@@ -157,7 +157,9 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 	if d.HasChange("ip") {
 		_, newVal := d.GetChange("ip")
 		ip := newVal.(string)
-		properties.Ip = &ip
+		ipNulStr := ionoscloud.NullableString{}
+		ipNulStr.Set(&ip)
+		properties.Ip = ipNulStr
 		hasChangeCount++
 	}
 	if d.HasChange("dhcp") {
@@ -278,8 +280,8 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if loadbalancer.Properties.Ip != nil {
-		if err := d.Set("ip", *loadbalancer.Properties.Ip); err != nil {
+	if loadbalancer.Properties.Ip.IsSet() && loadbalancer.Properties.Ip.Get() != nil {
+		if err := d.Set("ip", *loadbalancer.Properties.Ip.Get()); err != nil {
 			return nil, err
 		}
 	}
@@ -291,10 +293,10 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if loadbalancer.Entities != nil && loadbalancer.Entities.Balancednics != nil &&
-		loadbalancer.Entities.Balancednics.Items != nil && len(*loadbalancer.Entities.Balancednics.Items) > 0 {
+		len(loadbalancer.Entities.Balancednics.Items) > 0 {
 
 		var lans []string
-		for _, lan := range *loadbalancer.Entities.Balancednics.Items {
+		for _, lan := range loadbalancer.Entities.Balancednics.Items {
 			if *lan.Id != "" {
 				lans = append(lans, *lan.Id)
 			}

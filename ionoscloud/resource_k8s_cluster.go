@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourcek8sCluster() *schema.Resource {
@@ -165,8 +165,8 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	clusterName := d.Get("name").(string)
 	cluster := ionoscloud.KubernetesClusterForPost{
-		Properties: &ionoscloud.KubernetesClusterPropertiesForPost{
-			Name: &clusterName,
+		Properties: ionoscloud.KubernetesClusterPropertiesForPost{
+			Name: clusterName,
 		},
 	}
 
@@ -183,12 +183,12 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if mtVal, mtOk := d.GetOk("maintenance_window.0.time"); mtOk {
 		log.Printf("[INFO] Setting Maintenance Window Time to : %s", mtVal.(string))
 		mtVal := mtVal.(string)
-		cluster.Properties.MaintenanceWindow.Time = &mtVal
+		cluster.Properties.MaintenanceWindow.Time = mtVal
 	}
 
 	if mdVal, mdOk := d.GetOk("maintenance_window.0.day_of_the_week"); mdOk {
 		mdVal := mdVal.(string)
-		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
+		cluster.Properties.MaintenanceWindow.DayOfTheWeek = mdVal
 	}
 
 	if publicVal, publicOk := d.GetOkExists("public"); publicOk {
@@ -220,7 +220,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 				apiSubnets = append(apiSubnets, valueS)
 			}
 			if len(apiSubnets) > 0 {
-				cluster.Properties.ApiSubnetAllowList = &apiSubnets
+				cluster.Properties.ApiSubnetAllowList = apiSubnets
 			}
 		}
 	}
@@ -234,7 +234,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 				addBucket := false
 				if name, nameOk := d.GetOk(fmt.Sprintf("s3_buckets.%d.name", index)); nameOk {
 					name := name.(string)
-					s3Bucket.Name = &name
+					s3Bucket.Name = name
 					addBucket = true
 				} else {
 					diags := diag.FromErr(fmt.Errorf("name must be provided for Object Storage bucket"))
@@ -245,7 +245,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 				}
 			}
 			if len(s3Buckets) > 0 {
-				cluster.Properties.S3Buckets = &s3Buckets
+				cluster.Properties.S3Buckets = s3Buckets
 			}
 		}
 	}
@@ -322,15 +322,15 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	request := ionoscloud.KubernetesClusterForPut{}
 
 	clusterName := d.Get("name").(string)
-	request.Properties = &ionoscloud.KubernetesClusterPropertiesForPut{
-		Name: &clusterName,
+	request.Properties = ionoscloud.KubernetesClusterPropertiesForPut{
+		Name: clusterName,
 	}
 
 	if d.HasChange("name") {
 		oldName, newName := d.GetChange("name")
 		log.Printf("[INFO] k8s cluster name changed from %+v to %+v", oldName, newName)
 		newNameStr := newName.(string)
-		request.Properties.Name = &newNameStr
+		request.Properties.Name = newNameStr
 	}
 
 	log.Printf("[INFO] Attempting update cluster Id %s", d.Id())
@@ -354,8 +354,8 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			dayofTheWeek := d.Get("maintenance_window.0.day_of_the_week").(string)
 			winTime := d.Get("maintenance_window.0.time").(string)
 			maintenanceWindow := &ionoscloud.KubernetesMaintenanceWindow{
-				DayOfTheWeek: &dayofTheWeek,
-				Time:         &winTime,
+				DayOfTheWeek: dayofTheWeek,
+				Time:         winTime,
 			}
 
 			if d.HasChange("maintenance_window.0.day_of_the_week") {
@@ -364,7 +364,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 					log.Printf("[INFO] k8s maintenance window DOW changed from %+v to %+v", oldMd, newMd)
 					updateMaintenanceWindow = true
 					newMd := newMd.(string)
-					maintenanceWindow.DayOfTheWeek = &newMd
+					maintenanceWindow.DayOfTheWeek = newMd
 				}
 			}
 
@@ -375,7 +375,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 					log.Printf("[INFO] k8s maintenance window time changed from %+v to %+v", oldMt, newMt)
 					updateMaintenanceWindow = true
 					newMt := newMt.(string)
-					maintenanceWindow.Time = &newMt
+					maintenanceWindow.Time = newMt
 				}
 			}
 
@@ -395,7 +395,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				apiSubnets = append(apiSubnets, valueS)
 			}
 		}
-		request.Properties.ApiSubnetAllowList = &apiSubnets
+		request.Properties.ApiSubnetAllowList = apiSubnets
 	}
 
 	if d.HasChange("s3_buckets") {
@@ -408,7 +408,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				addBucket := false
 				if name, nameOk := d.GetOk(fmt.Sprintf("s3_buckets.%d.name", index)); nameOk {
 					name := name.(string)
-					s3Bucket.Name = &name
+					s3Bucket.Name = name
 					addBucket = true
 				}
 				if addBucket {
@@ -416,7 +416,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				}
 			}
 		}
-		request.Properties.S3Buckets = &s3Buckets
+		request.Properties.S3Buckets = s3Buckets
 	}
 
 	_, apiResponse, err := client.KubernetesApi.K8sPut(ctx, d.Id()).KubernetesCluster(request).Execute()
@@ -535,92 +535,87 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		d.SetId(*cluster.Id)
 	}
 
-	if cluster.Properties != nil {
-		if cluster.Properties.Name != nil {
-			if err := d.Set("name", *cluster.Properties.Name); err != nil {
-				return err
-			}
+	if err := d.Set("name", cluster.Properties.Name); err != nil {
+		return err
+	}
+
+	if cluster.Properties.K8sVersion != nil {
+		if err := d.Set("k8s_version", *cluster.Properties.K8sVersion); err != nil {
+			return err
 		}
 
-		if cluster.Properties.K8sVersion != nil {
-			if err := d.Set("k8s_version", *cluster.Properties.K8sVersion); err != nil {
-				return err
-			}
+	}
 
+	if cluster.Properties.MaintenanceWindow != nil {
+		if err := d.Set("maintenance_window", []map[string]string{
+			{
+				"time":            cluster.Properties.MaintenanceWindow.Time,
+				"day_of_the_week": cluster.Properties.MaintenanceWindow.DayOfTheWeek,
+			},
+		}); err != nil {
+			return err
 		}
+	}
 
-		if cluster.Properties.MaintenanceWindow != nil && cluster.Properties.MaintenanceWindow.Time != nil && cluster.Properties.MaintenanceWindow.DayOfTheWeek != nil {
-			if err := d.Set("maintenance_window", []map[string]string{
-				{
-					"time":            *cluster.Properties.MaintenanceWindow.Time,
-					"day_of_the_week": *cluster.Properties.MaintenanceWindow.DayOfTheWeek,
-				},
-			}); err != nil {
-				return err
-			}
+	if len(cluster.Properties.ViableNodePoolVersions) > 0 {
+		var viableNodePoolVersions []interface{}
+		for _, viableNodePoolVersion := range cluster.Properties.ViableNodePoolVersions {
+			viableNodePoolVersions = append(viableNodePoolVersions, viableNodePoolVersion)
 		}
-
-		if cluster.Properties.ViableNodePoolVersions != nil && len(*cluster.Properties.ViableNodePoolVersions) > 0 {
-			var viableNodePoolVersions []interface{}
-			for _, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
-				viableNodePoolVersions = append(viableNodePoolVersions, viableNodePoolVersion)
-			}
-			if err := d.Set("viable_node_pool_versions", viableNodePoolVersions); err != nil {
-				return err
-			}
+		if err := d.Set("viable_node_pool_versions", viableNodePoolVersions); err != nil {
+			return err
 		}
+	}
 
-		if cluster.Properties.Public != nil {
-			if err := d.Set("public", *cluster.Properties.Public); err != nil {
-				return utils.GenerateSetError(constant.K8sClusterResource, "public", err)
-			}
+	if cluster.Properties.Public != nil {
+		if err := d.Set("public", *cluster.Properties.Public); err != nil {
+			return utils.GenerateSetError(constant.K8sClusterResource, "public", err)
 		}
+	}
 
-		if cluster.Properties.Location != nil {
-			if err := d.Set("location", *cluster.Properties.Location); err != nil {
-				return utils.GenerateSetError(constant.K8sClusterResource, "location", err)
-			}
+	if cluster.Properties.Location != nil {
+		if err := d.Set("location", *cluster.Properties.Location); err != nil {
+			return utils.GenerateSetError(constant.K8sClusterResource, "location", err)
 		}
+	}
 
-		if cluster.Properties.NatGatewayIp != nil {
-			if err := d.Set("nat_gateway_ip", *cluster.Properties.NatGatewayIp); err != nil {
-				return utils.GenerateSetError(constant.K8sClusterResource, "nat_gateway_ip", err)
-			}
+	if cluster.Properties.NatGatewayIp != nil {
+		if err := d.Set("nat_gateway_ip", *cluster.Properties.NatGatewayIp); err != nil {
+			return utils.GenerateSetError(constant.K8sClusterResource, "nat_gateway_ip", err)
 		}
+	}
 
-		if cluster.Properties.NodeSubnet != nil {
-			if err := d.Set("node_subnet", *cluster.Properties.NodeSubnet); err != nil {
-				return utils.GenerateSetError(constant.K8sClusterResource, "node_subnet", err)
-			}
+	if cluster.Properties.NodeSubnet != nil {
+		if err := d.Set("node_subnet", *cluster.Properties.NodeSubnet); err != nil {
+			return utils.GenerateSetError(constant.K8sClusterResource, "node_subnet", err)
 		}
+	}
 
-		if cluster.Properties.ApiSubnetAllowList != nil {
-			apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))
-			for i, apiSubnetAllowList := range *cluster.Properties.ApiSubnetAllowList {
-				apiSubnetAllowLists[i] = apiSubnetAllowList
-			}
-			if err := d.Set("api_subnet_allow_list", apiSubnetAllowLists); err != nil {
-				return fmt.Errorf("error while setting api_subnet_allow_list property for cluster with ID: %s, error: %w", d.Id(), err)
-			}
-		} else {
-			var emptySlice []interface{}
-			if err := d.Set("api_subnet_allow_list", emptySlice); err != nil {
-				return fmt.Errorf("error while setting api_subnet_allow_list property for cluster with ID: %s, error: %w", d.Id(), err)
-			}
+	if cluster.Properties.ApiSubnetAllowList != nil {
+		apiSubnetAllowLists := make([]interface{}, len(cluster.Properties.ApiSubnetAllowList), len(cluster.Properties.ApiSubnetAllowList))
+		for i, apiSubnetAllowList := range cluster.Properties.ApiSubnetAllowList {
+			apiSubnetAllowLists[i] = apiSubnetAllowList
 		}
-
-		if cluster.Properties.S3Buckets != nil {
-			s3Buckets := make([]interface{}, len(*cluster.Properties.S3Buckets), len(*cluster.Properties.S3Buckets))
-			for i, s3Bucket := range *cluster.Properties.S3Buckets {
-				s3BucketEntry := make(map[string]interface{})
-				s3BucketEntry["name"] = *s3Bucket.Name
-				s3Buckets[i] = s3BucketEntry
-			}
-			if err := d.Set("s3_buckets", s3Buckets); err != nil {
-				return fmt.Errorf("error while setting s3_buckets property for cluser %s: %w", d.Id(), err)
-			}
+		if err := d.Set("api_subnet_allow_list", apiSubnetAllowLists); err != nil {
+			return fmt.Errorf("error while setting api_subnet_allow_list property for cluster with ID: %s, error: %w", d.Id(), err)
 		}
+	} else {
+		var emptySlice []interface{}
+		if err := d.Set("api_subnet_allow_list", emptySlice); err != nil {
+			return fmt.Errorf("error while setting api_subnet_allow_list property for cluster with ID: %s, error: %w", d.Id(), err)
+		}
+	}
 
+	if cluster.Properties.S3Buckets != nil {
+		s3Buckets := make([]interface{}, len(cluster.Properties.S3Buckets), len(cluster.Properties.S3Buckets))
+		for i, s3Bucket := range cluster.Properties.S3Buckets {
+			s3BucketEntry := make(map[string]interface{})
+			s3BucketEntry["name"] = s3Bucket.Name
+			s3Buckets[i] = s3BucketEntry
+		}
+		if err := d.Set("s3_buckets", s3Buckets); err != nil {
+			return fmt.Errorf("error while setting s3_buckets property for cluser %s: %w", d.Id(), err)
+		}
 	}
 
 	return nil

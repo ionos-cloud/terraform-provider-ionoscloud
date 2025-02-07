@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourceNatGatewayRule() *schema.Resource {
@@ -114,12 +114,12 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	natGatewayRule := ionoscloud.NatGatewayRule{
-		Properties: &ionoscloud.NatGatewayRuleProperties{},
+		Properties: ionoscloud.NatGatewayRuleProperties{},
 	}
 
 	if name, nameOk := d.GetOk("name"); nameOk {
 		name := name.(string)
-		natGatewayRule.Properties.Name = &name
+		natGatewayRule.Properties.Name = name
 	} else {
 		diags := diag.FromErr(fmt.Errorf("name must be provided for nat gateway rule"))
 		return diags
@@ -127,7 +127,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 
 	if sourceSubnet, sourceSubnetOk := d.GetOk("source_subnet"); sourceSubnetOk {
 		sourceSubnet := sourceSubnet.(string)
-		natGatewayRule.Properties.SourceSubnet = &sourceSubnet
+		natGatewayRule.Properties.SourceSubnet = sourceSubnet
 	} else {
 		diags := diag.FromErr(fmt.Errorf("source subnet must be provided for nat gateway rule"))
 		return diags
@@ -135,7 +135,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 
 	if publicIp, publicIpOk := d.GetOk("public_ip"); publicIpOk {
 		publicIp := publicIp.(string)
-		natGatewayRule.Properties.PublicIp = &publicIp
+		natGatewayRule.Properties.PublicIp = publicIp
 	} else {
 		diags := diag.FromErr(fmt.Errorf("public Ip must be provided for nat gateway rule"))
 		return diags
@@ -236,7 +236,7 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(services.SdkBundle).CloudApiClient
 	request := ionoscloud.NatGatewayRule{
-		Properties: &ionoscloud.NatGatewayRuleProperties{},
+		Properties: ionoscloud.NatGatewayRuleProperties{},
 	}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -245,7 +245,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
 		vStr := v.(string)
-		request.Properties.Name = &vStr
+		request.Properties.Name = vStr
 	}
 
 	if d.HasChange("type") {
@@ -263,13 +263,13 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 	if d.HasChange("source_subnet") {
 		_, v := d.GetChange("source_subnet")
 		vStr := v.(string)
-		request.Properties.SourceSubnet = &vStr
+		request.Properties.SourceSubnet = vStr
 	}
 
 	if d.HasChange("public_ip") {
 		_, v := d.GetChange("public_ip")
 		vStr := v.(string)
-		request.Properties.PublicIp = &vStr
+		request.Properties.PublicIp = vStr
 	}
 
 	if d.HasChange("target_subnet") {
@@ -315,7 +315,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	_, apiResponse, err := client.NATGatewaysApi.
 		DatacentersNatgatewaysRulesPatch(ctx, dcId, ngId, d.Id()).
-		NatGatewayRuleProperties(*request.Properties).
+		NatGatewayRuleProperties(request.Properties).
 		Execute()
 
 	if err != nil {
@@ -397,59 +397,51 @@ func setNatGatewayRuleData(d *schema.ResourceData, natGatewayRule *ionoscloud.Na
 		d.SetId(*natGatewayRule.Id)
 	}
 
-	if natGatewayRule.Properties != nil {
-		if natGatewayRule.Properties.Name != nil {
-			err := d.Set("name", *natGatewayRule.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for nat gateway %s: %w", d.Id(), err)
-			}
-		}
+	err := d.Set("name", natGatewayRule.Properties.Name)
+	if err != nil {
+		return fmt.Errorf("error while setting name property for nat gateway %s: %w", d.Id(), err)
+	}
 
-		if natGatewayRule.Properties.Type != nil {
-			err := d.Set("type", *natGatewayRule.Properties.Type)
-			if err != nil {
-				return fmt.Errorf("error while setting type property for nat gateway %s: %w", d.Id(), err)
-			}
+	if natGatewayRule.Properties.Type != nil {
+		err := d.Set("type", *natGatewayRule.Properties.Type)
+		if err != nil {
+			return fmt.Errorf("error while setting type property for nat gateway %s: %w", d.Id(), err)
 		}
+	}
 
-		if natGatewayRule.Properties.Protocol != nil {
-			err := d.Set("protocol", *natGatewayRule.Properties.Protocol)
-			if err != nil {
-				return fmt.Errorf("error while setting protocol property for nat gateway %s: %w", d.Id(), err)
-			}
+	if natGatewayRule.Properties.Protocol != nil {
+		err := d.Set("protocol", *natGatewayRule.Properties.Protocol)
+		if err != nil {
+			return fmt.Errorf("error while setting protocol property for nat gateway %s: %w", d.Id(), err)
 		}
+	}
 
-		if natGatewayRule.Properties.SourceSubnet != nil {
-			err := d.Set("source_subnet", *natGatewayRule.Properties.SourceSubnet)
-			if err != nil {
-				return fmt.Errorf("error while setting source_subnet property for nat gateway %s: %w", d.Id(), err)
-			}
+	err = d.Set("source_subnet", natGatewayRule.Properties.SourceSubnet)
+	if err != nil {
+		return fmt.Errorf("error while setting source_subnet property for nat gateway %s: %w", d.Id(), err)
+	}
+
+	err = d.Set("public_ip", natGatewayRule.Properties.PublicIp)
+	if err != nil {
+		return fmt.Errorf("error while setting public_ip property for nat gateway %s: %w", d.Id(), err)
+	}
+
+	if natGatewayRule.Properties.TargetSubnet != nil {
+		err := d.Set("target_subnet", *natGatewayRule.Properties.TargetSubnet)
+		if err != nil {
+			return fmt.Errorf("error while setting target_subnet property for nat gateway %s: %w", d.Id(), err)
 		}
+	}
 
-		if natGatewayRule.Properties.PublicIp != nil {
-			err := d.Set("public_ip", *natGatewayRule.Properties.PublicIp)
-			if err != nil {
-				return fmt.Errorf("error while setting public_ip property for nat gateway %s: %w", d.Id(), err)
-			}
-		}
-
-		if natGatewayRule.Properties.TargetSubnet != nil {
-			err := d.Set("target_subnet", *natGatewayRule.Properties.TargetSubnet)
-			if err != nil {
-				return fmt.Errorf("error while setting target_subnet property for nat gateway %s: %w", d.Id(), err)
-			}
-		}
-
-		if natGatewayRule.Properties.TargetPortRange != nil && natGatewayRule.Properties.TargetPortRange.Start != nil &&
-			natGatewayRule.Properties.TargetPortRange.End != nil {
-			err := d.Set("target_port_range", []map[string]int32{{
-				"start": *natGatewayRule.Properties.TargetPortRange.Start,
-				"end":   *natGatewayRule.Properties.TargetPortRange.End,
-			},
-			})
-			if err != nil {
-				return fmt.Errorf("error while setting target_port_range property for nat gateway %s: %w", d.Id(), err)
-			}
+	if natGatewayRule.Properties.TargetPortRange != nil && natGatewayRule.Properties.TargetPortRange.Start != nil &&
+		natGatewayRule.Properties.TargetPortRange.End != nil {
+		err := d.Set("target_port_range", []map[string]int32{{
+			"start": *natGatewayRule.Properties.TargetPortRange.Start,
+			"end":   *natGatewayRule.Properties.TargetPortRange.End,
+		},
+		})
+		if err != nil {
+			return fmt.Errorf("error while setting target_port_range property for nat gateway %s: %w", d.Id(), err)
 		}
 	}
 	return nil

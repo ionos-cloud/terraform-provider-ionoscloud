@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 	"strings"
 	"time"
@@ -15,7 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourceS3Key() *schema.Resource {
@@ -76,7 +77,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	active := d.Get("active").(bool)
 	s3Key := ionoscloud.S3Key{
-		Properties: &ionoscloud.S3KeyProperties{
+		Properties: ionoscloud.S3KeyProperties{
 			Active: &active,
 		},
 	}
@@ -113,7 +114,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	log.Printf("[INFO] Successfully retrieved Object Storage key %+v \n", *s3Key.Id)
 
-	if s3Key.HasProperties() && s3Key.Properties.HasActive() {
+	if s3Key.Properties.HasActive() {
 		log.Printf("[INFO] Successfully retrieved Object Storage key with status: %t", *s3Key.Properties.Active)
 	}
 
@@ -128,7 +129,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	request := ionoscloud.S3Key{}
-	request.Properties = &ionoscloud.S3KeyProperties{}
+	request.Properties = ionoscloud.S3KeyProperties{}
 
 	log.Printf("[INFO] Attempting to update Object Storage key %s", d.Id())
 
@@ -207,7 +208,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 // isS3KeyNotFound needed because api returns 422 instead of 404 on key being not found. will be removed once API issue is fixed
 func isS3KeyNotFound(err error) bool {
-	var genericOpenAPIError ionoscloud.GenericOpenAPIError
+	var genericOpenAPIError shared.GenericOpenAPIError
 	if !errors.As(err, &genericOpenAPIError) {
 		return false
 	}

@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func dataSourceBackupUnit() *schema.Resource {
@@ -57,7 +58,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	var backupUnit ionoscloud.BackupUnit
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -66,14 +67,12 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the backup unit %s: %w", id.(string), err))
 		}
-		if backupUnit.Properties != nil {
-			log.Printf("[INFO] Got backupUnit [Name=%s] [Id=%s]", *backupUnit.Properties.Name, *backupUnit.Id)
-		}
+		log.Printf("[INFO] Got backupUnit [Name=%s] [Id=%s]", backupUnit.Properties.Name, *backupUnit.Id)
 	} else {
 		/* search by name */
 		var backupUnits ionoscloud.BackupUnits
 
-		backupUnits, apiResponse, err := client.BackupUnitsApi.BackupunitsGet(ctx).Depth(1).Execute()
+		backupUnits, apiResponse, err := client.BackupServiceApi.BackupunitsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -82,8 +81,8 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		var results []ionoscloud.BackupUnit
 		if backupUnits.Items != nil {
-			for _, bu := range *backupUnits.Items {
-				if bu.Properties != nil && bu.Properties.Name != nil && *bu.Properties.Name == name.(string) {
+			for _, bu := range backupUnits.Items {
+				if bu.Properties.Name == name.(string) {
 					tmpBackupUnit, apiResponse, err := BackupUnitFindByID(ctx, *bu.Id, client)
 					logApiRequestTime(apiResponse)
 					if err != nil {

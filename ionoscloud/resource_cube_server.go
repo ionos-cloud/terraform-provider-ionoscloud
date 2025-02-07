@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
@@ -399,7 +399,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(services.SdkBundle).CloudApiClient
 
 	server := ionoscloud.Server{
-		Properties: &ionoscloud.ServerProperties{},
+		Properties: ionoscloud.ServerProperties{},
 	}
 
 	var image, imageAlias string
@@ -430,7 +430,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if _, ok := d.GetOk("boot_cdrom"); ok {
 		resId := d.Get("boot_cdrom").(string)
 		server.Properties.BootCdrom = &ionoscloud.ResourceReference{
-			Id: &resId,
+			Id: resId,
 		}
 	}
 
@@ -482,20 +482,20 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	server.Entities = &ionoscloud.ServerEntities{
 		Volumes: &ionoscloud.AttachedVolumes{
-			Items: &[]ionoscloud.Volume{
+			Items: []ionoscloud.Volume{
 				{
-					Properties: volume,
+					Properties: *volume,
 				},
 			},
 		},
 	}
 	var primaryNic *ionoscloud.Nic
-	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 {
-		primaryNic = &(*server.Entities.Nics.Items)[0]
+	if server.Entities.Nics != nil && len(server.Entities.Nics.Items) > 0 {
+		primaryNic = &(server.Entities.Nics.Items)[0]
 	}
 	// Nic Arguments
 	nic := ionoscloud.Nic{
-		Properties: &ionoscloud.NicProperties{},
+		Properties: ionoscloud.NicProperties{},
 	}
 	if _, ok := d.GetOk("nic"); ok {
 		nic, err = cloudapinic.GetNicFromSchemaCreate(d, "nic.0.")
@@ -506,16 +506,16 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	server.Entities.Nics = &ionoscloud.Nics{
-		Items: &[]ionoscloud.Nic{
+		Items: []ionoscloud.Nic{
 			nic,
 		},
 	}
-	primaryNic = &(*server.Entities.Nics.Items)[0]
+	primaryNic = &(server.Entities.Nics.Items)[0]
 	log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
 	log.Printf("[DEBUG] primaryNic dhcp %t", *primaryNic.Properties.Dhcp)
 
 	firewall := ionoscloud.FirewallRule{
-		Properties: &ionoscloud.FirewallruleProperties{},
+		Properties: ionoscloud.FirewallruleProperties{},
 	}
 	if _, ok := d.GetOk("nic.0.firewall"); ok {
 		var diags diag.Diagnostics
@@ -523,18 +523,18 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		if diags != nil {
 			return diags
 		}
-		(*server.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
+		(server.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
 			Firewallrules: &ionoscloud.FirewallRules{
-				Items: &[]ionoscloud.FirewallRule{
+				Items: []ionoscloud.FirewallRule{
 					firewall,
 				},
 			},
 		}
 	}
 
-	if primaryNic != nil && primaryNic.Properties != nil && primaryNic.Properties.Ips != nil {
-		if len(*primaryNic.Properties.Ips) == 0 {
-			*primaryNic.Properties.Ips = nil
+	if primaryNic != nil && primaryNic.Properties.Ips != nil {
+		if len(primaryNic.Properties.Ips) == 0 {
+			primaryNic.Properties.Ips = nil
 		}
 	}
 
@@ -572,7 +572,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
-		*createdServer.Id, *(*createdServer.Entities.Nics.Items)[0].Id).Execute()
+		*createdServer.Id, *(createdServer.Entities.Nics.Items)[0].Id).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %w", err))
@@ -580,16 +580,16 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if firewallRules.Items != nil {
-		if len(*firewallRules.Items) > 0 {
-			if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
+		if len(firewallRules.Items) > 0 {
+			if err := d.Set("firewallrule_id", *(firewallRules.Items)[0].Id); err != nil {
 				diags := diag.FromErr(err)
 				return diags
 			}
 		}
 	}
 
-	if (*createdServer.Entities.Nics.Items)[0].Id != nil {
-		primaryNicID := *(*createdServer.Entities.Nics.Items)[0].Id
+	if (createdServer.Entities.Nics.Items)[0].Id != nil {
+		primaryNicID := *(createdServer.Entities.Nics.Items)[0].Id
 		err := d.Set("primary_nic", primaryNicID)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
@@ -604,24 +604,23 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	if (*createdServer.Entities.Nics.Items)[0].Properties.Ips != nil &&
-		len(*(*createdServer.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
+	if (createdServer.Entities.Nics.Items)[0].Properties.Ips != nil &&
+		len((createdServer.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
 		createdServer.Entities.Volumes.Items != nil &&
-		len(*createdServer.Entities.Volumes.Items) > 0 &&
-		(*createdServer.Entities.Volumes.Items)[0].Properties != nil &&
-		(*createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword != nil {
+		len(createdServer.Entities.Volumes.Items) > 0 &&
+		(createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword != nil {
 
 		d.SetConnInfo(map[string]string{
 			"type":     "ssh",
-			"host":     (*(*createdServer.Entities.Nics.Items)[0].Properties.Ips)[0],
-			"password": *(*createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword,
+			"host":     ((createdServer.Entities.Nics.Items)[0].Properties.Ips)[0],
+			"password": *(createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword,
 		})
 	}
 
 	// Set inline volumes
 	if createdServer.Entities.Volumes != nil && createdServer.Entities.Volumes.Items != nil {
 		var inlineVolumeIds []string
-		for _, volume := range *createdServer.Entities.Volumes.Items {
+		for _, volume := range createdServer.Entities.Volumes.Items {
 			inlineVolumeIds = append(inlineVolumeIds, *volume.Id)
 		}
 
@@ -662,40 +661,38 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
-	if server.Properties != nil {
-		if server.Properties.TemplateUuid != nil {
-			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+	if server.Properties.TemplateUuid != nil {
+		if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
+			diags := diag.FromErr(err)
+			return diags
 		}
+	}
 
-		if server.Properties.Name != nil {
-			if err := d.Set("name", *server.Properties.Name); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+	if server.Properties.Name != nil {
+		if err := d.Set("name", *server.Properties.Name); err != nil {
+			diags := diag.FromErr(err)
+			return diags
 		}
+	}
 
-		if server.Properties.Hostname != nil {
-			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+	if server.Properties.Hostname != nil {
+		if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
+			diags := diag.FromErr(err)
+			return diags
 		}
+	}
 
-		if server.Properties.AvailabilityZone != nil {
-			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+	if server.Properties.AvailabilityZone != nil {
+		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+			diags := diag.FromErr(err)
+			return diags
 		}
+	}
 
-		if server.Properties.VmState != nil {
-			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+	if server.Properties.VmState != nil {
+		if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
+			diags := diag.FromErr(err)
+			return diags
 		}
 	}
 
@@ -712,14 +709,14 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
-		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
+		if err := nsg.SetNSGInResourceData(d, &server.Entities.Securitygroups.Items); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
-	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
+	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(server.Entities.Volumes.Items) > 0 &&
+		(server.Entities.Volumes.Items)[0].Properties.Image != nil {
+		if err := d.Set("boot_image", *(server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 			diags := diag.FromErr(err)
 			return diags
 		}
@@ -738,8 +735,8 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			return diags
 		}
 
-		if len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+		if len(nic.Properties.Ips) > 0 {
+			if err := d.Set("primary_ip", (nic.Properties.Ips)[0]); err != nil {
 				diags := diag.FromErr(err)
 				return diags
 			}
@@ -747,8 +744,8 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		network := cloudapinic.SetNetworkProperties(*nic)
 
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			network["ips"] = *nic.Properties.Ips
+		if nic.Properties.Ips != nil && len(nic.Properties.Ips) > 0 {
+			network["ips"] = nic.Properties.Ips
 		}
 
 		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
@@ -796,7 +793,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if server.Properties.BootCdrom != nil {
-		if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
+		if err := d.Set("boot_cdrom", server.Properties.BootCdrom.Id); err != nil {
 			diags := diag.FromErr(err)
 			return diags
 		}
@@ -924,7 +921,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("nic") {
 		nic := &ionoscloud.Nic{}
 		nicStr := d.Get("primary_nic").(string)
-		for _, n := range *server.Entities.Nics.Items {
+		for _, n := range server.Entities.Nics.Items {
 			if *n.Id == nicStr {
 				nic = &n
 				break
@@ -933,7 +930,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 		lan := int32(d.Get("nic.0.lan").(int))
 		properties := ionoscloud.NicProperties{
-			Lan: &lan,
+			Lan: lan,
 		}
 
 		if v, ok := d.GetOk("nic.0.name"); ok {
@@ -950,14 +947,16 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 					ips = append(ips, ip)
 				}
 				if ips != nil && len(ips) > 0 {
-					properties.Ips = &ips
+					properties.Ips = ips
 				}
 			}
 		}
 
 		if v, ok := d.GetOk("nic.0.ipv6_cidr_block"); ok {
 			ipv6Block := v.(string)
-			properties.Ipv6CidrBlock = &ipv6Block
+			ipv6BlockNulStr := ionoscloud.NullableString{}
+			ipv6BlockNulStr.Set(&ipv6Block)
+			properties.Ipv6CidrBlock = ipv6BlockNulStr
 		}
 
 		if v, ok := d.GetOk("nic.0.ipv6_ips"); ok {
@@ -968,14 +967,16 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				return diags
 			}
 			if len(ipv6Ips) > 0 {
-				properties.Ipv6Ips = &ipv6Ips
+				properties.Ipv6Ips = ipv6Ips
 			}
 		}
 
 		if d.HasChange("nic.0.dhcpv6") {
 			if dhcpv6, ok := d.GetOkExists("nic.0.dhcpv6"); ok {
 				dhcpv6 := dhcpv6.(bool)
-				properties.Dhcpv6 = &dhcpv6
+				dhcpv6NulBool := ionoscloud.NullableBool{}
+				dhcpv6NulBool.Set(&dhcpv6)
+				properties.Dhcpv6 = dhcpv6NulBool
 			} else {
 				properties.SetDhcpv6Nil()
 			}
@@ -1020,7 +1021,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, dcId, *server.Id, *nic.Id).Firewallrule(firewall).Execute()
 			} else {
-				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, *nic.Id, firewallId).Firewallrule(*firewall.Properties).Execute()
+				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, *nic.Id, firewallId).Firewallrule(firewall.Properties).Execute()
 
 			}
 			logApiRequestTime(apiResponse)
@@ -1042,7 +1043,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 			nic.Entities = &ionoscloud.NicEntities{
 				Firewallrules: &ionoscloud.FirewallRules{
-					Items: &[]ionoscloud.FirewallRule{
+					Items: []ionoscloud.FirewallRule{
 						firewall,
 					},
 				},
@@ -1088,23 +1089,21 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 func SetCubeVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 
 	volumeMap := map[string]interface{}{}
-	if volume.Properties != nil {
-		utils.SetPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
-		utils.SetPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
-		utils.SetPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
-		utils.SetPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
-		utils.SetPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
-		utils.SetPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
-		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
-		utils.SetPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
-		utils.SetPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
-		utils.SetPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
-		utils.SetPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
-	}
+	utils.SetPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
+	utils.SetPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
+	utils.SetPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
+	utils.SetPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
+	utils.SetPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
+	utils.SetPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
+	utils.SetPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
+	utils.SetPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
+	utils.SetPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
+	utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
+	utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
+	utils.SetPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
+	utils.SetPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
+	utils.SetPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
+	utils.SetPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
 	return volumeMap
 }
 
@@ -1153,18 +1152,18 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(*server.Id)
 
-	firstNicItem := (*server.Entities.Nics.Items)[0]
-	if server.Entities != nil && server.Entities.Nics != nil && firstNicItem.Properties != nil &&
+	firstNicItem := (server.Entities.Nics.Items)[0]
+	if server.Entities != nil && server.Entities.Nics != nil &&
 		firstNicItem.Properties.Ips != nil &&
-		len(*firstNicItem.Properties.Ips) > 0 {
-		log.Printf("[DEBUG] set primary_ip to %s", (*firstNicItem.Properties.Ips)[0])
-		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
+		len(firstNicItem.Properties.Ips) > 0 {
+		log.Printf("[DEBUG] set primary_ip to %s", (firstNicItem.Properties.Ips)[0])
+		if err := d.Set("primary_ip", (firstNicItem.Properties.Ips)[0]); err != nil {
 			return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
 		}
 	}
 
 	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
-		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
+		if err := nsg.SetNSGInResourceData(d, &server.Entities.Securitygroups.Items); err != nil {
 			return nil, err
 		}
 	}
@@ -1172,40 +1171,38 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, err
 	}
-	if server.Properties != nil {
-		if server.Properties.Name != nil {
-			if err := d.Set("name", *server.Properties.Name); err != nil {
-				return nil, fmt.Errorf("error setting name %w", err)
-			}
+	if server.Properties.Name != nil {
+		if err := d.Set("name", *server.Properties.Name); err != nil {
+			return nil, fmt.Errorf("error setting name %w", err)
 		}
-		if server.Properties.Hostname != nil {
-			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
-				return nil, fmt.Errorf("error setting hostname %w", err)
-			}
+	}
+	if server.Properties.Hostname != nil {
+		if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
+			return nil, fmt.Errorf("error setting hostname %w", err)
 		}
-		if server.Properties.Name != nil {
-			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
-				return nil, fmt.Errorf("error setting template uuid %w", err)
-			}
+	}
+	if server.Properties.Name != nil {
+		if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
+			return nil, fmt.Errorf("error setting template uuid %w", err)
 		}
+	}
 
-		if server.Properties.AvailabilityZone != nil {
-			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-				return nil, fmt.Errorf("error setting availability_zone %w", err)
-			}
+	if server.Properties.AvailabilityZone != nil {
+		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+			return nil, fmt.Errorf("error setting availability_zone %w", err)
 		}
 	}
 
 	if server.Entities != nil && server.Entities.Volumes != nil &&
-		len(*server.Entities.Volumes.Items) > 0 &&
-		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
+		len(server.Entities.Volumes.Items) > 0 &&
+		(server.Entities.Volumes.Items)[0].Properties.Image != nil {
+		if err := d.Set("boot_image", *(server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 			return nil, fmt.Errorf("error setting boot_image %w", err)
 		}
 	}
 
-	if server.Entities != nil && server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
-		primaryNic := *(*server.Entities.Nics.Items)[0].Id
+	if server.Entities != nil && len(server.Entities.Nics.Items) > 0 && (server.Entities.Nics.Items)[0].Id != nil {
+		primaryNic := *(server.Entities.Nics.Items)[0].Id
 		if err := d.Set("primary_nic", primaryNic); err != nil {
 			return nil, fmt.Errorf("error setting primary_nic %w", err)
 		}
@@ -1216,8 +1213,8 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 			return nil, err
 		}
 
-		if len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+		if len(nic.Properties.Ips) > 0 {
+			if err := d.Set("primary_ip", (nic.Properties.Ips)[0]); err != nil {
 				return nil, fmt.Errorf("error setting primary_ip %w", err)
 			}
 		}
@@ -1231,8 +1228,8 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if firewallRules.Items != nil {
-			if len(*firewallRules.Items) > 0 {
-				if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
+			if len(firewallRules.Items) > 0 {
+				if err := d.Set("firewallrule_id", *(firewallRules.Items)[0].Id); err != nil {
 					return nil, fmt.Errorf("error setting firewallrule_id %w", err)
 				}
 			}
@@ -1256,23 +1253,19 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	if server.Properties != nil && server.Properties.BootVolume != nil {
-		if server.Properties.BootVolume.Id != nil {
-			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
-				return nil, fmt.Errorf("error setting boot_volume %w", err)
-			}
+	if server.Properties.BootVolume != nil {
+		if err := d.Set("boot_volume", server.Properties.BootVolume.Id); err != nil {
+			return nil, fmt.Errorf("error setting boot_volume %w", err)
 		}
-		volumeObj, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, *server.Properties.BootVolume.Id).Execute()
+		volumeObj, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, server.Properties.BootVolume.Id).Execute()
 		logApiRequestTime(apiResponse)
 		if err == nil {
 			volumeItem := map[string]interface{}{}
-			if volumeObj.Properties != nil {
-				utils.SetPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
-				utils.SetPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
-				utils.SetPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
-				utils.SetPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
-				utils.SetPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
-			}
+			utils.SetPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
+			utils.SetPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
+			utils.SetPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
+			utils.SetPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
+			utils.SetPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
 
 			volumesList := []map[string]interface{}{volumeItem}
 			if err := d.Set("volume", volumesList); err != nil {

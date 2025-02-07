@@ -51,12 +51,14 @@ func main() {
 
 	var serveOpts []tf6server.ServeOpt
 
+	debugMode = true
+
 	if debugMode {
 		serveOpts = append(serveOpts, tf6server.WithManagedDebug())
 	}
 
 	err = tf6server.Serve(
-		"registry.terraform.io/ionos-cloud/ionoscloud",
+		"registry.terraform.io/hashicorp/ionoscloud",
 		muxServer.ProviderServer,
 		serveOpts...,
 	)

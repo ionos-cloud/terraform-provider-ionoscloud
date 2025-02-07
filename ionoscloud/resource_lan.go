@@ -16,7 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func resourceLan() *schema.Resource {
@@ -91,7 +91,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	client := meta.(services.SdkBundle).CloudApiClient
 	public := d.Get("public").(bool)
 	request := ionoscloud.Lan{
-		Properties: &ionoscloud.LanProperties{
+		Properties: ionoscloud.LanProperties{
 			Public: &public,
 		},
 	}
@@ -110,7 +110,9 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	if d.Get("ipv6_cidr_block") != nil {
 		ipv6 := d.Get("ipv6_cidr_block").(string)
 		log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), ipv6)
-		request.Properties.Ipv6CidrBlock = &ipv6
+		ipv6NulString := ionoscloud.NullableString{}
+		ipv6NulString.Set(&ipv6)
+		request.Properties.Ipv6CidrBlock = ipv6NulString
 	} else {
 		request.Properties.SetIpv6CidrBlockNil()
 	}
@@ -222,7 +224,9 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		if newIpv6 != nil && newIpv6.(string) != "" {
 			log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), newIpv6.(string))
 			ipv6 := newIpv6.(string)
-			properties.Ipv6CidrBlock = &ipv6
+			ipv6NulStr := ionoscloud.NullableString{}
+			ipv6NulStr.Set(&ipv6)
+			properties.Ipv6CidrBlock = ipv6NulStr
 		} else {
 			properties.SetIpv6CidrBlockNil()
 		}
@@ -308,38 +312,36 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 	d.SetId(*lan.Id)
 
-	if lan.Properties != nil {
-		if lan.Properties.Name != nil {
-			if err := d.Set("name", *lan.Properties.Name); err != nil {
-				return err
-			}
+	if lan.Properties.Name != nil {
+		if err := d.Set("name", *lan.Properties.Name); err != nil {
+			return err
 		}
-		if lan.Properties.IpFailover != nil && len(*lan.Properties.IpFailover) > 0 {
-			if err := d.Set("ip_failover", convertIpFailoverList(lan.Properties.IpFailover)); err != nil {
-				return err
-			}
+	}
+	if len(lan.Properties.IpFailover) > 0 {
+		if err := d.Set("ip_failover", convertIpFailoverList(&lan.Properties.IpFailover)); err != nil {
+			return err
 		}
-		if lan.Properties.Pcc != nil {
-			if err := d.Set("pcc", *lan.Properties.Pcc); err != nil {
-				return err
-			}
+	}
+	if lan.Properties.Pcc != nil {
+		if err := d.Set("pcc", *lan.Properties.Pcc); err != nil {
+			return err
 		}
-		if lan.Properties.Public != nil {
-			if err := d.Set("public", *lan.Properties.Public); err != nil {
-				return err
-			}
+	}
+	if lan.Properties.Public != nil {
+		if err := d.Set("public", *lan.Properties.Public); err != nil {
+			return err
 		}
+	}
 
-		if lan.Properties.Ipv4CidrBlock != nil {
-			if err := d.Set("ipv4_cidr_block", *lan.Properties.Ipv4CidrBlock); err != nil {
-				return utils.GenerateSetError("lan", "ipv4_cidr_block", err)
-			}
+	if lan.Properties.Ipv4CidrBlock.IsSet() && lan.Properties.Ipv4CidrBlock.Get() != nil {
+		if err := d.Set("ipv4_cidr_block", *lan.Properties.Ipv4CidrBlock.Get()); err != nil {
+			return utils.GenerateSetError("lan", "ipv4_cidr_block", err)
 		}
+	}
 
-		if lan.Properties.Ipv6CidrBlock != nil {
-			if err := d.Set("ipv6_cidr_block", *lan.Properties.Ipv6CidrBlock); err != nil {
-				return utils.GenerateSetError("lan", "ipv6_cidr_block", err)
-			}
+	if lan.Properties.Ipv6CidrBlock.IsSet() && lan.Properties.Ipv6CidrBlock.Get() != nil {
+		if err := d.Set("ipv6_cidr_block", *lan.Properties.Ipv6CidrBlock.Get()); err != nil {
+			return utils.GenerateSetError("lan", "ipv6_cidr_block", err)
 		}
 	}
 
@@ -417,7 +419,7 @@ func lanNicsDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema
 		return false, fmt.Errorf("an error occurred while searching for nics in datacenter with id: %s for lan with: id %s %w", dcId, d.Id(), err)
 	}
 
-	if nics.Items != nil && len(*nics.Items) > 0 {
+	if len(nics.Items) > 0 {
 		log.Printf("[INFO] there are still nics under LAN  with id %s", d.Id())
 		return false, nil
 	}

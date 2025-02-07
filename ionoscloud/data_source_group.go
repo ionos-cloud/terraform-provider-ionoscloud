@@ -7,7 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -139,7 +140,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if idOk {
 		/* search by ID */
-		var apiResponse *ionoscloud.APIResponse
+		var apiResponse *shared.APIResponse
 		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
@@ -160,8 +161,8 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		var results []ionoscloud.Group
 
 		if groups.Items != nil {
-			for _, g := range *groups.Items {
-				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == name.(string) {
+			for _, g := range groups.Items {
+				if g.Properties.Name != nil && *g.Properties.Name == name.(string) {
 					/* group found */
 					group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
 					logApiRequestTime(apiResponse)

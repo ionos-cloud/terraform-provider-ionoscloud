@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -209,7 +210,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 	}
 	var nodePool ionoscloud.KubernetesNodePool
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 	if idOk {
 		/* search by ID */
 		nodePool, apiResponse, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), id.(string)).Execute()
@@ -230,8 +231,8 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		if nodePools.Items != nil {
 			var results []ionoscloud.KubernetesNodePool
 
-			for _, c := range *nodePools.Items {
-				if c.Properties != nil && c.Properties.Name != nil && *c.Properties.Name == name.(string) {
+			for _, c := range nodePools.Items {
+				if c.Properties.Name == name.(string) {
 					tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
@@ -263,8 +264,8 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
-	if nodePool.Properties.AvailableUpgradeVersions != nil && len(*nodePool.Properties.AvailableUpgradeVersions) > 0 {
-		if err := d.Set("available_upgrade_versions", *nodePool.Properties.AvailableUpgradeVersions); err != nil {
+	if len(nodePool.Properties.AvailableUpgradeVersions) > 0 {
+		if err := d.Set("available_upgrade_versions", nodePool.Properties.AvailableUpgradeVersions); err != nil {
 			return diag.FromErr(err)
 		}
 	}

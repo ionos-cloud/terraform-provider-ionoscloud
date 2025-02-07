@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
@@ -210,9 +210,9 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	volume := ionoscloud.Volume{
-		Properties: volumeProperties,
+		Properties: *volumeProperties,
 	}
-	image, imageAlias, err = getImage(ctx, client, d, *volume.Properties)
+	image, imageAlias, err = getImage(ctx, client, d, volume.Properties)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -349,7 +349,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	if d.HasChange("size") {
 		_, newValue := d.GetChange("size")
 		newValueFloat32 := float32(newValue.(int))
-		properties.Size = &newValueFloat32
+		properties.Size = newValueFloat32
 	}
 	if d.HasChange("bus") {
 		_, newValue := d.GetChange("bus")
@@ -478,11 +478,9 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 		}
 	}
 
-	if volume.Properties.Size != nil {
-		err := d.Set("size", *volume.Properties.Size)
-		if err != nil {
-			return fmt.Errorf("error while setting size property for volume %s: %w", d.Id(), err)
-		}
+	err := d.Set("size", volume.Properties.Size)
+	if err != nil {
+		return fmt.Errorf("error while setting size property for volume %s: %w", d.Id(), err)
 	}
 
 	if volume.Properties.Bus != nil {
@@ -615,7 +613,7 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 	if !strings.EqualFold(serverType, constant.CubeType) {
 		volumeSize = float32(d.Get(path + "size").(int))
 		if volumeSize > 0 {
-			volume.Size = &volumeSize
+			volume.Size = volumeSize
 		}
 	}
 
@@ -659,7 +657,7 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 			publicKeys = append(publicKeys, publicKey)
 		}
 		if len(publicKeys) > 0 {
-			volume.SshKeys = &publicKeys
+			volume.SshKeys = publicKeys
 		}
 	}
 	return &volume, nil
@@ -688,7 +686,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcId, err)
 			}
 
-			img, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
+			img, err := resolveVolumeImageName(ctx, client, imageName, dc.Properties.Location)
 			if err != nil {
 				return image, imageAlias, err
 			}
@@ -704,14 +702,14 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				} else {
 					log.Printf("[INFO] looking for an image alias for %s\n", imageName)
 
-					imageAlias = getImageAlias(ctx, client, imageName, *dc.Properties.Location)
+					imageAlias = getImageAlias(ctx, client, imageName, dc.Properties.Location)
 					if imageAlias == "" {
 						return image, imageAlias, fmt.Errorf("Could not find an image/imagealias/snapshot that matches %s ", imageName)
 					}
 				}
 			}
 
-			if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) && isSnapshot == false &&
+			if volume.ImagePassword == nil && len(volume.SshKeys) == 0 && isSnapshot == false &&
 				(img == nil || (img.Properties.Public != nil && *img.Properties.Public)) {
 				return image, imageAlias, fmt.Errorf("volume, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
 			}
@@ -737,7 +735,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 
 			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 
-				if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
+				if volume.ImagePassword == nil && len(volume.SshKeys) == 0 {
 					return image, imageAlias, fmt.Errorf("public image, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
 				}
 
@@ -747,7 +745,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 					return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcId, err)
 				}
 
-				img, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
+				img, err := resolveVolumeImageName(ctx, client, imageName, dc.Properties.Location)
 
 				if err != nil {
 					return image, imageAlias, err
@@ -779,7 +777,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 
 				} else {
 					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
-						if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
+						if volume.ImagePassword == nil && (volume.SshKeys == nil || len(volume.SshKeys) == 0) {
 							return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided for imageName %s ", imageName)
 						}
 						image = imageName
@@ -795,7 +793,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 		return image, imageAlias, fmt.Errorf("either 'image_name', 'licence_type', or 'image_alias' must be set")
 	}
 
-	if isSnapshot == true && (volume.ImagePassword != nil || volume.SshKeys != nil && len(*volume.SshKeys) > 0) {
+	if isSnapshot == true && (volume.ImagePassword != nil || volume.SshKeys != nil && len(volume.SshKeys) > 0) {
 		return image, imageAlias, fmt.Errorf("passwords/SSH keys are not supported for snapshots")
 	}
 
@@ -815,10 +813,10 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 		log.Print(fmt.Errorf("error while fetching the list of snapshots %w", err))
 	}
 
-	if len(*snapshots.Items) > 0 {
-		for _, i := range *snapshots.Items {
+	if len(snapshots.Items) > 0 {
+		for _, i := range snapshots.Items {
 			imgName := ""
-			if i.Properties != nil && i.Properties.Name != nil && *i.Properties.Name != "" {
+			if i.Properties.Name != nil && *i.Properties.Name != "" {
 				imgName = *i.Properties.Name
 			}
 
@@ -847,8 +845,8 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 		log.Print(fmt.Errorf("error while fetching the list of locations %w", err))
 	}
 
-	if len(*locations.Properties.ImageAliases) > 0 {
-		for _, i := range *locations.Properties.ImageAliases {
+	if len(locations.Properties.ImageAliases) > 0 {
+		for _, i := range locations.Properties.ImageAliases {
 			alias := ""
 			if i != "" {
 				alias = i
@@ -876,13 +874,13 @@ func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, i
 		return nil, err
 	}
 
-	if len(*images.Items) > 0 {
+	if len(images.Items) > 0 {
 		var partialMatch *ionoscloud.Image
-		for _, image := range *images.Items {
+		for _, image := range images.Items {
 			// go for loop variable semantics workaround: https://github.com/golang/go/discussions/56010
 			imageEntry := image
 
-			if imageEntry.Properties != nil && imageEntry.Properties.Name != nil && *imageEntry.Properties.Name != "" {
+			if imageEntry.Properties.Name != nil && *imageEntry.Properties.Name != "" {
 
 				if *imageEntry.Properties.ImageType != HDDImage || *imageEntry.Properties.Location != location {
 					continue

@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
 )
 
 func dataSourceLocation() *schema.Resource {
@@ -87,8 +87,8 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 	var results []ionoscloud.Location
 
 	if nameOk && locations.Items != nil {
-		for _, loc := range *locations.Items {
-			if loc.Properties != nil && loc.Properties.Name != nil && *loc.Properties.Name == name.(string) {
+		for _, loc := range locations.Items {
+			if loc.Properties.Name != nil && *loc.Properties.Name == name.(string) {
 				results = append(results, loc)
 			}
 		}
@@ -117,45 +117,43 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 		d.SetId(*location.Id)
 	}
 
-	if location.Properties != nil {
-		var cpuArchitectures []interface{}
-		for _, cpuArchitecture := range *location.Properties.CpuArchitecture {
-			architectureEntry := make(map[string]interface{})
+	var cpuArchitectures []interface{}
+	for _, cpuArchitecture := range location.Properties.CpuArchitecture {
+		architectureEntry := make(map[string]interface{})
 
-			if cpuArchitecture.CpuFamily != nil {
-				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
-			}
-
-			if cpuArchitecture.MaxCores != nil {
-				architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
-			}
-
-			if cpuArchitecture.MaxRam != nil {
-				architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
-			}
-
-			if cpuArchitecture.Vendor != nil {
-				architectureEntry["vendor"] = *cpuArchitecture.Vendor
-			}
-
-			cpuArchitectures = append(cpuArchitectures, architectureEntry)
+		if cpuArchitecture.CpuFamily != nil {
+			architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
 		}
 
-		if len(cpuArchitectures) > 0 {
-			if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-				return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %w", d.Id(), err)
-			}
+		if cpuArchitecture.MaxCores != nil {
+			architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
 		}
 
-		var imageAliases []string
-		for _, imageAlias := range *location.Properties.ImageAliases {
-			imageAliases = append(imageAliases, imageAlias)
+		if cpuArchitecture.MaxRam != nil {
+			architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
 		}
 
-		if len(imageAliases) > 0 {
-			if err := d.Set("image_aliases", imageAliases); err != nil {
-				return fmt.Errorf("error while setting image_aliases property for datacenter %s: %w", d.Id(), err)
-			}
+		if cpuArchitecture.Vendor != nil {
+			architectureEntry["vendor"] = *cpuArchitecture.Vendor
+		}
+
+		cpuArchitectures = append(cpuArchitectures, architectureEntry)
+	}
+
+	if len(cpuArchitectures) > 0 {
+		if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+			return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %w", d.Id(), err)
+		}
+	}
+
+	var imageAliases []string
+	for _, imageAlias := range location.Properties.ImageAliases {
+		imageAliases = append(imageAliases, imageAlias)
+	}
+
+	if len(imageAliases) > 0 {
+		if err := d.Set("image_aliases", imageAliases); err != nil {
+			return fmt.Errorf("error while setting image_aliases property for datacenter %s: %w", d.Id(), err)
 		}
 	}
 

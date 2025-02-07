@@ -7,7 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/cloud/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
@@ -116,7 +117,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	var snapshot ionoscloud.Snapshot
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -138,8 +139,8 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		if snapshots.Items != nil {
-			for _, snp := range *snapshots.Items {
-				if snp.Properties != nil && snp.Properties.Name != nil && *snp.Properties.Name == name.(string) {
+			for _, snp := range snapshots.Items {
+				if snp.Properties.Name != nil && *snp.Properties.Name == name.(string) {
 					results = append(results, snp)
 				}
 			}
@@ -159,7 +160,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		if sizeOk {
 			var sizeResults []ionoscloud.Snapshot
 			for _, snp := range results {
-				if snp.Properties != nil && snp.Properties.Size != nil && *snp.Properties.Size == float32(size.(int)) {
+				if snp.Properties.Size != nil && *snp.Properties.Size == float32(size.(int)) {
 					sizeResults = append(sizeResults, snp)
 				}
 

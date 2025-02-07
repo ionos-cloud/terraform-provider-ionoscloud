@@ -102,7 +102,7 @@ func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 		if lan.Properties.IpFailover == nil {
 			return fmt.Errorf("LAN with ID: %s has no IP failover groups", lanId)
 		}
-		for _, failoverGroup := range *lan.Properties.IpFailover {
+		for _, failoverGroup := range lan.Properties.IpFailover {
 			if *failoverGroup.Ip == ip {
 				return nil
 			}
@@ -137,7 +137,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		} else {
 			found := false
 			if lan.Properties.IpFailover != nil {
-				for _, failoverGroup := range *lan.Properties.IpFailover {
+				for _, failoverGroup := range lan.Properties.IpFailover {
 					if *failoverGroup.Ip == ip {
 						found = true
 						break
