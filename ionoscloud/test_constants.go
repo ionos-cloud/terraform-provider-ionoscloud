@@ -83,7 +83,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   type = "ENTERPRISE"
   volume {
@@ -92,7 +91,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -137,7 +135,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -147,7 +144,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -189,7 +185,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -199,7 +194,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -241,7 +235,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   ssh_key_path = ["` + sshKey + `"]
@@ -252,7 +245,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -308,7 +300,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -318,7 +309,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
 }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -352,7 +342,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -362,7 +351,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
 }
 ` + ServerImagePassword
@@ -388,7 +376,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -398,7 +385,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
 }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -443,7 +429,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -453,7 +438,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -510,7 +494,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -520,7 +503,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -577,7 +559,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   vm_state = "` + constant.VMStateStop + `"
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -587,7 +568,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -637,7 +617,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   vm_state = "` + constant.VMStateStart + `"
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -647,7 +626,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -725,7 +703,6 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   name = "` + constant.ServerTestResource + `"
   hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "AUTO"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   
@@ -781,7 +758,6 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "AUTO"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
 
@@ -850,7 +826,6 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "AUTO"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   
@@ -920,7 +895,6 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   vm_state = "` + constant.CubeVMStateStop + `"
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "AUTO"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   
@@ -982,7 +956,6 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   name = "` + constant.ServerTestResource + `"
   vm_state = "` + constant.VMStateStart + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "AUTO"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   
@@ -1045,7 +1018,6 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   vm_state = "` + constant.CubeVMStateStop + `"
   name = "` + constant.UpdatedResources + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "AUTO"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   
@@ -1095,7 +1067,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name = "ubuntu:latest"
   image_password = random_password.image_password.result
   type = "ENTERPRISE"
@@ -1105,7 +1076,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
 }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -1145,7 +1115,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -1155,7 +1124,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
 }`
 
@@ -1180,7 +1148,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   type = "ENTERPRISE"
@@ -1190,7 +1157,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
 }`
 )
@@ -1218,7 +1184,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   volume {
     name = "system"
@@ -1226,7 +1191,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -1269,7 +1233,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
   volume {
@@ -1278,7 +1241,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -1320,7 +1282,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   volume {
@@ -1329,7 +1290,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -1371,7 +1331,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   ssh_key_path = ["` + sshKey + `"]
@@ -1381,7 +1340,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -1424,7 +1382,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -1433,7 +1390,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
 }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -1477,7 +1433,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
@@ -1486,7 +1441,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
 }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -1529,7 +1483,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name = "ubuntu:latest"
   image_password = random_password.image_password.result
   volume {
@@ -1538,7 +1491,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
 }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -1578,7 +1530,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   volume {
@@ -1587,7 +1538,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
 }`
 	testAccCheckServerVCPUNoNicUpdate = `
@@ -1611,7 +1561,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   volume {
@@ -1620,7 +1569,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
 }`
 )
@@ -1647,7 +1595,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   vm_state = "` + constant.VMStateStop + `"
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   volume {
@@ -1656,7 +1603,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
 }`
 
@@ -1681,7 +1627,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   vm_state = "` + constant.VMStateStart + `"
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
   volume {
@@ -1690,7 +1635,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
   }
 }`
 const testAccCheckCDNDistributionConfigOnlyRequired = `resource ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionTestResource + ` {
