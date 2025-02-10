@@ -38,8 +38,6 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 						constant.ServerResource+"."+serverTestResource2, "ram"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.availability_zone",
 						constant.ServerResource+"."+serverTestResource2, "availability_zone"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.cpu_family",
-						constant.ServerResource+"."+serverTestResource2, "cpu_family"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.type",
 						constant.ServerResource+"."+serverTestResource2, "type"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.type",
@@ -152,7 +150,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -184,7 +181,6 @@ resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
   cores = ` + noCoresTest + `
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
@@ -252,7 +248,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "` + cpuFamilyTest + `" 
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -292,7 +287,6 @@ resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
   cores = ` + noCoresTest + `
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "` + cpuFamilyTest + `" 
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
@@ -363,7 +357,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "` + cpuFamilyTest + `"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -389,7 +382,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + "2" +
   cores = ` + noCoresTest + `
   ram = 2048
   availability_zone = "ZONE_1"
-  cpu_family = "` + cpuFamilyTest + `"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
