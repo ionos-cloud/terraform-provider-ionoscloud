@@ -1,13 +1,19 @@
-## 6.7.1
-### Fixes
+## 6.7.1 (Upcoming)
+### Features
+- Add `IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT` to set a custom API URL for the Object Storage Management Product. Setting `endpoint` or `IONOS_API_URL` does not have any effect
 - Remove cpu_family and availability_zone from the tests
-
-## 6.6.10
+## 6.7.0
 ### Fixes
 - Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nill values.
+- Fix [#748](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/748) by removing unecessary error check
+- S3 key creation fails with 422 if s3 key not found. Add function to check for that specific response from the API.
 ### Features
 - Add new read-only attribute: `ipv4_cidr_block` to `ionoscloud_lan` resource and data source.
-- Make `volume` optional for `ionoscloud_server` resource
+- Make `volume` optional for `ionoscloud_server` resource.
+- `name` attribute for `ionoscloud_auto_certificate` resource is now required.
+- Add `allow_replace` field to `ionoscloud_pg_cluster` resource.
+### Docs
+- Changed dead link in MongoDB cluster docs.
 
 ## 6.6.9
 ### Features
