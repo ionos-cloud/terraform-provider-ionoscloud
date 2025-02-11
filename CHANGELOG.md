@@ -16,7 +16,7 @@
 - Add new read-only attribute: `ipv4_cidr_block` to `ionoscloud_lan` resource and data source.
 - Make `volume` optional for `ionoscloud_server` resource.
 - `name` attribute for `ionoscloud_auto_certificate` resource is now required.
-- Add `allow_replace` field to `ionoscloud_pg_cluster` resource. 
+- Add `allow_replace` field to `ionoscloud_pg_cluster` resource.
 ### Docs
 - Changed dead link in MongoDB cluster docs.
 

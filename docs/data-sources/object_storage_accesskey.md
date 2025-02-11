@@ -35,3 +35,5 @@ The following attributes are returned by the datasource:
 - `accesskey` - Access key metadata is a string of 92 characters.
 - `canonical_user_id` - The canonical user ID which is valid for user-owned buckets.
 - `contract_user_id` - The contract user ID which is valid for contract-owned buckets
+
+> **⚠ WARNING:** `IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT` can be used to set a custom API URL for the Object Storage Management SDK. Setting `endpoint` or `IONOS_API_URL` does not have any effect

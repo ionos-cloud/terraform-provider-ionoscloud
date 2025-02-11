@@ -33,6 +33,8 @@ The following arguments are supported:
   - `create` - (Optional)[string] Time to wait for the bucket to be created. Default is `10m`.
   - `delete` - (Optional)[string] Time to wait for the bucket to be deleted. Default is `10m`.
 
+> **⚠ WARNING:** `IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT` can be used to set a custom API URL for the Object Storage Management SDK. Setting `endpoint` or `IONOS_API_URL` does not have any effect.
+
 ## Import
 
 An object storage accesskey resource can be imported using its `resource id`, e.g.
