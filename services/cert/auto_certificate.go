@@ -99,12 +99,10 @@ func GetAutoCertificateDataCreate(d *schema.ResourceData) *certmanager.AutoCerti
 	autoCertificate.Properties.Provider = &providerID
 	commonName := d.Get("common_name").(string)
 	autoCertificate.Properties.CommonName = &commonName
+	name := d.Get("name").(string)
+	autoCertificate.Properties.Name = &name
 	keyAlgorithm := d.Get("key_algorithm").(string)
 	autoCertificate.Properties.KeyAlgorithm = &keyAlgorithm
-	if name, nameOk := d.GetOk("name"); nameOk {
-		name := name.(string)
-		autoCertificate.Properties.Name = &name
-	}
 	if subjectAlternativeNames, subjectAlternativeNamesOk := d.GetOk("subject_alternative_names"); subjectAlternativeNamesOk {
 		subjectAlternativeNames := subjectAlternativeNames.([]interface{})
 		var subjectAlternativeNamesList []string

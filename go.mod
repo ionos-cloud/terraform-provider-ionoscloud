@@ -21,7 +21,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
-	github.com/ionos-cloud/sdk-go-cert-manager v1.1.0
+	github.com/ionos-cloud/sdk-go-cert-manager v1.3.0
 	github.com/ionos-cloud/sdk-go-container-registry v1.2.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.1.1
 	github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1

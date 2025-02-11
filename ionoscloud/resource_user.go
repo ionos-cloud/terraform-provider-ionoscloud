@@ -179,10 +179,6 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 		return diag.FromErr(err)
 	}
 
-	if err = d.Set("group_ids", getUserGroups(&user)); err != nil {
-		return diag.FromErr(err)
-	}
-
 	return nil
 }
 

@@ -41,7 +41,7 @@ resource "ionoscloud_auto_certificate" "example" {
 * `location` - (Required)[string] The location of the auto-certificate.
 * `common_name` - (Required)[string] The common name (DNS) of the certificate to issue. The common name needs to be part of a zone in IONOS Cloud DNS.
 * `key_algorithm` - (Required)[string] The key algorithm used to generate the certificate.
-* `name` - (Optional)[string] A certificate name used for management purposes.
+* `name` - (Required)[string] A certificate name used for management purposes.
 * `subject_alternative_names` - (Optional)[list][string] Optional additional names to be added to the issued certificate. The additional names needs to be part of a zone in IONOS Cloud DNS.
 * `last_issued_certificate_id` - (Computed)[string] The ID of the last certificate that was issued.
 
