@@ -1,4 +1,6 @@
 ## 6.7.1 (Upcoming)
+### Fixes
+- Remove cpu_family and availability_zone from the tests
 ### Features
 - Add `IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT` to set a custom API URL for the Object Storage Management Product. Setting `endpoint` or `IONOS_API_URL` does not have any effect
 
@@ -11,7 +13,7 @@
 - Add new read-only attribute: `ipv4_cidr_block` to `ionoscloud_lan` resource and data source.
 - Make `volume` optional for `ionoscloud_server` resource.
 - `name` attribute for `ionoscloud_auto_certificate` resource is now required.
-- Add `allow_replace` field to `ionoscloud_pg_cluster` resource. 
+- Add `allow_replace` field to `ionoscloud_pg_cluster` resource.
 ### Docs
 - Changed dead link in MongoDB cluster docs.
 
