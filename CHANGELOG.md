@@ -1,4 +1,8 @@
-## 6.7.1 (Upcoming)
+## 6.7.2 -- upcoming release
+### Fixes
+- Fix provider crashing when `canonical_user_id` is `nil` in the response for object storage access key
+
+## 6.7.1
 ### Fixes
 - Remove cpu_family and availability_zone from the tests
 ### Features
