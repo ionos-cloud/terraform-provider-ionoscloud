@@ -3,6 +3,9 @@
 - Remove cpu_family and availability_zone from the tests
 ### Features
 - Add `IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT` to set a custom API URL for the Object Storage Management Product. Setting `endpoint` or `IONOS_API_URL` does not have any effect
+- Add the following privileges to the ionoscloud_group Terraform resource and data source to enhance group access control: accessAndManageLogging, accessAndManageCdn, accessAndManageVpn, 
+  accessAndManageApiGateway, accessAndManageKaas, accessAndManageNetworkFileStorage, accessAndManageAiModelHub, accessAndManageIamResources, createNetworkSecurityGroups, manageDns
+  manageRegistry, manageDataPlatform.
 
 ## 6.7.0
 ### Fixes
