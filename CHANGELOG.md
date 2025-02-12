@@ -1,4 +1,4 @@
-## 6.7.2 -- upcoming release
+## 6.7.2
 ### Fixes
 - Fix provider crashing when `canonical_user_id` is `nil` in the response for object storage access key
 
