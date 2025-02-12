@@ -137,20 +137,13 @@ func (c *Client) DeleteAccessKey(ctx context.Context, accessKeyID string, timeou
 // SetAccessKeyPropertiesToPlan sets accesskey properties from an SDK object to a AccesskeyResourceModel
 func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey objectstoragemanagement.AccessKeyRead) {
 	if accessKey.Properties != nil {
-		// Here we check the properties because based on the request not all are set and we do not want to overwrite with nil
-		if accessKey.Properties.AccessKey != nil {
-			plan.AccessKey = basetypes.NewStringPointerValue(accessKey.Properties.AccessKey)
-		}
-		if accessKey.Properties.CanonicalUserId != nil {
-			plan.CanonicalUserID = basetypes.NewStringPointerValue(accessKey.Properties.CanonicalUserId)
-		}
-		if accessKey.Properties.ContractUserId != nil {
-			plan.ContractUserID = basetypes.NewStringPointerValue(accessKey.Properties.ContractUserId)
-		}
-		if accessKey.Properties.Description != nil {
-			plan.Description = basetypes.NewStringPointerValue(accessKey.Properties.Description)
-		}
-		if accessKey.Properties.SecretKey != nil {
+		plan.AccessKey = basetypes.NewStringPointerValue(accessKey.Properties.AccessKey)
+		plan.CanonicalUserID = basetypes.NewStringPointerValue(accessKey.Properties.CanonicalUserId)
+		plan.ContractUserID = basetypes.NewStringPointerValue(accessKey.Properties.ContractUserId)
+		plan.Description = basetypes.NewStringPointerValue(accessKey.Properties.Description)
+		// The secret key is present only in the POST response, on subsequent GET calls we don't
+		// want to overwrite the secret key with nil, if the value is set just leave it as it is.
+		if plan.SecretKey.IsUnknown() {
 			plan.SecretKey = basetypes.NewStringPointerValue(accessKey.Properties.SecretKey)
 		}
 	}
