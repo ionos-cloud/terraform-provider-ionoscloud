@@ -1,8 +1,7 @@
 package services
 
 import (
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-
+	"github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
@@ -24,10 +23,10 @@ import (
 
 type SdkBundle struct {
 	CloudApiClient                *ionoscloud.APIClient
-	InMemoryDBClient              *inmemorydb.InMemoryDBClient
+	InMemoryDBClient              *inmemorydb.Client
 	PsqlClient                    *dbaas.PsqlClient
 	MongoClient                   *dbaas.MongoClient
-	MariaDBClient                 *mariadb.MariaDBClient
+	MariaDBClient                 *mariadb.Client
 	NFSClient                     *nfs.Client
 	CertManagerClient             *cert.Client
 	ContainerClient               *containerregistry.Client
@@ -41,5 +40,5 @@ type SdkBundle struct {
 	VPNClient                     *vpn.Client
 	S3Client                      *objectstorage.Client
 	ObjectStorageManagementClient *objectstoragemanagement.Client
-	MonitoringClient              *monitoring.MonitoringClient
+	MonitoringClient              *monitoring.Client
 }

@@ -2,6 +2,9 @@ package cert
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"net/http"
 	"os"
 	"runtime"
@@ -15,11 +18,13 @@ import (
 )
 
 type Client struct {
-	sdkClient *certmanager.APIClient
+	sdkClient    *certmanager.APIClient
+	loadedConfig *shared.LoadedConfig
 }
 
-func NewClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
-	certConfig := certmanager.NewConfiguration(username, password, token, url)
+func NewClient(clientOptions bundle.ClientOptions, loadedConfig *shared.LoadedConfig) *Client {
+	loadedconfig.SetClientOptionsFromLoadedConfig(&clientOptions, loadedConfig, shared.Cert)
+	certConfig := certmanager.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	if os.Getenv(constant.IonosDebug) != "" {
 		certConfig.Debug = true
@@ -27,12 +32,13 @@ func NewClient(username, password, token, url, version, terraformVersion string,
 	certConfig.MaxRetries = constant.MaxRetries
 	certConfig.MaxWaitTime = constant.MaxWaitTime
 
-	certConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+	certConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
 	certConfig.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-cert-manager/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, certmanager.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		"terraform-provider/_ionos-cloud-sdk-go-cert-manager/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		certmanager.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	return &Client{
-		sdkClient: certmanager.NewAPIClient(certConfig),
+		sdkClient:    certmanager.NewAPIClient(certConfig),
+		loadedConfig: loadedConfig,
 	}
 }

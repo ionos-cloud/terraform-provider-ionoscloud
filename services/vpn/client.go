@@ -2,6 +2,7 @@ package vpn
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"net/http"
 	"os"
 	"runtime"
@@ -16,7 +17,16 @@ import (
 
 // Client is a wrapper for the VPN SDK client
 type Client struct {
-	sdkClient vpn.APIClient
+	sdkClient    vpn.APIClient
+	loadedConfig *shared.LoadedConfig
+}
+
+func (c *Client) GetConfig() *shared.Configuration {
+	return c.sdkClient.GetConfig()
+}
+
+func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
+	return c.loadedConfig
 }
 
 var (
@@ -39,20 +49,23 @@ var (
 )
 
 // NewClient returns a new ionoscloud logging client
-func NewClient(username, password, token, url, terraformVersion string, insecure bool) *Client {
-	newConfig := shared.NewConfiguration(username, password, token, url)
+func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
+	newConfig := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	newConfig.MaxRetries = constant.MaxRetries
 	newConfig.MaxWaitTime = constant.MaxWaitTime
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
 	newConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-vpn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch",
-		vpn.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+		vpn.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 
-	return &Client{sdkClient: *vpn.NewAPIClient(newConfig)}
+	return &Client{sdkClient: *vpn.NewAPIClient(newConfig),
+		loadedConfig: sharedLoadedConfig,
+	}
 }
 
-func (c *Client) changeConfigURL(location string) {
+// ChangeConfigURL changes the URL of the client
+func (c *Client) ChangeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLVPN) != "" {
 		config.Servers = shared.ServerConfigurations{

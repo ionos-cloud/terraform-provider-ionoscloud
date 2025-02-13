@@ -67,6 +67,9 @@ github.com/cloudflare/circl/math/mlsbset
 github.com/cloudflare/circl/sign
 github.com/cloudflare/circl/sign/ed25519
 github.com/cloudflare/circl/sign/ed448
+# github.com/davecgh/go-spew v1.1.1
+## explicit
+github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.17.0
 ## explicit; go 1.17
 github.com/fatih/color
@@ -326,7 +329,7 @@ github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
-# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
+# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1 => /home/cguran/surse/oursdks/sdk-go-bundle/shared
 ## explicit; go 1.20
 github.com/ionos-cloud/sdk-go-bundle/shared
 # github.com/ionos-cloud/sdk-go-cert-manager v1.3.0
@@ -403,8 +406,15 @@ github.com/mitchellh/reflectwalk
 # github.com/oklog/run v1.1.0
 ## explicit; go 1.13
 github.com/oklog/run
+# github.com/pmezard/go-difflib v1.0.0
+## explicit
+github.com/pmezard/go-difflib/difflib
 # github.com/rogpeppe/go-internal v1.12.0
 ## explicit; go 1.20
+# github.com/stretchr/testify v1.10.0
+## explicit; go 1.17
+github.com/stretchr/testify/assert
+github.com/stretchr/testify/assert/yaml
 # github.com/vmihailenco/msgpack v4.0.4+incompatible
 ## explicit
 github.com/vmihailenco/msgpack
@@ -618,3 +628,4 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
+# github.com/ionos-cloud/sdk-go-bundle/shared => /home/cguran/surse/oursdks/sdk-go-bundle/shared

@@ -2,33 +2,35 @@ package autoscaling
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"net/http"
 	"os"
 	"runtime"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 type Client struct {
 	sdkClient *autoscaling.APIClient
 }
 
-func NewClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
-	newAutoscalingConfig := autoscaling.NewConfiguration(username, password, token, url)
+func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
+	loadedconfig.SetClientOptionsFromLoadedConfig(&clientOptions, sharedLoadedConfig, shared.Autoscaling)
+	newConfig := autoscaling.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	newConfig.UserAgent = fmt.Sprintf(
+		"terraform-provider/_ionos-cloud-sdk-go-vm-autoscaling/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		autoscaling.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	if os.Getenv(constant.IonosDebug) != "" {
-		newAutoscalingConfig.Debug = true
+		newConfig.Debug = true
 	}
-	newAutoscalingConfig.MaxRetries = constant.MaxRetries
-	newAutoscalingConfig.MaxWaitTime = constant.MaxWaitTime
-	newAutoscalingConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
-	newAutoscalingConfig.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-vm-autoscaling/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, autoscaling.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
-
-	return &Client{sdkClient: autoscaling.NewAPIClient(newAutoscalingConfig)}
+	newConfig.MaxRetries = constant.MaxRetries
+	newConfig.WaitTime = constant.MaxWaitTime
+	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	client := &Client{sdkClient: autoscaling.NewAPIClient(newConfig)}
+	return client
 }

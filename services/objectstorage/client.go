@@ -3,6 +3,7 @@ package objectstorage
 import (
 	"bytes"
 	"errors"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"io"
 	"net/http"
@@ -17,7 +18,12 @@ import (
 
 // Client is a wrapper around the Object Storage client.
 type Client struct {
-	client *objstorage.APIClient
+	client       *objstorage.APIClient
+	loadedConfig *shared.LoadedConfig
+}
+
+func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
+	return c.loadedConfig
 }
 
 const ionosAPIURLObjectStorage = "IONOS_API_URL_OBJECT_STORAGE"
@@ -28,10 +34,18 @@ func (c *Client) GetBaseClient() *objstorage.APIClient {
 }
 
 // NewClient creates a new Object Storage client with the given credentials and region.
-func NewClient(id, secret, region, endpoint string, insecure bool) *Client {
+func NewClient(id, secret, region, endpoint string, insecure bool, config *shared.LoadedConfig) *Client {
 	// Set custom endpoint if provided
 	if envValue := os.Getenv(ionosAPIURLObjectStorage); envValue != "" {
 		endpoint = envValue
+	}
+	if endpoint == "" {
+		if endpointOverrides := config.GetProductLocationOverrides(shared.ObjectStorage, region); endpointOverrides != nil {
+			endpoint = endpointOverrides.Name
+			if !insecure {
+				insecure = endpointOverrides.SkipTLSVerify
+			}
+		}
 	}
 	cfg := objstorage.NewConfiguration(endpoint)
 	signer := awsv4.NewSigner(credentials.NewStaticCredentials(id, secret, ""))
@@ -56,6 +70,7 @@ func NewClient(id, secret, region, endpoint string, insecure bool) *Client {
 	}
 	cfg.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	return &Client{
-		client: objstorage.NewAPIClient(cfg),
+		client:       objstorage.NewAPIClient(cfg),
+		loadedConfig: config,
 	}
 }

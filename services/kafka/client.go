@@ -2,6 +2,9 @@ package kafka
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"net/http"
 	"os"
 	"runtime"
@@ -16,7 +19,15 @@ import (
 
 // Client is a wrapper for the Kafka API Client
 type Client struct {
-	sdkClient kafka.APIClient
+	sdkClient    kafka.APIClient
+	loadedConfig *shared.LoadedConfig
+}
+
+func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
+	return c.loadedConfig
+}
+func (c *Client) GetConfig() *kafka.Configuration {
+	return c.sdkClient.GetConfig()
 }
 
 var (
@@ -37,24 +48,26 @@ var (
 	}
 )
 
-// NewClient returns a new Kafka API client
-func NewClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
-	config := kafka.NewConfiguration(username, password, token, url)
+func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
+	loadedconfig.SetClientOptionsFromLoadedConfig(&clientOptions, sharedLoadedConfig, shared.Kafka)
+
+	config := kafka.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	if os.Getenv(constant.IonosDebug) != "" {
 		config.Debug = true
 	}
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
-	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
 	config.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-kafka/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, kafka.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+		"terraform-provider/_ionos-cloud-sdk-go-kafka/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		kafka.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
-
-	return &Client{sdkClient: *kafka.NewAPIClient(config)}
+	client := Client{sdkClient: *kafka.NewAPIClient(config),
+		loadedConfig: sharedLoadedConfig,
+	}
+	return &client
 }
-
 func (c *Client) changeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	config.Servers = kafka.ServerConfigurations{

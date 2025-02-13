@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"log"
 	"net/url"
 	"time"
@@ -12,8 +13,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
 // GetStateChangeConf gets the default configuration for tracking a request progress
@@ -89,7 +88,7 @@ func WaitForStateChange(ctx context.Context, meta interface{}, d *schema.Resourc
 	}
 
 	if loc, err = apiResponse.Location(); err != nil {
-		return fmt.Errorf("error retrieving 'Location' header: %w", err)
+		return fmt.Errorf("error retrieving 'changeConfigURL' header: %w", err)
 	}
 	_, errState := GetStateChangeConf(meta, d, loc.String(), opTimeout).WaitForStateContext(ctx)
 	return errState

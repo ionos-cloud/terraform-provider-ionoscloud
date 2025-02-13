@@ -3,6 +3,7 @@ package kafka
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 	"strings"
 
@@ -13,12 +14,40 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// todo replace when sdk-bundle is used
+func overrideClientFromLoadedConfig(client *Client, productName, location string) {
+	loadedConfig := client.GetLoadedConfig()
+	if loadedConfig == nil {
+		return
+	}
+	config := client.GetConfig()
+	if config == nil {
+		return
+	}
+	endpoint := loadedConfig.GetProductLocationOverrides(productName, location)
+	if endpoint == nil {
+		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
+		return
+	}
+	config.Servers = kafka.ServerConfigurations{
+		{
+			URL:         endpoint.Name,
+			Description: shared.EndpointOverridden + location,
+		},
+	}
+	if endpoint.SkipTLSVerify {
+		config.HTTPClient.Transport = utils.CreateTransport(true)
+	}
+}
+
 // CreateCluster creates a new Kafka Cluster
 func (c *Client) CreateCluster(ctx context.Context, d *schema.ResourceData) (
 	kafka.ClusterRead, utils.ApiResponseInfo,
 	error,
 ) {
-	c.changeConfigURL(d.Get("location").(string))
+	location := d.Get("location").(string)
+	overrideClientFromLoadedConfig(c, shared.Kafka, location)
+	c.changeConfigURL(location)
 
 	request := setClusterPostRequest(d)
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).ClusterCreate(*request).Execute()
@@ -42,6 +71,7 @@ func (c *Client) IsClusterAvailable(ctx context.Context, d *schema.ResourceData)
 
 // DeleteCluster deletes a Kafka Cluster
 func (c *Client) DeleteCluster(ctx context.Context, id string, location string) (utils.ApiResponseInfo, error) {
+	overrideClientFromLoadedConfig(c, shared.Kafka, location)
 	c.changeConfigURL(location)
 
 	apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, id).Execute()
@@ -51,7 +81,9 @@ func (c *Client) DeleteCluster(ctx context.Context, id string, location string) 
 
 // IsClusterDeleted checks if the Kafka Cluster has been deleted
 func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	c.changeConfigURL(d.Get("location").(string))
+	location := d.Get("location").(string)
+	overrideClientFromLoadedConfig(c, shared.Kafka, location)
+	c.changeConfigURL(location)
 
 	_, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
@@ -62,6 +94,7 @@ func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (
 func (c *Client) GetClusterByID(ctx context.Context, id string, location string) (
 	kafka.ClusterRead, utils.ApiResponseInfo, error,
 ) {
+	overrideClientFromLoadedConfig(c, shared.Kafka, location)
 	c.changeConfigURL(location)
 
 	Cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, id).Execute()
@@ -71,6 +104,7 @@ func (c *Client) GetClusterByID(ctx context.Context, id string, location string)
 
 // ListClusters retrieves a list of Kafka Clusters
 func (c *Client) ListClusters(ctx context.Context, location string) (kafka.ClusterReadList, *kafka.APIResponse, error) {
+	overrideClientFromLoadedConfig(c, shared.Kafka, location)
 	c.changeConfigURL(location)
 
 	Clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGet(ctx).Execute()

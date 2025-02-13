@@ -168,9 +168,8 @@ func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceDa
 	clusterId := d.Id()
 
 	_, err := client.UpdateCluster(ctx, clusterId, d)
-
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a Dataplatform Cluster: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a Dataplatform Cluster: %w", err))
 		return diags
 	}
 

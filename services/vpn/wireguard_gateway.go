@@ -3,6 +3,7 @@ package vpn
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"log"
 	"strings"
 
@@ -19,7 +20,7 @@ var wireguardResourceName = "vpnSdk wireguard gateway"
 
 // CreateWireguardGateway creates a new wireguard gateway
 func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceData) (vpnSdk.WireguardGatewayRead, utils.ApiResponseInfo, error) {
-	c.changeConfigURL(d.Get("location").(string))
+	loadedconfig.OverrideClientEndpoint(c, shared.VPN, d.Get("location").(string))
 	request := setWireguardGWPostRequest(d)
 	wireguard, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysPost(ctx).WireguardGatewayCreate(*request).Execute()
 	apiResponse.LogInfo()
@@ -29,7 +30,8 @@ func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceD
 // IsWireguardAvailable checks if the wireguard is available
 func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	location := d.Get("location").(string)
-	c.changeConfigURL(location)
+	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
+
 	wireguardID := d.Id()
 	wireguard, _, err := c.GetWireguardGatewayByID(ctx, wireguardID, location)
 	if err != nil {
@@ -41,7 +43,7 @@ func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceDat
 
 // UpdateWireguardGateway updates a wireguard gateway
 func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schema.ResourceData) (vpnSdk.WireguardGatewayRead, utils.ApiResponseInfo, error) {
-	c.changeConfigURL(d.Get("location").(string))
+	loadedconfig.OverrideClientEndpoint(c, shared.VPN, d.Get("location").(string))
 	request := setWireguardGatewayPutRequest(d)
 	wireguardResponse, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysPut(ctx, id).WireguardGatewayEnsure(*request).Execute()
 	apiResponse.LogInfo()
@@ -50,7 +52,7 @@ func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schem
 
 // DeleteWireguardGateway deletes a wireguard gateway
 func (c *Client) DeleteWireguardGateway(ctx context.Context, id, location string) (utils.ApiResponseInfo, error) {
-	c.changeConfigURL(location)
+	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
 	apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -58,7 +60,7 @@ func (c *Client) DeleteWireguardGateway(ctx context.Context, id, location string
 
 // IsWireguardGatewayDeleted checks if the wireguard gateway is deleted
 func (c *Client) IsWireguardGatewayDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	c.changeConfigURL(d.Get("location").(string))
+	loadedconfig.OverrideClientEndpoint(c, shared.VPN, d.Get("location").(string))
 	_, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
@@ -66,7 +68,7 @@ func (c *Client) IsWireguardGatewayDeleted(ctx context.Context, d *schema.Resour
 
 // GetWireguardGatewayByID returns a wireguard by its ID
 func (c *Client) GetWireguardGatewayByID(ctx context.Context, id, location string) (vpnSdk.WireguardGatewayRead, *shared.APIResponse, error) {
-	c.changeConfigURL(location)
+	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
 	wireguard, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return wireguard, apiResponse, err
@@ -74,7 +76,7 @@ func (c *Client) GetWireguardGatewayByID(ctx context.Context, id, location strin
 
 // ListWireguardGateways returns a list of all wireguards
 func (c *Client) ListWireguardGateways(ctx context.Context, location string) (vpnSdk.WireguardGatewayReadList, *shared.APIResponse, error) {
-	c.changeConfigURL(location)
+	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
 	wireguards, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return wireguards, apiResponse, err
@@ -83,7 +85,7 @@ func (c *Client) ListWireguardGateways(ctx context.Context, location string) (vp
 // IsWireguardGatewayReady checks if the wireguard gateway is ready
 func (c *Client) IsWireguardGatewayReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	location := d.Get("location").(string)
-	c.changeConfigURL(location)
+	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
 	cluster, _, err := c.GetWireguardGatewayByID(ctx, d.Id(), location)
 	if err != nil {
 		return false, err
