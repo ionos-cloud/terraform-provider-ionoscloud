@@ -21,19 +21,21 @@ type Client struct {
 }
 
 // NewCDNClient returns a new CDN client
-func NewCDNClient(options bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	loadedconfig.SetGlobalClientOptionsFromFileConfig(&options, fileConfig, fileconfiguration.CDN)
+func NewCDNClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.CDN)
 
-	newConfigCDN := shared.NewConfiguration(options.Credentials.Username, options.Credentials.Password, options.Credentials.Token, options.Endpoint)
-	newConfigCDN.MaxRetries = constant.MaxRetries
-	newConfigCDN.MaxWaitTime = constant.MaxWaitTime
+	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config.MaxRetries = constant.MaxRetries
+	config.MaxWaitTime = constant.MaxWaitTime
 
-	newConfigCDN.HTTPClient = &http.Client{Transport: utils.CreateTransport(options.SkipTLSVerify)}
-	newConfigCDN.UserAgent = fmt.Sprintf(
+	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+
+	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/_ionos-cloud-sdk-go-cdn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		cdn.Version, options.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
+		cdn.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	return &Client{
-		SdkClient: cdn.NewAPIClient(newConfigCDN),
+		SdkClient: cdn.NewAPIClient(config),
 	}
 }

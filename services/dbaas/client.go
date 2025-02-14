@@ -28,38 +28,40 @@ type PsqlClient struct {
 
 func NewMongoClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *MongoClient {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Cloud)
-	newConfig := mongo.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
+	config := mongo.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)
-	newConfig.UserAgent = fmt.Sprintf(
+	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		mongo.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	if os.Getenv(constant.IonosDebug) != "" {
-		newConfig.Debug = true
+		config.Debug = true
 	}
-	newConfig.MaxRetries = constant.MaxRetries
-	newConfig.WaitTime = constant.MaxWaitTime
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	config.MaxRetries = constant.MaxRetries
+	config.WaitTime = constant.MaxWaitTime
+	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
 	client := MongoClient{
-		sdkClient: mongo.NewAPIClient(newConfig),
+		sdkClient: mongo.NewAPIClient(config),
 	}
 	return &client
 }
 
 func NewPSQLClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *PsqlClient {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Cloud)
-	newConfig := psql.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
-	newConfig.UserAgent = fmt.Sprintf(
+	config := psql.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		clientOptions.Version, psql.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 	if os.Getenv(constant.IonosDebug) != "" {
-		newConfig.Debug = true
+		config.Debug = true
 	}
-	newConfig.MaxRetries = constant.MaxRetries
-	newConfig.WaitTime = constant.MaxWaitTime
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	config.MaxRetries = constant.MaxRetries
+	config.WaitTime = constant.MaxWaitTime
+	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
 	client := PsqlClient{
-		sdkClient: psql.NewAPIClient(newConfig),
+		sdkClient: psql.NewAPIClient(config),
 	}
 	return &client
 }

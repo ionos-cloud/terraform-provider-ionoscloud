@@ -16,17 +16,18 @@ import (
 
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *ionoscloud.APIClient {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Cloud)
-	newConfig := ionoscloud.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
-	newConfig.UserAgent = fmt.Sprintf(
+	config := ionoscloud.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		ionoscloud.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 	if os.Getenv(constant.IonosDebug) != "" {
-		newConfig.Debug = true
+		config.Debug = true
 	}
-	newConfig.MaxRetries = constant.MaxRetries
-	newConfig.WaitTime = constant.MaxWaitTime
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	client := ionoscloud.NewAPIClient(newConfig)
+	config.MaxRetries = constant.MaxRetries
+	config.WaitTime = constant.MaxWaitTime
+	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	client := ionoscloud.NewAPIClient(config)
 	return client
 }

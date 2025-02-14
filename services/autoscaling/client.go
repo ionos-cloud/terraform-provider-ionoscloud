@@ -20,17 +20,18 @@ type Client struct {
 
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Autoscaling)
-	newConfig := autoscaling.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
-	newConfig.UserAgent = fmt.Sprintf(
+	config := autoscaling.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/_ionos-cloud-sdk-go-vm-autoscaling/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		autoscaling.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	if os.Getenv(constant.IonosDebug) != "" {
-		newConfig.Debug = true
+		config.Debug = true
 	}
-	newConfig.MaxRetries = constant.MaxRetries
-	newConfig.WaitTime = constant.MaxWaitTime
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	client := &Client{sdkClient: autoscaling.NewAPIClient(newConfig)}
+	config.MaxRetries = constant.MaxRetries
+	config.WaitTime = constant.MaxWaitTime
+	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	client := &Client{sdkClient: autoscaling.NewAPIClient(config)}
 	return client
 }

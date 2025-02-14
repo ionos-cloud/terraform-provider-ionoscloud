@@ -23,17 +23,18 @@ type Client struct {
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.DNS)
 
-	newConfigDNS := dns.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config := dns.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	if os.Getenv(constant.IonosDebug) != "" {
-		newConfigDNS.Debug = true
+		config.Debug = true
 	}
-	newConfigDNS.MaxRetries = constant.MaxRetries
-	newConfigDNS.MaxWaitTime = constant.MaxWaitTime
-	newConfigDNS.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	newConfigDNS.UserAgent = fmt.Sprintf(
+	config.MaxRetries = constant.MaxRetries
+	config.MaxWaitTime = constant.MaxWaitTime
+	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/ionos-cloud-sdk-go-dns/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		dns.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
-	return &Client{sdkClient: *dns.NewAPIClient(newConfigDNS)}
+	return &Client{sdkClient: *dns.NewAPIClient(config)}
 }

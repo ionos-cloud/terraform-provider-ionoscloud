@@ -21,17 +21,18 @@ type Client struct {
 
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Dataplatform)
-	newConfigDataplatform := dataplatform.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config := dataplatform.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	if os.Getenv(constant.IonosDebug) != "" {
-		newConfigDataplatform.Debug = true
+		config.Debug = true
 	}
-	newConfigDataplatform.MaxRetries = constant.MaxRetries
-	newConfigDataplatform.MaxWaitTime = constant.MaxWaitTime
+	config.MaxRetries = constant.MaxRetries
+	config.MaxWaitTime = constant.MaxWaitTime
+	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
 
-	newConfigDataplatform.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	newConfigDataplatform.UserAgent = fmt.Sprintf(
+	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/_ionos-cloud-sdk-go-dataplatform/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		dataplatform.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	return &Client{sdkClient: *dataplatform.NewAPIClient(newConfigDataplatform)}
+	return &Client{sdkClient: *dataplatform.NewAPIClient(config)}
 }

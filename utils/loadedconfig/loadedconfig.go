@@ -90,4 +90,5 @@ func SetGlobalClientOptionsFromFileConfig(clientOptions *bundle.ClientOptions, f
 	if clientOptions.Endpoint == "" {
 		clientOptions.Endpoint = productOverrides.Endpoints[0].Name
 	}
+	clientOptions.Certificate = productOverrides.Endpoints[0].CertificateAuthData
 }
