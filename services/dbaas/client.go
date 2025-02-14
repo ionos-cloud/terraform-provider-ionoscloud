@@ -2,7 +2,7 @@ package dbaas
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"net/http"
@@ -26,8 +26,8 @@ type PsqlClient struct {
 	sdkClient *psql.APIClient
 }
 
-func NewMongoClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *MongoClient {
-	loadedconfig.SetClientOptionsFromFileConfig(&clientOptions, sharedLoadedConfig, shared.Cloud)
+func NewMongoClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *MongoClient {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Cloud)
 	newConfig := mongo.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)
 	newConfig.UserAgent = fmt.Sprintf(
@@ -46,8 +46,8 @@ func NewMongoClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shar
 	return &client
 }
 
-func NewPSQLClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *PsqlClient {
-	loadedconfig.SetClientOptionsFromFileConfig(&clientOptions, sharedLoadedConfig, shared.Cloud)
+func NewPSQLClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *PsqlClient {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Cloud)
 	newConfig := psql.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	newConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",

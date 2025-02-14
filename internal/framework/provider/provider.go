@@ -2,7 +2,7 @@ package provider
 
 import (
 	"context"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
@@ -195,14 +195,14 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		insecureBool = clientOpts.Insecure.ValueBool()
 	}
 
-	loadedConfig, readFileErr := shared.ReadConfigFromFile()
+	fileConfig, readFileErr := fileconfiguration.ReadConfigFromFile()
 	if token == "" && (username == "" || password == "") {
 		if readFileErr != nil {
 			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
 			resp.Diagnostics.AddError("wile opening file", readFileErr.Error())
 			return
 		}
-		profile := loadedConfig.GetCurrentProfile()
+		profile := fileConfig.GetCurrentProfile()
 		if profile == nil {
 			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
 			return
@@ -217,11 +217,11 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		resp.Diagnostics.AddWarning("insecure mode enabled", "This is not recommended for production environments.")
 	}
 	clientOptions := bundle.ClientOptions{
-		ClientOverrideOptions: shared.ClientOverrideOptions{
+		ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
 			Endpoint:      cleanedEndpoint,
 			SkipTLSVerify: insecureBool,
 			//Certificate:   "",
-			Credentials: shared.Credentials{
+			Credentials: fileconfiguration.Credentials{
 				Username: username,
 				Password: password,
 				Token:    token,
@@ -232,25 +232,25 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	}
 
 	client := &services.SdkBundle{
-		CDNClient:                     cdnService.NewCDNClient(clientOptions, loadedConfig),
-		AutoscalingClient:             autoscalingService.NewClient(clientOptions, loadedConfig),
-		CertManagerClient:             cert.NewClient(clientOptions, loadedConfig),
-		CloudApiClient:                cloudapi.NewClient(clientOptions, loadedConfig),
-		ContainerClient:               crService.NewClient(clientOptions, loadedConfig),
-		DataplatformClient:            dataplatformService.NewClient(clientOptions, loadedConfig),
-		DNSClient:                     dnsService.NewClient(clientOptions, loadedConfig),
-		LoggingClient:                 loggingService.NewClient(clientOptions, loadedConfig),
-		MariaDBClient:                 mariadb.NewClient(clientOptions, loadedConfig),
-		MongoClient:                   dbaasService.NewMongoClient(clientOptions, loadedConfig),
-		NFSClient:                     nfsService.NewClient(clientOptions, loadedConfig),
-		PsqlClient:                    dbaasService.NewPSQLClient(clientOptions, loadedConfig),
-		KafkaClient:                   kafkaService.NewClient(clientOptions, loadedConfig),
-		APIGatewayClient:              apiGatewayService.NewClient(clientOptions, loadedConfig),
-		VPNClient:                     vpn.NewClient(clientOptions, loadedConfig),
-		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, loadedConfig),
-		S3Client:                      objectStorageService.NewClient(accessKey, secretKey, region, endpoint, insecureBool, loadedConfig),
-		ObjectStorageManagementClient: objectStorageManagementService.NewClient(clientOptions, loadedConfig),
-		MonitoringClient:              monitoringService.NewClient(clientOptions, loadedConfig),
+		CDNClient:                     cdnService.NewCDNClient(clientOptions, fileConfig),
+		AutoscalingClient:             autoscalingService.NewClient(clientOptions, fileConfig),
+		CertManagerClient:             cert.NewClient(clientOptions, fileConfig),
+		CloudApiClient:                cloudapi.NewClient(clientOptions, fileConfig),
+		ContainerClient:               crService.NewClient(clientOptions, fileConfig),
+		DataplatformClient:            dataplatformService.NewClient(clientOptions, fileConfig),
+		DNSClient:                     dnsService.NewClient(clientOptions, fileConfig),
+		LoggingClient:                 loggingService.NewClient(clientOptions, fileConfig),
+		MariaDBClient:                 mariadb.NewClient(clientOptions, fileConfig),
+		MongoClient:                   dbaasService.NewMongoClient(clientOptions, fileConfig),
+		NFSClient:                     nfsService.NewClient(clientOptions, fileConfig),
+		PsqlClient:                    dbaasService.NewPSQLClient(clientOptions, fileConfig),
+		KafkaClient:                   kafkaService.NewClient(clientOptions, fileConfig),
+		APIGatewayClient:              apiGatewayService.NewClient(clientOptions, fileConfig),
+		VPNClient:                     vpn.NewClient(clientOptions, fileConfig),
+		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, fileConfig),
+		S3Client:                      objectStorageService.NewClient(accessKey, secretKey, region, endpoint, insecureBool, fileConfig),
+		ObjectStorageManagementClient: objectStorageManagementService.NewClient(clientOptions, fileConfig),
+		MonitoringClient:              monitoringService.NewClient(clientOptions, fileConfig),
 	}
 	resp.DataSourceData = client
 	resp.ResourceData = client

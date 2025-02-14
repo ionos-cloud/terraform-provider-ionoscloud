@@ -1,8 +1,9 @@
-package shared
+package fileconfiguration
 
 import (
 	"crypto/x509"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"gopkg.in/yaml.v3"
 	"net/http"
 	"os"
@@ -88,8 +89,8 @@ type Profile struct {
 	Credentials Credentials
 }
 
-// LoadedConfig is a struct that represents the loaded configuration
-type LoadedConfig struct {
+// FileConfig is a struct that represents the loaded configuration
+type FileConfig struct {
 	// Version of the configuration
 	Version float64 `yaml:"version"`
 	// CurrentProfile active profile for configuration
@@ -100,8 +101,8 @@ type LoadedConfig struct {
 	Environments []Environment `yaml:"environments"`
 }
 
-// DefaultLoadedConfigFileName returns the default file path for the loaded configuration
-func DefaultLoadedConfigFileName() (string, error) {
+// DefaultConfigFileName returns the default file path for the loaded configuration
+func DefaultConfigFileName() (string, error) {
 	home := ""
 	var err error
 	if home, err = os.UserHomeDir(); err != nil {
@@ -116,10 +117,10 @@ func DefaultLoadedConfigFileName() (string, error) {
 
 func findConfigFile() string {
 	filePath := ""
-	filePath = os.Getenv(IonosFilePathEnvVar)
+	filePath = os.Getenv(shared.IonosFilePathEnvVar)
 	var err error
 	if filePath == "" {
-		if filePath, err = DefaultLoadedConfigFileName(); err != nil {
+		if filePath, err = DefaultConfigFileName(); err != nil {
 			return ""
 		}
 	}
@@ -147,12 +148,12 @@ func ReadProfilesFromFile() *Profiles {
 
 // ReadConfigFromFile reads yaml file, loads it into a struct and returns it
 // IONOS_CONFIG_FILE environment variable can be set to point to the file to be loaded
-func ReadConfigFromFile() (*LoadedConfig, error) {
+func ReadConfigFromFile() (*FileConfig, error) {
 	filePath := ""
-	filePath = os.Getenv(IonosFilePathEnvVar)
+	filePath = os.Getenv(shared.IonosFilePathEnvVar)
 	var err error
 	if filePath == "" {
-		if filePath, err = DefaultLoadedConfigFileName(); err != nil {
+		if filePath, err = DefaultConfigFileName(); err != nil {
 			return nil, err
 		}
 	}
@@ -166,12 +167,12 @@ func ReadConfigFromFile() (*LoadedConfig, error) {
 	if len(content) == 0 {
 		return nil, fmt.Errorf("file %s is empty", filePath)
 	}
-	loadedConfig := &LoadedConfig{}
+	loadedConfig := &FileConfig{}
 	if err = yaml.Unmarshal(content, loadedConfig); err != nil {
 		return nil, fmt.Errorf("while unmarshalling file %s, %w", filePath, err)
 	}
-	if os.Getenv(IonosCurrentProfileEnvVar) != "" {
-		loadedConfig.CurrentProfile = os.Getenv(IonosCurrentProfileEnvVar)
+	if os.Getenv(shared.IonosCurrentProfileEnvVar) != "" {
+		loadedConfig.CurrentProfile = os.Getenv(shared.IonosCurrentProfileEnvVar)
 	}
 	return loadedConfig, nil
 }
@@ -179,34 +180,34 @@ func ReadConfigFromFile() (*LoadedConfig, error) {
 // GetCurrentProfile returns the current profile from the loaded configuration
 // if the current profile is not set, it returns nil
 // if the current profile is set and found in the loaded configuration, it returns the profile
-func (loadedConfig *LoadedConfig) GetCurrentProfile() *Profile {
-	currentProfile := os.Getenv(IonosCurrentProfileEnvVar)
+func (fileConfig *FileConfig) GetCurrentProfile() *Profile {
+	currentProfile := os.Getenv(shared.IonosCurrentProfileEnvVar)
 	if currentProfile == "" {
-		currentProfile = loadedConfig.CurrentProfile
+		currentProfile = fileConfig.CurrentProfile
 	}
 	if currentProfile == "" {
-		SdkLogger.Printf("[WARN] no current profile set")
+		shared.SdkLogger.Printf("[WARN] no current profile set")
 		return nil
 	}
-	for _, profile := range loadedConfig.Profiles {
+	for _, profile := range fileConfig.Profiles {
 		if profile.Name == currentProfile {
-			if SdkLogLevel.Satisfies(Debug) {
-				SdkLogger.Printf("[DEBUG] using profile %s", profile.Name)
+			if shared.SdkLogLevel.Satisfies(shared.Debug) {
+				shared.SdkLogger.Printf("[DEBUG] using profile %s", profile.Name)
 			}
 			return &profile
 		}
 	}
-	if SdkLogLevel.Satisfies(Debug) {
-		SdkLogger.Printf("[WARN] no profile found for %s", currentProfile)
+	if shared.SdkLogLevel.Satisfies(shared.Debug) {
+		shared.SdkLogger.Printf("[WARN] no profile found for %s", currentProfile)
 	}
 	return nil
 }
 
-func (loadedConfig *LoadedConfig) GetEnvForCurrentProfile() string {
-	if loadedConfig == nil {
+func (fileConfig *FileConfig) GetEnvForCurrentProfile() string {
+	if fileConfig == nil {
 		return ""
 	}
-	if currentProfile := loadedConfig.GetCurrentProfile(); currentProfile != nil {
+	if currentProfile := fileConfig.GetCurrentProfile(); currentProfile != nil {
 		return currentProfile.Environment
 	}
 	return ""
@@ -214,18 +215,18 @@ func (loadedConfig *LoadedConfig) GetEnvForCurrentProfile() string {
 
 // GetProductOverrides returns the overrides for a specific product for the current environment
 // if no current environment is found, the first environment is used for the product that matches productName is returned
-func (loadedConfig *LoadedConfig) GetProductOverrides(productName string) *Product {
-	if loadedConfig == nil {
+func (fileConfig *FileConfig) GetProductOverrides(productName string) *Product {
+	if fileConfig == nil {
 		return nil
 	}
 	if productName == "" {
-		if SdkLogLevel.Satisfies(Debug) {
-			SdkLogger.Printf("[DEBUG] cannot get overrides as product name is empty")
+		if shared.SdkLogLevel.Satisfies(shared.Debug) {
+			shared.SdkLogger.Printf("[DEBUG] cannot get overrides as product name is empty")
 		}
 		return nil
 	}
-	currentEnv := loadedConfig.GetEnvForCurrentProfile()
-	for _, environment := range loadedConfig.Environments {
+	currentEnv := fileConfig.GetEnvForCurrentProfile()
+	for _, environment := range fileConfig.Environments {
 		if currentEnv != "" && environment.Name != currentEnv {
 			continue
 		}
@@ -235,17 +236,17 @@ func (loadedConfig *LoadedConfig) GetProductOverrides(productName string) *Produ
 			}
 		}
 	}
-	if SdkLogLevel.Satisfies(Debug) {
-		SdkLogger.Printf("[DEBUG] no environment overrides found for product %s", productName)
+	if shared.SdkLogLevel.Satisfies(shared.Debug) {
+		shared.SdkLogger.Printf("[DEBUG] no environment overrides found for product %s", productName)
 	}
 	return nil
 }
 
-func (loadedConfig *LoadedConfig) GetProductLocationOverrides(productName, location string) *Endpoint {
-	if loadedConfig == nil {
+func (fileConfig *FileConfig) GetProductLocationOverrides(productName, location string) *Endpoint {
+	if fileConfig == nil {
 		return nil
 	}
-	product := loadedConfig.GetProductOverrides(productName)
+	product := fileConfig.GetProductOverrides(productName)
 	if product == nil || len(product.Endpoints) == 0 {
 		return nil
 	}
@@ -254,8 +255,8 @@ func (loadedConfig *LoadedConfig) GetProductLocationOverrides(productName, locat
 			return &endpoint
 		}
 	}
-	if SdkLogLevel.Satisfies(Debug) {
-		SdkLogger.Printf("[DEBUG] no endpoint overrides found for product %s and location %s", productName, location)
+	if shared.SdkLogLevel.Satisfies(shared.Debug) {
+		shared.SdkLogger.Printf("[DEBUG] no endpoint overrides found for product %s and location %s", productName, location)
 	}
 	return nil
 }
@@ -266,8 +267,8 @@ func AddCertsToClient(httpClient *http.Client, authorityData string) {
 	if rootCAs == nil {
 		rootCAs = x509.NewCertPool()
 	}
-	if ok := rootCAs.AppendCertsFromPEM([]byte(authorityData)); !ok && SdkLogLevel.Satisfies(Debug) {
-		SdkLogger.Printf("No certs appended, using system certs only")
+	if ok := rootCAs.AppendCertsFromPEM([]byte(authorityData)); !ok && shared.SdkLogLevel.Satisfies(shared.Debug) {
+		shared.SdkLogger.Printf("No certs appended, using system certs only")
 	}
 	httpClient.Transport.(*http.Transport).TLSClientConfig.RootCAs = rootCAs
 	//httpClient.Transport = &http.Transport{

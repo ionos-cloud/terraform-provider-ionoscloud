@@ -2,7 +2,7 @@ package kafka
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"net/http"
@@ -19,12 +19,12 @@ import (
 
 // Client is a wrapper for the Kafka API Client
 type Client struct {
-	sdkClient    kafka.APIClient
-	loadedConfig *shared.LoadedConfig
+	sdkClient  kafka.APIClient
+	fileConfig *fileconfiguration.FileConfig
 }
 
-func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
-	return c.loadedConfig
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
 }
 func (c *Client) GetConfig() *kafka.Configuration {
 	return c.sdkClient.GetConfig()
@@ -48,8 +48,8 @@ var (
 	}
 )
 
-func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
-	loadedconfig.SetClientOptionsFromFileConfig(&clientOptions, sharedLoadedConfig, shared.Kafka)
+func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Kafka)
 
 	config := kafka.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
@@ -64,7 +64,7 @@ func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.Lo
 		kafka.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 	client := Client{sdkClient: *kafka.NewAPIClient(config),
-		loadedConfig: sharedLoadedConfig,
+		fileConfig: fileConfig,
 	}
 	return &client
 }

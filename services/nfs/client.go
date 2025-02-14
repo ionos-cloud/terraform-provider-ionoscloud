@@ -3,6 +3,7 @@ package nfs
 import (
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"log"
 	"net/http"
@@ -20,19 +21,19 @@ import (
 
 // Client is a wrapper for the NFS SDK
 type Client struct {
-	sdkClient    sdk.APIClient
-	loadedConfig *shared.LoadedConfig
+	sdkClient  sdk.APIClient
+	fileConfig *fileconfiguration.FileConfig
 }
 
-func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
-	return c.loadedConfig
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
 }
 
 func (c *Client) GetConfig() *sdk.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
-func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
+func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	config := sdk.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	if os.Getenv(constant.IonosDebug) != "" {
@@ -45,7 +46,7 @@ func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.Lo
 		sdk.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint:staticcheck
 
 	return &Client{sdkClient: *sdk.NewAPIClient(config),
-		loadedConfig: sharedLoadedConfig}
+		fileConfig: fileConfig}
 }
 
 // changeConfigURL sets the location of the NFS client which modifies the Host URL:
@@ -77,7 +78,7 @@ func (c *Client) changeConfigURL(location string) {
 	return
 }
 
-// overrideClientEndpoint todo - after move to bundle, replace with generic function from loadedconfig
+// overrideClientEndpoint todo - after move to bundle, replace with generic function from fileConfig
 func (c *Client) overrideClientEndpoint(productName, location string) {
 	//whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer c.changeConfigURL(location)
@@ -85,15 +86,15 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 	//	fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionoscloud.IonosApiUrlEnvVar))
 	//	return
 	//}
-	loadedConfig := c.GetLoadedConfig()
-	if loadedConfig == nil {
+	fileConfig := c.GetFileConfig()
+	if fileConfig == nil {
 		return
 	}
 	config := c.GetConfig()
 	if config == nil {
 		return
 	}
-	endpoint := loadedConfig.GetProductLocationOverrides(productName, location)
+	endpoint := fileConfig.GetProductLocationOverrides(productName, location)
 	if endpoint == nil {
 		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
 		return

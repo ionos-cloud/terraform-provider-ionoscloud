@@ -2,6 +2,7 @@ package loadedconfig
 
 import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"log"
@@ -20,12 +21,12 @@ var TerraformToSDK = map[string]string{
 	"us/mci": "us-mci",
 }
 
-type LoadedConfigProvider interface {
-	GetLoadedConfig() *shared.LoadedConfig
+type fileConfigProvider interface {
+	GetFileConfig() *fileconfiguration.FileConfig
 }
 
 type ConfigProviderWithLoader interface {
-	LoadedConfigProvider
+	fileConfigProvider
 	shared.ConfigProvider
 }
 type ConfigProviderWithLoaderAndLocation interface {
@@ -44,15 +45,15 @@ func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, prod
 	//	fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionoscloud.IonosApiUrlEnvVar))
 	//	return
 	//}
-	loadedConfig := client.GetLoadedConfig()
-	if loadedConfig == nil {
+	fileConfig := client.GetFileConfig()
+	if fileConfig == nil {
 		return
 	}
 	config := client.GetConfig()
 	if config == nil {
 		return
 	}
-	endpoint := loadedConfig.GetProductLocationOverrides(productName, location)
+	endpoint := fileConfig.GetProductLocationOverrides(productName, location)
 	if endpoint == nil {
 		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
 		return
@@ -68,13 +69,13 @@ func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, prod
 	}
 }
 
-// SetClientOptionsFromFileConfig sets the client options from the loaded config if not already set
+// SetGlobalClientOptionsFromFileConfig sets the client options from the loaded config if not already set
 // mutates clientOptions. Should only be used if the product does not have location overrides
-func SetClientOptionsFromFileConfig(clientOptions *bundle.ClientOptions, loadedConfig *shared.LoadedConfig, productName string) {
-	if clientOptions == nil || loadedConfig == nil {
+func SetGlobalClientOptionsFromFileConfig(clientOptions *bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig, productName string) {
+	if clientOptions == nil || fileConfig == nil {
 		return
 	}
-	productOverrides := loadedConfig.GetProductOverrides(productName)
+	productOverrides := fileConfig.GetProductOverrides(productName)
 	if productOverrides == nil || len(productOverrides.Endpoints) == 0 {
 		log.Printf("[WARN] Missing config for %s", productName)
 		return

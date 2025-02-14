@@ -2,6 +2,7 @@ package vpn
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"net/http"
 	"os"
@@ -17,16 +18,16 @@ import (
 
 // Client is a wrapper for the VPN SDK client
 type Client struct {
-	sdkClient    vpn.APIClient
-	loadedConfig *shared.LoadedConfig
+	sdkClient  vpn.APIClient
+	fileConfig *fileconfiguration.FileConfig
 }
 
 func (c *Client) GetConfig() *shared.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
-func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
-	return c.loadedConfig
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
 }
 
 var (
@@ -49,7 +50,7 @@ var (
 )
 
 // NewClient returns a new ionoscloud logging client
-func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
+func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	newConfig := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	newConfig.MaxRetries = constant.MaxRetries
 	newConfig.MaxWaitTime = constant.MaxWaitTime
@@ -60,7 +61,7 @@ func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.Lo
 	)
 
 	return &Client{sdkClient: *vpn.NewAPIClient(newConfig),
-		loadedConfig: sharedLoadedConfig,
+		fileConfig: fileConfig,
 	}
 }
 

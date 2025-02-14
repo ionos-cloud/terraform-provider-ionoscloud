@@ -2,6 +2,7 @@ package logging
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"net/http"
 	"os"
@@ -18,11 +19,11 @@ import (
 
 // Client is a wrapper for the Logging SDK client
 type Client struct {
-	sdkClient    logging.APIClient
-	loadedConfig *shared.LoadedConfig
+	sdkClient  logging.APIClient
+	fileConfig *fileconfiguration.FileConfig
 }
 
-func NewClient(clientOptions bundle.ClientOptions, loadedConfig *shared.LoadedConfig) *Client {
+func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
@@ -31,7 +32,7 @@ func NewClient(clientOptions bundle.ClientOptions, loadedConfig *shared.LoadedCo
 		"terraform-provider/%s_ionos-cloud-sdk-go-logging/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch",
 		logging.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
-	client := &Client{sdkClient: *logging.NewAPIClient(config), loadedConfig: loadedConfig}
+	client := &Client{sdkClient: *logging.NewAPIClient(config), fileConfig: fileConfig}
 
 	// override client with location from config file if it exists and no global endpoint it set
 	// todo cguran - remove after testing
@@ -52,8 +53,8 @@ func (c *Client) GetConfig() *shared.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
-func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
-	return c.loadedConfig
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
 }
 
 func (c *Client) ChangeConfigURL(location string) {

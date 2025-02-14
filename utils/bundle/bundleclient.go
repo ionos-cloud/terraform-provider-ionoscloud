@@ -1,11 +1,11 @@
 package bundle
 
 import (
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 )
 
 type ClientOptions struct {
-	shared.ClientOverrideOptions
+	fileconfiguration.ClientOverrideOptions
 	Version          string
 	TerraformVersion string
 }

@@ -3,6 +3,7 @@ package inmemorydb
 import (
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"net/http"
 	"os"
@@ -18,20 +19,20 @@ import (
 
 //nolint:golint
 type Client struct {
-	sdkClient    *inMemoryDB.APIClient
-	loadedConfig *shared.LoadedConfig
+	sdkClient  *inMemoryDB.APIClient
+	fileConfig *fileconfiguration.FileConfig
 }
 
-func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
-	return c.loadedConfig
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
 }
 
 func (c *Client) GetConfig() *inMemoryDB.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
-// NewClient creates a new in-memory db client. LoadedConfig is used to set/override the client options if it exists
-func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
+// NewClient creates a new in-memory db client. fileConfig is used to set/override the client options if it exists
+func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	newConfigDbaas := inMemoryDB.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)
 
@@ -47,8 +48,8 @@ func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.Lo
 		inMemoryDB.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	return &Client{
-		sdkClient:    inMemoryDB.NewAPIClient(newConfigDbaas),
-		loadedConfig: sharedLoadedConfig,
+		sdkClient:  inMemoryDB.NewAPIClient(newConfigDbaas),
+		fileConfig: fileConfig,
 	}
 }
 

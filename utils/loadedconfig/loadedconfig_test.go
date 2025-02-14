@@ -2,15 +2,16 @@ package loadedconfig
 
 import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"net/http"
 	"testing"
 )
 
-func TestSetClientOptionsFromLoadedConfig(t *testing.T) {
+func TestSetClientOptionsFromfileConfig(t *testing.T) {
 	type args struct {
 		clientOptions *bundle.ClientOptions
-		loadedConfig  *shared.LoadedConfig
+		fileConfig    *fileconfiguration.FileConfig
 		productName   string
 	}
 	tests := []struct {
@@ -22,16 +23,16 @@ func TestSetClientOptionsFromLoadedConfig(t *testing.T) {
 			name: "NilClientOptions",
 			args: args{
 				clientOptions: nil,
-				loadedConfig:  &shared.LoadedConfig{},
+				fileConfig:    &fileconfiguration.FileConfig{},
 				productName:   "testProduct",
 			},
 			wantClientOptions: nil,
 		},
 		{
-			name: "NilLoadedConfig",
+			name: "NilfileConfig",
 			args: args{
 				clientOptions: &bundle.ClientOptions{},
-				loadedConfig:  nil,
+				fileConfig:    nil,
 				productName:   "testProduct",
 			},
 			wantClientOptions: &bundle.ClientOptions{},
@@ -40,14 +41,14 @@ func TestSetClientOptionsFromLoadedConfig(t *testing.T) {
 			name: "MultipleEndpoints",
 			args: args{
 				clientOptions: &bundle.ClientOptions{},
-				loadedConfig: &shared.LoadedConfig{
-					Environments: []shared.Environment{
+				fileConfig: &fileconfiguration.FileConfig{
+					Environments: []fileconfiguration.Environment{
 						{
 							Name: "testEnv",
-							Products: []shared.Product{
+							Products: []fileconfiguration.Product{
 								{
 									Name: "testProduct",
-									Endpoints: []shared.Endpoint{
+									Endpoints: []fileconfiguration.Endpoint{
 										{Name: "endpoint1", SkipTLSVerify: true},
 										{Name: "endpoint2", SkipTLSVerify: false},
 									},
@@ -59,7 +60,7 @@ func TestSetClientOptionsFromLoadedConfig(t *testing.T) {
 				productName: "testProduct",
 			},
 			wantClientOptions: &bundle.ClientOptions{
-				ClientOverrideOptions: shared.ClientOverrideOptions{
+				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
 				},
@@ -69,14 +70,14 @@ func TestSetClientOptionsFromLoadedConfig(t *testing.T) {
 			name: "SingleEndpoint",
 			args: args{
 				clientOptions: &bundle.ClientOptions{},
-				loadedConfig: &shared.LoadedConfig{
-					Environments: []shared.Environment{
+				fileConfig: &fileconfiguration.FileConfig{
+					Environments: []fileconfiguration.Environment{
 						{
 							Name: "testEnv",
-							Products: []shared.Product{
+							Products: []fileconfiguration.Product{
 								{
 									Name: "testProduct",
-									Endpoints: []shared.Endpoint{
+									Endpoints: []fileconfiguration.Endpoint{
 										{Name: "endpoint1", SkipTLSVerify: true},
 									},
 								},
@@ -87,7 +88,7 @@ func TestSetClientOptionsFromLoadedConfig(t *testing.T) {
 				productName: "testProduct",
 			},
 			wantClientOptions: &bundle.ClientOptions{
-				ClientOverrideOptions: shared.ClientOverrideOptions{
+				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
 				},
@@ -97,14 +98,14 @@ func TestSetClientOptionsFromLoadedConfig(t *testing.T) {
 			name: "NoEndpoints",
 			args: args{
 				clientOptions: &bundle.ClientOptions{},
-				loadedConfig: &shared.LoadedConfig{
-					Environments: []shared.Environment{
+				fileConfig: &fileconfiguration.FileConfig{
+					Environments: []fileconfiguration.Environment{
 						{
 							Name: "testEnv",
-							Products: []shared.Product{
+							Products: []fileconfiguration.Product{
 								{
 									Name:      "testProduct",
-									Endpoints: []shared.Endpoint{},
+									Endpoints: []fileconfiguration.Endpoint{},
 								},
 							},
 						},
@@ -118,14 +119,14 @@ func TestSetClientOptionsFromLoadedConfig(t *testing.T) {
 			name: "BadProductName",
 			args: args{
 				clientOptions: &bundle.ClientOptions{},
-				loadedConfig: &shared.LoadedConfig{
-					Environments: []shared.Environment{
+				fileConfig: &fileconfiguration.FileConfig{
+					Environments: []fileconfiguration.Environment{
 						{
 							Name: "testEnv",
-							Products: []shared.Product{
+							Products: []fileconfiguration.Product{
 								{
 									Name:      "testProduct",
-									Endpoints: []shared.Endpoint{},
+									Endpoints: []fileconfiguration.Endpoint{},
 								},
 							},
 						},
@@ -138,7 +139,7 @@ func TestSetClientOptionsFromLoadedConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			SetClientOptionsFromFileConfig(tt.args.clientOptions, tt.args.loadedConfig, tt.args.productName)
+			SetGlobalClientOptionsFromFileConfig(tt.args.clientOptions, tt.args.fileConfig, tt.args.productName)
 			if tt.args.clientOptions != nil && tt.wantClientOptions != nil {
 				if tt.args.clientOptions.Endpoint != tt.wantClientOptions.Endpoint {
 					t.Errorf("got %v, want %v", tt.args.clientOptions.Endpoint, tt.wantClientOptions.Endpoint)
@@ -151,7 +152,7 @@ func TestSetClientOptionsFromLoadedConfig(t *testing.T) {
 	}
 }
 
-func TestOverrideClientFromLoadedConfig(t *testing.T) {
+func TestOverrideClientFromfileConfig(t *testing.T) {
 	type args struct {
 		client      ConfigProviderWithLoaderAndLocation
 		productName string
@@ -163,11 +164,11 @@ func TestOverrideClientFromLoadedConfig(t *testing.T) {
 		want *shared.ServerConfiguration
 	}{
 		{
-			name: "NilLoadedConfig",
+			name: "NilfileConfig",
 			args: args{
 				client: &mockConfigProviderWithLoaderAndLocation{
-					loadedConfig: nil,
-					config:       &shared.Configuration{},
+					fileConfig: nil,
+					config:     &shared.Configuration{},
 				},
 				productName: "testProduct",
 				location:    "testLocation",
@@ -178,8 +179,8 @@ func TestOverrideClientFromLoadedConfig(t *testing.T) {
 			name: "NoProductOverrides",
 			args: args{
 				client: &mockConfigProviderWithLoaderAndLocation{
-					loadedConfig: &shared.LoadedConfig{},
-					config:       &shared.Configuration{},
+					fileConfig: &fileconfiguration.FileConfig{},
+					config:     &shared.Configuration{},
 				},
 				productName: "testProduct",
 				location:    "testLocation",
@@ -190,14 +191,14 @@ func TestOverrideClientFromLoadedConfig(t *testing.T) {
 			name: "SingleEndpoint",
 			args: args{
 				client: &mockConfigProviderWithLoaderAndLocation{
-					loadedConfig: &shared.LoadedConfig{
-						Environments: []shared.Environment{
+					fileConfig: &fileconfiguration.FileConfig{
+						Environments: []fileconfiguration.Environment{
 							{
 								Name: "testEnv",
-								Products: []shared.Product{
+								Products: []fileconfiguration.Product{
 									{
 										Name: "testProduct",
-										Endpoints: []shared.Endpoint{
+										Endpoints: []fileconfiguration.Endpoint{
 											{Name: "endpoint1", SkipTLSVerify: true, Location: "testLocation"},
 										},
 									},
@@ -223,14 +224,14 @@ func TestOverrideClientFromLoadedConfig(t *testing.T) {
 			name: "MultipleEndpoints",
 			args: args{
 				client: &mockConfigProviderWithLoaderAndLocation{
-					loadedConfig: &shared.LoadedConfig{
-						Environments: []shared.Environment{
+					fileConfig: &fileconfiguration.FileConfig{
+						Environments: []fileconfiguration.Environment{
 							{
 								Name: "testEnv",
-								Products: []shared.Product{
+								Products: []fileconfiguration.Product{
 									{
 										Name: "testProduct",
-										Endpoints: []shared.Endpoint{
+										Endpoints: []fileconfiguration.Endpoint{
 											{Name: "endpoint1", SkipTLSVerify: true, Location: "testLocation"},
 											{Name: "endpoint2", SkipTLSVerify: false, Location: "testLocation"},
 										},
@@ -257,14 +258,14 @@ func TestOverrideClientFromLoadedConfig(t *testing.T) {
 			name: "WrongLocation",
 			args: args{
 				client: &mockConfigProviderWithLoaderAndLocation{
-					loadedConfig: &shared.LoadedConfig{
-						Environments: []shared.Environment{
+					fileConfig: &fileconfiguration.FileConfig{
+						Environments: []fileconfiguration.Environment{
 							{
 								Name: "testEnv",
-								Products: []shared.Product{
+								Products: []fileconfiguration.Product{
 									{
 										Name: "testProduct",
-										Endpoints: []shared.Endpoint{
+										Endpoints: []fileconfiguration.Endpoint{
 											{Name: "endpoint1", SkipTLSVerify: true, Location: "correctLocation"},
 										},
 									},
@@ -287,14 +288,14 @@ func TestOverrideClientFromLoadedConfig(t *testing.T) {
 			name: "EmptyLocation",
 			args: args{
 				client: &mockConfigProviderWithLoaderAndLocation{
-					loadedConfig: &shared.LoadedConfig{
-						Environments: []shared.Environment{
+					fileConfig: &fileconfiguration.FileConfig{
+						Environments: []fileconfiguration.Environment{
 							{
 								Name: "testEnv",
-								Products: []shared.Product{
+								Products: []fileconfiguration.Product{
 									{
 										Name: "testProduct",
-										Endpoints: []shared.Endpoint{
+										Endpoints: []fileconfiguration.Endpoint{
 											{Name: "endpoint1", SkipTLSVerify: true, Location: "correctLocation"},
 										},
 									},
@@ -339,55 +340,55 @@ func TestOverrideClientFromLoadedConfig(t *testing.T) {
 }
 
 type mockConfigProviderWithLoaderAndLocation struct {
-	loadedConfig *shared.LoadedConfig
-	config       *shared.Configuration
+	fileConfig *fileconfiguration.FileConfig
+	config     *shared.Configuration
 }
 
 func (m *mockConfigProviderWithLoaderAndLocation) ChangeConfigURL(location string) {
 	// Implement the logic to change the config URL based on the location
 }
 
-func (m *mockConfigProviderWithLoaderAndLocation) GetLoadedConfig() *shared.LoadedConfig {
-	return m.loadedConfig
+func (m *mockConfigProviderWithLoaderAndLocation) GetFileConfig() *fileconfiguration.FileConfig {
+	return m.fileConfig
 }
 
 func (m *mockConfigProviderWithLoaderAndLocation) GetConfig() *shared.Configuration {
 	return m.config
 }
 
-func TestSetClientOptionsFromLoadedConfigTable(t *testing.T) {
+func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 	tests := []struct {
 		name              string
 		clientOptions     *bundle.ClientOptions
-		loadedConfig      *shared.LoadedConfig
+		fileConfig        *fileconfiguration.FileConfig
 		productName       string
 		wantClientOptions *bundle.ClientOptions
 	}{
 		{
 			name:              "NilClientOptions",
 			clientOptions:     nil,
-			loadedConfig:      &shared.LoadedConfig{},
+			fileConfig:        &fileconfiguration.FileConfig{},
 			productName:       "testProduct",
 			wantClientOptions: nil,
 		},
 		{
-			name:              "NilLoadedConfig",
+			name:              "NilfileConfig",
 			clientOptions:     &bundle.ClientOptions{},
-			loadedConfig:      nil,
+			fileConfig:        nil,
 			productName:       "testProduct",
 			wantClientOptions: &bundle.ClientOptions{},
 		},
 		{
 			name:          "MultipleEndpoints",
 			clientOptions: &bundle.ClientOptions{},
-			loadedConfig: &shared.LoadedConfig{
-				Environments: []shared.Environment{
+			fileConfig: &fileconfiguration.FileConfig{
+				Environments: []fileconfiguration.Environment{
 					{
 						Name: "testEnv",
-						Products: []shared.Product{
+						Products: []fileconfiguration.Product{
 							{
 								Name: "testProduct",
-								Endpoints: []shared.Endpoint{
+								Endpoints: []fileconfiguration.Endpoint{
 									{Name: "endpoint1", SkipTLSVerify: true},
 									{Name: "endpoint2", SkipTLSVerify: false},
 								},
@@ -398,7 +399,7 @@ func TestSetClientOptionsFromLoadedConfigTable(t *testing.T) {
 			},
 			productName: "testProduct",
 			wantClientOptions: &bundle.ClientOptions{
-				ClientOverrideOptions: shared.ClientOverrideOptions{
+				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
 				},
@@ -407,14 +408,14 @@ func TestSetClientOptionsFromLoadedConfigTable(t *testing.T) {
 		{
 			name:          "SingleEndpoint",
 			clientOptions: &bundle.ClientOptions{},
-			loadedConfig: &shared.LoadedConfig{
-				Environments: []shared.Environment{
+			fileConfig: &fileconfiguration.FileConfig{
+				Environments: []fileconfiguration.Environment{
 					{
 						Name: "testEnv",
-						Products: []shared.Product{
+						Products: []fileconfiguration.Product{
 							{
 								Name: "testProduct",
-								Endpoints: []shared.Endpoint{
+								Endpoints: []fileconfiguration.Endpoint{
 									{Name: "endpoint1", SkipTLSVerify: true},
 								},
 							},
@@ -424,7 +425,7 @@ func TestSetClientOptionsFromLoadedConfigTable(t *testing.T) {
 			},
 			productName: "testProduct",
 			wantClientOptions: &bundle.ClientOptions{
-				ClientOverrideOptions: shared.ClientOverrideOptions{
+				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
 				},
@@ -433,14 +434,14 @@ func TestSetClientOptionsFromLoadedConfigTable(t *testing.T) {
 		{
 			name:          "NoEndpoints",
 			clientOptions: &bundle.ClientOptions{},
-			loadedConfig: &shared.LoadedConfig{
-				Environments: []shared.Environment{
+			fileConfig: &fileconfiguration.FileConfig{
+				Environments: []fileconfiguration.Environment{
 					{
 						Name: "testEnv",
-						Products: []shared.Product{
+						Products: []fileconfiguration.Product{
 							{
 								Name:      "testProduct",
-								Endpoints: []shared.Endpoint{},
+								Endpoints: []fileconfiguration.Endpoint{},
 							},
 						},
 					},
@@ -452,14 +453,14 @@ func TestSetClientOptionsFromLoadedConfigTable(t *testing.T) {
 		{
 			name:          "BadProductName",
 			clientOptions: &bundle.ClientOptions{},
-			loadedConfig: &shared.LoadedConfig{
-				Environments: []shared.Environment{
+			fileConfig: &fileconfiguration.FileConfig{
+				Environments: []fileconfiguration.Environment{
 					{
 						Name: "testEnv",
-						Products: []shared.Product{
+						Products: []fileconfiguration.Product{
 							{
 								Name:      "testProduct",
-								Endpoints: []shared.Endpoint{},
+								Endpoints: []fileconfiguration.Endpoint{},
 							},
 						},
 					},
@@ -472,7 +473,7 @@ func TestSetClientOptionsFromLoadedConfigTable(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			SetClientOptionsFromFileConfig(tt.clientOptions, tt.loadedConfig, tt.productName)
+			SetGlobalClientOptionsFromFileConfig(tt.clientOptions, tt.fileConfig, tt.productName)
 			if tt.clientOptions != nil && tt.wantClientOptions != nil {
 				if tt.clientOptions.Endpoint != tt.wantClientOptions.Endpoint {
 					t.Errorf("got %v, want %v", tt.clientOptions.Endpoint, tt.wantClientOptions.Endpoint)

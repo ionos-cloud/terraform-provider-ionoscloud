@@ -1,11 +1,11 @@
 package logging
 
 import (
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"os"
 	"testing"
 
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,7 +14,7 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 	tests := []struct {
 		name           string
 		clientOptions  bundle.ClientOptions
-		loadedConfig   *shared.LoadedConfig
+		fileConfig     *fileconfiguration.FileConfig
 		productName    string
 		location       string
 		envVar         string
@@ -24,11 +24,11 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 		{
 			name: "overrideClientEndpoint",
 			clientOptions: bundle.ClientOptions{
-				ClientOverrideOptions: shared.ClientOverrideOptions{
+				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
 					Endpoint:      "https://custom.endpoint.com",
 					SkipTLSVerify: true,
 					Certificate:   "",
-					Credentials: shared.Credentials{
+					Credentials: fileconfiguration.Credentials{
 						Username: "test-user",
 						Password: "test-password",
 						Token:    "test-token",
@@ -36,28 +36,28 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 				},
 				TerraformVersion: "1.0.0",
 			},
-			loadedConfig: &shared.LoadedConfig{
+			fileConfig: &fileconfiguration.FileConfig{
 				Version:        1.0,
 				CurrentProfile: "default",
-				Profiles: []shared.Profile{
+				Profiles: []fileconfiguration.Profile{
 					{
 						Environment: "de/fra",
 						Name:        "default",
-						Credentials: shared.Credentials{
+						Credentials: fileconfiguration.Credentials{
 							Username: "user123",
 							Password: "pass123",
 							Token:    "token123",
 						},
 					},
 				},
-				Environments: []shared.Environment{
+				Environments: []fileconfiguration.Environment{
 					{
 						Name:                "de/fra",
 						CertificateAuthData: "cert_data_here",
-						Products: []shared.Product{
+						Products: []fileconfiguration.Product{
 							{
 								Name: "logging",
-								Endpoints: []shared.Endpoint{
+								Endpoints: []fileconfiguration.Endpoint{
 									{
 										Name:          "https://override.logging.de-fra.ionos.com",
 										Location:      "de/fra",
@@ -69,7 +69,7 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 					},
 				},
 			},
-			productName:    shared.Logging,
+			productName:    fileconfiguration.Logging,
 			location:       "de/fra",
 			envVar:         "https://env.endpoint.com",
 			expectedURL:    "https://override.logging.de-fra.ionos.com",
@@ -78,11 +78,11 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 		{
 			name: "ProductNotDefinedInEnv",
 			clientOptions: bundle.ClientOptions{
-				ClientOverrideOptions: shared.ClientOverrideOptions{
+				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
 					Endpoint:      "https://custom.endpoint.com",
 					SkipTLSVerify: true,
 					Certificate:   "",
-					Credentials: shared.Credentials{
+					Credentials: fileconfiguration.Credentials{
 						Username: "test-user",
 						Password: "test-password",
 						Token:    "test-token",
@@ -90,29 +90,29 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 				},
 				TerraformVersion: "1.0.0",
 			},
-			loadedConfig: &shared.LoadedConfig{
+			fileConfig: &fileconfiguration.FileConfig{
 				Version:        1.0,
 				CurrentProfile: "default",
-				Profiles: []shared.Profile{
+				Profiles: []fileconfiguration.Profile{
 					{
 						Environment: "de/fra",
 						Name:        "default",
-						Credentials: shared.Credentials{
+						Credentials: fileconfiguration.Credentials{
 							Username: "user123",
 							Password: "pass123",
 							Token:    "token123",
 						},
 					},
 				},
-				Environments: []shared.Environment{
+				Environments: []fileconfiguration.Environment{
 					{
 						Name:                "de/fra",
 						CertificateAuthData: "cert_data_here",
-						Products:            []shared.Product{},
+						Products:            []fileconfiguration.Product{},
 					},
 				},
 			},
-			productName:    shared.Logging,
+			productName:    fileconfiguration.Logging,
 			location:       "de/fra",
 			envVar:         "https://env.endpoint.com",
 			expectedURL:    "https://custom.endpoint.com",
@@ -122,7 +122,7 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := NewClient(tt.clientOptions, tt.loadedConfig)
+			client := NewClient(tt.clientOptions, tt.fileConfig)
 
 			// Step 2: Override the client configuration from the loaded config
 			loadedconfig.SetClientOptionsFromConfig(client, tt.productName, tt.location)

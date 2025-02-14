@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"net/http"
@@ -20,8 +21,8 @@ type Client struct {
 }
 
 // NewCDNClient returns a new CDN client
-func NewCDNClient(options bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
-	loadedconfig.SetClientOptionsFromFileConfig(&options, sharedLoadedConfig, shared.CDN)
+func NewCDNClient(options bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&options, fileConfig, fileconfiguration.CDN)
 
 	newConfigCDN := shared.NewConfiguration(options.Credentials.Username, options.Credentials.Password, options.Credentials.Token, options.Endpoint)
 	newConfigCDN.MaxRetries = constant.MaxRetries

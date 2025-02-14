@@ -2,7 +2,7 @@ package cert
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"net/http"
@@ -18,12 +18,12 @@ import (
 )
 
 type Client struct {
-	sdkClient    *certmanager.APIClient
-	loadedConfig *shared.LoadedConfig
+	sdkClient  *certmanager.APIClient
+	fileConfig *fileconfiguration.FileConfig
 }
 
-func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
-	return c.loadedConfig
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
 }
 
 func (c *Client) GetConfig() *certmanager.Configuration {
@@ -31,8 +31,8 @@ func (c *Client) GetConfig() *certmanager.Configuration {
 }
 
 // todo cguran cert has both location(auto-cert) and no location on certificate. How do we override?
-func NewClient(clientOptions bundle.ClientOptions, loadedConfig *shared.LoadedConfig) *Client {
-	loadedconfig.SetClientOptionsFromFileConfig(&clientOptions, loadedConfig, shared.Cert)
+func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Cert)
 	certConfig := certmanager.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	if os.Getenv(constant.IonosDebug) != "" {
@@ -47,7 +47,7 @@ func NewClient(clientOptions bundle.ClientOptions, loadedConfig *shared.LoadedCo
 		certmanager.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	return &Client{
-		sdkClient:    certmanager.NewAPIClient(certConfig),
-		loadedConfig: loadedConfig,
+		sdkClient:  certmanager.NewAPIClient(certConfig),
+		fileConfig: fileConfig,
 	}
 }

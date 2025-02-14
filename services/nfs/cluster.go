@@ -3,7 +3,7 @@ package nfs
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"log"
 	"strings"
 
@@ -15,7 +15,7 @@ import (
 
 // GetNFSClusterByID returns a cluster given an ID
 func (c *Client) GetNFSClusterByID(ctx context.Context, id string, location string) (sdk.ClusterRead, *sdk.APIResponse, error) {
-	c.overrideClientEndpoint(shared.NFS, location)
+	c.overrideClientEndpoint(fileconfiguration.NFS, location)
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
@@ -23,7 +23,7 @@ func (c *Client) GetNFSClusterByID(ctx context.Context, id string, location stri
 
 // ListNFSClusters returns a list of all clusters
 func (c *Client) ListNFSClusters(ctx context.Context, d *schema.ResourceData) (sdk.ClusterReadList, *sdk.APIResponse, error) {
-	c.overrideClientEndpoint(shared.NFS, d.Get("location").(string))
+	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
 	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return clusters, apiResponse, err
@@ -31,7 +31,7 @@ func (c *Client) ListNFSClusters(ctx context.Context, d *schema.ResourceData) (s
 
 // DeleteNFSCluster deletes a cluster given an ID
 func (c *Client) DeleteNFSCluster(ctx context.Context, d *schema.ResourceData) (*sdk.APIResponse, error) {
-	c.overrideClientEndpoint(shared.NFS, d.Get("location").(string))
+	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
 	apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -39,7 +39,7 @@ func (c *Client) DeleteNFSCluster(ctx context.Context, d *schema.ResourceData) (
 
 // UpdateNFSCluster updates a cluster given an ID or creates a new one if it doesn't exist
 func (c *Client) UpdateNFSCluster(ctx context.Context, d *schema.ResourceData) (sdk.ClusterRead, *sdk.APIResponse, error) {
-	c.overrideClientEndpoint(shared.NFS, d.Get("location").(string))
+	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPut(ctx, d.Id()).
 		ClusterEnsure(*setClusterPutRequest(d)).Execute()
 	apiResponse.LogInfo()
@@ -48,7 +48,7 @@ func (c *Client) UpdateNFSCluster(ctx context.Context, d *schema.ResourceData) (
 
 // CreateNFSCluster creates a new cluster
 func (c *Client) CreateNFSCluster(ctx context.Context, d *schema.ResourceData) (sdk.ClusterRead, *sdk.APIResponse, error) {
-	c.overrideClientEndpoint(shared.NFS, d.Get("location").(string))
+	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).
 		ClusterCreate(*setClusterPostRequest(d)).Execute()
 	apiResponse.LogInfo()

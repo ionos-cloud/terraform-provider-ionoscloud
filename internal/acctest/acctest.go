@@ -3,7 +3,7 @@ package acctest
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"log"
 	"os"
@@ -106,11 +106,11 @@ func ObjectStorageClient() (*objstorage.APIClient, error) {
 	if accessKey == "" || secretKey == "" {
 		return nil, fmt.Errorf("%s and %s must be set for acceptance tests", envar.IonosS3AccessKey, envar.IonosS3SecretKey)
 	}
-	loadedConfig, readFileErr := shared.ReadConfigFromFile()
+	fileConfig, readFileErr := fileconfiguration.ReadConfigFromFile()
 	if readFileErr != nil {
 		log.Printf("Error reading config file: %v", readFileErr)
 	}
-	return objstorageservice.NewClient(accessKey, secretKey, "", "", insecureBool, loadedConfig).GetBaseClient(), nil
+	return objstorageservice.NewClient(accessKey, secretKey, "", "", insecureBool, fileConfig).GetBaseClient(), nil
 }
 
 // MonitoringClient returns a new Monitoring client for acceptance testing
@@ -129,9 +129,9 @@ func MonitoringClient() *monitoringService.Client {
 		insecureBool = boolValue
 	}
 	clientOptions := bundle.ClientOptions{
-		ClientOverrideOptions: shared.ClientOverrideOptions{
+		ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
 			SkipTLSVerify: insecureBool,
-			Credentials: shared.Credentials{
+			Credentials: fileconfiguration.Credentials{
 				Username: username,
 				Password: password,
 				Token:    token,

@@ -2,6 +2,7 @@ package monitoring
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"net/http"
 	"os"
@@ -18,19 +19,19 @@ import (
 
 // Client is a wrapper for the Monitoring SDK
 type Client struct { //nolint:golint
-	sdkClient    monitoring.APIClient
-	loadedConfig *shared.LoadedConfig
+	sdkClient  monitoring.APIClient
+	fileConfig *fileconfiguration.FileConfig
 }
 
 func (c *Client) GetConfig() *shared.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
-func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
-	return c.loadedConfig
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
 }
 
-func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
+func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)
 	config.MaxRetries = constant.MaxRetries
@@ -41,7 +42,7 @@ func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.Lo
 		monitoring.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint:staticcheck
 
 	return &Client{sdkClient: *monitoring.NewAPIClient(config),
-		loadedConfig: sharedLoadedConfig}
+		fileConfig: fileConfig}
 }
 
 var (

@@ -3,6 +3,7 @@ package mariadb
 import (
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"log"
 	"net/http"
@@ -18,13 +19,13 @@ import (
 )
 
 type Client struct {
-	sdkClient    *mariadb.APIClient
-	loadedConfig *shared.LoadedConfig
+	sdkClient  *mariadb.APIClient
+	fileConfig *fileconfiguration.FileConfig
 }
 
-// GetLoadedConfig returns the loaded configuration of the client
-func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
-	return c.loadedConfig
+// GetfileConfig returns the loaded configuration of the client
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
 }
 
 // GetConfig returns the configuration of the client
@@ -32,7 +33,7 @@ func (c *Client) GetConfig() *mariadb.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
-func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
+func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	newConfig := mariadb.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	if os.Getenv(constant.IonosDebug) != "" {
@@ -47,12 +48,12 @@ func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.Lo
 		mariadb.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	return &Client{
-		sdkClient:    mariadb.NewAPIClient(newConfig),
-		loadedConfig: sharedLoadedConfig,
+		sdkClient:  mariadb.NewAPIClient(newConfig),
+		fileConfig: fileConfig,
 	}
 }
 
-// overrideClientEndpoint todo - after move to bundle, replace with generic function from loadedconfig
+// overrideClientEndpoint todo - after move to bundle, replace with generic function from fileConfig
 func (c *Client) overrideClientEndpoint(productName, location string) {
 	//whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer c.changeConfigURL(location)
@@ -60,15 +61,15 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 	//	fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionoscloud.IonosApiUrlEnvVar))
 	//	return
 	//}
-	loadedConfig := c.GetLoadedConfig()
-	if loadedConfig == nil {
+	fileConfig := c.GetFileConfig()
+	if fileConfig == nil {
 		return
 	}
 	config := c.GetConfig()
 	if config == nil {
 		return
 	}
-	endpoint := loadedConfig.GetProductLocationOverrides(productName, location)
+	endpoint := fileConfig.GetProductLocationOverrides(productName, location)
 	if endpoint == nil {
 		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
 		return
