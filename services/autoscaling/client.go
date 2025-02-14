@@ -19,7 +19,7 @@ type Client struct {
 }
 
 func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
-	loadedconfig.SetClientOptionsFromLoadedConfig(&clientOptions, sharedLoadedConfig, shared.Autoscaling)
+	loadedconfig.SetClientOptionsFromFileConfig(&clientOptions, sharedLoadedConfig, shared.Autoscaling)
 	newConfig := autoscaling.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	newConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/_ionos-cloud-sdk-go-vm-autoscaling/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",

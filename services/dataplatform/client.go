@@ -20,7 +20,7 @@ type Client struct {
 }
 
 func NewClient(clientOptions bundle.ClientOptions, loadedConfig *shared.LoadedConfig) *Client {
-	loadedconfig.SetClientOptionsFromLoadedConfig(&clientOptions, loadedConfig, shared.Dataplatform)
+	loadedconfig.SetClientOptionsFromFileConfig(&clientOptions, loadedConfig, shared.Dataplatform)
 	newConfigDataplatform := dataplatform.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	if os.Getenv(constant.IonosDebug) != "" {
 		newConfigDataplatform.Debug = true

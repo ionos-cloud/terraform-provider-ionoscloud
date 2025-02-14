@@ -88,7 +88,7 @@ func WaitForStateChange(ctx context.Context, meta interface{}, d *schema.Resourc
 	}
 
 	if loc, err = apiResponse.Location(); err != nil {
-		return fmt.Errorf("error retrieving 'changeConfigURL' header: %w", err)
+		return fmt.Errorf("error retrieving 'location' header: %w", err)
 	}
 	_, errState := GetStateChangeConf(meta, d, loc.String(), opTimeout).WaitForStateContext(ctx)
 	return errState

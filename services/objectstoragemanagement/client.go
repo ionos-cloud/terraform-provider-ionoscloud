@@ -29,7 +29,7 @@ func (c *Client) GetBaseClient() *objectstoragemanagement.APIClient {
 
 // NewClient creates a new S3 client with the given credentials and region.
 func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
-	loadedconfig.SetClientOptionsFromLoadedConfig(&clientOptions, sharedLoadedConfig, shared.ObjectStorage) //todo cguran is this ObjectStorageManagement?
+	loadedconfig.SetClientOptionsFromFileConfig(&clientOptions, sharedLoadedConfig, shared.ObjectStorage) //todo cguran is this ObjectStorageManagement?
 	newObjectStorageManagementConfig := objectstoragemanagement.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)
 

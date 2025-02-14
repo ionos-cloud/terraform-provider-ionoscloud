@@ -33,12 +33,13 @@ type ConfigProviderWithLoaderAndLocation interface {
 	ChangeConfigURL(location string)
 }
 
-// OverrideClientEndpoint overrides the client configuration with the loaded config
+// SetClientOptionsFromConfig overrides the client configuration with the loaded config
 // if the product and location are found in the loaded config
 // Any changes here should be reflected in the service overrideClientEndpoint functions for the sdks not using bundle
-func OverrideClientEndpoint(client ConfigProviderWithLoaderAndLocation, productName, location string) {
-	//whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
+func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, productName, location string) {
+	//whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and override the endpoint
 	defer client.ChangeConfigURL(location)
+	//todo enable this check before loading endpoint from config?
 	//if os.Getenv(ionoscloud.IonosApiUrlEnvVar) != "" {
 	//	fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionoscloud.IonosApiUrlEnvVar))
 	//	return
@@ -67,9 +68,9 @@ func OverrideClientEndpoint(client ConfigProviderWithLoaderAndLocation, productN
 	}
 }
 
-// SetClientOptionsFromLoadedConfig sets the client options from the loaded config if not already set
+// SetClientOptionsFromFileConfig sets the client options from the loaded config if not already set
 // mutates clientOptions. Should only be used if the product does not have location overrides
-func SetClientOptionsFromLoadedConfig(clientOptions *bundle.ClientOptions, loadedConfig *shared.LoadedConfig, productName string) {
+func SetClientOptionsFromFileConfig(clientOptions *bundle.ClientOptions, loadedConfig *shared.LoadedConfig, productName string) {
 	if clientOptions == nil || loadedConfig == nil {
 		return
 	}

@@ -17,7 +17,7 @@ import (
 
 // CreateWireguardGatewayPeers creates a new wireguard peer
 func (c *Client) CreateWireguardGatewayPeers(ctx context.Context, d *schema.ResourceData, gatewayID string) (vpn.WireguardPeerRead, utils.ApiResponseInfo, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, d.Get("location").(string))
 	request, err := setWireguardPeersPostRequest(d)
 	if err != nil {
 		return vpn.WireguardPeerRead{}, nil, fmt.Errorf("error decoding endpoint: %w", err)
@@ -29,7 +29,7 @@ func (c *Client) CreateWireguardGatewayPeers(ctx context.Context, d *schema.Reso
 
 // IsWireguardPeerAvailable checks if the wireguard peer is available
 func (c *Client) IsWireguardPeerAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, d.Get("location").(string))
 	wireguardID := d.Id()
 	gatewayID := d.Get("gateway_id").(string)
 	location := d.Get("location").(string)
@@ -43,7 +43,7 @@ func (c *Client) IsWireguardPeerAvailable(ctx context.Context, d *schema.Resourc
 
 // UpdateWireguardPeer updates a wireguard peer
 func (c *Client) UpdateWireguardPeer(ctx context.Context, gatewayID, id string, d *schema.ResourceData) (vpn.WireguardPeerRead, utils.ApiResponseInfo, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, d.Get("location").(string))
 	request, err := setWireguardPeerPatchRequest(d)
 	if err != nil {
 		return vpn.WireguardPeerRead{}, nil, fmt.Errorf("error decoding endpoint: %w", err)
@@ -55,7 +55,7 @@ func (c *Client) UpdateWireguardPeer(ctx context.Context, gatewayID, id string, 
 
 // DeleteWireguardPeer deletes a wireguard peer
 func (c *Client) DeleteWireguardPeer(ctx context.Context, gatewayID, id, location string) (utils.ApiResponseInfo, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, location)
 	apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersDelete(ctx, gatewayID, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -63,7 +63,7 @@ func (c *Client) DeleteWireguardPeer(ctx context.Context, gatewayID, id, locatio
 
 // IsWireguardPeerDeleted checks if the wireguard peer is deleted
 func (c *Client) IsWireguardPeerDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, d.Get("location").(string))
 	gatewayID := d.Get("gateway_id").(string)
 	_, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersFindById(ctx, gatewayID, d.Id()).Execute()
 	apiResponse.LogInfo()
@@ -72,7 +72,7 @@ func (c *Client) IsWireguardPeerDeleted(ctx context.Context, d *schema.ResourceD
 
 // GetWireguardPeerByID returns a wireguard by its ID
 func (c *Client) GetWireguardPeerByID(ctx context.Context, gatewayID, id, location string) (vpn.WireguardPeerRead, *shared.APIResponse, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, location)
 	wireguard, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersFindById(ctx, gatewayID, id).Execute()
 	apiResponse.LogInfo()
 	return wireguard, apiResponse, err
@@ -80,7 +80,7 @@ func (c *Client) GetWireguardPeerByID(ctx context.Context, gatewayID, id, locati
 
 // ListWireguardPeers returns a list of all wireguards
 func (c *Client) ListWireguardPeers(ctx context.Context, gatewayID, location string) (vpn.WireguardPeerReadList, *shared.APIResponse, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, location)
 	wireguards, apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersGet(ctx, gatewayID).Execute()
 	apiResponse.LogInfo()
 	return wireguards, apiResponse, err
@@ -89,7 +89,7 @@ func (c *Client) ListWireguardPeers(ctx context.Context, gatewayID, location str
 // IsWireguardPeerReady checks if the wireguard peer is ready
 func (c *Client) IsWireguardPeerReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	location := d.Get("location").(string)
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, location)
 	gatewayID := d.Get("gateway_id").(string)
 	cluster, _, err := c.GetWireguardPeerByID(ctx, gatewayID, d.Id(), location)
 	if err != nil {

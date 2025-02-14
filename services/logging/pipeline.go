@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,24 +17,10 @@ import (
 
 var pipelineResourceName = "Logging Pipeline"
 
-// setOverrides sets the overrides for the client. searches in loaded config, or in location from plan
-// if location is empty, it will search in the environment variable ionosAPIURLLogging
-func (c *Client) setOverrides(location string) {
-	if location == "" && os.Getenv(ionosAPIURLLogging) != "" {
-		c.GetConfig().Servers = shared.ServerConfigurations{
-			{
-				URL: utils.CleanURL(os.Getenv(ionosAPIURLLogging)),
-			},
-		}
-	} else {
-		loadedconfig.OverrideClientEndpoint(c, shared.Logging, location)
-	}
-}
-
 // CreatePipeline creates a new pipeline
 func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.ProvisioningPipeline, utils.ApiResponseInfo, error) {
 	location := d.Get("location").(string)
-	loadedconfig.OverrideClientEndpoint(c, shared.Logging, location)
+	loadedconfig.SetClientOptionsFromConfig(c, shared.Logging, location)
 	request := setPipelinePostRequest(d)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPost(ctx).Pipeline(*request).Execute()
 	apiResponse.LogInfo()
@@ -59,7 +44,7 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 
 // UpdatePipeline updates a pipeline
 func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (logging.Pipeline, utils.ApiResponseInfo, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.Logging, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, shared.Logging, d.Get("location").(string))
 	request := setPipelinePatchRequest(d)
 	pipelineResponse, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPatch(ctx, id).Pipeline(*request).Execute()
 	apiResponse.LogInfo()
@@ -68,7 +53,7 @@ func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.Resour
 
 // DeletePipeline deletes a pipeline
 func (c *Client) DeletePipeline(ctx context.Context, location, id string) (utils.ApiResponseInfo, error) {
-	c.setOverrides(location)
+	loadedconfig.SetClientOptionsFromConfig(c, shared.Logging, location)
 	_, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -76,7 +61,7 @@ func (c *Client) DeletePipeline(ctx context.Context, location, id string) (utils
 
 // IsPipelineDeleted checks if the pipeline is deleted
 func (c *Client) IsPipelineDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.Logging, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, shared.Logging, d.Get("location").(string))
 	_, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
@@ -84,7 +69,7 @@ func (c *Client) IsPipelineDeleted(ctx context.Context, d *schema.ResourceData) 
 
 // GetPipelineByID returns a pipeline by its ID
 func (c *Client) GetPipelineByID(ctx context.Context, location, id string) (logging.Pipeline, *shared.APIResponse, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.Logging, location)
+	loadedconfig.SetClientOptionsFromConfig(c, shared.Logging, location)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return pipeline, apiResponse, err
@@ -92,7 +77,7 @@ func (c *Client) GetPipelineByID(ctx context.Context, location, id string) (logg
 
 // ListPipelines returns a list of all pipelines
 func (c *Client) ListPipelines(ctx context.Context, location string) (logging.PipelineListResponse, *shared.APIResponse, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.Logging, location)
+	loadedconfig.SetClientOptionsFromConfig(c, shared.Logging, location)
 	pipelines, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return pipelines, apiResponse, err

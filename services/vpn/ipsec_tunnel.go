@@ -31,7 +31,7 @@ var (
 
 // CreateIPSecTunnel creates a new VPN IPSec Tunnel
 func (c *Client) CreateIPSecTunnel(ctx context.Context, d *schema.ResourceData) (vpn.IPSecTunnelRead, *shared.APIResponse, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, d.Get("location").(string))
 	gatewayID := d.Get("gateway_id").(string)
 
 	request := setIPSecTunnelCreateRequest(d)
@@ -42,7 +42,7 @@ func (c *Client) CreateIPSecTunnel(ctx context.Context, d *schema.ResourceData) 
 
 // GetIPSecTunnelByID retrieves a VPN IPSec Tunnel by its ID and location
 func (c *Client) GetIPSecTunnelByID(ctx context.Context, id string, gatewayID string, location string) (vpn.IPSecTunnelRead, *shared.APIResponse, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, location)
 	tunnel, apiResponse, err := c.sdkClient.IPSecTunnelsApi.IpsecgatewaysTunnelsFindById(ctx, gatewayID, id).Execute()
 	apiResponse.LogInfo()
 	return tunnel, apiResponse, err
@@ -50,7 +50,7 @@ func (c *Client) GetIPSecTunnelByID(ctx context.Context, id string, gatewayID st
 
 // ListIPSecTunnel retrieves all VPN IPSec Tunnels from a given gateway and location
 func (c *Client) ListIPSecTunnel(ctx context.Context, gatewayID string, location string) (vpn.IPSecTunnelReadList, *shared.APIResponse, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, location)
 	gateways, apiResponse, err := c.sdkClient.IPSecTunnelsApi.IpsecgatewaysTunnelsGet(ctx, gatewayID).Execute()
 	apiResponse.LogInfo()
 	return gateways, apiResponse, err
@@ -58,7 +58,7 @@ func (c *Client) ListIPSecTunnel(ctx context.Context, gatewayID string, location
 
 // DeleteIPSecTunnel deletes a VPN IPSec Tunnel using its ID and location
 func (c *Client) DeleteIPSecTunnel(ctx context.Context, id string, gatewayID string, location string) (utils.ApiResponseInfo, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, location)
 	apiResponse, err := c.sdkClient.IPSecTunnelsApi.IpsecgatewaysTunnelsDelete(ctx, gatewayID, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -66,7 +66,7 @@ func (c *Client) DeleteIPSecTunnel(ctx context.Context, id string, gatewayID str
 
 // UpdateIPSecTunnel updates a VPN IPSec Tunnel
 func (c *Client) UpdateIPSecTunnel(ctx context.Context, d *schema.ResourceData) (vpn.IPSecTunnelRead, *shared.APIResponse, error) {
-	loadedconfig.OverrideClientEndpoint(c, shared.VPN, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, shared.VPN, d.Get("location").(string))
 	gatewayID := d.Get("gateway_id").(string)
 
 	request := setIPSecTunnelPutRequest(d)

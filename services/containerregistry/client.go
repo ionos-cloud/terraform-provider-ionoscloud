@@ -19,7 +19,7 @@ type Client struct {
 }
 
 func NewClient(clientOptions bundle.ClientOptions, loadedConfig *shared.LoadedConfig) *Client {
-	loadedconfig.SetClientOptionsFromLoadedConfig(&clientOptions, loadedConfig, shared.ContainerRegistry)
+	loadedconfig.SetClientOptionsFromFileConfig(&clientOptions, loadedConfig, shared.ContainerRegistry)
 	newConfig := cr.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	if os.Getenv(constant.IonosDebug) != "" {

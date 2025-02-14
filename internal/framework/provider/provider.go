@@ -252,13 +252,6 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		ObjectStorageManagementClient: objectStorageManagementService.NewClient(clientOptions, loadedConfig),
 		MonitoringClient:              monitoringService.NewClient(clientOptions, loadedConfig),
 	}
-	//overridesCert := loadedConfig.GetLocationOverridesFor("cert")
-	//if !insecureBool {
-	//	options.SkipTLSVerify = overridesCert.SkipTLSVerify
-	//}
-	//if cleanedEndpoint == "" {
-	//	options.Endpoint = overridesCert.Endpoint
-	//}
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }

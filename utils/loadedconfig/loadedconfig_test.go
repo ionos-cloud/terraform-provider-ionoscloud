@@ -138,7 +138,7 @@ func TestSetClientOptionsFromLoadedConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			SetClientOptionsFromLoadedConfig(tt.args.clientOptions, tt.args.loadedConfig, tt.args.productName)
+			SetClientOptionsFromFileConfig(tt.args.clientOptions, tt.args.loadedConfig, tt.args.productName)
 			if tt.args.clientOptions != nil && tt.wantClientOptions != nil {
 				if tt.args.clientOptions.Endpoint != tt.wantClientOptions.Endpoint {
 					t.Errorf("got %v, want %v", tt.args.clientOptions.Endpoint, tt.wantClientOptions.Endpoint)
@@ -316,7 +316,7 @@ func TestOverrideClientFromLoadedConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			OverrideClientEndpoint(tt.args.client, tt.args.productName, tt.args.location)
+			SetClientOptionsFromConfig(tt.args.client, tt.args.productName, tt.args.location)
 			config := tt.args.client.GetConfig()
 			if tt.want == nil {
 				if len(config.Servers) != 0 {
@@ -472,7 +472,7 @@ func TestSetClientOptionsFromLoadedConfigTable(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			SetClientOptionsFromLoadedConfig(tt.clientOptions, tt.loadedConfig, tt.productName)
+			SetClientOptionsFromFileConfig(tt.clientOptions, tt.loadedConfig, tt.productName)
 			if tt.clientOptions != nil && tt.wantClientOptions != nil {
 				if tt.clientOptions.Endpoint != tt.wantClientOptions.Endpoint {
 					t.Errorf("got %v, want %v", tt.clientOptions.Endpoint, tt.wantClientOptions.Endpoint)

@@ -125,7 +125,7 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 			client := NewClient(tt.clientOptions, tt.loadedConfig)
 
 			// Step 2: Override the client configuration from the loaded config
-			loadedconfig.OverrideClientEndpoint(client, tt.productName, tt.location)
+			loadedconfig.SetClientOptionsFromConfig(client, tt.productName, tt.location)
 
 			// Verify the override worked
 			assert.Equal(t, tt.expectedURL, client.GetConfig().Servers[0].URL)
