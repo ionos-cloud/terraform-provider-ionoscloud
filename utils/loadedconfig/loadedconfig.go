@@ -35,6 +35,7 @@ type ConfigProviderWithLoaderAndLocation interface {
 
 // OverrideClientEndpoint overrides the client configuration with the loaded config
 // if the product and location are found in the loaded config
+// Any changes here should be reflected in the service overrideClientEndpoint functions for the sdks not using bundle
 func OverrideClientEndpoint(client ConfigProviderWithLoaderAndLocation, productName, location string) {
 	//whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer client.ChangeConfigURL(location)
@@ -65,22 +66,6 @@ func OverrideClientEndpoint(client ConfigProviderWithLoaderAndLocation, productN
 		config.HTTPClient.Transport = utils.CreateTransport(true)
 	}
 }
-
-//func ChangeConfigURL(client ConfigProviderWithLoaderAndLocation, location string) {
-//	config := client.GetConfig()
-//	for _, server := range config.Servers {
-//		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) ||
-//			strings.EqualFold(server.URL, locationToURL[location]) {
-//			config.Servers = shared.ServerConfigurations{
-//				{
-//					URL:         server.URL,
-//					Description: shared.EndpointOverridden + location,
-//				},
-//			}
-//			return
-//		}
-//	}
-//}
 
 // SetClientOptionsFromLoadedConfig sets the client options from the loaded config if not already set
 // mutates clientOptions. Should only be used if the product does not have location overrides

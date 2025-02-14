@@ -56,24 +56,6 @@ var (
 	}
 )
 
-// todo cguran - check for description and override only after
-//func (c *Client) ChangeConfigURL(location string) {
-//	config := c.sdkClient.GetConfig()
-//	if location == "" && os.Getenv(ionosAPIURLMonitoring) != "" {
-//		config.Servers = shared.ServerConfigurations{
-//			{
-//				URL: utils.CleanURL(os.Getenv(ionosAPIURLMonitoring)),
-//			},
-//		}
-//		return
-//	}
-//	config.Servers = shared.ServerConfigurations{
-//		{
-//			URL: locationToURL[location],
-//		},
-//	}
-//}
-
 func (c *Client) ChangeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLMonitoring) != "" {

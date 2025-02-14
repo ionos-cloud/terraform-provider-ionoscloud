@@ -22,6 +22,15 @@ type Client struct {
 	loadedConfig *shared.LoadedConfig
 }
 
+func (c *Client) GetLoadedConfig() *shared.LoadedConfig {
+	return c.loadedConfig
+}
+
+func (c *Client) GetConfig() *certmanager.Configuration {
+	return c.sdkClient.GetConfig()
+}
+
+// todo cguran cert has both location(auto-cert) and no location on certificate. How do we override?
 func NewClient(clientOptions bundle.ClientOptions, loadedConfig *shared.LoadedConfig) *Client {
 	loadedconfig.SetClientOptionsFromLoadedConfig(&clientOptions, loadedConfig, shared.Cert)
 	certConfig := certmanager.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)

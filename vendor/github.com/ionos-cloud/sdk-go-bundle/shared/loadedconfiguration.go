@@ -26,6 +26,7 @@ const (
 	VPN               = "vpn"
 	InMemoryDB        = "inmemorydb"
 	ObjectStorage     = "objectstorage"
+	NFS               = "nfs"
 )
 
 // ClientOverrideOptions is a struct that represents the client override options

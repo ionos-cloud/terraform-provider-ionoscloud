@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
@@ -31,7 +32,7 @@ func (c *Client) GetConfig() *mariadb.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
-func NewMariaDBClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
+func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
 	newConfig := mariadb.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	if os.Getenv(constant.IonosDebug) != "" {
@@ -95,10 +96,16 @@ func (c *Client) changeConfigURL(location string) {
 		}
 		return
 	}
-	clientConfig.Servers = mariadb.ServerConfigurations{
-		{
-			URL: locationToURL[location],
-		},
+	for _, server := range clientConfig.Servers {
+		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
+			clientConfig.Servers = mariadb.ServerConfigurations{
+				{
+					URL:         server.URL,
+					Description: shared.EndpointOverridden + location,
+				},
+			}
+			return
+		}
 	}
 }
 

@@ -14,8 +14,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-//todo cguran implement override for mariadb
-
 // GetCluster retrieves a cluster by its ID and the location in which the cluster is created.
 func (c *Client) GetCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
 	c.overrideClientEndpoint(shared.Mariadb, location)

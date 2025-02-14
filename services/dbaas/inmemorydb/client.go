@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
@@ -29,29 +30,8 @@ func (c *Client) GetConfig() *inMemoryDB.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
-//
-////nolint:golint
-//func NewInMemoryDBClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
-//	newConfigDbaas := inMemoryDB.NewConfiguration(username, password, token, url)
-//
-//	if os.Getenv(constant.IonosDebug) != "" {
-//		newConfigDbaas.Debug = true
-//	}
-//	newConfigDbaas.MaxRetries = constant.MaxRetries
-//	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
-//
-//	newConfigDbaas.HTTPClient = &http.sdkClient{Transport: utils.CreateTransport(insecure)}
-//	newConfigDbaas.UserAgent = fmt.Sprintf(
-//		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-in-memory-db/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-//		version, inMemoryDB.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
-//
-//	return &Client{
-//		sdkClient: inMemoryDB.NewAPIClient(newConfigDbaas),
-//	}
-//}
-//
-
-func NewInMemoryDBClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
+// NewClient creates a new in-memory db client. LoadedConfig is used to set/override the client options if it exists
+func NewClient(clientOptions bundle.ClientOptions, sharedLoadedConfig *shared.LoadedConfig) *Client {
 	newConfigDbaas := inMemoryDB.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)
 
@@ -100,9 +80,15 @@ func (c *Client) changeConfigURL(location string) {
 		}
 		return
 	}
-	clientConfig.Servers = inMemoryDB.ServerConfigurations{
-		{
-			URL: locationToURL[location],
-		},
+	for _, server := range clientConfig.Servers {
+		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
+			clientConfig.Servers = inMemoryDB.ServerConfigurations{
+				{
+					URL:         server.URL,
+					Description: shared.EndpointOverridden + location,
+				},
+			}
+			return
+		}
 	}
 }

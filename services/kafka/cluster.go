@@ -16,6 +16,7 @@ import (
 
 // todo replace when sdk-bundle is used
 func overrideClientFromLoadedConfig(client *Client, productName, location string) {
+	defer client.changeConfigURL(location)
 	loadedConfig := client.GetLoadedConfig()
 	if loadedConfig == nil {
 		return
@@ -95,7 +96,6 @@ func (c *Client) GetClusterByID(ctx context.Context, id string, location string)
 	kafka.ClusterRead, utils.ApiResponseInfo, error,
 ) {
 	overrideClientFromLoadedConfig(c, shared.Kafka, location)
-	c.changeConfigURL(location)
 
 	Cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
@@ -105,7 +105,6 @@ func (c *Client) GetClusterByID(ctx context.Context, id string, location string)
 // ListClusters retrieves a list of Kafka Clusters
 func (c *Client) ListClusters(ctx context.Context, location string) (kafka.ClusterReadList, *kafka.APIResponse, error) {
 	overrideClientFromLoadedConfig(c, shared.Kafka, location)
-	c.changeConfigURL(location)
 
 	Clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGet(ctx).Execute()
 	apiResponse.LogInfo()
