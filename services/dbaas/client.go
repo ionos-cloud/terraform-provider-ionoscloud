@@ -27,7 +27,7 @@ type PsqlClient struct {
 }
 
 func NewMongoClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *MongoClient {
-	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Cloud)
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Mongo)
 	config := mongo.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)
 	config.UserAgent = fmt.Sprintf(
@@ -48,7 +48,7 @@ func NewMongoClient(clientOptions bundle.ClientOptions, fileConfig *fileconfigur
 }
 
 func NewPSQLClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *PsqlClient {
-	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Cloud)
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.PSQL)
 	config := psql.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",

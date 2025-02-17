@@ -15,6 +15,7 @@ const (
 	Mariadb           = "mariadb"
 	Logging           = "logging"
 	PSQL              = "psql"
+	Mongo             = "mongo"
 	Monitoring        = "monitoring"
 	Cert              = "cert"
 	ContainerRegistry = "containerregistry"
