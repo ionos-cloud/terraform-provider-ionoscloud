@@ -2,16 +2,18 @@ package containerregistry
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"runtime"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
-	"net/http"
-	"os"
-	"runtime"
 )
 
 type Client struct {

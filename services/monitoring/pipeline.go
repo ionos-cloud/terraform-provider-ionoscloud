@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"log"
 	"strings"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 
 	monitoringSDK "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
 )

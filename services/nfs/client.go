@@ -2,9 +2,6 @@ package nfs
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"log"
 	"net/http"
 	"os"
@@ -14,8 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	sdk "github.com/ionos-cloud/sdk-go-nfs"
 )
 
@@ -25,10 +25,12 @@ type Client struct {
 	fileConfig *fileconfiguration.FileConfig
 }
 
+// GetFileConfig returns the file configuration
 func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 	return c.fileConfig
 }
 
+// GetConfig returns the configuration
 func (c *Client) GetConfig() *sdk.Configuration {
 	return c.sdkClient.GetConfig()
 }
@@ -75,14 +77,13 @@ func (c *Client) changeConfigURL(location string) {
 			return
 		}
 	}
-	return
 }
 
 // overrideClientEndpoint todo - after move to bundle, replace with generic function from fileConfig
 func (c *Client) overrideClientEndpoint(productName, location string) {
-	//whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
+	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer c.changeConfigURL(location)
-	//if os.Getenv(ionoscloud.IonosApiUrlEnvVar) != "" {
+	// if os.Getenv(ionoscloud.IonosApiUrlEnvVar) != "" {
 	//	fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionoscloud.IonosApiUrlEnvVar))
 	//	return
 	//}

@@ -3,8 +3,6 @@ package acctest
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"log"
 	"os"
 	"strconv"
@@ -16,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/envar"
@@ -23,6 +22,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud"
 	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 	objstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 )
 
 const (

@@ -2,18 +2,19 @@ package inmemorydb
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 

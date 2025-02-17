@@ -2,8 +2,6 @@ package logging
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"net/http"
 	"os"
 	"runtime"
@@ -12,8 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -36,7 +36,7 @@ func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration
 
 	// override client with location from config file if it exists and no global endpoint it set
 	// todo cguran - remove after testing
-	//if clientOptions.Endpoint == "" && overridesCloudAPI != nil && len(overridesCloudAPI.Endpoints) > 0 {
+	// if clientOptions.Endpoint == "" && overridesCloudAPI != nil && len(overridesCloudAPI.Endpoints) > 0 {
 	//	for _, endpoint := range overridesCloudAPI.Endpoints {
 	//		endpointLocation := endpoint.ChangeConfigURL
 	//		if sdkLocation, ok := location.TerraformToSDK[endpoint.ChangeConfigURL]; ok {

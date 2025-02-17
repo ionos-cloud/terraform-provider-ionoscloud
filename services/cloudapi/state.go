@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"log"
 	"net/url"
 	"time"
@@ -13,6 +12,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
 // GetStateChangeConf gets the default configuration for tracking a request progress

@@ -341,7 +341,7 @@ const (
 	clusterVersionUpdatedValue      = "10.11"
 	clusterInstancesValue           = "1"
 	clusterInstancesUpdatedValue    = "2"
-	clusterLocationValue            = "fr/par"
+	clusterLocationValue            = "de/fra"
 	clusterCoresValue               = "4"
 	clusterCoresUpdatedValue        = "5"
 	clusterRamValue                 = "4"

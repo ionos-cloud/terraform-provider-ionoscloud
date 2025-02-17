@@ -2,18 +2,18 @@ package monitoring
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	monitoring "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 

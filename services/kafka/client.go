@@ -2,19 +2,18 @@ package kafka
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"net/http"
 	"os"
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	kafka "github.com/ionos-cloud/sdk-go-kafka"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 // Client is a wrapper for the Kafka API Client
@@ -23,9 +22,12 @@ type Client struct {
 	fileConfig *fileconfiguration.FileConfig
 }
 
+// GetFileConfig returns configuration read from the file
 func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 	return c.fileConfig
 }
+
+// GetConfig returns the configuration
 func (c *Client) GetConfig() *kafka.Configuration {
 	return c.sdkClient.GetConfig()
 }

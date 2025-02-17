@@ -118,10 +118,10 @@ func testAccProtoV6ProviderFactoriesInternal(t *testing.T, v **schema.Provider) 
 }
 
 func testAccPreCheck(t *testing.T) {
-	//pbUsername := os.Getenv(ionoscloud.IonosUsernameEnvVar)
-	//pbPassword := os.Getenv(ionoscloud.IonosPasswordEnvVar)
-	//pbToken := os.Getenv(ionoscloud.IonosTokenEnvVar)
-	//if pbToken == "" {
+	// pbUsername := os.Getenv(ionoscloud.IonosUsernameEnvVar)
+	// pbPassword := os.Getenv(ionoscloud.IonosPasswordEnvVar)
+	// pbToken := os.Getenv(ionoscloud.IonosTokenEnvVar)
+	// if pbToken == "" {
 	//	if pbUsername == "" || pbPassword == "" {
 	//		t.Fatalf("%s/%s or %s must be set for acceptance tests", ionoscloud.IonosUsernameEnvVar, ionoscloud.IonosPasswordEnvVar, ionoscloud.IonosTokenEnvVar)
 	//	}
