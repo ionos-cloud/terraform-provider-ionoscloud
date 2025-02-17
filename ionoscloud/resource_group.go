@@ -712,7 +712,7 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 		}
 
 		if group.Properties.AccessAndManageIamResources != nil {
-			err := d.Set("access_and_manage_iam_resources", *group.Properties.AccessAndManageAiModelHub)
+			err := d.Set("access_and_manage_iam_resources", *group.Properties.AccessAndManageIamResources)
 			if err != nil {
 				return fmt.Errorf("error while setting access_and_manage_iam_resources property for group %s: %w", d.Id(), err)
 			}

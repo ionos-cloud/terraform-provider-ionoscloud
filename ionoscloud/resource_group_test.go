@@ -49,6 +49,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_registry", "true"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_dataplatform", "true"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_logging", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_cdn", "true"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_vpn", "true"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_api_gateway", "true"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_kaas", "true"),
@@ -76,6 +77,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "manage_registry", constant.GroupResource+"."+constant.GroupTestResource, "manage_registry"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "manage_dataplatform", constant.GroupResource+"."+constant.GroupTestResource, "manage_dataplatform"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_logging", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_logging"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_cdn", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_cdn"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_vpn", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_vpn"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_api_gateway", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_api_gateway"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_and_manage_kaas", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_kaas"),
@@ -108,6 +110,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "manage_registry", constant.GroupResource+"."+constant.GroupTestResource, "manage_registry"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "manage_dataplatform", constant.GroupResource+"."+constant.GroupTestResource, "manage_dataplatform"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_and_manage_logging", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_logging"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_and_manage_cdn", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_cdn"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_and_manage_vpn", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_vpn"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_and_manage_api_gateway", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_api_gateway"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_and_manage_kaas", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_kaas"),
@@ -148,6 +151,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_registry", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_dataplatform", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_logging", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_cdn", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_vpn", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_api_gateway", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_kaas", "false"),
@@ -180,6 +184,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_registry", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_dataplatform", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_logging", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_cdn", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_vpn", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_api_gateway", "false"),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_kaas", "false"),
@@ -317,6 +322,7 @@ resource ` + constant.GroupResource + ` ` + constant.GroupTestResource + ` {
   manage_registry = true
   manage_dataplatform = true
   access_and_manage_logging = true
+  access_and_manage_cdn = true
   access_and_manage_vpn = true
   access_and_manage_api_gateway = true
   access_and_manage_kaas = true
@@ -409,6 +415,7 @@ resource ` + constant.GroupResource + ` "test_user_id" {
   manage_registry = false
   manage_dataplatform = false
   access_and_manage_logging = false
+  access_and_manage_cdn = false
   access_and_manage_vpn = false
   access_and_manage_api_gateway = false
   access_and_manage_kaas = false
