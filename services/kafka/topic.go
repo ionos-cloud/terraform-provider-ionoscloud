@@ -86,7 +86,7 @@ func (c *Client) IsTopicDeleted(ctx context.Context, d *schema.ResourceData) (bo
 	topicID := d.Id()
 	location := d.Get("location").(string)
 
-	c.changeConfigURL(location)
+	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
 
 	_, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()

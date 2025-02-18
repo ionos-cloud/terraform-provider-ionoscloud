@@ -3,6 +3,8 @@ package inmemorydb
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"log"
 	"strings"
 
@@ -13,9 +15,41 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// overrideClientEndpoint todo - after move to bundle, replace with generic function from fileConfig
+func (c *Client) overrideClientEndpoint(productName, location string) {
+	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
+	defer c.changeConfigURL(location)
+	// if os.Getenv(ionoscloud.IonosApiUrlEnvVar) != "" {
+	//	fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionoscloud.IonosApiUrlEnvVar))
+	//	return
+	//}
+	fileConfig := c.GetFileConfig()
+	if fileConfig == nil {
+		return
+	}
+	config := c.GetConfig()
+	if config == nil {
+		return
+	}
+	endpoint := fileConfig.GetProductLocationOverrides(productName, location)
+	if endpoint == nil {
+		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
+		return
+	}
+	config.Servers = inMemoryDB.ServerConfigurations{
+		{
+			URL:         endpoint.Name,
+			Description: shared.EndpointOverridden + location,
+		},
+	}
+	if endpoint.SkipTLSVerify {
+		config.HTTPClient.Transport = utils.CreateTransport(true)
+	}
+}
+
 // CreateReplicaSet sends a 'POST' request to the API to create a replica set.
 func (c *Client) CreateReplicaSet(ctx context.Context, replicaSet inMemoryDB.ReplicaSetCreate, location string) (inMemoryDB.ReplicaSetRead, *inMemoryDB.APIResponse, error) {
-	c.changeConfigURL(location)
+	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	replicaSetResponse, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsPost(ctx).ReplicaSetCreate(replicaSet).Execute()
 	apiResponse.LogInfo()
 	return replicaSetResponse, apiResponse, err
@@ -38,7 +72,7 @@ func (c *Client) IsReplicaSetReady(ctx context.Context, d *schema.ResourceData) 
 
 //nolint:golint
 func (c *Client) DeleteReplicaSet(ctx context.Context, replicaSetID, location string) (*inMemoryDB.APIResponse, error) {
-	c.changeConfigURL(location)
+	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsDelete(ctx, replicaSetID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -46,7 +80,7 @@ func (c *Client) DeleteReplicaSet(ctx context.Context, replicaSetID, location st
 
 //nolint:golint
 func (c *Client) UpdateReplicaSet(ctx context.Context, replicaSetID, location string, replicaSet inMemoryDB.ReplicaSetEnsure) (inMemoryDB.ReplicaSetRead, *inMemoryDB.APIResponse, error) {
-	c.changeConfigURL(location)
+	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	replicaSetResponse, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsPut(ctx, replicaSetID).ReplicaSetEnsure(replicaSet).Execute()
 	apiResponse.LogInfo()
 	return replicaSetResponse, apiResponse, err
@@ -67,7 +101,7 @@ func (c *Client) IsReplicaSetDeleted(ctx context.Context, d *schema.ResourceData
 
 //nolint:golint
 func (c *Client) GetReplicaSet(ctx context.Context, replicaSetID, location string) (inMemoryDB.ReplicaSetRead, *inMemoryDB.APIResponse, error) {
-	c.changeConfigURL(location)
+	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	replicaSet, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsFindById(ctx, replicaSetID).Execute()
 	apiResponse.LogInfo()
 	return replicaSet, apiResponse, err
@@ -75,7 +109,7 @@ func (c *Client) GetReplicaSet(ctx context.Context, replicaSetID, location strin
 
 //nolint:golint
 func (c *Client) GetSnapshot(ctx context.Context, snapshotID, location string) (inMemoryDB.SnapshotRead, *inMemoryDB.APIResponse, error) {
-	c.changeConfigURL(location)
+	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	snapshot, apiResponse, err := c.sdkClient.SnapshotApi.SnapshotsFindById(ctx, snapshotID).Execute()
 	apiResponse.LogInfo()
 	return snapshot, apiResponse, err
@@ -83,7 +117,7 @@ func (c *Client) GetSnapshot(ctx context.Context, snapshotID, location string) (
 
 //nolint:golint
 func (c *Client) ListReplicaSets(ctx context.Context, filterName, location string) (inMemoryDB.ReplicaSetReadList, *inMemoryDB.APIResponse, error) {
-	c.changeConfigURL(location)
+	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	request := c.sdkClient.ReplicaSetApi.ReplicasetsGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)
