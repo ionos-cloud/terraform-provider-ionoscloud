@@ -5,18 +5,19 @@ BATS_LIBS_PATH="${LIBS_PATH:-./libs}"  # fallback to relative path if not set
 load "${BATS_LIBS_PATH}/bats-assert/load"
 load "${BATS_LIBS_PATH}/bats-support/load"
 
+# A helper to check required env vars.
 setup_file() {
-    # CHECK REQUIRED ENV VARS
-    if [ -z "$VALID_IONOS_TOKEN" ]; then
-      echo "ERROR: VALID_IONOS_TOKEN must be set to a valid token for tests that require success." >&2
-      exit 1
-    fi
-    command -v ionosctl >/dev/null 2>&1 || { echo "ERROR: ionosctl command not found"; exit 1; }
+  if [ -z "$VALID_IONOS_TOKEN" ]; then
+    echo "ERROR: VALID_IONOS_TOKEN must be set to a valid token for tests that require success." >&2
+    exit 1
+  fi
+  command -v ionosctl >/dev/null 2>&1 || { echo "ERROR: ionosctl command not found"; exit 1; }
 }
 
 setup() {
   # Create a temporary working directory for Terraform.
-  TMP_DIR=$(mktemp -d)
+  TMP_DIR=/tmp/bats-test/ionoscloud-config
+  mkdir -p "$TMP_DIR"
   export TF_IN_AUTOMATION=1
 
   # Start the provider in debuggable mode and capture its output.
@@ -24,16 +25,16 @@ setup() {
   terraform-provider-ionoscloud -debuggable > "$PLUGIN_LOG" 2>&1 &
   PLUGIN_PID=$!
 
-  # Wait briefly for the provider to start.
+  # Wait for provider startup.
   sleep 2
 
-  # Extract TF_REATTACH_PROVIDERS info from the log.
+  # Extract TF_REATTACH_PROVIDERS from provider log.
   TF_REATTACH_LINE=$(grep -o "TF_REATTACH_PROVIDERS='[^']*'" "$PLUGIN_LOG")
   TF_REATTACH_VALUE=$(echo "$TF_REATTACH_LINE" | sed "s/TF_REATTACH_PROVIDERS='//;s/'//")
   export TF_REATTACH_PROVIDERS="$TF_REATTACH_VALUE"
 
-  # Write a Terraform configuration (Logging Pipeline) into main.tf.
-  cat > "$TMP_DIR/main.tf" <<'EOF'
+  # Write a Terraform configuration for a logging pipeline into main.tf.
+  cat > "$TMP_DIR/main.tf" <<EOF
 terraform {
   required_providers {
     ionoscloud = {
@@ -80,8 +81,8 @@ output "dummy" {
 }
 EOF
 
-  # Write a full config file (mimicking ~/.ionos/config) to config.yaml.
-  # Here profile "user1" gets the valid token (good token) from VALID_IONOS_TOKEN.
+  # Write a full configuration file (config.yaml) mimicking ~/.ionos/config.
+  # Profile user1 gets the good token from VALID_IONOS_TOKEN.
   cat > "$TMP_DIR/config.yaml" <<EOF
 version: 1.0
 currentProfile: user2
@@ -100,17 +101,29 @@ environments:
       - name: logging
         endpoints:
           - location: es/vit
-            name: https://logging.es-vit.ionos.com
+            name: https://logging1.de-fra.ionos.com
+            skipTlsVerify: false
           - location: bla
-            name: https://logging.de-txl.ionos.com
+            name: https://logging1.de-txl.ionos.com
+            certificateAuthData: "certauthdata"
+            skipTlsVerify: true
+      # For custom location testing, we include an endpoint for "mylocation".
+      - name: logging
+        endpoints:
+          - location: mylocation
+            name: https://custom.logging.ionos.com
+            skipTlsVerify: false
   - name: prod
     products:
       - name: logging
         endpoints:
           - location: es/vit
-            name: https://logging.es-vit.ionos.com
+            name: https://logging2.de-fra.ionos.com
+            skipTlsVerify: false
           - location: bla
-            name: https://logging.de-txl.ionos.com
+            name: https://bla.de-txl.ionos.com
+            certificateAuthData: "certauthdata"
+            skipTlsVerify: true
 EOF
 
   # Initialize Terraform.
@@ -118,33 +131,32 @@ EOF
   terraform init -input=false >/dev/null 2>&1
   popd > /dev/null
 
-  # Suppress Terraform debug output for the commands we run.
+  # Suppress Terraform debug output when running commands.
   export TF_LOG=""
 }
 
 teardown() {
+  # Remove any created logging pipelines.
   ionosctl logging-service pipeline delete -af
 
-  # Kill the provider process and clean up temporary files.
+  # Kill provider process and clean up.
   kill "$PLUGIN_PID" 2>/dev/null
   rm -f "$PLUGIN_LOG"
-  rm -rf "$TMP_DIR"
+#  rm -rf "$TMP_DIR"
 
   unset TF_IN_AUTOMATION TF_REATTACH_PROVIDERS TF_LOG
-  unset IONOS_CONFIG_FILE_PATH IONOS_CONFIG_PROFILE IONOS_TOKEN
+  unset IONOS_CONFIG_FILE IONOS_CURRENT_PROFILE IONOS_TOKEN
   unset IONOS_API_URL IONOS_API_URL_LOGGING
 }
 
 # -----------------------------------------------
-# Test Scenarios – using "terraform apply -auto-approve"
+# Test Scenarios
 # -----------------------------------------------
 
-# Scenario 1:
-# IONOS_CONFIG_FILE_PATH set. (Default profile is user2 => token "BAD_TOKEN")
-@test "Config file only: IONOS_CONFIG_FILE_PATH set (default profile user2) fails with 401" {
-  export IONOS_CONFIG_FILE_PATH="$TMP_DIR/config.yaml"
-  # No override: currentProfile is user2, token "BAD_TOKEN" (should fail)
-  unset IONOS_CONFIG_PROFILE IONOS_TOKEN
+# Scenario 1: IONOS_CONFIG_FILE set (default profile user2)
+@test "Scenario 1: Config file only: IONOS_CONFIG_FILE set (default profile user2) fails with 401" {
+  export IONOS_CONFIG_FILE="$TMP_DIR/config.yaml"
+  unset IONOS_CURRENT_PROFILE IONOS_TOKEN
 
   pushd "$TMP_DIR" > /dev/null
   run terraform apply -auto-approve -input=false -no-color
@@ -154,11 +166,10 @@ teardown() {
   assert_output -p "401"
 }
 
-# Scenario 2:
-# IONOS_CONFIG_PROFILE set to user1. (Should use the valid token from config file.)
-@test "Config file only: IONOS_CONFIG_PROFILE set to user1 applies successfully" {
-  export IONOS_CONFIG_FILE_PATH="$TMP_DIR/config.yaml"
-  export IONOS_CONFIG_PROFILE="user1"
+# Scenario 2: IONOS_CURRENT_PROFILE set to user1
+@test "Scenario 2: Config file only: IONOS_CURRENT_PROFILE set to user1 applies successfully" {
+  export IONOS_CONFIG_FILE="$TMP_DIR/config.yaml"
+  export IONOS_CURRENT_PROFILE="user1"
   unset IONOS_TOKEN
 
   pushd "$TMP_DIR" > /dev/null
@@ -169,21 +180,25 @@ teardown() {
   assert_output -p "Apply complete!"
 }
 
-# Scenario 3:
-# Non-existent IONOS_CONFIG_PROFILE.
-@test "Config file only: Non-existent IONOS_CONFIG_PROFILE errors appropriately" {
-  skip "todo"
+# Scenario 3: Non-existent IONOS_CURRENT_PROFILE
+@test "Scenario 3: Config file only: Non-existent IONOS_CURRENT_PROFILE errors appropriately" {
+  export IONOS_CONFIG_FILE="$TMP_DIR/config.yaml"
+  export IONOS_CURRENT_PROFILE="nonexistent"
+  unset IONOS_TOKEN
+
+  pushd "$TMP_DIR" > /dev/null
+  run terraform apply -auto-approve -input=false -no-color
+  popd > /dev/null
+
+  assert_failure
+  assert_output -p "Profile 'nonexistent' not found"
 }
 
-# Scenario 4:
-# IONOS_TOKEN env var overrides config file credentials. (Even if a profile is set, the env var wins.)
-@test "Env var credentials: IONOS_TOKEN overrides config file and apply succeeds" {
-  export IONOS_CONFIG_FILE_PATH="$TMP_DIR/config.yaml"
-  # Even though the config file would use a dummy token for user2,
-  # setting IONOS_TOKEN to a valid token should override them.
-  # according to the docs at least
+# Scenario 4: IONOS_TOKEN overrides config file credentials.
+@test "Scenario 4: Env var credentials: IONOS_TOKEN overrides config file and apply succeeds" {
+  export IONOS_CONFIG_FILE="$TMP_DIR/config.yaml"
   export IONOS_TOKEN="${VALID_IONOS_TOKEN}"
-  unset IONOS_CONFIG_PROFILE
+  unset IONOS_CURRENT_PROFILE
 
   pushd "$TMP_DIR" > /dev/null
   run terraform apply -auto-approve -input=false -no-color
@@ -193,11 +208,10 @@ teardown() {
   assert_output -p "Apply complete!"
 }
 
-# Scenario 5:
-# IONOS_API_URL override should override any endpoint defined in the config file.
-@test "Endpoint override: Global IONOS_API_URL override is accepted and apply succeeds" {
-  export IONOS_CONFIG_FILE_PATH="$TMP_DIR/config.yaml"
-  unset IONOS_CONFIG_PROFILE
+# Scenario 5: IONOS_API_URL override.
+@test "Scenario 5: Global IONOS_API_URL override should override config endpoints" {
+  export IONOS_CONFIG_FILE="$TMP_DIR/config.yaml"
+  unset IONOS_CURRENT_PROFILE
   export IONOS_API_URL="https://override.api.ionos.com"
   export IONOS_TOKEN="${VALID_IONOS_TOKEN}"
 
@@ -205,20 +219,16 @@ teardown() {
   run terraform apply -auto-approve -input=false -no-color
   popd > /dev/null
 
-  # We expect that the override causes Terraform to use the new endpoint.
-  # (Your provider may produce an error if the override endpoint is not resolvable.
-  # Here we check for an error that mentions the override, adjust as needed.)
+  # We expect an error mentioning the override (if the endpoint is unresolvable).
   assert_failure
   assert_output -p "lookup override.api.ionos.com"
 }
 
-# Scenario 6:
-# For products that have location-based URLs: verify that the endpoint is overridden only for the location provided.
-@test "Endpoint override: IONOS_API_URL_LOGGING override is accepted for logging product and apply succeeds" {
-  export IONOS_CONFIG_FILE_PATH="$TMP_DIR/config.yaml"
-  unset IONOS_CONFIG_PROFILE
-  # For logging, override the endpoint using a product-specific variable.
-  export IONOS_API_URL_LOGGING="https://override.logging.endpoint"
+# Scenario 6: For location-based URLs override.
+@test "Scenario 6: IONOS_API_URL_LOGGING override for logging product is applied and apply succeeds" {
+  export IONOS_CONFIG_FILE="$TMP_DIR/config.yaml"
+  unset IONOS_CURRENT_PROFILE
+  export IONOS_API_URL_LOGGING="https://logging.de-fra.ionos.com"
   export IONOS_TOKEN="${VALID_IONOS_TOKEN}"
 
   pushd "$TMP_DIR" > /dev/null
@@ -229,18 +239,91 @@ teardown() {
   assert_output -p "Apply complete!"
 }
 
-# Scenario 7:
-# Change environment in config file: update currentProfile and see if endpoints update accordingly.
-@test "Environment change: switching currentProfile in config file (simulate environment change)" {
-  skip "todo"
+# Scenario 7: Custom location override.
+@test "Scenario 7: Custom location override: when resource uses 'mylocation', config endpoint applies" {
+  # Modify the config file to add a custom endpoint for location "mylocation" (already added in config).
+  # Now, update the Terraform configuration to request logging pipeline in location "mylocation".
+  cat > "$TMP_DIR/main.tf" <<EOF
+terraform {
+  required_providers {
+    ionoscloud = {
+      source  = "ionos-cloud/ionoscloud"
+      version = "1.0.0"
+    }
+  }
 }
 
-# Scenario 8:
-# IONOS_API_URL_product_name override: For logging, test that IONOS_API_URL_LOGGING override works.
-@test "Product-specific override: IONOS_API_URL_LOGGING override is accepted and apply succeeds" {
-  export IONOS_CONFIG_FILE_PATH="$TMP_DIR/config.yaml"
-  unset IONOS_CONFIG_PROFILE
-  export IONOS_API_URL_LOGGING="https://override.logging.endpoint"
+variable "ionos_token" {
+  type    = string
+  default = ""
+}
+
+provider "ionoscloud" {
+  token = var.ionos_token
+}
+
+resource "ionoscloud_logging_pipeline" "example_custom" {
+  location = "mylocation"
+  name     = "pipelineexample-custom"
+  log {
+    source   = "kubernetes"
+    tag      = "customtag"
+    protocol = "http"
+    destinations {
+      type              = "loki"
+      retention_in_days = 7
+    }
+  }
+}
+
+output "dummy" {
+  value = "dummy"
+}
+EOF
+
+  # Use valid token via env.
+  export IONOS_TOKEN="${VALID_IONOS_TOKEN}"
+  unset IONOS_CURRENT_PROFILE
+
+  pushd "$TMP_DIR" > /dev/null
+  run terraform apply -auto-approve -input=false -no-color
+  popd > /dev/null
+
+  assert_success
+  assert_output -p "Apply complete!"
+}
+
+# Scenario 8: Change environment in config file.
+@test "Scenario 8: Changing environment in config file updates credentials and endpoints" {
+  # First, use profile user2 (prod) and expect failure with BAD_TOKEN.
+  export IONOS_CONFIG_FILE="$TMP_DIR/config.yaml"
+  export IONOS_CURRENT_PROFILE="user2"
+  unset IONOS_TOKEN
+
+  pushd "$TMP_DIR" > /dev/null
+  run terraform apply -auto-approve -input=false -no-color
+  popd > /dev/null
+
+  assert_failure
+  assert_output -p "401"
+
+  # Now change currentProfile in the config file to user1.
+  sed -i 's/currentProfile: user2/currentProfile: user1/' "$TMP_DIR/config.yaml"
+
+  pushd "$TMP_DIR" > /dev/null
+  run terraform apply -auto-approve -input=false -no-color
+  popd > /dev/null
+
+  # Expect success because user1 now provides the valid token.
+  assert_success
+  assert_output -p "Apply complete!"
+}
+
+# Scenario 9: Product-specific override.
+@test "Scenario 9: IONOS_API_URL_LOGGING override is accepted and apply succeeds" {
+  export IONOS_CONFIG_FILE="$TMP_DIR/config.yaml"
+  unset IONOS_CURRENT_PROFILE
+  export IONOS_API_URL_LOGGING="https://logging.de-fra.ionos.com"
   export IONOS_TOKEN="${VALID_IONOS_TOKEN}"
 
   pushd "$TMP_DIR" > /dev/null
