@@ -49,6 +49,7 @@ var (
 	}
 )
 
+// NewClient creates a new Kafka client
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	config := kafka.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 

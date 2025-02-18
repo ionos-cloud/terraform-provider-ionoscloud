@@ -23,6 +23,17 @@ type Client struct {
 	fileConfig *fileconfiguration.FileConfig
 }
 
+// GetConfig returns the configuration
+func (c *Client) GetConfig() *shared.Configuration {
+	return c.sdkClient.GetConfig()
+}
+
+// GetFileConfig returns configuration read from the file
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
+}
+
+// NewClient creates a new Logging client
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	config.MaxRetries = constant.MaxRetries
@@ -49,14 +60,7 @@ func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration
 	return client
 }
 
-func (c *Client) GetConfig() *shared.Configuration {
-	return c.sdkClient.GetConfig()
-}
-
-func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
-	return c.fileConfig
-}
-
+// ChangeConfigURL changes the configuration URL based on the location
 func (c *Client) ChangeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLLogging) != "" {

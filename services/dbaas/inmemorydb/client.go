@@ -24,10 +24,12 @@ type Client struct {
 	fileConfig *fileconfiguration.FileConfig
 }
 
+// GetFileConfig - returns the configuration read from the config file
 func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 	return c.fileConfig
 }
 
+// GetConfig - returns the configuration
 func (c *Client) GetConfig() *inMemoryDB.Configuration {
 	return c.sdkClient.GetConfig()
 }

@@ -7,7 +7,6 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objectstoragemanagement "github.com/ionos-cloud/sdk-go-object-storage-management"
 
@@ -29,7 +28,7 @@ func (c *Client) GetBaseClient() *objectstoragemanagement.APIClient {
 
 // NewClient creates a new S3 client with the given credentials and region.
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.ObjectStorageManagement) //todo cguran is this ObjectStorageManagement?
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.ObjectStorageManagement)
 	config := objectstoragemanagement.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)
 

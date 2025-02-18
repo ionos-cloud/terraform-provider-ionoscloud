@@ -16,10 +16,12 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
+// Client is a wrapper for the sdk client
 type Client struct {
 	sdkClient *cr.APIClient
 }
 
+// NewClient creates a new Container Registry client
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.ContainerRegistry)
 	config := cr.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)

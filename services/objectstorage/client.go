@@ -3,8 +3,6 @@ package objectstorage
 import (
 	"bytes"
 	"errors"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"io"
 	"net/http"
 	"os"
@@ -12,8 +10,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
-
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 // Client is a wrapper around the Object Storage client.
@@ -22,6 +22,7 @@ type Client struct {
 	fileConfig *fileconfiguration.FileConfig
 }
 
+// GetFileConfig returns the file configuration.
 func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 	return c.fileConfig
 }

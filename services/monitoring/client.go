@@ -23,14 +23,17 @@ type Client struct { //nolint:golint
 	fileConfig *fileconfiguration.FileConfig
 }
 
+// GetConfig - returns the configuration
 func (c *Client) GetConfig() *shared.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
+// GetFileConfig - returns the configuration read from the config file
 func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 	return c.fileConfig
 }
 
+// NewClient creates a new Monitoring client
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)

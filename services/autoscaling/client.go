@@ -16,10 +16,12 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
+// Client - wrapper over sdk client
 type Client struct {
 	sdkClient *autoscaling.APIClient
 }
 
+// NewClient - returns a new autoscaling client
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Autoscaling)
 	config := autoscaling.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)

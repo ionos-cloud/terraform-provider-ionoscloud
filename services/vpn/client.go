@@ -22,10 +22,12 @@ type Client struct {
 	fileConfig *fileconfiguration.FileConfig
 }
 
+// GetConfig returns the configuration
 func (c *Client) GetConfig() *shared.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
+// GetFileConfig returns configuration read from the file
 func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 	return c.fileConfig
 }

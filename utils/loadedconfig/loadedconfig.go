@@ -1,9 +1,10 @@
 package loadedconfig
 
 import (
+	"log"
+
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"log"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
@@ -45,11 +46,11 @@ type ConfigProviderWithLoaderAndLocation interface {
 func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and override the endpoint
 	defer client.ChangeConfigURL(location)
-	//todo enable this check before loading endpoint from config?
-	//if os.Getenv(ionoscloud.IonosApiUrlEnvVar) != "" {
+	// todo enable this check before loading endpoint from config?
+	// if os.Getenv(ionoscloud.IonosApiUrlEnvVar) != "" {
 	//	fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionoscloud.IonosApiUrlEnvVar))
 	//	return
-	//}
+	// }
 	fileConfig := client.GetFileConfig()
 	if fileConfig == nil {
 		return
