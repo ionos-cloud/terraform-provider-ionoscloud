@@ -49,7 +49,6 @@ func (c *Client) CreateCluster(ctx context.Context, d *schema.ResourceData) (
 ) {
 	location := d.Get("location").(string)
 	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
-	c.changeConfigURL(location)
 
 	request := setClusterPostRequest(d)
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).ClusterCreate(*request).Execute()
@@ -74,7 +73,6 @@ func (c *Client) IsClusterAvailable(ctx context.Context, d *schema.ResourceData)
 // DeleteCluster deletes a Kafka Cluster
 func (c *Client) DeleteCluster(ctx context.Context, id string, location string) (utils.ApiResponseInfo, error) {
 	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
-	c.changeConfigURL(location)
 
 	apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
@@ -85,7 +83,6 @@ func (c *Client) DeleteCluster(ctx context.Context, id string, location string) 
 func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	location := d.Get("location").(string)
 	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
-	c.changeConfigURL(location)
 
 	_, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()

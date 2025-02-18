@@ -11,26 +11,31 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
+// products that do not have a location and will override the endpoint that is used globally
 const (
-	Cloud                   = "cloud"
-	Mariadb                 = "mariadb"
-	Logging                 = "logging"
-	PSQL                    = "psql"
-	Mongo                   = "mongo"
-	Monitoring              = "monitoring"
+	Autoscaling             = "autoscaling"
+	APIGateway              = "apigateway"
+	CDN                     = "cdn"
 	Cert                    = "cert"
-	ContainerRegistry       = "containerregistry"
+	Cloud                   = "cloud"
 	Dataplatform            = "dataplatform"
 	DNS                     = "dns"
-	Autoscaling             = "autoscaling"
-	Kafka                   = "kafka"
-	CDN                     = "cdn"
-	APIGateway              = "apigateway"
-	VPN                     = "vpn"
-	InMemoryDB              = "inmemorydb"
-	ObjectStorage           = "objectstorage"
+	Mongo                   = "mongo"
 	ObjectStorageManagement = "objectstoragemanagement"
-	NFS                     = "nfs"
+	PSQL                    = "psql"
+)
+
+// products that have a location and will override the endpoint that is for each location
+const (
+	ContainerRegistry = "containerregistry"
+	InMemoryDB        = "inmemorydb"
+	Kafka             = "kafka"
+	Logging           = "logging"
+	Mariadb           = "mariadb"
+	Monitoring        = "monitoring"
+	NFS               = "nfs"
+	ObjectStorage     = "objectstorage"
+	VPN               = "vpn"
 )
 
 // ClientOverrideOptions is a struct that represents the client override options
@@ -55,6 +60,9 @@ type Credentials struct {
 // Endpoint is a struct that represents an endpoint
 type Endpoint struct {
 	// the location or the region
+	// Products that do not have a location and will override the endpoint that is used globally:
+	// cloud, objectstoragemanagement, kafka, dns, mongo, psql, dataplatform, creg, autoscaling, apigateway
+	// Products that have location-based endpoints: logging, monitoring, containerregistry, vpn, inmemorydb, nfs, objectstorage, mariadb
 	Location            string `yaml:"location"`
 	Name                string `yaml:"name"`
 	SkipTLSVerify       bool   `yaml:"skipTlsVerify"`
@@ -274,9 +282,4 @@ func AddCertsToClient(httpClient *http.Client, authorityData string) {
 		shared.SdkLogger.Printf("No certs appended, using system certs only")
 	}
 	httpClient.Transport.(*http.Transport).TLSClientConfig.RootCAs = rootCAs
-	//httpClient.Transport = &http.Transport{
-	//	TLSClientConfig: &tls.Config{
-	//		RootCAs: rootCAs,
-	//	},
-	//}
 }
