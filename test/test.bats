@@ -107,12 +107,6 @@ environments:
             name: https://logging1.de-txl.ionos.com
             certificateAuthData: "certauthdata"
             skipTlsVerify: true
-      # For custom location testing, we include an endpoint for "mylocation".
-      - name: logging
-        endpoints:
-          - location: mylocation
-            name: https://custom.logging.ionos.com
-            skipTlsVerify: false
   - name: prod
     products:
       - name: logging
