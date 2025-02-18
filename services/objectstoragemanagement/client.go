@@ -6,10 +6,11 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objectstoragemanagement "github.com/ionos-cloud/sdk-go-object-storage-management"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"

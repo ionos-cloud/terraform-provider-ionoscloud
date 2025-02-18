@@ -3,12 +3,11 @@ package kafka
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	kafka "github.com/ionos-cloud/sdk-go-kafka"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"

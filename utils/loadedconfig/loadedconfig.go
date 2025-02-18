@@ -46,10 +46,10 @@ func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, prod
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and override the endpoint
 	defer client.ChangeConfigURL(location)
 	//todo enable this check before loading endpoint from config?
-	// if os.Getenv(ionoscloud.IonosApiUrlEnvVar) != "" {
+	//if os.Getenv(ionoscloud.IonosApiUrlEnvVar) != "" {
 	//	fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionoscloud.IonosApiUrlEnvVar))
 	//	return
-	// }
+	//}
 	fileConfig := client.GetFileConfig()
 	if fileConfig == nil {
 		return

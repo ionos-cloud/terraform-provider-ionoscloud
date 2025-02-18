@@ -1,13 +1,14 @@
 package logging
 
 import (
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 	"os"
 	"testing"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 func TestClientConfigurationFlowTable(t *testing.T) {

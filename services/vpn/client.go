@@ -2,8 +2,6 @@ package vpn
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"net/http"
 	"os"
 	"runtime"
@@ -11,8 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	vpn "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 

@@ -1,11 +1,13 @@
 package loadedconfig
 
 import (
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"net/http"
 	"testing"
+
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 )
 
 func TestSetClientOptionsFromfileConfig(t *testing.T) {
