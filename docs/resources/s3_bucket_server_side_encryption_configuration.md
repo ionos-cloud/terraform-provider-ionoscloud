@@ -11,6 +11,8 @@ description: |-
 
 Manages Server Side Encryption Configuration for Buckets on IonosCloud.
 
+⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
+
 ## Example Usage
 
 ```hcl
@@ -36,8 +38,6 @@ The following arguments are supported:
 - `rule` - (Required)[block] A block of rule as defined below.
   - `apply_server_side_encryption_by_default` - (Required)[block] Defines the default encryption settings.
     - `sse_algorithm` - (Required)[string] Server-side encryption algorithm to use. Valid values are 'AES256'
-
-⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
 
 ## Import
 

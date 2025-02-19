@@ -11,6 +11,8 @@ description: |-
 
 Manages Lifecycle Configuration for Buckets on IonosCloud.
 
+⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
+
 ## Example Usage
 
 ```hcl
@@ -66,8 +68,6 @@ The following arguments are supported:
     - `noncurrent_days` - (Optional)[int] Specifies the number of days an object is noncurrent before the associated action can be performed.
   - `abort_incomplete_multipart_upload` - (Optional)[block] Specifies the days since the initiation of an incomplete multipart upload that IONOS Object Storage will wait before permanently removing all parts of the upload.
     - `days_after_initiation` - (Optional)[int] Specifies the number of days after which IONOS Object Storage aborts an incomplete multipart upload.
-
-⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
 
 ## Import
 

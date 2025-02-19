@@ -11,6 +11,8 @@ description: |-
 
 The **Objects data source** can be used to search for and return existing objects.
 
+⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
+
 ## Example Usage
 
 ```hcl
@@ -36,9 +38,6 @@ The following arguments are supported:
 - `max_keys` - (Optional)[int] Sets the maximum number of keys returned in the response body.Default is 1000.
 - `fetch_owner` - (Optional)[bool] If set to true, the response includes the owner field in the metadata.
 - `start_after` - (Optional)[string] Specifies the key to start after when listing objects in a bucket.
-
-⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
-
 
 ## Attributes Reference
 

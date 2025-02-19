@@ -11,6 +11,8 @@ description: |-
 
 Manages **Buckets versioning** on IonosCloud.
 
+⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
+
 ## Example Usage
 
 ```hcl
@@ -35,8 +37,6 @@ The following arguments are supported:
 - `versioning_configuration` - (Required)[block] A block of versioning_configuration as defined below.
   - `status` - (Required)[string] The versioning state of the bucket. Can be `Enabled` or `Suspended`.
   - `mfa_delete` - (Optional)[string] Specifies whether MFA delete is enabled or not. Can be `Enabled` or `Disabled`.
-
-⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
 
 ## Import
 
