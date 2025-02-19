@@ -28,13 +28,8 @@ terraform {
   }
 }
 
-variable "ionos_token" {
-  type    = string
-  default = ""
-}
-
 provider "ionoscloud" {
-  token = var.ionos_token
+  token = ""
 }
 
 resource "ionoscloud_logging_pipeline" "example" {
@@ -64,6 +59,7 @@ output "dummy" {
   value = "dummy"
 }
 EOF
+    chmod 600 "/tmp/bats-test/ionoscloud-config/main.tf"
 
     # Write a full configuration file (config) mimicking ~/.ionos/config.
     # Profile user1 gets the good token from VALID_IONOS_TOKEN.
@@ -103,13 +99,29 @@ environments:
             certificateAuthData: "certauthdata"
             skipTlsVerify: true
 EOF
-
+    chmod 600 "/tmp/bats-test/ionoscloud-config/config"
     # Suppress Terraform debug output when running commands.
     export TF_LOG=""
 
 }
 
 setup() {
+  unset IONOS_API_URL IONOS_API_URL_LOGGING IONOS_TOKEN IONOS_USERNAME IONOS_PASSWORD
+
+  # Start the provider in debuggable mode
+  # ( we need to do this before every test because of complicated reasons that I had to debug for hours)
+  PLUGIN_LOG=$(mktemp)
+  terraform-provider-ionoscloud -debuggable > "$PLUGIN_LOG" 2>&1 &
+  PLUGIN_PID=$!
+
+  # Wait for provider startup.
+  sleep 2
+
+  # Extract TF_REATTACH_PROVIDERS from provider log.
+  TF_REATTACH_LINE=$(grep -o "TF_REATTACH_PROVIDERS='[^']*'" "$PLUGIN_LOG")
+  TF_REATTACH_VALUE=$(echo "$TF_REATTACH_LINE" | sed "s/TF_REATTACH_PROVIDERS='//;s/'//")
+  export TF_REATTACH_PROVIDERS="$TF_REATTACH_VALUE"
+
   # Initialize Terraform.
   (
       cd "/tmp/bats-test/ionoscloud-config" || exit
@@ -204,7 +216,7 @@ teardown_file() {
 @test "Scenario 7: Custom location override: when resource uses 'mylocation', config endpoint applies" {
   # Modify the config file to add a custom endpoint for location "mylocation" (already added in config).
   # Now, update the Terraform configuration to request logging pipeline in location "mylocation".
-  cat > "$TMP_DIR/main.tf" <<EOF
+  cat > "/tmp/bats-test/ionoscloud-config/main.tf" <<EOF
 terraform {
   required_providers {
     ionoscloud = {
@@ -214,13 +226,8 @@ terraform {
   }
 }
 
-variable "ionos_token" {
-  type    = string
-  default = ""
-}
-
 provider "ionoscloud" {
-  token = var.ionos_token
+  token = ""
 }
 
 resource "ionoscloud_logging_pipeline" "example_custom" {
@@ -241,6 +248,7 @@ output "dummy" {
   value = "dummy"
 }
 EOF
+  chmod 600 "/tmp/bats-test/ionoscloud-config/main.tf"
 
   # Use valid token via env.
   export IONOS_TOKEN="${VALID_IONOS_TOKEN}"
@@ -256,7 +264,7 @@ EOF
 # Scenario 8: Change environment in config file.
 @test "Scenario 8: Changing environment in config file updates credentials and endpoints" {
   # First, use profile user2 (prod) and expect failure with BAD_TOKEN.
-  export IONOS_CONFIG_FILE="$TMP_DIR/config"
+  export IONOS_CONFIG_FILE="/tmp/bats-test/ionoscloud-config/config"
   export IONOS_CURRENT_PROFILE="user2"
   unset IONOS_TOKEN
 
@@ -266,7 +274,7 @@ EOF
   assert_output -p "401"
 
   # Now change currentProfile in the config file to user1.
-  sed -i 's/currentProfile: user2/currentProfile: user1/' "$TMP_DIR/config"
+  sed -i 's/currentProfile: user2/currentProfile: user1/' "/tmp/bats-test/ionoscloud-config/config"
 
   cd "/tmp/bats-test/ionoscloud-config"|| exit
   run terraform apply -auto-approve -input=false -no-color
@@ -276,9 +284,9 @@ EOF
   assert_output -p "Apply complete!"
 }
 
-# Scenario 9: Product-specific override.
-@test "Scenario 9: IONOS_API_URL_LOGGING override is accepted and apply succeeds" {
-  export IONOS_CONFIG_FILE="$TMP_DIR/config"
+# Scenario 6 extra: Product-specific override.
+@test "Scenario 6 extra: IONOS_API_URL_LOGGING override is accepted and apply succeeds" {
+  export IONOS_CONFIG_FILE="/tmp/bats-test/ionoscloud-config/config"
   unset IONOS_CURRENT_PROFILE
   export IONOS_API_URL_LOGGING="https://logging.de-fra.ionos.com"
   export IONOS_TOKEN="${VALID_IONOS_TOKEN}"
