@@ -37,6 +37,9 @@ The following arguments are supported:
 - `fetch_owner` - (Optional)[bool] If set to true, the response includes the owner field in the metadata.
 - `start_after` - (Optional)[string] Specifies the key to start after when listing objects in a bucket.
 
+⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
+
+
 ## Attributes Reference
 
 The following attributes are returned by the datasource:

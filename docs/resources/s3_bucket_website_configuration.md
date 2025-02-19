@@ -62,6 +62,9 @@ The following arguments are supported:
     - `replace_key_prefix_with` - (Optional) The object key to be used in the redirect request. For example, redirect request to error.html, the replace key prefix will be /error.html. Not required if one of the siblings is present.
     - `replace_key_with` - (Optional) The specific object key to use in the redirect request. For example, redirect request for error.html, the replace key will be /error.html. Not required if one of the siblings is present.
     - `http_redirect_code` - (Optional) The HTTP redirect code to use on the response. Not required if one of the siblings is present.
+
+⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
+
 ## Import
 
 IONOS Object Storage Bucket website configuration can be imported using the `bucket` name.

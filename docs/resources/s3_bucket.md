@@ -53,6 +53,8 @@ The following arguments are supported:
 
 ⚠️ **Note:** The name must be unique across all IONOS accounts in all IONOS Object Storage regions. The name should adhere to the following [restrictions](https://docs.ionos.com/cloud/storage-and-backup/s3-object-storage/concepts/buckets#naming-conventions).
 
+⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
+
 ## Import
 
 Resource Bucket can be imported using the `bucket name`

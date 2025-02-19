@@ -33,6 +33,9 @@ The following arguments are supported:
 - `restrict_public_buckets` - (Optional)[bool] Restricts access to buckets that have public policies. Buckets with policies that grant public access will have their access restricted.
 - `block_public_policy` - (Optional)[bool] Blocks public access to the bucket via bucket policies. Bucket policies that grant public access will not be allowed.
 - `block_public_acls` - (Optional)[bool] Indicates that access to the bucket via Access Control Lists (ACLs) that grant public access is blocked. In other words, ACLs that allow public access are not permitted.
+
+⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
+
 ## Import
 
 Resource Bucket access block can be imported using the `bucket name`

@@ -88,6 +88,9 @@ The following arguments are supported:
 - `mfa` - (Optional) [string]The concatenation of the authentication device's serial number, a space, and the value displayed on your authentication device.
 - `force_destroy` - (Optional)[bool] If true, the object will be destroyed if versioning is enabled then all versions will be destroyed. Default is `false`.
 
+⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
+
+
 ## Import
 
 Resource Object can be imported using the `bucket name` and `object key`

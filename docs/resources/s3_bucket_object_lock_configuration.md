@@ -43,6 +43,8 @@ The following arguments are supported:
     - `days` - (Optional)[int] The default retention period of the bucket in days.
     - `years` - (Optional)[int] The default retention period of the bucket in years.
 
+⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
+
 Days and years are mutually exclusive. You can only specify one of them.
 ## Import
 
