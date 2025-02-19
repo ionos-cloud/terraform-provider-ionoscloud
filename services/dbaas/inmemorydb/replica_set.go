@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,10 +20,10 @@ import (
 func (c *Client) overrideClientEndpoint(productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer c.changeConfigURL(location)
-	// if os.Getenv(ionoscloud.IonosApiUrlEnvVar) != "" {
-	//	fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionoscloud.IonosApiUrlEnvVar))
-	//	return
-	//}
+	if os.Getenv(inMemoryDB.IonosApiUrlEnvVar) != "" {
+		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(inMemoryDB.IonosApiUrlEnvVar))
+		return
+	}
 	fileConfig := c.GetFileConfig()
 	if fileConfig == nil {
 		return

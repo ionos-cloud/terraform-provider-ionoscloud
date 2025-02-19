@@ -1,7 +1,9 @@
 package loadedconfig
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
@@ -46,11 +48,11 @@ type ConfigProviderWithLoaderAndLocation interface {
 func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and override the endpoint
 	defer client.ChangeConfigURL(location)
-	// todo enable this check before loading endpoint from config?
-	// if os.Getenv(ionoscloud.IonosApiUrlEnvVar) != "" {
-	//	fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionoscloud.IonosApiUrlEnvVar))
-	//	return
-	// }
+	// do not set from config if we use IONOS_API_URL
+	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
+		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(shared.IonosApiUrlEnvVar))
+		return
+	}
 	fileConfig := client.GetFileConfig()
 	if fileConfig == nil {
 		return

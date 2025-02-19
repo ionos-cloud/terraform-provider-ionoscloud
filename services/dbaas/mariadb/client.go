@@ -57,10 +57,10 @@ func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration
 func (c *Client) overrideClientEndpoint(productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer c.changeConfigURL(location)
-	// if os.Getenv(ionoscloud.IonosApiUrlEnvVar) != "" {
-	//	fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionoscloud.IonosApiUrlEnvVar))
-	//	return
-	//}
+	if os.Getenv(mariadb.IonosApiUrlEnvVar) != "" {
+		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(mariadb.IonosApiUrlEnvVar))
+		return
+	}
 	fileConfig := c.GetFileConfig()
 	if fileConfig == nil {
 		return
