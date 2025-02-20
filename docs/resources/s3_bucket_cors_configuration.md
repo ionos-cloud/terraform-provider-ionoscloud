@@ -11,6 +11,8 @@ description: |-
 
 Manages Object Lock Configuration for Buckets on IonosCloud.
 
+⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
+
 ## Example Usage
 
 ```hcl
@@ -43,7 +45,6 @@ The following arguments are supported:
   - `expose_headers` - (Optional)[list] Specifies which headers are exposed to the browser.
   - `max_age_seconds` - (Optional)[int] Specifies how long the results of a pre-flight request can be cached in seconds.
   - `id` - (Optional)[int] Container for the Contract Number of the owner
-
 
 Days and years are mutually exclusive. You can only specify one of them.
 ## Import
