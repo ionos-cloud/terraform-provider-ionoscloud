@@ -65,6 +65,10 @@ func (c *InMemoryDBClient) IsReplicaSetReady(ctx context.Context, d *schema.Reso
 	if replicaSet.Metadata == nil || replicaSet.Metadata.State == nil {
 		return false, fmt.Errorf("metadata or state is empty for InMemoryDB replica set with ID: %v", replicaSetID)
 	}
+	if utils.IsStateFailed(*replicaSet.Metadata.State) {
+		return false, fmt.Errorf("replica set with ID: %v is in FAILED state", replicaSetID)
+	}
+
 	log.Printf("[INFO] state of the InMemoryDB replica set with ID: %v is: %v", replicaSetID, *replicaSet.Metadata.State)
 	return strings.EqualFold(*replicaSet.Metadata.State, constant.Available), nil
 }

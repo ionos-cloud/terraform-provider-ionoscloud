@@ -1,7 +1,7 @@
 ## 6.7.2
 ### Fixes
 - Fix provider crashing when `canonical_user_id` is `nil` in the response for object storage access key
-
+- Fail on `FAILED` state for inmemorydb cluster
 ## 6.7.1
 ### Fixes
 - Remove cpu_family and availability_zone from the tests
