@@ -191,8 +191,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id           = ionoscloud_datacenter.datacenter_example.id
   cores                   = 2
   ram                     = 2048
-  availability_zone       = "ZONE_1"
-  cpu_family              = "INTEL_SKYLAKE"
   image_name              = "rocky:latest"
   image_password          = ` + constant.RandomPassword + `.server_image_password.result
   volume {
