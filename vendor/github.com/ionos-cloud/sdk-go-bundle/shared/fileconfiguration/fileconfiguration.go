@@ -18,6 +18,7 @@ const (
 	CDN                     = "cdn"
 	Cert                    = "cert"
 	Cloud                   = "cloud"
+	ContainerRegistry       = "containerregistry"
 	Dataplatform            = "dataplatform"
 	DNS                     = "dns"
 	Mongo                   = "mongo"
@@ -27,15 +28,14 @@ const (
 
 // products that have a location and will override the endpoint that is for each location
 const (
-	ContainerRegistry = "containerregistry"
-	InMemoryDB        = "inmemorydb"
-	Kafka             = "kafka"
-	Logging           = "logging"
-	Mariadb           = "mariadb"
-	Monitoring        = "monitoring"
-	NFS               = "nfs"
-	ObjectStorage     = "objectstorage"
-	VPN               = "vpn"
+	InMemoryDB    = "inmemorydb"
+	Kafka         = "kafka"
+	Logging       = "logging"
+	Mariadb       = "mariadb"
+	Monitoring    = "monitoring"
+	NFS           = "nfs"
+	ObjectStorage = "objectstorage"
+	VPN           = "vpn"
 )
 
 // ClientOverrideOptions is a struct that represents the client override options

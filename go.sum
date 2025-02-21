@@ -132,6 +132,8 @@ github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1 h1:vd3SCqZ1OI5l7Tzql7NDb
 github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1/go.mod h1:JLbyt5wj7+f/njy7pnWD6K+cCfe32p8VrjmKks055+w=
 github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.1 h1:dZLxaH2n0nxCOKMkt49TibOiY1hkaHThpXEgJL0oZng=
 github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.1/go.mod h1:NuUqBA9DyP4PB3MtKy/R9XRHY1RZcwVP6E3tP4FwI7I=
+github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.2 h1:3lL+CwQtJ7vPNQcX3ugvvJd5MUSs6NNUbHEMrxezltE=
+github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.2/go.mod h1:NuUqBA9DyP4PB3MtKy/R9XRHY1RZcwVP6E3tP4FwI7I=
 github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1 h1:+tDoZ8IEPxYwJd6fDIpWksNJs9Zzw7Pu5A39jTew058=
 github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1/go.mod h1:rxOAeyAU6BTfghJibSRDdRNrKm2cIXMpSMe7JIWewJ8=
 github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3 h1:T05nbKqBIw2zmPwaV2pWyFcUVjblLMoShPM9nAYQjLM=
@@ -140,8 +142,12 @@ github.com/ionos-cloud/sdk-go-dns v1.2.1 h1:Sy7Jg5trzObad9VPvEh7BgeJrIhaxdGlBEvG
 github.com/ionos-cloud/sdk-go-dns v1.2.1/go.mod h1:l9gYdwtUshlBOiIi4nHn3RCX81XlV3VoNvLJrO2VfHg=
 github.com/ionos-cloud/sdk-go-kafka v1.0.0 h1:S0Tfy/KlYW7UJW6DoU43fF0/iNPc1YKC+AC56G9wfA4=
 github.com/ionos-cloud/sdk-go-kafka v1.0.0/go.mod h1:yIq1FjRtdcbwmybb42puagpLjmD2wbWAew8UMHO5wqU=
+github.com/ionos-cloud/sdk-go-kafka v1.1.2 h1:q4PV4DGlWwgvvkLmVxl5ffWWYVQcKr8EpEklGc9+9z0=
+github.com/ionos-cloud/sdk-go-kafka v1.1.2/go.mod h1:TfGSquLvfwlnc0Yt0t8OzUEmKHG+2TqoKsV+JZSnM6w=
 github.com/ionos-cloud/sdk-go-nfs v1.1.1 h1:tMMUPGKRQm2z5FTIMFoE/DJ8Xw3522T0jVutCGmsyMw=
 github.com/ionos-cloud/sdk-go-nfs v1.1.1/go.mod h1:jgNAKLmjzBP6RzPnjydleZzVlAL8KnYKPcBjWgLVxJk=
+github.com/ionos-cloud/sdk-go-nfs v1.1.3 h1:mqQOqOQSpcm9ccm6IhyUCLZBRimJlQi5cS16bbPJZo0=
+github.com/ionos-cloud/sdk-go-nfs v1.1.3/go.mod h1:jgNAKLmjzBP6RzPnjydleZzVlAL8KnYKPcBjWgLVxJk=
 github.com/ionos-cloud/sdk-go-object-storage v1.1.0 h1:4JTsxrbzFltF9liAHZ2I9f53rpkrXm8642UwQoQ+pMc=
 github.com/ionos-cloud/sdk-go-object-storage v1.1.0/go.mod h1:GMNkyZp5B70QInLTS79LWbZ7hoEy4F8TWL82zeInwBo=
 github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0 h1:pHRKSNT+cCcr5ghWMkCgY2ErxrcQCAjlCJu/VrdexUw=

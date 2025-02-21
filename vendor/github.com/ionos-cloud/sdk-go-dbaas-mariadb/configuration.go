@@ -27,7 +27,7 @@ const (
 	IonosApiUrlEnvVar     = "IONOS_API_URL"
 	IonosPinnedCertEnvVar = "IONOS_PINNED_CERT"
 	IonosLogLevelEnvVar   = "IONOS_LOG_LEVEL"
-	DefaultIonosServerUrl = "https://mariadb.de-txl.ionos.com"
+	DefaultIonosServerUrl = "https://mariadb.de-fra.ionos.com"
 	DefaultIonosBasePath  = ""
 	defaultMaxRetries     = 3
 	defaultWaitTime       = time.Duration(100) * time.Millisecond
@@ -36,8 +36,8 @@ const (
 
 var (
 	IonosServerUrls = []string{
-		"https://mariadb.de-txl.ionos.com",
 		"https://mariadb.de-fra.ionos.com",
+		"https://mariadb.de-txl.ionos.com",
 		"https://mariadb.es-vit.ionos.com",
 		"https://mariadb.fr-par.ionos.com",
 		"https://mariadb.gb-lhr.ionos.com",
@@ -141,7 +141,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go-dbaas-mariadb/v1.1.1",
+		UserAgent:          "ionos-cloud-sdk-go-dbaas/v1.0.0.Beta",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -153,39 +153,47 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		LogLevel:           getLogLevelFromEnv(),
 		Servers: ServerConfigurations{
 			{
-				URL:         getServerUrl(hostUrl),
-				Description: "Berlin, Germany",
-			},
-			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.de-fra.ionos.com",
 				Description: "Frankfurt, Germany",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
-				Description: "Logroño, Spain",
+				URL:         "https://mariadb.de-txl.ionos.com",
+				Description: "Berlin, Germany",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.es-vit.ionos.com",
+				Description: "LogroÃ±o, Spain",
+			},
+			{
+				URL:         "https://mariadb.fr-par.ionos.com",
 				Description: "Paris, France",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.gb-lhr.ionos.com",
 				Description: "London, Great Britain",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.us-ewr.ionos.com",
 				Description: "Newark, USA",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.us-las.ionos.com",
 				Description: "Las Vegas, USA",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.us-mci.ionos.com",
 				Description: "Lenexa, USA",
 			},
 		},
 		OperationServers: map[string]ServerConfigurations{},
+	}
+	if hostUrl != "" {
+		cfg.Servers = ServerConfigurations{
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "bla overriden endpoint",
+			},
+		}
 	}
 	return cfg
 }

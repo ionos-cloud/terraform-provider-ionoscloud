@@ -19,6 +19,8 @@ import (
 type Backup struct {
 	// The unique ID of the cluster that was backed up.
 	ClusterId *string `json:"clusterId,omitempty"`
+	// The S3 location where the backups will be stored.
+	Location *string `json:"location,omitempty"`
 	// The oldest available timestamp to which you can restore.
 	EarliestRecoveryTargetTime *IonosTime `json:"earliestRecoveryTargetTime,omitempty"`
 	// Size of all base backups in MiB. This is at least the sum of all base backup sizes.
@@ -76,6 +78,44 @@ func (o *Backup) SetClusterId(v string) {
 // HasClusterId returns a boolean if a field has been set.
 func (o *Backup) HasClusterId() bool {
 	if o != nil && o.ClusterId != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetLocation returns the Location field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Backup) GetLocation() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Location
+
+}
+
+// GetLocationOk returns a tuple with the Location field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Backup) GetLocationOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Location, true
+}
+
+// SetLocation sets field value
+func (o *Backup) SetLocation(v string) {
+
+	o.Location = &v
+
+}
+
+// HasLocation returns a boolean if a field has been set.
+func (o *Backup) HasLocation() bool {
+	if o != nil && o.Location != nil {
 		return true
 	}
 
@@ -207,6 +247,10 @@ func (o Backup) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.ClusterId != nil {
 		toSerialize["clusterId"] = o.ClusterId
+	}
+
+	if o.Location != nil {
+		toSerialize["location"] = o.Location
 	}
 
 	if o.EarliestRecoveryTargetTime != nil {

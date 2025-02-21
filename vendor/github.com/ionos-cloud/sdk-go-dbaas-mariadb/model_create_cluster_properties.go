@@ -30,6 +30,7 @@ type CreateClusterProperties struct {
 	// The friendly name of your cluster.
 	DisplayName       *string            `json:"displayName"`
 	MaintenanceWindow *MaintenanceWindow `json:"maintenanceWindow,omitempty"`
+	Backup            *BackupProperties  `json:"backup,omitempty"`
 	Credentials       *DBUser            `json:"credentials"`
 	FromBackup        *RestoreRequest    `json:"fromBackup,omitempty"`
 }
@@ -365,6 +366,44 @@ func (o *CreateClusterProperties) HasMaintenanceWindow() bool {
 	return false
 }
 
+// GetBackup returns the Backup field value
+// If the value is explicit nil, the zero value for BackupProperties will be returned
+func (o *CreateClusterProperties) GetBackup() *BackupProperties {
+	if o == nil {
+		return nil
+	}
+
+	return o.Backup
+
+}
+
+// GetBackupOk returns a tuple with the Backup field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *CreateClusterProperties) GetBackupOk() (*BackupProperties, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Backup, true
+}
+
+// SetBackup sets field value
+func (o *CreateClusterProperties) SetBackup(v BackupProperties) {
+
+	o.Backup = &v
+
+}
+
+// HasBackup returns a boolean if a field has been set.
+func (o *CreateClusterProperties) HasBackup() bool {
+	if o != nil && o.Backup != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetCredentials returns the Credentials field value
 // If the value is explicit nil, the zero value for DBUser will be returned
 func (o *CreateClusterProperties) GetCredentials() *DBUser {
@@ -473,6 +512,10 @@ func (o CreateClusterProperties) MarshalJSON() ([]byte, error) {
 
 	if o.MaintenanceWindow != nil {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
+	}
+
+	if o.Backup != nil {
+		toSerialize["backup"] = o.Backup
 	}
 
 	if o.Credentials != nil {

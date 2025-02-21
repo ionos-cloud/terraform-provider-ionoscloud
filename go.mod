@@ -4,6 +4,8 @@ go 1.22.0
 
 replace github.com/ionos-cloud/sdk-go-bundle/shared => /home/cguran/surse/oursdks/sdk-go-bundle/shared
 
+replace github.com/ionos-cloud/sdk-go-dbaas-mariadb => /tmp/sdk-go
+
 require (
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/cenkalti/backoff/v4 v4.3.0
@@ -27,12 +29,12 @@ require (
 	github.com/ionos-cloud/sdk-go-container-registry v1.2.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.1.1
 	github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1
-	github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.1
+	github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.3
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3
 	github.com/ionos-cloud/sdk-go-dns v1.2.1
-	github.com/ionos-cloud/sdk-go-kafka v1.0.0
-	github.com/ionos-cloud/sdk-go-nfs v1.1.1
+	github.com/ionos-cloud/sdk-go-kafka v1.1.2
+	github.com/ionos-cloud/sdk-go-nfs v1.1.3
 	github.com/ionos-cloud/sdk-go-object-storage v1.1.0
 	github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1
