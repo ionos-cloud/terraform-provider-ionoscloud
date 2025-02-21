@@ -345,7 +345,7 @@ github.com/ionos-cloud/sdk-go-dataplatform
 # github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dbaas-in-memory-db
-# github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.3 => /tmp/sdk-go
+# github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.3
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dbaas-mariadb
 # github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
@@ -630,4 +630,3 @@ google.golang.org/protobuf/types/known/timestamppb
 ## explicit
 gopkg.in/yaml.v3
 # github.com/ionos-cloud/sdk-go-bundle/shared => /home/cguran/surse/oursdks/sdk-go-bundle/shared
-# github.com/ionos-cloud/sdk-go-dbaas-mariadb => /tmp/sdk-go

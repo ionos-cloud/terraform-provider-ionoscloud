@@ -4,7 +4,7 @@ go 1.22.0
 
 replace github.com/ionos-cloud/sdk-go-bundle/shared => /home/cguran/surse/oursdks/sdk-go-bundle/shared
 
-replace github.com/ionos-cloud/sdk-go-dbaas-mariadb => /tmp/sdk-go
+
 
 require (
 	github.com/aws/aws-sdk-go v1.55.5
