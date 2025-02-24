@@ -196,7 +196,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		insecureBool = clientOpts.Insecure.ValueBool()
 	}
 
-	fileConfig, readFileErr := fileconfiguration.ReadConfigFromFile()
+	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
 	if token == "" && (username == "" || password == "") {
 		if readFileErr != nil {
 			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")

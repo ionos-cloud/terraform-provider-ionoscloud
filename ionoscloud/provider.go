@@ -283,7 +283,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	insecure, insecureSet := d.GetOk("insecure")
 	insecureBool := false
 
-	fileConfig, readFileErr := fileconfiguration.ReadConfigFromFile()
+	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
 	if !tokenOk {
 		if !usernameOk || !passwordOk {
 			if readFileErr != nil {

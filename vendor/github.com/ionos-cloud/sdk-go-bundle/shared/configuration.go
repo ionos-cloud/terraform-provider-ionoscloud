@@ -170,7 +170,7 @@ func NewConfigurationFromOptions(clientOptions ClientOptions) *Configuration {
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go/v1.0.4",
+		UserAgent:          "shared-sdk-go",
 		Username:           clientOptions.Credentials.Username,
 		Password:           clientOptions.Credentials.Password,
 		Token:              clientOptions.Credentials.Token,
@@ -180,6 +180,13 @@ func NewConfigurationFromOptions(clientOptions ClientOptions) *Configuration {
 		Servers:            ServerConfigurations{},
 		OperationServers:   map[string]ServerConfigurations{},
 	}
+	//if readFromFile {
+	//	config, err := fileconfiguration.New()
+	//	if err != nil {
+	//		SdkLogger.Printf("Error reading configuration file: %s", err)
+	//	}
+	//	cfg.fileConfiguration = config
+	//}
 	if clientOptions.Endpoint != "" {
 		cfg.Servers = ServerConfigurations{
 			{

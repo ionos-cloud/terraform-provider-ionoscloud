@@ -136,11 +136,9 @@ func ReadProfilesFromFile() *Profiles {
 	return loadedProfiles
 }
 
-// ReadConfigFromFile reads yaml file, loads it into a struct and returns it
+// New reads yaml file, loads it into a struct and returns it
 // IONOS_CONFIG_FILE environment variable can be set to point to the file to be loaded
-func ReadConfigFromFile() (*FileConfig, error) {
-	filePath := ""
-	filePath = os.Getenv(shared.IonosFilePathEnvVar)
+func New(filePath string) (*FileConfig, error) {
 	var err error
 	if filePath == "" {
 		if filePath, err = DefaultConfigFileName(); err != nil {
@@ -165,6 +163,10 @@ func ReadConfigFromFile() (*FileConfig, error) {
 		loadedConfig.CurrentProfile = os.Getenv(shared.IonosCurrentProfileEnvVar)
 	}
 	return loadedConfig, nil
+}
+
+func NewFromEnv() (*FileConfig, error) {
+	return New(os.Getenv(shared.IonosFilePathEnvVar))
 }
 
 // GetCurrentProfile returns the current profile from the loaded configuration
