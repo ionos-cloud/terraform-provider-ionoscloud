@@ -30,7 +30,7 @@ func NewCDNClient(clientOptions bundle.ClientOptions, fileConfig *fileconfigurat
 	config.MaxWaitTime = constant.MaxWaitTime
 
 	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	shared.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
 
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/_ionos-cloud-sdk-go-cdn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",

@@ -7,6 +7,7 @@ package shared
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -141,6 +142,59 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 				Description: "Production",
 			},
 		}
+	}
+	return cfg
+}
+
+// ClientOptions is a struct that represents the client options
+type ClientOptions struct {
+	// Endpoint is the endpoint that will be overridden
+	Endpoint string
+	// SkipTLSVerify skips tls verification. Not recommended for production!
+	SkipTLSVerify bool
+	// Certificate is the certificate that will be used for tls verification
+	Certificate string
+	// Credentials are the credentials that will be used for authentication
+	Credentials Credentials
+}
+
+// Credentials are the credentials that will be used for authentication
+type Credentials struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Token    string `yaml:"token"`
+}
+
+// NewConfigurationFromOptions returns a new shared.Configuration object created from the client options
+func NewConfigurationFromOptions(clientOptions ClientOptions) *Configuration {
+	cfg := &Configuration{
+		DefaultHeader:      make(map[string]string),
+		DefaultQueryParams: url.Values{},
+		UserAgent:          "ionos-cloud-sdk-go/v1.0.4",
+		Username:           clientOptions.Credentials.Username,
+		Password:           clientOptions.Credentials.Password,
+		Token:              clientOptions.Credentials.Token,
+		MaxRetries:         defaultMaxRetries,
+		MaxWaitTime:        defaultMaxWaitTime,
+		WaitTime:           defaultWaitTime,
+		Servers:            ServerConfigurations{},
+		OperationServers:   map[string]ServerConfigurations{},
+	}
+	if clientOptions.Endpoint != "" {
+		cfg.Servers = ServerConfigurations{
+			{
+				URL:         getServerUrl(clientOptions.Endpoint),
+				Description: "Production",
+			},
+		}
+	}
+	if clientOptions.SkipTLSVerify {
+		if transport, ok := cfg.HTTPClient.Transport.(*http.Transport); ok {
+			transport.TLSClientConfig.InsecureSkipVerify = clientOptions.SkipTLSVerify
+		}
+	}
+	if clientOptions.Certificate != "" {
+		AddCertsToClient(cfg.HTTPClient, clientOptions.Certificate)
 	}
 	return cfg
 }
@@ -336,5 +390,19 @@ func OverrideLocationFor(configProvider ConfigProvider, location, endpoint strin
 func SetSkipTLSVerify(configProvider ConfigProvider, skipTLSVerify bool) {
 	configProvider.GetConfig().HTTPClient.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTLSVerify},
+	}
+}
+
+// AddCertsToClient adds certificates to the http client
+func AddCertsToClient(httpClient *http.Client, authorityData string) {
+	rootCAs, _ := x509.SystemCertPool()
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+	if ok := rootCAs.AppendCertsFromPEM([]byte(authorityData)); !ok && SdkLogLevel.Satisfies(Debug) {
+		SdkLogger.Printf("No certs appended, using system certs only")
+	}
+	if transport, ok := httpClient.Transport.(*http.Transport); ok {
+		transport.TLSClientConfig.RootCAs = rootCAs
 	}
 }

@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 	"os"
 	"strconv"
@@ -217,11 +218,11 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		resp.Diagnostics.AddWarning("insecure mode enabled", "This is not recommended for production environments.")
 	}
 	clientOptions := bundle.ClientOptions{
-		ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
+		ClientOptions: shared.ClientOptions{
 			Endpoint:      cleanedEndpoint,
 			SkipTLSVerify: insecureBool,
 			//Certificate:   "",
-			Credentials: fileconfiguration.Credentials{
+			Credentials: shared.Credentials{
 				Username: username,
 				Password: password,
 				Token:    token,

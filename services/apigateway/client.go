@@ -2,6 +2,7 @@ package apigateway
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"net/http"
 	"os"
 	"runtime"
@@ -31,7 +32,7 @@ func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
 	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	shared.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/ionos-cloud-sdk-go-apigateway/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		apigateway.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck

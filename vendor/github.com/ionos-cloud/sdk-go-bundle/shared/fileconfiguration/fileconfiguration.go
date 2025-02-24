@@ -1,10 +1,8 @@
 package fileconfiguration
 
 import (
-	"crypto/x509"
 	"fmt"
 	"gopkg.in/yaml.v3"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -37,25 +35,6 @@ const (
 	ObjectStorage = "objectstorage"
 	VPN           = "vpn"
 )
-
-// ClientOverrideOptions is a struct that represents the client override options
-type ClientOverrideOptions struct {
-	// Endpoint is the endpoint that will be overridden
-	Endpoint string
-	// SkipTLSVerify skips tls verification. Not recommended for production!
-	SkipTLSVerify bool
-	// Certificate is the certificate that will be used for tls verification
-	Certificate string
-	// Credentials are the credentials that will be used for authentication
-	Credentials Credentials
-}
-
-// Credentials are the credentials that will be used for authentication
-type Credentials struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Token    string `yaml:"token"`
-}
 
 // Endpoint is a struct that represents an endpoint
 type Endpoint struct {
@@ -97,7 +76,7 @@ type Profiles struct {
 type Profile struct {
 	Name        string `yaml:"name"`
 	Environment string `yaml:"environment"`
-	Credentials Credentials
+	Credentials shared.Credentials
 }
 
 // FileConfig is a struct that represents the loaded configuration
@@ -253,6 +232,7 @@ func (fileConfig *FileConfig) GetProductOverrides(productName string) *Product {
 	return nil
 }
 
+// GetProductLocationOverrides returns the overrides for a specific product and location for the current environment
 func (fileConfig *FileConfig) GetProductLocationOverrides(productName, location string) *Endpoint {
 	if fileConfig == nil {
 		return nil
@@ -270,16 +250,4 @@ func (fileConfig *FileConfig) GetProductLocationOverrides(productName, location 
 		shared.SdkLogger.Printf("[DEBUG] no endpoint overrides found for product %s and location %s", productName, location)
 	}
 	return nil
-}
-
-// AddCertsToClient adds certificates to the http client
-func AddCertsToClient(httpClient *http.Client, authorityData string) {
-	rootCAs, _ := x509.SystemCertPool()
-	if rootCAs == nil {
-		rootCAs = x509.NewCertPool()
-	}
-	if ok := rootCAs.AppendCertsFromPEM([]byte(authorityData)); !ok && shared.SdkLogLevel.Satisfies(shared.Debug) {
-		shared.SdkLogger.Printf("No certs appended, using system certs only")
-	}
-	httpClient.Transport.(*http.Transport).TLSClientConfig.RootCAs = rootCAs
 }

@@ -2,6 +2,7 @@ package containerregistry
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"net/http"
 	"os"
 	"runtime"
@@ -33,7 +34,7 @@ func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration
 	config.MaxWaitTime = constant.MaxWaitTime
 
 	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	shared.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/_ionos-cloud-sdk-go-container-cr/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		cr.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)

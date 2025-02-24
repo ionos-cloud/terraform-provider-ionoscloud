@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 	"os"
 
@@ -314,11 +315,11 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		insecureBool = insecure.(bool)
 	}
 	clientOptions := bundle.ClientOptions{
-		ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
+		ClientOptions: shared.ClientOptions{
 			Endpoint:      endpoint,
 			SkipTLSVerify: insecureBool,
 			//Certificate:   "",
-			Credentials: fileconfiguration.Credentials{
+			Credentials: shared.Credentials{
 				Username: username,
 				Password: password,
 				Token:    token,

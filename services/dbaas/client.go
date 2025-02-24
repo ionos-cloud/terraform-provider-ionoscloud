@@ -2,6 +2,7 @@ package dbaas
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"net/http"
 	"os"
 	"runtime"
@@ -39,7 +40,7 @@ func NewMongoClient(clientOptions bundle.ClientOptions, fileConfig *fileconfigur
 	config.MaxRetries = constant.MaxRetries
 	config.WaitTime = constant.MaxWaitTime
 	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	shared.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
 	client := MongoClient{
 		sdkClient: mongo.NewAPIClient(config),
 	}
@@ -58,7 +59,7 @@ func NewPSQLClient(clientOptions bundle.ClientOptions, fileConfig *fileconfigura
 	config.MaxRetries = constant.MaxRetries
 	config.WaitTime = constant.MaxWaitTime
 	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	fileconfiguration.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	shared.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
 	client := PsqlClient{
 		sdkClient: psql.NewAPIClient(config),
 	}
