@@ -1,6 +1,7 @@
 ## 6.7.3
 ### Fixes
 - Remove cpu_family, availability_zone and rockylinux-8-GenericCloud-20230518 from docs
+- Do not return an error if acesskey is not found
 ## 6.7.2
 ### Fixes
 - Fix provider crashing when `canonical_user_id` is `nil` in the response for object storage access key

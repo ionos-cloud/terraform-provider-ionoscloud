@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	objectstoragemanagement "github.com/ionos-cloud/sdk-go-object-storage-management"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -54,6 +55,9 @@ func (c *Client) modifyConfigURL() {
 func (c *Client) GetAccessKey(ctx context.Context, accessKeyID string) (objectstoragemanagement.AccessKeyRead, *objectstoragemanagement.APIResponse, error) {
 	c.modifyConfigURL()
 	accessKey, apiResponse, err := c.client.AccesskeysApi.AccesskeysFindById(ctx, accessKeyID).Execute()
+	if apiResponse.HttpNotFound() {
+		return accessKey, apiResponse, nil
+	}
 	apiResponse.LogInfo()
 	return accessKey, apiResponse, err
 }
