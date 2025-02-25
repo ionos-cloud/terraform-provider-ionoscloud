@@ -55,9 +55,6 @@ func (c *Client) modifyConfigURL() {
 func (c *Client) GetAccessKey(ctx context.Context, accessKeyID string) (objectstoragemanagement.AccessKeyRead, *objectstoragemanagement.APIResponse, error) {
 	c.modifyConfigURL()
 	accessKey, apiResponse, err := c.client.AccesskeysApi.AccesskeysFindById(ctx, accessKeyID).Execute()
-	if apiResponse.HttpNotFound() {
-		return accessKey, apiResponse, nil
-	}
 	apiResponse.LogInfo()
 	return accessKey, apiResponse, err
 }
