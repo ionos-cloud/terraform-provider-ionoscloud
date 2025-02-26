@@ -307,12 +307,11 @@ func GetTokenDataCreate(d *schema.ResourceData) (*cr.PostTokenInput, error) {
 	}
 
 	if expiryDate, ok := d.GetOk("expiry_date"); ok {
-		expiryDate, err := convertToTime(expiryDate.(string))
+		expiryDate, err := convertToIonosTime(expiryDate.(string))
 		if err != nil {
 			return nil, err
 		}
-		nullableIonosTime := cr.NullableIonosTime{NullableTime: *(cr.NewNullableTime(expiryDate))}
-		token.Properties.ExpiryDate = &nullableIonosTime
+		token.Properties.ExpiryDate = expiryDate
 	}
 
 	if name, ok := d.GetOk("name"); ok {
@@ -338,15 +337,13 @@ func GetTokenDataUpdate(d *schema.ResourceData) (*cr.PatchTokenInput, error) {
 	token := cr.PatchTokenInput{}
 
 	if expiryDate, ok := d.GetOk("expiry_date"); ok {
-		expiryDate, err := convertToTime(expiryDate.(string))
+		expiryDate, err := convertToIonosTime(expiryDate.(string))
 		if err != nil {
 			return nil, err
 		}
-		nullableIonosTime := cr.NullableIonosTime{NullableTime: *(cr.NewNullableTime(expiryDate))}
-		token.ExpiryDate = &nullableIonosTime
+		token.ExpiryDate = expiryDate
 	} else {
-		nullableIonosTime := cr.NullableIonosTime{NullableTime: *(cr.NewNullableTime(nil))}
-		token.ExpiryDate = &nullableIonosTime
+		token.ExpiryDate = nil
 	}
 
 	if _, ok := d.GetOk("scopes"); ok {
@@ -517,7 +514,8 @@ func GetRegistryFeatures(d *schema.ResourceData) (*cr.RegistryFeatures, diag.Dia
 
 }
 
-func convertToTime(targetTime string) (*time.Time, error) {
+func convertToIonosTime(targetTime string) (*cr.IonosTime, error) {
+	var ionosTime cr.IonosTime
 	var convertedTime time.Time
 	var err error
 
@@ -527,5 +525,6 @@ func convertToTime(targetTime string) (*time.Time, error) {
 			return nil, fmt.Errorf("an error occurred while converting from IonosTime string to time.Time: %w", err)
 		}
 	}
-	return &convertedTime, nil
+	ionosTime.Time = convertedTime
+	return &ionosTime, nil
 }
