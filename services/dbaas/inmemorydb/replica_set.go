@@ -43,9 +43,7 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 			Description: shared.EndpointOverridden + location,
 		},
 	}
-	if endpoint.SkipTLSVerify {
-		config.HTTPClient.Transport = utils.CreateTransport(true)
-	}
+	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
 }
 
 // CreateReplicaSet sends a 'POST' request to the API to create a replica set.

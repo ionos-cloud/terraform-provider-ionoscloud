@@ -3,6 +3,7 @@ package objectstorage
 import (
 	"bytes"
 	"errors"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
 	"net/http"
 	"os"
@@ -12,8 +13,6 @@ import (
 	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 // Client is a wrapper around the Object Storage client.
@@ -40,12 +39,14 @@ func NewClient(id, secret, region, endpoint string, insecure bool, config *filec
 	if envValue := os.Getenv(ionosAPIURLObjectStorage); envValue != "" {
 		endpoint = envValue
 	}
+	certificateAuthData := ""
 	if endpoint == "" {
 		if endpointOverrides := config.GetProductLocationOverrides(fileconfiguration.ObjectStorage, region); endpointOverrides != nil {
 			endpoint = endpointOverrides.Name
 			if !insecure {
 				insecure = endpointOverrides.SkipTLSVerify
 			}
+			certificateAuthData = endpointOverrides.CertificateAuthData
 		}
 	}
 	cfg := objstorage.NewConfiguration(endpoint)
@@ -69,7 +70,7 @@ func NewClient(id, secret, region, endpoint string, insecure bool, config *filec
 		}
 		return err
 	}
-	cfg.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+	cfg.HTTPClient = &http.Client{Transport: shared.CreateTransport(insecure, certificateAuthData)}
 	return &Client{
 		client:     objstorage.NewAPIClient(cfg),
 		fileConfig: config,

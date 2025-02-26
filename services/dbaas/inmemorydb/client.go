@@ -45,7 +45,7 @@ func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration
 	newConfigDbaas.MaxRetries = constant.MaxRetries
 	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
 
-	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	newConfigDbaas.HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
 	newConfigDbaas.UserAgent = fmt.Sprintf(
 		"terraform-provider/ionos-cloud-sdk-go-dbaas-in-memory-db/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		inMemoryDB.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck

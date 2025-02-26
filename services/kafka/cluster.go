@@ -37,9 +37,8 @@ func overrideClientFromFileConfig(client *Client, productName, location string) 
 			Description: shared.EndpointOverridden + location,
 		},
 	}
-	if endpoint.SkipTLSVerify {
-		config.HTTPClient.Transport = utils.CreateTransport(true)
-	}
+	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
+
 }
 
 // CreateCluster creates a new Kafka Cluster

@@ -3,12 +3,12 @@ package loadedconfig
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 )
 
@@ -72,9 +72,8 @@ func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, prod
 			Description: shared.EndpointOverridden + location,
 		},
 	}
-	if endpoint.SkipTLSVerify {
-		config.HTTPClient.Transport = utils.CreateTransport(true)
-	}
+	config.HTTPClient = &http.Client{}
+	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
 }
 
 // SetGlobalClientOptionsFromFileConfig sets the client options from the loaded config if not already set

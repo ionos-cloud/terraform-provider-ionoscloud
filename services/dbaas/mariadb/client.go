@@ -80,9 +80,7 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 			Description: shared.EndpointOverridden + location,
 		},
 	}
-	if endpoint.SkipTLSVerify {
-		config.HTTPClient.Transport = utils.CreateTransport(true)
-	}
+	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
 }
 
 // changeConfigURL modifies the URL inside the client configuration.
