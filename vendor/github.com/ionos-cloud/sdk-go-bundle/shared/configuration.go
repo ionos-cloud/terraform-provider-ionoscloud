@@ -180,13 +180,6 @@ func NewConfigurationFromOptions(clientOptions ClientOptions) *Configuration {
 		Servers:            ServerConfigurations{},
 		OperationServers:   map[string]ServerConfigurations{},
 	}
-	//if readFromFile {
-	//	config, err := fileconfiguration.New()
-	//	if err != nil {
-	//		SdkLogger.Printf("Error reading configuration file: %s", err)
-	//	}
-	//	cfg.fileConfiguration = config
-	//}
 	if clientOptions.Endpoint != "" {
 		cfg.Servers = ServerConfigurations{
 			{
