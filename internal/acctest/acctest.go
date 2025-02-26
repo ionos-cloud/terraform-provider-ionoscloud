@@ -3,6 +3,7 @@ package acctest
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 	"os"
 	"strconv"
@@ -106,7 +107,7 @@ func ObjectStorageClient() (*objstorage.APIClient, error) {
 	if accessKey == "" || secretKey == "" {
 		return nil, fmt.Errorf("%s and %s must be set for acceptance tests", envar.IonosS3AccessKey, envar.IonosS3SecretKey)
 	}
-	fileConfig, readFileErr := fileconfiguration.ReadConfigFromFile()
+	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
 	if readFileErr != nil {
 		log.Printf("Error reading config file: %v", readFileErr)
 	}
@@ -129,9 +130,9 @@ func MonitoringClient() *monitoringService.Client {
 		insecureBool = boolValue
 	}
 	clientOptions := bundle.ClientOptions{
-		ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
+		ClientOptions: shared.ClientOptions{
 			SkipTLSVerify: insecureBool,
-			Credentials: fileconfiguration.Credentials{
+			Credentials: shared.Credentials{
 				Username: username,
 				Password: password,
 				Token:    token,

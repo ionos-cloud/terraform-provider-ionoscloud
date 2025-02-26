@@ -62,7 +62,7 @@ func TestSetClientOptionsFromfileConfig(t *testing.T) {
 				productName: "testProduct",
 			},
 			wantClientOptions: &bundle.ClientOptions{
-				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
+				ClientOptions: shared.ClientOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
 				},
@@ -90,7 +90,7 @@ func TestSetClientOptionsFromfileConfig(t *testing.T) {
 				productName: "testProduct",
 			},
 			wantClientOptions: &bundle.ClientOptions{
-				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
+				ClientOptions: shared.ClientOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
 				},
@@ -401,7 +401,7 @@ func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 			},
 			productName: "testProduct",
 			wantClientOptions: &bundle.ClientOptions{
-				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
+				ClientOptions: shared.ClientOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
 				},
@@ -427,7 +427,7 @@ func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 			},
 			productName: "testProduct",
 			wantClientOptions: &bundle.ClientOptions{
-				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
+				ClientOptions: shared.ClientOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
 				},

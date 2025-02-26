@@ -2,7 +2,6 @@ package monitoring
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"runtime"
 	"strings"
@@ -35,11 +34,9 @@ func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 
 // NewClient creates a new Monitoring client
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
-		clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
-	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/ionos-cloud-sdk-go-monitoring/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		monitoring.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint:staticcheck

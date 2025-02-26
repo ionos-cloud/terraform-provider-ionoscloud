@@ -12,7 +12,6 @@ import (
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
@@ -39,8 +38,8 @@ func NewMongoClient(clientOptions bundle.ClientOptions, fileConfig *fileconfigur
 	}
 	config.MaxRetries = constant.MaxRetries
 	config.WaitTime = constant.MaxWaitTime
-	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	shared.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	config.HTTPClient = http.DefaultClient
+	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	client := MongoClient{
 		sdkClient: mongo.NewAPIClient(config),
 	}
@@ -58,8 +57,8 @@ func NewPSQLClient(clientOptions bundle.ClientOptions, fileConfig *fileconfigura
 	}
 	config.MaxRetries = constant.MaxRetries
 	config.WaitTime = constant.MaxWaitTime
-	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	shared.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	config.HTTPClient = http.DefaultClient
+	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	client := PsqlClient{
 		sdkClient: psql.NewAPIClient(config),
 	}

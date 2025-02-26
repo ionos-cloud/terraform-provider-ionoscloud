@@ -11,7 +11,6 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
@@ -29,8 +28,8 @@ func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration
 	}
 	config.MaxRetries = constant.MaxRetries
 	config.WaitTime = constant.MaxWaitTime
-	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	shared.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	config.HTTPClient = http.DefaultClient
+	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	client := ionoscloud.NewAPIClient(config)
 	return client
 }

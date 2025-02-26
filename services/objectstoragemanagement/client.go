@@ -11,7 +11,6 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objectstoragemanagement "github.com/ionos-cloud/sdk-go-object-storage-management"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
@@ -38,8 +37,8 @@ func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration
 	}
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
-	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	shared.AddCertsToClient(config.HTTPClient, clientOptions.Certificate)
+	config.HTTPClient = http.DefaultClient
+	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		objectstoragemanagement.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck

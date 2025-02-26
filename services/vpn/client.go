@@ -2,7 +2,6 @@ package vpn
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"runtime"
 
@@ -53,10 +52,9 @@ var (
 
 // NewClient returns a new ionoscloud logging client
 func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	newConfig := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	newConfig := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)
 	newConfig.MaxRetries = constant.MaxRetries
 	newConfig.MaxWaitTime = constant.MaxWaitTime
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
 	newConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-vpn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch",
 		vpn.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck

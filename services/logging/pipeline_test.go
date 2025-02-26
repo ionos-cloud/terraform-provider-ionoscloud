@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"os"
 	"testing"
 
@@ -25,11 +26,11 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 		{
 			name: "overrideClientEndpoint",
 			clientOptions: bundle.ClientOptions{
-				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
+				ClientOptions: shared.ClientOptions{
 					Endpoint:      "https://custom.endpoint.com",
 					SkipTLSVerify: true,
 					Certificate:   "",
-					Credentials: fileconfiguration.Credentials{
+					Credentials: shared.Credentials{
 						Username: "test-user",
 						Password: "test-password",
 						Token:    "test-token",
@@ -44,7 +45,7 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 					{
 						Environment: "de/fra",
 						Name:        "default",
-						Credentials: fileconfiguration.Credentials{
+						Credentials: shared.Credentials{
 							Username: "user123",
 							Password: "pass123",
 							Token:    "token123",
@@ -79,11 +80,11 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 		{
 			name: "ProductNotDefinedInEnv",
 			clientOptions: bundle.ClientOptions{
-				ClientOverrideOptions: fileconfiguration.ClientOverrideOptions{
+				ClientOptions: shared.ClientOptions{
 					Endpoint:      "https://custom.endpoint.com",
 					SkipTLSVerify: true,
 					Certificate:   "",
-					Credentials: fileconfiguration.Credentials{
+					Credentials: shared.Credentials{
 						Username: "test-user",
 						Password: "test-password",
 						Token:    "test-token",
@@ -98,7 +99,7 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 					{
 						Environment: "de/fra",
 						Name:        "default",
-						Credentials: fileconfiguration.Credentials{
+						Credentials: shared.Credentials{
 							Username: "user123",
 							Password: "pass123",
 							Token:    "token123",

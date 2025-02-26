@@ -9,6 +9,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -179,6 +180,7 @@ func NewConfigurationFromOptions(clientOptions ClientOptions) *Configuration {
 		WaitTime:           defaultWaitTime,
 		Servers:            ServerConfigurations{},
 		OperationServers:   map[string]ServerConfigurations{},
+		HTTPClient:         http.DefaultClient,
 	}
 	if clientOptions.Endpoint != "" {
 		cfg.Servers = ServerConfigurations{
@@ -188,15 +190,30 @@ func NewConfigurationFromOptions(clientOptions ClientOptions) *Configuration {
 			},
 		}
 	}
-	if clientOptions.SkipTLSVerify {
-		if transport, ok := cfg.HTTPClient.Transport.(*http.Transport); ok {
-			transport.TLSClientConfig.InsecureSkipVerify = clientOptions.SkipTLSVerify
-		}
-	}
-	if clientOptions.Certificate != "" {
-		AddCertsToClient(cfg.HTTPClient, clientOptions.Certificate)
-	}
+	cfg.HTTPClient.Transport = CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	return cfg
+}
+
+func CreateTransport(insecure bool, certificate string) *http.Transport {
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
+	transport := &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		DialContext:           dialer.DialContext,
+		DisableKeepAlives:     true,
+		IdleConnTimeout:       30 * time.Second,
+		TLSHandshakeTimeout:   15 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		MaxIdleConnsPerHost:   3,
+		MaxConnsPerHost:       3,
+	}
+	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: insecure}
+	if certificate != "" {
+		transport.TLSClientConfig.RootCAs = AddCertsToClient(certificate)
+	}
+	return transport
 }
 
 func NewConfigurationFromEnv() *Configuration {
@@ -394,7 +411,7 @@ func SetSkipTLSVerify(configProvider ConfigProvider, skipTLSVerify bool) {
 }
 
 // AddCertsToClient adds certificates to the http client
-func AddCertsToClient(httpClient *http.Client, authorityData string) {
+func AddCertsToClient(authorityData string) *x509.CertPool {
 	rootCAs, _ := x509.SystemCertPool()
 	if rootCAs == nil {
 		rootCAs = x509.NewCertPool()
@@ -402,7 +419,5 @@ func AddCertsToClient(httpClient *http.Client, authorityData string) {
 	if ok := rootCAs.AppendCertsFromPEM([]byte(authorityData)); !ok && SdkLogLevel.Satisfies(Debug) {
 		SdkLogger.Printf("No certs appended, using system certs only")
 	}
-	if transport, ok := httpClient.Transport.(*http.Transport); ok {
-		transport.TLSClientConfig.RootCAs = rootCAs
-	}
+	return rootCAs
 }
