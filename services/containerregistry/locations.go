@@ -7,10 +7,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	cr "github.com/ionos-cloud/sdk-go-container-registry"
+	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
-func (c *Client) GetAllLocations(ctx context.Context) (cr.LocationsResponse, *cr.APIResponse, error) {
+func (c *Client) GetAllLocations(ctx context.Context) (cr.LocationsResponse, *shared.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.LocationsApi.LocationsGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return versions, apiResponse, err
@@ -23,7 +24,7 @@ func SetCRLocationsData(d *schema.ResourceData, locations cr.LocationsResponse) 
 
 	if locations.Items != nil {
 		var locationList []string
-		for _, location := range *locations.Items {
+		for _, location := range locations.Items {
 			locationList = append(locationList, *location.Id)
 		}
 		err := d.Set("locations", locationList)
