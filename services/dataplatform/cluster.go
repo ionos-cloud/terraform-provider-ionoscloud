@@ -24,6 +24,9 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 	if cluster.Metadata == nil || cluster.Metadata.State == nil {
 		return false, fmt.Errorf("expected metadata, got empty for cluster id %s", d.Id())
 	}
+	if utils.IsStateFailed(*cluster.Metadata.State) {
+		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
+	}
 	log.Printf("[DEBUG] dataplatform cluster state %s", *cluster.Metadata.State)
 	return strings.EqualFold(*cluster.Metadata.State, constant.Available), nil
 }
