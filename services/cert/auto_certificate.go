@@ -101,15 +101,17 @@ func GetAutoCertificateDataCreate(d *schema.ResourceData) *certmanager.AutoCerti
 	autoCertificate.Properties.Name = name
 	keyAlgorithm := d.Get("key_algorithm").(string)
 	autoCertificate.Properties.KeyAlgorithm = keyAlgorithm
+	// The API doesn't accept nil for subjectAlternativeNames, so if the attribute is missing from
+	// the configuration file, we have to send an empty list.
+	subjectAlternativeNamesList := make([]string, 0)
 	if subjectAlternativeNames, subjectAlternativeNamesOk := d.GetOk("subject_alternative_names"); subjectAlternativeNamesOk {
 		subjectAlternativeNames := subjectAlternativeNames.([]interface{})
-		var subjectAlternativeNamesList []string
 		for _, subjectAlternativeName := range subjectAlternativeNames {
 			subjectAlternativeName := subjectAlternativeName.(string)
 			subjectAlternativeNamesList = append(subjectAlternativeNamesList, subjectAlternativeName)
 		}
-		autoCertificate.Properties.SubjectAlternativeNames = subjectAlternativeNamesList
 	}
+	autoCertificate.Properties.SubjectAlternativeNames = subjectAlternativeNamesList
 	return &autoCertificate
 }
 
