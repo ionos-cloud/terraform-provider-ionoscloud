@@ -136,7 +136,7 @@ func setRecordPutRequest(d *schema.ResourceData) dns.RecordEnsure {
 
 	if typeValue, ok := d.GetOk("type"); ok {
 		typeString := typeValue.(string)
-		request.Properties.Type = typeString
+		request.Properties.Type = dns.RecordType(typeString)
 	}
 
 	if contentValue, ok := d.GetOk("content"); ok {
