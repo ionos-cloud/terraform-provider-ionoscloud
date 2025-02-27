@@ -20,7 +20,7 @@ var _ datasource.DataSourceWithConfigure = (*pipelineDataSource)(nil)
 var _ datasource.DataSourceWithConfigValidators = (*pipelineDataSource)(nil)
 
 type pipelineDataSource struct {
-	client *monitoringService.MonitoringClient
+	client *monitoringService.Client
 }
 
 type pipelineDataSourceModel struct {

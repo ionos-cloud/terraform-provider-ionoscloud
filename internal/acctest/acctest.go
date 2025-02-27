@@ -3,6 +3,7 @@ package acctest
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 	"os"
 	"strconv"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/envar"
@@ -21,6 +23,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud"
 	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 	objstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 )
 
 const (
@@ -104,17 +107,19 @@ func ObjectStorageClient() (*objstorage.APIClient, error) {
 	if accessKey == "" || secretKey == "" {
 		return nil, fmt.Errorf("%s and %s must be set for acceptance tests", envar.IonosS3AccessKey, envar.IonosS3SecretKey)
 	}
-
-	return objstorageservice.NewClient(accessKey, secretKey, "", "", insecureBool).GetBaseClient(), nil
+	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
+	if readFileErr != nil {
+		log.Printf("Error reading config file: %v", readFileErr)
+	}
+	return objstorageservice.NewClient(accessKey, secretKey, "", "", insecureBool, fileConfig).GetBaseClient(), nil
 }
 
 // MonitoringClient returns a new Monitoring client for acceptance testing
-func MonitoringClient() *monitoringService.MonitoringClient {
+func MonitoringClient() *monitoringService.Client {
 	token := os.Getenv(envar.IonosToken)
 	username := os.Getenv(envar.IonosUsername)
 	password := os.Getenv(envar.IonosPassword)
 	insecureStr := os.Getenv(envar.IonosInsecure)
-	version := ionoscloud.Version
 
 	insecureBool := false
 	if insecureStr != "" {
@@ -124,6 +129,15 @@ func MonitoringClient() *monitoringService.MonitoringClient {
 		}
 		insecureBool = boolValue
 	}
-
-	return monitoringService.NewClient(username, password, token, "", version, "", insecureBool)
+	clientOptions := bundle.ClientOptions{
+		ClientOptions: shared.ClientOptions{
+			SkipTLSVerify: insecureBool,
+			Credentials: shared.Credentials{
+				Username: username,
+				Password: password,
+				Token:    token,
+			},
+		},
+	}
+	return monitoringService.NewClient(clientOptions, nil)
 }
