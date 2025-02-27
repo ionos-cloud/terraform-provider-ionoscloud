@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"strings"
 
+	certsdk "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	certSDK "github.com/ionos-cloud/sdk-go-cert-manager"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
+	certservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 )
 
 func dataSourceCertificateManagerAutoCertificate() *schema.Resource {
@@ -82,7 +83,7 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(fmt.Errorf("please provide either the auto-certificate ID or name"))
 	}
 
-	var autoCertificate certSDK.AutoCertificateRead
+	var autoCertificate certsdk.AutoCertificateRead
 	var err error
 
 	if idOk {
@@ -96,10 +97,10 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching auto-certificates: %w", err))
 		}
-		var results []certSDK.AutoCertificateRead
+		var results []certsdk.AutoCertificateRead
 		if autoCertificates.Items != nil {
-			for _, autoCertificateItem := range *autoCertificates.Items {
-				if autoCertificateItem.Properties != nil && autoCertificateItem.Properties.Name != nil && strings.EqualFold(*autoCertificateItem.Properties.Name, name.(string)) {
+			for _, autoCertificateItem := range autoCertificates.Items {
+				if strings.EqualFold(autoCertificateItem.Properties.Name, name.(string)) {
 					results = append(results, autoCertificateItem)
 				}
 			}
@@ -114,7 +115,7 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 		autoCertificate = results[0]
 	}
 
-	if err := certService.SetAutoCertificateData(d, autoCertificate); err != nil {
+	if err := certservice.SetAutoCertificateData(d, autoCertificate); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil

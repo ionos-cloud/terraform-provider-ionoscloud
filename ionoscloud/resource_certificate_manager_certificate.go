@@ -108,7 +108,7 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 		return diags
 	}
 
-	d.SetId(*certificateDto.Id)
+	d.SetId(certificateDto.Id)
 
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsCertReady); err != nil {
 		return diag.FromErr(err)
