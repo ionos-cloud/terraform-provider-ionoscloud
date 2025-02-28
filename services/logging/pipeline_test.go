@@ -8,14 +8,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 func TestClientConfigurationFlowTable(t *testing.T) {
 	tests := []struct {
 		name            string
-		clientOptions   bundle.ClientOptions
+		clientOptions   clientoptions.TerraformClientOptions
 		fileConfig      *fileconfiguration.FileConfig
 		productName     string
 		location        string
@@ -27,7 +27,7 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 	}{
 		{
 			name: "overrideClientEndpoint",
-			clientOptions: bundle.ClientOptions{
+			clientOptions: clientoptions.TerraformClientOptions{
 				ClientOptions: shared.ClientOptions{
 					Endpoint:      "https://custom.endpoint.com",
 					SkipTLSVerify: true,
@@ -83,7 +83,7 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 		},
 		{
 			name: "ProductNotDefinedInEnvUseGlobal",
-			clientOptions: bundle.ClientOptions{
+			clientOptions: clientoptions.TerraformClientOptions{
 				ClientOptions: shared.ClientOptions{
 					Endpoint:      "https://custom.endpoint.com",
 					SkipTLSVerify: true,

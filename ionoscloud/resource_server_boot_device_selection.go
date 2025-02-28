@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 
@@ -89,7 +89,7 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 }
 
 func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ss := cloudapiserver.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
+	ss := cloudapiserver.Service{Client: meta.(bundleclient.SdkBundle).CloudApiClient, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
@@ -133,7 +133,7 @@ func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.Reso
 }
 
 func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ss := cloudapiserver.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
+	ss := cloudapiserver.Service{Client: meta.(bundleclient.SdkBundle).CloudApiClient, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
