@@ -230,6 +230,11 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		},
 		Version:          version,
 		TerraformVersion: terraformVersion,
+		StorageOptions: bundle.StorageOptions{
+			AccessKey: accessKey,
+			SecretKey: secretKey,
+			Region:    region,
+		},
 	}
 
 	client := &services.SdkBundle{
@@ -249,7 +254,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		APIGatewayClient:              apiGatewayService.NewClient(clientOptions, fileConfig),
 		VPNClient:                     vpn.NewClient(clientOptions, fileConfig),
 		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, fileConfig),
-		S3Client:                      objectStorageService.NewClient(accessKey, secretKey, region, endpoint, insecureBool, fileConfig),
+		S3Client:                      objectStorageService.NewClient(clientOptions, fileConfig),
 		ObjectStorageManagementClient: objectStorageManagementService.NewClient(clientOptions, fileConfig),
 		MonitoringClient:              monitoringService.NewClient(clientOptions, fileConfig),
 	}
