@@ -196,7 +196,9 @@ func SetDataplatformClusterData(d *schema.ResourceData, cluster dataplatform.Clu
 	if cluster.Id != nil {
 		d.SetId(*cluster.Id)
 	}
-
+	if cluster.Properties == nil {
+		return fmt.Errorf("expected properties in the response for the Dataplatform Cluster with ID: %s, but received 'nil' instead", d.Id())
+	}
 	if cluster.Properties.Name != nil {
 		if err := d.Set("name", *cluster.Properties.Name); err != nil {
 			return utils.GenerateSetError(clusterResourceName, "name", err)

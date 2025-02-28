@@ -141,7 +141,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go-dbaas-mariadb/v1.1.1",
+		UserAgent:          "ionos-cloud-sdk-go-dbaas-mariadb/v1.1.3",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -153,39 +153,47 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		LogLevel:           getLogLevelFromEnv(),
 		Servers: ServerConfigurations{
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.de-txl.ionos.com",
 				Description: "Berlin, Germany",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.de-fra.ionos.com",
 				Description: "Frankfurt, Germany",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.es-vit.ionos.com",
 				Description: "Logroño, Spain",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.fr-par.ionos.com",
 				Description: "Paris, France",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.gb-lhr.ionos.com",
 				Description: "London, Great Britain",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.us-ewr.ionos.com",
 				Description: "Newark, USA",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.us-las.ionos.com",
 				Description: "Las Vegas, USA",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://mariadb.us-mci.ionos.com",
 				Description: "Lenexa, USA",
 			},
 		},
 		OperationServers: map[string]ServerConfigurations{},
+	}
+	if hostUrl != "" {
+		cfg.Servers = ServerConfigurations{
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "overriden endpoint",
+			},
+		}
 	}
 	return cfg
 }

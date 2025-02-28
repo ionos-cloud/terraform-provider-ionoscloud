@@ -19,9 +19,9 @@ var locationToURL = map[string]string{
 }
 var ionosAPIURLCert = "IONOS_API_URL_CERT"
 
-// modifyConfigURL modifies the URL inside the client configuration.
+// ChangeConfigURL modifies the URL inside the client configuration.
 // This function is required in order to make requests to different endpoints based on location.
-func (c *Client) modifyConfigURL(location string) {
+func (c *Client) ChangeConfigURL(location string) {
 	clientConfig := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLCert) != "" {
 		clientConfig.Servers = certmanager.ServerConfigurations{
@@ -40,7 +40,7 @@ func (c *Client) modifyConfigURL(location string) {
 
 //nolint:golint
 func (c *Client) GetProvider(ctx context.Context, providerID, location string) (certmanager.ProviderRead, *certmanager.APIResponse, error) {
-	c.modifyConfigURL(location)
+	c.ChangeConfigURL(location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersFindById(ctx, providerID).Execute()
 	apiResponse.LogInfo()
 	return provider, apiResponse, err
@@ -48,7 +48,7 @@ func (c *Client) GetProvider(ctx context.Context, providerID, location string) (
 
 //nolint:golint
 func (c *Client) ListProviders(ctx context.Context, location string) (certmanager.ProviderReadList, *certmanager.APIResponse, error) {
-	c.modifyConfigURL(location)
+	c.ChangeConfigURL(location)
 	providers, apiResponse, err := c.sdkClient.ProviderApi.ProvidersGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return providers, apiResponse, err
@@ -56,7 +56,7 @@ func (c *Client) ListProviders(ctx context.Context, location string) (certmanage
 
 //nolint:golint
 func (c *Client) CreateProvider(ctx context.Context, providerPostData certmanager.ProviderCreate, location string) (certmanager.ProviderRead, *certmanager.APIResponse, error) {
-	c.modifyConfigURL(location)
+	c.ChangeConfigURL(location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersPost(ctx).ProviderCreate(providerPostData).Execute()
 	apiResponse.LogInfo()
 	return provider, apiResponse, err
@@ -64,7 +64,7 @@ func (c *Client) CreateProvider(ctx context.Context, providerPostData certmanage
 
 //nolint:golint
 func (c *Client) UpdateProvider(ctx context.Context, providerID, location string, providerPatchData certmanager.ProviderPatch) (certmanager.ProviderRead, *certmanager.APIResponse, error) {
-	c.modifyConfigURL(location)
+	c.ChangeConfigURL(location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersPatch(ctx, providerID).ProviderPatch(providerPatchData).Execute()
 	apiResponse.LogInfo()
 	return provider, apiResponse, err
@@ -72,7 +72,7 @@ func (c *Client) UpdateProvider(ctx context.Context, providerID, location string
 
 //nolint:golint
 func (c *Client) DeleteProvider(ctx context.Context, providerID, location string) (*certmanager.APIResponse, error) {
-	c.modifyConfigURL(location)
+	c.ChangeConfigURL(location)
 	apiResponse, err := c.sdkClient.ProviderApi.ProvidersDelete(ctx, providerID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err

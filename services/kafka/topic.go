@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	kafka "github.com/ionos-cloud/sdk-go-kafka"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -18,7 +18,7 @@ import (
 func (c *Client) CreateTopic(ctx context.Context, d *schema.ResourceData) (
 	kafka.TopicRead, utils.ApiResponseInfo, error,
 ) {
-	c.changeConfigURL(d.Get("location").(string))
+	overrideClientFromFileConfig(c, fileconfiguration.Kafka, d.Get("location").(string))
 
 	topic := setTopicPostRequest(d)
 	clusterID := d.Get("cluster_id").(string)
@@ -33,7 +33,7 @@ func (c *Client) CreateTopic(ctx context.Context, d *schema.ResourceData) (
 func (c *Client) GetTopicByID(ctx context.Context, clusterID string, topicID string, location string) (
 	kafka.TopicRead, utils.ApiResponseInfo, error,
 ) {
-	c.changeConfigURL(location)
+	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
 
 	topic, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()
@@ -45,7 +45,7 @@ func (c *Client) GetTopicByID(ctx context.Context, clusterID string, topicID str
 func (c *Client) ListTopics(ctx context.Context, clusterID string, location string) (
 	kafka.TopicReadList, utils.ApiResponseInfo, error,
 ) {
-	c.changeConfigURL(location)
+	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
 
 	topics, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
@@ -55,11 +55,10 @@ func (c *Client) ListTopics(ctx context.Context, clusterID string, location stri
 
 // DeleteTopic deletes a Kafka Cluster Topic
 func (c *Client) DeleteTopic(ctx context.Context, clusterID string, topicID string, location string) (utils.ApiResponseInfo, error) {
-	c.changeConfigURL(location)
+	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
 
 	apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsDelete(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()
-
 	return apiResponse, err
 }
 
@@ -86,7 +85,7 @@ func (c *Client) IsTopicDeleted(ctx context.Context, d *schema.ResourceData) (bo
 	topicID := d.Id()
 	location := d.Get("location").(string)
 
-	c.changeConfigURL(location)
+	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
 
 	_, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()

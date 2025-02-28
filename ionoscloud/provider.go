@@ -2,27 +2,21 @@ package ionoscloud
 
 import (
 	"context"
-	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
-	"net/http"
 	"os"
-	"runtime"
-
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-
-	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -31,22 +25,16 @@ import (
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
+	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
+	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
+	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 var Version = "DEV"
-
-type ClientOptions struct {
-	Username         string
-	Password         string
-	Token            string
-	Url              string
-	Version          string
-	TerraformVersion string
-	Insecure         bool
-}
 
 // Provider returns a schema.Provider for ionoscloud
 func Provider() *schema.Provider {
@@ -273,30 +261,48 @@ func Provider() *schema.Provider {
 }
 
 func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
-
-	var clientOpts ClientOptions
-	username, usernameOk := d.GetOk("username")
-	password, passwordOk := d.GetOk("password")
-	token, tokenOk := d.GetOk("token")
+	usernameItf, usernameOk := d.GetOk("username")
+	passwordItf, passwordOk := d.GetOk("password")
+	tokenItf, tokenOk := d.GetOk("token")
+	username := ""
+	if usernameOk {
+		username = usernameItf.(string)
+	}
+	password := ""
+	if passwordOk {
+		password = passwordItf.(string)
+	}
+	token := ""
+	if tokenOk {
+		token = tokenItf.(string)
+	}
 	// for some reason, ENVDEFAULTFUNC does not work for this(boolean?) field
 	if insecure := os.Getenv("IONOS_ALLOW_INSECURE"); insecure != "" {
 		_ = d.Set("insecure", true)
 	}
 	insecure, insecureSet := d.GetOk("insecure")
+	insecureBool := false
 
+	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
 	if !tokenOk {
-		if !usernameOk {
-			diags := diag.FromErr(fmt.Errorf("neither IonosCloud token, nor IonosCloud username has been provided"))
-			return nil, diags
+		if !usernameOk || !passwordOk {
+			if readFileErr != nil {
+				return nil, diag.Errorf("missing credentials, either token or username and password must be set, %s", readFileErr.Error())
+			}
+			profile := fileConfig.GetCurrentProfile()
+			if profile == nil {
+				return nil, diag.Errorf("missing credentials, either token or username and password must be set")
+			}
+			token = profile.Credentials.Token
+			username = profile.Credentials.Username
+			password = profile.Credentials.Password
 		}
-
-		if !passwordOk {
-			diags := diag.FromErr(fmt.Errorf("neither IonosCloud token, nor IonosCloud password has been provided"))
-			return nil, diags
+		if token == "" && (username == "" || password == "") {
+			return nil, diag.Errorf("missing credentials, either token or username and password must be set")
 		}
 	}
 
-	cleanedURL := utils.CleanURL(d.Get("endpoint").(string))
+	endpoint := utils.CleanURL(d.Get("endpoint").(string))
 
 	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
 		// will inject x-contract-number to sdks
@@ -305,126 +311,46 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		}
 	}
 
-	// Standard client configuration
-	clientOpts.Username = username.(string)
-	clientOpts.Password = password.(string)
-	clientOpts.Token = token.(string)
-	clientOpts.Url = cleanedURL
-	clientOpts.TerraformVersion = terraformVersion
 	if insecureSet {
-		clientOpts.Insecure = insecure.(bool)
+		insecureBool = insecure.(bool)
+	}
+	clientOptions := bundle.ClientOptions{
+		ClientOptions: shared.ClientOptions{
+			Endpoint:      endpoint,
+			SkipTLSVerify: insecureBool,
+			//Certificate:   "",
+			Credentials: shared.Credentials{
+				Username: username,
+				Password: password,
+				Token:    token,
+			},
+		},
+		Version:          "",
+		TerraformVersion: terraformVersion,
 	}
 
-	return NewSDKBundleClient(clientOpts), nil
-}
-
-// NewSDKBundleClient returns a new SDK bundle client
-func NewSDKBundleClient(clientOpts ClientOptions) interface{} {
-	clientOpts.Version = ionoscloud.Version
-	return services.SdkBundle{
-		CDNClient:          NewClientByType(clientOpts, cdnClient).(*cdnService.Client),
-		AutoscalingClient:  NewClientByType(clientOpts, autoscalingClient).(*autoscalingService.Client),
-		CertManagerClient:  NewClientByType(clientOpts, certManagerClient).(*cert.Client),
-		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
-		ContainerClient:    NewClientByType(clientOpts, containerRegistryClient).(*crService.Client),
-		DataplatformClient: NewClientByType(clientOpts, dataplatformClient).(*dataplatformService.Client),
-		DNSClient:          NewClientByType(clientOpts, dnsClient).(*dnsService.Client),
-		LoggingClient:      NewClientByType(clientOpts, loggingClient).(*loggingService.Client),
-		MariaDBClient:      NewClientByType(clientOpts, mariaDBClient).(*mariadb.MariaDBClient),
-		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
-		NFSClient:          NewClientByType(clientOpts, nfsClient).(*nfsService.Client),
-		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
-		KafkaClient:        NewClientByType(clientOpts, kafkaClient).(*kafkaService.Client),
-		APIGatewayClient:   NewClientByType(clientOpts, apiGatewayClient).(*apiGatewayService.Client),
-		VPNClient:          NewClientByType(clientOpts, vpnClient).(*vpn.Client),
-		InMemoryDBClient:   NewClientByType(clientOpts, inMemoryDBClient).(*inmemorydb.InMemoryDBClient),
+	client := services.SdkBundle{
+		CDNClient:                     cdnService.NewCDNClient(clientOptions, fileConfig),
+		AutoscalingClient:             autoscalingService.NewClient(clientOptions, fileConfig),
+		CertManagerClient:             cert.NewClient(clientOptions, fileConfig),
+		CloudApiClient:                cloudapi.NewClient(clientOptions, fileConfig),
+		ContainerClient:               crService.NewClient(clientOptions, fileConfig),
+		DataplatformClient:            dataplatformService.NewClient(clientOptions, fileConfig),
+		DNSClient:                     dnsService.NewClient(clientOptions, fileConfig),
+		LoggingClient:                 loggingService.NewClient(clientOptions, fileConfig),
+		MariaDBClient:                 mariadb.NewClient(clientOptions, fileConfig),
+		MongoClient:                   dbaasService.NewMongoClient(clientOptions, fileConfig),
+		PsqlClient:                    dbaasService.NewPSQLClient(clientOptions, fileConfig),
+		NFSClient:                     nfsService.NewClient(clientOptions, fileConfig),
+		KafkaClient:                   kafkaService.NewClient(clientOptions, fileConfig),
+		APIGatewayClient:              apiGatewayService.NewClient(clientOptions, fileConfig),
+		VPNClient:                     vpn.NewClient(clientOptions, fileConfig),
+		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, fileConfig),
+		ObjectStorageManagementClient: objectStorageManagementService.NewClient(clientOptions, fileConfig),
+		MonitoringClient:              monitoringService.NewClient(clientOptions, fileConfig),
 	}
-}
 
-type clientType int
-
-const (
-	ionosClient clientType = iota
-	cdnClient
-	autoscalingClient
-	certManagerClient
-	containerRegistryClient
-	dataplatformClient
-	dnsClient
-	loggingClient
-	mariaDBClient
-	mongoClient
-	nfsClient
-	psqlClient
-	s3Client
-	kafkaClient
-	apiGatewayClient
-	vpnClient
-	inMemoryDBClient
-)
-
-// NewClientByType returns a new client based on the client type
-func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
-	switch clientType {
-	case ionosClient:
-		{
-			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
-			newConfig.UserAgent = fmt.Sprintf(
-				"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
-			)
-			if os.Getenv(constant.IonosDebug) != "" {
-				newConfig.Debug = true
-			}
-			newConfig.MaxRetries = constant.MaxRetries
-			newConfig.WaitTime = constant.MaxWaitTime
-			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOpts.Insecure)}
-			client := ionoscloud.NewAPIClient(newConfig)
-			return client
-		}
-	case cdnClient:
-		return cdnService.NewCDNClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case autoscalingClient:
-		return autoscalingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case certManagerClient:
-		return cert.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case containerRegistryClient:
-		return crService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case dataplatformClient:
-		return dataplatformService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case dnsClient:
-		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case loggingClient:
-		return loggingService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case mariaDBClient:
-		return mariadb.NewMariaDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case mongoClient:
-		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case nfsClient:
-		return nfsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case psqlClient:
-		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case s3Client:
-		{
-			config := objstorage.NewConfiguration(clientOpts.Url)
-			config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOpts.Insecure)}
-			myS3Client := objstorage.NewAPIClient(config)
-			return myS3Client
-		}
-	case kafkaClient:
-		return kafkaService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username, clientOpts.Insecure)
-	case apiGatewayClient:
-		return apiGatewayService.NewClient(
-			clientOpts.Username, clientOpts.Password, clientOpts.Token,
-			clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion, clientOpts.Insecure)
-	case vpnClient:
-		return vpn.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Username, clientOpts.Insecure)
-	case inMemoryDBClient:
-		return inmemorydb.NewInMemoryDBClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username, clientOpts.Insecure)
-	default:
-		log.Fatalf("[ERROR] unknown client type %d", clientType)
-	}
-	return nil
+	return client, nil
 }
 
 // resourceDefaultTimeouts sets default value for each Timeout type

@@ -3,13 +3,15 @@ package cdn
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	"net/http"
 	"runtime"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 // Client is a struct that defines the CDN client
@@ -18,17 +20,17 @@ type Client struct {
 }
 
 // NewCDNClient returns a new CDN client
-func NewCDNClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
-	newConfigCDN := shared.NewConfiguration(username, password, token, url)
-	newConfigCDN.MaxRetries = constant.MaxRetries
-	newConfigCDN.MaxWaitTime = constant.MaxWaitTime
+func NewCDNClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.CDN)
 
-	newConfigCDN.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
-	newConfigCDN.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-cdn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, cdn.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
+	config := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)
+	config.MaxRetries = constant.MaxRetries
+	config.MaxWaitTime = constant.MaxWaitTime
+	config.UserAgent = fmt.Sprintf(
+		"terraform-provider/_ionos-cloud-sdk-go-cdn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		cdn.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	return &Client{
-		SdkClient: cdn.NewAPIClient(newConfigCDN),
+		SdkClient: cdn.NewAPIClient(config),
 	}
 }

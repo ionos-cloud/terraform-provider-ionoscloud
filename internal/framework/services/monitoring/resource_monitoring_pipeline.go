@@ -26,7 +26,7 @@ var (
 )
 
 type pipelineResource struct {
-	client *monitoringService.MonitoringClient
+	client *monitoringService.Client
 }
 
 type pipelineResourceModel struct {
