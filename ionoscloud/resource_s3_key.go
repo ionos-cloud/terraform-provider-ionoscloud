@@ -8,8 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -51,7 +50,7 @@ func resourceS3Key() *schema.Resource {
 }
 
 func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	userId := d.Get("user_id").(string)
 	rsp, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysPost(ctx, userId).Execute()
@@ -68,7 +67,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 	keyId := *rsp.Id
 	d.SetId(keyId)
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -87,7 +86,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(fmt.Errorf("error saving key data %s: %w", keyId, err))
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -95,7 +94,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	userId := d.Get("user_id").(string)
 
@@ -125,7 +124,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	request := ionoscloud.S3Key{}
 	request.Properties = &ionoscloud.S3KeyProperties{}
@@ -150,7 +149,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -158,7 +157,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	userId := d.Get("user_id").(string)
 	apiResponse, err := client.UserS3KeysApi.UmUsersS3keysDelete(ctx, userId, d.Id()).Execute()
@@ -250,7 +249,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	userId := parts[0]
 	keyId := parts[1]
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, keyId).Execute()
 	logApiRequestTime(apiResponse)

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func dataSourcePcc() *schema.Resource {
@@ -161,7 +161,7 @@ func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnec
 }
 
 func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")

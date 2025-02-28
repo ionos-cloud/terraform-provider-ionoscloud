@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -110,7 +110,7 @@ func TestAccLoggingPipeline(t *testing.T) {
 }
 
 func testAccLoggingPipelineDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).LoggingClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).LoggingClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	defer cancel()
 
@@ -133,7 +133,7 @@ func testAccLoggingPipelineDestroyCheck(s *terraform.State) error {
 
 func testAccLoggingPipelineExistenceCheck(path string, pipeline *logging.Pipeline) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).LoggingClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).LoggingClient
 		rs, ok := s.RootModule().Resources[path]
 
 		if !ok {

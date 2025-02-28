@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -54,7 +54,7 @@ func dataSourceDbaasPgSqlDatabases() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).PsqlClient
 	clusterId := d.Get("cluster_id").(string)
 	owner, ownerOk := d.GetOk("owner")
 	resourceName := "PgSQL databases"

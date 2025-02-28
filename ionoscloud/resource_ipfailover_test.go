@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -76,7 +76,7 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 
 func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -112,7 +112,7 @@ func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 }
 
 func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	defer cancel()

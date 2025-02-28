@@ -11,7 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	dns "github.com/ionos-cloud/sdk-go-dns"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -110,7 +111,7 @@ func TestAccDNSRecord(t *testing.T) {
 }
 
 func testAccDNSRecordDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).DNSClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).DNSClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	defer cancel()
 
@@ -134,7 +135,7 @@ func testAccDNSRecordDestroyCheck(s *terraform.State) error {
 
 func testAccDNSRecordExistenceCheck(path string, record *dns.RecordRead) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).DNSClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).DNSClient
 		rs, ok := s.RootModule().Resources[path]
 
 		if !ok {

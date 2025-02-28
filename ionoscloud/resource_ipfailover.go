@@ -6,15 +6,13 @@ import (
 	"log"
 	"strings"
 
+	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilan"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -63,7 +61,7 @@ func resourceLanIPFailover() *schema.Resource {
 }
 
 func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -94,7 +92,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(fmt.Errorf("an error occurred while patching a lans IP failover group, LAN ID: %s, error: %w", lanId, err))
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -104,7 +102,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -149,7 +147,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -190,7 +188,7 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 			return diags
 		}
 
-		if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return diag.FromErr(errState)
 		}
 	}
@@ -198,7 +196,7 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -229,7 +227,7 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -246,7 +244,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	lanId := parts[1]
 	ip := parts[2]
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 	apiResponse.LogInfo()

@@ -57,10 +57,7 @@ func TestAccBucketPublicAccessBlockResource(t *testing.T) {
 }
 
 func testAccCheckBucketPublicAccessBlockDestroy(s *terraform.State) error {
-	client, err := acctest.ObjectStorageClient()
-	if err != nil {
-		return err
-	}
+	client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_s3_bucket_public_access_block" {

@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go-nfs"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -94,7 +94,7 @@ func resourceNFSCluster() *schema.Resource {
 }
 
 func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 
 	response, _, err := client.CreateNFSCluster(ctx, d)
 	if err != nil {
@@ -113,7 +113,7 @@ func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 
 	response, _, err := client.UpdateNFSCluster(ctx, d)
 	if err != nil {
@@ -130,7 +130,7 @@ func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 	clusterID := d.Id()
 	_, err := client.DeleteNFSCluster(ctx, d)
 	if err != nil {
@@ -144,7 +144,7 @@ func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<replica_set_id>'", d.Id())
@@ -172,7 +172,7 @@ func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 	cluster, err := findCluster(ctx, d, d.Id(), d.Get("location").(string), client)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error finding NFS Cluster: %w", err))

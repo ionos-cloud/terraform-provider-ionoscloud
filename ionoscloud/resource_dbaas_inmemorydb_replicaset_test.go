@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -179,7 +179,7 @@ func TestAccDBaaSInMemoryDBReplicaSetBasic(t *testing.T) {
 }
 
 func testAccCheckDBaaSInMemoryDBReplicaSetDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).InMemoryDBClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).InMemoryDBClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	defer cancel()
 	for _, rs := range s.RootModule().Resources {
@@ -200,7 +200,7 @@ func testAccCheckDBaaSInMemoryDBReplicaSetDestroyCheck(s *terraform.State) error
 
 func testAccCheckDBaaSInMemoryDBReplicaSetExists(n string, replicaSet *inMemoryDB.ReplicaSetRead) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).InMemoryDBClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).InMemoryDBClient
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("resource not found: %s", n)

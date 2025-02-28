@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -121,7 +122,7 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 }
 
 func testAccCheckContainerRegistryDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).ContainerClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).ContainerClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -151,7 +152,7 @@ func testAccCheckContainerRegistryDestroyCheck(s *terraform.State) error {
 
 func testAccCheckContainerRegistryExists(n string, registry *cr.RegistryResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).ContainerClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).ContainerClient
 
 		rs, ok := s.RootModule().Resources[n]
 

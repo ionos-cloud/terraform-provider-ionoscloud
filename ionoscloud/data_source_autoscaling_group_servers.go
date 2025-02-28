@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 // DataSourceAutoscalingGroupServers defines the schema for the Autoscaling Group Servers data source
@@ -39,7 +39,7 @@ func DataSourceAutoscalingGroupServers() *schema.Resource {
 }
 
 func dataSourceAutoscalingServersRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).AutoscalingClient
+	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 
 	id, idOk := d.GetOk("group_id")
 

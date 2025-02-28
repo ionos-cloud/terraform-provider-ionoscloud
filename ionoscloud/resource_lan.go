@@ -7,8 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -88,7 +87,7 @@ func resourceLan() *schema.Resource {
 }
 
 func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	public := d.Get("public").(bool)
 	request := ionoscloud.Lan{
 		Properties: &ionoscloud.LanProperties{
@@ -129,9 +128,9 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	log.Printf("[INFO] LAN ID: %s", d.Id())
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if errState != nil {
-			if cloudapi.IsRequestFailed(errState) {
+			if bundleclient.IsRequestFailed(errState) {
 				d.SetId("")
 			}
 		}
@@ -167,7 +166,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 
@@ -195,7 +194,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	properties := &ionoscloud.LanProperties{}
 	newValue := d.Get("public")
 	public := newValue.(bool)
@@ -238,7 +237,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -246,7 +245,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 
 	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
@@ -271,7 +270,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -76,7 +76,7 @@ func resourceCertificateManagerProvider() *schema.Resource {
 }
 
 func providerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	location := d.Get("location").(string)
 
 	providerCreateData := cert.GetProviderDataCreate(d)
@@ -98,7 +98,7 @@ func providerCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func providerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	providerID := d.Id()
 	location := d.Get("location").(string)
 	provider, apiResponse, err := client.GetProvider(ctx, providerID, location)
@@ -117,7 +117,7 @@ func providerRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 }
 
 func providerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	providerID := d.Id()
 	location := d.Get("location").(string)
 
@@ -136,7 +136,7 @@ func providerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func providerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	providerID := d.Id()
 	location := d.Get("location").(string)
 	apiResponse, err := client.DeleteProvider(ctx, providerID, location)
@@ -155,7 +155,7 @@ func providerDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func providerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid import ID: %v, expected ID in the format: '<location>:<provider_id>'", d.Id())

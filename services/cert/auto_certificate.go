@@ -17,7 +17,7 @@ import (
 //
 //nolint:golint
 func (c *Client) GetAutoCertificate(ctx context.Context, autoCertificateID, location string) (certmanager.AutoCertificateRead, *certmanager.APIResponse, error) {
-	c.modifyConfigURL(location)
+	c.ChangeConfigURL(location)
 	autoCertificate, apiResponse, err := c.sdkClient.AutoCertificateApi.AutoCertificatesFindById(ctx, autoCertificateID).Execute()
 	apiResponse.LogInfo()
 	return autoCertificate, apiResponse, err
@@ -25,7 +25,7 @@ func (c *Client) GetAutoCertificate(ctx context.Context, autoCertificateID, loca
 
 //nolint:golint
 func (c *Client) ListAutoCertificates(ctx context.Context, location string) (certmanager.AutoCertificateReadList, *certmanager.APIResponse, error) {
-	c.modifyConfigURL(location)
+	c.ChangeConfigURL(location)
 	autoCertificates, apiResponse, err := c.sdkClient.AutoCertificateApi.AutoCertificatesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return autoCertificates, apiResponse, err
@@ -33,7 +33,7 @@ func (c *Client) ListAutoCertificates(ctx context.Context, location string) (cer
 
 //nolint:golint
 func (c *Client) CreateAutoCertificate(ctx context.Context, location string, autoCertificatePostData certmanager.AutoCertificateCreate) (certmanager.AutoCertificateRead, *certmanager.APIResponse, error) {
-	c.modifyConfigURL(location)
+	c.ChangeConfigURL(location)
 	autoCertificate, apiResponse, err := c.sdkClient.AutoCertificateApi.AutoCertificatesPost(ctx).AutoCertificateCreate(autoCertificatePostData).Execute()
 	apiResponse.LogInfo()
 	return autoCertificate, apiResponse, err
@@ -41,7 +41,7 @@ func (c *Client) CreateAutoCertificate(ctx context.Context, location string, aut
 
 //nolint:golint
 func (c *Client) UpdateAutoCertificate(ctx context.Context, autoCertificateID, location string, autoCertificatePatchData certmanager.AutoCertificatePatch) (certmanager.AutoCertificateRead, *certmanager.APIResponse, error) {
-	c.modifyConfigURL(location)
+	c.ChangeConfigURL(location)
 	autoCertificate, apiResponse, err := c.sdkClient.AutoCertificateApi.AutoCertificatesPatch(ctx, autoCertificateID).AutoCertificatePatch(autoCertificatePatchData).Execute()
 	apiResponse.LogInfo()
 	return autoCertificate, apiResponse, err
@@ -49,7 +49,7 @@ func (c *Client) UpdateAutoCertificate(ctx context.Context, autoCertificateID, l
 
 //nolint:golint
 func (c *Client) DeleteAutoCertificate(ctx context.Context, autoCertificateID, location string) (*certmanager.APIResponse, error) {
-	c.modifyConfigURL(location)
+	c.ChangeConfigURL(location)
 	apiResponse, err := c.sdkClient.AutoCertificateApi.AutoCertificatesDelete(ctx, autoCertificateID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err

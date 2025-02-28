@@ -6,8 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
@@ -100,7 +99,7 @@ and log the extent to which your instances are being accessed.`,
 }
 
 func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	networkLoadBalancer := ionoscloud.NetworkLoadBalancer{
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
@@ -189,8 +188,8 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 
 	d.SetId(*networkLoadBalancerResp.Id)
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		if cloudapi.IsRequestFailed(errState) {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
 		return diag.FromErr(errState)
@@ -200,7 +199,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -225,7 +224,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	request := ionoscloud.NetworkLoadBalancer{
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
 	}
@@ -334,7 +333,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -342,7 +341,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -354,7 +353,7 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -364,7 +363,7 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {

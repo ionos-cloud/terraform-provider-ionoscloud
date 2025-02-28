@@ -7,7 +7,7 @@ import (
 
 	ionoscloudcdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
@@ -138,7 +138,7 @@ func resourceCDNDistribution() *schema.Resource {
 
 func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(services.SdkBundle).CDNClient
+	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	distributionDomain := d.Get("domain").(string)
 
@@ -176,7 +176,7 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CDNClient
+	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	distribution, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsFindById(ctx, d.Id()).Execute()
 
@@ -199,7 +199,7 @@ func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CDNClient
+	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	distributionDomain := d.Get("domain").(string)
 
@@ -237,7 +237,7 @@ func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceCDNDistributionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CDNClient
+	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	_, err := client.SdkClient.DistributionsApi.DistributionsDelete(ctx, d.Id()).Execute()
 
@@ -251,7 +251,7 @@ func resourceCDNDistributionDelete(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceCDNDistributionImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := *meta.(services.SdkBundle).CDNClient
+	client := *meta.(bundleclient.SdkBundle).CDNClient
 
 	distributionID := d.Id()
 

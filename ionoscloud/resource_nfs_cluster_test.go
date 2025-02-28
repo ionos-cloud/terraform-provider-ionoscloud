@@ -9,7 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -70,7 +71,7 @@ func TestAccNFSClusterBasic(t *testing.T) {
 }
 
 func testAccCheckNFSClusterDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).NFSClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).NFSClient
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != constant.NFSClusterResource {
@@ -91,7 +92,7 @@ func testAccCheckNFSClusterDestroy(s *terraform.State) error {
 
 func testAccCheckNFSClusterExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).NFSClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NFSClient
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {

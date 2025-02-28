@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -77,8 +77,8 @@ func resourceAPIGateway() *schema.Resource {
 }
 
 func resourceAPIGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).APIGatewayClient
-	logClient := meta.(services.SdkBundle).LoggingClient
+	client := meta.(bundleclient.SdkBundle).APIGatewayClient
+	logClient := meta.(bundleclient.SdkBundle).LoggingClient
 
 	logs, ok := d.GetOk("logs")
 	if ok && logs.(bool) {
@@ -107,8 +107,8 @@ func resourceAPIGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceAPIGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).APIGatewayClient
-	logClient := meta.(services.SdkBundle).LoggingClient
+	client := meta.(bundleclient.SdkBundle).APIGatewayClient
+	logClient := meta.(bundleclient.SdkBundle).LoggingClient
 
 	logs, ok := d.GetOk("logs")
 	if ok && logs.(bool) {
@@ -135,7 +135,7 @@ func resourceAPIGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceAPIGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).APIGatewayClient
+	client := meta.(bundleclient.SdkBundle).APIGatewayClient
 	gatewayID := d.Id()
 	_, err := client.DeleteAPIGateway(ctx, gatewayID)
 	if err != nil {
@@ -157,7 +157,7 @@ func resourceAPIGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceAPIGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).APIGatewayClient
+	client := meta.(bundleclient.SdkBundle).APIGatewayClient
 	gatewayID := d.Id()
 	gateway, resp, err := client.GetAPIGatewayByID(ctx, gatewayID)
 	if err != nil {

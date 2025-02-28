@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 )
 
 func dataSourceServer() *schema.Resource {
@@ -457,7 +457,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 }
 
 func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {

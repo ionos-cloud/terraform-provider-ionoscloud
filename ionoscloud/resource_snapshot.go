@@ -10,8 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func resourceSnapshot() *schema.Resource {
@@ -122,7 +121,7 @@ func resourceSnapshot() *schema.Resource {
 }
 
 func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	volumeId := d.Get("volume_id").(string)
@@ -148,8 +147,8 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	d.SetId(*rsp.Id)
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		if cloudapi.IsRequestFailed(errState) {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
 		return diag.FromErr(errState)
@@ -159,7 +158,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -181,7 +180,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	name := d.Get("name").(string)
 	input := ionoscloud.NewSnapshotProperties()
@@ -221,7 +220,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -229,7 +228,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -238,7 +237,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -247,7 +246,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	snapshotId := d.Id()
 	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()

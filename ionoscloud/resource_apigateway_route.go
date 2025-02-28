@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -117,7 +117,7 @@ func resourceAPIGatewayRoute() *schema.Resource {
 }
 
 func resourceAPIGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).APIGatewayClient
+	client := meta.(bundleclient.SdkBundle).APIGatewayClient
 
 	createdRoute, _, err := client.CreateRoute(ctx, d)
 	if err != nil {
@@ -139,7 +139,7 @@ func resourceAPIGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).APIGatewayClient
+	client := meta.(bundleclient.SdkBundle).APIGatewayClient
 
 	routeID := d.Id()
 	gatewayID := d.Get("gateway_id").(string)
@@ -164,7 +164,7 @@ func resourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceAPIGatewayRouteUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).APIGatewayClient
+	client := meta.(bundleclient.SdkBundle).APIGatewayClient
 
 	updatedRoute, _, err := client.UpdateRoute(ctx, d)
 	if err != nil {
@@ -186,7 +186,7 @@ func resourceAPIGatewayRouteUpdate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceAPIGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).APIGatewayClient
+	client := meta.(bundleclient.SdkBundle).APIGatewayClient
 	gatewayID := d.Get("gateway_id").(string)
 	routeID := d.Id()
 

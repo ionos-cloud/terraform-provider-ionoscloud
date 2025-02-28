@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -83,7 +83,7 @@ func resourceKafkaTopic() *schema.Resource {
 	}
 }
 func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).KafkaClient
+	client := meta.(bundleclient.SdkBundle).KafkaClient
 
 	createdTopic, _, err := client.CreateTopic(ctx, d)
 	if err != nil {
@@ -108,7 +108,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).KafkaClient
+	client := meta.(bundleclient.SdkBundle).KafkaClient
 	topicID := d.Id()
 	clusterID := d.Get("cluster_id").(string)
 	location := d.Get("location").(string)
@@ -133,7 +133,7 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).KafkaClient
+	client := meta.(bundleclient.SdkBundle).KafkaClient
 	topicID := d.Id()
 	clusterID := d.Get("cluster_id").(string)
 	location := d.Get("location").(string)

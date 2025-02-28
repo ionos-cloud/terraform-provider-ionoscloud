@@ -7,7 +7,8 @@ import (
 	"fmt"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -58,7 +59,7 @@ func TestAccKeyBasic(t *testing.T) {
 
 func testAccChecksKeyDestroyCheck(s *terraform.State) error {
 
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != constant.S3KeyResource {
@@ -84,7 +85,7 @@ func testAccChecksKeyDestroyCheck(s *terraform.State) error {
 func testAccCheckKeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 

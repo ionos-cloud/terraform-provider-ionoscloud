@@ -142,7 +142,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go-kafka/v1.0.0",
+		UserAgent:          "ionos-cloud-sdk-go-kafka/v1.1.2",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -154,39 +154,47 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		LogLevel:           getLogLevelFromEnv(),
 		Servers: ServerConfigurations{
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://kafka.de-fra.ionos.com",
 				Description: "Production de-fra",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://kafka.de-txl.ionos.com",
 				Description: "Production de-txl",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://kafka.es-vit.ionos.com",
 				Description: "Production es-vit",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://kafka.gb-lhr.ionos.com",
 				Description: "Production gb-lhr",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://kafka.us-ewr.ionos.com",
 				Description: "Production us-ewr",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://kafka.us-las.ionos.com",
 				Description: "Production us-las",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://kafka.us-mci.ionos.com",
 				Description: "Production us-mci",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://kafka.fr-par.ionos.com",
 				Description: "Production fr-par",
 			},
 		},
 		OperationServers: map[string]ServerConfigurations{},
+	}
+	if hostUrl != "" {
+		cfg.Servers = ServerConfigurations{
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "overriden endpoint",
+			},
+		}
 	}
 	return cfg
 }

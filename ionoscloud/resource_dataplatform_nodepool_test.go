@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -165,7 +165,7 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 }
 
 func testAccCheckDataplatformNodePoolDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).DataplatformClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).DataplatformClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -198,7 +198,7 @@ func testAccCheckDataplatformNodePoolDestroyCheck(s *terraform.State) error {
 
 func testAccCheckDataplatformNodePoolExists(n string, nodePool *dataplatform.NodePoolResponseData) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).DataplatformClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).DataplatformClient
 
 		rs, ok := s.RootModule().Resources[n]
 
