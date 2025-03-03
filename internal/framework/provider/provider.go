@@ -200,7 +200,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	if token == "" && (username == "" || password == "") {
 		if readFileErr != nil {
 			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
-			resp.Diagnostics.AddError("wile opening file", readFileErr.Error())
+			resp.Diagnostics.AddError("while opening file", readFileErr.Error())
 			return
 		}
 		profile := fileConfig.GetCurrentProfile()
