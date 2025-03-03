@@ -14,7 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
+	autoscaling "github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
@@ -434,14 +435,14 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while expanding properties: %w", err))
 	}
-	group.Properties = properties
+	group.Properties = *properties
 	autoscalingGroup, _, err := client.CreateGroup(ctx, group)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating Autoscaling Group: %w", err))
 	}
 
-	d.SetId(*autoscalingGroup.Id)
-	log.Printf("[INFO] Autoscaling Group created. Id set to %s", *autoscalingGroup.Id)
+	d.SetId(autoscalingGroup.Id)
+	log.Printf("[INFO] Autoscaling Group created. Id set to %s", autoscalingGroup.Id)
 
 	if err := checkAction(ctx, client, d); err != nil {
 		d.SetId("")
@@ -464,7 +465,7 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	log.Printf("[INFO] successfully retrieved Autoscaling Group %s: %+v", d.Id(), group)
-	if err := setAutoscalingGroupData(d, group.Properties); err != nil {
+	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -486,14 +487,14 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	group := autoscaling.GroupPut{
-		Properties: &autoscaling.GroupPutProperties{
-			MaxReplicaCount:      autoscaling.PtrInt64(int64(d.Get("max_replica_count").(int))),
-			MinReplicaCount:      autoscaling.PtrInt64(int64(d.Get("min_replica_count").(int))),
-			Name:                 autoscaling.PtrString(d.Get("name").(string)),
-			Policy:               expandPolicy(d.Get("policy").([]any)),
-			ReplicaConfiguration: replicaConfiguration,
+		Properties: autoscaling.GroupPutProperties{
+			MaxReplicaCount:      int64(d.Get("max_replica_count").(int)),
+			MinReplicaCount:      int64(d.Get("min_replica_count").(int)),
+			Name:                 d.Get("name").(string),
+			Policy:               *expandPolicy(d.Get("policy").([]any)),
+			ReplicaConfiguration: *replicaConfiguration,
 			Datacenter: &autoscaling.GroupPutPropertiesDatacenter{
-				Id: autoscaling.PtrString(d.Get("datacenter_id").(string)),
+				Id: d.Get("datacenter_id").(string),
 			},
 		},
 	}
@@ -540,7 +541,7 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 
 	log.Printf("[INFO] Autoscaling Group found: %+v", group)
 
-	if err := setAutoscalingGroupData(d, group.Properties); err != nil {
+	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
 		return nil, err
 	}
 
@@ -554,13 +555,13 @@ func expandProperties(d *schema.ResourceData) (*autoscaling.GroupProperties, err
 	}
 
 	return &autoscaling.GroupProperties{
-		MaxReplicaCount:      autoscaling.PtrInt64(int64(d.Get("max_replica_count").(int))),
-		MinReplicaCount:      autoscaling.PtrInt64(int64(d.Get("min_replica_count").(int))),
-		Name:                 autoscaling.PtrString(d.Get("name").(string)),
+		MaxReplicaCount:      shared.ToPtr(int64(d.Get("max_replica_count").(int))),
+		MinReplicaCount:      shared.ToPtr(int64(d.Get("min_replica_count").(int))),
+		Name:                 shared.ToPtr(d.Get("name").(string)),
 		Policy:               expandPolicy(d.Get("policy").([]any)),
 		ReplicaConfiguration: replicaConfiguration,
 		Datacenter: &autoscaling.GroupPropertiesDatacenter{
-			Id: autoscaling.PtrString(d.Get("datacenter_id").(string)),
+			Id: d.Get("datacenter_id").(string),
 		},
 	}, nil
 }
@@ -579,12 +580,12 @@ func expandPolicy(l []any) *autoscaling.GroupPolicy {
 	scaleOutThreshold := float32(s["scale_out_threshold"].(int))
 	unit := autoscaling.QueryUnit(s["unit"].(string))
 	out := &autoscaling.GroupPolicy{
-		Metric:            &metric,
-		ScaleInAction:     scaleInAction,
-		ScaleInThreshold:  &scaleInThreshold,
-		ScaleOutAction:    scaleOutAction,
-		ScaleOutThreshold: &scaleOutThreshold,
-		Unit:              &unit,
+		Metric:            metric,
+		ScaleInAction:     *scaleInAction,
+		ScaleInThreshold:  scaleInThreshold,
+		ScaleOutAction:    *scaleOutAction,
+		ScaleOutThreshold: scaleOutThreshold,
+		Unit:              unit,
 	}
 
 	// optional fields
@@ -606,9 +607,9 @@ func expandReplicaConfiguration(l []any) (*autoscaling.ReplicaPropertiesPost, er
 	cores := int32(s["cores"].(int))
 	ram := int32(s["ram"].(int))
 	out := &autoscaling.ReplicaPropertiesPost{
-		AvailabilityZone: &availabilityZone,
-		Cores:            &cores,
-		Ram:              &ram,
+		AvailabilityZone: *autoscaling.NewNullableAvailabilityZone(&availabilityZone),
+		Cores:            cores,
+		Ram:              ram,
 	}
 
 	// optional fields
@@ -643,10 +644,10 @@ func expandScaleInAction(l []any) *autoscaling.GroupPolicyScaleInAction {
 	cooldownPeriod := s["cooldown_period"].(string)
 	deleteVolumes := s["delete_volumes"].(bool)
 	out := &autoscaling.GroupPolicyScaleInAction{
-		Amount:         &amount,
-		AmountType:     &amountType,
-		CooldownPeriod: &cooldownPeriod,
-		DeleteVolumes:  &deleteVolumes,
+		Amount:         amount,
+		AmountType:     amountType,
+		CooldownPeriod: *autoscaling.NewNullableString(&cooldownPeriod),
+		DeleteVolumes:  deleteVolumes,
 	}
 
 	// optional fields
@@ -669,9 +670,9 @@ func expandScaleOutAction(l []any) *autoscaling.GroupPolicyScaleOutAction {
 	cooldownPeriod := s["cooldown_period"].(string)
 
 	return &autoscaling.GroupPolicyScaleOutAction{
-		Amount:         &amount,
-		AmountType:     &amountType,
-		CooldownPeriod: &cooldownPeriod,
+		Amount:         amount,
+		AmountType:     amountType,
+		CooldownPeriod: *autoscaling.NewNullableString(&cooldownPeriod),
 	}
 }
 
@@ -686,22 +687,22 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 		typ := autoscaling.VolumeHwType(s["type"].(string))
 		bootOrder := s["boot_order"].(string)
 		volumes[i] = autoscaling.ReplicaVolumePost{
-			Name:      &name,
-			Size:      &size,
-			Type:      &typ,
-			BootOrder: &bootOrder,
+			Name:      name,
+			Size:      size,
+			Type:      typ,
+			BootOrder: bootOrder,
 		}
 
 		// optional fields
 		if v, ok := s["image"]; ok {
-			volumes[i].Image = autoscaling.PtrString(v.(string))
+			volumes[i].Image = *autoscaling.NewNullableString(shared.ToPtr(v.(string)))
 		}
 
 		if v, ok := s["image_alias"]; ok {
-			volumes[i].ImageAlias = autoscaling.PtrString(v.(string))
+			volumes[i].ImageAlias = *autoscaling.NewNullableString(shared.ToPtr(v.(string)))
 		}
 
-		if *volumes[i].Image == "" && *volumes[i].ImageAlias == "" {
+		if volumes[i].Image.IsSet() && volumes[i].ImageAlias.IsSet() {
 			return nil, fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property")
 		}
 
@@ -710,15 +711,15 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 			if err != nil {
 				return nil, err
 			}
-			volumes[i].SshKeys = &keys
+			volumes[i].SshKeys = keys
 		}
 
 		if v, ok := s["user_data"]; ok {
-			volumes[i].UserData = autoscaling.PtrString(v.(string))
+			volumes[i].UserData = shared.ToPtr(v.(string))
 		}
 
 		if v, ok := s["image_password"]; ok {
-			volumes[i].ImagePassword = autoscaling.PtrString(v.(string))
+			volumes[i].ImagePassword = shared.ToPtr(v.(string))
 		}
 
 		if v, ok := s["bus"]; ok {
@@ -726,7 +727,7 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 		}
 
 		if v, ok := s["backup_unit_id"]; ok {
-			volumes[i].BackupunitId = autoscaling.PtrString(v.(string))
+			volumes[i].BackupunitId = shared.ToPtr(v.(string))
 		}
 	}
 
@@ -756,8 +757,8 @@ func expandNICs(l []any) []autoscaling.ReplicaNic {
 		lan := int32(s["lan"].(int))
 		name := s["name"].(string)
 		nics[i] = autoscaling.ReplicaNic{
-			Lan:  &lan,
-			Name: &name,
+			Lan:  lan,
+			Name: name,
 		}
 
 		// optional fields
@@ -796,10 +797,10 @@ func expandFlowLogs(l []any) []autoscaling.NicFlowLog {
 
 		// all fields are required
 		flowLogs[i] = autoscaling.NicFlowLog{
-			Name:      autoscaling.PtrString(s["name"].(string)),
-			Action:    autoscaling.PtrString(s["action"].(string)),
-			Direction: autoscaling.PtrString(s["direction"].(string)),
-			Bucket:    autoscaling.PtrString(s["bucket"].(string)),
+			Name:      s["name"].(string),
+			Action:    s["action"].(string),
+			Direction: s["direction"].(string),
+			Bucket:    s["bucket"].(string),
 		}
 	}
 
@@ -817,9 +818,9 @@ func expandTargetGroup(l []any) *autoscaling.TargetGroup {
 	port := int32(s["port"].(int))
 	weight := int32(s["weight"].(int))
 	return &autoscaling.TargetGroup{
-		TargetGroupId: &targetGroupID,
-		Port:          &port,
-		Weight:        &weight,
+		TargetGroupId: targetGroupID,
+		Port:          port,
+		Weight:        weight,
 	}
 }
 
@@ -830,7 +831,7 @@ func expandFirewallRules(l []any) []autoscaling.NicFirewallRule {
 
 		// required fields
 		rules[i] = autoscaling.NicFirewallRule{
-			Protocol: autoscaling.PtrString(s["protocol"].(string)),
+			Protocol: s["protocol"].(string),
 		}
 
 		// optional fields
@@ -915,17 +916,14 @@ func setAutoscalingGroupData(d *schema.ResourceData, groupProperties *autoscalin
 		}
 
 		if groupProperties.Datacenter != nil {
-			if err := d.Set("datacenter_id", *groupProperties.Datacenter.Id); err != nil {
+			if err := d.Set("datacenter_id", groupProperties.Datacenter.Id); err != nil {
 				return utils.GenerateSetError(resourceName, "datacenter_id", err)
 			}
 		}
 
-		if groupProperties.Location != nil {
-			if err := d.Set("location", *groupProperties.Location); err != nil {
-				return utils.GenerateSetError(resourceName, "location", err)
-			}
+		if err := d.Set("location", groupProperties.Location); err != nil {
+			return utils.GenerateSetError(resourceName, "location", err)
 		}
-
 	}
 	return nil
 }
@@ -944,24 +942,20 @@ func flattenPolicyProperties(gp *autoscaling.GroupPolicy) []map[string]any {
 	utils.SetPropWithNilCheck(policy, "scale_out_threshold", gp.ScaleOutThreshold)
 	utils.SetPropWithNilCheck(policy, "unit", gp.Unit)
 	utils.SetPropWithNilCheck(policy, "scale_in_action", flattenScaleInActionProperties(gp.ScaleInAction))
-	utils.SetPropWithNilCheck(policy, "scale_out_action", flattenScaleOutActionProperties(*gp.ScaleOutAction))
+	utils.SetPropWithNilCheck(policy, "scale_out_action", flattenScaleOutActionProperties(gp.ScaleOutAction))
 
 	groupPolicies[0] = policy
 	return groupPolicies
 }
 
-func flattenScaleInActionProperties(scaleInAction *autoscaling.GroupPolicyScaleInAction) []map[string]any {
-	if scaleInAction == nil {
-		scaleInActions := make([]map[string]any, 0)
-		return scaleInActions
-	}
+func flattenScaleInActionProperties(scaleInAction autoscaling.GroupPolicyScaleInAction) []map[string]any {
 	scaleInActions := make([]map[string]any, 1)
 	scaleIn := map[string]any{}
 
 	utils.SetPropWithNilCheck(scaleIn, "amount", scaleInAction.Amount)
 	utils.SetPropWithNilCheck(scaleIn, "amount_type", scaleInAction.AmountType)
-	utils.SetPropWithNilCheck(scaleIn, "termination_policy_type", scaleInAction.TerminationPolicy)
-	utils.SetPropWithNilCheck(scaleIn, "cooldown_period", scaleInAction.CooldownPeriod)
+	utils.SetPropWithNilCheck(scaleIn, "termination_policy_type", scaleInAction.TerminationPolicy.Get())
+	utils.SetPropWithNilCheck(scaleIn, "cooldown_period", scaleInAction.CooldownPeriod.Get())
 	utils.SetPropWithNilCheck(scaleIn, "delete_volumes", scaleInAction.DeleteVolumes)
 
 	scaleInActions[0] = scaleIn
@@ -969,17 +963,12 @@ func flattenScaleInActionProperties(scaleInAction *autoscaling.GroupPolicyScaleI
 }
 
 func flattenScaleOutActionProperties(scaleOutAction autoscaling.GroupPolicyScaleOutAction) []map[string]any {
-	if scaleOutAction.Amount == nil {
-		scaleOutActions := make([]map[string]any, 0)
-		return scaleOutActions
-	}
-
 	scaleOutActions := make([]map[string]any, 1)
 	scaleOut := map[string]any{}
 
 	utils.SetPropWithNilCheck(scaleOut, "amount", scaleOutAction.Amount)
 	utils.SetPropWithNilCheck(scaleOut, "amount_type", scaleOutAction.AmountType)
-	utils.SetPropWithNilCheck(scaleOut, "cooldown_period", scaleOutAction.CooldownPeriod)
+	utils.SetPropWithNilCheck(scaleOut, "cooldown_period", scaleOutAction.CooldownPeriod.Get())
 
 	scaleOutActions[0] = scaleOut
 	return scaleOutActions
@@ -1004,14 +993,14 @@ func flattenReplicaConfiguration(d *schema.ResourceData, replicaConfiguration *a
 	return replicas
 }
 
-func flattenNIC(replicaNICs *[]autoscaling.ReplicaNic) []map[string]any {
+func flattenNIC(replicaNICs []autoscaling.ReplicaNic) []map[string]any {
 	if replicaNICs == nil {
 		nics := make([]map[string]any, 0)
 		return nics
 	}
 
-	nics := make([]map[string]any, len(*replicaNICs))
-	for i, nic := range *replicaNICs {
+	nics := make([]map[string]any, len(replicaNICs))
+	for i, nic := range replicaNICs {
 		trNIC := map[string]any{}
 		utils.SetPropWithNilCheck(trNIC, "lan", nic.Lan)
 		utils.SetPropWithNilCheck(trNIC, "name", nic.Name)
@@ -1026,14 +1015,14 @@ func flattenNIC(replicaNICs *[]autoscaling.ReplicaNic) []map[string]any {
 	return nics
 }
 
-func flattenFirewallRules(rules *[]autoscaling.NicFirewallRule) []map[string]any {
+func flattenFirewallRules(rules []autoscaling.NicFirewallRule) []map[string]any {
 	if rules == nil {
 		firewallRules := make([]map[string]any, 0)
 		return firewallRules
 	}
 
-	firewallRules := make([]map[string]any, len(*rules))
-	for i, rule := range *rules {
+	firewallRules := make([]map[string]any, len(rules))
+	for i, rule := range rules {
 		trRule := map[string]any{}
 		utils.SetPropWithNilCheck(trRule, "name", rule.Name)
 		utils.SetPropWithNilCheck(trRule, "protocol", rule.Protocol)
@@ -1050,14 +1039,14 @@ func flattenFirewallRules(rules *[]autoscaling.NicFirewallRule) []map[string]any
 	return firewallRules
 }
 
-func flattenFlowLogs(logs *[]autoscaling.NicFlowLog) []map[string]any {
+func flattenFlowLogs(logs []autoscaling.NicFlowLog) []map[string]any {
 	if logs == nil {
 		flowLogs := make([]map[string]any, 0)
 		return flowLogs
 	}
 
-	flowLogs := make([]map[string]any, len(*logs))
-	for i, flog := range *logs {
+	flowLogs := make([]map[string]any, len(logs))
+	for i, flog := range logs {
 		trLog := map[string]any{}
 		utils.SetPropWithNilCheck(trLog, "name", flog.Name)
 		utils.SetPropWithNilCheck(trLog, "action", flog.Action)
@@ -1084,14 +1073,14 @@ func flattenTargetGroup(tg *autoscaling.TargetGroup) []map[string]any {
 	return targetGroups
 }
 
-func flattenVolume(d *schema.ResourceData, replicaVolumes *[]autoscaling.ReplicaVolumePost) []map[string]any {
+func flattenVolume(d *schema.ResourceData, replicaVolumes []autoscaling.ReplicaVolumePost) []map[string]any {
 	if replicaVolumes == nil {
 		volumes := make([]map[string]any, 0)
 		return volumes
 	}
 
-	volumes := make([]map[string]any, len(*replicaVolumes))
-	for i, volume := range *replicaVolumes {
+	volumes := make([]map[string]any, len(replicaVolumes))
+	for i, volume := range replicaVolumes {
 		trVolume := map[string]any{}
 		utils.SetPropWithNilCheck(trVolume, "name", volume.Name)
 		utils.SetPropWithNilCheck(trVolume, "image_alias", volume.ImageAlias)
@@ -1119,14 +1108,14 @@ func actionReady(ctx context.Context, client *autoscalingService.Client, d *sche
 		return true, fmt.Errorf("error checking action status: %w", err)
 	}
 
-	if *action.Properties.ActionStatus == autoscaling.ACTIONSTATUS_FAILED {
+	if action.Properties.ActionStatus == autoscaling.ACTIONSTATUS_FAILED {
 		return false, fmt.Errorf("action failed")
 	}
 
-	if action.Properties == nil || action.Properties.ActionStatus == nil {
+	if action.Properties == nil {
 		return false, fmt.Errorf("expected a value for the action status but received 'nil' instead")
 	}
-	return strings.EqualFold(string(*action.Properties.ActionStatus), string(autoscaling.ACTIONSTATUS_SUCCESSFUL)), nil
+	return strings.EqualFold(string(action.Properties.ActionStatus), string(autoscaling.ACTIONSTATUS_SUCCESSFUL)), nil
 }
 
 // checkAction gets the triggered action and waits for it to be ready
@@ -1140,15 +1129,11 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 		return fmt.Errorf("no action triggered for group: %s", d.Id())
 	}
 
-	if len(*actions.Items) == 0 {
+	if len(actions.Items) == 0 {
 		return fmt.Errorf("no action triggered for group: %s", d.Id())
 	}
 
-	if (*actions.Items)[0].Id == nil {
-		return fmt.Errorf("no action id found for group: %s", d.Id())
-	}
-
-	actionID := *(*actions.Items)[0].Id
+	actionID := (actions.Items)[0].Id
 
 	// wait for completion of triggered action
 	for {

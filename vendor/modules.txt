@@ -323,6 +323,9 @@ github.com/ionos-cloud/sdk-go-bundle/products/logging/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.2 => /home/radu/work/sdk-go-bundle/products/vmautoscaling
+## explicit; go 1.22.0
+github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
@@ -365,9 +368,6 @@ github.com/ionos-cloud/sdk-go-object-storage
 # github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-object-storage-management
-# github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-vm-autoscaling
 # github.com/ionos-cloud/sdk-go/v6 v6.3.2
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go/v6
@@ -618,3 +618,4 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
+# github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 => /home/radu/work/sdk-go-bundle/products/vmautoscaling

@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
+	autoscaling "github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	as "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
@@ -392,12 +392,8 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	if group.Id == nil {
-		return diag.FromErr(fmt.Errorf("expected a valid ID for the Autoscaling Group, but received 'nil' instead"))
-	}
-
-	d.SetId(*group.Id)
-	if err = setAutoscalingGroupData(d, group.Properties); err != nil {
+	d.SetId(group.Id)
+	if err = setAutoscalingGroupData(d, &group.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -432,17 +428,13 @@ func fetchGroupByName(ctx context.Context, client *as.Client, name string) (*aut
 		return nil, fmt.Errorf("no group found")
 	}
 
-	for _, g := range *groups.Items {
-		if g.Id == nil {
-			return nil, fmt.Errorf("expected a valid ID for the Autoscaling Group, but received 'nil' instead")
-		}
-
-		tmpGroup, _, err := client.GetGroup(ctx, *g.Id, 2)
+	for _, g := range groups.Items {
+		tmpGroup, _, err := client.GetGroup(ctx, g.Id, 2)
 		if err != nil {
-			return nil, fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err)
+			return nil, fmt.Errorf("an error occurred while fetching group %s: %w", g.Id, err)
 		}
 
-		if tmpGroup.Properties != nil && tmpGroup.Properties.Name != nil && strings.EqualFold(*tmpGroup.Properties.Name, name) {
+		if tmpGroup.Properties.Name != nil && strings.EqualFold(*tmpGroup.Properties.Name, name) {
 			return &tmpGroup, nil
 		}
 	}
