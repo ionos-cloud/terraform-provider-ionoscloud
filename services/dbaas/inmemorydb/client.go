@@ -56,7 +56,6 @@ func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration
 	}
 }
 
-// todo cguran override on each request
 var (
 	locationToURL = map[string]string{
 		"":       "https://in-memory-db.de-fra.ionos.com",
