@@ -61,7 +61,7 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 		apiResponse.LogInfo()
 		if err != nil {
 			if apiResponse.HttpNotFound() || isS3KeyNotFound(err) {
-				return diag.FromErr(fmt.Errorf("no s3 key found with the specified criteria: userID = %s id = %s", userID, id))
+				return diag.FromErr(fmt.Errorf("no storage key found with the specified criteria: userID = %s id = %s", userID, id))
 			}
 			diags := diag.FromErr(fmt.Errorf("error while reading Object Storage key: %w, %s", err, userID))
 			return diags
@@ -70,14 +70,14 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 		s3Keys, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysGet(ctx, userID).Depth(2).Execute()
 		apiResponse.LogInfo()
 		if apiResponse.HttpNotFound() || isS3KeyNotFound(err) {
-			return diag.FromErr(fmt.Errorf("no s3 key found with the specified criteria: userID = %s", userID))
+			return diag.FromErr(fmt.Errorf("no storage key found with the specified criteria: userID = %s", userID))
 		}
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while reading Object Storage key: %w, %s", err, userID))
 			return diags
 		}
 		if s3Keys.Items == nil || len(*s3Keys.Items) == 0 {
-			return diag.FromErr(fmt.Errorf("no s3 key found with the specified criteria: userID = %s", userID))
+			return diag.FromErr(fmt.Errorf("no storage key found with the specified criteria: userID = %s", userID))
 		} else if len(*s3Keys.Items) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one storage key found with the specified criteria: userID = %s", userID))
 		}
