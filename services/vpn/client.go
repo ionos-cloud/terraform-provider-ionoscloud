@@ -2,21 +2,33 @@ package vpn
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	vpn "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 // Client is a wrapper for the VPN SDK client
 type Client struct {
-	sdkClient vpn.APIClient
+	sdkClient  vpn.APIClient
+	fileConfig *fileconfiguration.FileConfig
+}
+
+// GetConfig returns the configuration
+func (c *Client) GetConfig() *shared.Configuration {
+	return c.sdkClient.GetConfig()
+}
+
+// GetFileConfig returns configuration read from the file
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
 }
 
 var (
@@ -39,20 +51,22 @@ var (
 )
 
 // NewClient returns a new ionoscloud logging client
-func NewClient(username, password, token, url, terraformVersion string, insecure bool) *Client {
-	newConfig := shared.NewConfiguration(username, password, token, url)
+func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	newConfig := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)
 	newConfig.MaxRetries = constant.MaxRetries
 	newConfig.MaxWaitTime = constant.MaxWaitTime
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
 	newConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-vpn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch",
-		vpn.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+		vpn.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 
-	return &Client{sdkClient: *vpn.NewAPIClient(newConfig)}
+	return &Client{sdkClient: *vpn.NewAPIClient(newConfig),
+		fileConfig: fileConfig,
+	}
 }
 
-func (c *Client) changeConfigURL(location string) {
+// ChangeConfigURL changes the URL of the client
+func (c *Client) ChangeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLVPN) != "" {
 		config.Servers = shared.ServerConfigurations{
