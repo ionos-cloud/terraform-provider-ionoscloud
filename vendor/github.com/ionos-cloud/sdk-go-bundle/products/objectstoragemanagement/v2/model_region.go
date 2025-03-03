@@ -222,7 +222,9 @@ func (o Region) ToMap() (map[string]interface{}, error) {
 	toSerialize["endpoint"] = o.Endpoint
 	toSerialize["website"] = o.Website
 	toSerialize["capability"] = o.Capability
-	toSerialize["storageClasses"] = o.StorageClasses
+	if !IsNil(o.StorageClasses) {
+		toSerialize["storageClasses"] = o.StorageClasses
+	}
 	toSerialize["location"] = o.Location
 	return toSerialize, nil
 }

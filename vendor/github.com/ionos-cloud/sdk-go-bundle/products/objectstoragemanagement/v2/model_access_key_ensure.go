@@ -20,7 +20,7 @@ var _ MappedNullable = &AccessKeyEnsure{}
 // AccessKeyEnsure struct for AccessKeyEnsure
 type AccessKeyEnsure struct {
 	// The ID (UUID) of the AccessKey.
-	Id string `json:"id"`
+	Id *string `json:"id,omitempty"`
 	// Metadata
 	Metadata   map[string]interface{} `json:"metadata,omitempty"`
 	Properties AccessKey              `json:"properties"`
@@ -30,10 +30,9 @@ type AccessKeyEnsure struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAccessKeyEnsure(id string, properties AccessKey) *AccessKeyEnsure {
+func NewAccessKeyEnsure(properties AccessKey) *AccessKeyEnsure {
 	this := AccessKeyEnsure{}
 
-	this.Id = id
 	this.Properties = properties
 
 	return &this
@@ -47,28 +46,36 @@ func NewAccessKeyEnsureWithDefaults() *AccessKeyEnsure {
 	return &this
 }
 
-// GetId returns the Id field value
+// GetId returns the Id field value if set, zero value otherwise.
 func (o *AccessKeyEnsure) GetId() string {
-	if o == nil {
+	if o == nil || IsNil(o.Id) {
 		var ret string
 		return ret
 	}
-
-	return o.Id
+	return *o.Id
 }
 
-// GetIdOk returns a tuple with the Id field value
+// GetIdOk returns a tuple with the Id field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *AccessKeyEnsure) GetIdOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Id) {
 		return nil, false
 	}
-	return &o.Id, true
+	return o.Id, true
 }
 
-// SetId sets field value
+// HasId returns a boolean if a field has been set.
+func (o *AccessKeyEnsure) HasId() bool {
+	if o != nil && !IsNil(o.Id) {
+		return true
+	}
+
+	return false
+}
+
+// SetId gets a reference to the given string and assigns it to the Id field.
 func (o *AccessKeyEnsure) SetId(v string) {
-	o.Id = v
+	o.Id = &v
 }
 
 // GetMetadata returns the Metadata field value if set, zero value otherwise.
@@ -137,7 +144,9 @@ func (o AccessKeyEnsure) MarshalJSON() ([]byte, error) {
 
 func (o AccessKeyEnsure) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["id"] = o.Id
+	if !IsNil(o.Id) {
+		toSerialize["id"] = o.Id
+	}
 	if !IsNil(o.Metadata) {
 		toSerialize["metadata"] = o.Metadata
 	}

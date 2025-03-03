@@ -168,7 +168,9 @@ func (o RegionReadListAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["type"] = o.Type
 	toSerialize["href"] = o.Href
-	toSerialize["items"] = o.Items
+	if !IsNil(o.Items) {
+		toSerialize["items"] = o.Items
+	}
 	return toSerialize, nil
 }
 

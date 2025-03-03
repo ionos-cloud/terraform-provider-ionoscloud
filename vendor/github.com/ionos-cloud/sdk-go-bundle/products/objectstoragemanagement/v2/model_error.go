@@ -120,7 +120,9 @@ func (o Error) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.HttpStatus) {
 		toSerialize["httpStatus"] = o.HttpStatus
 	}
-	toSerialize["messages"] = o.Messages
+	if !IsNil(o.Messages) {
+		toSerialize["messages"] = o.Messages
+	}
 	return toSerialize, nil
 }
 
