@@ -24,6 +24,11 @@ type Client struct {
 	fileConfig *fileconfiguration.FileConfig
 }
 
+// GetFileConfig returns the file configuration.
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
+}
+
 const ionosAPIURLObjectStorage = "IONOS_API_URL_OBJECT_STORAGE"
 
 // GetBaseClient returns the base client.
