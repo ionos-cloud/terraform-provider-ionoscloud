@@ -112,8 +112,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = random_password.image_password.result
   type = "ENTERPRISE"
@@ -123,7 +121,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
 }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id

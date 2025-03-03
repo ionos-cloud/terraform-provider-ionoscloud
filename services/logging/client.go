@@ -42,19 +42,6 @@ func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration
 		logging.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	client := &Client{sdkClient: *logging.NewAPIClient(config), fileConfig: fileConfig}
-
-	// override client with location from config file if it exists and no global endpoint it set
-	// todo cguran - remove after testing
-	// if clientOptions.Endpoint == "" && overridesCloudAPI != nil && len(overridesCloudAPI.Endpoints) > 0 {
-	//	for _, endpoint := range overridesCloudAPI.Endpoints {
-	//		endpointLocation := endpoint.ChangeConfigURL
-	//		if sdkLocation, ok := location.TerraformToSDK[endpoint.ChangeConfigURL]; ok {
-	//			endpointLocation = sdkLocation
-	//		}
-	//		replaceServers := len(overridesCloudAPI.Endpoints) == 1 && endpointLocation == ""
-	//		shared.OverrideLocationFor(&client.sdkClient, endpointLocation, endpoint.Name, replaceServers)
-	//	}
-	//}
 	return client
 }
 

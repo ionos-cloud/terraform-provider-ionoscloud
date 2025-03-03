@@ -3,6 +3,7 @@ package objectstoragemanagement
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -10,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	objectstoragemanagement "github.com/ionos-cloud/sdk-go-object-storage-management"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 // AccesskeyResourceModel is used to represent an accesskey
@@ -32,15 +35,36 @@ type AccessKeyDataSourceModel struct {
 	ID              types.String `tfsdk:"id"`
 }
 
+var ionosAPIURLObjectStorageManagement = "IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT"
+
+// modifyConfigURL modifies the URL inside the client configuration.
+// This function is required in order to make requests to different endpoints.
+func (c *Client) modifyConfigURL() {
+	clientConfig := c.client.GetConfig()
+	if os.Getenv(ionosAPIURLObjectStorageManagement) != "" {
+		clientConfig.Servers = objectstoragemanagement.ServerConfigurations{
+			{
+				URL: utils.CleanURL(os.Getenv(ionosAPIURLObjectStorageManagement)),
+			},
+		}
+		return
+	}
+}
+
 // GetAccessKey retrieves an accesskey
 func (c *Client) GetAccessKey(ctx context.Context, accessKeyID string) (objectstoragemanagement.AccessKeyRead, *objectstoragemanagement.APIResponse, error) {
+	c.modifyConfigURL()
 	accessKey, apiResponse, err := c.client.AccesskeysApi.AccesskeysFindById(ctx, accessKeyID).Execute()
+	if apiResponse.HttpNotFound() {
+		return accessKey, apiResponse, nil
+	}
 	apiResponse.LogInfo()
 	return accessKey, apiResponse, err
 }
 
 // ListAccessKeys retrieves all accesskeys
 func (c *Client) ListAccessKeys(ctx context.Context) (objectstoragemanagement.AccessKeyReadList, *objectstoragemanagement.APIResponse, error) {
+	c.modifyConfigURL()
 	accessKeys, apiResponse, err := c.client.AccesskeysApi.AccesskeysGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return accessKeys, apiResponse, err
@@ -48,6 +72,7 @@ func (c *Client) ListAccessKeys(ctx context.Context) (objectstoragemanagement.Ac
 
 // ListAccessKeysFilter retrieves accesskeys using the accessKeyId filter
 func (c *Client) ListAccessKeysFilter(ctx context.Context, accessKeyID string) (objectstoragemanagement.AccessKeyReadList, *objectstoragemanagement.APIResponse, error) {
+	c.modifyConfigURL()
 	accessKeys, apiResponse, err := c.client.AccesskeysApi.AccesskeysGet(ctx).FilterAccesskeyId(accessKeyID).Execute()
 	apiResponse.LogInfo()
 	return accessKeys, apiResponse, err
@@ -55,6 +80,7 @@ func (c *Client) ListAccessKeysFilter(ctx context.Context, accessKeyID string) (
 
 // CreateAccessKey creates an accesskey
 func (c *Client) CreateAccessKey(ctx context.Context, accessKey objectstoragemanagement.AccessKeyCreate, timeout time.Duration) (objectstoragemanagement.AccessKeyRead, *objectstoragemanagement.APIResponse, error) {
+	c.modifyConfigURL()
 	accessKeyResponse, apiResponse, err := c.client.AccesskeysApi.AccesskeysPost(ctx).AccessKeyCreate(accessKey).Execute()
 	apiResponse.LogInfo()
 
@@ -74,6 +100,7 @@ func (c *Client) CreateAccessKey(ctx context.Context, accessKey objectstorageman
 
 // UpdateAccessKey updates an accesskey
 func (c *Client) UpdateAccessKey(ctx context.Context, accessKeyID string, accessKey objectstoragemanagement.AccessKeyEnsure, timeout time.Duration) (objectstoragemanagement.AccessKeyRead, *objectstoragemanagement.APIResponse, error) {
+	c.modifyConfigURL()
 	accessKeyResponse, apiResponse, err := c.client.AccesskeysApi.AccesskeysPut(ctx, accessKeyID).AccessKeyEnsure(accessKey).Execute()
 	apiResponse.LogInfo()
 
@@ -93,6 +120,7 @@ func (c *Client) UpdateAccessKey(ctx context.Context, accessKeyID string, access
 
 // DeleteAccessKey deletes an accesskey
 func (c *Client) DeleteAccessKey(ctx context.Context, accessKeyID string, timeout time.Duration) (*objectstoragemanagement.APIResponse, error) {
+	c.modifyConfigURL()
 	apiResponse, err := c.client.AccesskeysApi.AccesskeysDelete(ctx, accessKeyID).Execute()
 	apiResponse.LogInfo()
 
@@ -112,22 +140,14 @@ func (c *Client) DeleteAccessKey(ctx context.Context, accessKeyID string, timeou
 
 // SetAccessKeyPropertiesToPlan sets accesskey properties from an SDK object to a AccesskeyResourceModel
 func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey objectstoragemanagement.AccessKeyRead) {
-
 	if accessKey.Properties != nil {
-		// Here we check the properties because based on the request not all are set and we do not want to overwrite with nil
-		if accessKey.Properties.AccessKey != nil {
-			plan.AccessKey = basetypes.NewStringPointerValue(accessKey.Properties.AccessKey)
-		}
-		if accessKey.Properties.CanonicalUserId != nil {
-			plan.CanonicalUserID = basetypes.NewStringPointerValue(accessKey.Properties.CanonicalUserId)
-		}
-		if accessKey.Properties.ContractUserId != nil {
-			plan.ContractUserID = basetypes.NewStringPointerValue(accessKey.Properties.ContractUserId)
-		}
-		if accessKey.Properties.Description != nil {
-			plan.Description = basetypes.NewStringPointerValue(accessKey.Properties.Description)
-		}
-		if accessKey.Properties.SecretKey != nil {
+		plan.AccessKey = basetypes.NewStringPointerValue(accessKey.Properties.AccessKey)
+		plan.CanonicalUserID = basetypes.NewStringPointerValue(accessKey.Properties.CanonicalUserId)
+		plan.ContractUserID = basetypes.NewStringPointerValue(accessKey.Properties.ContractUserId)
+		plan.Description = basetypes.NewStringPointerValue(accessKey.Properties.Description)
+		// The secret key is present only in the POST response, on subsequent GET calls we don't
+		// want to overwrite the secret key with nil, if the value is set just leave it as it is.
+		if plan.SecretKey.IsUnknown() {
 			plan.SecretKey = basetypes.NewStringPointerValue(accessKey.Properties.SecretKey)
 		}
 	}
@@ -138,7 +158,6 @@ func SetAccessKeyPropertiesToPlan(plan *AccesskeyResourceModel, accessKey object
 
 // SetAccessKeyPropertiesToDataSourcePlan sets accesskey properties from an SDK object to a AccessKeyDataSourceModel
 func SetAccessKeyPropertiesToDataSourcePlan(plan *AccessKeyDataSourceModel, accessKey objectstoragemanagement.AccessKeyRead) {
-
 	if accessKey.Properties != nil {
 		// Here we check the properties because based on the request not all are set and we do not want to overwrite with nil
 		if accessKey.Properties.AccessKey != nil {

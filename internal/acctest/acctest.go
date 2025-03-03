@@ -126,11 +126,12 @@ func ObjectStorageClient() (*objstorage.APIClient, error) {
 }
 
 // MonitoringClient returns a new Monitoring client for acceptance testing
-func MonitoringClient() *monitoringService.Client {
+func MonitoringClient() *monitoringService.MonitoringClient {
 	token := os.Getenv(envar.IonosToken)
 	username := os.Getenv(envar.IonosUsername)
 	password := os.Getenv(envar.IonosPassword)
 	insecureStr := os.Getenv(envar.IonosInsecure)
+	version := ionoscloud.Version
 
 	insecureBool := false
 	if insecureStr != "" {
@@ -140,15 +141,6 @@ func MonitoringClient() *monitoringService.Client {
 		}
 		insecureBool = boolValue
 	}
-	clientOptions := bundle.ClientOptions{
-		ClientOptions: shared.ClientOptions{
-			SkipTLSVerify: insecureBool,
-			Credentials: shared.Credentials{
-				Username: username,
-				Password: password,
-				Token:    token,
-			},
-		},
-	}
-	return monitoringService.NewClient(clientOptions, nil)
+
+	return monitoringService.NewClient(username, password, token, "", version, "", insecureBool)
 }

@@ -2,9 +2,11 @@ package provider
 
 import (
 	"context"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"runtime"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -13,7 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
@@ -24,7 +27,6 @@ import (
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -39,11 +41,11 @@ import (
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-// FrameworkClientOptions is the configuration for the provider.
-type FrameworkClientOptions struct {
+// ClientOptions is the configuration for the provider.
+type ClientOptions struct {
 	Username       types.String `tfsdk:"username"`
 	Password       types.String `tfsdk:"password"`
 	Token          types.String `tfsdk:"token"`
@@ -120,7 +122,7 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 
 // Configure configures the provider.
 func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var clientOpts FrameworkClientOptions
+	var clientOpts ClientOptions
 	diags := req.Config.Get(ctx, &clientOpts)
 	resp.Diagnostics.Append(diags...)
 
@@ -196,22 +198,14 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		insecureBool = clientOpts.Insecure.ValueBool()
 	}
 
-	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
 	if token == "" && (username == "" || password == "") {
-		if readFileErr != nil {
-			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
-			resp.Diagnostics.AddError("wile opening file", readFileErr.Error())
-			return
-		}
-		profile := fileConfig.GetCurrentProfile()
-		if profile == nil {
-			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
-			return
-		}
-		token = profile.Credentials.Token
-		username = profile.Credentials.Username
-		password = profile.Credentials.Password
+		resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
 	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	cleanedEndpoint := utils.CleanURL(endpoint)
 
 	if insecureBool == true {
@@ -258,8 +252,25 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		ObjectStorageManagementClient: objectStorageManagementService.NewClient(clientOptions, fileConfig),
 		MonitoringClient:              monitoringService.NewClient(clientOptions, fileConfig),
 	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
+}
+
+func newCloudapiClient(username, password, token, endpoint, version, terraformVersion string, insecure bool) *ionoscloud.APIClient {
+	newConfig := ionoscloud.NewConfiguration(username, password, token, endpoint)
+	newConfig.UserAgent = fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	)
+	if os.Getenv(constant.IonosDebug) != "" {
+		newConfig.Debug = true
+	}
+	newConfig.MaxRetries = constant.MaxRetries
+	newConfig.WaitTime = constant.MaxWaitTime
+	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+	client := ionoscloud.NewAPIClient(newConfig)
+	return client
 }
 
 // Resources returns the resources for the provider.

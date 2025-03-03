@@ -47,8 +47,6 @@ resource "ionoscloud_server" "example" {
     datacenter_id         = ionoscloud_datacenter.example.id
     cores                 = 1
     ram                   = 1024
-    availability_zone     = "ZONE_1"
-    cpu_family            = "INTEL_XEON"
     image_name            = data.ionoscloud_image.example.name
     image_password        = random_password.server_image_password.result
     type                  = "ENTERPRISE"
