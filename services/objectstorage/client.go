@@ -3,7 +3,6 @@ package objectstorage
 import (
 	"bytes"
 	"errors"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"io"
 	"net/http"
 	"os"
@@ -12,12 +11,17 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 )
 
 // Client is a wrapper around the Object Storage client.
 type Client struct {
-	client *objstorage.APIClient
+	client     *objstorage.APIClient
+	fileConfig *fileconfiguration.FileConfig
 }
 
 const ionosAPIURLObjectStorage = "IONOS_API_URL_OBJECT_STORAGE"

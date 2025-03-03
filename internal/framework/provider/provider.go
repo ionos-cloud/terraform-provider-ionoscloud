@@ -3,6 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"log"
 	"net/http"
 	"os"
@@ -27,6 +29,7 @@ import (
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -41,6 +44,7 @@ import (
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -198,14 +202,26 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		insecureBool = clientOpts.Insecure.ValueBool()
 	}
 
-	if token == "" && (username == "" || password == "") {
-		resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
-	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
+	if token == "" && (username == "" || password == "") {
+		if readFileErr != nil {
+			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
+			resp.Diagnostics.AddError("wile opening file", readFileErr.Error())
+			return
+		}
+		profile := fileConfig.GetCurrentProfile()
+		if profile == nil {
+			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
+			return
+		}
+		token = profile.Credentials.Token
+		username = profile.Credentials.Username
+		password = profile.Credentials.Password
+	}
 	cleanedEndpoint := utils.CleanURL(endpoint)
 
 	if insecureBool == true {

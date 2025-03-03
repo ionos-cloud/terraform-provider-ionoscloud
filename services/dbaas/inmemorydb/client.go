@@ -2,25 +2,42 @@ package inmemorydb
 
 import (
 	"fmt"
+
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 //nolint:golint
-type InMemoryDBClient struct {
-	sdkClient *inMemoryDB.APIClient
+type Client struct {
+	sdkClient  *inMemoryDB.APIClient
+	fileConfig *fileconfiguration.FileConfig
 }
 
-//nolint:golint
-func NewInMemoryDBClient(username, password, token, url, version, terraformVersion string, insecure bool) *InMemoryDBClient {
-	newConfigDbaas := inMemoryDB.NewConfiguration(username, password, token, url)
+// GetFileConfig - returns the configuration read from the config file
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
+}
+
+// GetConfig - returns the configuration
+func (c *Client) GetConfig() *inMemoryDB.Configuration {
+	return c.sdkClient.GetConfig()
+}
+
+// NewClient creates a new in-memory db client. fileConfig is used to set/override the client options if it exists
+func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	newConfigDbaas := inMemoryDB.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
+		clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	if os.Getenv(constant.IonosDebug) != "" {
 		newConfigDbaas.Debug = true
@@ -28,10 +45,10 @@ func NewInMemoryDBClient(username, password, token, url, version, terraformVersi
 	newConfigDbaas.MaxRetries = constant.MaxRetries
 	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
 
-	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+	newConfigDbaas.HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
 	newConfigDbaas.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-in-memory-db/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, inMemoryDB.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
+		"terraform-provider/ionos-cloud-sdk-go-dbaas-in-memory-db/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		inMemoryDB.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	return &Client{
 		sdkClient:  inMemoryDB.NewAPIClient(newConfigDbaas),
