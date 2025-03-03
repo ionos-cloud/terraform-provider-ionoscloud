@@ -164,6 +164,10 @@ func GetMariaDBClusterDataCreate(d *schema.ResourceData) (*mariadb.CreateCluster
 		cluster.Properties.MaintenanceWindow = GetMariaClusterMaintenanceWindowData(d)
 	}
 
+	if _, ok := d.GetOk("backup"); ok {
+		cluster.Properties.Backup = GetMariaClusterBackupData(d)
+	}
+
 	return &cluster, nil
 }
 
@@ -212,6 +216,7 @@ func GetMariaDBClusterDataUpdate(d *schema.ResourceData) (*mariadb.PatchClusterR
 	if d.HasChange("maintenance_window") {
 		cluster.Properties.MaintenanceWindow = GetMariaClusterMaintenanceWindowData(d)
 	}
+
 	return &cluster, nil
 }
 
@@ -259,6 +264,18 @@ func GetMariaClusterMaintenanceWindowData(d *schema.ResourceData) *mariadb.Maint
 	}
 
 	return &maintenanceWindow
+}
+
+// GetMariaClusterBackupData retrieves the data from the terraform resource and sets it in the MariaDB Backup struct.
+func GetMariaClusterBackupData(d *schema.ResourceData) *mariadb.BackupProperties {
+	var backup mariadb.BackupProperties
+
+	if loc, ok := d.GetOk("backup.0.location"); ok {
+		loc := loc.(string)
+		backup.Location = &loc
+	}
+
+	return &backup
 }
 
 // GetMariaClusterCredentialsData retrieves the data from the terraform resource and sets it in the MariaDB DBUser struct.
@@ -346,6 +363,15 @@ func (c *MariaDBClient) SetMariaDBClusterData(d *schema.ResourceData, cluster ma
 		}
 	}
 
+	if cluster.Properties.Backup != nil {
+		var bac []interface{}
+		backupEntry := c.SetBackupProperties(*cluster.Properties.Backup)
+		bac = append(bac, backupEntry)
+		if err := d.Set("backup", bac); err != nil {
+			return utils.GenerateSetError(resourceName, "backup", err)
+		}
+	}
+
 	if cluster.Properties.DnsName != nil {
 		if err := d.Set("dns_name", *cluster.Properties.DnsName); err != nil {
 			return utils.GenerateSetError(resourceName, "dns_name", err)
@@ -372,4 +398,12 @@ func (c *MariaDBClient) SetMaintenanceWindowProperties(maintenanceWindow mariadb
 	utils.SetPropWithNilCheck(maintenance, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
 
 	return maintenance
+}
+
+func (c *MariaDBClient) SetBackupProperties(backup mariadb.BackupProperties) map[string]interface{} {
+	bac := map[string]interface{}{}
+
+	utils.SetPropWithNilCheck(bac, "location", backup.Location)
+
+	return bac
 }
