@@ -364,7 +364,7 @@ func (c *MariaDBClient) SetMariaDBClusterData(d *schema.ResourceData, cluster ma
 	}
 
 	if cluster.Properties.Backup != nil {
-		var bac []interface{}
+		var bac []any
 		backupEntry := c.setBackupProperties(*cluster.Properties.Backup)
 		bac = append(bac, backupEntry)
 		if err := d.Set("backup", bac); err != nil {
@@ -400,8 +400,8 @@ func (c *MariaDBClient) SetMaintenanceWindowProperties(maintenanceWindow mariadb
 	return maintenance
 }
 
-func (c *MariaDBClient) setBackupProperties(backup mariadb.BackupProperties) map[string]interface{} {
-	bac := map[string]interface{}{}
+func (c *MariaDBClient) setBackupProperties(backup mariadb.BackupProperties) map[string]any {
+	bac := map[string]any{}
 
 	utils.SetPropWithNilCheck(bac, "location", backup.Location)
 

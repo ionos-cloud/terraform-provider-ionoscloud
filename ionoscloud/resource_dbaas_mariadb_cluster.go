@@ -147,7 +147,7 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 			"backup": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
-				Description: "Properties configuring the backup of the cluster.",
+				Description: "Properties configuring the backup of the cluster. Immutable, change forces re-creation of the cluster.",
 				Optional:    true,
 				ForceNew:    true,
 				Elem: &schema.Resource{
