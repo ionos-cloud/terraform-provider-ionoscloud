@@ -2,7 +2,6 @@ package acctest
 
 import (
 	"context"
-	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"log"
@@ -16,14 +15,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/envar"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/provider"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
-	objstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 )
 
 const (
@@ -90,69 +87,7 @@ func PreCheck(t *testing.T) {
 	})
 }
 
-// ObjectStorageClient returns a new S3 client for acceptance testing
-func ObjectStorageClient() (*objstorage.APIClient, error) {
-	accessKey := os.Getenv(envar.IonosS3AccessKey)
-	secretKey := os.Getenv(envar.IonosS3SecretKey)
-	insecureStr := os.Getenv("IONOS_ALLOW_INSECURE")
-	insecureBool := false
-	if insecureStr != "" {
-		boolValue, err := strconv.ParseBool(insecureStr)
-		if err != nil {
-			log.Fatal(err)
-		}
-		insecureBool = boolValue
-
-	}
-	if accessKey == "" || secretKey == "" {
-		return nil, fmt.Errorf("%s and %s must be set for acceptance tests", envar.IonosS3AccessKey, envar.IonosS3SecretKey)
-	}
-	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
-	if readFileErr != nil {
-		log.Printf("Error reading config file: %v", readFileErr)
-	}
-	clientOptions := clientoptions.TerraformClientOptions{
-		ClientOptions: shared.ClientOptions{
-			SkipTLSVerify: insecureBool,
-			Endpoint:      "",
-		},
-		StorageOptions: clientoptions.StorageOptions{
-			AccessKey: accessKey,
-			SecretKey: secretKey,
-		},
-	}
-
-	return objstorageservice.NewClient(clientOptions, fileConfig).GetBaseClient(), nil
-}
-
-// MonitoringClient returns a new Monitoring client for acceptance testing
-//func MonitoringClient() *monitoringService.Client {
-//	token := os.Getenv(envar.IonosToken)
-//	username := os.Getenv(envar.IonosUsername)
-//	password := os.Getenv(envar.IonosPassword)
-//	insecureStr := os.Getenv(envar.IonosInsecure)
-//
-//	insecureBool := false
-//	if insecureStr != "" {
-//		boolValue, err := strconv.ParseBool(insecureStr)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//		insecureBool = boolValue
-//	}
-//	clientOptions := clientoptions.TerraformClientOptions{
-//		ClientOptions: shared.ClientOptions{
-//			SkipTLSVerify: insecureBool,
-//			Credentials: shared.Credentials{
-//				Username: username,
-//				Password: password,
-//				Token:    token,
-//			},
-//		},
-//	}
-//	return monitoringService.NewClient(clientOptions, nil)
-//}
-
+// NewTestBundleClientFromEnv creates a new bundle test client from environment variables
 func NewTestBundleClientFromEnv() *bundleclient.SdkBundle {
 	accessKey := os.Getenv(envar.IonosS3AccessKey)
 	secretKey := os.Getenv(envar.IonosS3SecretKey)

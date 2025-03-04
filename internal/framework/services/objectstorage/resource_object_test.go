@@ -6,17 +6,17 @@ package objectstorage_test
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 	"io"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 const (

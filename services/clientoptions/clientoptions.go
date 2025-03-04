@@ -10,6 +10,7 @@ type TerraformClientOptions struct {
 	TerraformVersion string
 }
 
+// StorageOptions - options passed to the storage clients
 type StorageOptions struct {
 	AccessKey string
 	SecretKey string
