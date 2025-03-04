@@ -119,7 +119,6 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterStorageSizeAttribute, clusterStorageSizeUpdatedValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekUpdateValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeUpdateValue),
-					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterBackupAttribute+".0."+clusterBackupLocationAttribute, clusterBackupLocationUpdateValue),
 				),
 			},
 			{
@@ -257,7 +256,6 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
   ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameValue + `"
   ` + connections + `
   ` + maintenanceWindowUpdated + `
-  ` + backupUpdated + `
   ` + credentials + `
 }
 `
@@ -275,7 +273,6 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
   ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameValue + `"
   ` + connections + `
   ` + maintenanceWindowUpdated + `
-  ` + backupUpdated + `
   ` + credentials + `
 }
 `
@@ -336,10 +333,6 @@ const maintenanceWindowUpdated = clusterMaintenanceWindowAttribute + `{
 
 const backup = clusterBackupAttribute + `{
 	` + clusterBackupLocationAttribute + ` = "` + clusterBackupLocationValue + `"
-}`
-
-const backupUpdated = clusterBackupAttribute + `{
-	` + clusterBackupLocationAttribute + ` = "` + clusterBackupLocationUpdateValue + `"
 }`
 
 const credentials = clusterCredentialsAttribute + `{

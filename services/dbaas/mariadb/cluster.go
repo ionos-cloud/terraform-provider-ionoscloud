@@ -165,7 +165,7 @@ func GetMariaDBClusterDataCreate(d *schema.ResourceData) (*mariadb.CreateCluster
 	}
 
 	if _, ok := d.GetOk("backup"); ok {
-		cluster.Properties.Backup = GetMariaClusterBackupData(d)
+		cluster.Properties.Backup = getMariaClusterBackupData(d)
 	}
 
 	return &cluster, nil
@@ -266,8 +266,8 @@ func GetMariaClusterMaintenanceWindowData(d *schema.ResourceData) *mariadb.Maint
 	return &maintenanceWindow
 }
 
-// GetMariaClusterBackupData retrieves the data from the terraform resource and sets it in the MariaDB Backup struct.
-func GetMariaClusterBackupData(d *schema.ResourceData) *mariadb.BackupProperties {
+// getMariaClusterBackupData retrieves the data from the terraform resource and sets it in the MariaDB Backup struct.
+func getMariaClusterBackupData(d *schema.ResourceData) *mariadb.BackupProperties {
 	var backup mariadb.BackupProperties
 
 	if loc, ok := d.GetOk("backup.0.location"); ok {
@@ -365,7 +365,7 @@ func (c *MariaDBClient) SetMariaDBClusterData(d *schema.ResourceData, cluster ma
 
 	if cluster.Properties.Backup != nil {
 		var bac []interface{}
-		backupEntry := c.SetBackupProperties(*cluster.Properties.Backup)
+		backupEntry := c.setBackupProperties(*cluster.Properties.Backup)
 		bac = append(bac, backupEntry)
 		if err := d.Set("backup", bac); err != nil {
 			return utils.GenerateSetError(resourceName, "backup", err)
@@ -400,7 +400,7 @@ func (c *MariaDBClient) SetMaintenanceWindowProperties(maintenanceWindow mariadb
 	return maintenance
 }
 
-func (c *MariaDBClient) SetBackupProperties(backup mariadb.BackupProperties) map[string]interface{} {
+func (c *MariaDBClient) setBackupProperties(backup mariadb.BackupProperties) map[string]interface{} {
 	bac := map[string]interface{}{}
 
 	utils.SetPropWithNilCheck(bac, "location", backup.Location)

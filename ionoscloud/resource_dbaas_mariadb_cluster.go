@@ -149,7 +149,7 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 				MaxItems:    1,
 				Description: "Properties configuring the backup of the cluster.",
 				Optional:    true,
-				Computed:    true,
+				ForceNew:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"location": {

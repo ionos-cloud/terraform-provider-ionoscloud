@@ -1915,7 +1915,6 @@ const clusterMaintenanceWindowTimeValue = "09:00:00"
 const clusterMaintenanceWindowTimeUpdateValue = "10:00:00"
 
 const clusterBackupLocationValue = "de"
-const clusterBackupLocationUpdateValue = "us"
 
 const wireguardGatewayConfig = `
 resource "ionoscloud_datacenter" "datacenter_example" {
