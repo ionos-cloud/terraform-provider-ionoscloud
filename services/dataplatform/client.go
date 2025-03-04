@@ -21,6 +21,7 @@ type Client struct {
 	sdkClient dataplatform.APIClient
 }
 
+// NewClient - creates a new dataplatform client
 func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Dataplatform)
 	config := dataplatform.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)

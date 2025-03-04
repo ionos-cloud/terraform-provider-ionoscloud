@@ -3,7 +3,6 @@ package objectstorage
 import (
 	"bytes"
 	"errors"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
 	"net/http"
 	"os"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 

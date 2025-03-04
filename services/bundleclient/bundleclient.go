@@ -25,6 +25,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 )
 
+// New creates a new SdkBundle client
 func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *SdkBundle {
 	return &SdkBundle{
 		CDNClient:                     cdnService.NewClient(clientOptions, fileConfig),
@@ -49,6 +50,7 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 	}
 }
 
+// SdkBundle is a struct that defines the bundle client. It is used for both sdkv2 and plugin framework
 type SdkBundle struct {
 	CloudApiClient                *ionoscloud.APIClient
 	InMemoryDBClient              *inmemorydb.Client
