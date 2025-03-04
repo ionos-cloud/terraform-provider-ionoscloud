@@ -6,7 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func dataSourceDBaaSInMemoryDBSnapshot() *schema.Resource {
@@ -63,7 +64,7 @@ func dataSourceDBaaSInMemoryDBSnapshot() *schema.Resource {
 }
 
 func dataSourceInMemoryDBSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).InMemoryDBClient
+	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	id := d.Get("id").(string)
 	location := d.Get("location").(string)
 

@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 )
 
@@ -270,10 +271,7 @@ resource "ionoscloud_s3_bucket_versioning" "bucket" {
 func testAccCheckBucketAddObjectsWithLegalHold(ctx context.Context, n string, keys ...string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
-		client, err := acctest.ObjectStorageClient()
-		if err != nil {
-			return err
-		}
+		client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
 		for _, key := range keys {
 			body, err := createTempFile("test", "test")
@@ -306,21 +304,15 @@ func testAccCheckBucketExists(ctx context.Context, n string) resource.TestCheckF
 			return fmt.Errorf("Not Found: %s", n)
 		}
 
-		client, err := acctest.ObjectStorageClient()
-		if err != nil {
-			return err
-		}
+		client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
-		_, err = client.BucketsApi.HeadBucket(ctx, rs.Primary.Attributes["name"]).Execute()
+		_, err := client.BucketsApi.HeadBucket(ctx, rs.Primary.Attributes["name"]).Execute()
 		return err
 	}
 }
 
 func testAccCheckBucketDestroy(s *terraform.State) error {
-	client, err := acctest.ObjectStorageClient()
-	if err != nil {
-		return err
-	}
+	client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_s3_bucket" {
@@ -347,13 +339,10 @@ func testAccCheckBucketDestroy(s *terraform.State) error {
 func testAccCheckBucketDeleteObjects(ctx context.Context, n string, keys ...string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
-		client, err := acctest.ObjectStorageClient()
-		if err != nil {
-			return err
-		}
+		client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
 		for _, key := range keys {
-			_, _, err = client.ObjectsApi.DeleteObject(ctx, rs.Primary.Attributes["name"], key).Execute()
+			_, _, err := client.ObjectsApi.DeleteObject(ctx, rs.Primary.Attributes["name"], key).Execute()
 			if err != nil {
 				return fmt.Errorf("DeleteObject error: %w", err)
 			}
@@ -367,10 +356,7 @@ func testAccCheckBucketAddObjects(ctx context.Context, n string, keys ...string)
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
 
-		client, err := acctest.ObjectStorageClient()
-		if err != nil {
-			return err
-		}
+		client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
 		for _, key := range keys {
 			body, err := createTempFile("test", "test")

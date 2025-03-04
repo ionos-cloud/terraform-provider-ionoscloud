@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -105,7 +105,7 @@ func TestAccDataCenterBasic(t *testing.T) {
 }
 
 func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -135,7 +135,7 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 
 func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 

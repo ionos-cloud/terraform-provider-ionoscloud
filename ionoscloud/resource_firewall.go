@@ -7,8 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -101,7 +100,7 @@ func resourceFirewall() *schema.Resource {
 }
 
 func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	firewall, diags := getFirewallData(d, "", false)
 	if diags != nil {
@@ -117,8 +116,8 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 	d.SetId(*fw.Id)
 
 	// Wait, catching any errors
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		if cloudapi.IsRequestFailed(errState) {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if bundleclient.IsRequestFailed(errState) {
 			log.Printf("[DEBUG] firewall resource failed to be created")
 			d.SetId("")
 		}
@@ -130,7 +129,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, d.Get("datacenter_id").(string),
 		d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
@@ -155,7 +154,7 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	firewall, diags := getFirewallData(d, "", true)
 	if diags != nil {
@@ -169,7 +168,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(fmt.Errorf("error getting state change for firewall patch %w", errState))
 	}
 
@@ -177,7 +176,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.FirewallRulesApi.
 		DatacentersServersNicsFirewallrulesDelete(
@@ -190,7 +189,7 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return diag.FromErr(fmt.Errorf("error getting state change for firewall delete %w", errState))
 	}
 
@@ -201,7 +200,7 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 4 || parts[0] == "" || parts[1] == "" || parts[2] == "" || parts[3] == "" {

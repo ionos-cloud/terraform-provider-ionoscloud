@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -59,7 +59,7 @@ func TestVpnIPSecGatewayResource(t *testing.T) {
 }
 
 func testCheckIPSecGatewayDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).VPNClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).VPNClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -87,7 +87,7 @@ func testCheckIPSecGatewayDestroy(s *terraform.State) error {
 
 func testAccCheckIPSecGatewayExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).VPNClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).VPNClient
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("not found: %s", n)

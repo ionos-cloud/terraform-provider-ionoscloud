@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func dataSourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
@@ -145,7 +145,7 @@ func dataSourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 }
 
 func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).InMemoryDBClient
+	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	id, idOk := d.GetOk("id")
 	displayName, displayNameOk := d.GetOk("display_name")
 	location := d.Get("location").(string)

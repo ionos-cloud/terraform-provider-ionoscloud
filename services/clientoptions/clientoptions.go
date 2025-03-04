@@ -1,11 +1,9 @@
-package bundle
+package clientoptions
 
-import (
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-)
+import "github.com/ionos-cloud/sdk-go-bundle/shared"
 
-// ClientOptions - options passed to the terraform clients
-type ClientOptions struct {
+// TerraformClientOptions - options passed to the terraform clients
+type TerraformClientOptions struct {
 	shared.ClientOptions
 	StorageOptions   StorageOptions
 	Version          string

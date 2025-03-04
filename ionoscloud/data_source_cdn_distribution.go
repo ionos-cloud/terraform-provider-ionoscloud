@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 )
 
@@ -135,7 +135,7 @@ func dataSourceCDNDistribution() *schema.Resource {
 }
 
 func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CDNClient
+	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	idValue, idOk := d.GetOk("id")
 	domainValue, domainOk := d.GetOk("domain")

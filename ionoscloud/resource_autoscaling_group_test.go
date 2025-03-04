@@ -10,11 +10,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -371,7 +370,7 @@ func TestAccAutoscalingGroup_replicaWithVolume(t *testing.T) {
 }
 
 func testAccCheckAutoscalingGroupDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).AutoscalingClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).AutoscalingClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -401,7 +400,7 @@ func testAccCheckAutoscalingGroupDestroyCheck(s *terraform.State) error {
 
 func testAccCheckAutoscalingGroupExists(name string, autoscalingGroup *autoscaling.Group) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).AutoscalingClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).AutoscalingClient
 
 		rs, ok := s.RootModule().Resources[name]
 

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mariadbSDK "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 )
 
@@ -82,7 +82,7 @@ func dataSourceDBaaSMariaDBBackups() *schema.Resource {
 }
 
 func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MariaDBClient
+	client := meta.(bundleclient.SdkBundle).MariaDBClient
 
 	clusterIdIntf, clusterIdOk := d.GetOk("cluster_id")
 	clusterId := clusterIdIntf.(string)

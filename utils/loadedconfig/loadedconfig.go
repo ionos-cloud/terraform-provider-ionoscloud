@@ -9,7 +9,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 )
 
 // TerraformToSDK maps the Terraform location to the SDK location
@@ -78,7 +78,7 @@ func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, prod
 
 // SetGlobalClientOptionsFromFileConfig sets the client options from the loaded config if not already set
 // mutates clientOptions. Should only be used if the product does not have location overrides
-func SetGlobalClientOptionsFromFileConfig(clientOptions *bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig, productName string) {
+func SetGlobalClientOptionsFromFileConfig(clientOptions *clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig, productName string) {
 	if clientOptions == nil || fileConfig == nil {
 		return
 	}

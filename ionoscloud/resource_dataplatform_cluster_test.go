@@ -11,7 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -88,7 +89,7 @@ func TestAccDataplatformClusterBasic(t *testing.T) {
 }
 
 func testAccCheckDataplatformClusterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).DataplatformClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).DataplatformClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -120,7 +121,7 @@ func testAccCheckDataplatformClusterDestroyCheck(s *terraform.State) error {
 
 func testAccCheckDataplatformClusterExists(n string, cluster *dataplatform.ClusterResponseData) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).DataplatformClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).DataplatformClient
 
 		rs, ok := s.RootModule().Resources[n]
 

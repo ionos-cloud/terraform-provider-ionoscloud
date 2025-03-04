@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -104,7 +104,7 @@ func resourceLoggingPipeline() *schema.Resource {
 }
 
 func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).LoggingClient
+	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineResponse, _, err := client.CreatePipeline(ctx, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while creating a Logging pipeline: %w", err))
@@ -119,7 +119,7 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).LoggingClient
+	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineID := d.Id()
 	location := ""
 	if newLocation, ok := d.GetOk("location"); ok {
@@ -144,7 +144,7 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 }
 
 func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).LoggingClient
+	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineID := d.Id()
 	location := d.Get("location").(string)
 	apiResponse, err := client.DeletePipeline(ctx, location, pipelineID)
@@ -164,7 +164,7 @@ func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).LoggingClient
+	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineID := d.Id()
 
 	pipelineResponse, _, err := client.UpdatePipeline(ctx, pipelineID, d)

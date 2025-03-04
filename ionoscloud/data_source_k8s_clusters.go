@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/iancoleman/strcase"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 
@@ -43,7 +43,7 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 		"k8s_version": "k8sVersion",
 	}
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	req := client.KubernetesApi.K8sGet(ctx).Depth(1)
 
 	filters, filtersOk := d.GetOk("filter")

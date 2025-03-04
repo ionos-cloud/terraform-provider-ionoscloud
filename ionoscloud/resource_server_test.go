@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -859,7 +859,7 @@ func TestAccServerBootDeviceSelection(t *testing.T) {
 }
 
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -892,7 +892,7 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 
 func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
@@ -935,7 +935,7 @@ func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc
 
 func testAccCheckServerExists(serverName string, server *ionoscloud.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[serverName]
 
