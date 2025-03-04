@@ -111,7 +111,18 @@ func ObjectStorageClient() (*objstorage.APIClient, error) {
 	if readFileErr != nil {
 		log.Printf("Error reading config file: %v", readFileErr)
 	}
-	return objstorageservice.NewClient(accessKey, secretKey, "", "", insecureBool, fileConfig).GetBaseClient(), nil
+	clientOptions := bundle.ClientOptions{
+		ClientOptions: shared.ClientOptions{
+			SkipTLSVerify: insecureBool,
+			Endpoint:      "",
+		},
+		StorageOptions: bundle.StorageOptions{
+			AccessKey: accessKey,
+			SecretKey: secretKey,
+		},
+	}
+
+	return objstorageservice.NewClient(clientOptions, fileConfig).GetBaseClient(), nil
 }
 
 // MonitoringClient returns a new Monitoring client for acceptance testing
@@ -129,6 +140,7 @@ func MonitoringClient() *monitoringService.Client {
 		}
 		insecureBool = boolValue
 	}
+
 	clientOptions := bundle.ClientOptions{
 		ClientOptions: shared.ClientOptions{
 			SkipTLSVerify: insecureBool,

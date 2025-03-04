@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"log"
 	"os"
 	"strconv"
@@ -13,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
@@ -230,6 +230,11 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		},
 		Version:          version,
 		TerraformVersion: terraformVersion,
+		StorageOptions: bundle.StorageOptions{
+			AccessKey: accessKey,
+			SecretKey: secretKey,
+			Region:    region,
+		},
 	}
 
 	client := &services.SdkBundle{
@@ -249,10 +254,11 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		APIGatewayClient:              apiGatewayService.NewClient(clientOptions, fileConfig),
 		VPNClient:                     vpn.NewClient(clientOptions, fileConfig),
 		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, fileConfig),
-		S3Client:                      objectStorageService.NewClient(accessKey, secretKey, region, endpoint, insecureBool, fileConfig),
+		S3Client:                      objectStorageService.NewClient(clientOptions, fileConfig),
 		ObjectStorageManagementClient: objectStorageManagementService.NewClient(clientOptions, fileConfig),
 		MonitoringClient:              monitoringService.NewClient(clientOptions, fileConfig),
 	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }

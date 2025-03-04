@@ -41,9 +41,7 @@ func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration
 		"terraform-provider/%s_ionos-cloud-sdk-go-logging/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch",
 		logging.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
-	client := &Client{sdkClient: *logging.NewAPIClient(config), fileConfig: fileConfig}
-
-	return client
+	return &Client{sdkClient: *logging.NewAPIClient(config), fileConfig: fileConfig}
 }
 
 // ChangeConfigURL changes the configuration URL based on the location
