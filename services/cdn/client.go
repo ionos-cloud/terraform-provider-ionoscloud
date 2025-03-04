@@ -19,8 +19,8 @@ type Client struct {
 	SdkClient *cdn.APIClient
 }
 
-// NewCDNClient returns a new CDN client
-func NewCDNClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+// NewClient returns a new CDN client
+func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.CDN)
 
 	config := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)

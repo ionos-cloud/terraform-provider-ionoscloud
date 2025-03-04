@@ -27,7 +27,7 @@ import (
 
 func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *SdkBundle {
 	return &SdkBundle{
-		CDNClient:                     cdnService.NewCDNClient(clientOptions, fileConfig),
+		CDNClient:                     cdnService.NewClient(clientOptions, fileConfig),
 		AutoscalingClient:             autoscalingService.NewClient(clientOptions, fileConfig),
 		CertManagerClient:             cert.NewClient(clientOptions, fileConfig),
 		CloudApiClient:                cloudapi.NewClient(clientOptions, fileConfig),
