@@ -103,6 +103,20 @@ func dataSourceDBaaSMariaDBCluster() *schema.Resource {
 					},
 				},
 			},
+			"backup": {
+				Type:        schema.TypeList,
+				Description: "Properties configuring the backup of the cluster.",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"location": {
+							Type:        schema.TypeString,
+							Description: "The S3 location where the backups will be stored.",
+							Computed:    true,
+						},
+					},
+				},
+			},
 			"dns_name": {
 				Type:        schema.TypeString,
 				Description: "The DNS name pointing to your cluster.",
