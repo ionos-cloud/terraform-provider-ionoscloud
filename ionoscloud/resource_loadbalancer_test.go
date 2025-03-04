@@ -138,8 +138,6 @@ resource "ionoscloud_server" "webserver" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
   volume {
@@ -185,8 +183,6 @@ resource "ionoscloud_server" "webserver" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {

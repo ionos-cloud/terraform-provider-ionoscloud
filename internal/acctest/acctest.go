@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"log"
 	"os"
 	"strconv"
@@ -15,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/envar"
@@ -167,8 +167,8 @@ func NewTestBundleClientFromEnv() *bundleclient.SdkBundle {
 			log.Fatal(err)
 		}
 		insecureBool = boolValue
-
 	}
+
 	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
 	if readFileErr != nil {
 		log.Printf("Error reading config file: %v", readFileErr)

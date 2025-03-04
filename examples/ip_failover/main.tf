@@ -41,8 +41,6 @@ resource "ionoscloud_server" "example_A" {
   datacenter_id     = ionoscloud_datacenter.example.id
   cores             = 1
   ram               = 1024
-  availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_XEON"
   image_name        = data.ionoscloud_image.example.id
   image_password    = random_password.server_A_image_password.result
   volume {
@@ -77,8 +75,6 @@ resource "ionoscloud_server" "example_B" {
   datacenter_id     = ionoscloud_datacenter.example.id
   cores             = 1
   ram               = 1024
-  availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_XEON"
   image_name        = data.ionoscloud_image.example.id
   image_password    = random_password.server_B_image_password.result
   volume {

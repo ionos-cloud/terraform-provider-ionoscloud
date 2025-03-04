@@ -1,3 +1,21 @@
+## 6.7.3
+### Fixes
+- Remove cpu_family, availability_zone and rockylinux-8-GenericCloud-20230518 from docs
+- Do not return an error if `ionoscloud_object_storage_acesskey` is not found
+- `ionoscloud_s3_key` data source should require only `user_id`
+## 6.7.2
+### Fixes
+- Fix provider crashing when `canonical_user_id` is `nil` in the response for object storage access key
+- Fail on `FAILED` state for inmemorydb cluster
+## 6.7.1
+### Fixes
+- Remove cpu_family and availability_zone from the tests
+### Features
+- Add `IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT` to set a custom API URL for the Object Storage Management Product. Setting `endpoint` or `IONOS_API_URL` does not have any effect
+- Add the following privileges to the ionoscloud_group Terraform resource and data source to enhance group access control: accessAndManageLogging, accessAndManageCdn, accessAndManageVpn, 
+  accessAndManageApiGateway, accessAndManageKaas, accessAndManageNetworkFileStorage, accessAndManageAiModelHub, accessAndManageIamResources, createNetworkSecurityGroups, manageDns
+  manageRegistry, manageDataPlatform.
+
 ## 6.7.0
 ### Fixes
 - Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nill values.
@@ -7,7 +25,7 @@
 - Add new read-only attribute: `ipv4_cidr_block` to `ionoscloud_lan` resource and data source.
 - Make `volume` optional for `ionoscloud_server` resource.
 - `name` attribute for `ionoscloud_auto_certificate` resource is now required.
-- Add `allow_replace` field to `ionoscloud_pg_cluster` resource. 
+- Add `allow_replace` field to `ionoscloud_pg_cluster` resource.
 ### Docs
 - Changed dead link in MongoDB cluster docs.
 

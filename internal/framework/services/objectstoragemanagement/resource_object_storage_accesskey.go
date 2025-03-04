@@ -128,7 +128,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 
 	accessKeyRead, _, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Access Key API error", err.Error())
+		resp.Diagnostics.AddError("access Key API error", err.Error())
 		return
 	}
 
@@ -150,9 +150,13 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	accessKey, _, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
+	accessKey, apiResponse, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Access Key API error", err.Error())
+		resp.Diagnostics.AddError("read Access Key API error", err.Error())
+		return
+	}
+	if apiResponse.HttpNotFound() {
+		resp.State.RemoveResource(ctx)
 		return
 	}
 
@@ -197,7 +201,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 
 	accessKeyRead, _, err := r.client.GetAccessKey(ctx, *accessKeyResponse.Id)
 	if err != nil {
-		resp.Diagnostics.AddError("Access Key API error", err.Error())
+		resp.Diagnostics.AddError("on update, read access Key API error", err.Error())
 		return
 	}
 

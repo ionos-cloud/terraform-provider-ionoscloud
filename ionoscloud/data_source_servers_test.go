@@ -36,10 +36,6 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 						constant.ServerResource+"."+serverTestResource2, "cores"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.ram",
 						constant.ServerResource+"."+serverTestResource2, "ram"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.availability_zone",
-						constant.ServerResource+"."+serverTestResource2, "availability_zone"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.cpu_family",
-						constant.ServerResource+"."+serverTestResource2, "cpu_family"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.type",
 						constant.ServerResource+"."+serverTestResource2, "type"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.type",
@@ -52,8 +48,6 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 						constant.ServerResource+"."+serverTestResource2, "volume.0.disk_type"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.volumes.0.bus",
 						constant.ServerResource+"."+serverTestResource2, "volume.0.bus"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.volumes.0.availability_zone",
-						constant.ServerResource+"."+serverTestResource2, "volume.0.availability_zone"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.name",
 						constant.ServerResource+"."+serverTestResource2, "nic.0.name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.lan",
@@ -151,8 +145,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
-  availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -162,7 +154,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "IDE"
-    availability_zone = "ZONE_1"
 	}
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -183,8 +174,6 @@ resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = ` + noCoresTest + `
   ram = 2048
-  availability_zone = "ZONE_1"
-  cpu_family = "INTEL_XEON"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
@@ -194,7 +183,6 @@ resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "IDE"
-    availability_zone = "ZONE_1"
 	}
   nic {
     lan = 1
@@ -251,8 +239,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
-  availability_zone = "ZONE_1"
-  cpu_family = "` + cpuFamilyTest + `" 
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -262,7 +248,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "IDE"
-    availability_zone = "ZONE_1"
 	}
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -291,8 +276,6 @@ resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = ` + noCoresTest + `
   ram = 2048
-  availability_zone = "ZONE_1"
-  cpu_family = "` + cpuFamilyTest + `" 
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
@@ -302,7 +285,6 @@ resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "IDE"
-    availability_zone = "ZONE_1"
 	}
   nic {
     lan = 1
@@ -362,8 +344,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
-  availability_zone = "ZONE_1"
-  cpu_family = "` + cpuFamilyTest + `"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
@@ -373,7 +353,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "IDE"
-    availability_zone = "ZONE_1"
 	}
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -388,8 +367,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + "2" +
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = ` + noCoresTest + `
   ram = 2048
-  availability_zone = "ZONE_1"
-  cpu_family = "` + cpuFamilyTest + `"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
@@ -399,7 +376,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + "2" +
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "IDE"
-    availability_zone = "ZONE_1"
 	}
   nic {
     lan = 1

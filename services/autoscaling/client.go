@@ -2,12 +2,12 @@ package autoscaling
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"net/http"
 	"os"
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
 
