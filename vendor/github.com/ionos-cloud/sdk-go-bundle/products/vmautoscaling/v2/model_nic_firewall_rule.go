@@ -3,7 +3,7 @@
  *
  * The VM Auto Scaling Service enables IONOS clients to horizontally scale the number of VM replicas based on configured rules. You can use VM Auto Scaling to ensure that you have a sufficient number of replicas to handle your application loads at all times.  For this purpose, create a VM Auto Scaling Group that contains the server replicas. The VM Auto Scaling Service ensures that the number of replicas in the group is always within the defined limits.   When scaling policies are set, VM Auto Scaling creates or deletes replicas according to the requirements of your applications. For each policy, specified 'scale-in' and 'scale-out' actions are performed when the corresponding thresholds are reached.
  *
- * API version: 1-SDK.1
+ * API version: 1.0.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -21,25 +21,25 @@ var _ MappedNullable = &NicFirewallRule{}
 // NicFirewallRule struct for NicFirewallRule
 type NicFirewallRule struct {
 	// The name of the firewall rule.
-	Name NullableString `json:"name,omitempty"`
+	Name *string `json:"name,omitempty"`
 	// The protocol for the rule. The property cannot be modified after its creation (not allowed in update requests).
 	Protocol string `json:"protocol"`
 	// Only traffic originating from the respective MAC address is permitted. Valid format: 'aa:bb:cc:dd:ee:ff'. The value 'null' allows traffic from any MAC address.
-	SourceMac NullableString `json:"sourceMac,omitempty"`
+	SourceMac *string `json:"sourceMac,omitempty"`
 	// Only traffic originating from the respective IPv4 address is permitted. The value 'null' allows traffic from any IP address.
-	SourceIp NullableString `json:"sourceIp,omitempty"`
+	SourceIp *string `json:"sourceIp,omitempty"`
 	// If the target NIC has multiple IP addresses, only the traffic directed to the respective IP address of the NIC is allowed. The value 'null' allows traffic to any target IP address.
-	TargetIp NullableString `json:"targetIp,omitempty"`
+	TargetIp *string `json:"targetIp,omitempty"`
 	// Sets the allowed code (from 0 to 254) when ICMP protocol is selected. The value 'null'' allows all codes.
-	IcmpCode NullableInt32 `json:"icmpCode,omitempty"`
+	IcmpCode *int32 `json:"icmpCode,omitempty"`
 	// Sets the allowed type (from 0 to 254) if the protocol ICMP is selected. The value 'null' allows all types.
-	IcmpType NullableInt32 `json:"icmpType,omitempty"`
+	IcmpType *int32 `json:"icmpType,omitempty"`
 	// Sets the initial range of the allowed port (from 1 to 65535) if the protocol TCP or UDP is selected. The value 'null' for 'portRangeStart' and 'portRangeEnd' allows all ports.
-	PortRangeStart NullableInt32 `json:"portRangeStart,omitempty"`
+	PortRangeStart *int32 `json:"portRangeStart,omitempty"`
 	// Sets the end range of the allowed port (from 1 to 65535) if the protocol TCP or UDP is selected. The value 'null' for 'portRangeStart' and 'portRangeEnd' allows all ports.
-	PortRangeEnd NullableInt32 `json:"portRangeEnd,omitempty"`
+	PortRangeEnd *int32 `json:"portRangeEnd,omitempty"`
 	// The firewall rule type. If not specified, the default value 'INGRESS' is used.
-	Type NullableString `json:"type,omitempty"`
+	Type *string `json:"type,omitempty"`
 }
 
 // NewNicFirewallRule instantiates a new NicFirewallRule object
@@ -62,47 +62,36 @@ func NewNicFirewallRuleWithDefaults() *NicFirewallRule {
 	return &this
 }
 
-// GetName returns the Name field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetName returns the Name field value if set, zero value otherwise.
 func (o *NicFirewallRule) GetName() string {
-	if o == nil || IsNil(o.Name.Get()) {
+	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
 	}
-	return *o.Name.Get()
+	return *o.Name
 }
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *NicFirewallRule) GetNameOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
-	return o.Name.Get(), o.Name.IsSet()
+	return o.Name, true
 }
 
 // HasName returns a boolean if a field has been set.
 func (o *NicFirewallRule) HasName() bool {
-	if o != nil && o.Name.IsSet() {
+	if o != nil && !IsNil(o.Name) {
 		return true
 	}
 
 	return false
 }
 
-// SetName gets a reference to the given NullableString and assigns it to the Name field.
+// SetName gets a reference to the given string and assigns it to the Name field.
 func (o *NicFirewallRule) SetName(v string) {
-	o.Name.Set(&v)
-}
-
-// SetNameNil sets the value for Name to be an explicit nil
-func (o *NicFirewallRule) SetNameNil() {
-	o.Name.Set(nil)
-}
-
-// UnsetName ensures that no value is present for Name, not even an explicit nil
-func (o *NicFirewallRule) UnsetName() {
-	o.Name.Unset()
+	o.Name = &v
 }
 
 // GetProtocol returns the Protocol field value
@@ -129,348 +118,260 @@ func (o *NicFirewallRule) SetProtocol(v string) {
 	o.Protocol = v
 }
 
-// GetSourceMac returns the SourceMac field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetSourceMac returns the SourceMac field value if set, zero value otherwise.
 func (o *NicFirewallRule) GetSourceMac() string {
-	if o == nil || IsNil(o.SourceMac.Get()) {
+	if o == nil || IsNil(o.SourceMac) {
 		var ret string
 		return ret
 	}
-	return *o.SourceMac.Get()
+	return *o.SourceMac
 }
 
 // GetSourceMacOk returns a tuple with the SourceMac field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *NicFirewallRule) GetSourceMacOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.SourceMac) {
 		return nil, false
 	}
-	return o.SourceMac.Get(), o.SourceMac.IsSet()
+	return o.SourceMac, true
 }
 
 // HasSourceMac returns a boolean if a field has been set.
 func (o *NicFirewallRule) HasSourceMac() bool {
-	if o != nil && o.SourceMac.IsSet() {
+	if o != nil && !IsNil(o.SourceMac) {
 		return true
 	}
 
 	return false
 }
 
-// SetSourceMac gets a reference to the given NullableString and assigns it to the SourceMac field.
+// SetSourceMac gets a reference to the given string and assigns it to the SourceMac field.
 func (o *NicFirewallRule) SetSourceMac(v string) {
-	o.SourceMac.Set(&v)
+	o.SourceMac = &v
 }
 
-// SetSourceMacNil sets the value for SourceMac to be an explicit nil
-func (o *NicFirewallRule) SetSourceMacNil() {
-	o.SourceMac.Set(nil)
-}
-
-// UnsetSourceMac ensures that no value is present for SourceMac, not even an explicit nil
-func (o *NicFirewallRule) UnsetSourceMac() {
-	o.SourceMac.Unset()
-}
-
-// GetSourceIp returns the SourceIp field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetSourceIp returns the SourceIp field value if set, zero value otherwise.
 func (o *NicFirewallRule) GetSourceIp() string {
-	if o == nil || IsNil(o.SourceIp.Get()) {
+	if o == nil || IsNil(o.SourceIp) {
 		var ret string
 		return ret
 	}
-	return *o.SourceIp.Get()
+	return *o.SourceIp
 }
 
 // GetSourceIpOk returns a tuple with the SourceIp field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *NicFirewallRule) GetSourceIpOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.SourceIp) {
 		return nil, false
 	}
-	return o.SourceIp.Get(), o.SourceIp.IsSet()
+	return o.SourceIp, true
 }
 
 // HasSourceIp returns a boolean if a field has been set.
 func (o *NicFirewallRule) HasSourceIp() bool {
-	if o != nil && o.SourceIp.IsSet() {
+	if o != nil && !IsNil(o.SourceIp) {
 		return true
 	}
 
 	return false
 }
 
-// SetSourceIp gets a reference to the given NullableString and assigns it to the SourceIp field.
+// SetSourceIp gets a reference to the given string and assigns it to the SourceIp field.
 func (o *NicFirewallRule) SetSourceIp(v string) {
-	o.SourceIp.Set(&v)
+	o.SourceIp = &v
 }
 
-// SetSourceIpNil sets the value for SourceIp to be an explicit nil
-func (o *NicFirewallRule) SetSourceIpNil() {
-	o.SourceIp.Set(nil)
-}
-
-// UnsetSourceIp ensures that no value is present for SourceIp, not even an explicit nil
-func (o *NicFirewallRule) UnsetSourceIp() {
-	o.SourceIp.Unset()
-}
-
-// GetTargetIp returns the TargetIp field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetTargetIp returns the TargetIp field value if set, zero value otherwise.
 func (o *NicFirewallRule) GetTargetIp() string {
-	if o == nil || IsNil(o.TargetIp.Get()) {
+	if o == nil || IsNil(o.TargetIp) {
 		var ret string
 		return ret
 	}
-	return *o.TargetIp.Get()
+	return *o.TargetIp
 }
 
 // GetTargetIpOk returns a tuple with the TargetIp field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *NicFirewallRule) GetTargetIpOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.TargetIp) {
 		return nil, false
 	}
-	return o.TargetIp.Get(), o.TargetIp.IsSet()
+	return o.TargetIp, true
 }
 
 // HasTargetIp returns a boolean if a field has been set.
 func (o *NicFirewallRule) HasTargetIp() bool {
-	if o != nil && o.TargetIp.IsSet() {
+	if o != nil && !IsNil(o.TargetIp) {
 		return true
 	}
 
 	return false
 }
 
-// SetTargetIp gets a reference to the given NullableString and assigns it to the TargetIp field.
+// SetTargetIp gets a reference to the given string and assigns it to the TargetIp field.
 func (o *NicFirewallRule) SetTargetIp(v string) {
-	o.TargetIp.Set(&v)
+	o.TargetIp = &v
 }
 
-// SetTargetIpNil sets the value for TargetIp to be an explicit nil
-func (o *NicFirewallRule) SetTargetIpNil() {
-	o.TargetIp.Set(nil)
-}
-
-// UnsetTargetIp ensures that no value is present for TargetIp, not even an explicit nil
-func (o *NicFirewallRule) UnsetTargetIp() {
-	o.TargetIp.Unset()
-}
-
-// GetIcmpCode returns the IcmpCode field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetIcmpCode returns the IcmpCode field value if set, zero value otherwise.
 func (o *NicFirewallRule) GetIcmpCode() int32 {
-	if o == nil || IsNil(o.IcmpCode.Get()) {
+	if o == nil || IsNil(o.IcmpCode) {
 		var ret int32
 		return ret
 	}
-	return *o.IcmpCode.Get()
+	return *o.IcmpCode
 }
 
 // GetIcmpCodeOk returns a tuple with the IcmpCode field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *NicFirewallRule) GetIcmpCodeOk() (*int32, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.IcmpCode) {
 		return nil, false
 	}
-	return o.IcmpCode.Get(), o.IcmpCode.IsSet()
+	return o.IcmpCode, true
 }
 
 // HasIcmpCode returns a boolean if a field has been set.
 func (o *NicFirewallRule) HasIcmpCode() bool {
-	if o != nil && o.IcmpCode.IsSet() {
+	if o != nil && !IsNil(o.IcmpCode) {
 		return true
 	}
 
 	return false
 }
 
-// SetIcmpCode gets a reference to the given NullableInt32 and assigns it to the IcmpCode field.
+// SetIcmpCode gets a reference to the given int32 and assigns it to the IcmpCode field.
 func (o *NicFirewallRule) SetIcmpCode(v int32) {
-	o.IcmpCode.Set(&v)
+	o.IcmpCode = &v
 }
 
-// SetIcmpCodeNil sets the value for IcmpCode to be an explicit nil
-func (o *NicFirewallRule) SetIcmpCodeNil() {
-	o.IcmpCode.Set(nil)
-}
-
-// UnsetIcmpCode ensures that no value is present for IcmpCode, not even an explicit nil
-func (o *NicFirewallRule) UnsetIcmpCode() {
-	o.IcmpCode.Unset()
-}
-
-// GetIcmpType returns the IcmpType field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetIcmpType returns the IcmpType field value if set, zero value otherwise.
 func (o *NicFirewallRule) GetIcmpType() int32 {
-	if o == nil || IsNil(o.IcmpType.Get()) {
+	if o == nil || IsNil(o.IcmpType) {
 		var ret int32
 		return ret
 	}
-	return *o.IcmpType.Get()
+	return *o.IcmpType
 }
 
 // GetIcmpTypeOk returns a tuple with the IcmpType field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *NicFirewallRule) GetIcmpTypeOk() (*int32, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.IcmpType) {
 		return nil, false
 	}
-	return o.IcmpType.Get(), o.IcmpType.IsSet()
+	return o.IcmpType, true
 }
 
 // HasIcmpType returns a boolean if a field has been set.
 func (o *NicFirewallRule) HasIcmpType() bool {
-	if o != nil && o.IcmpType.IsSet() {
+	if o != nil && !IsNil(o.IcmpType) {
 		return true
 	}
 
 	return false
 }
 
-// SetIcmpType gets a reference to the given NullableInt32 and assigns it to the IcmpType field.
+// SetIcmpType gets a reference to the given int32 and assigns it to the IcmpType field.
 func (o *NicFirewallRule) SetIcmpType(v int32) {
-	o.IcmpType.Set(&v)
+	o.IcmpType = &v
 }
 
-// SetIcmpTypeNil sets the value for IcmpType to be an explicit nil
-func (o *NicFirewallRule) SetIcmpTypeNil() {
-	o.IcmpType.Set(nil)
-}
-
-// UnsetIcmpType ensures that no value is present for IcmpType, not even an explicit nil
-func (o *NicFirewallRule) UnsetIcmpType() {
-	o.IcmpType.Unset()
-}
-
-// GetPortRangeStart returns the PortRangeStart field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetPortRangeStart returns the PortRangeStart field value if set, zero value otherwise.
 func (o *NicFirewallRule) GetPortRangeStart() int32 {
-	if o == nil || IsNil(o.PortRangeStart.Get()) {
+	if o == nil || IsNil(o.PortRangeStart) {
 		var ret int32
 		return ret
 	}
-	return *o.PortRangeStart.Get()
+	return *o.PortRangeStart
 }
 
 // GetPortRangeStartOk returns a tuple with the PortRangeStart field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *NicFirewallRule) GetPortRangeStartOk() (*int32, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.PortRangeStart) {
 		return nil, false
 	}
-	return o.PortRangeStart.Get(), o.PortRangeStart.IsSet()
+	return o.PortRangeStart, true
 }
 
 // HasPortRangeStart returns a boolean if a field has been set.
 func (o *NicFirewallRule) HasPortRangeStart() bool {
-	if o != nil && o.PortRangeStart.IsSet() {
+	if o != nil && !IsNil(o.PortRangeStart) {
 		return true
 	}
 
 	return false
 }
 
-// SetPortRangeStart gets a reference to the given NullableInt32 and assigns it to the PortRangeStart field.
+// SetPortRangeStart gets a reference to the given int32 and assigns it to the PortRangeStart field.
 func (o *NicFirewallRule) SetPortRangeStart(v int32) {
-	o.PortRangeStart.Set(&v)
+	o.PortRangeStart = &v
 }
 
-// SetPortRangeStartNil sets the value for PortRangeStart to be an explicit nil
-func (o *NicFirewallRule) SetPortRangeStartNil() {
-	o.PortRangeStart.Set(nil)
-}
-
-// UnsetPortRangeStart ensures that no value is present for PortRangeStart, not even an explicit nil
-func (o *NicFirewallRule) UnsetPortRangeStart() {
-	o.PortRangeStart.Unset()
-}
-
-// GetPortRangeEnd returns the PortRangeEnd field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetPortRangeEnd returns the PortRangeEnd field value if set, zero value otherwise.
 func (o *NicFirewallRule) GetPortRangeEnd() int32 {
-	if o == nil || IsNil(o.PortRangeEnd.Get()) {
+	if o == nil || IsNil(o.PortRangeEnd) {
 		var ret int32
 		return ret
 	}
-	return *o.PortRangeEnd.Get()
+	return *o.PortRangeEnd
 }
 
 // GetPortRangeEndOk returns a tuple with the PortRangeEnd field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *NicFirewallRule) GetPortRangeEndOk() (*int32, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.PortRangeEnd) {
 		return nil, false
 	}
-	return o.PortRangeEnd.Get(), o.PortRangeEnd.IsSet()
+	return o.PortRangeEnd, true
 }
 
 // HasPortRangeEnd returns a boolean if a field has been set.
 func (o *NicFirewallRule) HasPortRangeEnd() bool {
-	if o != nil && o.PortRangeEnd.IsSet() {
+	if o != nil && !IsNil(o.PortRangeEnd) {
 		return true
 	}
 
 	return false
 }
 
-// SetPortRangeEnd gets a reference to the given NullableInt32 and assigns it to the PortRangeEnd field.
+// SetPortRangeEnd gets a reference to the given int32 and assigns it to the PortRangeEnd field.
 func (o *NicFirewallRule) SetPortRangeEnd(v int32) {
-	o.PortRangeEnd.Set(&v)
+	o.PortRangeEnd = &v
 }
 
-// SetPortRangeEndNil sets the value for PortRangeEnd to be an explicit nil
-func (o *NicFirewallRule) SetPortRangeEndNil() {
-	o.PortRangeEnd.Set(nil)
-}
-
-// UnsetPortRangeEnd ensures that no value is present for PortRangeEnd, not even an explicit nil
-func (o *NicFirewallRule) UnsetPortRangeEnd() {
-	o.PortRangeEnd.Unset()
-}
-
-// GetType returns the Type field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetType returns the Type field value if set, zero value otherwise.
 func (o *NicFirewallRule) GetType() string {
-	if o == nil || IsNil(o.Type.Get()) {
+	if o == nil || IsNil(o.Type) {
 		var ret string
 		return ret
 	}
-	return *o.Type.Get()
+	return *o.Type
 }
 
 // GetTypeOk returns a tuple with the Type field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *NicFirewallRule) GetTypeOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Type) {
 		return nil, false
 	}
-	return o.Type.Get(), o.Type.IsSet()
+	return o.Type, true
 }
 
 // HasType returns a boolean if a field has been set.
 func (o *NicFirewallRule) HasType() bool {
-	if o != nil && o.Type.IsSet() {
+	if o != nil && !IsNil(o.Type) {
 		return true
 	}
 
 	return false
 }
 
-// SetType gets a reference to the given NullableString and assigns it to the Type field.
+// SetType gets a reference to the given string and assigns it to the Type field.
 func (o *NicFirewallRule) SetType(v string) {
-	o.Type.Set(&v)
-}
-
-// SetTypeNil sets the value for Type to be an explicit nil
-func (o *NicFirewallRule) SetTypeNil() {
-	o.Type.Set(nil)
-}
-
-// UnsetType ensures that no value is present for Type, not even an explicit nil
-func (o *NicFirewallRule) UnsetType() {
-	o.Type.Unset()
+	o.Type = &v
 }
 
 func (o NicFirewallRule) MarshalJSON() ([]byte, error) {
@@ -483,33 +384,33 @@ func (o NicFirewallRule) MarshalJSON() ([]byte, error) {
 
 func (o NicFirewallRule) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Name.IsSet() {
-		toSerialize["name"] = o.Name.Get()
+	if !IsNil(o.Name) {
+		toSerialize["name"] = o.Name
 	}
 	toSerialize["protocol"] = o.Protocol
-	if o.SourceMac.IsSet() {
-		toSerialize["sourceMac"] = o.SourceMac.Get()
+	if !IsNil(o.SourceMac) {
+		toSerialize["sourceMac"] = o.SourceMac
 	}
-	if o.SourceIp.IsSet() {
-		toSerialize["sourceIp"] = o.SourceIp.Get()
+	if !IsNil(o.SourceIp) {
+		toSerialize["sourceIp"] = o.SourceIp
 	}
-	if o.TargetIp.IsSet() {
-		toSerialize["targetIp"] = o.TargetIp.Get()
+	if !IsNil(o.TargetIp) {
+		toSerialize["targetIp"] = o.TargetIp
 	}
-	if o.IcmpCode.IsSet() {
-		toSerialize["icmpCode"] = o.IcmpCode.Get()
+	if !IsNil(o.IcmpCode) {
+		toSerialize["icmpCode"] = o.IcmpCode
 	}
-	if o.IcmpType.IsSet() {
-		toSerialize["icmpType"] = o.IcmpType.Get()
+	if !IsNil(o.IcmpType) {
+		toSerialize["icmpType"] = o.IcmpType
 	}
-	if o.PortRangeStart.IsSet() {
-		toSerialize["portRangeStart"] = o.PortRangeStart.Get()
+	if !IsNil(o.PortRangeStart) {
+		toSerialize["portRangeStart"] = o.PortRangeStart
 	}
-	if o.PortRangeEnd.IsSet() {
-		toSerialize["portRangeEnd"] = o.PortRangeEnd.Get()
+	if !IsNil(o.PortRangeEnd) {
+		toSerialize["portRangeEnd"] = o.PortRangeEnd
 	}
-	if o.Type.IsSet() {
-		toSerialize["type"] = o.Type.Get()
+	if !IsNil(o.Type) {
+		toSerialize["type"] = o.Type
 	}
 	return toSerialize, nil
 }

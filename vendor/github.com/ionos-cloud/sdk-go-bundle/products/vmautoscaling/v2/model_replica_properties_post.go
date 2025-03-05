@@ -3,7 +3,7 @@
  *
  * The VM Auto Scaling Service enables IONOS clients to horizontally scale the number of VM replicas based on configured rules. You can use VM Auto Scaling to ensure that you have a sufficient number of replicas to handle your application loads at all times.  For this purpose, create a VM Auto Scaling Group that contains the server replicas. The VM Auto Scaling Service ensures that the number of replicas in the group is always within the defined limits.   When scaling policies are set, VM Auto Scaling creates or deletes replicas according to the requirements of your applications. For each policy, specified 'scale-in' and 'scale-out' actions are performed when the corresponding thresholds are reached.
  *
- * API version: 1-SDK.1
+ * API version: 1.0.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -20,7 +20,7 @@ var _ MappedNullable = &ReplicaPropertiesPost{}
 
 // ReplicaPropertiesPost struct for ReplicaPropertiesPost
 type ReplicaPropertiesPost struct {
-	AvailabilityZone NullableAvailabilityZone `json:"availabilityZone,omitempty"`
+	AvailabilityZone *AvailabilityZone `json:"availabilityZone,omitempty"`
 	// The total number of cores for the VMs.
 	Cores     int32      `json:"cores"`
 	CpuFamily *CpuFamily `json:"cpuFamily,omitempty"`
@@ -53,47 +53,36 @@ func NewReplicaPropertiesPostWithDefaults() *ReplicaPropertiesPost {
 	return &this
 }
 
-// GetAvailabilityZone returns the AvailabilityZone field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetAvailabilityZone returns the AvailabilityZone field value if set, zero value otherwise.
 func (o *ReplicaPropertiesPost) GetAvailabilityZone() AvailabilityZone {
-	if o == nil || IsNil(o.AvailabilityZone.Get()) {
+	if o == nil || IsNil(o.AvailabilityZone) {
 		var ret AvailabilityZone
 		return ret
 	}
-	return *o.AvailabilityZone.Get()
+	return *o.AvailabilityZone
 }
 
 // GetAvailabilityZoneOk returns a tuple with the AvailabilityZone field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ReplicaPropertiesPost) GetAvailabilityZoneOk() (*AvailabilityZone, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.AvailabilityZone) {
 		return nil, false
 	}
-	return o.AvailabilityZone.Get(), o.AvailabilityZone.IsSet()
+	return o.AvailabilityZone, true
 }
 
 // HasAvailabilityZone returns a boolean if a field has been set.
 func (o *ReplicaPropertiesPost) HasAvailabilityZone() bool {
-	if o != nil && o.AvailabilityZone.IsSet() {
+	if o != nil && !IsNil(o.AvailabilityZone) {
 		return true
 	}
 
 	return false
 }
 
-// SetAvailabilityZone gets a reference to the given NullableAvailabilityZone and assigns it to the AvailabilityZone field.
+// SetAvailabilityZone gets a reference to the given AvailabilityZone and assigns it to the AvailabilityZone field.
 func (o *ReplicaPropertiesPost) SetAvailabilityZone(v AvailabilityZone) {
-	o.AvailabilityZone.Set(&v)
-}
-
-// SetAvailabilityZoneNil sets the value for AvailabilityZone to be an explicit nil
-func (o *ReplicaPropertiesPost) SetAvailabilityZoneNil() {
-	o.AvailabilityZone.Set(nil)
-}
-
-// UnsetAvailabilityZone ensures that no value is present for AvailabilityZone, not even an explicit nil
-func (o *ReplicaPropertiesPost) UnsetAvailabilityZone() {
-	o.AvailabilityZone.Unset()
+	o.AvailabilityZone = &v
 }
 
 // GetCores returns the Cores field value
@@ -250,8 +239,8 @@ func (o ReplicaPropertiesPost) MarshalJSON() ([]byte, error) {
 
 func (o ReplicaPropertiesPost) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if o.AvailabilityZone.IsSet() {
-		toSerialize["availabilityZone"] = o.AvailabilityZone.Get()
+	if !IsNil(o.AvailabilityZone) {
+		toSerialize["availabilityZone"] = o.AvailabilityZone
 	}
 	toSerialize["cores"] = o.Cores
 	if !IsNil(o.CpuFamily) {

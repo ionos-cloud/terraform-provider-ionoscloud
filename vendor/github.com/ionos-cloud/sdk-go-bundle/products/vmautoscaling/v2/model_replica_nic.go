@@ -3,7 +3,7 @@
  *
  * The VM Auto Scaling Service enables IONOS clients to horizontally scale the number of VM replicas based on configured rules. You can use VM Auto Scaling to ensure that you have a sufficient number of replicas to handle your application loads at all times.  For this purpose, create a VM Auto Scaling Group that contains the server replicas. The VM Auto Scaling Service ensures that the number of replicas in the group is always within the defined limits.   When scaling policies are set, VM Auto Scaling creates or deletes replicas according to the requirements of your applications. For each policy, specified 'scale-in' and 'scale-out' actions are performed when the corresponding thresholds are reached.
  *
- * API version: 1-SDK.1
+ * API version: 1.0.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -25,11 +25,11 @@ type ReplicaNic struct {
 	// The replica NIC name.
 	Name string `json:"name"`
 	// DHCP for this replica NIC. This is an optional attribute with the default value 'TRUE' if not specified in the request payload or as null.
-	Dhcp NullableBool `json:"dhcp,omitempty"`
+	Dhcp *bool `json:"dhcp,omitempty"`
 	// Activate or deactivate the firewall. By default, an active firewall without any defined rules will block all incoming network traffic except for the firewall rules that explicitly allows certain protocols, IP addresses and ports.
-	FirewallActive NullableBool `json:"firewallActive,omitempty"`
+	FirewallActive *bool `json:"firewallActive,omitempty"`
 	// The type of firewall rules that will be allowed on the NIC. If not specified, the default INGRESS value is used.
-	FirewallType NullableString `json:"firewallType,omitempty"`
+	FirewallType *string `json:"firewallType,omitempty"`
 	// List of all flow logs for the specified NIC.
 	FlowLogs []NicFlowLog `json:"flowLogs,omitempty"`
 	// List of all firewall rules for the specified NIC.
@@ -106,138 +106,105 @@ func (o *ReplicaNic) SetName(v string) {
 	o.Name = v
 }
 
-// GetDhcp returns the Dhcp field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetDhcp returns the Dhcp field value if set, zero value otherwise.
 func (o *ReplicaNic) GetDhcp() bool {
-	if o == nil || IsNil(o.Dhcp.Get()) {
+	if o == nil || IsNil(o.Dhcp) {
 		var ret bool
 		return ret
 	}
-	return *o.Dhcp.Get()
+	return *o.Dhcp
 }
 
 // GetDhcpOk returns a tuple with the Dhcp field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ReplicaNic) GetDhcpOk() (*bool, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Dhcp) {
 		return nil, false
 	}
-	return o.Dhcp.Get(), o.Dhcp.IsSet()
+	return o.Dhcp, true
 }
 
 // HasDhcp returns a boolean if a field has been set.
 func (o *ReplicaNic) HasDhcp() bool {
-	if o != nil && o.Dhcp.IsSet() {
+	if o != nil && !IsNil(o.Dhcp) {
 		return true
 	}
 
 	return false
 }
 
-// SetDhcp gets a reference to the given NullableBool and assigns it to the Dhcp field.
+// SetDhcp gets a reference to the given bool and assigns it to the Dhcp field.
 func (o *ReplicaNic) SetDhcp(v bool) {
-	o.Dhcp.Set(&v)
+	o.Dhcp = &v
 }
 
-// SetDhcpNil sets the value for Dhcp to be an explicit nil
-func (o *ReplicaNic) SetDhcpNil() {
-	o.Dhcp.Set(nil)
-}
-
-// UnsetDhcp ensures that no value is present for Dhcp, not even an explicit nil
-func (o *ReplicaNic) UnsetDhcp() {
-	o.Dhcp.Unset()
-}
-
-// GetFirewallActive returns the FirewallActive field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetFirewallActive returns the FirewallActive field value if set, zero value otherwise.
 func (o *ReplicaNic) GetFirewallActive() bool {
-	if o == nil || IsNil(o.FirewallActive.Get()) {
+	if o == nil || IsNil(o.FirewallActive) {
 		var ret bool
 		return ret
 	}
-	return *o.FirewallActive.Get()
+	return *o.FirewallActive
 }
 
 // GetFirewallActiveOk returns a tuple with the FirewallActive field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ReplicaNic) GetFirewallActiveOk() (*bool, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.FirewallActive) {
 		return nil, false
 	}
-	return o.FirewallActive.Get(), o.FirewallActive.IsSet()
+	return o.FirewallActive, true
 }
 
 // HasFirewallActive returns a boolean if a field has been set.
 func (o *ReplicaNic) HasFirewallActive() bool {
-	if o != nil && o.FirewallActive.IsSet() {
+	if o != nil && !IsNil(o.FirewallActive) {
 		return true
 	}
 
 	return false
 }
 
-// SetFirewallActive gets a reference to the given NullableBool and assigns it to the FirewallActive field.
+// SetFirewallActive gets a reference to the given bool and assigns it to the FirewallActive field.
 func (o *ReplicaNic) SetFirewallActive(v bool) {
-	o.FirewallActive.Set(&v)
+	o.FirewallActive = &v
 }
 
-// SetFirewallActiveNil sets the value for FirewallActive to be an explicit nil
-func (o *ReplicaNic) SetFirewallActiveNil() {
-	o.FirewallActive.Set(nil)
-}
-
-// UnsetFirewallActive ensures that no value is present for FirewallActive, not even an explicit nil
-func (o *ReplicaNic) UnsetFirewallActive() {
-	o.FirewallActive.Unset()
-}
-
-// GetFirewallType returns the FirewallType field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetFirewallType returns the FirewallType field value if set, zero value otherwise.
 func (o *ReplicaNic) GetFirewallType() string {
-	if o == nil || IsNil(o.FirewallType.Get()) {
+	if o == nil || IsNil(o.FirewallType) {
 		var ret string
 		return ret
 	}
-	return *o.FirewallType.Get()
+	return *o.FirewallType
 }
 
 // GetFirewallTypeOk returns a tuple with the FirewallType field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ReplicaNic) GetFirewallTypeOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.FirewallType) {
 		return nil, false
 	}
-	return o.FirewallType.Get(), o.FirewallType.IsSet()
+	return o.FirewallType, true
 }
 
 // HasFirewallType returns a boolean if a field has been set.
 func (o *ReplicaNic) HasFirewallType() bool {
-	if o != nil && o.FirewallType.IsSet() {
+	if o != nil && !IsNil(o.FirewallType) {
 		return true
 	}
 
 	return false
 }
 
-// SetFirewallType gets a reference to the given NullableString and assigns it to the FirewallType field.
+// SetFirewallType gets a reference to the given string and assigns it to the FirewallType field.
 func (o *ReplicaNic) SetFirewallType(v string) {
-	o.FirewallType.Set(&v)
+	o.FirewallType = &v
 }
 
-// SetFirewallTypeNil sets the value for FirewallType to be an explicit nil
-func (o *ReplicaNic) SetFirewallTypeNil() {
-	o.FirewallType.Set(nil)
-}
-
-// UnsetFirewallType ensures that no value is present for FirewallType, not even an explicit nil
-func (o *ReplicaNic) UnsetFirewallType() {
-	o.FirewallType.Unset()
-}
-
-// GetFlowLogs returns the FlowLogs field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetFlowLogs returns the FlowLogs field value if set, zero value otherwise.
 func (o *ReplicaNic) GetFlowLogs() []NicFlowLog {
-	if o == nil {
+	if o == nil || IsNil(o.FlowLogs) {
 		var ret []NicFlowLog
 		return ret
 	}
@@ -246,7 +213,6 @@ func (o *ReplicaNic) GetFlowLogs() []NicFlowLog {
 
 // GetFlowLogsOk returns a tuple with the FlowLogs field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ReplicaNic) GetFlowLogsOk() ([]NicFlowLog, bool) {
 	if o == nil || IsNil(o.FlowLogs) {
 		return nil, false
@@ -256,7 +222,7 @@ func (o *ReplicaNic) GetFlowLogsOk() ([]NicFlowLog, bool) {
 
 // HasFlowLogs returns a boolean if a field has been set.
 func (o *ReplicaNic) HasFlowLogs() bool {
-	if o != nil && IsNil(o.FlowLogs) {
+	if o != nil && !IsNil(o.FlowLogs) {
 		return true
 	}
 
@@ -268,9 +234,9 @@ func (o *ReplicaNic) SetFlowLogs(v []NicFlowLog) {
 	o.FlowLogs = v
 }
 
-// GetFirewallRules returns the FirewallRules field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetFirewallRules returns the FirewallRules field value if set, zero value otherwise.
 func (o *ReplicaNic) GetFirewallRules() []NicFirewallRule {
-	if o == nil {
+	if o == nil || IsNil(o.FirewallRules) {
 		var ret []NicFirewallRule
 		return ret
 	}
@@ -279,7 +245,6 @@ func (o *ReplicaNic) GetFirewallRules() []NicFirewallRule {
 
 // GetFirewallRulesOk returns a tuple with the FirewallRules field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ReplicaNic) GetFirewallRulesOk() ([]NicFirewallRule, bool) {
 	if o == nil || IsNil(o.FirewallRules) {
 		return nil, false
@@ -289,7 +254,7 @@ func (o *ReplicaNic) GetFirewallRulesOk() ([]NicFirewallRule, bool) {
 
 // HasFirewallRules returns a boolean if a field has been set.
 func (o *ReplicaNic) HasFirewallRules() bool {
-	if o != nil && IsNil(o.FirewallRules) {
+	if o != nil && !IsNil(o.FirewallRules) {
 		return true
 	}
 
@@ -345,19 +310,19 @@ func (o ReplicaNic) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["lan"] = o.Lan
 	toSerialize["name"] = o.Name
-	if o.Dhcp.IsSet() {
-		toSerialize["dhcp"] = o.Dhcp.Get()
+	if !IsNil(o.Dhcp) {
+		toSerialize["dhcp"] = o.Dhcp
 	}
-	if o.FirewallActive.IsSet() {
-		toSerialize["firewallActive"] = o.FirewallActive.Get()
+	if !IsNil(o.FirewallActive) {
+		toSerialize["firewallActive"] = o.FirewallActive
 	}
-	if o.FirewallType.IsSet() {
-		toSerialize["firewallType"] = o.FirewallType.Get()
+	if !IsNil(o.FirewallType) {
+		toSerialize["firewallType"] = o.FirewallType
 	}
-	if o.FlowLogs != nil {
+	if !IsNil(o.FlowLogs) {
 		toSerialize["flowLogs"] = o.FlowLogs
 	}
-	if o.FirewallRules != nil {
+	if !IsNil(o.FirewallRules) {
 		toSerialize["firewallRules"] = o.FirewallRules
 	}
 	if !IsNil(o.TargetGroup) {

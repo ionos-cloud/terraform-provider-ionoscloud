@@ -3,7 +3,7 @@
  *
  * The VM Auto Scaling Service enables IONOS clients to horizontally scale the number of VM replicas based on configured rules. You can use VM Auto Scaling to ensure that you have a sufficient number of replicas to handle your application loads at all times.  For this purpose, create a VM Auto Scaling Group that contains the server replicas. The VM Auto Scaling Service ensures that the number of replicas in the group is always within the defined limits.   When scaling policies are set, VM Auto Scaling creates or deletes replicas according to the requirements of your applications. For each policy, specified 'scale-in' and 'scale-out' actions are performed when the corresponding thresholds are reached.
  *
- * API version: 1-SDK.1
+ * API version: 1.0.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -24,7 +24,7 @@ type GroupPolicyScaleOutAction struct {
 	Amount     float32      `json:"amount"`
 	AmountType ActionAmount `json:"amountType"`
 	// The minimum time that elapses after the start of this scaling action until the following scaling action is started. While a scaling action is in progress, no second action is initiated for the same VM Auto Scaling Group. Instead, the metric is re-evaluated after the current scaling action completes (either successfully or with errors). This is currently validated with a minimum value of 2 minutes and a maximum of 24 hours. The default value is 5 minutes if not specified.
-	CooldownPeriod NullableString `json:"cooldownPeriod,omitempty"`
+	CooldownPeriod *string `json:"cooldownPeriod,omitempty"`
 }
 
 // NewGroupPolicyScaleOutAction instantiates a new GroupPolicyScaleOutAction object
@@ -36,8 +36,8 @@ func NewGroupPolicyScaleOutAction(amount float32, amountType ActionAmount) *Grou
 
 	this.Amount = amount
 	this.AmountType = amountType
-	var cooldownPeriod = "5m"
-	this.CooldownPeriod = *NewNullableString(&cooldownPeriod)
+	var cooldownPeriod string = "5m"
+	this.CooldownPeriod = &cooldownPeriod
 
 	return &this
 }
@@ -47,8 +47,8 @@ func NewGroupPolicyScaleOutAction(amount float32, amountType ActionAmount) *Grou
 // but it doesn't guarantee that properties required by API are set
 func NewGroupPolicyScaleOutActionWithDefaults() *GroupPolicyScaleOutAction {
 	this := GroupPolicyScaleOutAction{}
-	var cooldownPeriod = "5m"
-	this.CooldownPeriod = *NewNullableString(&cooldownPeriod)
+	var cooldownPeriod string = "5m"
+	this.CooldownPeriod = &cooldownPeriod
 	return &this
 }
 
@@ -100,47 +100,36 @@ func (o *GroupPolicyScaleOutAction) SetAmountType(v ActionAmount) {
 	o.AmountType = v
 }
 
-// GetCooldownPeriod returns the CooldownPeriod field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetCooldownPeriod returns the CooldownPeriod field value if set, zero value otherwise.
 func (o *GroupPolicyScaleOutAction) GetCooldownPeriod() string {
-	if o == nil || IsNil(o.CooldownPeriod.Get()) {
+	if o == nil || IsNil(o.CooldownPeriod) {
 		var ret string
 		return ret
 	}
-	return *o.CooldownPeriod.Get()
+	return *o.CooldownPeriod
 }
 
 // GetCooldownPeriodOk returns a tuple with the CooldownPeriod field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *GroupPolicyScaleOutAction) GetCooldownPeriodOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.CooldownPeriod) {
 		return nil, false
 	}
-	return o.CooldownPeriod.Get(), o.CooldownPeriod.IsSet()
+	return o.CooldownPeriod, true
 }
 
 // HasCooldownPeriod returns a boolean if a field has been set.
 func (o *GroupPolicyScaleOutAction) HasCooldownPeriod() bool {
-	if o != nil && o.CooldownPeriod.IsSet() {
+	if o != nil && !IsNil(o.CooldownPeriod) {
 		return true
 	}
 
 	return false
 }
 
-// SetCooldownPeriod gets a reference to the given NullableString and assigns it to the CooldownPeriod field.
+// SetCooldownPeriod gets a reference to the given string and assigns it to the CooldownPeriod field.
 func (o *GroupPolicyScaleOutAction) SetCooldownPeriod(v string) {
-	o.CooldownPeriod.Set(&v)
-}
-
-// SetCooldownPeriodNil sets the value for CooldownPeriod to be an explicit nil
-func (o *GroupPolicyScaleOutAction) SetCooldownPeriodNil() {
-	o.CooldownPeriod.Set(nil)
-}
-
-// UnsetCooldownPeriod ensures that no value is present for CooldownPeriod, not even an explicit nil
-func (o *GroupPolicyScaleOutAction) UnsetCooldownPeriod() {
-	o.CooldownPeriod.Unset()
+	o.CooldownPeriod = &v
 }
 
 func (o GroupPolicyScaleOutAction) MarshalJSON() ([]byte, error) {
@@ -155,8 +144,8 @@ func (o GroupPolicyScaleOutAction) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["amount"] = o.Amount
 	toSerialize["amountType"] = o.AmountType
-	if o.CooldownPeriod.IsSet() {
-		toSerialize["cooldownPeriod"] = o.CooldownPeriod.Get()
+	if !IsNil(o.CooldownPeriod) {
+		toSerialize["cooldownPeriod"] = o.CooldownPeriod
 	}
 	return toSerialize, nil
 }

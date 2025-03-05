@@ -493,7 +493,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 			Name:                 d.Get("name").(string),
 			Policy:               *expandPolicy(d.Get("policy").([]any)),
 			ReplicaConfiguration: *replicaConfiguration,
-			Datacenter: &autoscaling.GroupPutPropertiesDatacenter{
+			Datacenter: autoscaling.GroupPutPropertiesDatacenter{
 				Id: d.Get("datacenter_id").(string),
 			},
 		},
@@ -560,7 +560,7 @@ func expandProperties(d *schema.ResourceData) (*autoscaling.GroupProperties, err
 		Name:                 shared.ToPtr(d.Get("name").(string)),
 		Policy:               expandPolicy(d.Get("policy").([]any)),
 		ReplicaConfiguration: replicaConfiguration,
-		Datacenter: &autoscaling.GroupPropertiesDatacenter{
+		Datacenter: autoscaling.GroupPropertiesDatacenter{
 			Id: d.Get("datacenter_id").(string),
 		},
 	}, nil
@@ -607,7 +607,7 @@ func expandReplicaConfiguration(l []any) (*autoscaling.ReplicaPropertiesPost, er
 	cores := int32(s["cores"].(int))
 	ram := int32(s["ram"].(int))
 	out := &autoscaling.ReplicaPropertiesPost{
-		AvailabilityZone: *autoscaling.NewNullableAvailabilityZone(&availabilityZone),
+		AvailabilityZone: &availabilityZone,
 		Cores:            cores,
 		Ram:              ram,
 	}
@@ -646,7 +646,7 @@ func expandScaleInAction(l []any) *autoscaling.GroupPolicyScaleInAction {
 	out := &autoscaling.GroupPolicyScaleInAction{
 		Amount:         amount,
 		AmountType:     amountType,
-		CooldownPeriod: *autoscaling.NewNullableString(&cooldownPeriod),
+		CooldownPeriod: &cooldownPeriod,
 		DeleteVolumes:  deleteVolumes,
 	}
 
@@ -672,7 +672,7 @@ func expandScaleOutAction(l []any) *autoscaling.GroupPolicyScaleOutAction {
 	return &autoscaling.GroupPolicyScaleOutAction{
 		Amount:         amount,
 		AmountType:     amountType,
-		CooldownPeriod: *autoscaling.NewNullableString(&cooldownPeriod),
+		CooldownPeriod: &cooldownPeriod,
 	}
 }
 
@@ -695,14 +695,14 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 
 		// optional fields
 		if v, ok := s["image"]; ok {
-			volumes[i].Image = *autoscaling.NewNullableString(shared.ToPtr(v.(string)))
+			volumes[i].Image = shared.ToPtr(v.(string))
 		}
 
 		if v, ok := s["image_alias"]; ok {
-			volumes[i].ImageAlias = *autoscaling.NewNullableString(shared.ToPtr(v.(string)))
+			volumes[i].ImageAlias = shared.ToPtr(v.(string))
 		}
 
-		if volumes[i].Image.IsSet() && volumes[i].ImageAlias.IsSet() {
+		if volumes[i].Image != nil && volumes[i].ImageAlias != nil {
 			return nil, fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property")
 		}
 
@@ -915,10 +915,8 @@ func setAutoscalingGroupData(d *schema.ResourceData, groupProperties *autoscalin
 			}
 		}
 
-		if groupProperties.Datacenter != nil {
-			if err := d.Set("datacenter_id", groupProperties.Datacenter.Id); err != nil {
-				return utils.GenerateSetError(resourceName, "datacenter_id", err)
-			}
+		if err := d.Set("datacenter_id", groupProperties.Datacenter.Id); err != nil {
+			return utils.GenerateSetError(resourceName, "datacenter_id", err)
 		}
 
 		if err := d.Set("location", groupProperties.Location); err != nil {
@@ -954,8 +952,8 @@ func flattenScaleInActionProperties(scaleInAction autoscaling.GroupPolicyScaleIn
 
 	utils.SetPropWithNilCheck(scaleIn, "amount", scaleInAction.Amount)
 	utils.SetPropWithNilCheck(scaleIn, "amount_type", scaleInAction.AmountType)
-	utils.SetPropWithNilCheck(scaleIn, "termination_policy_type", scaleInAction.TerminationPolicy.Get())
-	utils.SetPropWithNilCheck(scaleIn, "cooldown_period", scaleInAction.CooldownPeriod.Get())
+	utils.SetPropWithNilCheck(scaleIn, "termination_policy_type", scaleInAction.TerminationPolicy)
+	utils.SetPropWithNilCheck(scaleIn, "cooldown_period", scaleInAction.CooldownPeriod)
 	utils.SetPropWithNilCheck(scaleIn, "delete_volumes", scaleInAction.DeleteVolumes)
 
 	scaleInActions[0] = scaleIn
@@ -968,7 +966,7 @@ func flattenScaleOutActionProperties(scaleOutAction autoscaling.GroupPolicyScale
 
 	utils.SetPropWithNilCheck(scaleOut, "amount", scaleOutAction.Amount)
 	utils.SetPropWithNilCheck(scaleOut, "amount_type", scaleOutAction.AmountType)
-	utils.SetPropWithNilCheck(scaleOut, "cooldown_period", scaleOutAction.CooldownPeriod.Get())
+	utils.SetPropWithNilCheck(scaleOut, "cooldown_period", scaleOutAction.CooldownPeriod)
 
 	scaleOutActions[0] = scaleOut
 	return scaleOutActions

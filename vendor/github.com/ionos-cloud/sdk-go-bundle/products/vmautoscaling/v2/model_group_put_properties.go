@@ -3,7 +3,7 @@
  *
  * The VM Auto Scaling Service enables IONOS clients to horizontally scale the number of VM replicas based on configured rules. You can use VM Auto Scaling to ensure that you have a sufficient number of replicas to handle your application loads at all times.  For this purpose, create a VM Auto Scaling Group that contains the server replicas. The VM Auto Scaling Service ensures that the number of replicas in the group is always within the defined limits.   When scaling policies are set, VM Auto Scaling creates or deletes replicas according to the requirements of your applications. For each policy, specified 'scale-in' and 'scale-out' actions are performed when the corresponding thresholds are reached.
  *
- * API version: 1-SDK.1
+ * API version: 1.0.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -20,7 +20,7 @@ var _ MappedNullable = &GroupPutProperties{}
 
 // GroupPutProperties struct for GroupPutProperties
 type GroupPutProperties struct {
-	Datacenter *GroupPutPropertiesDatacenter `json:"datacenter,omitempty"`
+	Datacenter GroupPutPropertiesDatacenter `json:"datacenter"`
 	// The data center location.
 	Location string `json:"location"`
 	// The maximum value for the number of replicas on a VM Auto Scaling Group. Must be >= 0 and <= 200. Will be enforced for both automatic and manual changes.
@@ -37,9 +37,10 @@ type GroupPutProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGroupPutProperties(location string, maxReplicaCount int64, minReplicaCount int64, name string, policy GroupPolicy, replicaConfiguration ReplicaPropertiesPost) *GroupPutProperties {
+func NewGroupPutProperties(datacenter GroupPutPropertiesDatacenter, location string, maxReplicaCount int64, minReplicaCount int64, name string, policy GroupPolicy, replicaConfiguration ReplicaPropertiesPost) *GroupPutProperties {
 	this := GroupPutProperties{}
 
+	this.Datacenter = datacenter
 	this.Location = location
 	this.MaxReplicaCount = maxReplicaCount
 	this.MinReplicaCount = minReplicaCount
@@ -58,36 +59,28 @@ func NewGroupPutPropertiesWithDefaults() *GroupPutProperties {
 	return &this
 }
 
-// GetDatacenter returns the Datacenter field value if set, zero value otherwise.
+// GetDatacenter returns the Datacenter field value
 func (o *GroupPutProperties) GetDatacenter() GroupPutPropertiesDatacenter {
-	if o == nil || IsNil(o.Datacenter) {
+	if o == nil {
 		var ret GroupPutPropertiesDatacenter
 		return ret
 	}
-	return *o.Datacenter
+
+	return o.Datacenter
 }
 
-// GetDatacenterOk returns a tuple with the Datacenter field value if set, nil otherwise
+// GetDatacenterOk returns a tuple with the Datacenter field value
 // and a boolean to check if the value has been set.
 func (o *GroupPutProperties) GetDatacenterOk() (*GroupPutPropertiesDatacenter, bool) {
-	if o == nil || IsNil(o.Datacenter) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Datacenter, true
+	return &o.Datacenter, true
 }
 
-// HasDatacenter returns a boolean if a field has been set.
-func (o *GroupPutProperties) HasDatacenter() bool {
-	if o != nil && !IsNil(o.Datacenter) {
-		return true
-	}
-
-	return false
-}
-
-// SetDatacenter gets a reference to the given GroupPutPropertiesDatacenter and assigns it to the Datacenter field.
+// SetDatacenter sets field value
 func (o *GroupPutProperties) SetDatacenter(v GroupPutPropertiesDatacenter) {
-	o.Datacenter = &v
+	o.Datacenter = v
 }
 
 // GetLocation returns the Location field value
@@ -244,9 +237,7 @@ func (o GroupPutProperties) MarshalJSON() ([]byte, error) {
 
 func (o GroupPutProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Datacenter) {
-		toSerialize["datacenter"] = o.Datacenter
-	}
+	toSerialize["datacenter"] = o.Datacenter
 	toSerialize["location"] = o.Location
 	toSerialize["maxReplicaCount"] = o.MaxReplicaCount
 	toSerialize["minReplicaCount"] = o.MinReplicaCount

@@ -3,7 +3,7 @@
  *
  * The VM Auto Scaling Service enables IONOS clients to horizontally scale the number of VM replicas based on configured rules. You can use VM Auto Scaling to ensure that you have a sufficient number of replicas to handle your application loads at all times.  For this purpose, create a VM Auto Scaling Group that contains the server replicas. The VM Auto Scaling Service ensures that the number of replicas in the group is always within the defined limits.   When scaling policies are set, VM Auto Scaling creates or deletes replicas according to the requirements of your applications. For each policy, specified 'scale-in' and 'scale-out' actions are performed when the corresponding thresholds are reached.
  *
- * API version: 1-SDK.1
+ * API version: 1.0.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -21,9 +21,9 @@ var _ MappedNullable = &ReplicaVolumePost{}
 // ReplicaVolumePost struct for ReplicaVolumePost
 type ReplicaVolumePost struct {
 	// The image installed on the disk. Currently, only the UUID of the image is supported.  >Note that either 'image' or 'imageAlias' must be specified, but not both.
-	Image NullableString `json:"image,omitempty"`
+	Image *string `json:"image,omitempty"`
 	// The image installed on the volume. Must be an 'imageAlias' as specified via the images API. Note that one of 'image' or 'imageAlias' must be set, but not both.
-	ImageAlias NullableString `json:"imageAlias,omitempty"`
+	ImageAlias *string `json:"imageAlias,omitempty"`
 	// The replica volume name.
 	Name string `json:"name"`
 	// The size of this replica volume in GB.
@@ -69,90 +69,68 @@ func NewReplicaVolumePostWithDefaults() *ReplicaVolumePost {
 	return &this
 }
 
-// GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetImage returns the Image field value if set, zero value otherwise.
 func (o *ReplicaVolumePost) GetImage() string {
-	if o == nil || IsNil(o.Image.Get()) {
+	if o == nil || IsNil(o.Image) {
 		var ret string
 		return ret
 	}
-	return *o.Image.Get()
+	return *o.Image
 }
 
 // GetImageOk returns a tuple with the Image field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ReplicaVolumePost) GetImageOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Image) {
 		return nil, false
 	}
-	return o.Image.Get(), o.Image.IsSet()
+	return o.Image, true
 }
 
 // HasImage returns a boolean if a field has been set.
 func (o *ReplicaVolumePost) HasImage() bool {
-	if o != nil && o.Image.IsSet() {
+	if o != nil && !IsNil(o.Image) {
 		return true
 	}
 
 	return false
 }
 
-// SetImage gets a reference to the given NullableString and assigns it to the Image field.
+// SetImage gets a reference to the given string and assigns it to the Image field.
 func (o *ReplicaVolumePost) SetImage(v string) {
-	o.Image.Set(&v)
+	o.Image = &v
 }
 
-// SetImageNil sets the value for Image to be an explicit nil
-func (o *ReplicaVolumePost) SetImageNil() {
-	o.Image.Set(nil)
-}
-
-// UnsetImage ensures that no value is present for Image, not even an explicit nil
-func (o *ReplicaVolumePost) UnsetImage() {
-	o.Image.Unset()
-}
-
-// GetImageAlias returns the ImageAlias field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetImageAlias returns the ImageAlias field value if set, zero value otherwise.
 func (o *ReplicaVolumePost) GetImageAlias() string {
-	if o == nil || IsNil(o.ImageAlias.Get()) {
+	if o == nil || IsNil(o.ImageAlias) {
 		var ret string
 		return ret
 	}
-	return *o.ImageAlias.Get()
+	return *o.ImageAlias
 }
 
 // GetImageAliasOk returns a tuple with the ImageAlias field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ReplicaVolumePost) GetImageAliasOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.ImageAlias) {
 		return nil, false
 	}
-	return o.ImageAlias.Get(), o.ImageAlias.IsSet()
+	return o.ImageAlias, true
 }
 
 // HasImageAlias returns a boolean if a field has been set.
 func (o *ReplicaVolumePost) HasImageAlias() bool {
-	if o != nil && o.ImageAlias.IsSet() {
+	if o != nil && !IsNil(o.ImageAlias) {
 		return true
 	}
 
 	return false
 }
 
-// SetImageAlias gets a reference to the given NullableString and assigns it to the ImageAlias field.
+// SetImageAlias gets a reference to the given string and assigns it to the ImageAlias field.
 func (o *ReplicaVolumePost) SetImageAlias(v string) {
-	o.ImageAlias.Set(&v)
-}
-
-// SetImageAliasNil sets the value for ImageAlias to be an explicit nil
-func (o *ReplicaVolumePost) SetImageAliasNil() {
-	o.ImageAlias.Set(nil)
-}
-
-// UnsetImageAlias ensures that no value is present for ImageAlias, not even an explicit nil
-func (o *ReplicaVolumePost) UnsetImageAlias() {
-	o.ImageAlias.Unset()
+	o.ImageAlias = &v
 }
 
 // GetName returns the Name field value
@@ -421,11 +399,11 @@ func (o ReplicaVolumePost) MarshalJSON() ([]byte, error) {
 
 func (o ReplicaVolumePost) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Image.IsSet() {
-		toSerialize["image"] = o.Image.Get()
+	if !IsNil(o.Image) {
+		toSerialize["image"] = o.Image
 	}
-	if o.ImageAlias.IsSet() {
-		toSerialize["imageAlias"] = o.ImageAlias.Get()
+	if !IsNil(o.ImageAlias) {
+		toSerialize["imageAlias"] = o.ImageAlias
 	}
 	toSerialize["name"] = o.Name
 	toSerialize["size"] = o.Size

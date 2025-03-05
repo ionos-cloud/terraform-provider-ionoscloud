@@ -3,7 +3,7 @@
  *
  * The VM Auto Scaling Service enables IONOS clients to horizontally scale the number of VM replicas based on configured rules. You can use VM Auto Scaling to ensure that you have a sufficient number of replicas to handle your application loads at all times.  For this purpose, create a VM Auto Scaling Group that contains the server replicas. The VM Auto Scaling Service ensures that the number of replicas in the group is always within the defined limits.   When scaling policies are set, VM Auto Scaling creates or deletes replicas according to the requirements of your applications. For each policy, specified 'scale-in' and 'scale-out' actions are performed when the corresponding thresholds are reached.
  *
- * API version: 1-SDK.1
+ * API version: 1.0.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -24,8 +24,8 @@ type GroupPolicyScaleInAction struct {
 	Amount     float32      `json:"amount"`
 	AmountType ActionAmount `json:"amountType"`
 	// The minimum time that elapses after the start of this scaling action until the next scaling action is started. With a scaling action in progress, no second scaling action is started for the same VM Auto Scaling Group. Instead, the metric is re-evaluated after the current scaling action completes (either successfully or with errors). This is currently validated with a minimum value of 2 minutes and a maximum value of 24 hours. The default value is 5 minutes if not specified.
-	CooldownPeriod    NullableString                `json:"cooldownPeriod,omitempty"`
-	TerminationPolicy NullableTerminationPolicyType `json:"terminationPolicy,omitempty"`
+	CooldownPeriod    *string                `json:"cooldownPeriod,omitempty"`
+	TerminationPolicy *TerminationPolicyType `json:"terminationPolicy,omitempty"`
 	// If set to `true`, when deleting an replica during scale in, any attached volume will also be deleted. When set to `false`, all volumes remain in the datacenter and must be deleted manually.  **Note**, that every scale-out creates new volumes. When they are not deleted, they will eventually use all of your contracts resource limits. At this point, scaling out would not be possible anymore.
 	DeleteVolumes bool `json:"deleteVolumes"`
 }
@@ -39,8 +39,8 @@ func NewGroupPolicyScaleInAction(amount float32, amountType ActionAmount, delete
 
 	this.Amount = amount
 	this.AmountType = amountType
-	var cooldownPeriod = "5m"
-	this.CooldownPeriod = *NewNullableString(&cooldownPeriod)
+	var cooldownPeriod string = "5m"
+	this.CooldownPeriod = &cooldownPeriod
 	this.DeleteVolumes = deleteVolumes
 
 	return &this
@@ -51,8 +51,8 @@ func NewGroupPolicyScaleInAction(amount float32, amountType ActionAmount, delete
 // but it doesn't guarantee that properties required by API are set
 func NewGroupPolicyScaleInActionWithDefaults() *GroupPolicyScaleInAction {
 	this := GroupPolicyScaleInAction{}
-	var cooldownPeriod = "5m"
-	this.CooldownPeriod = *NewNullableString(&cooldownPeriod)
+	var cooldownPeriod string = "5m"
+	this.CooldownPeriod = &cooldownPeriod
 	return &this
 }
 
@@ -104,90 +104,68 @@ func (o *GroupPolicyScaleInAction) SetAmountType(v ActionAmount) {
 	o.AmountType = v
 }
 
-// GetCooldownPeriod returns the CooldownPeriod field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetCooldownPeriod returns the CooldownPeriod field value if set, zero value otherwise.
 func (o *GroupPolicyScaleInAction) GetCooldownPeriod() string {
-	if o == nil || IsNil(o.CooldownPeriod.Get()) {
+	if o == nil || IsNil(o.CooldownPeriod) {
 		var ret string
 		return ret
 	}
-	return *o.CooldownPeriod.Get()
+	return *o.CooldownPeriod
 }
 
 // GetCooldownPeriodOk returns a tuple with the CooldownPeriod field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *GroupPolicyScaleInAction) GetCooldownPeriodOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.CooldownPeriod) {
 		return nil, false
 	}
-	return o.CooldownPeriod.Get(), o.CooldownPeriod.IsSet()
+	return o.CooldownPeriod, true
 }
 
 // HasCooldownPeriod returns a boolean if a field has been set.
 func (o *GroupPolicyScaleInAction) HasCooldownPeriod() bool {
-	if o != nil && o.CooldownPeriod.IsSet() {
+	if o != nil && !IsNil(o.CooldownPeriod) {
 		return true
 	}
 
 	return false
 }
 
-// SetCooldownPeriod gets a reference to the given NullableString and assigns it to the CooldownPeriod field.
+// SetCooldownPeriod gets a reference to the given string and assigns it to the CooldownPeriod field.
 func (o *GroupPolicyScaleInAction) SetCooldownPeriod(v string) {
-	o.CooldownPeriod.Set(&v)
+	o.CooldownPeriod = &v
 }
 
-// SetCooldownPeriodNil sets the value for CooldownPeriod to be an explicit nil
-func (o *GroupPolicyScaleInAction) SetCooldownPeriodNil() {
-	o.CooldownPeriod.Set(nil)
-}
-
-// UnsetCooldownPeriod ensures that no value is present for CooldownPeriod, not even an explicit nil
-func (o *GroupPolicyScaleInAction) UnsetCooldownPeriod() {
-	o.CooldownPeriod.Unset()
-}
-
-// GetTerminationPolicy returns the TerminationPolicy field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetTerminationPolicy returns the TerminationPolicy field value if set, zero value otherwise.
 func (o *GroupPolicyScaleInAction) GetTerminationPolicy() TerminationPolicyType {
-	if o == nil || IsNil(o.TerminationPolicy.Get()) {
+	if o == nil || IsNil(o.TerminationPolicy) {
 		var ret TerminationPolicyType
 		return ret
 	}
-	return *o.TerminationPolicy.Get()
+	return *o.TerminationPolicy
 }
 
 // GetTerminationPolicyOk returns a tuple with the TerminationPolicy field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *GroupPolicyScaleInAction) GetTerminationPolicyOk() (*TerminationPolicyType, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.TerminationPolicy) {
 		return nil, false
 	}
-	return o.TerminationPolicy.Get(), o.TerminationPolicy.IsSet()
+	return o.TerminationPolicy, true
 }
 
 // HasTerminationPolicy returns a boolean if a field has been set.
 func (o *GroupPolicyScaleInAction) HasTerminationPolicy() bool {
-	if o != nil && o.TerminationPolicy.IsSet() {
+	if o != nil && !IsNil(o.TerminationPolicy) {
 		return true
 	}
 
 	return false
 }
 
-// SetTerminationPolicy gets a reference to the given NullableTerminationPolicyType and assigns it to the TerminationPolicy field.
+// SetTerminationPolicy gets a reference to the given TerminationPolicyType and assigns it to the TerminationPolicy field.
 func (o *GroupPolicyScaleInAction) SetTerminationPolicy(v TerminationPolicyType) {
-	o.TerminationPolicy.Set(&v)
-}
-
-// SetTerminationPolicyNil sets the value for TerminationPolicy to be an explicit nil
-func (o *GroupPolicyScaleInAction) SetTerminationPolicyNil() {
-	o.TerminationPolicy.Set(nil)
-}
-
-// UnsetTerminationPolicy ensures that no value is present for TerminationPolicy, not even an explicit nil
-func (o *GroupPolicyScaleInAction) UnsetTerminationPolicy() {
-	o.TerminationPolicy.Unset()
+	o.TerminationPolicy = &v
 }
 
 // GetDeleteVolumes returns the DeleteVolumes field value
@@ -226,11 +204,11 @@ func (o GroupPolicyScaleInAction) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["amount"] = o.Amount
 	toSerialize["amountType"] = o.AmountType
-	if o.CooldownPeriod.IsSet() {
-		toSerialize["cooldownPeriod"] = o.CooldownPeriod.Get()
+	if !IsNil(o.CooldownPeriod) {
+		toSerialize["cooldownPeriod"] = o.CooldownPeriod
 	}
-	if o.TerminationPolicy.IsSet() {
-		toSerialize["terminationPolicy"] = o.TerminationPolicy.Get()
+	if !IsNil(o.TerminationPolicy) {
+		toSerialize["terminationPolicy"] = o.TerminationPolicy
 	}
 	toSerialize["deleteVolumes"] = o.DeleteVolumes
 	return toSerialize, nil
