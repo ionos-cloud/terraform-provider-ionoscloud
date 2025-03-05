@@ -5,8 +5,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -24,6 +26,7 @@ func TestAccKeyBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders:        randomProviderVersion343(),
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		CheckDestroy:             testAccChecksKeyDestroyCheck,
 		Steps: []resource.TestStep{
@@ -44,6 +47,20 @@ func TestAccKeyBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "active"),
 				),
 			},
+			{
+				Config: testAccDataSourceS3KeyMatchUserID,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(constant.S3KeyResource+"."+constant.S3KeyTestResource, "id"),
+					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "id", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "id"),
+					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "secret", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "secret"),
+					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "active"),
+				),
+			},
+			{
+				Config:      testAccDataSourceS3KeyMatchUserIDNotFound,
+				ExpectError: regexp.MustCompile("no s3 key found with the specified criteria"),
+			},
+
 			// {
 			//	Config: testAccChecks3KeyConfigUpdate,
 			//	Check: resource.ComposeTestCheckFunc(
@@ -120,7 +137,8 @@ resource ` + constant.UserResource + ` "example" {
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
   password = "abc123-321CBA"
-  administrator = false
+  administrator = true
+  active        = true
   force_sec_auth= false
 }
 
@@ -149,7 +167,18 @@ resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
 //	}`
 var testAccDataSourceS3KeyMatchId = testAccChecks3KeyConfigBasic + `
 data ` + constant.S3KeyResource + ` ` + constant.S3KeyDataSourceById + ` {
-user_id    	= ` + constant.UserResource + `.example.id
-id			= ` + constant.S3KeyResource + `.` + constant.S3KeyTestResource + `.id
+  user_id    	= ` + constant.UserResource + `.example.id
+  id			= ` + constant.S3KeyResource + `.` + constant.S3KeyTestResource + `.id
+}
+`
+
+var testAccDataSourceS3KeyMatchUserID = testAccChecks3KeyConfigBasic + `
+data ` + constant.S3KeyResource + ` ` + constant.S3KeyDataSourceById + ` {
+  user_id    	= ` + constant.UserResource + `.example.id
+}
+`
+var testAccDataSourceS3KeyMatchUserIDNotFound = testAccChecks3KeyConfigBasic + resourceRandomUUID + `
+data ` + constant.S3KeyResource + ` ` + constant.S3KeyDataSourceById + ` {
+  user_id = random_uuid.uuid.result
 }
 `

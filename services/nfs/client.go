@@ -2,52 +2,115 @@ package nfs
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	sdk "github.com/ionos-cloud/sdk-go-nfs"
 )
 
 // Client is a wrapper for the NFS SDK
 type Client struct {
-	sdkClient sdk.APIClient
+	sdkClient  sdk.APIClient
+	fileConfig *fileconfiguration.FileConfig
 }
 
-// NewClient returns a new NFS client
-func NewClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
-	config := sdk.NewConfiguration(username, password, token, url)
+// GetFileConfig returns the file configuration
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
+}
+
+// GetConfig returns the configuration
+func (c *Client) GetConfig() *sdk.Configuration {
+	return c.sdkClient.GetConfig()
+}
+
+func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	config := sdk.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	if os.Getenv(constant.IonosDebug) != "" {
 		config.Debug = true
 	}
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
-	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
-	config.UserAgent = fmt.Sprintf("terraform-provider/%s_ionos-cloud-sdk-go-nfs/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s", version, sdk.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint:staticcheck
+	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	config.UserAgent = fmt.Sprintf("terraform-provider/ionos-cloud-sdk-go-nfs/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		sdk.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint:staticcheck
 
-	return &Client{sdkClient: *sdk.NewAPIClient(config)}
+	return &Client{sdkClient: *sdk.NewAPIClient(config),
+		fileConfig: fileConfig}
 }
 
-// Location sets the location of the NFS client which modifies the Host URL:
+// changeConfigURL sets the location of the NFS client which modifies the Host URL:
 //   - de/fra:    https://nfs.de-fra.ionos.com
 //   - de/txl:    https://nfs.de-txl.ionos.com
-func (c *Client) Location(location string) *Client {
+func (c *Client) changeConfigURL(location string) {
+	config := c.sdkClient.GetConfig()
 	// if there is no location set, return the client as is. allows to overwrite the url with IONOS_API_URL
 	if location == "" && os.Getenv(ionosAPIURLNFS) != "" {
-		c.sdkClient.GetConfig().Servers = sdk.ServerConfigurations{
+		config.Servers = sdk.ServerConfigurations{
 			{
 				URL: utils.CleanURL(os.Getenv(ionosAPIURLNFS)),
 			},
 		}
-		return c
+		return
 	}
-	var locationToURL = map[string]string{
+
+	for _, server := range config.Servers {
+		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
+			config.Servers = sdk.ServerConfigurations{
+				{
+					URL:         server.URL,
+					Description: shared.EndpointOverridden + location,
+				},
+			}
+			return
+		}
+	}
+}
+
+// overrideClientEndpoint todo - after move to bundle, replace with generic function from fileConfig
+func (c *Client) overrideClientEndpoint(productName, location string) {
+	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
+	defer c.changeConfigURL(location)
+	if os.Getenv(sdk.IonosApiUrlEnvVar) != "" {
+		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(sdk.IonosApiUrlEnvVar))
+		return
+	}
+	fileConfig := c.GetFileConfig()
+	if fileConfig == nil {
+		return
+	}
+	config := c.GetConfig()
+	if config == nil {
+		return
+	}
+	endpoint := fileConfig.GetProductLocationOverrides(productName, location)
+	if endpoint == nil {
+		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
+		return
+	}
+	config.Servers = sdk.ServerConfigurations{
+		{
+			URL:         endpoint.Name,
+			Description: shared.EndpointOverridden + location,
+		},
+	}
+	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
+}
+
+var (
+	locationToURL = map[string]string{
 		"":       "https://nfs.de-fra.ionos.com",
 		"de/fra": "https://nfs.de-fra.ionos.com",
 		"de/txl": "https://nfs.de-txl.ionos.com",
@@ -58,17 +121,9 @@ func (c *Client) Location(location string) *Client {
 		"us/ewr": "https://nfs.us-ewr.ionos.com",
 		"us/mci": "https://nfs.us-mci.ionos.com",
 	}
-	c.sdkClient.GetConfig().Servers = sdk.ServerConfigurations{
-		{
-			URL: locationToURL[location],
-		},
-	}
-
-	return c
-}
-
-// ValidNFSLocations is a list of valid locations for the Network File Storage Cluster.
-var ValidNFSLocations = []string{"de/fra", "de/txl", "fr-par", "gb-lhr", "es/vit", "us/las", "us/ewr", "us/mci"}
+	// ValidNFSLocations is a list of valid locations for the Network File Storage Cluster.
+	ValidNFSLocations = []string{"de/fra", "de/txl", "fr-par", "gb-lhr", "es/vit", "us/las", "us/ewr", "us/mci"}
+)
 
 // ionosAPIURLNFS is the environment variable key for the NFS API URL.
-var ionosAPIURLNFS = "IONOS_API_URL_NFS"
+const ionosAPIURLNFS = "IONOS_API_URL_NFS"
