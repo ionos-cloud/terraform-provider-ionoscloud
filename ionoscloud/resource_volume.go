@@ -210,9 +210,9 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	volume := ionoscloud.Volume{
-		Properties: *volumeProperties,
+		Properties: volumeProperties,
 	}
-	image, imageAlias, err = getImage(ctx, client, d, volume.Properties)
+	image, imageAlias, err = getImage(ctx, client, d, *volume.Properties)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -349,7 +349,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	if d.HasChange("size") {
 		_, newValue := d.GetChange("size")
 		newValueFloat32 := float32(newValue.(int))
-		properties.Size = newValueFloat32
+		properties.Size = &newValueFloat32
 	}
 	if d.HasChange("bus") {
 		_, newValue := d.GetChange("bus")
@@ -613,7 +613,7 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 	if !strings.EqualFold(serverType, constant.CubeType) {
 		volumeSize = float32(d.Get(path + "size").(int))
 		if volumeSize > 0 {
-			volume.Size = volumeSize
+			volume.Size = &volumeSize
 		}
 	}
 

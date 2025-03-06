@@ -329,7 +329,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["id"] = shared.ToValueDefault(volume.Id)
 			entry["name"] = shared.ToValueDefault(volume.Properties.Name)
 			entry["type"] = shared.ToValueDefault(volume.Properties.Type)
-			entry["size"] = float32OrDefault(&volume.Properties.Size, 0)
+			entry["size"] = float32OrDefault(volume.Properties.Size, 0)
 			entry["availability_zone"] = shared.ToValueDefault(volume.Properties.AvailabilityZone)
 			entry["image_name"] = shared.ToValueDefault(volume.Properties.Image)
 			entry["image_password"] = shared.ToValueDefault(volume.Properties.ImagePassword)
@@ -389,7 +389,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				entry["ipv6_ips"] = ipv6Ips
 			}
 
-			entry["ipv6_cidr_block"] = shared.ToValueDefault(&nic.Properties.Ipv6CidrBlock)
+			entry["ipv6_cidr_block"] = shared.ToValueDefault(nic.Properties.Ipv6CidrBlock.Get())
 			entry["dhcpv6"] = boolOrDefault(nic.Properties.Dhcpv6.Get(), false)
 			entry["dhcp"] = boolOrDefault(nic.Properties.Dhcp, false)
 			entry["lan"] = int32OrDefault(&nic.Properties.Lan, 0)

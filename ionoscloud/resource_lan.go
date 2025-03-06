@@ -333,8 +333,8 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 		}
 	}
 
-	if lan.Properties.Ipv4CidrBlock.IsSet() && lan.Properties.Ipv4CidrBlock.Get() != nil {
-		if err := d.Set("ipv4_cidr_block", *lan.Properties.Ipv4CidrBlock.Get()); err != nil {
+	if lan.Properties.Ipv4CidrBlock != nil {
+		if err := d.Set("ipv4_cidr_block", *lan.Properties.Ipv4CidrBlock); err != nil {
 			return utils.GenerateSetError("lan", "ipv4_cidr_block", err)
 		}
 	}

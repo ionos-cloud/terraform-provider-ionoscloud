@@ -87,6 +87,8 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 		NicUuid: &nicUuid,
 	})
 
+	// Ipv4CIDRBlock is read only so we don't want to send it in the request.
+	lan.Properties.Ipv4CidrBlock = nil
 	// Modify the LAN using the new list
 	lan, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(lan.Properties).Execute()
 	apiResponse.LogInfo()
@@ -183,6 +185,9 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 			NicUuid: &oldNicUuid,
 		})
 
+		// Ipv4CIDRBlock is readonly so we don't want to send it in the request.
+		lan.Properties.Ipv4CidrBlock = nil
+
 		_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(lan.Properties).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
@@ -221,6 +226,9 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 		Ip:      &ip,
 		NicUuid: &nicUuid,
 	})
+
+	// Ipv4CIDRBlock is readonly so we don't want to send it in the request.
+	lan.Properties.Ipv4CidrBlock = nil
 
 	_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(lan.Properties).Execute()
 	apiResponse.LogInfo()

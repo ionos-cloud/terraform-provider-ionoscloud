@@ -617,7 +617,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		serverReq.Entities.Volumes = &ionoscloud.AttachedVolumes{
 			Items: []ionoscloud.Volume{
 				{
-					Properties: *volume,
+					Properties: volume,
 				},
 			},
 		}
@@ -985,7 +985,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				}
 				if v, ok := d.GetOk(volumePath + "size"); ok {
 					vInt := float32(v.(int))
-					properties.Size = vInt
+					properties.Size = &vInt
 				}
 				if v, ok := d.GetOk(volumePath + "bus"); ok {
 					vStr := v.(string)

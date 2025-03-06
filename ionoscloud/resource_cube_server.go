@@ -484,7 +484,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		Volumes: &ionoscloud.AttachedVolumes{
 			Items: []ionoscloud.Volume{
 				{
-					Properties: *volume,
+					Properties: volume,
 				},
 			},
 		},
