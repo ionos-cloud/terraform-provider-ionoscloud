@@ -10,12 +10,11 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
-
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 )
 
 // Client is a wrapper around the Object Storage client.
@@ -37,7 +36,7 @@ func (c *Client) GetBaseClient() *objstorage.APIClient {
 }
 
 // NewClient creates a new Object Storage client with the given credentials and region.
-func NewClient(clientOptions bundle.ClientOptions, config *fileconfiguration.FileConfig) *Client {
+func NewClient(clientOptions clientoptions.TerraformClientOptions, config *fileconfiguration.FileConfig) *Client {
 	// Set custom endpoint if provided
 	if envValue := os.Getenv(ionosAPIURLObjectStorage); envValue != "" {
 		clientOptions.Endpoint = envValue

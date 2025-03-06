@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"log"
 	"os"
 	"strconv"
@@ -14,32 +13,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
-	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
-	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
-	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
-	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
-	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
-	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
-	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
-	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
-	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
-	objectStorageService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
-	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 )
 
 // FrameworkClientOptions is the configuration for the provider.
@@ -217,7 +199,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	if insecureBool == true {
 		resp.Diagnostics.AddWarning("insecure mode enabled", "This is not recommended for production environments.")
 	}
-	clientOptions := bundle.ClientOptions{
+	clientOptions := clientoptions.TerraformClientOptions{
 		ClientOptions: shared.ClientOptions{
 			Endpoint:      cleanedEndpoint,
 			SkipTLSVerify: insecureBool,
@@ -230,35 +212,14 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		},
 		Version:          version,
 		TerraformVersion: terraformVersion,
-		StorageOptions: bundle.StorageOptions{
+		StorageOptions: clientoptions.StorageOptions{
 			AccessKey: accessKey,
 			SecretKey: secretKey,
 			Region:    region,
 		},
 	}
 
-	client := &services.SdkBundle{
-		CDNClient:                     cdnService.NewCDNClient(clientOptions, fileConfig),
-		AutoscalingClient:             autoscalingService.NewClient(clientOptions, fileConfig),
-		CertManagerClient:             cert.NewClient(clientOptions, fileConfig),
-		CloudApiClient:                cloudapi.NewClient(clientOptions, fileConfig),
-		ContainerClient:               crService.NewClient(clientOptions, fileConfig),
-		DataplatformClient:            dataplatformService.NewClient(clientOptions, fileConfig),
-		DNSClient:                     dnsService.NewClient(clientOptions, fileConfig),
-		LoggingClient:                 loggingService.NewClient(clientOptions, fileConfig),
-		MariaDBClient:                 mariadb.NewClient(clientOptions, fileConfig),
-		MongoClient:                   dbaasService.NewMongoClient(clientOptions, fileConfig),
-		NFSClient:                     nfsService.NewClient(clientOptions, fileConfig),
-		PsqlClient:                    dbaasService.NewPSQLClient(clientOptions, fileConfig),
-		KafkaClient:                   kafkaService.NewClient(clientOptions, fileConfig),
-		APIGatewayClient:              apiGatewayService.NewClient(clientOptions, fileConfig),
-		VPNClient:                     vpn.NewClient(clientOptions, fileConfig),
-		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, fileConfig),
-		S3Client:                      objectStorageService.NewClient(clientOptions, fileConfig),
-		ObjectStorageManagementClient: objectStorageManagementService.NewClient(clientOptions, fileConfig),
-		MonitoringClient:              monitoringService.NewClient(clientOptions, fileConfig),
-	}
-
+	client := bundleclient.New(clientOptions, fileConfig)
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }

@@ -13,8 +13,8 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -33,7 +33,7 @@ func (c *Client) GetConfig() *mariadb.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
-func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	newConfig := mariadb.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	if os.Getenv(constant.IonosDebug) != "" {

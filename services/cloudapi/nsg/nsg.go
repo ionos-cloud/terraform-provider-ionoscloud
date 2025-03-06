@@ -9,7 +9,7 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 // Service implements utility methods for the Network Security Group
@@ -36,8 +36,8 @@ func (nsg *Service) PutServerNSG(ctx context.Context, dcID, serverID string, raw
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if errState := cloudapi.WaitForStateChange(ctx, nsg.Meta, nsg.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		if cloudapi.IsRequestFailed(errState) {
+	if errState := bundleclient.WaitForStateChange(ctx, nsg.Meta, nsg.D, apiResponse, schema.TimeoutUpdate); errState != nil {
+		if bundleclient.IsRequestFailed(errState) {
 			nsg.D.SetId("")
 		}
 		return diag.FromErr(fmt.Errorf("an error occurred while waiting for securitygroup state change on put. dcID: %s, server_id: %s, Response: (%w)", dcID, serverID, errState))
@@ -62,8 +62,8 @@ func (nsg *Service) PutNICNSG(ctx context.Context, dcID, serverID, nicID string,
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if errState := cloudapi.WaitForStateChange(ctx, nsg.Meta, nsg.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		if cloudapi.IsRequestFailed(errState) {
+	if errState := bundleclient.WaitForStateChange(ctx, nsg.Meta, nsg.D, apiResponse, schema.TimeoutUpdate); errState != nil {
+		if bundleclient.IsRequestFailed(errState) {
 			nsg.D.SetId("")
 		}
 		return diag.FromErr(fmt.Errorf("an error occurred while waiting for securitygroup state change on put. dcID: %s, server_id: %s, nic_id %s, Response: (%w)", dcID, serverID, nicID, errState))
@@ -88,7 +88,7 @@ func (nsg *Service) SetDefaultDatacenterNSG(ctx context.Context, dcID, nsgID str
 	// Create a dummy ResourceData with the ID of the Datacenter to ensure WaitForStateChange tracks correctly.
 	d := &schema.ResourceData{}
 	d.SetId(dcID)
-	if errState := cloudapi.WaitForStateChange(ctx, nsg.Meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, nsg.Meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		waitErr := fmt.Errorf("an error occurred while waiting for default security group to be set for datacenter. dcID: %s, nsgID: %s, Response(%w)", dcID, nsgID, errState)
 		if nsgID == "" {
 			waitErr = fmt.Errorf("an error occurred while waiting for default security group to be unset for datacenter. dcID:%s, Response: %w", dcID, errState)

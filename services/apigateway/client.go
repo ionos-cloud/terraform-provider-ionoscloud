@@ -2,16 +2,16 @@ package apigateway
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"net/http"
 	"os"
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	apigateway "github.com/ionos-cloud/sdk-go-api-gateway"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
@@ -21,7 +21,7 @@ type Client struct {
 	sdkClient apigateway.APIClient
 }
 
-func NewClient(clientOptions bundle.ClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.APIGateway)
 	config := apigateway.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 

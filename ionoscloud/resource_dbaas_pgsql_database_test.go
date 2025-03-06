@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -68,7 +69,7 @@ func TestAccPgSqlDatabase(t *testing.T) {
 
 func pgSqlDatabaseExistsCheck(path string, database *pgsql.DatabaseResource) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).PsqlClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).PsqlClient
 		rs, ok := s.RootModule().Resources[path]
 		if !ok {
 			return fmt.Errorf("not found: %s", path)
@@ -91,7 +92,7 @@ func pgSqlDatabaseExistsCheck(path string, database *pgsql.DatabaseResource) res
 }
 
 func pgSqlDatabaseDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).PsqlClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).PsqlClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	defer cancel()
 

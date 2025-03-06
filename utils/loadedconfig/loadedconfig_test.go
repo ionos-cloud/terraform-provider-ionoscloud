@@ -7,19 +7,19 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/bundle"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 )
 
 func TestSetClientOptionsFromfileConfig(t *testing.T) {
 	type args struct {
-		clientOptions *bundle.ClientOptions
+		clientOptions *clientoptions.TerraformClientOptions
 		fileConfig    *fileconfiguration.FileConfig
 		productName   string
 	}
 	tests := []struct {
 		name              string
 		args              args
-		wantClientOptions *bundle.ClientOptions
+		wantClientOptions *clientoptions.TerraformClientOptions
 	}{
 		{
 			name: "NilClientOptions",
@@ -33,16 +33,16 @@ func TestSetClientOptionsFromfileConfig(t *testing.T) {
 		{
 			name: "NilfileConfig",
 			args: args{
-				clientOptions: &bundle.ClientOptions{},
+				clientOptions: &clientoptions.TerraformClientOptions{},
 				fileConfig:    nil,
 				productName:   "testProduct",
 			},
-			wantClientOptions: &bundle.ClientOptions{},
+			wantClientOptions: &clientoptions.TerraformClientOptions{},
 		},
 		{
 			name: "MultipleEndpoints",
 			args: args{
-				clientOptions: &bundle.ClientOptions{},
+				clientOptions: &clientoptions.TerraformClientOptions{},
 				fileConfig: &fileconfiguration.FileConfig{
 					Environments: []fileconfiguration.Environment{
 						{
@@ -61,7 +61,7 @@ func TestSetClientOptionsFromfileConfig(t *testing.T) {
 				},
 				productName: "testProduct",
 			},
-			wantClientOptions: &bundle.ClientOptions{
+			wantClientOptions: &clientoptions.TerraformClientOptions{
 				ClientOptions: shared.ClientOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
@@ -71,7 +71,7 @@ func TestSetClientOptionsFromfileConfig(t *testing.T) {
 		{
 			name: "SingleEndpoint",
 			args: args{
-				clientOptions: &bundle.ClientOptions{},
+				clientOptions: &clientoptions.TerraformClientOptions{},
 				fileConfig: &fileconfiguration.FileConfig{
 					Environments: []fileconfiguration.Environment{
 						{
@@ -89,7 +89,7 @@ func TestSetClientOptionsFromfileConfig(t *testing.T) {
 				},
 				productName: "testProduct",
 			},
-			wantClientOptions: &bundle.ClientOptions{
+			wantClientOptions: &clientoptions.TerraformClientOptions{
 				ClientOptions: shared.ClientOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
@@ -99,7 +99,7 @@ func TestSetClientOptionsFromfileConfig(t *testing.T) {
 		{
 			name: "NoEndpoints",
 			args: args{
-				clientOptions: &bundle.ClientOptions{},
+				clientOptions: &clientoptions.TerraformClientOptions{},
 				fileConfig: &fileconfiguration.FileConfig{
 					Environments: []fileconfiguration.Environment{
 						{
@@ -115,12 +115,12 @@ func TestSetClientOptionsFromfileConfig(t *testing.T) {
 				},
 				productName: "testProduct",
 			},
-			wantClientOptions: &bundle.ClientOptions{},
+			wantClientOptions: &clientoptions.TerraformClientOptions{},
 		},
 		{
 			name: "BadProductName",
 			args: args{
-				clientOptions: &bundle.ClientOptions{},
+				clientOptions: &clientoptions.TerraformClientOptions{},
 				fileConfig: &fileconfiguration.FileConfig{
 					Environments: []fileconfiguration.Environment{
 						{
@@ -136,7 +136,7 @@ func TestSetClientOptionsFromfileConfig(t *testing.T) {
 				},
 				productName: "productDoesNotExist",
 			},
-			wantClientOptions: &bundle.ClientOptions{},
+			wantClientOptions: &clientoptions.TerraformClientOptions{},
 		},
 	}
 	for _, tt := range tests {
@@ -361,10 +361,10 @@ func (m *mockConfigProviderWithLoaderAndLocation) GetConfig() *shared.Configurat
 func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 	tests := []struct {
 		name              string
-		clientOptions     *bundle.ClientOptions
+		clientOptions     *clientoptions.TerraformClientOptions
 		fileConfig        *fileconfiguration.FileConfig
 		productName       string
-		wantClientOptions *bundle.ClientOptions
+		wantClientOptions *clientoptions.TerraformClientOptions
 	}{
 		{
 			name:              "NilClientOptions",
@@ -375,14 +375,14 @@ func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 		},
 		{
 			name:              "NilfileConfig",
-			clientOptions:     &bundle.ClientOptions{},
+			clientOptions:     &clientoptions.TerraformClientOptions{},
 			fileConfig:        nil,
 			productName:       "testProduct",
-			wantClientOptions: &bundle.ClientOptions{},
+			wantClientOptions: &clientoptions.TerraformClientOptions{},
 		},
 		{
 			name:          "MultipleEndpoints",
-			clientOptions: &bundle.ClientOptions{},
+			clientOptions: &clientoptions.TerraformClientOptions{},
 			fileConfig: &fileconfiguration.FileConfig{
 				Environments: []fileconfiguration.Environment{
 					{
@@ -400,7 +400,7 @@ func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 				},
 			},
 			productName: "testProduct",
-			wantClientOptions: &bundle.ClientOptions{
+			wantClientOptions: &clientoptions.TerraformClientOptions{
 				ClientOptions: shared.ClientOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
@@ -409,7 +409,7 @@ func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 		},
 		{
 			name:          "SingleEndpoint",
-			clientOptions: &bundle.ClientOptions{},
+			clientOptions: &clientoptions.TerraformClientOptions{},
 			fileConfig: &fileconfiguration.FileConfig{
 				Environments: []fileconfiguration.Environment{
 					{
@@ -426,7 +426,7 @@ func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 				},
 			},
 			productName: "testProduct",
-			wantClientOptions: &bundle.ClientOptions{
+			wantClientOptions: &clientoptions.TerraformClientOptions{
 				ClientOptions: shared.ClientOptions{
 					Endpoint:      "endpoint1",
 					SkipTLSVerify: true,
@@ -435,7 +435,7 @@ func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 		},
 		{
 			name:          "NoEndpoints",
-			clientOptions: &bundle.ClientOptions{},
+			clientOptions: &clientoptions.TerraformClientOptions{},
 			fileConfig: &fileconfiguration.FileConfig{
 				Environments: []fileconfiguration.Environment{
 					{
@@ -450,11 +450,11 @@ func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 				},
 			},
 			productName:       "testProduct",
-			wantClientOptions: &bundle.ClientOptions{},
+			wantClientOptions: &clientoptions.TerraformClientOptions{},
 		},
 		{
 			name:          "BadProductName",
-			clientOptions: &bundle.ClientOptions{},
+			clientOptions: &clientoptions.TerraformClientOptions{},
 			fileConfig: &fileconfiguration.FileConfig{
 				Environments: []fileconfiguration.Environment{
 					{
@@ -469,7 +469,7 @@ func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 				},
 			},
 			productName:       "productDoesNotExist",
-			wantClientOptions: &bundle.ClientOptions{},
+			wantClientOptions: &clientoptions.TerraformClientOptions{},
 		},
 	}
 

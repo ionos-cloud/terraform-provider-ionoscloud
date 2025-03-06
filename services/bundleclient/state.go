@@ -1,4 +1,4 @@
-package cloudapi
+package bundleclient
 
 import (
 	"context"
@@ -12,8 +12,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
 // GetStateChangeConf gets the default configuration for tracking a request progress
@@ -34,7 +32,7 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, location strin
 // resourceStateRefreshFunc tracks progress of a request
 func resourceStateRefreshFunc(meta interface{}, path string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client := meta.(services.SdkBundle).CloudApiClient
+		client := meta.(SdkBundle).CloudApiClient
 
 		log.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {
