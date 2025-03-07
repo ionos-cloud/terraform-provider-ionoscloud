@@ -1949,5 +1949,8 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
     day_of_the_week       = "Monday"
     time                  = "09:00:00"
   }
+  backup {
+	loc = "de"
+  }
   tier = "STANDARD"
 }` // nolint:unused

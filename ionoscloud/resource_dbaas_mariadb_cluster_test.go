@@ -256,6 +256,7 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
   ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameValue + `"
   ` + connections + `
   ` + maintenanceWindowUpdated + `
+  ` + backup + `
   ` + credentials + `
 }
 `
@@ -273,6 +274,7 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
   ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameValue + `"
   ` + connections + `
   ` + maintenanceWindowUpdated + `
+  ` + backup + `
   ` + credentials + `
 }
 `
