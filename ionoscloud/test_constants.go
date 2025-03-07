@@ -1900,6 +1900,9 @@ const clusterConnectionsCidrAttribute = "cidr"
 const clusterDisplayNameAttribute = "display_name"
 const clusterMaintenanceWindowAttribute = "maintenance_window"
 const clusterMaintenanceWindowDayOfTheWeekAttribute = "day_of_the_week"
+const clusterBackupAttribute = "backup"
+const clusterBackupLocationAttribute = "location"
+
 const clusterMaintenanceWindowTimeAttribute = "time"
 const clusterCredentialsAttribute = "credentials"
 const clusterCredentialsUsernameAttribute = "username"
@@ -1910,6 +1913,8 @@ const clusterMaintenanceWindowDayOfTheWeekValue = "Sunday"
 const clusterMaintenanceWindowDayOfTheWeekUpdateValue = "Monday"
 const clusterMaintenanceWindowTimeValue = "09:00:00"
 const clusterMaintenanceWindowTimeUpdateValue = "10:00:00"
+
+const clusterBackupLocationValue = "de"
 
 const wireguardGatewayConfig = `
 resource "ionoscloud_datacenter" "datacenter_example" {
@@ -1943,6 +1948,9 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
   maintenance_window {
     day_of_the_week       = "Monday"
     time                  = "09:00:00"
+  }
+  backup {
+	loc = "de"
   }
   tier = "STANDARD"
 }` // nolint:unused
