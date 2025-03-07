@@ -445,7 +445,6 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	log.Printf("[INFO] Autoscaling Group created. Id set to %s", autoscalingGroup.Id)
 
 	if err := checkAction(ctx, client, d); err != nil {
-		resourceAutoscalingGroupRead(ctx, d, meta)
 		return diag.FromErr(err)
 	}
 
