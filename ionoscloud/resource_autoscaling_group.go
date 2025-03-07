@@ -701,7 +701,7 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 			volumes[i].ImageAlias = shared.ToPtr(v.(string))
 		}
 
-		if volumes[i].Image == nil && volumes[i].ImageAlias == nil {
+		if *volumes[i].Image == "" && *volumes[i].ImageAlias == "" {
 			return nil, fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property")
 		}
 
