@@ -109,13 +109,34 @@ func testAccCheckNFSClusterExists(n string) resource.TestCheckFunc {
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching NFS Cluster with ID: %v, error: %w", rs.Primary.ID, err)
 		}
-		if *found.Id != rs.Primary.ID {
+		if found.Id != rs.Primary.ID {
 			return fmt.Errorf("resource not found")
 		}
 
 		return nil
 	}
 }
+
+// This configuration is used because there are some problems with the API and the creation/deletion
+// of the setup resources (datacenter, lan, server) is not possible (there are some problems with
+// LAN deletion). Because of that, for the moment, only to test the InMemoryDB functionality, we
+// will use data sources for already existing setup resources.
+
+const temporaryConfigSetup = `
+data "ionoscloud_datacenter" "datacenterDS" {
+	id = "88eeae0d-515d-44c1-b142-d9293c20e676"
+}
+
+data "ionoscloud_lan" "lanDS" {
+	id = "1"
+	datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
+}
+
+data "ionoscloud_server" "serverDS" {
+	id = "1f77a37e-2b38-49f2-b2e1-61a47ccf5f15"
+	datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
+}
+`
 
 const testAccCheckNFSClusterConfig = `
 resource "ionoscloud_datacenter" "nfs_dc" {
@@ -164,7 +185,7 @@ resource "ionoscloud_server" "nfs_server" {
 }
 `
 
-const testAccCheckNFSClusterConfigBasic = testAccCheckNFSClusterConfig + `
+const testAccCheckNFSClusterConfigBasic = temporaryConfigSetup + `
 resource "ionoscloud_nfs_cluster" "example" {
   name = "example"
   location = "de/txl"
@@ -175,14 +196,14 @@ resource "ionoscloud_nfs_cluster" "example" {
   }
 
   connections {
-    datacenter_id = ionoscloud_datacenter.nfs_dc.id
-    ip_address    = format("%s/24", ionoscloud_server.nfs_server.nic[0].ips[0])
-    lan           = ionoscloud_lan.nfs_lan.id
+    datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
+    ip_address    = format("%s/24", data.ionoscloud_server.serverDS.nics[0].ips[0])
+    lan           = data.ionoscloud_lan.lanDS.id
   }
 }
 `
 
-const testAccCheckNFSClusterConfigUpdate = testAccCheckNFSClusterConfig + `
+const testAccCheckNFSClusterConfigUpdate = temporaryConfigSetup + `
 resource "ionoscloud_nfs_cluster" "example" {
   name = "example_updated"
   location = "de/txl"
@@ -193,9 +214,9 @@ resource "ionoscloud_nfs_cluster" "example" {
   }
 
   connections {
-    datacenter_id = ionoscloud_datacenter.nfs_dc.id
-    ip_address    = format("%s/24", ionoscloud_server.nfs_server.nic[0].ips[0])
-    lan           = ionoscloud_lan.nfs_lan.id
+    datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
+    ip_address    = format("%s/24", data.ionoscloud_server.serverDS.nics[0].ips[0])
+    lan           = data.ionoscloud_lan.lanDS.id
   }
 }
 `

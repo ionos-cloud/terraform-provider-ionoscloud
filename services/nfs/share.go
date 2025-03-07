@@ -5,11 +5,12 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	sdk "github.com/ionos-cloud/sdk-go-nfs"
+	sdk "github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 // GetNFSShareByID returns a share given an ID
-func (c *Client) GetNFSShareByID(ctx context.Context, clusterID, shareID string, location string) (sdk.ShareRead, *sdk.APIResponse, error) {
+func (c *Client) GetNFSShareByID(ctx context.Context, clusterID, shareID string, location string) (sdk.ShareRead, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.NFS, location)
 	share, apiResponse, err := c.sdkClient.SharesApi.ClustersSharesFindById(ctx, clusterID, shareID).Execute()
 	apiResponse.LogInfo()
@@ -17,7 +18,7 @@ func (c *Client) GetNFSShareByID(ctx context.Context, clusterID, shareID string,
 }
 
 // ListNFSShares returns a list of all shares
-func (c *Client) ListNFSShares(ctx context.Context, d *schema.ResourceData) (sdk.ShareReadList, *sdk.APIResponse, error) {
+func (c *Client) ListNFSShares(ctx context.Context, d *schema.ResourceData) (sdk.ShareReadList, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
 	shares, apiResponse, err := c.sdkClient.SharesApi.
 		ClustersSharesGet(ctx, d.Get("cluster_id").(string)).Execute()
@@ -26,7 +27,7 @@ func (c *Client) ListNFSShares(ctx context.Context, d *schema.ResourceData) (sdk
 }
 
 // DeleteNFSShare deletes a share given an ID
-func (c *Client) DeleteNFSShare(ctx context.Context, clusterID, shareID string, location string) (*sdk.APIResponse, error) {
+func (c *Client) DeleteNFSShare(ctx context.Context, clusterID, shareID string, location string) (*shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.NFS, location)
 	apiResponse, err := c.sdkClient.SharesApi.ClustersSharesDelete(ctx, clusterID, shareID).Execute()
 	apiResponse.LogInfo()
@@ -34,7 +35,7 @@ func (c *Client) DeleteNFSShare(ctx context.Context, clusterID, shareID string, 
 }
 
 // UpdateNFSShare updates an existing share
-func (c *Client) UpdateNFSShare(ctx context.Context, d *schema.ResourceData) (sdk.ShareRead, *sdk.APIResponse, error) {
+func (c *Client) UpdateNFSShare(ctx context.Context, d *schema.ResourceData) (sdk.ShareRead, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
 	share, apiResponse, err := c.sdkClient.SharesApi.
 		ClustersSharesPut(ctx, d.Get("cluster_id").(string), d.Id()).ShareEnsure(*setShareEnsureRequest(d)).Execute()
@@ -43,7 +44,7 @@ func (c *Client) UpdateNFSShare(ctx context.Context, d *schema.ResourceData) (sd
 }
 
 // CreateNFSShare creates a new share
-func (c *Client) CreateNFSShare(ctx context.Context, d *schema.ResourceData) (sdk.ShareRead, *sdk.APIResponse, error) {
+func (c *Client) CreateNFSShare(ctx context.Context, d *schema.ResourceData) (sdk.ShareRead, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
 	share, apiResponse, err := c.sdkClient.SharesApi.
 		ClustersSharesPost(ctx, d.Get("cluster_id").(string)).ShareCreate(*setShareCreateRequest(d)).Execute()
@@ -95,8 +96,8 @@ func setShareConfig(d *schema.ResourceData) sdk.Share {
 
 		clientGroups = append(clientGroups, sdk.ShareClientGroups{
 			Description: &description,
-			IpNetworks:  &ipNetworks,
-			Hosts:       &hosts,
+			IpNetworks:  ipNetworks,
+			Hosts:       hosts,
 			Nfs: &sdk.ShareClientGroupsNfs{
 				Squash: &squash,
 			},
@@ -104,21 +105,21 @@ func setShareConfig(d *schema.ResourceData) sdk.Share {
 	}
 
 	return sdk.Share{
-		Name:         &name,
+		Name:         name,
 		Quota:        &quota,
 		Gid:          &gid,
 		Uid:          &uid,
-		ClientGroups: &clientGroups,
+		ClientGroups: clientGroups,
 	}
 }
 
 // SetNFSShareData sets data from the SDK share to the resource data
 func (c *Client) SetNFSShareData(d *schema.ResourceData, share sdk.ShareRead) error {
-	d.SetId(*share.Id)
-	if err := d.Set("name", *share.Properties.Name); err != nil {
+	d.SetId(share.Id)
+	if err := d.Set("name", share.Properties.Name); err != nil {
 		return err
 	}
-	if err := d.Set("nfs_path", *share.Metadata.NfsPath); err != nil {
+	if err := d.Set("nfs_path", share.Metadata.NfsPath); err != nil {
 		return err
 	}
 	if err := d.Set("quota", int(*share.Properties.Quota)); err != nil {
@@ -130,7 +131,7 @@ func (c *Client) SetNFSShareData(d *schema.ResourceData, share sdk.ShareRead) er
 	if err := d.Set("uid", int(*share.Properties.Uid)); err != nil {
 		return err
 	}
-	if err := d.Set("client_groups", flattenClientGroups(*share.Properties.ClientGroups)); err != nil {
+	if err := d.Set("client_groups", flattenClientGroups(share.Properties.ClientGroups)); err != nil {
 		return err
 	}
 	return nil
@@ -141,8 +142,8 @@ func flattenClientGroups(clientGroups []sdk.ShareClientGroups) []map[string]inte
 	for i, cg := range clientGroups {
 		flattened := map[string]interface{}{
 			"description": *cg.Description,
-			"ip_networks": *cg.IpNetworks,
-			"hosts":       *cg.Hosts,
+			"ip_networks": cg.IpNetworks,
+			"hosts":       cg.Hosts,
 			"nfs": []map[string]interface{}{
 				{
 					"squash": *cg.Nfs.Squash,
