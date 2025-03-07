@@ -13,7 +13,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
-	nfs "github.com/ionos-cloud/sdk-go-nfs"
+	nfs "github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
 )
 
 func dataSourceNFSCluster() *schema.Resource {
@@ -122,8 +122,8 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		var results []nfs.ClusterRead
-		for _, cl := range *clusters.Items {
-			if cl.Properties != nil && cl.Properties.Name != nil && utils.NameMatches(*cl.Properties.Name, name, partialMatch) {
+		for _, cl := range clusters.Items {
+			if utils.NameMatches(cl.Properties.Name, name, partialMatch) {
 				results = append(results, cl)
 			}
 		}

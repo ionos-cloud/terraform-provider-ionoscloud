@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go-nfs"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
@@ -100,7 +100,7 @@ func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating NFS Cluster: %w", err))
 	}
-	clusterID := *response.Id
+	clusterID := response.Id
 	d.SetId(clusterID)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {

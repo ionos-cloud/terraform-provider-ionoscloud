@@ -7,14 +7,15 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	sdk "github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	sdk "github.com/ionos-cloud/sdk-go-nfs"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 // GetNFSClusterByID returns a cluster given an ID
-func (c *Client) GetNFSClusterByID(ctx context.Context, id string, location string) (sdk.ClusterRead, *sdk.APIResponse, error) {
+func (c *Client) GetNFSClusterByID(ctx context.Context, id string, location string) (sdk.ClusterRead, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.NFS, location)
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
@@ -22,7 +23,7 @@ func (c *Client) GetNFSClusterByID(ctx context.Context, id string, location stri
 }
 
 // ListNFSClusters returns a list of all clusters
-func (c *Client) ListNFSClusters(ctx context.Context, d *schema.ResourceData) (sdk.ClusterReadList, *sdk.APIResponse, error) {
+func (c *Client) ListNFSClusters(ctx context.Context, d *schema.ResourceData) (sdk.ClusterReadList, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
 	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGet(ctx).Execute()
 	apiResponse.LogInfo()
@@ -30,7 +31,7 @@ func (c *Client) ListNFSClusters(ctx context.Context, d *schema.ResourceData) (s
 }
 
 // DeleteNFSCluster deletes a cluster given an ID
-func (c *Client) DeleteNFSCluster(ctx context.Context, d *schema.ResourceData) (*sdk.APIResponse, error) {
+func (c *Client) DeleteNFSCluster(ctx context.Context, d *schema.ResourceData) (*shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
 	apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
@@ -38,7 +39,7 @@ func (c *Client) DeleteNFSCluster(ctx context.Context, d *schema.ResourceData) (
 }
 
 // UpdateNFSCluster updates a cluster given an ID or creates a new one if it doesn't exist
-func (c *Client) UpdateNFSCluster(ctx context.Context, d *schema.ResourceData) (sdk.ClusterRead, *sdk.APIResponse, error) {
+func (c *Client) UpdateNFSCluster(ctx context.Context, d *schema.ResourceData) (sdk.ClusterRead, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPut(ctx, d.Id()).
 		ClusterEnsure(*setClusterPutRequest(d)).Execute()
@@ -47,7 +48,7 @@ func (c *Client) UpdateNFSCluster(ctx context.Context, d *schema.ResourceData) (
 }
 
 // CreateNFSCluster creates a new cluster
-func (c *Client) CreateNFSCluster(ctx context.Context, d *schema.ResourceData) (sdk.ClusterRead, *sdk.APIResponse, error) {
+func (c *Client) CreateNFSCluster(ctx context.Context, d *schema.ResourceData) (sdk.ClusterRead, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).
 		ClusterCreate(*setClusterPostRequest(d)).Execute()
@@ -57,20 +58,10 @@ func (c *Client) CreateNFSCluster(ctx context.Context, d *schema.ResourceData) (
 
 // SetNFSClusterData sets the data of the cluster in the terraform resource
 func (c *Client) SetNFSClusterData(d *schema.ResourceData, cluster sdk.ClusterRead) error {
-	d.SetId(*cluster.Id)
+	d.SetId(cluster.Id)
 
-	if cluster.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the NFS Cluster with ID: %s, but received 'nil' instead", *cluster.Id)
-	}
-
-	if cluster.Metadata == nil {
-		return fmt.Errorf("expected metadata in the response for the NFS Cluster with ID: %s, but received 'nil' instead", *cluster.Id)
-	}
-
-	if cluster.Properties.Name != nil {
-		if err := d.Set("name", *cluster.Properties.Name); err != nil {
-			return err
-		}
+	if err := d.Set("name", cluster.Properties.Name); err != nil {
+		return err
 	}
 
 	if cluster.Properties.Size != nil {
@@ -86,23 +77,21 @@ func (c *Client) SetNFSClusterData(d *schema.ResourceData, cluster sdk.ClusterRe
 			},
 		}
 		if err := d.Set("nfs", nfs); err != nil {
-			return fmt.Errorf("error setting nfs data for the NFS Cluster with ID %s: %w", *cluster.Id, err)
+			return fmt.Errorf("error setting nfs data for the NFS Cluster with ID %s: %w", cluster.Id, err)
 		}
 	}
 
-	if cluster.Properties.Connections != nil {
-		var connections []map[string]interface{}
-		for _, connection := range *cluster.Properties.Connections {
-			connectionData := map[string]interface{}{
-				"datacenter_id": *connection.DatacenterId,
-				"lan":           *connection.Lan,
-				"ip_address":    *connection.IpAddress,
-			}
-			connections = append(connections, connectionData)
+	var connections []map[string]interface{}
+	for _, connection := range cluster.Properties.Connections {
+		connectionData := map[string]interface{}{
+			"datacenter_id": connection.DatacenterId,
+			"lan":           connection.Lan,
+			"ip_address":    connection.IpAddress,
 		}
+		connections = append(connections, connectionData)
 
 		if err := d.Set("connections", connections); err != nil {
-			return fmt.Errorf("error setting connections for the NFS Cluster with ID %s: %w", *cluster.Id, err)
+			return fmt.Errorf("error setting connections for the NFS Cluster with ID %s: %w", cluster.Id, err)
 		}
 	}
 
@@ -118,12 +107,8 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 		return false, fmt.Errorf("failed checking if Cluster %s from %s is ready: %w", clusterID, location, err)
 	}
 
-	if cluster.Metadata == nil || cluster.Metadata.Status == nil {
-		return false, fmt.Errorf("metadata or status is empty for Cluster ID: %v", clusterID)
-	}
-
-	log.Printf("[INFO] state of the cluster with ID %s is: %s", clusterID, *cluster.Metadata.Status)
-	return strings.EqualFold(*cluster.Metadata.Status, constant.Available), nil
+	log.Printf("[INFO] state of the cluster with ID %s is: %s", clusterID, cluster.Metadata.Status)
+	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
 }
 
 // IsClusterDeleted checks if the cluster is deleted
@@ -176,16 +161,16 @@ func setClusterConfig(d *schema.ResourceData) sdk.Cluster {
 		ipAddress := connData["ip_address"].(string)
 
 		connections[0] = sdk.ClusterConnections{
-			DatacenterId: &datacenterID,
-			Lan:          &lan,
-			IpAddress:    &ipAddress,
+			DatacenterId: datacenterID,
+			Lan:          lan,
+			IpAddress:    ipAddress,
 		}
 	}
 
 	return sdk.Cluster{
-		Name:        &name,
+		Name:        name,
 		Size:        &size,
 		Nfs:         &nfs,
-		Connections: &connections,
+		Connections: connections,
 	}
 }
