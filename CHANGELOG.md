@@ -1,3 +1,7 @@
+## 6.7.4
+### Docs
+- Added links in resources
+
 ## 6.7.3
 ### Fixes
 - Remove cpu_family, availability_zone and rockylinux-8-GenericCloud-20230518 from docs
