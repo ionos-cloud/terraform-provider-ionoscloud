@@ -9,6 +9,8 @@ description: |-
 
 # ionoscloud_dataplatform_node_pool
 
+[Dataplatform Node Pool](https://docs.ionos.com/cloud/data-analytics/managed-stackable/overview#platform-components)
+
 ## Example Usage
 
 ```hcl

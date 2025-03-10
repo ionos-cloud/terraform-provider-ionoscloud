@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_dataplatform_cluster
 
-Manages a **Dataplatform Cluster**.
+Manages a [Dataplatform Cluster](https://docs.ionos.com/cloud/data-analytics/managed-stackable/overview#platform-components).
 
 ## Example Usage
 

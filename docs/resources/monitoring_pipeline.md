@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_monitoring_pipeline
 
-Manages a **Monitoring pipeline**.
+Manages a [Monitoring pipeline](https://docs.ionos.com/cloud/observability/monitoring-service).
 
 > ⚠️  Only tokens are accepted for authorization in the **monitoring_pipeline** resource. Please ensure you are using tokens as other methods will not be valid.
 

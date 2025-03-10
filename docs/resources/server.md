@@ -9,7 +9,9 @@ description: |-
 
 # ionoscloud_server
 
-Manages a **Server** on IonosCloud.
+Dedicated Core Servers or [Enterprise Servers](https://docs.ionos.com/cloud/compute-services/compute-engine/dedicated-core) are provisioned and hosted in one of IONOS' physical data centers. Dedicated Core Servers behave exactly like physical servers. They can be configured and managed with your choice of the operating system.
+
+Check out [Limitations](https://docs.ionos.com/cloud/compute-services/compute-engine/dedicated-core#limitations).
 
 ## Example Usage
 

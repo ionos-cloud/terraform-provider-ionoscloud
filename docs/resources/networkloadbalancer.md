@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_networkloadbalancer
 
-Manages a **Network Load Balancer**  on IonosCloud.
+Manages a [Network Load Balancer](https://docs.ionos.com/cloud/network-services/network-load-balancer/outline) on IonosCloud.
 
 ## Example Usage
 

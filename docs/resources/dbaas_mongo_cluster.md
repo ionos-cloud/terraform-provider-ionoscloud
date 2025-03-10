@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_mongo_cluster
 
-Manages a **DbaaS Mongo Cluster**.
+Manages a [DbaaS Mongo Cluster](https://docs.ionos.com/cloud/databases/mongodb/overview).
 
 ## Example Usage for playground or business editions. They require template_id defined.
 
