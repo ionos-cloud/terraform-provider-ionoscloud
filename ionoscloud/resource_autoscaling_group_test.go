@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
+	autoscaling "github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -423,7 +423,7 @@ func testAccCheckAutoscalingGroupExists(name string, autoscalingGroup *autoscali
 			return fmt.Errorf("error occurred while fetching autoscaling group: %s, %w", rs.Primary.ID, err)
 		}
 
-		if *foundGroup.Id != rs.Primary.ID {
+		if foundGroup.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
 		}
 		autoscalingGroup = &foundGroup
@@ -606,6 +606,7 @@ resource "ionoscloud_target_group" "autoscaling_target_group" {
     name                      = "Target Group Example" 
     algorithm                 = "ROUND_ROBIN"
     protocol                  = "HTTP"
+  	protocol_version          = "HTTP1"
 }
 
 resource "time_sleep" "wait_10_minutes" {
