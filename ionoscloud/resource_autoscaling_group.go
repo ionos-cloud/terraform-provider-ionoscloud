@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
@@ -17,7 +18,6 @@ import (
 	autoscaling "github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -428,7 +428,7 @@ Notice that exactly one volume can be set to PRIMARY or all of them set to AUTO.
 }
 
 func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client := meta.(services.SdkBundle).AutoscalingClient
+	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 
 	var group autoscaling.GroupPost
 	properties, err := expandProperties(d)
@@ -452,7 +452,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client := meta.(services.SdkBundle).AutoscalingClient
+	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 	group, apiResponse, err := client.GetGroup(ctx, d.Id(), 2)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -474,7 +474,7 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client := meta.(services.SdkBundle).AutoscalingClient
+	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 
 	if d.HasChange("datacenter_id") {
 		return diag.FromErr(fmt.Errorf("datacenter_id property is immutable and can be used only in create requests"))
@@ -512,7 +512,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client := meta.(services.SdkBundle).AutoscalingClient
+	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 	if _, err := client.DeleteGroup(ctx, d.Id()); err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while deleting an Autoscaling Group %s %w", d.Id(), err))
 	}
@@ -525,7 +525,7 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).AutoscalingClient
+	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 
 	groupID := d.Id()
 

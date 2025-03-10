@@ -12,7 +12,7 @@ import (
 
 	objectStorageManagement "github.com/ionos-cloud/sdk-go-object-storage-management"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -82,7 +82,7 @@ func (r *accesskeyResource) Configure(_ context.Context, req resource.ConfigureR
 		return
 	}
 
-	clientBundle, ok := req.ProviderData.(*services.SdkBundle)
+	clientBundle, ok := req.ProviderData.(*bundleclient.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",

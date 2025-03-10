@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -64,7 +64,7 @@ func resourceDbaasMongoUser() *schema.Resource {
 }
 
 func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).MongoClient
 	request := mongo.User{
 		Properties: &mongo.UserProperties{},
 	}
@@ -119,7 +119,7 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).MongoClient
 	request := mongo.PatchUserRequest{
 		Properties: mongo.NewPatchUserProperties(),
 	}
@@ -171,7 +171,7 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).MongoClient
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
@@ -194,7 +194,7 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).MongoClient
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
@@ -220,7 +220,7 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).MongoClient
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {

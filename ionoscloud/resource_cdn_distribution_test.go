@@ -10,7 +10,7 @@ import (
 
 	ionoscloud_cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -128,7 +128,7 @@ func TestAccDistributionBasic(t *testing.T) {
 }
 
 func testAccCheckCDNDistributionDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CDNClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).CDNClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -157,7 +157,7 @@ func testAccCheckCDNDistributionDestroyCheck(s *terraform.State) error {
 
 func testAccCheckCDNDistributionExists(n string, distribution *ionoscloud_cdn.Distribution) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CDNClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).CDNClient
 
 		rs, ok := s.RootModule().Resources[n]
 

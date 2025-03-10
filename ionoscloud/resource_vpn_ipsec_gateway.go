@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -122,7 +122,7 @@ func resourceVpnIPSecGateway() *schema.Resource {
 }
 
 func resourceVpnIPSecGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 
 	gateway, _, err := client.CreateIPSecGateway(ctx, d)
 	if err != nil {
@@ -139,7 +139,7 @@ func resourceVpnIPSecGatewayCreate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	id := d.Id()
 	location := d.Get("location").(string)
 
@@ -157,7 +157,7 @@ func resourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, me
 	return diag.FromErr(vpn.SetIPSecGatewayData(d, gateway))
 }
 func resourceVpnIPSecGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 
 	gateway, _, err := client.UpdateIPSecGateway(ctx, d)
 	if err != nil {
@@ -173,7 +173,7 @@ func resourceVpnIPSecGatewayUpdate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceVpnIPSecGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	id := d.Id()
 	location := d.Get("location").(string)
 

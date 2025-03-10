@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 )
 
@@ -77,10 +78,7 @@ resource "ionoscloud_s3_bucket_policy" "test" {
 }
 
 func testAccCheckBucketPolicyDestroy(s *terraform.State) error {
-	client, err := acctest.ObjectStorageClient()
-	if err != nil {
-		return err
-	}
+	client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_s3_bucket_policy" {

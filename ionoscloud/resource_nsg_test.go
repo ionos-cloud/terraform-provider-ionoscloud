@@ -9,7 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -226,7 +227,7 @@ func TestAccNSGFirewallRules(t *testing.T) {
 }
 
 func testAccCheckNSGDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -255,7 +256,7 @@ func testAccCheckNSGDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNSGExists(n string, nsg *ionoscloud.SecurityGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -287,7 +288,7 @@ func testAccCheckNSGExists(n string, nsg *ionoscloud.SecurityGroup) resource.Tes
 }
 
 func testAccCheckNSGRuleDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -316,7 +317,7 @@ func testAccCheckNSGRuleDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNSGFirewallRuleExists(n string, rule *ionoscloud.FirewallRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 

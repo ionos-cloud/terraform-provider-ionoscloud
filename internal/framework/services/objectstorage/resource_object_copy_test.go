@@ -6,11 +6,13 @@ package objectstorage_test
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"testing"
 )
 
 func TestAccObjectCopy_basic(t *testing.T) {
@@ -178,10 +180,7 @@ func TestAccObjectCopy_targetWithMultipleSlashes(t *testing.T) {
 
 func testAccCheckObjectCopyDestroy(ctx context.Context) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client, err := acctest.ObjectStorageClient()
-		if err != nil {
-			return err
-		}
+		client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "ionoscloud_s3_object_copy" {
@@ -213,10 +212,7 @@ func testAccCheckObjectCopyExists(ctx context.Context, n string) resource.TestCh
 			return fmt.Errorf("Not Found: %s", n)
 		}
 
-		client, err := acctest.ObjectStorageClient()
-		if err != nil {
-			return err
-		}
+		client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
 		if rs.Primary.Attributes["bucket"] != "" && rs.Primary.Attributes["key"] != "" {
 			_, _, err := client.ObjectsApi.HeadObject(ctx, rs.Primary.Attributes["bucket"], rs.Primary.Attributes["key"]).Execute()
