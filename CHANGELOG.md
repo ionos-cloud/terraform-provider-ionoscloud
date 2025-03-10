@@ -1,3 +1,9 @@
+## 6.8.1
+### Refactor
+- Use bundle SDK for VM Autoscaling
+### Fixes
+- Keep the VM autoscaling group in state if the action fails
+- Fix VM Autoscaling tests and examples
 ## 6.7.3
 ### Fixes
 - Remove cpu_family, availability_zone and rockylinux-8-GenericCloud-20230518 from docs
