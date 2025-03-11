@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_volume
 
-Manages a [Volume](https://docs.ionos.com/cloud/containers/managed-kubernetes/how-tos/mount-an-nfs-volume) on IonosCloud.
+Manages a [Volume](https://docs.ionos.com/cloud/storage-and-backup/block-storage) on IonosCloud.
 
 ## Example Usage
 

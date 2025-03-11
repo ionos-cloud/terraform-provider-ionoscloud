@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_nfs_cluster
 
-Create clusters of [Network File Storage (NFS)](https://docs.ionos.com/cloud/containers/managed-kubernetes/how-tos/mount-an-nfs-volume) on IonosCloud.
+Create clusters of [Network File Storage (NFS)](https://docs.ionos.com/cloud/storage-and-backup/network-file-storage) on IonosCloud.
 
 ## Example Usage
 
