@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_auto_certificate_provider
 
-Manages a **CM provider**. 
+Manages a [CM provider](https://docs.ionos.com/cloud/network-services/certificate-manager). 
 
 ## Example Usage
 

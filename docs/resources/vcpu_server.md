@@ -9,7 +9,11 @@ description: |-
 
 # ionoscloud_vcpu_server
 
-Manages a **VCPU Server** on IonosCloud.
+A [vCPU Server](https://docs.ionos.com/cloud/compute-services/compute-engine/vcpu-server) that you create is a new Virtual Machine (VM) provisioned and hosted in one of IONOS' physical data centers. A vCPU Server behaves exactly like physical servers and you can use them either standalone or in combination with other IONOS Cloud products.
+
+These servers are configured with virtual CPUs and distributed among multiple users sharing the same physical server. The performance of your vCPU Server relies on various factors, including the underlying CPU of the physical server, VM configurations, and the current load on the physical server.
+
+This section lists the limitations of [vCPU Servers](https://docs.ionos.com/cloud/compute-services/compute-engine/vcpu-server#limitations-of-vcpu-servers)
 
 ## Example Usage
 

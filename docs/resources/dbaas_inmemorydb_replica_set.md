@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_inmemorydb_replicaset
 
-Manages a **DBaaS InMemoryDB Replica Set**.
+Manages a [DBaaS InMemoryDB Replica Set](https://docs.ionos.com/cloud/databases/in-memory-db/overview) Replica Set.
 
 ## Example Usage
 
