@@ -11,11 +11,13 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
+// GetGroupServer returns a group server given an ID
 func (c *Client) GetGroupServer(ctx context.Context, groupId string, serverId string) (autoscaling.Server, *shared.APIResponse, error) {
 	server, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsServersFindById(ctx, serverId, groupId).Execute()
 	return server, apiResponse, err
 }
 
+// GetAllGroupServers returns a list of all group servers
 func (c *Client) GetAllGroupServers(ctx context.Context, groupId string) (autoscaling.ServerCollection, *shared.APIResponse, error) {
 	servers, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsServersGet(ctx, groupId).Execute()
 	return servers, apiResponse, err
