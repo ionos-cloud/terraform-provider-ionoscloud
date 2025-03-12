@@ -8,20 +8,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
-	shared "github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 )
 
 // GetClusterBackups retrieves a list of backups for a given cluster ID and the location in which the cluster is created.
-func (c *MariaDBClient) GetClusterBackups(ctx context.Context, clusterID, location string) (mariadb.BackupList, *shared.APIResponse, error) {
-	c.modifyConfigURL(location)
+func (c *Client) GetClusterBackups(ctx context.Context, clusterID, location string) (mariadb.BackupList, *shared.APIResponse, error) {
+	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
 	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err
 }
 
 // FindBackupByID retrieves a backup by its ID and the location in which the cluster is created.
-func (c *MariaDBClient) FindBackupByID(ctx context.Context, backupID, location string) (mariadb.BackupResponse, *shared.APIResponse, error) {
-	c.modifyConfigURL(location)
+func (c *Client) FindBackupByID(ctx context.Context, backupID, location string) (mariadb.BackupResponse, *shared.APIResponse, error) {
+	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
 	backups, apiResponse, err := c.sdkClient.BackupsApi.BackupsFindById(ctx, backupID).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err

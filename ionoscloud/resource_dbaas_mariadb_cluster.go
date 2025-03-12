@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -196,7 +196,7 @@ func errorOnVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, _ int
 }
 
 func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MariaDBClient
+	client := meta.(bundleclient.SdkBundle).MariaDBClient
 
 	cluster, err := mariadb.GetMariaDBClusterDataCreate(d)
 	if err != nil {
@@ -221,7 +221,7 @@ func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MariaDBClient
+	client := meta.(bundleclient.SdkBundle).MariaDBClient
 	clusterID := d.Id()
 	_, apiResponse, err := client.DeleteCluster(ctx, d.Id(), d.Get("location").(string))
 	if err != nil {
@@ -243,7 +243,7 @@ func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).MariaDBClient
+	client := meta.(bundleclient.SdkBundle).MariaDBClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<cluster_id>'", d.Id())
@@ -273,7 +273,7 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MariaDBClient
+	client := meta.(bundleclient.SdkBundle).MariaDBClient
 	clusterID := d.Id()
 	cluster, apiResponse, err := client.GetCluster(ctx, clusterID, d.Get("location").(string))
 	if err != nil {
@@ -293,7 +293,7 @@ func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func mariaDBClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MariaDBClient
+	client := meta.(bundleclient.SdkBundle).MariaDBClient
 
 	clusterID := d.Id()
 	cluster, err := mariadb.GetMariaDBClusterDataUpdate(d)

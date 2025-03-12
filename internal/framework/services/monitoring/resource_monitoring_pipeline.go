@@ -15,7 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	monitoringSDK "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -26,7 +26,7 @@ var (
 )
 
 type pipelineResource struct {
-	client *monitoringService.MonitoringClient
+	client *monitoringService.Client
 }
 
 type pipelineResourceModel struct {
@@ -101,7 +101,7 @@ func (r *pipelineResource) Configure(_ context.Context, req resource.ConfigureRe
 		return
 	}
 
-	clientBundle, ok := req.ProviderData.(*services.SdkBundle)
+	clientBundle, ok := req.ProviderData.(*bundleclient.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",

@@ -6,20 +6,21 @@ import (
 	"log"
 	"strings"
 
-	vpnSdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	vpnsdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 var wireguardResourceName = "vpnSdk wireguard gateway"
 
 // CreateWireguardGateway creates a new wireguard gateway
-func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceData) (vpnSdk.WireguardGatewayRead, utils.ApiResponseInfo, error) {
-	c.changeConfigURL(d.Get("location").(string))
+func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceData) (vpnsdk.WireguardGatewayRead, utils.ApiResponseInfo, error) {
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, d.Get("location").(string))
 	request := setWireguardGWPostRequest(d)
 	wireguard, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysPost(ctx).WireguardGatewayCreate(*request).Execute()
 	apiResponse.LogInfo()
@@ -29,7 +30,8 @@ func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceD
 // IsWireguardAvailable checks if the wireguard is available
 func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	location := d.Get("location").(string)
-	c.changeConfigURL(location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
+
 	wireguardID := d.Id()
 	wireguard, _, err := c.GetWireguardGatewayByID(ctx, wireguardID, location)
 	if err != nil {
@@ -40,8 +42,8 @@ func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceDat
 }
 
 // UpdateWireguardGateway updates a wireguard gateway
-func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schema.ResourceData) (vpnSdk.WireguardGatewayRead, utils.ApiResponseInfo, error) {
-	c.changeConfigURL(d.Get("location").(string))
+func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schema.ResourceData) (vpnsdk.WireguardGatewayRead, utils.ApiResponseInfo, error) {
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, d.Get("location").(string))
 	request := setWireguardGatewayPutRequest(d)
 	wireguardResponse, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysPut(ctx, id).WireguardGatewayEnsure(*request).Execute()
 	apiResponse.LogInfo()
@@ -50,7 +52,7 @@ func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schem
 
 // DeleteWireguardGateway deletes a wireguard gateway
 func (c *Client) DeleteWireguardGateway(ctx context.Context, id, location string) (utils.ApiResponseInfo, error) {
-	c.changeConfigURL(location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -58,23 +60,23 @@ func (c *Client) DeleteWireguardGateway(ctx context.Context, id, location string
 
 // IsWireguardGatewayDeleted checks if the wireguard gateway is deleted
 func (c *Client) IsWireguardGatewayDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	c.changeConfigURL(d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, d.Get("location").(string))
 	_, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
 }
 
 // GetWireguardGatewayByID returns a wireguard by its ID
-func (c *Client) GetWireguardGatewayByID(ctx context.Context, id, location string) (vpnSdk.WireguardGatewayRead, *shared.APIResponse, error) {
-	c.changeConfigURL(location)
+func (c *Client) GetWireguardGatewayByID(ctx context.Context, id, location string) (vpnsdk.WireguardGatewayRead, *shared.APIResponse, error) {
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	wireguard, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return wireguard, apiResponse, err
 }
 
 // ListWireguardGateways returns a list of all wireguards
-func (c *Client) ListWireguardGateways(ctx context.Context, location string) (vpnSdk.WireguardGatewayReadList, *shared.APIResponse, error) {
-	c.changeConfigURL(location)
+func (c *Client) ListWireguardGateways(ctx context.Context, location string) (vpnsdk.WireguardGatewayReadList, *shared.APIResponse, error) {
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	wireguards, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return wireguards, apiResponse, err
@@ -83,7 +85,7 @@ func (c *Client) ListWireguardGateways(ctx context.Context, location string) (vp
 // IsWireguardGatewayReady checks if the wireguard gateway is ready
 func (c *Client) IsWireguardGatewayReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	location := d.Get("location").(string)
-	c.changeConfigURL(location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	cluster, _, err := c.GetWireguardGatewayByID(ctx, d.Id(), location)
 	if err != nil {
 		return false, err
@@ -92,8 +94,8 @@ func (c *Client) IsWireguardGatewayReady(ctx context.Context, d *schema.Resource
 	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
 }
 
-func setWireguardGWPostRequest(d *schema.ResourceData) *vpnSdk.WireguardGatewayCreate {
-	request := vpnSdk.WireguardGatewayCreate{Properties: vpnSdk.WireguardGateway{}}
+func setWireguardGWPostRequest(d *schema.ResourceData) *vpnsdk.WireguardGatewayCreate {
+	request := vpnsdk.WireguardGatewayCreate{Properties: vpnsdk.WireguardGateway{}}
 	name := d.Get("name").(string)
 	gatewayIP := d.Get("gateway_ip").(string)
 	privateKey := d.Get("private_key").(string)
@@ -131,13 +133,13 @@ func setWireguardGWPostRequest(d *schema.ResourceData) *vpnSdk.WireguardGatewayC
 	return &request
 }
 
-func getWireguardGwConnectionsData(d *schema.ResourceData) []vpnSdk.Connection {
-	connections := make([]vpnSdk.Connection, 0)
+func getWireguardGwConnectionsData(d *schema.ResourceData) []vpnsdk.Connection {
+	connections := make([]vpnsdk.Connection, 0)
 
 	if connectionValues, ok := d.GetOk("connections"); ok {
 		connectionsItf := connectionValues.([]any)
 		for idx := range connectionsItf {
-			connection := vpnSdk.Connection{}
+			connection := vpnsdk.Connection{}
 			if datacenterID, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", idx)); ok {
 				datacenterID := datacenterID.(string)
 				connection.DatacenterId = datacenterID
@@ -163,8 +165,8 @@ func getWireguardGwConnectionsData(d *schema.ResourceData) []vpnSdk.Connection {
 	return connections
 }
 
-func setWireguardGatewayPutRequest(d *schema.ResourceData) *vpnSdk.WireguardGatewayEnsure {
-	request := vpnSdk.WireguardGatewayEnsure{Properties: vpnSdk.WireguardGateway{}}
+func setWireguardGatewayPutRequest(d *schema.ResourceData) *vpnsdk.WireguardGatewayEnsure {
+	request := vpnsdk.WireguardGatewayEnsure{Properties: vpnsdk.WireguardGateway{}}
 	request.Id = d.Id()
 	request.Properties.GatewayIP = d.Get("gateway_ip").(string)
 	request.Properties.Name = d.Get("name").(string)
@@ -192,7 +194,7 @@ func setWireguardGatewayPutRequest(d *schema.ResourceData) *vpnSdk.WireguardGate
 }
 
 // SetWireguardGWData sets the wireguard gateway data
-func SetWireguardGWData(d *schema.ResourceData, wireguard vpnSdk.WireguardGatewayRead) error {
+func SetWireguardGWData(d *schema.ResourceData, wireguard vpnsdk.WireguardGatewayRead) error {
 	d.SetId(wireguard.Id)
 
 	if err := d.Set("name", wireguard.Properties.Name); err != nil {
@@ -246,7 +248,7 @@ func SetWireguardGWData(d *schema.ResourceData, wireguard vpnSdk.WireguardGatewa
 	return nil
 }
 
-func setWireguardMaintenanceWindowData(wireguardGateway vpnSdk.WireguardGateway) []interface{} {
+func setWireguardMaintenanceWindowData(wireguardGateway vpnsdk.WireguardGateway) []interface{} {
 	var maintenanceWindows []interface{}
 	maintenanceWindow := map[string]interface{}{}
 	utils.SetPropWithNilCheck(maintenanceWindow, "time", wireguardGateway.MaintenanceWindow.Time)

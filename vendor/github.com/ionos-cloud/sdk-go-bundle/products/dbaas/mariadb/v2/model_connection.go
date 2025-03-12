@@ -121,6 +121,14 @@ func (o *Connection) SetCidr(v string) {
 	o.Cidr = v
 }
 
+func (o Connection) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o Connection) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["datacenterId"] = o.DatacenterId

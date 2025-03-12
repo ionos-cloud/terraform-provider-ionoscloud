@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_mariadb_cluster
 
-Manages a **DBaaS MariaDB Cluster**. 
+Manages a [DBaaS MariaDB Cluster](https://docs.ionos.com/cloud/databases/mariadb/overview). 
 
 ## Example Usage
 
@@ -31,9 +31,7 @@ resource "ionoscloud_server" "example" {
   datacenter_id           = ionoscloud_datacenter.example.id
   cores                   = 2
   ram                     = 2048
-  availability_zone       = "ZONE_1"
-  cpu_family              = "INTEL_SKYLAKE"
-  image_name              = "rockylinux-8-GenericCloud-20240528"
+  image_name              = "rocky:latest"
   image_password          = "password"
   volume {
     name                  = "example"

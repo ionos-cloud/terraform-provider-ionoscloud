@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func dataSourceGroup() *schema.Resource {
@@ -83,6 +83,66 @@ func dataSourceGroup() *schema.Resource {
 				Description: "Privilege for a group to manage DBaaS related functionality",
 				Computed:    true,
 			},
+			"access_and_manage_dns": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage dns records.",
+				Computed:    true,
+			},
+			"manage_registry": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for group accessing container registry related functionality.",
+				Computed:    true,
+			},
+			"manage_dataplatform": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage the Data Platform.",
+				Computed:    true,
+			},
+			"access_and_manage_logging": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage Logging.",
+				Computed:    true,
+			},
+			"access_and_manage_cdn": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage Cdn.",
+				Computed:    true,
+			},
+			"access_and_manage_vpn": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage Vpn.",
+				Computed:    true,
+			},
+			"access_and_manage_api_gateway": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage ApiGateway.",
+				Computed:    true,
+			},
+			"access_and_manage_kaas": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage Kaas.",
+				Computed:    true,
+			},
+			"access_and_manage_network_file_storage": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage NetworkFileStorage.",
+				Computed:    true,
+			},
+			"access_and_manage_ai_model_hub": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage AiModelHub.",
+				Computed:    true,
+			},
+			"access_and_manage_iam_resources": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage IamResources.",
+				Computed:    true,
+			},
+			"create_network_security_groups": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to create NetworkSecurityGroups.",
+				Computed:    true,
+			},
 			"users": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -121,7 +181,7 @@ func dataSourceGroup() *schema.Resource {
 }
 
 func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")

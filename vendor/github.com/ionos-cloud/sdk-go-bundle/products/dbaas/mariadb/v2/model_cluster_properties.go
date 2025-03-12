@@ -34,6 +34,7 @@ type ClusterProperties struct {
 	StorageSize       *int32             `json:"storageSize,omitempty"`
 	Connections       []Connection       `json:"connections,omitempty"`
 	MaintenanceWindow *MaintenanceWindow `json:"maintenanceWindow,omitempty"`
+	Backup            *BackupProperties  `json:"backup,omitempty"`
 }
 
 // NewClusterProperties instantiates a new ClusterProperties object
@@ -342,6 +343,46 @@ func (o *ClusterProperties) SetMaintenanceWindow(v MaintenanceWindow) {
 	o.MaintenanceWindow = &v
 }
 
+// GetBackup returns the Backup field value if set, zero value otherwise.
+func (o *ClusterProperties) GetBackup() BackupProperties {
+	if o == nil || IsNil(o.Backup) {
+		var ret BackupProperties
+		return ret
+	}
+	return *o.Backup
+}
+
+// GetBackupOk returns a tuple with the Backup field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ClusterProperties) GetBackupOk() (*BackupProperties, bool) {
+	if o == nil || IsNil(o.Backup) {
+		return nil, false
+	}
+	return o.Backup, true
+}
+
+// HasBackup returns a boolean if a field has been set.
+func (o *ClusterProperties) HasBackup() bool {
+	if o != nil && !IsNil(o.Backup) {
+		return true
+	}
+
+	return false
+}
+
+// SetBackup gets a reference to the given BackupProperties and assigns it to the Backup field.
+func (o *ClusterProperties) SetBackup(v BackupProperties) {
+	o.Backup = &v
+}
+
+func (o ClusterProperties) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ClusterProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.DisplayName) {
@@ -370,6 +411,9 @@ func (o ClusterProperties) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.MaintenanceWindow) {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
+	}
+	if !IsNil(o.Backup) {
+		toSerialize["backup"] = o.Backup
 	}
 	return toSerialize, nil
 }

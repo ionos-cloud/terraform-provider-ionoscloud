@@ -23,7 +23,7 @@ var _ MappedNullable = &RestoreRequest{}
 type RestoreRequest struct {
 	// The unique ID of the resource.
 	BackupId string `json:"backupId"`
-	// The timestamp to which the cluster should be restored. If empty, the backup will be applied to the latest timestamp.  This value must be supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.  Must be within the earliestRecoveryTargetTime and now.  The earliestRecoveryTargetTime can be looked up in the  backup object.
+	// The timestamp to which the cluster should be restored. If empty, the backup will be applied to the latest timestamp.  This value must be supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.  Must be within the earliestRecoveryTargetTime and now.  The earliestRecoveryTargetTime can be looked up in the backup object.
 	RecoveryTargetTime *IonosTime `json:"recoveryTargetTime,omitempty"`
 }
 
@@ -101,6 +101,14 @@ func (o *RestoreRequest) HasRecoveryTargetTime() bool {
 // SetRecoveryTargetTime gets a reference to the given time.Time and assigns it to the RecoveryTargetTime field.
 func (o *RestoreRequest) SetRecoveryTargetTime(v time.Time) {
 	o.RecoveryTargetTime = &IonosTime{v}
+}
+
+func (o RestoreRequest) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o RestoreRequest) ToMap() (map[string]interface{}, error) {

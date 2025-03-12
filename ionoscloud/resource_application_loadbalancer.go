@@ -11,8 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -92,7 +91,7 @@ and log the extent to which your instances are being accessed.`,
 }
 
 func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	applicationLoadBalancer := ionoscloud.ApplicationLoadBalancer{
 		Properties: &ionoscloud.ApplicationLoadBalancerProperties{},
@@ -171,8 +170,8 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 
 	d.SetId(*applicationLoadbalancer.Id)
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		if cloudapi.IsRequestFailed(errState) {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
 		return diag.FromErr(errState)
@@ -207,7 +206,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 }
 
 func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -240,7 +239,7 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 }
 
 func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	request := ionoscloud.ApplicationLoadBalancer{
 		Properties: &ionoscloud.ApplicationLoadBalancerProperties{},
@@ -339,7 +338,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -347,7 +346,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 }
 
 func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -359,7 +358,7 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -369,7 +368,7 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 }
 
 func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 

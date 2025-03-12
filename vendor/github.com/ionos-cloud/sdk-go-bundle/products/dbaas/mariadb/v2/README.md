@@ -19,11 +19,11 @@ The API can be accessed within an instance running in IONOS Cloud or directly ov
 
 ### Use go get to retrieve the SDK to add it to your GOPATH workspace, or project's Go module dependencies.
 ```bash
-go get github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb.git
+go get github.com/ionos-cloud/sdk-go-bundle/mariadb.git
 ```
 To update the SDK use go get -u to retrieve the latest version of the SDK.
 ```bash
-go get -u github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb.git
+go get -u github.com/ionos-cloud/sdk-go-bundle/mariadb.git
 ```
 ### Go Modules
 
@@ -31,7 +31,7 @@ If you are using Go modules, your go get will default to the latest tagged relea
 
 To get the latest SDK repository, use @latest.
 ```bash
-go get github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb@latest
+go get github.com/ionos-cloud/sdk-go-bundle/mariadb@latest
 ```
 
 ## Environment Variables
@@ -79,7 +79,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb"
+	mariadb "github.com/ionos-cloud/sdk-go-bundle/mariadb"
 	"log"
 )
 
@@ -100,7 +100,7 @@ There are 2 ways to generate your token:
         "fmt"
         "github.com/ionos-cloud/sdk-go-bundle/products/auth"
         "github.com/ionos-cloud/sdk-go-bundle/shared"
-        mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb"
+        mariadb "github.com/ionos-cloud/sdk-go-bundle/mariadb"
         "log"
     )
 
@@ -134,7 +134,7 @@ There are 2 ways to generate your token:
         "context"
         "fmt"
         "github.com/ionos-cloud/sdk-go-bundle/products/auth"
-         mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb"
+         mariadb "github.com/ionos-cloud/sdk-go-bundle/mariadb"
         "log"
     )
 
@@ -192,7 +192,7 @@ There are log levels that you can set: `Off`, `Debug` and `Trace`.
 package main
 
     import (
-        mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb"
+        mariadb "github.com/ionos-cloud/sdk-go-bundle/mariadb"
         "github.com/ionos-cloud/sdk-go-bundle/shared"
         "github.com/sirupsen/logrus"
     )
@@ -240,6 +240,7 @@ All URIs are relative to *https://mariadb.de-txl.ionos.com*
  - [Backup](docs/models/Backup)
  - [BackupList](docs/models/BackupList)
  - [BackupListAllOf](docs/models/BackupListAllOf)
+ - [BackupProperties](docs/models/BackupProperties)
  - [BackupResponse](docs/models/BackupResponse)
  - [BaseBackup](docs/models/BaseBackup)
  - [ClusterList](docs/models/ClusterList)

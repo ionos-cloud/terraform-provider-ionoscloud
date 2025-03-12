@@ -6,16 +6,17 @@ package objectstorage_test
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"io"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 const (
@@ -686,10 +687,7 @@ func testAccCheckObjectExists(ctx context.Context, n string, body *string) resou
 			return fmt.Errorf("Not Found: %s", n)
 		}
 
-		client, err := acctest.ObjectStorageClient()
-		if err != nil {
-			return err
-		}
+		client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
 		output, _, err := buildGetObjectRequest(ctx, client, rs.Primary.Attributes).Execute()
 		if err != nil {
@@ -759,10 +757,7 @@ func testAccObjectCreateTempFile(t *testing.T, data string) string {
 }
 
 func testAccCheckObjectDestroy(s *terraform.State) error {
-	client, err := acctest.ObjectStorageClient()
-	if err != nil {
-		return err
-	}
+	client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_s3_object" {

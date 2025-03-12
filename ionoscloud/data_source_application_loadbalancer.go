@@ -7,7 +7,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -91,7 +91,7 @@ and log the extent to which your instances are being accessed.`,
 }
 
 func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	datacenterId := d.Get("datacenter_id").(string)
 

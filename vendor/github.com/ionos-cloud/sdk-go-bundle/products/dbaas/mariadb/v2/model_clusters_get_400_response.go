@@ -93,6 +93,14 @@ func (o *ClustersGet400Response) SetMessages(v []ErrorMessage) {
 	o.Messages = v
 }
 
+func (o ClustersGet400Response) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ClustersGet400Response) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["httpStatus"] = o.HttpStatus

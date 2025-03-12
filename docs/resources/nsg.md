@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_nsg
 
-Manages a **Network Security Group** on IonosCloud.
+Manages a [Network Security Group](https://docs.ionos.com/cloud/network-services/network-security-groups/overview) on IonosCloud.
 
 ## Example Usage
 

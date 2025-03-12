@@ -4,60 +4,28 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
 	shared "github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-var locationToURL = map[string]string{
-	"":       "https://mariadb.de-txl.ionos.com",
-	"de/fra": "https://mariadb.de-fra.ionos.com",
-	"de/txl": "https://mariadb.de-txl.ionos.com",
-	"es/vit": "https://mariadb.es-vit.ionos.com",
-	"fr/par": "https://mariadb.fr-par.ionos.com",
-	"gb/lhr": "https://mariadb.gb-lhr.ionos.com",
-	"us/ewr": "https://mariadb.us-ewr.ionos.com",
-	"us/las": "https://mariadb.us-las.ionos.com",
-	"us/mci": "https://mariadb.us-mci.ionos.com",
-}
-var ionosAPIURLMariaDB = "IONOS_API_URL_MARIADB"
-
-// modifyConfigURL modifies the URL inside the client configuration.
-// This function is required in order to make requests to different endpoints based on location.
-func (c *MariaDBClient) modifyConfigURL(location string) {
-	clientConfig := c.sdkClient.GetConfig()
-	if location == "" && os.Getenv(ionosAPIURLMariaDB) != "" {
-		clientConfig.Servers = shared.ServerConfigurations{
-			{
-				URL: utils.CleanURL(os.Getenv(ionosAPIURLMariaDB)),
-			},
-		}
-		return
-	}
-	clientConfig.Servers = shared.ServerConfigurations{
-		{
-			URL: locationToURL[location],
-		},
-	}
-}
-
 // GetCluster retrieves a cluster by its ID and the location in which the cluster is created.
-func (c *MariaDBClient) GetCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
-	c.modifyConfigURL(location)
+func (c *Client) GetCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
+	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
 
 // ListClusters retrieves a list of clusters based on the location. Filters can be used.
-func (c *MariaDBClient) ListClusters(ctx context.Context, filterName, location string) (mariadb.ClusterList, *shared.APIResponse, error) {
-	c.modifyConfigURL(location)
+func (c *Client) ListClusters(ctx context.Context, filterName, location string) (mariadb.ClusterList, *shared.APIResponse, error) {
+	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
 	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)
@@ -68,30 +36,30 @@ func (c *MariaDBClient) ListClusters(ctx context.Context, filterName, location s
 }
 
 // CreateCluster creates a new cluster using the provided data in the request and the location.
-func (c *MariaDBClient) CreateCluster(ctx context.Context, cluster mariadb.CreateClusterRequest, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
-	c.modifyConfigURL(location)
+func (c *Client) CreateCluster(ctx context.Context, cluster mariadb.CreateClusterRequest, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
+	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
 // UpdateCluster updates a cluster by its ID and the location in which the cluster is created.
-func (c *MariaDBClient) UpdateCluster(ctx context.Context, cluster mariadb.PatchClusterRequest, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
-	c.modifyConfigURL(location)
+func (c *Client) UpdateCluster(ctx context.Context, cluster mariadb.PatchClusterRequest, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
+	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterID).PatchClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
 // DeleteCluster deletes a cluster by its ID and the location in which the cluster is created.
-func (c *MariaDBClient) DeleteCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
-	c.modifyConfigURL(location)
+func (c *Client) DeleteCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
+	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
-func (c *MariaDBClient) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	clusterID := d.Id()
 	location := d.Get("location").(string)
 	cluster, _, err := c.GetCluster(ctx, clusterID, location)
@@ -107,7 +75,7 @@ func (c *MariaDBClient) IsClusterReady(ctx context.Context, d *schema.ResourceDa
 	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
 }
 
-func (c *MariaDBClient) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	clusterID := d.Id()
 	_, apiResponse, err := c.GetCluster(ctx, clusterID, d.Get("location").(string))
 	if err != nil {
@@ -295,7 +263,7 @@ func GetMariaClusterCredentialsData(d *schema.ResourceData) mariadb.DBUser {
 	return user
 }
 
-func (c *MariaDBClient) SetMariaDBClusterData(d *schema.ResourceData, cluster mariadb.ClusterResponse) error {
+func (c *Client) SetMariaDBClusterData(d *schema.ResourceData, cluster mariadb.ClusterResponse) error {
 
 	resourceName := "MariaDB cluster"
 
@@ -381,7 +349,7 @@ func (c *MariaDBClient) SetMariaDBClusterData(d *schema.ResourceData, cluster ma
 	return nil
 }
 
-func (c *MariaDBClient) SetConnectionProperties(connection mariadb.Connection) map[string]interface{} {
+func (c *Client) SetConnectionProperties(connection mariadb.Connection) map[string]interface{} {
 	connectionMap := map[string]interface{}{}
 
 	utils.SetPropWithNilCheck(connectionMap, "datacenter_id", connection.DatacenterId)
@@ -391,7 +359,7 @@ func (c *MariaDBClient) SetConnectionProperties(connection mariadb.Connection) m
 	return connectionMap
 }
 
-func (c *MariaDBClient) SetMaintenanceWindowProperties(maintenanceWindow mariadb.MaintenanceWindow) map[string]interface{} {
+func (c *Client) SetMaintenanceWindowProperties(maintenanceWindow mariadb.MaintenanceWindow) map[string]interface{} {
 	maintenance := map[string]interface{}{}
 
 	utils.SetPropWithNilCheck(maintenance, "time", maintenanceWindow.Time)
@@ -400,7 +368,7 @@ func (c *MariaDBClient) SetMaintenanceWindowProperties(maintenanceWindow mariadb
 	return maintenance
 }
 
-func (c *MariaDBClient) setBackupProperties(backup mariadb.BackupProperties) map[string]any {
+func (c *Client) setBackupProperties(backup mariadb.BackupProperties) map[string]any {
 	bac := map[string]any{}
 
 	utils.SetPropWithNilCheck(bac, "location", backup.Location)

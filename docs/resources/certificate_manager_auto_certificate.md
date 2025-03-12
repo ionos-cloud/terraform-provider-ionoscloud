@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_auto_certificate
 
-Manages a **CM AutoCertificate**. 
+Manages a [CM AutoCertificate](https://docs.ionos.com/cloud/network-services/certificate-manager/auto-certificate/create-auto-certificate). 
 
 ## Example Usage
 

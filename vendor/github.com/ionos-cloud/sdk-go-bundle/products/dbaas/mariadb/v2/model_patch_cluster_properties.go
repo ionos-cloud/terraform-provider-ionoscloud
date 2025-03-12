@@ -275,6 +275,14 @@ func (o *PatchClusterProperties) SetMaintenanceWindow(v MaintenanceWindow) {
 	o.MaintenanceWindow = &v
 }
 
+func (o PatchClusterProperties) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o PatchClusterProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.MariadbVersion) {

@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -180,7 +180,7 @@ func resourceVpnIPSecTunnel() *schema.Resource {
 }
 
 func resourceVpnIPSecTunnelCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	pskKey := ""
 
 	if d.Get("auth.0.method").(string) == "PSK" && d.Get("auth.0.psk_key").(string) == "" {
@@ -221,7 +221,7 @@ func resourceVpnIPSecTunnelCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	id := d.Id()
 	location := d.Get("location").(string)
 	gatewayID := d.Get("gateway_id").(string)
@@ -252,7 +252,7 @@ func resourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 func resourceVpnIPSecTunnelUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	pskKey := ""
 
 	if d.Get("auth.0.method").(string) == "PSK" && d.Get("auth.0.psk_key").(string) == "" {
@@ -292,7 +292,7 @@ func resourceVpnIPSecTunnelUpdate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceVpnIPSecTunnelDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	id := d.Id()
 	location := d.Get("location").(string)
 	gatewayID := d.Get("gateway_id").(string)

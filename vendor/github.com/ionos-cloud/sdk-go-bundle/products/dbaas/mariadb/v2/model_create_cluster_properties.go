@@ -33,6 +33,7 @@ type CreateClusterProperties struct {
 	// The friendly name of your cluster.
 	DisplayName       string             `json:"displayName"`
 	MaintenanceWindow *MaintenanceWindow `json:"maintenanceWindow,omitempty"`
+	Backup            *BackupProperties  `json:"backup,omitempty"`
 	Credentials       DBUser             `json:"credentials"`
 	FromBackup        *RestoreRequest    `json:"fromBackup,omitempty"`
 }
@@ -264,6 +265,38 @@ func (o *CreateClusterProperties) SetMaintenanceWindow(v MaintenanceWindow) {
 	o.MaintenanceWindow = &v
 }
 
+// GetBackup returns the Backup field value if set, zero value otherwise.
+func (o *CreateClusterProperties) GetBackup() BackupProperties {
+	if o == nil || IsNil(o.Backup) {
+		var ret BackupProperties
+		return ret
+	}
+	return *o.Backup
+}
+
+// GetBackupOk returns a tuple with the Backup field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateClusterProperties) GetBackupOk() (*BackupProperties, bool) {
+	if o == nil || IsNil(o.Backup) {
+		return nil, false
+	}
+	return o.Backup, true
+}
+
+// HasBackup returns a boolean if a field has been set.
+func (o *CreateClusterProperties) HasBackup() bool {
+	if o != nil && !IsNil(o.Backup) {
+		return true
+	}
+
+	return false
+}
+
+// SetBackup gets a reference to the given BackupProperties and assigns it to the Backup field.
+func (o *CreateClusterProperties) SetBackup(v BackupProperties) {
+	o.Backup = &v
+}
+
 // GetCredentials returns the Credentials field value
 func (o *CreateClusterProperties) GetCredentials() DBUser {
 	if o == nil {
@@ -320,6 +353,14 @@ func (o *CreateClusterProperties) SetFromBackup(v RestoreRequest) {
 	o.FromBackup = &v
 }
 
+func (o CreateClusterProperties) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o CreateClusterProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["mariadbVersion"] = o.MariadbVersion
@@ -331,6 +372,9 @@ func (o CreateClusterProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize["displayName"] = o.DisplayName
 	if !IsNil(o.MaintenanceWindow) {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
+	}
+	if !IsNil(o.Backup) {
+		toSerialize["backup"] = o.Backup
 	}
 	toSerialize["credentials"] = o.Credentials
 	if !IsNil(o.FromBackup) {

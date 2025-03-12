@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dbaas "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func dataSourceDBaaSMariaDBCluster() *schema.Resource {
@@ -127,7 +127,7 @@ func dataSourceDBaaSMariaDBCluster() *schema.Resource {
 }
 
 func dataSourceMariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MariaDBClient
+	client := meta.(bundleclient.SdkBundle).MariaDBClient
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("display_name")
 	location := d.Get("location").(string)

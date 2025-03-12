@@ -6,8 +6,9 @@ package objectstorage_test
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"testing"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -69,10 +70,7 @@ resource "ionoscloud_s3_bucket_server_side_encryption_configuration" "test" {
 }
 
 func testAccCheckBucketSSEConfigurationDestroy(s *terraform.State) error {
-	client, err := acctest.ObjectStorageClient()
-	if err != nil {
-		return err
-	}
+	client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_s3_bucket_server_side_encryption_configuration" {
@@ -103,12 +101,9 @@ func testAccCheckSSEConfigurationExists(ctx context.Context, n string) resource.
 			return fmt.Errorf("Not Found: %s", n)
 		}
 
-		client, err := acctest.ObjectStorageClient()
-		if err != nil {
-			return err
-		}
+		client := acctest.NewTestBundleClientFromEnv().S3Client.GetBaseClient()
 
-		_, _, err = client.EncryptionApi.GetBucketEncryption(ctx, rs.Primary.Attributes["bucket"]).Execute()
+		_, _, err := client.EncryptionApi.GetBucketEncryption(ctx, rs.Primary.Attributes["bucket"]).Execute()
 		return err
 	}
 }

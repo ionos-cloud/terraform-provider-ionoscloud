@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_logging_pipeline
 
-Manages a **Logging pipeline**.
+Manages a [Logging pipeline](https://docs.ionos.com/cloud/observability/logging-service/overview/log-pipelines).
 
 > ⚠️  Only tokens are accepted for authorization in the **logging_pipeline** resource. Please ensure you are using tokens as other methods will not be valid.
 
