@@ -156,6 +156,7 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							Description:      "The S3 location where the backups will be stored.",
 							Required:         true,
+							ForceNew:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 					},
