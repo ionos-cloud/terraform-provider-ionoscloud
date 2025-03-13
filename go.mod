@@ -30,7 +30,7 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3
 	github.com/ionos-cloud/sdk-go-dns v1.2.1
-	github.com/ionos-cloud/sdk-go-nfs v1.1.1
+	github.com/ionos-cloud/sdk-go-nfs v1.1.3
 	github.com/ionos-cloud/sdk-go-object-storage v1.1.0
 	github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1

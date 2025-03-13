@@ -54,7 +54,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.1.2"
+	Version = "products/kafka/v2.0.0"
 )
 
 // APIClient manages communication with the Kafka as a Service API API v1.7.1
