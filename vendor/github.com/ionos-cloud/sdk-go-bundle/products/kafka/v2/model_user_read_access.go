@@ -174,6 +174,14 @@ func (o *UserReadAccess) SetProperties(v User) {
 	o.Properties = v
 }
 
+func (o UserReadAccess) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o UserReadAccess) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id

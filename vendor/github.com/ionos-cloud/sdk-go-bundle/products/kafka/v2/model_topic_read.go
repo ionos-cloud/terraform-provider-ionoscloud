@@ -174,6 +174,14 @@ func (o *TopicRead) SetProperties(v Topic) {
 	o.Properties = v
 }
 
+func (o TopicRead) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o TopicRead) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id

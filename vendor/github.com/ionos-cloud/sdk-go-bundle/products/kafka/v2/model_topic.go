@@ -177,6 +177,14 @@ func (o *Topic) SetLogRetention(v TopicLogRetention) {
 	o.LogRetention = &v
 }
 
+func (o Topic) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o Topic) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name

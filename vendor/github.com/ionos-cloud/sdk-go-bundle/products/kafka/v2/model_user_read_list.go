@@ -156,6 +156,14 @@ func (o *UserReadList) SetItems(v []UserRead) {
 	o.Items = v
 }
 
+func (o UserReadList) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o UserReadList) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id

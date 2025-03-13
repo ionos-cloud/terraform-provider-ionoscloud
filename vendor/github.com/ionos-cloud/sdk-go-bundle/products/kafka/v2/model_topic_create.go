@@ -101,6 +101,14 @@ func (o *TopicCreate) SetProperties(v Topic) {
 	o.Properties = v
 }
 
+func (o TopicCreate) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o TopicCreate) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Metadata) {

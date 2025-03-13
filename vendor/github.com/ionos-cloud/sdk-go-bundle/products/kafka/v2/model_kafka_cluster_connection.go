@@ -122,6 +122,14 @@ func (o *KafkaClusterConnection) SetBrokerAddresses(v []string) {
 	o.BrokerAddresses = v
 }
 
+func (o KafkaClusterConnection) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o KafkaClusterConnection) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["datacenterId"] = o.DatacenterId
