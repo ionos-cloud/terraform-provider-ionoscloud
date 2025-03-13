@@ -3,7 +3,6 @@ package objectstorage
 import (
 	"bytes"
 	"errors"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"io"
 	"net/http"
 	"os"
@@ -11,13 +10,22 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
-
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 )
 
 // Client is a wrapper around the Object Storage client.
 type Client struct {
-	client *objstorage.APIClient
+	client     *objstorage.APIClient
+	fileConfig *fileconfiguration.FileConfig
+}
+
+// GetFileConfig returns the file configuration.
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
 }
 
 const ionosAPIURLObjectStorage = "IONOS_API_URL_OBJECT_STORAGE"
@@ -28,13 +36,23 @@ func (c *Client) GetBaseClient() *objstorage.APIClient {
 }
 
 // NewClient creates a new Object Storage client with the given credentials and region.
-func NewClient(id, secret, region, endpoint string, insecure bool) *Client {
+func NewClient(clientOptions clientoptions.TerraformClientOptions, config *fileconfiguration.FileConfig) *Client {
 	// Set custom endpoint if provided
 	if envValue := os.Getenv(ionosAPIURLObjectStorage); envValue != "" {
-		endpoint = envValue
+		clientOptions.Endpoint = envValue
 	}
-	cfg := objstorage.NewConfiguration(endpoint)
-	signer := awsv4.NewSigner(credentials.NewStaticCredentials(id, secret, ""))
+	certificateAuthData := ""
+	if clientOptions.Endpoint == "" {
+		if endpointOverrides := config.GetProductLocationOverrides(fileconfiguration.ObjectStorage, clientOptions.StorageOptions.Region); endpointOverrides != nil {
+			clientOptions.Endpoint = endpointOverrides.Name
+			if !clientOptions.SkipTLSVerify {
+				clientOptions.SkipTLSVerify = endpointOverrides.SkipTLSVerify
+			}
+			certificateAuthData = endpointOverrides.CertificateAuthData
+		}
+	}
+	cfg := objstorage.NewConfiguration(clientOptions.Endpoint)
+	signer := awsv4.NewSigner(credentials.NewStaticCredentials(clientOptions.StorageOptions.AccessKey, clientOptions.StorageOptions.SecretKey, ""))
 	cfg.MiddlewareWithError = func(r *http.Request) error {
 		var reader io.ReadSeeker
 		if r.Body != nil {
@@ -45,17 +63,18 @@ func NewClient(id, secret, region, endpoint string, insecure bool) *Client {
 			reader = bytes.NewReader(bodyBytes)
 		}
 
-		if region == "" {
-			region = "eu-central-3"
+		if clientOptions.StorageOptions.Region == "" {
+			clientOptions.StorageOptions.Region = "eu-central-3"
 		}
-		_, err := signer.Sign(r, reader, "s3", region, time.Now())
+		_, err := signer.Sign(r, reader, "s3", clientOptions.StorageOptions.Region, time.Now())
 		if errors.Is(err, credentials.ErrStaticCredentialsEmpty) {
 			return errors.New("object storage credentials are missing. Please set s3_access_key and s3_secret_key provider attributes or environment variables IONOS_S3_ACCESS_KEY and IONOS_S3_SECRET_KEY")
 		}
 		return err
 	}
-	cfg.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+	cfg.HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, certificateAuthData)}
 	return &Client{
-		client: objstorage.NewAPIClient(cfg),
+		client:     objstorage.NewAPIClient(cfg),
+		fileConfig: config,
 	}
 }

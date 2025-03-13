@@ -9,7 +9,9 @@ description: |-
 
 # ionoscloud_cube_server
 
-Manages a **Cube Server** on IonosCloud.
+A [Cube](https://docs.ionos.com/cloud/compute-services/cubes/overview) is a Virtual Machine (VM) with an attached NVMe Volume. You can use each newly created Cube as a new VM, either standalone or in combination with other IONOS Cloud products.
+
+Check out [Configuration templates](https://docs.ionos.com/cloud/compute-services/cubes/overview#basic-cubes)
 
 ## Example Usage
 

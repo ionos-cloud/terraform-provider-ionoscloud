@@ -20,7 +20,6 @@ When this happens, please refine your search string so that it is specific enoug
 data "ionoscloud_share" "example" {
   group_id      = "group_id"
   resource_id   = "resource_id"
-  id			= "share_id"
 }
 ```
 
@@ -30,10 +29,8 @@ The following arguments are supported:
 
 * `group_id` - (Required)The ID of the specific group containing the resource to update.
 * `resource_id` - (Required)The ID of the specific resource to update.
-* `id` - (Required)The uuid of the share object
 
-
-`id`, `resource_id` and `group_id` must be provided. If any of them are missing, the datasource will return an error.
+`resource_id` and `group_id` must be provided. If any of them are missing, the datasource will return an error.
 
 ## Attributes Reference
 

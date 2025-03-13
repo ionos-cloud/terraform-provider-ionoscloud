@@ -9,7 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func TestAccNFSShareBasic(t *testing.T) {
@@ -72,7 +73,7 @@ func TestAccNFSShareBasic(t *testing.T) {
 }
 
 func testAccCheckNFSShareDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).NFSClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).NFSClient
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_nfs_share" {
@@ -93,7 +94,7 @@ func testAccCheckNFSShareDestroy(s *terraform.State) error {
 
 func testAccCheckNFSShareExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).NFSClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NFSClient
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {

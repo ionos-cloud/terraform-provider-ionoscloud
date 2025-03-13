@@ -32,7 +32,7 @@ Needs to have the resource be previously created, or a depends_on clause to ensu
 this data source is called.
 
 ```hcl
-data "ionoscloud_vpn_ipsec_gateway" "example" {
+data "ionoscloud_vpn_ipsec_tunnel" "example" {
   name     = "ipsec-tunnel"
   gateway_id = "gateway_id"
   location = "gateway_location"

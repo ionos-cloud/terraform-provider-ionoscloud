@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_kafka_cluster
 
-Manages a **Kafka Cluster** on IonosCloud.
+Manages a [Kafka Cluster](https://docs.ionos.com/cloud/data-analytics/kafka/overview) on IonosCloud.
 
 ## Example Usage
 
@@ -66,7 +66,6 @@ resource "ionoscloud_server" "example" {
   cores             = 1
   ram               = 2 * 1024
   availability_zone = "AUTO"
-  cpu_family        = "INTEL_SKYLAKE"
   image_name = "ubuntu:latest" # alias name
   image_password    = random_password.password.result
   volume {

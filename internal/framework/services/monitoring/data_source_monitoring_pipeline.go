@@ -12,7 +12,7 @@ import (
 
 	monitoringSDK "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 )
 
@@ -20,7 +20,7 @@ var _ datasource.DataSourceWithConfigure = (*pipelineDataSource)(nil)
 var _ datasource.DataSourceWithConfigValidators = (*pipelineDataSource)(nil)
 
 type pipelineDataSource struct {
-	client *monitoringService.MonitoringClient
+	client *monitoringService.Client
 }
 
 type pipelineDataSourceModel struct {
@@ -49,7 +49,7 @@ func (d *pipelineDataSource) Configure(ctx context.Context, req datasource.Confi
 		return
 	}
 
-	clientBundle, ok := req.ProviderData.(*services.SdkBundle)
+	clientBundle, ok := req.ProviderData.(*bundleclient.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",

@@ -51,11 +51,13 @@ func (resp *APIResponse) HttpNotFound() bool {
 // does not print anything for nil APIResponse values
 func (resp *APIResponse) LogInfo() {
 
-	if resp != nil {
-		SdkLogger.Printf("[DEBUG] Request time : %s for operation : %s",
-			resp.RequestTime, resp.Operation)
-		if resp.Response != nil {
-			SdkLogger.Printf("[DEBUG] response status code : %d\n", resp.StatusCode)
+	if SdkLogLevel.Satisfies(Debug) {
+		if resp != nil {
+			SdkLogger.Printf("[DEBUG] Request time: %s for operation: %s",
+				resp.RequestTime, resp.Operation)
+			if resp.Response != nil {
+				SdkLogger.Printf("[DEBUG] response status code: %d\n", resp.StatusCode)
+			}
 		}
 	}
 }

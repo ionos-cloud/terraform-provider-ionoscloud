@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_object_storage_accesskey
 
-Manages an **Object Storage Accesskey** on IonosCloud.
+Manages an [Object Storage Accesskey](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage/concepts/key-management) on IonosCloud.
 
 ## Example Usage
 
@@ -32,6 +32,8 @@ The following arguments are supported:
 - `timeouts` - (Optional) Timeouts for this resource.
   - `create` - (Optional)[string] Time to wait for the bucket to be created. Default is `10m`.
   - `delete` - (Optional)[string] Time to wait for the bucket to be deleted. Default is `10m`.
+
+> **⚠ WARNING:** `IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT` can be used to set a custom API URL for the Object Storage Management SDK. Setting `endpoint` or `IONOS_API_URL` does not have any effect.
 
 ## Import
 

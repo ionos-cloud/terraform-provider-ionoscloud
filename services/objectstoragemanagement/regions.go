@@ -25,6 +25,7 @@ type capability struct {
 
 // GetRegion retrieves a region
 func (c *Client) GetRegion(ctx context.Context, regionID string, depth float32) (objectstoragemanagement.RegionRead, *objectstoragemanagement.APIResponse, error) {
+	c.modifyConfigURL()
 	region, apiResponse, err := c.client.RegionsApi.RegionsFindByRegion(ctx, regionID).Execute()
 	apiResponse.LogInfo()
 	return region, apiResponse, err
@@ -32,6 +33,7 @@ func (c *Client) GetRegion(ctx context.Context, regionID string, depth float32) 
 
 // ListRegions lists all regions
 func (c *Client) ListRegions(ctx context.Context) (objectstoragemanagement.RegionReadList, *objectstoragemanagement.APIResponse, error) {
+	c.modifyConfigURL()
 	regions, apiResponse, err := c.client.RegionsApi.RegionsGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return regions, apiResponse, err

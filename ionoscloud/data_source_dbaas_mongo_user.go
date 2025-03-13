@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
 
@@ -70,7 +70,7 @@ func dataSourceDbaasMongoUser() *schema.Resource {
 }
 
 func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).MongoClient
 
 	clusterIdIf, idOk := d.GetOk("cluster_id")
 	usernameIf, nameOk := d.GetOk("username")

@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_cdn_distribution
 
-Manages a **CDN Distribution** on IonosCloud.
+Manages a [CDN Distribution](https://docs.ionos.com/cloud/network-services/cdn/overview#how-does-cdn-work) on IonosCloud.
 
 ## Example Usage
 

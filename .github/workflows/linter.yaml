@@ -40,13 +40,13 @@ jobs:
         id: go
         run: echo "::set-output name=cache::$(go env GOCACHE)"
       - name: Cache the Go Build Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.0
         with:
           path: ${{ steps.go.outputs.cache }}
           key: ${{ runner.os }}-build-lint-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-build-lint-
       - name: Cache Go Dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.0
         with:
           path: .work/pkg
           key: ${{ runner.os }}-pkg-${{ hashFiles('**/go.sum') }}

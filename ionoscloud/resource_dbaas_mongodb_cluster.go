@@ -8,7 +8,7 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -307,7 +307,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 }
 
 func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).MongoClient
 
 	if err := dbaas.MongoClusterCheckRequiredFieldsSet(d); err != nil {
 		return diag.FromErr(err)
@@ -334,7 +334,7 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).MongoClient
 	clusterId := d.Id()
 	patchRequest := dbaas.SetMongoClusterPatchProperties(d)
 
@@ -357,7 +357,7 @@ func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).MongoClient
 
 	cluster, apiResponse, err := client.GetCluster(ctx, d.Id())
 
@@ -380,7 +380,7 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).MongoClient
 
 	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
 
@@ -404,7 +404,7 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).MongoClient
 
 	clusterId := d.Id()
 

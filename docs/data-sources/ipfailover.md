@@ -18,7 +18,7 @@ If a single match is found, it will be returned. If your search results in multi
 ```hcl
 data "ionoscloud_ipfailover" "example" {
   datacenter_id   = "datacenter_id"
-  id              = "lan_id"
+  lan_id              = "lan_id"
 }
 ```
 
@@ -27,7 +27,7 @@ data "ionoscloud_ipfailover" "example" {
 The following arguments are supported:
 
 * `datacenter_id` - (Required) The ID of the datacenter containing the ip failover datasource
-* `id` - (Required) The id of the lan of which the IP failover belongs 
+* `lan_id` - (Required) The id of the lan of which the IP failover belongs 
 
 
 ## Attributes Reference

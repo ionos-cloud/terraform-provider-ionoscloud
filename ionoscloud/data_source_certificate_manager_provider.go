@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	certSDK "github.com/ionos-cloud/sdk-go-cert-manager"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -66,7 +66,7 @@ func dataSourceCertificateManagerProvider() *schema.Resource {
 }
 
 func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 	location := d.Get("location").(string)

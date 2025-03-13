@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -255,7 +256,7 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 }
 
 func testAccCheckDbaasMongoClusterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).MongoClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).MongoClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -282,7 +283,7 @@ func testAccCheckDbaasMongoClusterDestroyCheck(s *terraform.State) error {
 
 func testAccCheckDbaasMongoClusterExists(n string, cluster *mongo.ClusterResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).MongoClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).MongoClient
 
 		rs, ok := s.RootModule().Resources[n]
 

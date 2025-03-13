@@ -11,7 +11,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -113,7 +114,7 @@ func TestAccAPIGatewayRouteDataSourceGetByName(t *testing.T) {
 
 func testAccCheckAPIGatewayRouteExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).APIGatewayClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).APIGatewayClient
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
@@ -138,7 +139,7 @@ func testAccCheckAPIGatewayRouteExists(n string) resource.TestCheckFunc {
 }
 
 func testAccCheckAPIGatewayRouteDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).APIGatewayClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).APIGatewayClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	defer cancel()
 

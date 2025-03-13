@@ -10,12 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -232,7 +233,7 @@ func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 }
 
 func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).PsqlClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).PsqlClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -259,7 +260,7 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 
 func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).PsqlClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).PsqlClient
 
 		rs, ok := s.RootModule().Resources[n]
 
