@@ -11,7 +11,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -143,18 +143,14 @@ func (c *PsqlClient) IsUserDeleted(ctx context.Context, d *schema.ResourceData) 
 //nolint:golint
 func SetUserMongoData(d *schema.ResourceData, user *mongo.User) error {
 	if user.Properties != nil {
-		if user.Properties.Username != nil {
-			if err := d.Set("username", *user.Properties.Username); err != nil {
-				return err
-			}
-			d.SetId(uuidgen.GenerateUuidFromName(*user.Properties.Username))
-		} else {
-			return fmt.Errorf("expected a valid username in the response for the Mongo user, but received 'nil' instead")
+		if err := d.Set("username", user.Properties.Username); err != nil {
+			return err
 		}
+		d.SetId(uuidgen.GenerateUuidFromName(user.Properties.Username))
 
-		if user.Properties.Roles != nil && len(*user.Properties.Roles) > 0 {
-			userRoles := make([]interface{}, len(*user.Properties.Roles))
-			for index, user := range *user.Properties.Roles {
+		if user.Properties.Roles != nil && len(user.Properties.Roles) > 0 {
+			userRoles := make([]interface{}, len(user.Properties.Roles))
+			for index, user := range user.Properties.Roles {
 				userEntry := make(map[string]interface{})
 
 				if user.Role != nil {

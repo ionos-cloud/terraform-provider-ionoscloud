@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -94,27 +94,28 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 
 	var results []mongo.User
 
-	if users.Items != nil && len(*users.Items) > 0 {
-		for _, userItem := range *users.Items {
-			if userItem.Properties != nil && userItem.Properties.Username != nil && strings.EqualFold(*userItem.Properties.Username, username) {
+	if len(users.Items) > 0 {
+		for _, userItem := range users.Items {
+			if userItem.Properties != nil && strings.EqualFold(userItem.Properties.Username, username) {
 				results = append(results, userItem)
 			}
 		}
 	}
 
-	if results == nil || len(results) == 0 {
+	switch {
+	case len(results) == 0:
 		return diag.FromErr(fmt.Errorf("no DBaaS mongo user found with the specified username = %s and cluster_id = %s", username, clusterId))
-	} else if len(results) > 1 {
+	case len(results) > 1:
 		return diag.FromErr(fmt.Errorf("more than one DBaaS mongo user found with the specified criteria username = %s and cluster_id = %s", username, clusterId))
-	} else {
+	default:
 		user = results[0]
 	}
 
 	if err := dbaas.SetUserMongoData(d, &user); err != nil {
 		return diag.FromErr(err)
 	}
-	if user.Properties != nil && user.Properties.Username != nil {
-		d.SetId(clusterId + *user.Properties.Username)
+	if user.Properties != nil {
+		d.SetId(clusterId + user.Properties.Username)
 	}
 
 	return nil
