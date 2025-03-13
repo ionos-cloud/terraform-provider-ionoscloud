@@ -2,7 +2,8 @@ package acctest
 
 import (
 	"context"
-	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"log"
 	"os"
 	"strconv"
@@ -14,13 +15,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/envar"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/provider"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud"
-	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
-	objstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 )
 
 const (
@@ -87,35 +87,14 @@ func PreCheck(t *testing.T) {
 	})
 }
 
-// ObjectStorageClient returns a new S3 client for acceptance testing
-func ObjectStorageClient() (*objstorage.APIClient, error) {
+// NewTestBundleClientFromEnv creates a new bundle test client from environment variables
+func NewTestBundleClientFromEnv() *bundleclient.SdkBundle {
 	accessKey := os.Getenv(envar.IonosS3AccessKey)
 	secretKey := os.Getenv(envar.IonosS3SecretKey)
-	insecureStr := os.Getenv("IONOS_ALLOW_INSECURE")
-	insecureBool := false
-	if insecureStr != "" {
-		boolValue, err := strconv.ParseBool(insecureStr)
-		if err != nil {
-			log.Fatal(err)
-		}
-		insecureBool = boolValue
-
-	}
-	if accessKey == "" || secretKey == "" {
-		return nil, fmt.Errorf("%s and %s must be set for acceptance tests", envar.IonosS3AccessKey, envar.IonosS3SecretKey)
-	}
-
-	return objstorageservice.NewClient(accessKey, secretKey, "", "", insecureBool).GetBaseClient(), nil
-}
-
-// MonitoringClient returns a new Monitoring client for acceptance testing
-func MonitoringClient() *monitoringService.MonitoringClient {
 	token := os.Getenv(envar.IonosToken)
 	username := os.Getenv(envar.IonosUsername)
 	password := os.Getenv(envar.IonosPassword)
 	insecureStr := os.Getenv(envar.IonosInsecure)
-	version := ionoscloud.Version
-
 	insecureBool := false
 	if insecureStr != "" {
 		boolValue, err := strconv.ParseBool(insecureStr)
@@ -125,5 +104,23 @@ func MonitoringClient() *monitoringService.MonitoringClient {
 		insecureBool = boolValue
 	}
 
-	return monitoringService.NewClient(username, password, token, "", version, "", insecureBool)
+	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
+	if readFileErr != nil {
+		log.Printf("Error reading config file: %v", readFileErr)
+	}
+	clientOptions := clientoptions.TerraformClientOptions{
+		ClientOptions: shared.ClientOptions{
+			SkipTLSVerify: insecureBool,
+			Credentials: shared.Credentials{
+				Username: username,
+				Password: password,
+				Token:    token,
+			},
+		},
+		StorageOptions: clientoptions.StorageOptions{
+			AccessKey: accessKey,
+			SecretKey: secretKey,
+		},
+	}
+	return bundleclient.New(clientOptions, fileConfig)
 }

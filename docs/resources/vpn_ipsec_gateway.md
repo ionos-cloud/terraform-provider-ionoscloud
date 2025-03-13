@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_vpn_ipsec_gateway
 
-An IPSec Gateway resource manages the creation, management, and deletion of VPN IPSec Gateways within the IONOS Cloud
+An [IPSec Gateway](https://docs.ionos.com/cloud/network-services/vpn-gateway/overview) resource manages the creation, management, and deletion of VPN IPSec Gateways within the IONOS Cloud
 infrastructure. This resource facilitates the creation of VPN IPSec Gateways, enabling secure connections between your
 network resources.
 

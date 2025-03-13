@@ -6,17 +6,28 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-
 	kafka "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 // Client is a wrapper for the Kafka API Client
 type Client struct {
-	sdkClient kafka.APIClient
+	sdkClient  kafka.APIClient
+	fileConfig *fileconfiguration.FileConfig
+}
+
+// GetFileConfig returns configuration read from the file
+func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
+	return c.fileConfig
+}
+
+// GetConfig returns the configuration
+func (c *Client) GetConfig() *kafka.Configuration {
+	return c.sdkClient.GetConfig()
 }
 
 var (
@@ -37,23 +48,23 @@ var (
 	}
 )
 
-// NewClient returns a new Kafka API client
-func NewClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
-	config := shared.NewConfiguration(username, password, token, url)
+// NewClient creates a new Kafka client
+func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
 	config.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-kafka/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, kafka.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+		"terraform-provider/_ionos-cloud-sdk-go-kafka/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		kafka.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 
-	client := &Client{
+	client := Client{
 		sdkClient: *kafka.NewAPIClient(config),
 	}
-	client.sdkClient.GetConfig().HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+	client.sdkClient.GetConfig().HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
 
-	return client
+	return &client
 }
 
 func (c *Client) changeConfigURL(location string) {

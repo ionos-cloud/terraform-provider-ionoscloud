@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_nfs_cluster
 
-Create clusters of Network File Storage (NFS) on IonosCloud.
+Create clusters of [Network File Storage (NFS)](https://docs.ionos.com/cloud/storage-and-backup/network-file-storage) on IonosCloud.
 
 ## Example Usage
 
@@ -80,8 +80,6 @@ resource "ionoscloud_server" "nfs_server" {
   datacenter_id     = ionoscloud_datacenter.nfs_dc.id
   cores             = 1
   ram               = 2048
-  availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_SKYLAKE"
   image_name        = data.ionoscloud_image.HDD_image.id
   image_password    = random_password.password.result
   volume {

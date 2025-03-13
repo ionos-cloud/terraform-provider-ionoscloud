@@ -8,14 +8,13 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
 func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
@@ -127,7 +126,7 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 }
 
 func testAccCheckDBaaSMariaDBClusterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).MariaDBClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).MariaDBClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	defer cancel()
 	for _, rs := range s.RootModule().Resources {
@@ -148,7 +147,7 @@ func testAccCheckDBaaSMariaDBClusterDestroyCheck(s *terraform.State) error {
 
 func testAccCheckDBaaSMariaDBClusterExists(n string, cluster *mariadb.ClusterResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).MariaDBClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).MariaDBClient
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
@@ -191,9 +190,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id           = ionoscloud_datacenter.datacenter_example.id
   cores                   = 2
   ram                     = 2048
-  availability_zone       = "ZONE_1"
-  cpu_family              = "INTEL_SKYLAKE"
-  image_name              = "rockylinux-8-GenericCloud-20230518"
+  image_name              = "rocky:latest"
   image_password          = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name                  = "example"

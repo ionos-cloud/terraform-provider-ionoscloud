@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -62,7 +62,7 @@ func TestKafkaClusterResource(t *testing.T) {
 }
 
 func testCheckKafkaClusterDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).KafkaClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).KafkaClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -90,7 +90,7 @@ func testCheckKafkaClusterDestroy(s *terraform.State) error {
 
 func testAccCheckKafkaClusterExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(services.SdkBundle).KafkaClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).KafkaClient
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("not found: %s", n)

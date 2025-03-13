@@ -2,17 +2,19 @@ package dbaas
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"net/http"
 	"os"
 	"runtime"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 type MongoClient struct {
@@ -23,40 +25,42 @@ type PsqlClient struct {
 	sdkClient *psql.APIClient
 }
 
-func NewMongoClient(username, password, token, url, version, terraformVersion string, insecure bool) *MongoClient {
-	newConfigDbaas := mongo.NewConfiguration(username, password, token, url)
+func NewMongoClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *MongoClient {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Mongo)
+	config := mongo.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
+		clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config.UserAgent = fmt.Sprintf(
+		"terraform-provider/_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		mongo.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	if os.Getenv(constant.IonosDebug) != "" {
-		newConfigDbaas.Debug = true
+		config.Debug = true
 	}
-	newConfigDbaas.MaxRetries = constant.MaxRetries
-	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
-
-	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
-	newConfigDbaas.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, mongo.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
-	return &MongoClient{
-		sdkClient: mongo.NewAPIClient(newConfigDbaas),
+	config.MaxRetries = constant.MaxRetries
+	config.WaitTime = constant.MaxWaitTime
+	config.HTTPClient = http.DefaultClient
+	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
+	client := MongoClient{
+		sdkClient: mongo.NewAPIClient(config),
 	}
+	return &client
 }
 
-func NewPsqlClient(username, password, token, url, version, terraformVersion string, insecure bool) *PsqlClient {
-	newConfigDbaas := psql.NewConfiguration(username, password, token, url)
-
-	if os.Getenv(constant.IonosDebug) != "" {
-		newConfigDbaas.Debug = true
-	}
-	newConfigDbaas.MaxRetries = constant.MaxRetries
-	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
-
-	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
-	newConfigDbaas.UserAgent = fmt.Sprintf(
+func NewPSQLClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *PsqlClient {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.PSQL)
+	config := psql.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, psql.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
-	return &PsqlClient{
-		sdkClient: psql.NewAPIClient(newConfigDbaas),
+		clientOptions.Version, psql.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+	if os.Getenv(constant.IonosDebug) != "" {
+		config.Debug = true
 	}
+	config.MaxRetries = constant.MaxRetries
+	config.WaitTime = constant.MaxWaitTime
+	config.HTTPClient = http.DefaultClient
+	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
+	client := PsqlClient{
+		sdkClient: psql.NewAPIClient(config),
+	}
+	return &client
 }

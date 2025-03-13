@@ -55,7 +55,6 @@ resource "ionoscloud_server" "example" {
   cores             = 2
   ram               = 2048
   availability_zone = "AUTO"
-  cpu_family        = "INTEL_SKYLAKE"
   image_name        = "ubuntu:latest"
   image_password    = random_password.image_password.result
   volume {
