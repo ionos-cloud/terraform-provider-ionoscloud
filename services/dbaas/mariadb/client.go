@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
+	shared "github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -29,36 +29,35 @@ func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 }
 
 // GetConfig returns the configuration of the client
-func (c *Client) GetConfig() *mariadb.Configuration {
+func (c *Client) GetConfig() *shared.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
 func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	newConfig := mariadb.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	newConfig := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
-	if os.Getenv(constant.IonosDebug) != "" {
-		newConfig.Debug = true
-	}
 	newConfig.MaxRetries = constant.MaxRetries
 	newConfig.MaxWaitTime = constant.MaxWaitTime
 
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
 	newConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/ionos-cloud-sdk-go-dbaas-mariadb/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		mariadb.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	return &Client{
+	client := &Client{
 		sdkClient:  mariadb.NewAPIClient(newConfig),
 		fileConfig: fileConfig,
 	}
+
+	client.sdkClient.GetConfig().HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
+	return client
 }
 
 // overrideClientEndpoint todo - after move to bundle, replace with generic function from fileConfig
 func (c *Client) overrideClientEndpoint(productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer c.changeConfigURL(location)
-	if os.Getenv(mariadb.IonosApiUrlEnvVar) != "" {
-		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(mariadb.IonosApiUrlEnvVar))
+	if os.Getenv(ionosAPIURLMariaDB) != "" {
+		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionosAPIURLMariaDB))
 		return
 	}
 	fileConfig := c.GetFileConfig()
@@ -74,7 +73,7 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
 		return
 	}
-	config.Servers = mariadb.ServerConfigurations{
+	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
 			Description: shared.EndpointOverridden + location,
@@ -88,7 +87,7 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 func (c *Client) changeConfigURL(location string) {
 	clientConfig := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLMariaDB) != "" {
-		clientConfig.Servers = mariadb.ServerConfigurations{
+		clientConfig.Servers = shared.ServerConfigurations{
 			{
 				URL: utils.CleanURL(os.Getenv(ionosAPIURLMariaDB)),
 			},
@@ -97,7 +96,7 @@ func (c *Client) changeConfigURL(location string) {
 	}
 	for _, server := range clientConfig.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
-			clientConfig.Servers = mariadb.ServerConfigurations{
+			clientConfig.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
 					Description: shared.EndpointOverridden + location,
@@ -106,6 +105,7 @@ func (c *Client) changeConfigURL(location string) {
 			return
 		}
 	}
+
 }
 
 var (

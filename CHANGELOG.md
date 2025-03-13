@@ -1,4 +1,8 @@
 ## 6.7.4
+### Features
+- Add backup to mariadb
+## Refactor
+- Use SDK bundle for mariadb
 ### Docs
 - Added links in resources
 
