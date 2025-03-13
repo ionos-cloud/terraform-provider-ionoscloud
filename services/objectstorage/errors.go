@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log"
 
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 )
 
 func isBucketNotEmptyError(err error) bool {

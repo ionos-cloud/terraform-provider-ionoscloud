@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 )
 
 // ListObjectVersionsInput represents the input for the ListObjectVersionsPaginator.

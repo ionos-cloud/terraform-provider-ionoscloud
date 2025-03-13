@@ -7,7 +7,7 @@ import (
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 )
 
 const errAccessDenied = "AccessDenied"

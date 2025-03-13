@@ -5,7 +5,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 // KeyValueTags is a map of key-value tags.
@@ -81,7 +82,7 @@ func (t KeyValueTags) Ignore(ignoreTags KeyValueTags) KeyValueTags {
 func (t KeyValueTags) ToList() []objstorage.Tag {
 	tags := make([]objstorage.Tag, 0, len(t))
 	for key, value := range t {
-		tags = append(tags, objstorage.Tag{Key: objstorage.PtrString(key), Value: objstorage.PtrString(value)})
+		tags = append(tags, objstorage.Tag{Key: shared.ToPtr(key), Value: shared.ToPtr(value)})
 	}
 
 	return tags

@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 // ObjectCopyResourceModel defines the fields for the Terraform resource model.
@@ -122,7 +123,7 @@ func (c *Client) UpdateObjectCopy(ctx context.Context, plan, state *ObjectCopyRe
 func (c *Client) DeleteObjectCopy(ctx context.Context, data *ObjectCopyResourceModel) error {
 	var (
 		err  error
-		resp *objstorage.APIResponse
+		resp *shared.APIResponse
 	)
 
 	if !data.VersionID.IsNull() {
@@ -142,7 +143,7 @@ func (c *Client) DeleteObjectCopy(ctx context.Context, data *ObjectCopyResourceM
 	return err
 }
 
-func (c *Client) setObjectCopyComputedAttributes(ctx context.Context, data *ObjectCopyResourceModel, apiResponse *objstorage.APIResponse, output *objstorage.CopyObjectResult) error {
+func (c *Client) setObjectCopyComputedAttributes(ctx context.Context, data *ObjectCopyResourceModel, apiResponse *shared.APIResponse, output *objstorage.CopyObjectResult) error {
 	contentType := apiResponse.Header.Get("Content-Type")
 	if contentType != "" {
 		data.ContentType = types.StringValue(contentType)
@@ -174,7 +175,7 @@ func (c *Client) setObjectCopyComputedAttributes(ctx context.Context, data *Obje
 	return nil
 }
 
-func deleteObjectCopyByModel(ctx context.Context, client *objstorage.APIClient, data *ObjectCopyResourceModel) (map[string]interface{}, *objstorage.APIResponse, error) {
+func deleteObjectCopyByModel(ctx context.Context, client *objstorage.APIClient, data *ObjectCopyResourceModel) (map[string]interface{}, *shared.APIResponse, error) {
 	req := client.ObjectsApi.DeleteObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.VersionID.IsNull() {
 		req = req.VersionId(data.VersionID.ValueString())
@@ -376,7 +377,7 @@ func hasObjectCopyContentChanges(plan, state *ObjectCopyResourceModel) bool {
 	return needsChange
 }
 
-func (c *Client) setObjectCopyCommonAttributes(ctx context.Context, data *ObjectCopyResourceModel, apiResponse *objstorage.APIResponse) error {
+func (c *Client) setObjectCopyCommonAttributes(ctx context.Context, data *ObjectCopyResourceModel, apiResponse *shared.APIResponse) error {
 	setObjectCopyContentData(data, apiResponse)
 	setObjectCopyServerSideEncryptionData(data, apiResponse)
 	if err := setObjectCopyObjectLockData(data, apiResponse); err != nil {
@@ -408,7 +409,7 @@ func (c *Client) setObjectCopyCommonAttributes(ctx context.Context, data *Object
 	return nil
 }
 
-func setObjectCopyContentData(data *ObjectCopyResourceModel, apiResponse *objstorage.APIResponse) {
+func setObjectCopyContentData(data *ObjectCopyResourceModel, apiResponse *shared.APIResponse) {
 	contentType := apiResponse.Header.Get("Content-Type")
 	if contentType != "" {
 		data.ContentType = types.StringValue(contentType)
@@ -447,7 +448,7 @@ func setObjectCopyContentData(data *ObjectCopyResourceModel, apiResponse *objsto
 	}
 }
 
-func setObjectCopyServerSideEncryptionData(data *ObjectCopyResourceModel, apiResponse *objstorage.APIResponse) {
+func setObjectCopyServerSideEncryptionData(data *ObjectCopyResourceModel, apiResponse *shared.APIResponse) {
 	serverSideEncryption := apiResponse.Header.Get("x-amz-server-side-encryption")
 	if serverSideEncryption != "" {
 		data.ServerSideEncryption = types.StringValue(serverSideEncryption)
@@ -470,7 +471,7 @@ func setObjectCopyServerSideEncryptionData(data *ObjectCopyResourceModel, apiRes
 
 }
 
-func setObjectCopyObjectLockData(data *ObjectCopyResourceModel, apiResponse *objstorage.APIResponse) error {
+func setObjectCopyObjectLockData(data *ObjectCopyResourceModel, apiResponse *shared.APIResponse) error {
 	objectLockMode := apiResponse.Header.Get("x-amz-object-lock-mode")
 	if objectLockMode != "" {
 		data.ObjectLockMode = types.StringValue(objectLockMode)

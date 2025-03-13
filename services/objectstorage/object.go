@@ -14,7 +14,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/mitchellh/go-homedir"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
@@ -83,7 +84,7 @@ type ObjectDataSourceModel struct {
 }
 
 // UploadObject uploads an object to a bucket.
-func (c *Client) UploadObject(ctx context.Context, data *ObjectResourceModel) (*objstorage.APIResponse, error) {
+func (c *Client) UploadObject(ctx context.Context, data *ObjectResourceModel) (*shared.APIResponse, error) {
 	putReq := c.client.ObjectsApi.PutObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	err := fillPutObjectRequest(&putReq, data)
 	if err != nil {
@@ -187,7 +188,7 @@ func (c *Client) UpdateObject(ctx context.Context, plan, state *ObjectResourceMo
 func (c *Client) DeleteObject(ctx context.Context, data *ObjectResourceModel) error {
 	var (
 		err  error
-		resp *objstorage.APIResponse
+		resp *shared.APIResponse
 	)
 
 	if !data.VersionID.IsNull() {
@@ -208,7 +209,7 @@ func (c *Client) DeleteObject(ctx context.Context, data *ObjectResourceModel) er
 }
 
 // SetObjectComputedAttributes sets computed attributes for an object.
-func (c *Client) SetObjectComputedAttributes(ctx context.Context, data *ObjectResourceModel, apiResponse *objstorage.APIResponse) error {
+func (c *Client) SetObjectComputedAttributes(ctx context.Context, data *ObjectResourceModel, apiResponse *shared.APIResponse) error {
 	contentType := apiResponse.Header.Get("Content-Type")
 	if contentType != "" {
 		data.ContentType = types.StringValue(contentType)
@@ -262,7 +263,7 @@ func (c *Client) updateObjectLock(ctx context.Context, plan, state *ObjectResour
 	return nil
 }
 
-func (c *Client) putRetention(ctx context.Context, plan, state *ObjectResourceModel) (*objstorage.APIResponse, error) {
+func (c *Client) putRetention(ctx context.Context, plan, state *ObjectResourceModel) (*shared.APIResponse, error) {
 	retentionDate, err := getRetentionDate(plan.ObjectLockRetainUntilDate)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse object lock retain until date: %w", err)
@@ -287,7 +288,7 @@ func (c *Client) putRetention(ctx context.Context, plan, state *ObjectResourceMo
 	return baseReq.Execute()
 }
 
-func (c *Client) setObjectCommonAttributes(ctx context.Context, data *ObjectResourceModel, apiResponse *objstorage.APIResponse) error {
+func (c *Client) setObjectCommonAttributes(ctx context.Context, data *ObjectResourceModel, apiResponse *shared.APIResponse) error {
 	setContentData(data, apiResponse)
 	setServerSideEncryptionData(data, apiResponse)
 	if err := setObjectLockData(data, apiResponse); err != nil {
@@ -335,7 +336,7 @@ func (c *Client) getTags(ctx context.Context, bucket, key string) (types.Map, er
 	return tagsMap, nil
 }
 
-func (c *Client) setObjectModelData(ctx context.Context, apiResponse *objstorage.APIResponse, data *ObjectResourceModel) error {
+func (c *Client) setObjectModelData(ctx context.Context, apiResponse *shared.APIResponse, data *ObjectResourceModel) error {
 	if err := c.setObjectCommonAttributes(ctx, data, apiResponse); err != nil {
 		return err
 	}
@@ -398,7 +399,7 @@ type objectFindRequest struct {
 	ServerSideEncryptionCustomerKeyMD5    types.String
 }
 
-func (c *Client) findObject(ctx context.Context, data *objectFindRequest) (*objstorage.HeadObjectOutput, *objstorage.APIResponse, error) {
+func (c *Client) findObject(ctx context.Context, data *objectFindRequest) (*objstorage.HeadObjectOutput, *shared.APIResponse, error) {
 	req := c.client.ObjectsApi.HeadObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.Etag.IsNull() {
 		req = req.IfMatch(data.Etag.ValueString())
@@ -455,7 +456,7 @@ func expandObjectDate(v string) *objstorage.IonosTime {
 	return &objstorage.IonosTime{Time: t.UTC()}
 }
 
-func setContentData(data *ObjectResourceModel, apiResponse *objstorage.APIResponse) {
+func setContentData(data *ObjectResourceModel, apiResponse *shared.APIResponse) {
 	contentType := apiResponse.Header.Get("Content-Type")
 	if contentType != "" {
 		data.ContentType = types.StringValue(contentType)
@@ -494,7 +495,7 @@ func setContentData(data *ObjectResourceModel, apiResponse *objstorage.APIRespon
 	}
 }
 
-func setServerSideEncryptionData(data *ObjectResourceModel, apiResponse *objstorage.APIResponse) {
+func setServerSideEncryptionData(data *ObjectResourceModel, apiResponse *shared.APIResponse) {
 	serverSideEncryption := apiResponse.Header.Get("x-amz-server-side-encryption")
 	if serverSideEncryption != "" {
 		data.ServerSideEncryption = types.StringValue(serverSideEncryption)
@@ -517,7 +518,7 @@ func setServerSideEncryptionData(data *ObjectResourceModel, apiResponse *objstor
 
 }
 
-func setObjectLockData(data *ObjectResourceModel, apiResponse *objstorage.APIResponse) error {
+func setObjectLockData(data *ObjectResourceModel, apiResponse *shared.APIResponse) error {
 	objectLockMode := apiResponse.Header.Get("x-amz-object-lock-mode")
 	if objectLockMode != "" {
 		data.ObjectLockMode = types.StringValue(objectLockMode)
@@ -541,7 +542,7 @@ func setObjectLockData(data *ObjectResourceModel, apiResponse *objstorage.APIRes
 	return nil
 }
 
-func getMetadataFromAPIResponse(ctx context.Context, apiResponse *objstorage.APIResponse) (types.Map, error) {
+func getMetadataFromAPIResponse(ctx context.Context, apiResponse *shared.APIResponse) (types.Map, error) {
 	metadataMap := getMetadataMapFromHeaders(apiResponse, "X-Amz-Meta-")
 
 	if len(metadataMap) > 0 {
@@ -556,7 +557,7 @@ func getMetadataFromAPIResponse(ctx context.Context, apiResponse *objstorage.API
 	return types.MapNull(types.StringType), nil
 }
 
-func getMetadataMapFromHeaders(apiResponse *objstorage.APIResponse, prefix string) map[string]string {
+func getMetadataMapFromHeaders(apiResponse *shared.APIResponse, prefix string) map[string]string {
 	metaHeaders := map[string]string{}
 	for name, values := range apiResponse.Header {
 		if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
@@ -587,7 +588,7 @@ func (c *Client) getContentType(ctx context.Context, data *objectFindRequest) (s
 	return apiResponse.Header.Get("Content-Type"), nil
 }
 
-func deleteObjectByModel(ctx context.Context, client *objstorage.APIClient, data *ObjectResourceModel) (map[string]interface{}, *objstorage.APIResponse, error) {
+func deleteObjectByModel(ctx context.Context, client *objstorage.APIClient, data *ObjectResourceModel) (map[string]interface{}, *shared.APIResponse, error) {
 	req := client.ObjectsApi.DeleteObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.VersionID.IsNull() {
 		req = req.VersionId(data.VersionID.ValueString())

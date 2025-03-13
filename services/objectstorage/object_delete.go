@@ -7,7 +7,7 @@ import (
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 )
 
 // DeleteRequest represents a request to delete an object from a general purpose bucket.
@@ -72,7 +72,7 @@ func DeleteAllObjectVersions(ctx context.Context, client *objstorage.APIClient, 
 	return objCount, nil
 }
 
-func deleteObject(ctx context.Context, client *objstorage.APIClient, req *DeleteRequest) (*objstorage.APIResponse, error) {
+func deleteObject(ctx context.Context, client *objstorage.APIClient, req *DeleteRequest) (*shared.APIResponse, error) {
 	r := client.ObjectsApi.DeleteObject(ctx, req.Bucket, req.Key)
 	if req.VersionID != "" {
 		r = r.VersionId(req.VersionID)
@@ -200,6 +200,6 @@ func tryDisableLegalHold(ctx context.Context, client *objstorage.APIClient, buck
 	return true, nil
 }
 
-func httpForbidden(response *objstorage.APIResponse) bool {
+func httpForbidden(response *shared.APIResponse) bool {
 	return response != nil && response.Response != nil && response.StatusCode == http.StatusForbidden
 }
