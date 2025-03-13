@@ -19,11 +19,11 @@ The API can be accessed within an instance running in IONOS Cloud or directly ov
 
 ### Use go get to retrieve the SDK to add it to your GOPATH workspace, or project's Go module dependencies.
 ```bash
-go get github.com/ionos-cloud/sdk-go-bundle/mariadb.git
+go get github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb.git
 ```
 To update the SDK use go get -u to retrieve the latest version of the SDK.
 ```bash
-go get -u github.com/ionos-cloud/sdk-go-bundle/mariadb.git
+go get -u github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb.git
 ```
 ### Go Modules
 
@@ -31,7 +31,7 @@ If you are using Go modules, your go get will default to the latest tagged relea
 
 To get the latest SDK repository, use @latest.
 ```bash
-go get github.com/ionos-cloud/sdk-go-bundle/mariadb@latest
+go get github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb@latest
 ```
 
 ## Environment Variables
@@ -68,6 +68,11 @@ By default, *https://mariadb.de-txl.ionos.com* is used, however this can be over
 by setting the `IONOS_API_URL` environment variable or by specifying the `hostUrl` parameter when
 initializing the sdk client.
 
+**NOTE**: We recommend passing the URL without the `https://` or `http://` prefix. The SDK
+checks and adds it if necessary when configurations are created using `NewConfiguration` or
+`NewConfigurationFromEnv`. This is to avoid issues caused by typos in the prefix that cannot
+ be easily detected and debugged.
+
 ### Basic Authentication
 
 - **Type**: HTTP basic authentication
@@ -79,7 +84,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	mariadb "github.com/ionos-cloud/sdk-go-bundle/mariadb"
+	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb"
 	"log"
 )
 
@@ -100,7 +105,7 @@ There are 2 ways to generate your token:
         "fmt"
         "github.com/ionos-cloud/sdk-go-bundle/products/auth"
         "github.com/ionos-cloud/sdk-go-bundle/shared"
-        mariadb "github.com/ionos-cloud/sdk-go-bundle/mariadb"
+        mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb"
         "log"
     )
 
@@ -134,7 +139,7 @@ There are 2 ways to generate your token:
         "context"
         "fmt"
         "github.com/ionos-cloud/sdk-go-bundle/products/auth"
-         mariadb "github.com/ionos-cloud/sdk-go-bundle/mariadb"
+         mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb"
         "log"
     )
 
@@ -192,7 +197,7 @@ There are log levels that you can set: `Off`, `Debug` and `Trace`.
 package main
 
     import (
-        mariadb "github.com/ionos-cloud/sdk-go-bundle/mariadb"
+        mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb"
         "github.com/ionos-cloud/sdk-go-bundle/shared"
         "github.com/sirupsen/logrus"
     )

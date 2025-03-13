@@ -320,8 +320,8 @@ github.com/ionos-cloud/sdk-go-api-gateway
 # github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2
-# github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.0.0 => /home/radu/work/sdk-go-bundle/products/dbaas/mariadb
-## explicit; go 1.22.0
+# github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0
+## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 ## explicit; go 1.21
@@ -630,4 +630,3 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 => /home/radu/work/sdk-go-bundle/products/dbaas/mariadb
