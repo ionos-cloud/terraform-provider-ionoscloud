@@ -30,7 +30,7 @@ func overrideClientFromFileConfig(client *Client, productName, location string) 
 		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
 		return
 	}
-	config.Servers = kafka.ServerConfigurations{
+	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
 			Description: shared.EndpointOverridden + location,
@@ -96,7 +96,7 @@ func (c *Client) GetClusterByID(ctx context.Context, id string, location string)
 }
 
 // ListClusters retrieves a list of Kafka Clusters
-func (c *Client) ListClusters(ctx context.Context, location string) (kafka.ClusterReadList, *kafka.APIResponse, error) {
+func (c *Client) ListClusters(ctx context.Context, location string) (kafka.ClusterReadList, *shared.APIResponse, error) {
 	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
 
 	Clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGet(ctx).Execute()

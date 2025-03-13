@@ -26,7 +26,7 @@ func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 }
 
 // GetConfig returns the configuration
-func (c *Client) GetConfig() *kafka.Configuration {
+func (c *Client) GetConfig() *shared.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
