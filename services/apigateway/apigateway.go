@@ -117,6 +117,10 @@ func (c *Client) IsGatewayReady(ctx context.Context, d *schema.ResourceData) (bo
 		return false, fmt.Errorf("metadata or status is empty for API Gateway ID: %v", gatewayID)
 	}
 
+	if strings.EqualFold(*gateway.Metadata.Status, constant.Failed) {
+		return false, fmt.Errorf("API Gateway creation failed for ID: %v", gatewayID)
+	}
+
 	log.Printf("[INFO] state of the gateway with ID %s is: %s ", gatewayID, *gateway.Metadata.Status)
 	return strings.EqualFold(*gateway.Metadata.Status, constant.Available), nil
 }
