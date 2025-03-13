@@ -1,3 +1,7 @@
+## 6.7.5 (future release)
+### Refactor
+- Use SDK Bundle instead of the Kafka SDK
+
 ## 6.7.4
 ### Docs
 - Added links in resources

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	kafkaSdk "github.com/ionos-cloud/sdk-go-kafka"
+	kafkaSdk "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
@@ -107,8 +107,8 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching Kafka Cluster Topics: %w", err))
 		}
 
-		for _, t := range *topics.Items {
-			if t.Properties != nil && t.Properties.Name != nil && utils.NameMatches(*t.Properties.Name, name, partialMatch) {
+		for _, t := range topics.Items {
+			if utils.NameMatches(t.Properties.Name, name, partialMatch) {
 				results = append(results, t)
 			}
 		}
