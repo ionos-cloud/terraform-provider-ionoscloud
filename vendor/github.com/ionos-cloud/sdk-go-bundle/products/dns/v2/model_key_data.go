@@ -3,7 +3,7 @@
  *
  * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.16.0
+ * API version: 1.17.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -106,6 +106,14 @@ func (o *KeyData) HasPubKey() bool {
 // SetPubKey gets a reference to the given string and assigns it to the PubKey field.
 func (o *KeyData) SetPubKey(v string) {
 	o.PubKey = &v
+}
+
+func (o KeyData) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o KeyData) ToMap() (map[string]interface{}, error) {

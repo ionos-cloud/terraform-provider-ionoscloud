@@ -3,7 +3,7 @@
  *
  * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.16.0
+ * API version: 1.17.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -54,10 +54,10 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "products/dns/v2.0.1"
+	Version = "products/dns/v2.2.0"
 )
 
-// APIClient manages communication with the IONOS Cloud - DNS API API v1.16.0
+// APIClient manages communication with the IONOS Cloud - DNS API API v1.17.0
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *shared.Configuration
@@ -106,13 +106,14 @@ func DeepCopy(cfg *shared.Configuration) (*shared.Configuration, error) {
 // NewAPIClient creates a new API client. Requires a userAgent string describing your application.
 // optionally a custom http.Client to allow for advanced features such as caching.
 func NewAPIClient(cfg *shared.Configuration) *APIClient {
-	// Attempt to deep copy the input configuration
+	// Attempt to deep copy the input configuration. If the configuration contains an httpclient,
+	// deepcopy(serialization) will fail. In this case, we fallback to a shallow copy.
 	cfgCopy, err := DeepCopy(cfg)
 	if err != nil {
 		log.Printf("Error creating deep copy of configuration: %v", err)
 
 		// shallow copy instead as a fallback
-		cfgCopy := &shared.Configuration{}
+		cfgCopy = &shared.Configuration{}
 		*cfgCopy = *cfg
 	}
 
@@ -415,8 +416,15 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 			}
 		}
 
-		if shared.SdkLogLevel.Satisfies(shared.Trace) {
-			dump, err := httputil.DumpRequestOut(clonedRequest, true)
+		if shared.SdkLogLevel.Satisfies(shared.Debug) {
+			logRequest := request.Clone(request.Context())
+
+			// Remove the Authorization header if Debug is enabled (but not in Trace mode)
+			if !shared.SdkLogLevel.Satisfies(shared.Trace) {
+				logRequest.Header.Del("Authorization")
+			}
+
+			dump, err := httputil.DumpRequestOut(logRequest, true)
 			if err == nil {
 				shared.SdkLogger.Printf(" DumpRequestOut : %s\n", string(dump))
 			} else {

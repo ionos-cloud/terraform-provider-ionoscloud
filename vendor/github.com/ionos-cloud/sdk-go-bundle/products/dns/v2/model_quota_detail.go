@@ -3,7 +3,7 @@
  *
  * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.16.0
+ * API version: 1.17.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -155,6 +155,14 @@ func (o *QuotaDetail) GetReverseRecordsOk() (*int32, bool) {
 // SetReverseRecords sets field value
 func (o *QuotaDetail) SetReverseRecords(v int32) {
 	o.ReverseRecords = v
+}
+
+func (o QuotaDetail) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o QuotaDetail) ToMap() (map[string]interface{}, error) {

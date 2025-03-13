@@ -3,7 +3,7 @@
  *
  * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.16.0
+ * API version: 1.17.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -205,6 +205,14 @@ func (o *DnssecKey) HasComposedKeyData() bool {
 // SetComposedKeyData gets a reference to the given string and assigns it to the ComposedKeyData field.
 func (o *DnssecKey) SetComposedKeyData(v string) {
 	o.ComposedKeyData = &v
+}
+
+func (o DnssecKey) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o DnssecKey) ToMap() (map[string]interface{}, error) {

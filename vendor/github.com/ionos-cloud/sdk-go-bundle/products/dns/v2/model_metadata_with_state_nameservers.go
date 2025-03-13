@@ -3,7 +3,7 @@
  *
  * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.16.0
+ * API version: 1.17.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -33,8 +33,10 @@ type MetadataWithStateNameservers struct {
 	// Unique name of the identity that created the resource.
 	LastModifiedBy *string `json:"lastModifiedBy,omitempty"`
 	// The unique ID of the user who last modified the resource.
-	LastModifiedByUserId *string           `json:"lastModifiedByUserId,omitempty"`
-	State                ProvisioningState `json:"state"`
+	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
+	// Unique name of the resource.
+	ResourceURN *string           `json:"resourceURN,omitempty"`
+	State       ProvisioningState `json:"state"`
 	// The list of nameservers associated to the zone.  Nameservers are different for primary and secondary zones. For primary zones it would be: - ns-ic.ui-dns.com - ns-ic.ui-dns.de - ns-ic.ui-dns.org - ns-ic.ui-dns.biz  And for secondary zones: - nscs.ui-dns.com - nscs.ui-dns.de - nscs.ui-dns.org - nscs.ui-dns.biz
 	Nameservers []string `json:"nameservers"`
 }
@@ -252,6 +254,38 @@ func (o *MetadataWithStateNameservers) SetLastModifiedByUserId(v string) {
 	o.LastModifiedByUserId = &v
 }
 
+// GetResourceURN returns the ResourceURN field value if set, zero value otherwise.
+func (o *MetadataWithStateNameservers) GetResourceURN() string {
+	if o == nil || IsNil(o.ResourceURN) {
+		var ret string
+		return ret
+	}
+	return *o.ResourceURN
+}
+
+// GetResourceURNOk returns a tuple with the ResourceURN field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *MetadataWithStateNameservers) GetResourceURNOk() (*string, bool) {
+	if o == nil || IsNil(o.ResourceURN) {
+		return nil, false
+	}
+	return o.ResourceURN, true
+}
+
+// HasResourceURN returns a boolean if a field has been set.
+func (o *MetadataWithStateNameservers) HasResourceURN() bool {
+	if o != nil && !IsNil(o.ResourceURN) {
+		return true
+	}
+
+	return false
+}
+
+// SetResourceURN gets a reference to the given string and assigns it to the ResourceURN field.
+func (o *MetadataWithStateNameservers) SetResourceURN(v string) {
+	o.ResourceURN = &v
+}
+
 // GetState returns the State field value
 func (o *MetadataWithStateNameservers) GetState() ProvisioningState {
 	if o == nil {
@@ -300,6 +334,14 @@ func (o *MetadataWithStateNameservers) SetNameservers(v []string) {
 	o.Nameservers = v
 }
 
+func (o MetadataWithStateNameservers) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o MetadataWithStateNameservers) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.CreatedDate) {
@@ -319,6 +361,9 @@ func (o MetadataWithStateNameservers) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.LastModifiedByUserId) {
 		toSerialize["lastModifiedByUserId"] = o.LastModifiedByUserId
+	}
+	if !IsNil(o.ResourceURN) {
+		toSerialize["resourceURN"] = o.ResourceURN
 	}
 	toSerialize["state"] = o.State
 	toSerialize["nameservers"] = o.Nameservers

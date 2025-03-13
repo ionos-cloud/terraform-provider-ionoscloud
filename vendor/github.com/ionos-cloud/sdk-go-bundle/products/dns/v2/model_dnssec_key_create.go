@@ -3,7 +3,7 @@
  *
  * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.16.0
+ * API version: 1.17.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -65,6 +65,14 @@ func (o *DnssecKeyCreate) GetPropertiesOk() (*DnssecKeyParameters, bool) {
 // SetProperties sets field value
 func (o *DnssecKeyCreate) SetProperties(v DnssecKeyParameters) {
 	o.Properties = v
+}
+
+func (o DnssecKeyCreate) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o DnssecKeyCreate) ToMap() (map[string]interface{}, error) {

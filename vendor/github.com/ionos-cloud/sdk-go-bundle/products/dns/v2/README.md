@@ -54,6 +54,11 @@ By default, *https://dns.de-fra.ionos.com* is used, however this can be override
 by setting the `IONOS_API_URL` environment variable or by specifying the `hostUrl` parameter when
 initializing the sdk client.
 
+**NOTE**: We recommend passing the URL without the `https://` or `http://` prefix. The SDK
+checks and adds it if necessary when configurations are created using `NewConfiguration` or
+`NewConfigurationFromEnv`. This is to avoid issues caused by typos in the prefix that cannot
+ be easily detected and debugged.
+
 ### Basic Authentication
 
 - **Type**: HTTP basic authentication
@@ -279,6 +284,7 @@ All URIs are relative to *https://dns.de-fra.ionos.com*
  - [RecordEnsure](docs/models/RecordEnsure)
  - [RecordRead](docs/models/RecordRead)
  - [RecordReadList](docs/models/RecordReadList)
+ - [RecordType](docs/models/RecordType)
  - [ReverseRecord](docs/models/ReverseRecord)
  - [ReverseRecordCreate](docs/models/ReverseRecordCreate)
  - [ReverseRecordEnsure](docs/models/ReverseRecordEnsure)

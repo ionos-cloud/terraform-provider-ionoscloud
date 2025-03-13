@@ -17,7 +17,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/ionos-cloud/sdk-go-api-gateway v1.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
-	github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.0.1
+	github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.0
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 	github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0

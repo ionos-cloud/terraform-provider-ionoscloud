@@ -3,7 +3,7 @@
  *
  * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.16.0
+ * API version: 1.17.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -127,6 +127,14 @@ func (o *ReverseRecord) GetIpOk() (*string, bool) {
 // SetIp sets field value
 func (o *ReverseRecord) SetIp(v string) {
 	o.Ip = v
+}
+
+func (o ReverseRecord) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o ReverseRecord) ToMap() (map[string]interface{}, error) {

@@ -3,7 +3,7 @@
  *
  * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.16.0
+ * API version: 1.17.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -65,6 +65,14 @@ func (o *SecondaryZoneReadListAllOf) GetItemsOk() ([]SecondaryZoneRead, bool) {
 // SetItems sets field value
 func (o *SecondaryZoneReadListAllOf) SetItems(v []SecondaryZoneRead) {
 	o.Items = v
+}
+
+func (o SecondaryZoneReadListAllOf) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o SecondaryZoneReadListAllOf) ToMap() (map[string]interface{}, error) {

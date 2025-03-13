@@ -3,7 +3,7 @@
  *
  * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.16.0
+ * API version: 1.17.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -120,6 +120,14 @@ func (o *MetadataForSecondaryZoneRecords) GetRootNameOk() (*string, bool) {
 // SetRootName sets field value
 func (o *MetadataForSecondaryZoneRecords) SetRootName(v string) {
 	o.RootName = v
+}
+
+func (o MetadataForSecondaryZoneRecords) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o MetadataForSecondaryZoneRecords) ToMap() (map[string]interface{}, error) {

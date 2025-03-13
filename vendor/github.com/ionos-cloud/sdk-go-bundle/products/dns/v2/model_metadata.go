@@ -3,7 +3,7 @@
  *
  * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.16.0
+ * API version: 1.17.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -34,6 +34,8 @@ type Metadata struct {
 	LastModifiedBy *string `json:"lastModifiedBy,omitempty"`
 	// The unique ID of the user who last modified the resource.
 	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
+	// Unique name of the resource.
+	ResourceURN *string `json:"resourceURN,omitempty"`
 }
 
 // NewMetadata instantiates a new Metadata object
@@ -246,6 +248,46 @@ func (o *Metadata) SetLastModifiedByUserId(v string) {
 	o.LastModifiedByUserId = &v
 }
 
+// GetResourceURN returns the ResourceURN field value if set, zero value otherwise.
+func (o *Metadata) GetResourceURN() string {
+	if o == nil || IsNil(o.ResourceURN) {
+		var ret string
+		return ret
+	}
+	return *o.ResourceURN
+}
+
+// GetResourceURNOk returns a tuple with the ResourceURN field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Metadata) GetResourceURNOk() (*string, bool) {
+	if o == nil || IsNil(o.ResourceURN) {
+		return nil, false
+	}
+	return o.ResourceURN, true
+}
+
+// HasResourceURN returns a boolean if a field has been set.
+func (o *Metadata) HasResourceURN() bool {
+	if o != nil && !IsNil(o.ResourceURN) {
+		return true
+	}
+
+	return false
+}
+
+// SetResourceURN gets a reference to the given string and assigns it to the ResourceURN field.
+func (o *Metadata) SetResourceURN(v string) {
+	o.ResourceURN = &v
+}
+
+func (o Metadata) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o Metadata) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.CreatedDate) {
@@ -265,6 +307,9 @@ func (o Metadata) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.LastModifiedByUserId) {
 		toSerialize["lastModifiedByUserId"] = o.LastModifiedByUserId
+	}
+	if !IsNil(o.ResourceURN) {
+		toSerialize["resourceURN"] = o.ResourceURN
 	}
 	return toSerialize, nil
 }

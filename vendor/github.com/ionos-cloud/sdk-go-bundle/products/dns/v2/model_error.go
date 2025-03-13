@@ -3,7 +3,7 @@
  *
  * Cloud DNS service helps IONOS Cloud customers to automate DNS Zone and Record management.
  *
- * API version: 1.16.0
+ * API version: 1.17.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -105,6 +105,14 @@ func (o *Error) HasMessages() bool {
 // SetMessages gets a reference to the given []ErrorMessages and assigns it to the Messages field.
 func (o *Error) SetMessages(v []ErrorMessages) {
 	o.Messages = v
+}
+
+func (o Error) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o Error) ToMap() (map[string]interface{}, error) {
