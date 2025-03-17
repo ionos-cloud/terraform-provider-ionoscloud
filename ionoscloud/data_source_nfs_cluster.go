@@ -13,7 +13,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
-	nfs "github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
 )
 
 func dataSourceNFSCluster() *schema.Resource {

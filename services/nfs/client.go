@@ -14,14 +14,14 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	sdk "github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 )
 
 // Client is a wrapper for the NFS SDK
 type Client struct {
-	sdkClient  sdk.APIClient
+	sdkClient  nfs.APIClient
 	fileConfig *fileconfiguration.FileConfig
 }
 
@@ -42,9 +42,9 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	config.MaxWaitTime = constant.MaxWaitTime
 	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
 	config.UserAgent = fmt.Sprintf("terraform-provider/ionos-cloud-sdk-go-nfs/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		sdk.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint:staticcheck
+		nfs.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint:staticcheck
 
-	return &Client{sdkClient: *sdk.NewAPIClient(config),
+	return &Client{sdkClient: *nfs.NewAPIClient(config),
 		fileConfig: fileConfig}
 }
 
