@@ -86,7 +86,7 @@ func deleteObject(ctx context.Context, client *objstorage.APIClient, req *Delete
 	return apiResponse, err
 }
 
-func deleteVersionsPage(ctx context.Context, client *objstorage.APIClient, versions *[]objstorage.ObjectVersion, bucket, key string, force bool) (int, error) {
+func deleteVersionsPage(ctx context.Context, client *objstorage.APIClient, versions []objstorage.ObjectVersion, bucket, key string, force bool) (int, error) {
 	var (
 		objCount int
 		lastErr  error
@@ -96,7 +96,7 @@ func deleteVersionsPage(ctx context.Context, client *objstorage.APIClient, versi
 		return objCount, nil
 	}
 
-	for _, v := range *versions {
+	for _, v := range versions {
 		if key != shared.ToValueDefault(v.Key) {
 			continue
 		}
@@ -145,7 +145,7 @@ func deleteVersionsPage(ctx context.Context, client *objstorage.APIClient, versi
 	return objCount, lastErr
 }
 
-func deleteMarkersPage(ctx context.Context, client *objstorage.APIClient, markers *[]objstorage.DeleteMarkerEntry, bucket, key string) (int, error) {
+func deleteMarkersPage(ctx context.Context, client *objstorage.APIClient, markers []objstorage.DeleteMarkerEntry, bucket, key string) (int, error) {
 	var (
 		objCount int
 		lastErr  error
@@ -155,7 +155,7 @@ func deleteMarkersPage(ctx context.Context, client *objstorage.APIClient, marker
 		return objCount, nil
 	}
 
-	for _, m := range *markers {
+	for _, m := range markers {
 		if key != shared.ToValueDefault(m.Key) {
 			continue
 		}

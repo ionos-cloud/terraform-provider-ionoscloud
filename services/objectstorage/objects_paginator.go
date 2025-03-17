@@ -85,7 +85,7 @@ func (p *ListObjectsV2Paginator) NextPage(ctx context.Context) (*objstorage.List
 		return nil, err
 	}
 
-	if output.IsTruncated != nil && *output.IsTruncated {
+	if output.IsTruncated {
 		p.input.ContinuationToken = output.NextContinuationToken
 	} else {
 		p.hasMore = false
