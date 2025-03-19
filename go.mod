@@ -19,7 +19,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 	github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0
-	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.2
+	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
 	github.com/ionos-cloud/sdk-go-cert-manager v1.3.0
@@ -39,8 +39,6 @@ require (
 	golang.org/x/crypto v0.26.0
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-replace github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 => /home/radu/work/sdk-go-bundle/products/objectstoragemanagement
 
 require (
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect

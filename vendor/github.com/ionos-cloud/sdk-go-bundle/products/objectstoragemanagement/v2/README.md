@@ -13,11 +13,11 @@ The API can be accessed within an instance running in IONOS Cloud or directly ov
 
 ### Use go get to retrieve the SDK to add it to your GOPATH workspace, or project's Go module dependencies.
 ```bash
-go get github.com/ionos-cloud/sdk-go-bundle/objectstoragemanagement.git
+go get github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement.git
 ```
 To update the SDK use go get -u to retrieve the latest version of the SDK.
 ```bash
-go get -u github.com/ionos-cloud/sdk-go-bundle/objectstoragemanagement.git
+go get -u github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement.git
 ```
 ### Go Modules
 
@@ -25,7 +25,7 @@ If you are using Go modules, your go get will default to the latest tagged relea
 
 To get the latest SDK repository, use @latest.
 ```bash
-go get github.com/ionos-cloud/sdk-go-bundle/objectstoragemanagement@latest
+go get github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement@latest
 ```
 
 ## Environment Variables
@@ -55,6 +55,11 @@ By default, *https://s3.ionos.com* is used, however this can be overriden at aut
 by setting the `IONOS_API_URL` environment variable or by specifying the `hostUrl` parameter when
 initializing the sdk client.
 
+**NOTE**: We recommend passing the URL without the `https://` or `http://` prefix. The SDK
+checks and adds it if necessary when configurations are created using `NewConfiguration` or
+`NewConfigurationFromEnv`. This is to avoid issues caused by typos in the prefix that cannot
+ be easily detected and debugged.
+
 ### Basic Authentication
 
 - **Type**: HTTP basic authentication
@@ -66,7 +71,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	objectstoragemanagement "github.com/ionos-cloud/sdk-go-bundle/objectstoragemanagement"
+	objectstoragemanagement "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement"
 	"log"
 )
 
@@ -87,7 +92,7 @@ There are 2 ways to generate your token:
         "fmt"
         "github.com/ionos-cloud/sdk-go-bundle/products/auth"
         "github.com/ionos-cloud/sdk-go-bundle/shared"
-        objectstoragemanagement "github.com/ionos-cloud/sdk-go-bundle/objectstoragemanagement"
+        objectstoragemanagement "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement"
         "log"
     )
 
@@ -121,7 +126,7 @@ There are 2 ways to generate your token:
         "context"
         "fmt"
         "github.com/ionos-cloud/sdk-go-bundle/products/auth"
-         objectstoragemanagement "github.com/ionos-cloud/sdk-go-bundle/objectstoragemanagement"
+         objectstoragemanagement "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement"
         "log"
     )
 
@@ -179,7 +184,7 @@ There are log levels that you can set: `Off`, `Debug` and `Trace`.
 package main
 
     import (
-        objectstoragemanagement "github.com/ionos-cloud/sdk-go-bundle/objectstoragemanagement"
+        objectstoragemanagement "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement"
         "github.com/ionos-cloud/sdk-go-bundle/shared"
         "github.com/sirupsen/logrus"
     )

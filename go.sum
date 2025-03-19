@@ -120,6 +120,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1 h1:GXxdNKl7haQnH
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1/go.mod h1:N0ifRq3ENqGg6qht1WPrVgSkcavPS5SRWlNfkHUZbfQ=
 github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0 h1:gVh+jd0o8ROtJLWqUB6/VU8vSLdj/kRYAz/qbMO7z7I=
 github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0/go.mod h1:PRdc/x/r7tMEV7rh2uZYJ8ososjfIF/cXiGX/D6FdTs=
+github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0 h1:6xP8S4gGu+n8xpvyvVuWjWljeuPduCA+mvpb2rgqDt0=
+github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0/go.mod h1:Zzv2k/EXEYp+nwGk2s86jkvUJLa4ebWJoOdGfYcb8mQ=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2 h1:qR/ul88v/3ZF+ZLFFv6LE9TrjZS1qM4R10UlXCaQzcs=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2/go.mod h1:V6WHbWsQDlZsLtHqgsXO81Z9eJBsczE3Q6VY8J+rutc=
 github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1 h1:NWobgIhmUJKG6ohFXefMj+KmpEEvLYEDUgGzpns6HQE=
