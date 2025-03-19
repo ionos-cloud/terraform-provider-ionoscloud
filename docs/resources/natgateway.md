@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_natgateway
 
-Manages a **Nat Gateway** on IonosCloud.
+Manages a [Nat Gateway](https://docs.ionos.com/cloud/network-services/nat-gateway/overview) on IonosCloud.
 
 ## Example Usage
 

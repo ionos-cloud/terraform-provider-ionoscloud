@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
@@ -109,7 +109,7 @@ func resourceContainerRegistry() *schema.Resource {
 }
 
 func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ContainerClient
+	client := meta.(bundleclient.SdkBundle).ContainerClient
 
 	containerRegistry, err := crService.GetRegistryDataCreate(d)
 	if err != nil {
@@ -135,7 +135,7 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(services.SdkBundle).ContainerClient
+	client := meta.(bundleclient.SdkBundle).ContainerClient
 
 	registry, apiResponse, err := client.GetRegistry(ctx, d.Id())
 	if err != nil {
@@ -157,7 +157,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ContainerClient
+	client := meta.(bundleclient.SdkBundle).ContainerClient
 
 	containerRegistry, err := crService.GetRegistryDataUpdate(d)
 	if err != nil {
@@ -187,7 +187,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).ContainerClient
+	client := meta.(bundleclient.SdkBundle).ContainerClient
 
 	registryId := d.Id()
 
@@ -206,7 +206,7 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).ContainerClient
+	client := meta.(bundleclient.SdkBundle).ContainerClient
 
 	registryId := d.Id()
 

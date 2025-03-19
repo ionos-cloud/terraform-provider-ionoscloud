@@ -10,10 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
-
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
+	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func resourceNSG() *schema.Resource {
@@ -51,7 +50,7 @@ func resourceNSG() *schema.Resource {
 }
 
 func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
 	sgName := d.Get("name").(string)
@@ -69,7 +68,7 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while creating a Network Security Group for datacenter dcID: %s, %w", datacenterID, err))
 	}
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %w", datacenterID, err))
 	}
 	d.SetId(*securityGroup.Id)
@@ -78,7 +77,7 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 }
 
 func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	datacenterID := d.Get("datacenter_id").(string)
 
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, d.Id()).Depth(2).Execute()
@@ -94,7 +93,7 @@ func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
 	sgName := d.Get("name").(string)
@@ -114,7 +113,7 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %w", datacenterID, err))
 	}
 
@@ -122,7 +121,7 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	datacenterID := d.Get("datacenter_id").(string)
 
@@ -133,7 +132,7 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %w", datacenterID, err))
 	}
 
@@ -141,7 +140,7 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 

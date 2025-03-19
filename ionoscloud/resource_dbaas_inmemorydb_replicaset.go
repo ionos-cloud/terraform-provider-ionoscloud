@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -202,7 +202,7 @@ func resourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 }
 
 func replicaSetCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).InMemoryDBClient
+	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 
 	replicaSet := inmemorydb.GetReplicaSetDataCreate(d)
 	response, _, err := client.CreateReplicaSet(ctx, replicaSet, d.Get("location").(string))
@@ -220,7 +220,7 @@ func replicaSetCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 }
 
 func replicaSetDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).InMemoryDBClient
+	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	replicaSetID := d.Id()
 	apiResponse, err := client.DeleteReplicaSet(ctx, replicaSetID, d.Get("location").(string))
 	if err != nil {
@@ -241,7 +241,7 @@ func replicaSetDelete(ctx context.Context, d *schema.ResourceData, meta interfac
 }
 
 func replicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).InMemoryDBClient
+	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	replicaSetID := d.Id()
 	replicaSet, apiResponse, err := client.GetReplicaSet(ctx, replicaSetID, d.Get("location").(string))
 	if err != nil {
@@ -259,7 +259,7 @@ func replicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func replicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).InMemoryDBClient
+	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	replicaSetID := d.Id()
 	replicaSet := inmemorydb.GetReplicaSetDataUpdate(d)
 	response, _, err := client.UpdateReplicaSet(ctx, replicaSetID, d.Get("location").(string), replicaSet)
@@ -277,7 +277,7 @@ func replicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 }
 
 func replicaSetImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).InMemoryDBClient
+	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<replica_set_id>'", d.Id())

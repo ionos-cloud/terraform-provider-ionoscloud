@@ -2,7 +2,6 @@ package ionoscloud
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -16,8 +15,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -121,14 +118,6 @@ func testAccProtoV6ProviderFactoriesInternal(t *testing.T, v **schema.Provider) 
 }
 
 func testAccPreCheck(t *testing.T) {
-	pbUsername := os.Getenv(ionoscloud.IonosUsernameEnvVar)
-	pbPassword := os.Getenv(ionoscloud.IonosPasswordEnvVar)
-	pbToken := os.Getenv(ionoscloud.IonosTokenEnvVar)
-	if pbToken == "" {
-		if pbUsername == "" || pbPassword == "" {
-			t.Fatalf("%s/%s or %s must be set for acceptance tests", ionoscloud.IonosUsernameEnvVar, ionoscloud.IonosPasswordEnvVar, ionoscloud.IonosTokenEnvVar)
-		}
-	}
 
 	diags := testAccProvider.Configure(context.TODO(), terraform.NewResourceConfigRaw(nil))
 	if diags.HasError() {

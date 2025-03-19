@@ -6,12 +6,12 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dns "github.com/ionos-cloud/sdk-go-dns"
+
+	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func dataSourceDNSRecord() *schema.Resource {
@@ -74,7 +74,7 @@ func dataSourceDNSRecord() *schema.Resource {
 }
 
 func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 	partialMatch := d.Get("partial_match").(bool)
 	zoneId := d.Get("zone_id").(string)
 	idValue, idOk := d.GetOk("id")
@@ -110,7 +110,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Records: %w", err))
 			}
-			results = *records.Items
+			results = records.Items
 		} else {
 			// In order to have an exact name match, we must retrieve all the DNS Records and then
 			// build a list of exact matches based on the response, there is no other way since using
@@ -119,13 +119,13 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Records: %w", err))
 			}
-			for _, recordItem := range *records.Items {
+			for _, recordItem := range records.Items {
 				// Since each record has a unique name, there is no need to keep on searching if
 				// we already found the required record.
 				if len(results) == 1 {
 					break
 				}
-				if recordItem.Properties != nil && recordItem.Properties.Name != nil && strings.EqualFold(*recordItem.Properties.Name, recordName) {
+				if strings.EqualFold(recordItem.Properties.Name, recordName) {
 					results = append(results, recordItem)
 				}
 			}

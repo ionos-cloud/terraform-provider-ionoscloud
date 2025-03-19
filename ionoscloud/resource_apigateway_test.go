@@ -11,7 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	ionoscloud "github.com/ionos-cloud/sdk-go-api-gateway"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 var testAccCheckAPIGatewayConfig_basic = `
@@ -137,7 +138,7 @@ func TestAccAPIGateway_basic(t *testing.T) {
 }
 
 func testAccCheckAPIGatewayDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(services.SdkBundle).APIGatewayClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).APIGatewayClient
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_apigateway" {
@@ -164,7 +165,7 @@ func testAccCheckAPIGatewayExists(n string, apiGateway *ionoscloud.GatewayRead) 
 			return fmt.Errorf("not found: %s", n)
 		}
 
-		client := testAccProvider.Meta().(services.SdkBundle).APIGatewayClient
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).APIGatewayClient
 		found, _, err := client.GetAPIGatewayByID(context.Background(), rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("error fetching API Gateway with ID %s: %v", rs.Primary.ID, err)

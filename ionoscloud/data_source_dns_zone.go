@@ -6,12 +6,12 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dns "github.com/ionos-cloud/sdk-go-dns"
+
+	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func dataSourceDNSZone() *schema.Resource {
@@ -58,7 +58,7 @@ func dataSourceDNSZone() *schema.Resource {
 }
 
 func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	partialMatch := d.Get("partial_match").(bool)
@@ -95,7 +95,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Zones: %w", err))
 			}
-			results = *zones.Items
+			results = zones.Items
 		} else {
 			// In order to have an exact name match, we must retrieve all the DNS Zones and then
 			// build a list of exact matches based on the response, there is no other way since using
@@ -104,13 +104,13 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Zones: %w", err))
 			}
-			for _, zoneItem := range *zones.Items {
+			for _, zoneItem := range zones.Items {
 				// Since each zone has a unique name, there is no need to keep on searching if
 				// we already found the required zone.
 				if len(results) == 1 {
 					break
 				}
-				if zoneItem.Properties != nil && zoneItem.Properties.ZoneName != nil && strings.EqualFold(*zoneItem.Properties.ZoneName, name) {
+				if strings.EqualFold(zoneItem.Properties.ZoneName, name) {
 					results = append(results, zoneItem)
 				}
 			}

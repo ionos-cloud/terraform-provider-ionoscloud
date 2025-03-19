@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 )
 
@@ -102,7 +101,7 @@ func dataSourceLoggingPipeline() *schema.Resource {
 }
 
 func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).LoggingClient
+	client := meta.(bundleclient.SdkBundle).LoggingClient
 	location := d.Get("location").(string)
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")

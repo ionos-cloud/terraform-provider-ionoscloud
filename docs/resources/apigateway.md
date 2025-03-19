@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_apigateway
 
-An API gateway consists of the generic rules and configurations.
+An [API gateway](https://api.ionos.com/docs/apigateway/v1/#tag/APIGateways) consists of the generic rules and configurations.
 
 ## Usage example
 

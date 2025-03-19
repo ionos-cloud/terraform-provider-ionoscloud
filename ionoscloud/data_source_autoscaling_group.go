@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	autoscaling "github.com/ionos-cloud/sdk-go-vm-autoscaling"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	as "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 )
 
@@ -368,7 +368,7 @@ func DataSourceAutoscalingGroup() *schema.Resource {
 }
 
 func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).AutoscalingClient
+	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")

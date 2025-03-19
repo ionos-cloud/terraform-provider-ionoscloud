@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_mariadb_cluster
 
-Manages a **DBaaS MariaDB Cluster**. 
+Manages a [DBaaS MariaDB Cluster](https://docs.ionos.com/cloud/databases/mariadb/overview). 
 
 ## Example Usage
 

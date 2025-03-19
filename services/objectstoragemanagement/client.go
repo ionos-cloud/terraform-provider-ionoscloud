@@ -5,13 +5,15 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-
-	objectstoragemanagement "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	objectstoragemanagement "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 // Client is a wrapper around the S3 client.
@@ -25,19 +27,22 @@ func (c *Client) GetBaseClient() *objectstoragemanagement.APIClient {
 }
 
 // NewClient creates a new S3 client with the given credentials and region.
-func NewClient(username, password, token, url, version, terraformVersion string, insecure bool) *Client {
-	newObjectStorageManagementConfig := shared.NewConfiguration(username, password, token, url)
+func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.ObjectStorageManagement)
+	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
+		clientOptions.Credentials.Token, clientOptions.Endpoint)
 
-	newObjectStorageManagementConfig.MaxRetries = constant.MaxRetries
-	newObjectStorageManagementConfig.MaxWaitTime = constant.MaxWaitTime
-	newObjectStorageManagementConfig.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, objectstoragemanagement.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
+	config.MaxRetries = constant.MaxRetries
+	config.MaxWaitTime = constant.MaxWaitTime
+	config.HTTPClient = http.DefaultClient
+	config.UserAgent = fmt.Sprintf(
+		"terraform-provider/ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		objectstoragemanagement.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
 
 	client := &Client{
-		client: objectstoragemanagement.NewAPIClient(newObjectStorageManagementConfig),
+		client: objectstoragemanagement.NewAPIClient(config),
 	}
-	client.client.GetConfig().HTTPClient = &http.Client{Transport: utils.CreateTransport(insecure)}
+	client.client.GetConfig().HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
 
 	return client
 }

@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_certificate
 
-Manages a **Certificate** on IonosCloud.
+Manages a [Certificate](https://docs.ionos.com/cloud/network-services/certificate-manager) on IonosCloud.
 
 ## Example Usage
 

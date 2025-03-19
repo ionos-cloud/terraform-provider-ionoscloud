@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_pg_cluster
 
-Manages a **DbaaS PgSql Cluster**.
+Manages a [DbaaS PgSql Cluster](https://docs.ionos.com/cloud/databases/postgresql/overview).
 
 ## Example Usage
 

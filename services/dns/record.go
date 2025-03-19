@@ -2,14 +2,14 @@ package dns
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dns "github.com/ionos-cloud/sdk-go-dns"
+	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -20,7 +20,7 @@ var recordResourceName = "DNS Record"
 func (c *Client) CreateRecord(ctx context.Context, zoneId string, d *schema.ResourceData) (recordResponse dns.RecordRead, responseInfo utils.ApiResponseInfo, err error) {
 	recordUUID := uuidgen.ResourceUuid()
 	request := setRecordPutRequest(d)
-	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordUUID.String()).RecordEnsure(*request).Execute()
+	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordUUID.String()).RecordEnsure(request).Execute()
 	apiResponse.LogInfo()
 	return recordResponse, apiResponse, err
 }
@@ -33,23 +33,21 @@ func (c *Client) IsRecordCreated(ctx context.Context, d *schema.ResourceData) (b
 	if err != nil {
 		return false, err
 	}
-	if record.Metadata == nil || record.Metadata.State == nil {
-		return false, fmt.Errorf("expected metadata, got empty for record with ID: %s, zone ID: %s", recordID, zoneId)
-	}
-	log.Printf("[DEBUG] record state: %s", *record.Metadata.State)
 
-	return strings.EqualFold((string)(*record.Metadata.State), (string)(dns.PROVISIONINGSTATE_AVAILABLE)), nil
+	log.Printf("[DEBUG] record state: %s", record.Metadata.State)
+
+	return strings.EqualFold((string)(record.Metadata.State), (string)(dns.PROVISIONINGSTATE_AVAILABLE)), nil
 }
 
 //nolint:golint
-func (c *Client) GetRecordById(ctx context.Context, zoneId, recordID string) (dns.RecordRead, *dns.APIResponse, error) {
+func (c *Client) GetRecordById(ctx context.Context, zoneId, recordID string) (dns.RecordRead, *shared.APIResponse, error) {
 	record, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsFindById(ctx, zoneId, recordID).Execute()
 	apiResponse.LogInfo()
 	return record, apiResponse, err
 }
 
 //nolint:golint
-func (c *Client) ListRecords(ctx context.Context, recordName string) (dns.RecordReadList, *dns.APIResponse, error) {
+func (c *Client) ListRecords(ctx context.Context, recordName string) (dns.RecordReadList, *shared.APIResponse, error) {
 	request := c.sdkClient.RecordsApi.RecordsGet(ctx)
 	if recordName != "" {
 		request = request.FilterName(recordName)
@@ -61,34 +59,18 @@ func (c *Client) ListRecords(ctx context.Context, recordName string) (dns.Record
 
 //nolint:golint
 func (c *Client) SetRecordData(d *schema.ResourceData, record dns.RecordRead) error {
-	if record.Id != nil {
-		d.SetId(*record.Id)
+	d.SetId(record.Id)
+
+	if err := d.Set("name", record.Properties.Name); err != nil {
+		return utils.GenerateSetError(recordResourceName, "name", err)
 	}
 
-	if record.Properties == nil {
-		return fmt.Errorf("expected properties in the record response for the record with ID: %s, but received 'nil' instead", *record.Id)
+	if err := d.Set("type", record.Properties.Type); err != nil {
+		return utils.GenerateSetError(recordResourceName, "type", err)
 	}
 
-	if record.Metadata == nil {
-		return fmt.Errorf("expected metadata in the response for the record with ID: %s, but received 'nil' instead", *record.Id)
-	}
-
-	if record.Properties.Name != nil {
-		if err := d.Set("name", *record.Properties.Name); err != nil {
-			return utils.GenerateSetError(recordResourceName, "name", err)
-		}
-	}
-
-	if record.Properties.Type != nil {
-		if err := d.Set("type", *record.Properties.Type); err != nil {
-			return utils.GenerateSetError(recordResourceName, "type", err)
-		}
-	}
-
-	if record.Properties.Content != nil {
-		if err := d.Set("content", *record.Properties.Content); err != nil {
-			return utils.GenerateSetError(recordResourceName, "content", err)
-		}
+	if err := d.Set("content", record.Properties.Content); err != nil {
+		return utils.GenerateSetError(recordResourceName, "content", err)
 	}
 
 	if record.Properties.Ttl != nil {
@@ -109,10 +91,8 @@ func (c *Client) SetRecordData(d *schema.ResourceData, record dns.RecordRead) er
 		}
 	}
 
-	if record.Metadata.Fqdn != nil {
-		if err := d.Set("fqdn", *record.Metadata.Fqdn); err != nil {
-			return utils.GenerateSetError(recordResourceName, "fqdn", err)
-		}
+	if err := d.Set("fqdn", record.Metadata.Fqdn); err != nil {
+		return utils.GenerateSetError(recordResourceName, "fqdn", err)
 	}
 
 	return nil
@@ -137,31 +117,31 @@ func (c *Client) IsRecordDeleted(ctx context.Context, d *schema.ResourceData) (b
 //nolint:golint
 func (c *Client) UpdateRecord(ctx context.Context, zoneId, recordID string, d *schema.ResourceData) (dns.RecordRead, utils.ApiResponseInfo, error) {
 	request := setRecordPutRequest(d)
-	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordID).RecordEnsure(*request).Execute()
+	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordID).RecordEnsure(request).Execute()
 	apiResponse.LogInfo()
 	return recordResponse, apiResponse, err
 }
 
-func setRecordPutRequest(d *schema.ResourceData) *dns.RecordEnsure {
+func setRecordPutRequest(d *schema.ResourceData) dns.RecordEnsure {
 	request := dns.RecordEnsure{
-		Properties: &dns.Record{},
+		Properties: dns.Record{},
 	}
 
 	// tread carefully, workaround for setting empty name
 	isNull := d.GetRawConfig().AsValueMap()["name"].IsNull()
 	if nameValue, _ := d.GetOk("name"); !isNull {
 		name := nameValue.(string)
-		request.Properties.Name = &name
+		request.Properties.Name = name
 	}
 
 	if typeValue, ok := d.GetOk("type"); ok {
 		typeString := typeValue.(string)
-		request.Properties.Type = &typeString
+		request.Properties.Type = dns.RecordType(typeString)
 	}
 
 	if contentValue, ok := d.GetOk("content"); ok {
 		content := contentValue.(string)
-		request.Properties.Content = &content
+		request.Properties.Content = content
 	}
 
 	if ttlValue, ok := d.GetOk("ttl"); ok {
@@ -180,5 +160,5 @@ func setRecordPutRequest(d *schema.ResourceData) *dns.RecordEnsure {
 		enabled := enabledValue.(bool)
 		request.Properties.Enabled = &enabled
 	}
-	return &request
+	return request
 }

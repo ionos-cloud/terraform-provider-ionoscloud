@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -161,7 +161,7 @@ func checkClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _
 
 }
 func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	clusterName := d.Get("name").(string)
 	cluster := ionoscloud.KubernetesClusterForPost{
@@ -292,7 +292,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -317,7 +317,7 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	request := ionoscloud.KubernetesClusterForPut{}
 
@@ -461,7 +461,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	apiResponse, err := client.KubernetesApi.K8sDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -505,7 +505,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	clusterId := d.Id()
 

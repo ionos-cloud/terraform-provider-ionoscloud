@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	vpnSdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 )
 
@@ -115,7 +115,7 @@ func dataSourceVpnWireguardGateway() *schema.Resource {
 }
 
 func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	location := d.Get("location").(string)

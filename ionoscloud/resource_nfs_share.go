@@ -9,9 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
 func resourceNFSShare() *schema.Resource {
@@ -126,12 +125,12 @@ func resourceNFSShare() *schema.Resource {
 }
 
 func resourceNFSShareCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 	response, _, err := client.CreateNFSShare(ctx, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating NFS Share: %w", err))
 	}
-	shareID := *response.Id
+	shareID := response.Id
 	d.SetId(shareID)
 
 	if err := client.SetNFSShareData(d, response); err != nil {
@@ -141,7 +140,7 @@ func resourceNFSShareCreate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 	clusterID := d.Get("cluster_id").(string)
 	location := d.Get("location").(string)
 	shareID := d.Id()
@@ -158,7 +157,7 @@ func resourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceNFSShareUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 	response, _, err := client.UpdateNFSShare(ctx, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error updating NFS Share: %w", err))
@@ -171,7 +170,7 @@ func resourceNFSShareUpdate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceNFSShareDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 	clusterID := d.Get("cluster_id").(string)
 	location := d.Get("location").(string)
 	shareID := d.Id()
@@ -184,7 +183,7 @@ func resourceNFSShareDelete(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceNFSShareImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 3 {
 		return nil, fmt.Errorf("invalid import ID: %q, expected ID in the format '<location>:<cluster_id>:<share_id>'", d.Id())

@@ -9,16 +9,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 var pipelineResourceName = "Logging Pipeline"
 
 // CreatePipeline creates a new pipeline
 func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.ProvisioningPipeline, utils.ApiResponseInfo, error) {
-	c.changeConfigURL(d.Get("location").(string))
+	location := d.Get("location").(string)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
 	request := setPipelinePostRequest(d)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPost(ctx).Pipeline(*request).Execute()
 	apiResponse.LogInfo()
@@ -42,7 +45,7 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 
 // UpdatePipeline updates a pipeline
 func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (logging.Pipeline, utils.ApiResponseInfo, error) {
-	c.changeConfigURL(d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, d.Get("location").(string))
 	request := setPipelinePatchRequest(d)
 	pipelineResponse, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPatch(ctx, id).Pipeline(*request).Execute()
 	apiResponse.LogInfo()
@@ -51,7 +54,7 @@ func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.Resour
 
 // DeletePipeline deletes a pipeline
 func (c *Client) DeletePipeline(ctx context.Context, location, id string) (utils.ApiResponseInfo, error) {
-	c.changeConfigURL(location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
 	_, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -59,7 +62,7 @@ func (c *Client) DeletePipeline(ctx context.Context, location, id string) (utils
 
 // IsPipelineDeleted checks if the pipeline is deleted
 func (c *Client) IsPipelineDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	c.changeConfigURL(d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, d.Get("location").(string))
 	_, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
@@ -67,7 +70,7 @@ func (c *Client) IsPipelineDeleted(ctx context.Context, d *schema.ResourceData) 
 
 // GetPipelineByID returns a pipeline by its ID
 func (c *Client) GetPipelineByID(ctx context.Context, location, id string) (logging.Pipeline, *shared.APIResponse, error) {
-	c.changeConfigURL(location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return pipeline, apiResponse, err
@@ -75,7 +78,7 @@ func (c *Client) GetPipelineByID(ctx context.Context, location, id string) (logg
 
 // ListPipelines returns a list of all pipelines
 func (c *Client) ListPipelines(ctx context.Context, location string) (logging.PipelineListResponse, *shared.APIResponse, error) {
-	c.changeConfigURL(location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
 	pipelines, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return pipelines, apiResponse, err
