@@ -139,6 +139,14 @@ func (o *SnapshotListAllOf) SetItems(v []SnapshotResponse) {
 	o.Items = v
 }
 
+func (o SnapshotListAllOf) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o SnapshotListAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Type) {

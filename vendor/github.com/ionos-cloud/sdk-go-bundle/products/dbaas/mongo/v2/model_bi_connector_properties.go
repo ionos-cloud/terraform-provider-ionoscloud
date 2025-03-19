@@ -146,6 +146,14 @@ func (o *BiConnectorProperties) SetPort(v string) {
 	o.Port = &v
 }
 
+func (o BiConnectorProperties) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o BiConnectorProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Enabled) {

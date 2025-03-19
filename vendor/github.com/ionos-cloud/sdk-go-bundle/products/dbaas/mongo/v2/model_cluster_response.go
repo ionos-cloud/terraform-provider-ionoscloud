@@ -172,6 +172,14 @@ func (o *ClusterResponse) SetProperties(v ClusterProperties) {
 	o.Properties = &v
 }
 
+func (o ClusterResponse) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ClusterResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Type) {

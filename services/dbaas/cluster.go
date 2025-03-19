@@ -253,7 +253,7 @@ func SetMongoClusterCreateProperties(d *schema.ResourceData) (*mongo.CreateClust
 
 	if mongoVersion, ok := d.GetOk("mongodb_version"); ok {
 		mongoVersion := mongoVersion.(string)
-		mongoCluster.Properties.MongoDBVersion = &mongoVersion
+		mongoCluster.Properties.MongoDBVersion = mongoVersion
 	}
 
 	if instances, ok := d.GetOk("instances"); ok {
@@ -365,6 +365,12 @@ func SetMongoClusterPatchProperties(d *schema.ResourceData) *mongo.PatchClusterR
 		_, template := d.GetChange("template_id")
 		templateStr := template.(string)
 		patchRequest.Properties.TemplateID = &templateStr
+	}
+
+	if d.HasChange("mongodb_version") {
+		_, mongodb_version := d.GetChange("mongodb_version")
+		mongodbVersionStr := mongodb_version.(string)
+		patchRequest.Properties.MongoDBVersion = &mongodbVersionStr
 	}
 
 	if d.HasChange("connections") {

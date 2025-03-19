@@ -24,7 +24,7 @@ type CreateClusterProperties struct {
 	// The unique ID of the template, which specifies the number of cores, storage size, and memory. You cannot downgrade to a smaller template or minor edition (e.g. from business to playground). To get a list of all templates to confirm the changes use the /templates endpoint.
 	TemplateID *string `json:"templateID,omitempty"`
 	// The MongoDB version of your cluster.
-	MongoDBVersion *string `json:"mongoDBVersion,omitempty"`
+	MongoDBVersion string `json:"mongoDBVersion"`
 	// The total number of instances in the cluster (one primary and n-1 secondaries).
 	Instances int32 `json:"instances"`
 	// The total number of shards in the cluster.
@@ -53,9 +53,10 @@ type CreateClusterProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateClusterProperties(instances int32, connections []Connection, location string, displayName string) *CreateClusterProperties {
+func NewCreateClusterProperties(mongoDBVersion string, instances int32, connections []Connection, location string, displayName string) *CreateClusterProperties {
 	this := CreateClusterProperties{}
 
+	this.MongoDBVersion = mongoDBVersion
 	this.Instances = instances
 	this.Connections = connections
 	this.Location = location
@@ -136,36 +137,28 @@ func (o *CreateClusterProperties) SetTemplateID(v string) {
 	o.TemplateID = &v
 }
 
-// GetMongoDBVersion returns the MongoDBVersion field value if set, zero value otherwise.
+// GetMongoDBVersion returns the MongoDBVersion field value
 func (o *CreateClusterProperties) GetMongoDBVersion() string {
-	if o == nil || IsNil(o.MongoDBVersion) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.MongoDBVersion
+
+	return o.MongoDBVersion
 }
 
-// GetMongoDBVersionOk returns a tuple with the MongoDBVersion field value if set, nil otherwise
+// GetMongoDBVersionOk returns a tuple with the MongoDBVersion field value
 // and a boolean to check if the value has been set.
 func (o *CreateClusterProperties) GetMongoDBVersionOk() (*string, bool) {
-	if o == nil || IsNil(o.MongoDBVersion) {
+	if o == nil {
 		return nil, false
 	}
-	return o.MongoDBVersion, true
+	return &o.MongoDBVersion, true
 }
 
-// HasMongoDBVersion returns a boolean if a field has been set.
-func (o *CreateClusterProperties) HasMongoDBVersion() bool {
-	if o != nil && !IsNil(o.MongoDBVersion) {
-		return true
-	}
-
-	return false
-}
-
-// SetMongoDBVersion gets a reference to the given string and assigns it to the MongoDBVersion field.
+// SetMongoDBVersion sets field value
 func (o *CreateClusterProperties) SetMongoDBVersion(v string) {
-	o.MongoDBVersion = &v
+	o.MongoDBVersion = v
 }
 
 // GetInstances returns the Instances field value
@@ -584,6 +577,14 @@ func (o *CreateClusterProperties) SetStorageType(v StorageType) {
 	o.StorageType = &v
 }
 
+func (o CreateClusterProperties) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o CreateClusterProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Type) {
@@ -592,9 +593,7 @@ func (o CreateClusterProperties) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.TemplateID) {
 		toSerialize["templateID"] = o.TemplateID
 	}
-	if !IsNil(o.MongoDBVersion) {
-		toSerialize["mongoDBVersion"] = o.MongoDBVersion
-	}
+	toSerialize["mongoDBVersion"] = o.MongoDBVersion
 	toSerialize["instances"] = o.Instances
 	if !IsNil(o.Shards) {
 		toSerialize["shards"] = o.Shards

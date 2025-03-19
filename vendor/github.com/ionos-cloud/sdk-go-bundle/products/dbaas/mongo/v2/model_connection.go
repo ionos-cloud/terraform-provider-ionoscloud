@@ -25,8 +25,6 @@ type Connection struct {
 	LanId string `json:"lanId"`
 	// The list of IPs for your cluster. All IPs must be in a /24 network. Note the following unavailable IP ranges: 10.233.114.0/24
 	CidrList []string `json:"cidrList"`
-	// List of whitelisted CIDRs.
-	Whitelist []string `json:"whitelist,omitempty"`
 }
 
 // NewConnection instantiates a new Connection object
@@ -123,36 +121,12 @@ func (o *Connection) SetCidrList(v []string) {
 	o.CidrList = v
 }
 
-// GetWhitelist returns the Whitelist field value if set, zero value otherwise.
-func (o *Connection) GetWhitelist() []string {
-	if o == nil || IsNil(o.Whitelist) {
-		var ret []string
-		return ret
+func (o Connection) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
 	}
-	return o.Whitelist
-}
-
-// GetWhitelistOk returns a tuple with the Whitelist field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Connection) GetWhitelistOk() ([]string, bool) {
-	if o == nil || IsNil(o.Whitelist) {
-		return nil, false
-	}
-	return o.Whitelist, true
-}
-
-// HasWhitelist returns a boolean if a field has been set.
-func (o *Connection) HasWhitelist() bool {
-	if o != nil && !IsNil(o.Whitelist) {
-		return true
-	}
-
-	return false
-}
-
-// SetWhitelist gets a reference to the given []string and assigns it to the Whitelist field.
-func (o *Connection) SetWhitelist(v []string) {
-	o.Whitelist = v
+	return json.Marshal(toSerialize)
 }
 
 func (o Connection) ToMap() (map[string]interface{}, error) {
@@ -160,9 +134,6 @@ func (o Connection) ToMap() (map[string]interface{}, error) {
 	toSerialize["datacenterId"] = o.DatacenterId
 	toSerialize["lanId"] = o.LanId
 	toSerialize["cidrList"] = o.CidrList
-	if !IsNil(o.Whitelist) {
-		toSerialize["whitelist"] = o.Whitelist
-	}
 	return toSerialize, nil
 }
 

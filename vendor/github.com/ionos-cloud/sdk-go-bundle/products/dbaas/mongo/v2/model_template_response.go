@@ -172,6 +172,14 @@ func (o *TemplateResponse) SetProperties(v TemplateProperties) {
 	o.Properties = &v
 }
 
+func (o TemplateResponse) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o TemplateResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Type) {

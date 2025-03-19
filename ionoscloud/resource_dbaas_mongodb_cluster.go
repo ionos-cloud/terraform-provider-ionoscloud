@@ -54,7 +54,6 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "The MongoDB version of your cluster. Update forces cluster re-creation.",
 				Required:         true,
-				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"instances": {

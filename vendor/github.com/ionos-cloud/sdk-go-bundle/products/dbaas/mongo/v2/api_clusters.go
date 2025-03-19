@@ -752,3 +752,140 @@ func (a *ClustersApiService) ClustersPostExecute(r ApiClustersPostRequest) (Clus
 
 	return localVarReturnValue, localVarAPIResponse, nil
 }
+
+type ApiClustersVersionsGetRequest struct {
+	ctx        _context.Context
+	ApiService *ClustersApiService
+	clusterId  string
+}
+
+func (r ApiClustersVersionsGetRequest) Execute() (MongoDBVersionList, *shared.APIResponse, error) {
+	return r.ApiService.ClustersVersionsGetExecute(r)
+}
+
+/*
+ * ClustersVersionsGet Get available MongoDB versions for this cluster
+ * Retrieves all MongoDB versions currently selectable for this cluster.
+ * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param clusterId The unique ID of the cluster.
+ * @return ApiClustersVersionsGetRequest
+ */
+func (a *ClustersApiService) ClustersVersionsGet(ctx _context.Context, clusterId string) ApiClustersVersionsGetRequest {
+	return ApiClustersVersionsGetRequest{
+		ApiService: a,
+		ctx:        ctx,
+		clusterId:  clusterId,
+	}
+}
+
+/*
+ * Execute executes the request
+ * @return MongoDBVersionList
+ */
+func (a *ClustersApiService) ClustersVersionsGetExecute(r ApiClustersVersionsGetRequest) (MongoDBVersionList, *shared.APIResponse, error) {
+	var (
+		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarPostBody     interface{}
+		localVarFormFileName string
+		localVarFileName     string
+		localVarFileBytes    []byte
+		localVarReturnValue  MongoDBVersionList
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.ClustersVersionsGet")
+	if err != nil {
+		gerr := shared.GenericOpenAPIError{}
+		gerr.SetError(err.Error())
+		return localVarReturnValue, nil, gerr
+	}
+
+	localVarPath := localBasePath + "/clusters/{clusterId}/versions"
+	localVarPath = strings.Replace(localVarPath, "{"+"clusterId"+"}", _neturl.PathEscape(parameterValueToString(r.clusterId, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := _neturl.Values{}
+	localVarFormParams := _neturl.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(shared.ContextAPIKeys).(map[string]shared.APIKey); ok {
+			if apiKey, ok := auth["tokenAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
+
+	localVarAPIResponse := &shared.APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestTime: httpRequestTime,
+		RequestURL:  localVarPath,
+		Operation:   "ClustersVersionsGet",
+	}
+
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarAPIResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarAPIResponse.Payload = localVarBody
+	if err != nil {
+		return localVarReturnValue, localVarAPIResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := shared.GenericOpenAPIError{}
+		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
+		newErr.SetBody(localVarBody)
+		newErr.SetError(fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)))
+		var v ErrorResponse
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.SetError(err.Error())
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.SetModel(v)
+		return localVarReturnValue, localVarAPIResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := shared.GenericOpenAPIError{}
+		newErr.SetStatusCode(localVarHTTPResponse.StatusCode)
+		newErr.SetBody(localVarBody)
+		newErr.SetError(err.Error())
+		return localVarReturnValue, localVarAPIResponse, newErr
+	}
+
+	return localVarReturnValue, localVarAPIResponse, nil
+}

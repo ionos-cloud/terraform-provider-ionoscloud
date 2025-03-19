@@ -33,6 +33,8 @@ type PatchClusterProperties struct {
 	Connections []Connection           `json:"connections,omitempty"`
 	// The unique ID of the template, which specifies the number of cores, storage size, and memory. You cannot downgrade to a smaller template or minor edition (e.g. from business to playground). To get a list of all templates to confirm the changes use the /templates endpoint.
 	TemplateID *string `json:"templateID,omitempty"`
+	// The MongoDB version of your cluster.
+	MongoDBVersion *string `json:"mongoDBVersion,omitempty"`
 	// The cluster edition.
 	Edition *string `json:"edition,omitempty"`
 	// The number of CPU cores per instance.
@@ -350,6 +352,38 @@ func (o *PatchClusterProperties) SetTemplateID(v string) {
 	o.TemplateID = &v
 }
 
+// GetMongoDBVersion returns the MongoDBVersion field value if set, zero value otherwise.
+func (o *PatchClusterProperties) GetMongoDBVersion() string {
+	if o == nil || IsNil(o.MongoDBVersion) {
+		var ret string
+		return ret
+	}
+	return *o.MongoDBVersion
+}
+
+// GetMongoDBVersionOk returns a tuple with the MongoDBVersion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *PatchClusterProperties) GetMongoDBVersionOk() (*string, bool) {
+	if o == nil || IsNil(o.MongoDBVersion) {
+		return nil, false
+	}
+	return o.MongoDBVersion, true
+}
+
+// HasMongoDBVersion returns a boolean if a field has been set.
+func (o *PatchClusterProperties) HasMongoDBVersion() bool {
+	if o != nil && !IsNil(o.MongoDBVersion) {
+		return true
+	}
+
+	return false
+}
+
+// SetMongoDBVersion gets a reference to the given string and assigns it to the MongoDBVersion field.
+func (o *PatchClusterProperties) SetMongoDBVersion(v string) {
+	o.MongoDBVersion = &v
+}
+
 // GetEdition returns the Edition field value if set, zero value otherwise.
 func (o *PatchClusterProperties) GetEdition() string {
 	if o == nil || IsNil(o.Edition) {
@@ -510,6 +544,14 @@ func (o *PatchClusterProperties) SetStorageType(v StorageType) {
 	o.StorageType = &v
 }
 
+func (o PatchClusterProperties) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o PatchClusterProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Type) {
@@ -538,6 +580,9 @@ func (o PatchClusterProperties) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.TemplateID) {
 		toSerialize["templateID"] = o.TemplateID
+	}
+	if !IsNil(o.MongoDBVersion) {
+		toSerialize["mongoDBVersion"] = o.MongoDBVersion
 	}
 	if !IsNil(o.Edition) {
 		toSerialize["edition"] = o.Edition

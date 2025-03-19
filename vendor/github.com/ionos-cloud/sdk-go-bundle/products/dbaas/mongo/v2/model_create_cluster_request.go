@@ -105,6 +105,14 @@ func (o *CreateClusterRequest) SetProperties(v CreateClusterProperties) {
 	o.Properties = &v
 }
 
+func (o CreateClusterRequest) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o CreateClusterRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Metadata) {

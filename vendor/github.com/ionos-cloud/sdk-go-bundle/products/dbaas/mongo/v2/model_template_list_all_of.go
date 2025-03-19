@@ -139,6 +139,14 @@ func (o *TemplateListAllOf) SetItems(v []TemplateResponse) {
 	o.Items = v
 }
 
+func (o TemplateListAllOf) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o TemplateListAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Type) {

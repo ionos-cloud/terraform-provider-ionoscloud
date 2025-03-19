@@ -107,6 +107,14 @@ func (o *ClusterLogsInstancesMessages) SetMessage(v string) {
 	o.Message = &v
 }
 
+func (o ClusterLogsInstancesMessages) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ClusterLogsInstancesMessages) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Time) {
