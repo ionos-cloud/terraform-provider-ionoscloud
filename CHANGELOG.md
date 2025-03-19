@@ -6,6 +6,7 @@
 ### Refactor
 - Use DNS bundle product instead of sdk-go-dns
 - Use Container Registry bundle product instead of sdk-go-container-registry
+- Use Certificate Manager bundle product instead of sdk-go-cert-manager
 
 ## 6.7.3
 ### Fixes
