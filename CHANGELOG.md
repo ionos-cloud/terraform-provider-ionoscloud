@@ -5,6 +5,8 @@
 - Use SDK bundle for mariadb
 ### Docs
 - Added links in resources
+### Refactor
+- Use DNS bundle product instead of sdk-go-dns
 
 ## 6.7.3
 ### Fixes
