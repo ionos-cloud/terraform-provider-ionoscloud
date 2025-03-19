@@ -81,7 +81,7 @@ func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while creating an auto-certificate: %w", err))
 	}
-	autoCertificateID := *response.Id
+	autoCertificateID := response.Id
 	d.SetId(autoCertificateID)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsAutoCertificateReady)

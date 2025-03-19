@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	certSDK "github.com/ionos-cloud/sdk-go-cert-manager"
+	certSDK "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
@@ -94,8 +94,8 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 		var results []certSDK.ProviderRead
 		if providers.Items != nil {
-			for _, providerItem := range *providers.Items {
-				if providerItem.Properties != nil && providerItem.Properties.Name != nil && strings.EqualFold(*providerItem.Properties.Name, name.(string)) {
+			for _, providerItem := range providers.Items {
+				if strings.EqualFold(providerItem.Properties.Name, name.(string)) {
 					results = append(results, providerItem)
 				}
 			}
