@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	objectStorageManagement "github.com/ionos-cloud/sdk-go-object-storage-management"
+	objectStorageManagement "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
@@ -114,8 +114,8 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	defer cancel()
 
 	var accessKey = objectStorageManagement.AccessKeyCreate{
-		Properties: &objectStorageManagement.AccessKey{
-			Description: data.Description.ValueStringPointer(),
+		Properties: objectStorageManagement.AccessKey{
+			Description: data.Description.ValueString(),
 		},
 	}
 	accessKeyResponse, _, err := r.client.CreateAccessKey(ctx, accessKey, createTimeout)
@@ -186,8 +186,8 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 	defer cancel()
 
 	var accessKey = objectStorageManagement.AccessKeyEnsure{
-		Properties: &objectStorageManagement.AccessKey{
-			Description: plan.Description.ValueStringPointer(),
+		Properties: objectStorageManagement.AccessKey{
+			Description: plan.Description.ValueString(),
 		},
 	}
 
@@ -197,9 +197,9 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	plan.ID = basetypes.NewStringPointerValue(accessKeyResponse.Id)
+	plan.ID = basetypes.NewStringValue(accessKeyResponse.Id)
 
-	accessKeyRead, _, err := r.client.GetAccessKey(ctx, *accessKeyResponse.Id)
+	accessKeyRead, _, err := r.client.GetAccessKey(ctx, accessKeyResponse.Id)
 	if err != nil {
 		resp.Diagnostics.AddError("on update, read access Key API error", err.Error())
 		return

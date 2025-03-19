@@ -1,3 +1,7 @@
+## 6.7.5
+## Refactor
+- Use SDK bundle for Object Storage Management
+
 ## 6.7.4
 ### Docs
 - Added links in resources
