@@ -7,12 +7,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	nfs2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
-	nfs "github.com/ionos-cloud/sdk-go-nfs"
+	"github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
 )
 
 func dataSourceNFSCluster() *schema.Resource {
@@ -92,7 +93,7 @@ func dataSourceNFSCluster() *schema.Resource {
 }
 
 func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	partialMatch := d.Get("partial_match").(bool)
@@ -121,8 +122,8 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		var results []nfs.ClusterRead
-		for _, cl := range *clusters.Items {
-			if cl.Properties != nil && cl.Properties.Name != nil && utils.NameMatches(*cl.Properties.Name, name, partialMatch) {
+		for _, cl := range clusters.Items {
+			if utils.NameMatches(cl.Properties.Name, name, partialMatch) {
 				results = append(results, cl)
 			}
 		}

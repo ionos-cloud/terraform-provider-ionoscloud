@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_datacenter
 
-Manages a Virtual **Data Center** on IonosCloud.
+Manages a Virtual [Data Center](https://docs.ionos.com/cloud/set-up-ionos-cloud/get-started/configure-data-center) on IonosCloud.
 
 ## Example Usage
 

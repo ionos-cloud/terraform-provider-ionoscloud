@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"strings"
 
+	certsdk "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	certSDK "github.com/ionos-cloud/sdk-go-cert-manager"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 )
 
@@ -70,7 +71,7 @@ func dataSourceCertificateManagerAutoCertificate() *schema.Resource {
 }
 
 func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	location := d.Get("location").(string)
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -82,7 +83,7 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(fmt.Errorf("please provide either the auto-certificate ID or name"))
 	}
 
-	var autoCertificate certSDK.AutoCertificateRead
+	var autoCertificate certsdk.AutoCertificateRead
 	var err error
 
 	if idOk {
@@ -96,10 +97,10 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching auto-certificates: %w", err))
 		}
-		var results []certSDK.AutoCertificateRead
+		var results []certsdk.AutoCertificateRead
 		if autoCertificates.Items != nil {
-			for _, autoCertificateItem := range *autoCertificates.Items {
-				if autoCertificateItem.Properties != nil && autoCertificateItem.Properties.Name != nil && strings.EqualFold(*autoCertificateItem.Properties.Name, name.(string)) {
+			for _, autoCertificateItem := range autoCertificates.Items {
+				if strings.EqualFold(autoCertificateItem.Properties.Name, name.(string)) {
 					results = append(results, autoCertificateItem)
 				}
 			}

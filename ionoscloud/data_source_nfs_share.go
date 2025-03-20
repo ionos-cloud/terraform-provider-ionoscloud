@@ -7,11 +7,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	nfs "github.com/ionos-cloud/sdk-go-nfs"
+	"github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	nfs2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -125,7 +125,7 @@ func dataSourceNFSShare() *schema.Resource {
 }
 
 func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).NFSClient
+	client := meta.(bundleclient.SdkBundle).NFSClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	partialMatch := d.Get("partial_match").(bool)
@@ -155,8 +155,8 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		var results []nfs.ShareRead
-		for _, sh := range *shares.Items {
-			if sh.Properties != nil && sh.Properties.Name != nil && utils.NameMatches(*sh.Properties.Name, name, partialMatch) {
+		for _, sh := range shares.Items {
+			if utils.NameMatches(sh.Properties.Name, name, partialMatch) {
 				results = append(results, sh)
 			}
 		}

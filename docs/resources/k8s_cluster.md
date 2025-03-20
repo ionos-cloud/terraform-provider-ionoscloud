@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_k8s_cluster
 
-Manages a **Managed Kubernetes Cluster** on IonosCloud.
+Manages a [Managed Kubernetes Cluster](https://docs.ionos.com/cloud/containers/managed-kubernetes/overview) on IonosCloud.
 
 ## Example Usage
 

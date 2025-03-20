@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_backup_unit
 
-Manages a **Backup Unit** on IonosCloud.
+Manages a [Backup Unit](https://docs.ionos.com/cloud/storage-and-backup/backup-service/overview) on IonosCloud.
 
 ## Example Usage
 

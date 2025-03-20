@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_autoscaling_group
 
-Manages an Autoscaling Group on IonosCloud.
+Manages an [Autoscaling Group](https://docs.ionos.com/cloud/compute-services/vm-auto-scaling/overview#components-of-vm-auto-scaling) on IonosCloud.
 
 ## Example Usage
 
@@ -143,7 +143,7 @@ The following arguments are supported:
 - `replica_configuration` - (Required)[List]  
     - `availability_zone` - (Required)[string] The zone where the VMs are created using this configuration. Possible values are: `AUTO`, `ZONE_1`, `ZONE_2`.
     - `cores` - (Required)[int] The total number of cores for the VMs.
-    - `cpu_family` - (Optional)[string] PU family for the VMs created using this configuration. If null, the VM will be created with the default CPU family for the assigned location. Possible values are: `INTEL_SKYLAKE`, `INTEL_XEON`.
+    - `cpu_family` - (Optional)[string] CPU family for the VMs created using this configuration. If null, the VM will be created with the default CPU family for the assigned location. Possible values are: `INTEL_SKYLAKE`, `INTEL_XEON`.
     - `nics` - (Optional)[set] List of NICs associated with this Replica.
         - `lan` - (Required)[int] Lan ID for this replica Nic.
         - `name` - (Required)[string] Name for this replica NIC.

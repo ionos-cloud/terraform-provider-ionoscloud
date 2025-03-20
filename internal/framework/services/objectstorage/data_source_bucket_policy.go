@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
@@ -36,7 +36,7 @@ func (d *bucketPolicyDataSource) Configure(ctx context.Context, req datasource.C
 		return
 	}
 
-	clientBundle, ok := req.ProviderData.(*services.SdkBundle)
+	clientBundle, ok := req.ProviderData.(*bundleclient.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",

@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -55,7 +55,7 @@ func (fs *Service) Delete(ctx context.Context, datacenterId, serverId, nicId, fi
 	if err != nil {
 		return apiResponse, err
 	}
-	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutDelete); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutDelete); errState != nil {
 		return apiResponse, fmt.Errorf("on delete an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterId, serverId, nicId, firewallId, errState)
 	}
 	return apiResponse, nil
@@ -67,7 +67,7 @@ func (fs *Service) Create(ctx context.Context, datacenterId, serverId, nicId str
 	if err != nil {
 		return nil, apiResponse, fmt.Errorf("an error occurred while creating firewall rule for dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, err)
 	}
-	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutCreate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutCreate); errState != nil {
 		return nil, apiResponse, fmt.Errorf("on create an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
 	return &firewall, apiResponse, nil
@@ -79,7 +79,7 @@ func (fs *Service) Update(ctx context.Context, datacenterId, serverId, nicId, id
 	if err != nil {
 		return nil, apiResponse, fmt.Errorf("an error occurred while updating firewall rule for dcId: %s, server_id: %s, nic_id: %s, id %s, Response: (%w)", datacenterId, serverId, nicId, id, err)
 	}
-	if errState := cloudapi.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutUpdate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return nil, apiResponse, fmt.Errorf("on update an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
 	return &firewall, apiResponse, nil

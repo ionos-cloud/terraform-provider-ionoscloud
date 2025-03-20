@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dns "github.com/ionos-cloud/sdk-go-dns"
+	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -51,25 +50,23 @@ func resourceDNSZone() *schema.Resource {
 }
 
 func zoneCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneResponse, _, err := client.CreateZone(ctx, d)
 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while creating a DNS Zone: %w", err))
 	}
-	if zoneResponse.Metadata.State != nil {
-		if *zoneResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
-			// This is a temporary error message since right now the API is not returning errors that we can work with.
-			return diag.FromErr(fmt.Errorf("zone creation has failed, this can happen if the data in the request is not correct, " +
-				"please check again the values defined in the plan"))
-		}
+	if zoneResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
+		// This is a temporary error message since right now the API is not returning errors that we can work with.
+		return diag.FromErr(fmt.Errorf("zone creation has failed, this can happen if the data in the request is not correct, " +
+			"please check again the values defined in the plan"))
 	}
-	d.SetId(*zoneResponse.Id)
+	d.SetId(zoneResponse.Id)
 	return zoneRead(ctx, d, meta)
 }
 
 func zoneRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Id()
 	zone, apiResponse, err := client.GetZoneById(ctx, zoneId)
 
@@ -91,25 +88,23 @@ func zoneRead(ctx context.Context, d *schema.ResourceData, meta interface{}) dia
 }
 
 func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Id()
 
 	zoneResponse, _, err := client.UpdateZone(ctx, zoneId, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while updating the DNS Zone with ID: %s, error: %w", zoneId, err))
 	}
-	if zoneResponse.Metadata.State != nil {
-		if *zoneResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
-			// This is a temporary error message since right now the API is not returning errors that we can work with.
-			return diag.FromErr(fmt.Errorf("zone update has failed, this can happen if the data in the request is not correct, " +
-				"please check again the values defined in the plan"))
-		}
+	if zoneResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
+		// This is a temporary error message since right now the API is not returning errors that we can work with.
+		return diag.FromErr(fmt.Errorf("zone update has failed, this can happen if the data in the request is not correct, " +
+			"please check again the values defined in the plan"))
 	}
 	return nil
 }
 
 func zoneDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Id()
 
 	apiResponse, err := client.DeleteZone(ctx, zoneId)
@@ -129,7 +124,7 @@ func zoneDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 }
 
 func zoneImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Id()
 
 	zone, apiResponse, err := client.GetZoneById(ctx, zoneId)

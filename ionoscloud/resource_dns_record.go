@@ -6,12 +6,11 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dns "github.com/ionos-cloud/sdk-go-dns"
+	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -68,29 +67,25 @@ func resourceDNSRecord() *schema.Resource {
 }
 
 func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 
 	recordResponse, _, err := client.CreateRecord(ctx, zoneId, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while creating a record for the DNS zone with ID: %s, error: %w", zoneId, err))
 	}
-	if recordResponse.Metadata == nil {
-		return diag.FromErr(fmt.Errorf("expected metadata in the response for the record with ID: %s, but received 'nil' instead", *recordResponse.Id))
+
+	if recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
+		// This is a temporary error message since right now the API is not returning errors that we can work with.
+		return diag.FromErr(fmt.Errorf("record creation has failed, this can happen if the data in the request is not correct, " +
+			"please check again the values defined in the plan"))
 	}
-	if recordResponse.Metadata.State != nil {
-		if *recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
-			// This is a temporary error message since right now the API is not returning errors that we can work with.
-			return diag.FromErr(fmt.Errorf("record creation has failed, this can happen if the data in the request is not correct, " +
-				"please check again the values defined in the plan"))
-		}
-	}
-	d.SetId(*recordResponse.Id)
+	d.SetId(recordResponse.Id)
 	return recordRead(ctx, d, meta)
 }
 
 func recordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
 
@@ -110,7 +105,7 @@ func recordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 }
 
 func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
 
@@ -118,18 +113,16 @@ func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while updating the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err))
 	}
-	if recordResponse.Metadata.State != nil {
-		if *recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
-			// This is a temporary error message since right now the API is not returning errors that we can work with.
-			return diag.FromErr(fmt.Errorf("record update has failed, this can happen if the data in the request is not correct, " +
-				"please check again the values defined in the plan"))
-		}
+	if recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
+		// This is a temporary error message since right now the API is not returning errors that we can work with.
+		return diag.FromErr(fmt.Errorf("record update has failed, this can happen if the data in the request is not correct, " +
+			"please check again the values defined in the plan"))
 	}
 	return recordRead(ctx, d, meta)
 }
 
 func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
 
@@ -149,7 +142,7 @@ func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{})
 }
 
 func recordImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).DNSClient
+	client := meta.(bundleclient.SdkBundle).DNSClient
 
 	// Split the string provided in order to get the IDs for both zone and record.
 	parts := strings.Split(d.Id(), "/")

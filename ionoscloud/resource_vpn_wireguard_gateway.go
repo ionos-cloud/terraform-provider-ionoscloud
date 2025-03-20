@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -142,7 +142,7 @@ func resourceVpnWireguardGateway() *schema.Resource {
 }
 
 func resourceVpnWireguardGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 
 	gateway, _, err := client.CreateWireguardGateway(ctx, d)
 	if err != nil {
@@ -157,7 +157,7 @@ func resourceVpnWireguardGatewayCreate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	location := d.Get("location").(string)
 	wireguard, _, err := client.GetWireguardGatewayByID(ctx, d.Id(), location)
 	if err != nil {
@@ -166,7 +166,7 @@ func resourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData
 	return diag.FromErr(vpn.SetWireguardGWData(d, wireguard))
 }
 func resourceVpnWireguardGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 
 	wireguard, _, err := client.UpdateWireguardGateway(ctx, d.Id(), d)
 	if err != nil {
@@ -181,7 +181,7 @@ func resourceVpnWireguardGatewayUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).VPNClient
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	location := d.Get("location").(string)
 	apiResponse, err := client.DeleteWireguardGateway(ctx, d.Id(), location)
 	if err != nil {
@@ -207,7 +207,7 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceVpnWireguardGatewayImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	client := m.(services.SdkBundle).VPNClient
+	client := m.(bundleclient.SdkBundle).VPNClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid import format: %s, expecting the following format: location:id", d.Id())

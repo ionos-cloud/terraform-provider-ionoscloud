@@ -6,7 +6,10 @@ package shared
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,13 +20,15 @@ import (
 var DefaultIonosBasePath = ""
 
 const (
-	IonosUsernameEnvVar   = "IONOS_USERNAME"
-	IonosPasswordEnvVar   = "IONOS_PASSWORD"
-	IonosTokenEnvVar      = "IONOS_TOKEN"
-	IonosApiUrlEnvVar     = "IONOS_API_URL"
-	IonosPinnedCertEnvVar = "IONOS_PINNED_CERT"
-	IonosLogLevelEnvVar   = "IONOS_LOG_LEVEL"
-	DefaultIonosServerUrl = "https://api.ionos.com/"
+	IonosUsernameEnvVar       = "IONOS_USERNAME"
+	IonosPasswordEnvVar       = "IONOS_PASSWORD"
+	IonosTokenEnvVar          = "IONOS_TOKEN"
+	IonosApiUrlEnvVar         = "IONOS_API_URL"
+	IonosPinnedCertEnvVar     = "IONOS_PINNED_CERT"
+	IonosLogLevelEnvVar       = "IONOS_LOG_LEVEL"
+	IonosFilePathEnvVar       = "IONOS_CONFIG_FILE"
+	IonosCurrentProfileEnvVar = "IONOS_CURRENT_PROFILE"
+	DefaultIonosServerUrl     = "https://api.ionos.com/"
 
 	defaultMaxRetries  = 3
 	defaultWaitTime    = time.Duration(100) * time.Millisecond
@@ -98,7 +103,7 @@ type ServerConfiguration struct {
 // ServerConfigurations stores multiple ServerConfiguration items
 type ServerConfigurations []ServerConfiguration
 
-// shared.Configuration stores the configuration of the API client
+// Configuration stores the configuration of the API client
 type Configuration struct {
 	Host               string            `json:"host,omitempty"`
 	Scheme             string            `json:"scheme,omitempty"`
@@ -142,6 +147,75 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	return cfg
 }
 
+// ClientOptions is a struct that represents the client options
+type ClientOptions struct {
+	// Endpoint is the endpoint that will be overridden
+	Endpoint string
+	// SkipTLSVerify skips tls verification. Not recommended for production!
+	SkipTLSVerify bool
+	// Certificate is the certificate that will be used for tls verification
+	Certificate string
+	// Credentials are the credentials that will be used for authentication
+	Credentials Credentials
+}
+
+// Credentials are the credentials that will be used for authentication
+type Credentials struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Token    string `yaml:"token"`
+}
+
+// NewConfigurationFromOptions returns a new shared.Configuration object created from the client options
+func NewConfigurationFromOptions(clientOptions ClientOptions) *Configuration {
+	cfg := &Configuration{
+		DefaultHeader:      make(map[string]string),
+		DefaultQueryParams: url.Values{},
+		UserAgent:          "shared-sdk-go",
+		Username:           clientOptions.Credentials.Username,
+		Password:           clientOptions.Credentials.Password,
+		Token:              clientOptions.Credentials.Token,
+		MaxRetries:         defaultMaxRetries,
+		MaxWaitTime:        defaultMaxWaitTime,
+		WaitTime:           defaultWaitTime,
+		Servers:            ServerConfigurations{},
+		OperationServers:   map[string]ServerConfigurations{},
+		HTTPClient:         http.DefaultClient,
+	}
+	if clientOptions.Endpoint != "" {
+		cfg.Servers = ServerConfigurations{
+			{
+				URL:         getServerUrl(clientOptions.Endpoint),
+				Description: "Production",
+			},
+		}
+	}
+	cfg.HTTPClient.Transport = CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
+	return cfg
+}
+
+func CreateTransport(insecure bool, certificate string) *http.Transport {
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
+	transport := &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		DialContext:           dialer.DialContext,
+		DisableKeepAlives:     true,
+		IdleConnTimeout:       30 * time.Second,
+		TLSHandshakeTimeout:   15 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		MaxIdleConnsPerHost:   3,
+		MaxConnsPerHost:       3,
+	}
+	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: insecure}
+	if certificate != "" {
+		transport.TLSClientConfig.RootCAs = AddCertsToClient(certificate)
+	}
+	return transport
+}
+
 func NewConfigurationFromEnv() *Configuration {
 	return NewConfiguration(os.Getenv(IonosUsernameEnvVar), os.Getenv(IonosPasswordEnvVar), os.Getenv(IonosTokenEnvVar), os.Getenv(IonosApiUrlEnvVar))
 }
@@ -158,10 +232,10 @@ func (c *Configuration) AddDefaultQueryParam(key string, value string) {
 // URL formats template on a index using given variables
 func (sc ServerConfigurations) URL(index int, variables map[string]string) (string, error) {
 	if index < 0 || len(sc) <= index {
-		return "", fmt.Errorf("Index %v out of range %v", index, len(sc)-1)
+		return "", fmt.Errorf("index %v out of range %v", index, len(sc)-1)
 	}
 	server := sc[index]
-	url := server.URL
+	serverUrl := server.URL
 
 	// go through variables and replace placeholders
 	for name, variable := range server.Variables {
@@ -173,14 +247,14 @@ func (sc ServerConfigurations) URL(index int, variables map[string]string) (stri
 				}
 			}
 			if !found {
-				return "", fmt.Errorf("The variable %s in the server URL has invalid value %v. Must be %v", name, value, variable.EnumValues)
+				return "", fmt.Errorf("the variable %s in the server URL has invalid value %v. Must be %v", name, value, variable.EnumValues)
 			}
-			url = strings.Replace(url, "{"+name+"}", value, -1)
+			serverUrl = strings.Replace(serverUrl, "{"+name+"}", value, -1)
 		} else {
-			url = strings.Replace(url, "{"+name+"}", variable.DefaultValue, -1)
+			serverUrl = strings.Replace(serverUrl, "{"+name+"}", variable.DefaultValue, -1)
 		}
 	}
-	return url, nil
+	return serverUrl, nil
 }
 
 // ServerURL returns URL based on server settings
@@ -194,7 +268,7 @@ func getServerIndex(ctx context.Context) (int, error) {
 		if index, ok := si.(int); ok {
 			return index, nil
 		}
-		return 0, reportError("Invalid type %T should be int", si)
+		return 0, reportError("invalid type %T should be int", si)
 	}
 	return 0, nil
 }
@@ -283,4 +357,67 @@ func (c *Configuration) ServerURLWithContext(ctx context.Context, endpoint strin
 	}
 
 	return sc.URL(index, variables)
+}
+
+// ConfigProvider is an interface that allows to get the configuration of shared clients
+type ConfigProvider interface {
+	GetConfig() *Configuration
+}
+
+// EndpointOverridden is a constant that is used to mark the endpoint as overridden and can be used to search for the location
+// in the server configuration.
+const EndpointOverridden = "endpoint from config file"
+
+// OverrideLocationFor aims to override the server URL for a given client configuration, based on location and endpoint inputs.
+// Mutates the client configuration. It searches for the location in the server configuration and overrides the endpoint.
+// If the endpoint is empty, it early exits without making changes.
+func OverrideLocationFor(configProvider ConfigProvider, location, endpoint string, replaceServers bool) {
+	if endpoint == "" {
+		return
+	}
+	// If the replaceServers flag is set, we replace the servers with the new endpoint
+	if replaceServers {
+		SdkLogger.Printf("[DEBUG] Replacing all server configurations for location %s", location)
+		configProvider.GetConfig().Servers = []ServerConfiguration{
+			{
+				URL:         endpoint,
+				Description: EndpointOverridden + location,
+			},
+		}
+		return
+	}
+	location = strings.TrimSpace(location)
+	endpoint = strings.TrimSpace(endpoint)
+	servers := configProvider.GetConfig().Servers
+	for idx := range servers {
+		if strings.Contains(servers[idx].URL, location) {
+			SdkLogger.Printf("[DEBUG] Overriding server configuration for location %s", location)
+			servers[idx].URL = endpoint
+			servers[idx].Description = EndpointOverridden + location
+			return
+		}
+	}
+	SdkLogger.Printf("[DEBUG] Adding new server configuration for location %s", location)
+	configProvider.GetConfig().Servers = append(configProvider.GetConfig().Servers, ServerConfiguration{
+		URL:         endpoint,
+		Description: EndpointOverridden + location,
+	})
+}
+
+func SetSkipTLSVerify(configProvider ConfigProvider, skipTLSVerify bool) {
+	configProvider.GetConfig().HTTPClient.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTLSVerify},
+	}
+}
+
+// AddCertsToClient adds certificates to the http client
+func AddCertsToClient(authorityData string) *x509.CertPool {
+	rootCAs, _ := x509.SystemCertPool()
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+	if ok := rootCAs.AppendCertsFromPEM([]byte(authorityData)); !ok && SdkLogLevel.Satisfies(Debug) {
+		SdkLogger.Printf("No certs appended, using system certs only")
+	}
+	return rootCAs
 }

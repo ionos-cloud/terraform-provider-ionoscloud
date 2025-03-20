@@ -8,8 +8,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
@@ -557,7 +556,7 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 }
 
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	datacenterId := d.Get("datacenter_id").(string)
 
 	serverReq, err := initializeCreateRequests(d)
@@ -678,8 +677,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		d.SetId(*postServer.Id)
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		if cloudapi.IsRequestFailed(errState) {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		if bundleclient.IsRequestFailed(errState) {
 			log.Printf("[DEBUG] failed to create server resource")
 			d.SetId("")
 		}
@@ -817,7 +816,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Id()
@@ -875,7 +874,7 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 }
 
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -942,7 +941,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		bootCdrom := n.(string)
 
 		if utils.IsValidUUID(bootCdrom) {
-			ss := cloudapiserver.Service{Client: meta.(services.SdkBundle).CloudApiClient, Meta: meta, D: d}
+			ss := cloudapiserver.Service{Client: meta.(bundleclient.SdkBundle).CloudApiClient, Meta: meta, D: d}
 			ss.UpdateBootDevice(ctx, dcId, d.Id(), bootCdrom)
 		}
 	}
@@ -955,7 +954,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return diag.FromErr(errState)
 	}
 
@@ -1005,7 +1004,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 					return diags
 				}
 
-				if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+				if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 					return diag.FromErr(errState)
 				}
 			}
@@ -1227,7 +1226,7 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 			return diags
 		}
 
-		if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 			return diag.FromErr(errState)
 		}
 
@@ -1236,7 +1235,7 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 	// A bigger depth is required since we need all volumes items.
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Depth(2).Execute()
@@ -1262,7 +1261,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	}
 
-	if errState := cloudapi.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return diag.FromErr(fmt.Errorf("error getting state change for datacenter delete %w", errState))
 	}
 
@@ -1281,7 +1280,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	datacenterId := parts[0]
 	serverId := parts[1]
 
-	client := meta.(services.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Depth(3).Execute()
 	logApiRequestTime(apiResponse)

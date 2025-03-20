@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -36,7 +36,7 @@ func (d *regionDataSource) Configure(ctx context.Context, req datasource.Configu
 		return
 	}
 
-	clientbundle, ok := req.ProviderData.(*services.SdkBundle)
+	clientbundle, ok := req.ProviderData.(*bundleclient.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",

@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_container_registry_token
 
-Manages an **Container Registry Token** on IonosCloud.
+Manages an [Container Registry Token](https://docs.ionos.com/cloud/containers/private-container-registry/overview) on IonosCloud.
 
 ## Example Usage
 

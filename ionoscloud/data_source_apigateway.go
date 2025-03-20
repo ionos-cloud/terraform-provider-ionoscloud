@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	apigateway "github.com/ionos-cloud/sdk-go-api-gateway"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -73,7 +73,7 @@ func dataSourceAPIGateway() *schema.Resource {
 }
 
 func dataSourceAPIGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).APIGatewayClient
+	client := meta.(bundleclient.SdkBundle).APIGatewayClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	partialMatch := d.Get("partial_match").(bool)

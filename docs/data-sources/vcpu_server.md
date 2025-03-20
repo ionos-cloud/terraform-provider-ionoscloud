@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_vcpu_server
 
-The **VCPU Server data source** can be used to search for and return existing VCPU servers. 
+The [VCPU Server data source](https://docs.ionos.com/cloud/compute-services/compute-engine/vcpu-server) can be used to search for and return existing VCPU servers. 
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -73,7 +73,7 @@ func resourceCertificateManagerAutoCertificate() *schema.Resource {
 }
 
 func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	location := d.Get("location").(string)
 
 	autoCertificateCreateData := cert.GetAutoCertificateDataCreate(d)
@@ -81,7 +81,7 @@ func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while creating an auto-certificate: %w", err))
 	}
-	autoCertificateID := *response.Id
+	autoCertificateID := response.Id
 	d.SetId(autoCertificateID)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsAutoCertificateReady)
@@ -94,7 +94,7 @@ func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func autoCertificateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	autoCertificateID := d.Id()
 	location := d.Get("location").(string)
 	autoCertificate, apiResponse, err := client.GetAutoCertificate(ctx, autoCertificateID, location)
@@ -113,7 +113,7 @@ func autoCertificateRead(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func autoCertificateUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	autoCertificateID := d.Id()
 	location := d.Get("location").(string)
 
@@ -132,7 +132,7 @@ func autoCertificateUpdate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func autoCertificateDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	autoCertificateID := d.Id()
 	location := d.Get("location").(string)
 	apiResponse, err := client.DeleteAutoCertificate(ctx, autoCertificateID, location)
@@ -151,7 +151,7 @@ func autoCertificateDelete(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(services.SdkBundle).CertManagerClient
+	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid import ID: %v, expected ID in the format: '<location>:<auto_certificate_ID>", d.Id())

@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 )
 
@@ -159,7 +160,7 @@ func checkPipelineExists(ctx context.Context, accessPath string) resource.TestCh
 		if !ok {
 			return fmt.Errorf("Not found: %s", accessPath)
 		}
-		client := acctest.MonitoringClient()
+		client := acctest.NewTestBundleClientFromEnv().MonitoringClient
 		_, _, err := client.GetPipelineByID(ctx, rs.Primary.ID, rs.Primary.Attributes["location"])
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching Monitoring pipeline with ID: %v, error: %w", rs.Primary.ID, err)
@@ -169,8 +170,7 @@ func checkPipelineExists(ctx context.Context, accessPath string) resource.TestCh
 }
 
 func checkPipelineDestroy(s *terraform.State) error {
-	client := acctest.MonitoringClient()
-
+	client := acctest.NewTestBundleClientFromEnv().MonitoringClient
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_monitoring_pipeline" {
 			continue
