@@ -666,7 +666,9 @@ func fillContentData(data *ObjectResourceModel, req *objstorage.ApiPutObjectRequ
 }
 
 func fillServerSideEncryptionData(data *ObjectResourceModel, req *objstorage.ApiPutObjectRequest) {
-	if !data.ServerSideEncryption.IsNull() {
+	// Since server_side_encryption is both OPTIONAL and COMPUTED, the attribute is set to UNKNOWN in the plan when the
+	// value is not provided in the terraform configuration, not NULL like we originally expected.
+	if !data.ServerSideEncryption.IsUnknown() {
 		*req = req.XAmzServerSideEncryption(data.ServerSideEncryption.ValueString())
 	}
 
