@@ -2,9 +2,11 @@ package ionoscloud
 
 import (
 	"context"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 	"os"
+	"runtime/debug"
+
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -310,6 +312,11 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		},
 		Version:          "",
 		TerraformVersion: terraformVersion,
+	}
+
+	info, ok := debug.ReadBuildInfo()
+	if ok {
+		clientOptions.Version = info.Main.Version
 	}
 
 	client := bundleclient.New(clientOptions, fileConfig)

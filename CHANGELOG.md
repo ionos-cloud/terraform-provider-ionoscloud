@@ -1,4 +1,6 @@
 ## 6.7.4
+### Fixes
+- Trying to get Ionoscloud provider version for user agent
 ### Docs
 - Added links in resources
 ### Refactor
