@@ -2,15 +2,12 @@ package provider
 
 import (
 	"context"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 	"os"
-<<<<<<< HEAD
-	"runtime"
 	"runtime/debug"
-=======
->>>>>>> master
 	"strconv"
+
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -19,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
