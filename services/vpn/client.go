@@ -58,8 +58,8 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	newConfig.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-vpn/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		clientOptions.Version, vpn.Version, clientOptions.TerraformVersion,
-		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH,
-	) //nolint:staticcheck
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	)
 
 	return &Client{sdkClient: *vpn.NewAPIClient(newConfig),
 		fileConfig: fileConfig,

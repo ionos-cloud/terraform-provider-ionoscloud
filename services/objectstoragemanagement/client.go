@@ -43,8 +43,8 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		clientOptions.Version, objectstoragemanagement.Version, clientOptions.TerraformVersion,
-		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH,
-	) //nolint:staticcheck
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	)
 
 	return &Client{client: objectstoragemanagement.NewAPIClient(config)}
 }

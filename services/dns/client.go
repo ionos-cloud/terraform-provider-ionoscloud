@@ -30,8 +30,8 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dns/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		clientOptions.Version, dns.Version, clientOptions.TerraformVersion,
-		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH,
-	) //nolint:staticcheck
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	)
 	client := &Client{
 		sdkClient: *dns.NewAPIClient(config),
 	}

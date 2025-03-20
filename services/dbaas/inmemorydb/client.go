@@ -49,8 +49,8 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	newConfigDbaas.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-in-memory-db/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		clientOptions.Version, inMemoryDB.Version, clientOptions.TerraformVersion,
-		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH,
-	) //nolint:staticcheck
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	)
 
 	return &Client{
 		sdkClient:  inMemoryDB.NewAPIClient(newConfigDbaas),
