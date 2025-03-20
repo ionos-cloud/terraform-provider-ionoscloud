@@ -2,10 +2,11 @@ package objectstoragemanagement
 
 import (
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"net/http"
 	"os"
 	"runtime"
+
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
@@ -40,8 +41,10 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	config.HTTPClient = http.DefaultClient
 	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	config.UserAgent = fmt.Sprintf(
-		"terraform-provider/ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		objectstoragemanagement.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) //nolint:staticcheck
+		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		clientOptions.Version, objectstoragemanagement.Version, clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH,
+	) //nolint:staticcheck
 
 	return &Client{client: objectstoragemanagement.NewAPIClient(config)}
 }

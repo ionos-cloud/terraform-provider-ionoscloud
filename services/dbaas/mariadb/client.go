@@ -44,8 +44,10 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 
 	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
 	newConfig.UserAgent = fmt.Sprintf(
-		"terraform-provider/ionos-cloud-sdk-go-dbaas-mariadb/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		mariadb.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mariadb/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		clientOptions.Version, mariadb.Version, clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH,
+	)
 
 	return &Client{
 		sdkClient:  mariadb.NewAPIClient(newConfig),
