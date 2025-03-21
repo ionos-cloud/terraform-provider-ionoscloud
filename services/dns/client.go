@@ -22,7 +22,6 @@ type Client struct {
 
 func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.DNS)
-
 	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	config.MaxRetries = constant.MaxRetries
@@ -37,5 +36,5 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	}
 	client.sdkClient.GetConfig().HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
 
-	return &Client{sdkClient: *dns.NewAPIClient(config)}
+	return client
 }
