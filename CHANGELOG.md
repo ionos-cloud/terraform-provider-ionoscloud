@@ -5,6 +5,7 @@
 - Added links in resources
 ### Refactor
 - Use DNS bundle product instead of sdk-go-dns
+- Use Certificate Manager bundle product instead of sdk-go-cert-manager
 
 ## 6.7.3
 ### Fixes
