@@ -67,6 +67,14 @@ func (o *PostTokenInput) SetProperties(v PostTokenProperties) {
 	o.Properties = v
 }
 
+func (o PostTokenInput) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o PostTokenInput) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["properties"] = o.Properties

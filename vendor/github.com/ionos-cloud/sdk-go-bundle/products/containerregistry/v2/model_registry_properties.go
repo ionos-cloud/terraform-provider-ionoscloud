@@ -259,6 +259,14 @@ func (o *RegistryProperties) SetApiSubnetAllowList(v []string) {
 	o.ApiSubnetAllowList = v
 }
 
+func (o RegistryProperties) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o RegistryProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.GarbageCollectionSchedule) {

@@ -335,6 +335,14 @@ func (o *ArtifactMetadataAllOf) SetVulnFixableCount(v int64) {
 	o.VulnFixableCount = &v
 }
 
+func (o ArtifactMetadataAllOf) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ArtifactMetadataAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["lastPushedAt"] = o.LastPushedAt

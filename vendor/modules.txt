@@ -323,7 +323,7 @@ github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/cert/v2
-# github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.0.2
+# github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.0

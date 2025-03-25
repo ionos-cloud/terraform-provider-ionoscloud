@@ -253,6 +253,14 @@ func (o *ApiResourceMetadata) SetState(v string) {
 	o.State = v
 }
 
+func (o ApiResourceMetadata) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ApiResourceMetadata) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["createdBy"] = o.CreatedBy

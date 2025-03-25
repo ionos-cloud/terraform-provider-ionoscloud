@@ -73,6 +73,14 @@ func (o *RegistryFeatures) SetVulnerabilityScanning(v FeatureVulnerabilityScanni
 	o.VulnerabilityScanning = &v
 }
 
+func (o RegistryFeatures) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o RegistryFeatures) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.VulnerabilityScanning) {

@@ -205,10 +205,18 @@ func (o *TokenProperties) SetStatus(v string) {
 	o.Status = &v
 }
 
+func (o TokenProperties) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o TokenProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["credentials"] = o.Credentials
-	if o.ExpiryDate.IsSet() {
+	if o.ExpiryDate != nil && o.ExpiryDate.IsSet() {
 		toSerialize["expiryDate"] = o.ExpiryDate.Get()
 	}
 	toSerialize["name"] = o.Name

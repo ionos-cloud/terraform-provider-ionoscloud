@@ -93,6 +93,14 @@ func (o *ApiErrorResponse) SetMessages(v []ApiErrorMessage) {
 	o.Messages = v
 }
 
+func (o ApiErrorResponse) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ApiErrorResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["httpStatus"] = o.HttpStatus

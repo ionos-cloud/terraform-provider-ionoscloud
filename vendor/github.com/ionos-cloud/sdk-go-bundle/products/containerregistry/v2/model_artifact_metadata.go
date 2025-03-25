@@ -573,6 +573,14 @@ func (o *ArtifactMetadata) SetVulnFixableCount(v int64) {
 	o.VulnFixableCount = &v
 }
 
+func (o ArtifactMetadata) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ArtifactMetadata) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.CreatedDate) {

@@ -102,6 +102,14 @@ func (o *StorageUsage) SetUpdatedAt(v time.Time) {
 	o.UpdatedAt = &IonosTime{v}
 }
 
+func (o StorageUsage) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o StorageUsage) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["bytes"] = o.Bytes

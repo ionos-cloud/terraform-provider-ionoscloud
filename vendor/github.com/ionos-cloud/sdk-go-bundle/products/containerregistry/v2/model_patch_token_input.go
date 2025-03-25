@@ -22,9 +22,9 @@ var _ MappedNullable = &PatchTokenInput{}
 
 // PatchTokenInput struct for PatchTokenInput
 type PatchTokenInput struct {
-	ExpiryDate *IonosTime `json:"expiryDate,omitempty"`
-	Scopes     []Scope    `json:"scopes,omitempty"`
-	Status     *string    `json:"status,omitempty"`
+	ExpiryDate *NullableIonosTime `json:"expiryDate,omitempty"`
+	Scopes     []Scope            `json:"scopes,omitempty"`
+	Status     *string            `json:"status,omitempty"`
 }
 
 // NewPatchTokenInput instantiates a new PatchTokenInput object
@@ -45,36 +45,47 @@ func NewPatchTokenInputWithDefaults() *PatchTokenInput {
 	return &this
 }
 
-// GetExpiryDate returns the ExpiryDate field value if set, zero value otherwise.
+// GetExpiryDate returns the ExpiryDate field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *PatchTokenInput) GetExpiryDate() time.Time {
-	if o == nil || IsNil(o.ExpiryDate) {
+	if o == nil || IsNil(o.ExpiryDate.Get()) {
 		var ret time.Time
 		return ret
 	}
-	return o.ExpiryDate.Time
+	return *o.ExpiryDate.Get()
 }
 
 // GetExpiryDateOk returns a tuple with the ExpiryDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *PatchTokenInput) GetExpiryDateOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.ExpiryDate) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.ExpiryDate.Time, true
+	return o.ExpiryDate.Get(), o.ExpiryDate.IsSet()
 }
 
 // HasExpiryDate returns a boolean if a field has been set.
 func (o *PatchTokenInput) HasExpiryDate() bool {
-	if o != nil && !IsNil(o.ExpiryDate) {
+	if o != nil && o.ExpiryDate.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetExpiryDate gets a reference to the given time.Time and assigns it to the ExpiryDate field.
+// SetExpiryDate gets a reference to the given NullableTime and assigns it to the ExpiryDate field.
 func (o *PatchTokenInput) SetExpiryDate(v time.Time) {
-	o.ExpiryDate = &IonosTime{v}
+	o.ExpiryDate.Set(&v)
+}
+
+// SetExpiryDateNil sets the value for ExpiryDate to be an explicit nil
+func (o *PatchTokenInput) SetExpiryDateNil() {
+	o.ExpiryDate.Set(nil)
+}
+
+// UnsetExpiryDate ensures that no value is present for ExpiryDate, not even an explicit nil
+func (o *PatchTokenInput) UnsetExpiryDate() {
+	o.ExpiryDate.Unset()
 }
 
 // GetScopes returns the Scopes field value if set, zero value otherwise.
@@ -141,10 +152,18 @@ func (o *PatchTokenInput) SetStatus(v string) {
 	o.Status = &v
 }
 
+func (o PatchTokenInput) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o PatchTokenInput) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.ExpiryDate) {
-		toSerialize["expiryDate"] = o.ExpiryDate
+	if o.ExpiryDate != nil && o.ExpiryDate.IsSet() {
+		toSerialize["expiryDate"] = o.ExpiryDate.Get()
 	}
 	if !IsNil(o.Scopes) {
 		toSerialize["scopes"] = o.Scopes

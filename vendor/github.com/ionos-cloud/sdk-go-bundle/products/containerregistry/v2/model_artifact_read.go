@@ -172,6 +172,14 @@ func (o *ArtifactRead) SetProperties(v Artifact) {
 	o.Properties = v
 }
 
+func (o ArtifactRead) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ArtifactRead) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id

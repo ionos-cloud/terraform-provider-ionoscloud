@@ -192,6 +192,14 @@ func (o *PutTokenOutput) SetType(v string) {
 	o.Type = &v
 }
 
+func (o PutTokenOutput) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o PutTokenOutput) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Href) {

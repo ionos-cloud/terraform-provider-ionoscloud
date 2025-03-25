@@ -155,6 +155,14 @@ func (o *Artifact) SetMediaType(v string) {
 	o.MediaType = v
 }
 
+func (o Artifact) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o Artifact) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["repositoryName"] = o.RepositoryName

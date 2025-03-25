@@ -232,6 +232,14 @@ func (o *RepositoryReadList) SetLinks(v Links) {
 	o.Links = v
 }
 
+func (o RepositoryReadList) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o RepositoryReadList) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id

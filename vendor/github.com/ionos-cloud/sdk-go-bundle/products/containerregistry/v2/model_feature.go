@@ -102,6 +102,14 @@ func (o *Feature) SetProperties(v map[string]interface{}) {
 	o.Properties = v
 }
 
+func (o Feature) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o Feature) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["enabled"] = o.Enabled
