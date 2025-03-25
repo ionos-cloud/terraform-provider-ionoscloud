@@ -100,6 +100,14 @@ func (o *CertificatePatch) SetProperties(v PatchName) {
 	o.Properties = v
 }
 
+func (o CertificatePatch) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o CertificatePatch) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Metadata) {

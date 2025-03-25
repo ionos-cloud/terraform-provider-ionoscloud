@@ -235,6 +235,14 @@ func (o *AutoCertificateReadList) SetLinks(v Links) {
 	o.Links = v
 }
 
+func (o AutoCertificateReadList) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o AutoCertificateReadList) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id

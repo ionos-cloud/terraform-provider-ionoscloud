@@ -141,6 +141,14 @@ func (o *Links) SetNext(v string) {
 	o.Next = &v
 }
 
+func (o Links) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o Links) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Prev) {

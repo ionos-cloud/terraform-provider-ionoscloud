@@ -100,6 +100,14 @@ func (o *AutoCertificatePatch) SetProperties(v PatchName) {
 	o.Properties = v
 }
 
+func (o AutoCertificatePatch) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o AutoCertificatePatch) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Metadata) {

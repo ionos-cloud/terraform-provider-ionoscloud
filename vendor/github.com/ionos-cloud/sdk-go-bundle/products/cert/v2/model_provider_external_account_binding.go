@@ -107,6 +107,14 @@ func (o *ProviderExternalAccountBinding) SetKeySecret(v string) {
 	o.KeySecret = &v
 }
 
+func (o ProviderExternalAccountBinding) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ProviderExternalAccountBinding) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.KeyId) {
