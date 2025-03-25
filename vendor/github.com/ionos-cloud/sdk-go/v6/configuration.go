@@ -131,7 +131,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go/v6.3.2",
+		UserAgent:          "ionos-cloud-sdk-go/v1.0.0",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -145,11 +145,19 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		Scheme:             getScheme(hostUrl),
 		Servers: ServerConfigurations{
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://api.ionos.com/cloudapi/v6",
 				Description: "No description provided",
 			},
 		},
 		OperationServers: map[string]ServerConfigurations{},
+	}
+	if hostUrl != "" {
+		cfg.Servers = ServerConfigurations{
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "overriden endpoint",
+			},
+		}
 	}
 	return cfg
 }
@@ -179,6 +187,12 @@ func (sc ServerConfigurations) URL(index int, variables map[string]string) (stri
 	}
 	server := sc[index]
 	url := server.URL
+	if !strings.Contains(url, "http://") && !strings.Contains(url, "https://") {
+		return "", fmt.Errorf(
+			"the URL provided appears to be missing the protocol scheme prefix (\"https://\" or \"http://\"), please verify and try again: %s",
+			url,
+		)
+	}
 
 	// go through variables and replace placeholders
 	for name, variable := range server.Variables {
@@ -261,13 +275,12 @@ func getServerUrl(serverUrl string) string {
 	if serverUrl == "" {
 		return DefaultIonosServerUrl
 	}
-	if !strings.HasPrefix(serverUrl, "https://") && !strings.HasPrefix(serverUrl, "http://") {
-		serverUrl = fmt.Sprintf("https://%s", serverUrl)
-	}
+
 	if !strings.HasSuffix(serverUrl, DefaultIonosBasePath) {
 		serverUrl = fmt.Sprintf("%s%s", serverUrl, DefaultIonosBasePath)
 	}
-	return serverUrl
+
+	return EnsureURLFormat(serverUrl)
 }
 
 func getHost(serverUrl string) string {

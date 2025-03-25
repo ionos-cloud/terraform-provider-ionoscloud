@@ -148,6 +148,13 @@ func resourceK8sNodePool() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"server_type": {
+				Type:             schema.TypeString,
+				Description:      "The server type for the compute engine",
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"DedicatedCore", "VCPU"}, true)),
+			},
 			"availability_zone": {
 				Type:             schema.TypeString,
 				Description:      "The compute availability zone in which the nodes should exist",
@@ -411,7 +418,6 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	datacenterId := d.Get("datacenter_id").(string)
 	k8sVersion := d.Get("k8s_version").(string)
 	availabilityZone := d.Get("availability_zone").(string)
-	cpuFamily := d.Get("cpu_family").(string)
 	storageType := d.Get("storage_type").(string)
 	nodeCount := int32(d.Get("node_count").(int))
 	coresCount := int32(d.Get("cores_count").(int))
@@ -422,7 +428,6 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		Properties: &ionoscloud.KubernetesNodePoolPropertiesForPost{
 			AvailabilityZone: &availabilityZone,
 			CoresCount:       &coresCount,
-			CpuFamily:        &cpuFamily,
 			DatacenterId:     &datacenterId,
 			K8sVersion:       &k8sVersion,
 			Name:             &name,
@@ -431,6 +436,16 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 			StorageSize:      &storageSize,
 			StorageType:      &storageType,
 		},
+	}
+
+	if serverType, serverTypeOk := d.GetOk("server_type"); serverTypeOk {
+		serverType := ionoscloud.KubernetesNodePoolServerType(serverType.(string))
+		k8sNodepool.Properties.ServerType = &serverType
+	}
+
+	if cpuFamily, cpuFamilyOk := d.GetOk("cpu_family"); cpuFamilyOk {
+		cpuFamily := cpuFamily.(string)
+		k8sNodepool.Properties.CpuFamily = &cpuFamily
 	}
 
 	if _, mwOk := d.GetOk("maintenance_window.0"); mwOk {
@@ -667,6 +682,14 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
+	if d.HasChange("server_type") {
+		oldServerType, newServerType := d.GetChange("server_type")
+		log.Printf("[INFO] k8s pool server type changed from %+v to %+v", oldServerType, newServerType)
+
+		serverType := ionoscloud.KubernetesNodePoolServerType(newServerType.(string))
+		request.Properties.ServerType = &serverType
+	}
+
 	if d.HasChange("public_ips") {
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
 		log.Printf("[INFO] k8s pool public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
@@ -873,6 +896,12 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 
 		if nodePool.Properties.CpuFamily != nil {
 			if err := d.Set("cpu_family", *nodePool.Properties.CpuFamily); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.ServerType != nil {
+			if err := d.Set("server_type", *nodePool.Properties.ServerType); err != nil {
 				return err
 			}
 		}
