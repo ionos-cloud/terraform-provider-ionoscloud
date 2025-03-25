@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	cr "github.com/ionos-cloud/sdk-go-container-registry"
+	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
@@ -129,17 +129,16 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 
 		log.Printf("[INFO] Using data source for container token by name with partial_match %t and name: %s", partialMatch, name)
 
-		if tokens.Items != nil && len(*tokens.Items) > 0 {
-			for _, tokenItem := range *tokens.Items {
-				if tokenItem.Properties != nil && tokenItem.Properties.Name != nil &&
-					(partialMatch && strings.Contains(*tokenItem.Properties.Name, name) ||
-						!partialMatch && strings.EqualFold(*tokenItem.Properties.Name, name)) {
+		if tokens.Items != nil && len(tokens.Items) > 0 {
+			for _, tokenItem := range tokens.Items {
+				if partialMatch && strings.Contains(tokenItem.Properties.Name, name) ||
+					!partialMatch && strings.EqualFold(tokenItem.Properties.Name, name) {
 					results = append(results, tokenItem)
 				}
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no token found with the specified name = %s", name))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one token found with the specified criteria: name = %s", name))
@@ -151,11 +150,8 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 	if token.Id != nil {
 		d.SetId(*token.Id)
 	}
-	if token.Properties == nil {
-		return diag.FromErr(fmt.Errorf("no token properties found with the specified id = %s", *token.Id))
-	}
 
-	if err := crService.SetTokenData(d, *token.Properties); err != nil {
+	if err := crService.SetTokenData(d, token.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 
