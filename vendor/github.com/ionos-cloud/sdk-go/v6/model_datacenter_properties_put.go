@@ -21,7 +21,7 @@ type DatacenterPropertiesPut struct {
 	// A description for the datacenter, such as staging, production.
 	Description *string `json:"description,omitempty"`
 	// The physical location where the datacenter will be created. This will be where all of your servers live. Property cannot be modified after datacenter creation (disallowed in update requests).
-	Location *string `json:"location"`
+	Location *string `json:"location,omitempty"`
 	// The version of the data center; incremented with every change.
 	Version *int32 `json:"version,omitempty"`
 	// List of features supported by the location where this data center is provisioned.
@@ -40,10 +40,8 @@ type DatacenterPropertiesPut struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDatacenterPropertiesPut(location string) *DatacenterPropertiesPut {
+func NewDatacenterPropertiesPut() *DatacenterPropertiesPut {
 	this := DatacenterPropertiesPut{}
-
-	this.Location = &location
 
 	return &this
 }
