@@ -144,7 +144,7 @@ func resourceK8sNodePool() *schema.Resource {
 			"cpu_family": {
 				Type:             schema.TypeString,
 				Description:      "CPU Family",
-				Required:         true,
+				Optional:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
