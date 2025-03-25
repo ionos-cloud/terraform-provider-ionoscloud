@@ -100,6 +100,14 @@ func (o *AutoCertificateCreate) SetProperties(v AutoCertificate) {
 	o.Properties = v
 }
 
+func (o AutoCertificateCreate) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o AutoCertificateCreate) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Metadata) {

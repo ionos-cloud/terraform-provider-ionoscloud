@@ -155,6 +155,14 @@ func (o *CertificateReadListAllOf) SetItems(v []CertificateRead) {
 	o.Items = v
 }
 
+func (o CertificateReadListAllOf) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o CertificateReadListAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id

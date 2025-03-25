@@ -320,7 +320,7 @@ github.com/ionos-cloud/sdk-go-api-gateway
 # github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2
-# github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.1.0
+# github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.2.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/cert/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0

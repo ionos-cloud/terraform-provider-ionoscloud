@@ -94,6 +94,14 @@ func (o *MetadataWithStatusAllOf) SetMessage(v string) {
 	o.Message = v
 }
 
+func (o MetadataWithStatusAllOf) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o MetadataWithStatusAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["state"] = o.State

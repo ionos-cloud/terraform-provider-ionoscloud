@@ -173,6 +173,14 @@ func (o *AutoCertificateRead) SetProperties(v AutoCertificate) {
 	o.Properties = v
 }
 
+func (o AutoCertificateRead) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o AutoCertificateRead) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
