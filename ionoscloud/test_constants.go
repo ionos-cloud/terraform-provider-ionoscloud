@@ -1899,7 +1899,6 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
   tier = "STANDARD"
 }` // nolint:unused
 
-
 // This configuration is used because there are some problems with the API and the creation/deletion
 // of the setup resources (datacenter, lan, server) is not possible (there are some problems with
 // LAN deletion). Because of that, for the moment, only to test the InMemoryDB and NFS functionalities, we
