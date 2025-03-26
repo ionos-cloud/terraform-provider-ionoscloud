@@ -1856,6 +1856,8 @@ const clusterMaintenanceWindowTimeAttribute = "time"
 const clusterCredentialsAttribute = "credentials"
 const clusterCredentialsUsernameAttribute = "username"
 const clusterCredentialsPasswordAttribute = "password"
+const datacenterResourceName = "datacenter_example"
+const lanResourceName = "lan_example"
 
 // Values
 const clusterMaintenanceWindowDayOfTheWeekValue = "Sunday"
