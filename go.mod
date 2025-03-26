@@ -1,6 +1,7 @@
 module github.com/ionos-cloud/terraform-provider-ionoscloud/v6
 
 go 1.22.0
+toolchain go1.24.1
 
 require (
 	github.com/aws/aws-sdk-go v1.55.5
@@ -37,7 +38,7 @@ require (
 	github.com/ionos-cloud/sdk-go/v6 v6.3.2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.35.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -96,7 +97,7 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/zclconf/go-cty v1.15.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
 	golang.org/x/oauth2 v0.25.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
