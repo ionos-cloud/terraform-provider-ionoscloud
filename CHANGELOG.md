@@ -1,6 +1,7 @@
 ## 6.7.4
 ### Fixes
 - Trying to get Ionoscloud provider version for user agent
+- Fix import bug for Dataplatform node pool
 ### Docs
 - Added links in resources
 ### Refactor
