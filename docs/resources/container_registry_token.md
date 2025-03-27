@@ -43,6 +43,9 @@ The following arguments are supported:
 
 * `name`                  - (Required)[string] The name of the container registry token. Immutable, update forces re-creation of the resource.
 * `expiry-date`           - (Optional)[string] The value must be supplied as ISO 8601 timestamp
+* `credentials`           - (Computed)[map]
+  * `username`            - (Computed)[string] The username of the container registry token
+  * `password`            - (Computed)[string] The password of the container registry token
 * `scopes`                - (Optional)[map]
   * `actions`             - (Required)[string] Example: ["pull", "push", "delete"]
   * `name`                - (Required)[string]

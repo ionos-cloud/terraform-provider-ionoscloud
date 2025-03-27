@@ -142,7 +142,7 @@ func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error
 	}
 
 	if _, ok := d.GetOk("garbage_collection_schedule"); ok {
-		registry.Properties.GarbageCollectionSchedule = GetWeeklySchedule(d, "garbage_collection_schedule")
+		registry.Properties.GarbageCollectionSchedule = getWeeklySchedule(d, "garbage_collection_schedule")
 	}
 
 	if location, ok := d.GetOk("location"); ok {
@@ -156,7 +156,7 @@ func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error
 	}
 
 	if v, ok := d.GetOk("api_subnet_allow_list"); ok {
-		raw := v.([]interface{})
+		raw := v.([]any)
 		ips := make([]string, len(raw))
 		err := utils.DecodeInterfaceToStruct(raw, ips)
 		if err != nil {
@@ -176,7 +176,7 @@ func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, erro
 	registry := cr.PatchRegistryInput{}
 
 	if _, ok := d.GetOk("garbage_collection_schedule"); ok {
-		registry.GarbageCollectionSchedule = GetWeeklySchedule(d, "garbage_collection_schedule")
+		registry.GarbageCollectionSchedule = getWeeklySchedule(d, "garbage_collection_schedule")
 	}
 
 	// When api_subnet_allow_list = [] in the TF plan:
@@ -185,7 +185,7 @@ func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, erro
 	// We don't want to ignore the cases in which we modify the api_subnet_allow_list to an empty list, so
 	// here we need to use 'GetOkExists'.
 	if v, ok := d.GetOkExists("api_subnet_allow_list"); ok { //nolint:staticcheck
-		raw := v.([]interface{})
+		raw := v.([]any)
 		ips := make([]string, len(raw))
 		err := utils.DecodeInterfaceToStruct(raw, ips)
 		if err != nil {
@@ -197,13 +197,12 @@ func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, erro
 	return &registry, nil
 }
 
-//nolint:golint
-func GetWeeklySchedule(d *schema.ResourceData, property string) *cr.WeeklySchedule {
+func getWeeklySchedule(d *schema.ResourceData, property string) *cr.WeeklySchedule {
 	var weeklySchedule cr.WeeklySchedule
 
 	if days, ok := d.GetOk(fmt.Sprintf("%v.0.days", property)); ok {
 		var daysToAdd []cr.Day
-		for _, day := range days.([]interface{}) {
+		for _, day := range days.([]any) {
 			daysToAdd = append(daysToAdd, cr.Day(day.(string)))
 		}
 		weeklySchedule.Days = daysToAdd
@@ -217,7 +216,7 @@ func GetWeeklySchedule(d *schema.ResourceData, property string) *cr.WeeklySchedu
 	return &weeklySchedule
 }
 
-//nolint:golint
+// SetRegistryData sets the registry data for the container registry
 func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error {
 
 	resourceName := "registry"
@@ -227,8 +226,8 @@ func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error
 	}
 
 	if registry.Properties.GarbageCollectionSchedule != nil {
-		var schedule []interface{}
-		scheduleEntry := SetWeeklySchedule(*registry.Properties.GarbageCollectionSchedule)
+		var schedule []any
+		scheduleEntry := setWeeklySchedule(*registry.Properties.GarbageCollectionSchedule)
 		schedule = append(schedule, scheduleEntry)
 		if err := d.Set("garbage_collection_schedule", schedule); err != nil {
 			return utils.GenerateSetError(resourceName, "garbage_collection_schedule", err)
@@ -250,8 +249,8 @@ func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error
 	}
 
 	if registry.Properties.StorageUsage != nil {
-		var storage []interface{}
-		storageEntry := SetStorageUsage(*registry.Properties.StorageUsage)
+		var storage []any
+		storageEntry := setStorageUsage(*registry.Properties.StorageUsage)
 		storage = append(storage, storageEntry)
 		if err := d.Set("storage_usage", storage); err != nil {
 			return utils.GenerateSetError(resourceName, "storage_usage", err)
@@ -275,10 +274,9 @@ func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error
 	return nil
 }
 
-//nolint:golint
-func SetWeeklySchedule(weeklySchedule cr.WeeklySchedule) map[string]interface{} {
+func setWeeklySchedule(weeklySchedule cr.WeeklySchedule) map[string]any {
 
-	schedule := map[string]interface{}{}
+	schedule := map[string]any{}
 
 	utils.SetPropWithNilCheck(schedule, "time", weeklySchedule.Time)
 	utils.SetPropWithNilCheck(schedule, "days", weeklySchedule.Days)
@@ -286,10 +284,9 @@ func SetWeeklySchedule(weeklySchedule cr.WeeklySchedule) map[string]interface{} 
 	return schedule
 }
 
-//nolint:golint
-func SetStorageUsage(storageUsage cr.StorageUsage) map[string]interface{} {
+func setStorageUsage(storageUsage cr.StorageUsage) map[string]any {
 
-	storage := map[string]interface{}{}
+	storage := map[string]any{}
 
 	utils.SetPropWithNilCheck(storage, "bytes", storageUsage.Bytes)
 	if storageUsage.UpdatedAt != nil {
@@ -299,7 +296,7 @@ func SetStorageUsage(storageUsage cr.StorageUsage) map[string]interface{} {
 	return storage
 }
 
-//nolint:golint
+// GetTokenDataCreate returns the token data for the registry token
 func GetTokenDataCreate(d *schema.ResourceData) (*cr.PostTokenInput, error) {
 
 	token := cr.PostTokenInput{
@@ -332,7 +329,7 @@ func GetTokenDataCreate(d *schema.ResourceData) (*cr.PostTokenInput, error) {
 	return &token, nil
 }
 
-//nolint:golint
+// GetTokenDataUpdate returns the token data for the registry token
 func GetTokenDataUpdate(d *schema.ResourceData) (*cr.PatchTokenInput, error) {
 
 	token := cr.PatchTokenInput{}
@@ -361,19 +358,19 @@ func GetTokenDataUpdate(d *schema.ResourceData) (*cr.PatchTokenInput, error) {
 	return &token, nil
 }
 
-//nolint:golint
+// GetScopes returns the scopes for the registry token
 func GetScopes(d *schema.ResourceData) []cr.Scope {
 	scopes := make([]cr.Scope, 0)
 
 	if scopeValue, ok := d.GetOk("scopes"); ok {
-		scopeValue := scopeValue.([]interface{})
+		scopeValue := scopeValue.([]any)
 		for _, item := range scopeValue {
 
-			scopeContent := item.(map[string]interface{})
+			scopeContent := item.(map[string]any)
 			connection := cr.Scope{}
 
 			if actions, ok := scopeContent["actions"]; ok {
-				actions := actions.([]interface{})
+				actions := actions.([]any)
 				var actionsToAdd []string
 				if len(actions) > 0 {
 					for _, action := range actions {
@@ -402,17 +399,10 @@ func GetScopes(d *schema.ResourceData) []cr.Scope {
 
 }
 
-//nolint:golint
+// SetTokenData sets the token data for the registry token. Does not set credentials, as they never change once created
 func SetTokenData(d *schema.ResourceData, tokenProps cr.TokenProperties) error {
 
 	regToken := "registry token "
-
-	var credentials []interface{}
-	credentialsEntry := SetCredentials(tokenProps.Credentials)
-	credentials = append(credentials, credentialsEntry)
-	if err := d.Set("credentials", credentials); err != nil {
-		return utils.GenerateSetError(regToken, "credentials", err)
-	}
 
 	if tokenProps.ExpiryDate != nil {
 		timeValue := tokenProps.ExpiryDate.NullableTime
@@ -425,7 +415,7 @@ func SetTokenData(d *schema.ResourceData, tokenProps cr.TokenProperties) error {
 		return utils.GenerateSetError(regToken, "name", err)
 	}
 
-	scopes := SetScopes(tokenProps.Scopes)
+	scopes := setScopes(tokenProps.Scopes)
 	if err := d.Set("scopes", scopes); err != nil {
 		return utils.GenerateSetError(regToken, "scopes", err)
 	}
@@ -439,22 +429,24 @@ func SetTokenData(d *schema.ResourceData, tokenProps cr.TokenProperties) error {
 	return nil
 }
 
-//nolint:golint
-func SetCredentials(credentials cr.Credentials) map[string]interface{} {
+// SetCredentials sets the credentials for the registry token. username can be set on read, password will be set only on create
+func SetCredentials(credentials cr.Credentials) map[string]any {
 
-	credentialsEntry := map[string]interface{}{}
-
-	utils.SetPropWithNilCheck(credentialsEntry, "username", credentials.Username)
+	credentialsEntry := map[string]any{}
+	credentialsEntry["username"] = credentials.Username
+	if credentials.Password != "" {
+		credentialsEntry["password"] = credentials.Password
+		utils.SetPropWithNilCheck(credentialsEntry, "password", credentials.Password)
+	}
 
 	return credentialsEntry
 }
 
-//nolint:golint
-func SetScopes(scopes []cr.Scope) []interface{} {
+func setScopes(scopes []cr.Scope) []any {
 
-	var tokenScopes []interface{} //nolint:prealloc
+	var tokenScopes []any //nolint:prealloc
 	for _, scope := range scopes {
-		scopeEntry := make(map[string]interface{})
+		scopeEntry := make(map[string]any)
 
 		if scope.Actions != nil {
 			scopeEntry["actions"] = scope.Actions
