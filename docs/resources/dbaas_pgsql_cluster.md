@@ -94,12 +94,6 @@ resource "ionoscloud_server" "example" {
   }
 }
 
-locals {
- prefix                   = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
- database_ip              = cidrhost(local.prefix, 1)
- database_ip_cidr         = format("%s/%s", local.database_ip, "24")
-}
-
 resource "ionoscloud_pg_cluster" "example" {
   postgres_version        = "12"
   instances               = 1
@@ -114,7 +108,7 @@ resource "ionoscloud_pg_cluster" "example" {
   connections   {
     datacenter_id         =  ionoscloud_datacenter.example.id 
     lan_id                =  ionoscloud_lan.example.id 
-    cidr                  =  local.database_ip_cidr
+    cidr                  =  "database_ip_cidr_from_nic"
   }
   location                = ionoscloud_datacenter.example.location
   display_name            = "PostgreSQL_cluster"

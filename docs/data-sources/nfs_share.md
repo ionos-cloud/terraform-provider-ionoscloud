@@ -30,14 +30,6 @@ data "ionoscloud_nfs_share" "example" {
   name = "partial-name"
   partial_match = true
 }
-
-output "share_test_output" {
-    value = format("share %s quota %sMiB path '%s'",
-        data.ionoscloud_nfs_share.example.name,
-        data.ionoscloud_nfs_share.example.quota,
-        data.ionoscloud_nfs_share.example.nfs_path,
-    )
-}
 ```
 
 ## Argument Reference

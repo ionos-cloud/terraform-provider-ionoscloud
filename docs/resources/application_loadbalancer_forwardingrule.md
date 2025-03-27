@@ -85,9 +85,9 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "example" {
 #optionally you can add a certificate to the application load balancer
 resource "ionoscloud_certificate" "cert" {
   name = "add_name_here"
-  certificate = "${file("path_to_cert")}"
-  certificate_chain = "${file("path_to_cert_chain")}"
-  private_key = "${file("path_to_private_key")}"
+  certificate = "your_certificate"
+  certificate_chain = "your_certificate_chain"
+  private_key = "your_private_key"
 }
 ```
 

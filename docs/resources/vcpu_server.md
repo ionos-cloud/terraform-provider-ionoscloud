@@ -128,7 +128,7 @@ Resource VCPU Server can be imported using the `resource id` and the `datacenter
 ```shell
 terraform import ionoscloud_vcpu_server.myserver datacenter uuid/server uuid
 ```
-Optionally, you can pass `primary_nic` and `firewallrule_id` so terraform will know to import also the first nic and firewall rule (if it exists on the server):
+Optionally, you can pass `primary_nic` and `firewallrule_id` so pulumi will know to import also the first nic and firewall rule (if it exists on the server):
 ```shell
 terraform import ionoscloud_vcpu_server.myserver datacenter uuid/server uuid/primary nic id/firewall rule id
 ```
@@ -138,7 +138,4 @@ terraform import ionoscloud_vcpu_server.myserver datacenter uuid/server uuid/pri
 Please note that for any secondary volume, you need to set the **licence_type** property to **UNKNOWN**
 
 ⚠️ **Note:** Important for deleting an `firewall` rule from within a list of inline resources defined on the same nic. There is one limitation to removing one firewall rule
-from the middle of the list of `firewall` rules. Terraform will actually modify the existing rules and delete the last one.
-More details [here](https://github.com/hashicorp/terraform/issues/14275). There is a workaround described in the issue 
-that involves moving the resources in the list prior to deletion.
-`terraform state mv <resource-name>.<resource-id>[<i>] <resource-name>.<resource-id>[<j>]`
+from the middle of the list of `firewall` rules. The existing rules will be modified and the last one will be deleted.

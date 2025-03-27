@@ -47,14 +47,6 @@ resource "ionoscloud_cdn_distribution" "example" {
     }
   }
 }
-
-#optionally you can add a certificate to the distribution
-resource "ionoscloud_certificate" "cert" {
-  name = "add_name_here"
-  certificate = "${file("path_to_cert")}"
-  certificate_chain = "${file("path_to_cert_chain")}"
-  private_key = "${file("path_to_private_key")}"
-}
 ```
 
 ## Argument Reference

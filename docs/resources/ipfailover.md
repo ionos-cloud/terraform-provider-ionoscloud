@@ -75,9 +75,9 @@ resource "random_password" "server_image_password" {
 * `lan_id` - (Required)[string] The ID of a LAN.
 * `nicuuid` - (Required)[string] The ID of a NIC.
 
-> **⚠ WARNING:** Do not modify the IP for an IP failover group (that was provisioned via Terraform)
+> **⚠ WARNING:** Do not modify the IP for an IP failover group (that was provisioned via Pulumi)
 > using the DCD, the API or other means because it may lead to unexpected behavior. If you provisioned
-> an IP failover group using Terraform, please use only Terraform in order to manage the created
+> an IP failover group using Pulumi, please use only Pulumi in order to manage the created
 > IP failover group.
 
 > **⚠ WARNING:** For creating multiple IP failover groups at the same time, you can use one of the

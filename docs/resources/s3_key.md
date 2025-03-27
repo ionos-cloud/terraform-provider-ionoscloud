@@ -45,4 +45,4 @@ An IONOS Object Storage Unit resource can be imported using its user id as well 
 terraform import ionoscloud_s3_key.demo userid/s3Keyid
 ```
 
-This can be helpful when you want to import IONOS Object Storage Keys which you have already created manually or using other means, outside of terraform.
+This can be helpful when you want to import IONOS Object Storage Keys which you have already created manually or using other means, outside of pulumi.

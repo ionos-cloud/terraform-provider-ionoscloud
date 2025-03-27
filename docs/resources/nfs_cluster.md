@@ -97,12 +97,6 @@ resource "ionoscloud_server" "nfs_server" {
   }
 }
 
-locals {
-  nfs_server_cidr = format("%s/24", ionoscloud_server.nfs_server.nic[0].ips[0])
-  nfs_cluster_ip = cidrhost(local.nfs_server_cidr, 10)
-  nfs_cluster_cidr = format("%s/24", local.nfs_cluster_ip)
-}
-
 resource "ionoscloud_nfs_cluster" "example" {
   name = "test"
   location = "de/txl"
@@ -114,7 +108,7 @@ resource "ionoscloud_nfs_cluster" "example" {
   
   connections {
     datacenter_id = ionoscloud_datacenter.nfs_dc.id
-    ip_address    = local.nfs_cluster_cidr
+    ip_address    = "nfs_cluster_cidr_from_nic"
     lan           = ionoscloud_lan.nfs_lan.id
   }
 }

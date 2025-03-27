@@ -86,15 +86,6 @@ resource "random_password" "password" {
   special = false
 }
 
-locals {
-  prefix = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
-  server_net_index              = split(".", ionoscloud_server.example.nic[0].ips[0])[3]
-  kafka_cluster_broker_ips      = [
-    for i in range(local.server_net_index + 1, local.server_net_index + 4) :cidrhost(local.prefix, i)
-  ]
-  kafka_cluster_broker_ips_cidr = [for ip in local.kafka_cluster_broker_ips : format("%s/%s", ip, "24")]
-}
-
 resource "ionoscloud_kafka_cluster" "example" {
   name     = "example-kafka-cluster"
   location = ionoscloud_datacenter.example.location
@@ -103,7 +94,7 @@ resource "ionoscloud_kafka_cluster" "example" {
   connections {
     datacenter_id = ionoscloud_datacenter.example.id
     lan_id = ionoscloud_lan.example.id
-    broker_addresses = local.kafka_cluster_broker_ips_cidr
+    broker_addresses = "kafka_cluster_broker_ips_cidr_list"
   }
 }
 ```

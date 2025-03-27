@@ -84,7 +84,7 @@ resource "ionoscloud_lan" "example"{
   datacenter_id     = ionoscloud_datacenter.example.id
   public            = true
   name              = "IPv6 Enabled LAN"
-  ipv6_cidr_block   = cidrsubnet(ionoscloud_datacenter.example.ipv6_cidr_block,8,2)
+  ipv6_cidr_block   = "ipv6_cidr_block_from_dc"
 }
 
 resource "ionoscloud_server" "example" {
@@ -117,12 +117,12 @@ resource "ionoscloud_nic" "example" {
   firewall_active       = true
   firewall_type         = "INGRESS"
   dhcpv6                = false
-  ipv6_cidr_block       = cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14)
+  ipv6_cidr_block       = "ipv6_cidr_block_from_lan"
   ipv6_ips              = [ 
-                              cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),10),
-                              cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),20),
-                              cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),30)
-                          ]
+    "ipv6_ip1",
+    "ipv6_ip2",
+    "ipv6_ip3"
+  ]
 }
 
 resource "random_password" "server_image_password" {
@@ -133,6 +133,40 @@ resource "random_password" "server_image_password" {
 ## Example configuring Flowlog
 
 ```hcl
+resource "ionoscloud_datacenter" "example" {
+  name                = "Datacenter Example"
+  location            = "us/las"
+  description         = "Datacenter Description"
+  sec_auth_protection = false
+}
+
+resource "ionoscloud_lan" "example"{
+  datacenter_id     = ionoscloud_datacenter.example.id
+  public            = true
+  name              = "IPv6 Enabled LAN"
+  ipv6_cidr_block   = "ipv6_cidr_block_from_dc"
+}
+
+resource "ionoscloud_server" "example" {
+  name                  = "Server Example"
+  datacenter_id         = ionoscloud_datacenter.example.id
+  cores                 = 1
+  ram                   = 1024
+  availability_zone     = "ZONE_1"
+  cpu_family            = "INTEL_XEON"
+  image_name            = "Ubuntu-20.04"
+  image_password        = random_password.server_image_password.result
+  volume {
+    name                = "system"
+    size                = 14
+    disk_type           = "SSD"
+  }
+  nic {
+    lan                 = "1"
+    dhcp                = true
+    firewall_active     = true
+  }
+}
 resource "ionoscloud_nic" "example" {
   datacenter_id         = ionoscloud_datacenter.example.id
   server_id             = ionoscloud_server.example.id
@@ -142,11 +176,11 @@ resource "ionoscloud_nic" "example" {
   firewall_active       = true
   firewall_type         = "INGRESS"
   dhcpv6                = false
-  ipv6_cidr_block       = cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14)
+  ipv6_cidr_block       = "ipv6_cidr_block_from_lan"
   ipv6_ips              = [
-    cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),10),
-    cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),20),
-    cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,14),30)
+    "ipv6_ip1",
+    "ipv6_ip2",
+    "ipv6_ip3"
   ]
   flowlog {
     action    = "ACCEPTED"
@@ -154,6 +188,11 @@ resource "ionoscloud_nic" "example" {
     direction = "INGRESS"
     name      = "flowlog"
   }  
+}
+
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = false
 }
 ```
 
@@ -196,7 +235,7 @@ terraform import ionoscloud_nic.mynic datacenter uuid/server uuid/nic uuid
 ## Working with load balancers
 Please be aware that when using a NIC in a load balancer, the load balancer will
 change the NIC's ID behind the scenes, therefore the plan will always report this change
-trying to revert the state to the one specified by your terraform file.
+trying to revert the state to the one specified by your file.
 In order to prevent this, use the "lifecycle meta-argument" when declaring your NIC,
 in order to ignore changes to the `lan` attribute:
 
