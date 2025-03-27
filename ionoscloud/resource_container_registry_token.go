@@ -35,8 +35,9 @@ func resourceContainerRegistryToken() *schema.Resource {
 							Required: true,
 						},
 						"password": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:      schema.TypeString,
+							Required:  true,
+							Sensitive: true,
 						},
 					},
 				},
@@ -125,6 +126,13 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 
 	if err = crService.SetTokenData(d, registryTokenResponse.Properties); err != nil {
 		return diag.FromErr(err)
+	}
+
+	var credentials []any
+	credentialsEntry := crService.SetCredentials(registryTokenResponse.Properties.Credentials)
+	credentials = append(credentials, credentialsEntry)
+	if err := d.Set("credentials", credentials); err != nil {
+		return diag.FromErr(utils.GenerateSetError("token", "credentials", err))
 	}
 	return nil
 }

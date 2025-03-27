@@ -13,6 +13,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceContainerRegistryToken() *schema.Resource {
@@ -155,6 +156,12 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
+	var credentials []any
+	credentialsEntry := crService.SetCredentials(token.Properties.Credentials)
+	credentials = append(credentials, credentialsEntry)
+	if err := d.Set("credentials", credentials); err != nil {
+		return diag.FromErr(utils.GenerateSetError("token", "credentials", err))
+	}
 	return nil
 
 }
