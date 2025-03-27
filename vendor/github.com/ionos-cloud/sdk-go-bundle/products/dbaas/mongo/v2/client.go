@@ -53,7 +53,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "products/dbaas/mongo/v2.2.2"
+	Version = "products/dbaas/mongo/v2.1.0"
 )
 
 // APIClient manages communication with the IONOS DBaaS MongoDB REST API API v1.0.0
@@ -115,6 +115,8 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 		cfgCopy = &shared.Configuration{}
 		*cfgCopy = *cfg
 	}
+
+	cfgCopy.UserAgent = "sdk-go-bundle/products/dbaas/mongo/v2.1.0"
 
 	// Initialize default values in the copied configuration
 	if cfgCopy.HTTPClient == nil {

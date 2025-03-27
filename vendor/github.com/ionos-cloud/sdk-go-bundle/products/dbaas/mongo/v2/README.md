@@ -16,11 +16,11 @@ The API can be accessed within an instance running in IONOS Cloud or directly ov
 
 ### Use go get to retrieve the SDK to add it to your GOPATH workspace, or project's Go module dependencies.
 ```bash
-go get github.com/ionos-cloud/sdk-go-bundle/mongo.git
+go get github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo.git
 ```
 To update the SDK use go get -u to retrieve the latest version of the SDK.
 ```bash
-go get -u github.com/ionos-cloud/sdk-go-bundle/mongo.git
+go get -u github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo.git
 ```
 ### Go Modules
 
@@ -28,7 +28,7 @@ If you are using Go modules, your go get will default to the latest tagged relea
 
 To get the latest SDK repository, use @latest.
 ```bash
-go get github.com/ionos-cloud/sdk-go-bundle/mongo@latest
+go get github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo@latest
 ```
 
 ## Environment Variables
@@ -74,7 +74,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	mongo "github.com/ionos-cloud/sdk-go-bundle/mongo"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo"
 	"log"
 )
 
@@ -95,7 +95,7 @@ There are 2 ways to generate your token:
         "fmt"
         "github.com/ionos-cloud/sdk-go-bundle/products/auth"
         "github.com/ionos-cloud/sdk-go-bundle/shared"
-        mongo "github.com/ionos-cloud/sdk-go-bundle/mongo"
+        mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo"
         "log"
     )
 
@@ -129,7 +129,7 @@ There are 2 ways to generate your token:
         "context"
         "fmt"
         "github.com/ionos-cloud/sdk-go-bundle/products/auth"
-         mongo "github.com/ionos-cloud/sdk-go-bundle/mongo"
+         mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo"
         "log"
     )
 
@@ -187,7 +187,7 @@ There are log levels that you can set: `Off`, `Debug` and `Trace`.
 package main
 
     import (
-        mongo "github.com/ionos-cloud/sdk-go-bundle/mongo"
+        mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo"
         "github.com/ionos-cloud/sdk-go-bundle/shared"
         "github.com/sirupsen/logrus"
     )

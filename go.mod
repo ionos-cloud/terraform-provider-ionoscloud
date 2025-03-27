@@ -17,7 +17,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/ionos-cloud/sdk-go-api-gateway v1.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
-	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.0.2
+	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 	github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
@@ -40,8 +40,6 @@ require (
 	golang.org/x/crypto v0.33.0
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-replace github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 => /home/radu/work/sdk-go-bundle/products/dbaas/mongo
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
