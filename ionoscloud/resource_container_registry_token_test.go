@@ -45,6 +45,8 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.type", "repository"),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "status", "enabled"),
 					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "name", constant.ContainerRegistryTokenTestResource),
+					resource.TestCheckResourceAttrSet(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "credentials.0.password"),
+					resource.TestCheckResourceAttr(constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "credentials.0.username", constant.ContainerRegistryTokenTestResource),
 				),
 			},
 			{
@@ -104,7 +106,7 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 			},
 			{
 				Config:      getConfigurationFromTemplate(testAccDataSourceContainerRegistryTokenMultipleTokensFound, templateData),
-				ExpectError: regexp.MustCompile("more than one token found with the specified criteria: name = test-container-registry-token"),
+				ExpectError: regexp.MustCompile("more than one token found with the specified criteria: name = " + constant.ContainerRegistryTokenTestResource),
 			},
 		},
 	})
@@ -127,7 +129,7 @@ func testAccCheckContainerRegistryTokenDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.GetToken(ctx, rs.Primary.Attributes["registry_id"], rs.Primary.ID)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if !apiResponse.HttpNotFound() {
 				return fmt.Errorf("an error occurred while checking the destruction of the container registry token %s: %w", rs.Primary.ID, err)
 			}
 		} else {
