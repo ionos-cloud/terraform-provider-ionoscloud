@@ -436,7 +436,6 @@ func SetCredentials(credentials cr.Credentials) map[string]any {
 	credentialsEntry["username"] = credentials.Username
 	if credentials.Password != "" {
 		credentialsEntry["password"] = credentials.Password
-		utils.SetPropWithNilCheck(credentialsEntry, "password", credentials.Password)
 	}
 
 	return credentialsEntry
