@@ -113,7 +113,7 @@ The following arguments are supported:
 - `datacenter_id` - (Required)[string] A Datacenter's UUID
 - `k8s_cluster_id`- (Required)[string] A k8s cluster's UUID
 - `cpu_family` - (Optional)[string] The desired CPU Family - See the API documentation for more information. *This attribute is immutable*.
-- `server_type` - (Optional)[string] The server type for the compute engine - See the API documentation for more information.
+- `server_type` - (Optional)[string] The server type for the compute engine - See the API documentation for more information. Possible values: `DedicatedCore`, `VCPU`
 - `availability_zone` - (Required)[string] - The desired Compute availability zone - See the API documentation for more information. *This attribute is immutable*.
 - `storage_type` -(Required)[string] - The desired storage type - SSD/HDD. *This attribute is immutable*.
 - `node_count` -(Required)[int] - The desired number of nodes in the node pool
