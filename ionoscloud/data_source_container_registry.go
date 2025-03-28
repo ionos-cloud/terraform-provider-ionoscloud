@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	cr "github.com/ionos-cloud/sdk-go-container-registry"
+	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
@@ -120,6 +120,7 @@ func dataSourceContainerRegistry() *schema.Resource {
 	}
 }
 
+//nolint:gocyclo
 func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).ContainerClient
 
@@ -159,22 +160,21 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 			return diags
 		}
 
-		results = *registries.Items
+		results = registries.Items
 		if nameOk {
 			partialMatch := d.Get("partial_match").(bool)
 
 			log.Printf("[INFO] Using data source for container registry by name with partial_match %t and name: %s", partialMatch, name)
 
-			if registries.Items != nil && len(*registries.Items) > 0 {
+			if registries.Items != nil && len(registries.Items) > 0 {
 				var registriesByName []cr.RegistryResponse
-				for _, registryItem := range *registries.Items {
-					if registryItem.Properties != nil && registryItem.Properties.Name != nil &&
-						(partialMatch && strings.Contains(*registryItem.Properties.Name, name) ||
-							!partialMatch && strings.EqualFold(*registryItem.Properties.Name, name)) {
+				for _, registryItem := range registries.Items {
+					if partialMatch && strings.Contains(registryItem.Properties.Name, name) ||
+						!partialMatch && strings.EqualFold(registryItem.Properties.Name, name) {
 						registriesByName = append(registriesByName, registryItem)
 					}
 				}
-				if registriesByName != nil && len(registriesByName) > 0 {
+				if len(registriesByName) > 0 {
 					results = registriesByName
 				} else {
 					return diag.FromErr(fmt.Errorf("no registry found with the specified criteria: name = %v", name))
@@ -185,11 +185,11 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 		if locationOk {
 			var registriesByLocation []cr.RegistryResponse
 			for _, registryItem := range results {
-				if registryItem.Properties != nil && registryItem.Properties.Name != nil && strings.EqualFold(*registryItem.Properties.Location, location) {
+				if strings.EqualFold(registryItem.Properties.Location, location) {
 					registriesByLocation = append(registriesByLocation, registryItem)
 				}
 			}
-			if registriesByLocation != nil && len(registriesByLocation) > 0 {
+			if len(registriesByLocation) > 0 {
 				results = registriesByLocation
 			} else {
 				return diag.FromErr(fmt.Errorf("no registry found with the specified criteria: location = %v", location))

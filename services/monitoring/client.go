@@ -17,7 +17,7 @@ import (
 )
 
 // Client is a wrapper for the Monitoring SDK
-type Client struct { //nolint:golint
+type Client struct {
 	sdkClient  monitoring.APIClient
 	fileConfig *fileconfiguration.FileConfig
 }
@@ -38,8 +38,10 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
 	config.UserAgent = fmt.Sprintf(
-		"terraform-provider/ionos-cloud-sdk-go-monitoring/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		monitoring.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint:staticcheck
+		"terraform-provider/%s_ionos-cloud-sdk-go-monitoring/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		clientOptions.Version, monitoring.Version, clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, // nolint:staticcheck
+	)
 
 	return &Client{sdkClient: *monitoring.NewAPIClient(config),
 		fileConfig: fileConfig}

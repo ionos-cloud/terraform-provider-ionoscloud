@@ -111,7 +111,7 @@ func testAccCheckNFSShareExists(n string) resource.TestCheckFunc {
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching NFS Share with ID: %v, error: %w", rs.Primary.ID, err)
 		}
-		if *found.Id != rs.Primary.ID {
+		if found.Id != rs.Primary.ID {
 			return fmt.Errorf("resource not found")
 		}
 

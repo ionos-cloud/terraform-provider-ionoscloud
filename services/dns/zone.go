@@ -2,21 +2,21 @@ package dns
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dns "github.com/ionos-cloud/sdk-go-dns"
+	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 var zoneResourceName = "DNS Zone"
 
-//nolint:golint
+// CreateZone creates a new DNS Zone
 func (c *Client) CreateZone(ctx context.Context, d *schema.ResourceData) (zoneResponse dns.ZoneRead, responseInfo utils.ApiResponseInfo, err error) {
 	zoneUuid := uuidgen.ResourceUuid()
 	request := setZonePutRequest(d)
@@ -25,30 +25,28 @@ func (c *Client) CreateZone(ctx context.Context, d *schema.ResourceData) (zoneRe
 	return responseData, apiResponse, err
 }
 
-//nolint:golint
+// IsZoneCreated checks if a zone is created
 func (c *Client) IsZoneCreated(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	zoneID := d.Id()
 	zone, _, err := c.GetZoneById(ctx, zoneID)
 	if err != nil {
 		return false, err
 	}
-	if zone.Metadata == nil || zone.Metadata.State == nil {
-		return false, fmt.Errorf("expected metadata, got empty for zone with ID: %s", zoneID)
-	}
-	log.Printf("[DEBUG] zone state: %s", *zone.Metadata.State)
 
-	return strings.EqualFold((string)(*zone.Metadata.State), (string)(dns.PROVISIONINGSTATE_AVAILABLE)), nil
+	log.Printf("[DEBUG] zone state: %s", zone.Metadata.State)
+
+	return strings.EqualFold((string)(zone.Metadata.State), (string)(dns.PROVISIONINGSTATE_AVAILABLE)), nil
 }
 
-//nolint:golint
-func (c *Client) GetZoneById(ctx context.Context, id string) (dns.ZoneRead, *dns.APIResponse, error) {
+// GetZoneById gets a zone by ID
+func (c *Client) GetZoneById(ctx context.Context, id string) (dns.ZoneRead, *shared.APIResponse, error) {
 	zone, apiResponse, err := c.sdkClient.ZonesApi.ZonesFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return zone, apiResponse, err
 }
 
-//nolint:golint
-func (c *Client) ListZones(ctx context.Context, filterName string) (dns.ZoneReadList, *dns.APIResponse, error) {
+// ListZones lists all zones
+func (c *Client) ListZones(ctx context.Context, filterName string) (dns.ZoneReadList, *shared.APIResponse, error) {
 	request := c.sdkClient.ZonesApi.ZonesGet(ctx)
 	if filterName != "" {
 		request = request.FilterZoneName(filterName)
@@ -58,24 +56,12 @@ func (c *Client) ListZones(ctx context.Context, filterName string) (dns.ZoneRead
 	return zones, apiResponse, err
 }
 
-//nolint:golint
+// SetZoneData sets the data of a zone
 func (c *Client) SetZoneData(d *schema.ResourceData, zone dns.ZoneRead) error {
-	if zone.Id != nil {
-		d.SetId(*zone.Id)
-	}
+	d.SetId(zone.Id)
 
-	if zone.Properties == nil {
-		return fmt.Errorf("expected properties in the zone response for the zone with ID: %s, but received 'nil' instead", *zone.Id)
-	}
-
-	if zone.Metadata == nil {
-		return fmt.Errorf("expected metadata in the response for the zone with ID: %s, but received 'nil' instead", *zone.Id)
-	}
-
-	if zone.Properties.ZoneName != nil {
-		if err := d.Set("name", *zone.Properties.ZoneName); err != nil {
-			return utils.GenerateSetError(zoneResourceName, "name", err)
-		}
+	if err := d.Set("name", zone.Properties.ZoneName); err != nil {
+		return utils.GenerateSetError(zoneResourceName, "name", err)
 	}
 
 	if zone.Properties.Description != nil {
@@ -90,16 +76,14 @@ func (c *Client) SetZoneData(d *schema.ResourceData, zone dns.ZoneRead) error {
 		}
 	}
 
-	if zone.Metadata.Nameservers != nil {
-		if err := d.Set("nameservers", *zone.Metadata.Nameservers); err != nil {
-			return utils.GenerateSetError(zoneResourceName, "nameservers", err)
-		}
+	if err := d.Set("nameservers", zone.Metadata.Nameservers); err != nil {
+		return utils.GenerateSetError(zoneResourceName, "nameservers", err)
 	}
 
 	return nil
 }
 
-//nolint:golint
+// UpdateZone updates a zone
 func (c *Client) UpdateZone(ctx context.Context, id string, d *schema.ResourceData) (dns.ZoneRead, utils.ApiResponseInfo, error) {
 	request := setZonePutRequest(d)
 	zoneResponse, apiResponse, err := c.sdkClient.ZonesApi.ZonesPut(ctx, id).ZoneEnsure(*request).Execute()
@@ -107,14 +91,14 @@ func (c *Client) UpdateZone(ctx context.Context, id string, d *schema.ResourceDa
 	return zoneResponse, apiResponse, err
 }
 
-//nolint:golint
+// DeleteZone deletes a zone
 func (c *Client) DeleteZone(ctx context.Context, id string) (utils.ApiResponseInfo, error) {
 	_, apiResponse, err := c.sdkClient.ZonesApi.ZonesDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-//nolint:golint
+// IsZoneDeleted checks if a zone is deleted
 func (c *Client) IsZoneDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := c.sdkClient.ZonesApi.ZonesFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
@@ -123,12 +107,12 @@ func (c *Client) IsZoneDeleted(ctx context.Context, d *schema.ResourceData) (boo
 
 func setZonePutRequest(d *schema.ResourceData) *dns.ZoneEnsure {
 	request := dns.ZoneEnsure{
-		Properties: &dns.Zone{},
+		Properties: dns.Zone{},
 	}
 
 	if nameValue, ok := d.GetOk("name"); ok {
 		name := nameValue.(string)
-		request.Properties.ZoneName = &name
+		request.Properties.ZoneName = name
 	}
 
 	if descriptionValue, ok := d.GetOk("description"); ok {

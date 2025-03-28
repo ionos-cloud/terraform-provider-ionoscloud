@@ -7,7 +7,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
+	certmanager "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -24,61 +25,61 @@ var ionosAPIURLCert = "IONOS_API_URL_CERT"
 func (c *Client) ChangeConfigURL(location string) {
 	clientConfig := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLCert) != "" {
-		clientConfig.Servers = certmanager.ServerConfigurations{
+		clientConfig.Servers = shared.ServerConfigurations{
 			{
 				URL: utils.CleanURL(os.Getenv(ionosAPIURLCert)),
 			},
 		}
 		return
 	}
-	clientConfig.Servers = certmanager.ServerConfigurations{
+	clientConfig.Servers = shared.ServerConfigurations{
 		{
 			URL: locationToURL[location],
 		},
 	}
 }
 
-//nolint:golint
-func (c *Client) GetProvider(ctx context.Context, providerID, location string) (certmanager.ProviderRead, *certmanager.APIResponse, error) {
+// GetProvider gets a provider
+func (c *Client) GetProvider(ctx context.Context, providerID, location string) (certmanager.ProviderRead, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersFindById(ctx, providerID).Execute()
 	apiResponse.LogInfo()
 	return provider, apiResponse, err
 }
 
-//nolint:golint
-func (c *Client) ListProviders(ctx context.Context, location string) (certmanager.ProviderReadList, *certmanager.APIResponse, error) {
+// ListProviders lists all providers
+func (c *Client) ListProviders(ctx context.Context, location string) (certmanager.ProviderReadList, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	providers, apiResponse, err := c.sdkClient.ProviderApi.ProvidersGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return providers, apiResponse, err
 }
 
-//nolint:golint
-func (c *Client) CreateProvider(ctx context.Context, providerPostData certmanager.ProviderCreate, location string) (certmanager.ProviderRead, *certmanager.APIResponse, error) {
+// CreateProvider creates a provider
+func (c *Client) CreateProvider(ctx context.Context, providerPostData certmanager.ProviderCreate, location string) (certmanager.ProviderRead, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersPost(ctx).ProviderCreate(providerPostData).Execute()
 	apiResponse.LogInfo()
 	return provider, apiResponse, err
 }
 
-//nolint:golint
-func (c *Client) UpdateProvider(ctx context.Context, providerID, location string, providerPatchData certmanager.ProviderPatch) (certmanager.ProviderRead, *certmanager.APIResponse, error) {
+// UpdateProvider updates a provider
+func (c *Client) UpdateProvider(ctx context.Context, providerID, location string, providerPatchData certmanager.ProviderPatch) (certmanager.ProviderRead, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersPatch(ctx, providerID).ProviderPatch(providerPatchData).Execute()
 	apiResponse.LogInfo()
 	return provider, apiResponse, err
 }
 
-//nolint:golint
-func (c *Client) DeleteProvider(ctx context.Context, providerID, location string) (*certmanager.APIResponse, error) {
+// DeleteProvider deletes a provider
+func (c *Client) DeleteProvider(ctx context.Context, providerID, location string) (*shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	apiResponse, err := c.sdkClient.ProviderApi.ProvidersDelete(ctx, providerID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-//nolint:golint
+// IsProviderReady checks if a provider is in available state
 func (c *Client) IsProviderReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	providerID := d.Id()
 	location := d.Get("location").(string)
@@ -86,16 +87,13 @@ func (c *Client) IsProviderReady(ctx context.Context, d *schema.ResourceData) (b
 	if err != nil {
 		return false, fmt.Errorf("error checking certificate manager provider status: %w", err)
 	}
-	if provider.Metadata == nil || provider.Metadata.State == nil {
-		return false, fmt.Errorf("metadata or state is empty for certificate manager provider with ID: %v", d.Id())
+	if utils.IsStateFailed(provider.Metadata.State) {
+		return false, fmt.Errorf("error while checking if auto-certificate provider is ready, provider ID: %v, state: %v", provider.Id, provider.Metadata.State)
 	}
-	if utils.IsStateFailed(*provider.Metadata.State) {
-		return false, fmt.Errorf("error while checking if auto-certificate provider is ready, provider ID: %v, state: %v", *provider.Id, *provider.Metadata.State)
-	}
-	return strings.EqualFold(*provider.Metadata.State, constant.Available), nil
+	return strings.EqualFold(provider.Metadata.State, constant.Available), nil
 }
 
-//nolint:golint
+// IsProviderDeleted checks if a provider is deleted
 func (c *Client) IsProviderDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	providerID := d.Id()
 	location := d.Get("location").(string)
@@ -106,24 +104,24 @@ func (c *Client) IsProviderDeleted(ctx context.Context, d *schema.ResourceData) 
 		}
 		return false, fmt.Errorf("error while checking deletion status for certificate manager provider with ID: %v, error: %w", d.Id(), err)
 	}
-	if provider.Metadata != nil && provider.Metadata.State != nil && utils.IsStateFailed(*provider.Metadata.State) {
-		return false, fmt.Errorf("error while checking if auto-certificate provider is deleted properly, provider ID: %v, state: %v", *provider.Id, *provider.Metadata.State)
+	if utils.IsStateFailed(provider.Metadata.State) {
+		return false, fmt.Errorf("error while checking if auto-certificate provider is deleted properly, provider ID: %v, state: %v", provider.Id, provider.Metadata.State)
 	}
 	return false, nil
 }
 
-//nolint:golint
+// GetProviderDataCreate gets the data for creating a provider
 func GetProviderDataCreate(d *schema.ResourceData) *certmanager.ProviderCreate {
 	provider := certmanager.ProviderCreate{
-		Properties: &certmanager.Provider{},
+		Properties: certmanager.Provider{},
 	}
 
 	name := d.Get("name").(string)
-	provider.Properties.Name = &name
+	provider.Properties.Name = name
 	email := d.Get("email").(string)
-	provider.Properties.Email = &email
+	provider.Properties.Email = email
 	server := d.Get("server").(string)
-	provider.Properties.Server = &server
+	provider.Properties.Server = server
 	if _, ok := d.GetOk("external_account_binding"); ok {
 		keyId := d.Get("external_account_binding.0.key_id").(string)
 		keySecret := d.Get("external_account_binding.0.key_secret").(string)
@@ -135,43 +133,33 @@ func GetProviderDataCreate(d *schema.ResourceData) *certmanager.ProviderCreate {
 	return &provider
 }
 
-//nolint:golint
+// SetProviderData sets the data of a provider
 func SetProviderData(d *schema.ResourceData, provider certmanager.ProviderRead) error {
 	resourceName := "Auto-certificate provider"
-	if provider.Id != nil {
-		d.SetId(*provider.Id)
+	d.SetId(provider.Id)
+
+	if err := d.Set("name", provider.Properties.Name); err != nil {
+		return utils.GenerateSetError(resourceName, "name", err)
 	}
-	if provider.Properties == nil {
-		return fmt.Errorf("response properties should not be empty for auto-certificate provider with ID: %v", *provider.Id)
+
+	if err := d.Set("email", provider.Properties.Email); err != nil {
+		return utils.GenerateSetError(resourceName, "email", err)
 	}
-	if provider.Properties.Name != nil {
-		if err := d.Set("name", *provider.Properties.Name); err != nil {
-			return utils.GenerateSetError(resourceName, "name", err)
-		}
-	}
-	if provider.Properties.Email != nil {
-		if err := d.Set("email", *provider.Properties.Email); err != nil {
-			return utils.GenerateSetError(resourceName, "email", err)
-		}
-	}
-	if provider.Properties.Server != nil {
-		if err := d.Set("server", *provider.Properties.Server); err != nil {
-			return utils.GenerateSetError(resourceName, "server", err)
-		}
+	if err := d.Set("server", provider.Properties.Server); err != nil {
+		return utils.GenerateSetError(resourceName, "server", err)
 	}
 	return nil
 }
 
-//nolint:golint
+// GetProviderDataUpdate gets the data for updating a provider
 func GetProviderDataUpdate(d *schema.ResourceData) *certmanager.ProviderPatch {
 	provider := certmanager.ProviderPatch{
-		Properties: &certmanager.PatchName{},
+		Properties: certmanager.PatchName{},
 	}
-
 	if d.HasChange("name") {
 		_, newValue := d.GetChange("name")
 		newValueStr := newValue.(string)
-		provider.Properties.Name = &newValueStr
+		provider.Properties.Name = newValueStr
 	}
 	return &provider
 }

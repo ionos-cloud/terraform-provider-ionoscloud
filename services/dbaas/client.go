@@ -31,8 +31,10 @@ func NewMongoClient(clientOptions clientoptions.TerraformClientOptions, fileConf
 	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)
 	config.UserAgent = fmt.Sprintf(
-		"terraform-provider/_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		mongo.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		clientOptions.Version, mongo.Version, clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	)
 
 	config.MaxRetries = constant.MaxRetries
 	config.WaitTime = constant.MaxWaitTime
@@ -48,7 +50,9 @@ func NewPSQLClient(clientOptions clientoptions.TerraformClientOptions, fileConfi
 	config := psql.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		clientOptions.Version, psql.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		clientOptions.Version, psql.Version, clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	)
 	if os.Getenv(constant.IonosDebug) != "" {
 		config.Debug = true
 	}

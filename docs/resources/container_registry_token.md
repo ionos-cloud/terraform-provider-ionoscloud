@@ -40,14 +40,17 @@ resource "ionoscloud_container_registry_token" "example" {
 ## Argument Reference
 
 The following arguments are supported:
-
+* `registry_id`           - (Required)[string] The ID of the container registry
 * `name`                  - (Required)[string] The name of the container registry token. Immutable, update forces re-creation of the resource.
 * `expiry-date`           - (Optional)[string] The value must be supplied as ISO 8601 timestamp
-* `scopes`                - (Optional)[map]
+* `credentials`           - (Computed)[map]
+  * `username`            - (Computed)[string] The username of the container registry token
+  * `password`            - (Computed)[string] The password/token of the container registry token which will also be saved to a file if `save_password_to_file` is set
+* `scopes`                - (Optional)(Computed) [map]
   * `actions`             - (Required)[string] Example: ["pull", "push", "delete"]
   * `name`                - (Required)[string]
   * `type`                - (Required)[string]
-* `status`                - (Optional)[string] Must have on of the values: `enabled`, `disabled`
+* `status`                - (Optional)[string] Must have one of the values: `enabled`, `disabled`
 * `save_password_to_file` - (Optional)[string] Saves token password to file. Only works on create. Takes as argument a file name, or a file path
 
 > **⚠ WARNING** `save_password_to_file` must be used with caution. 
