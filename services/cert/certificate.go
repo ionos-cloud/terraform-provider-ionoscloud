@@ -12,42 +12,36 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
-//nolint:golint
 func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager.CertificateRead, *shared.APIResponse, error) {
 	cert, apiResponse, err := c.sdkClient.CertificateApi.CertificatesFindById(ctx, certId).Execute()
 	apiResponse.LogInfo()
 	return cert, apiResponse, err
 }
 
-//nolint:golint
 func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateReadList, *shared.APIResponse, error) {
 	certs, apiResponse, err := c.sdkClient.CertificateApi.CertificatesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return certs, apiResponse, err
 }
 
-//nolint:golint
 func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.CertificateCreate) (certmanager.CertificateRead, *shared.APIResponse, error) {
 	certResponse, apiResponse, err := c.sdkClient.CertificateApi.CertificatesPost(ctx).CertificateCreate(certPostDto).Execute()
 	apiResponse.LogInfo()
 	return certResponse, apiResponse, err
 }
 
-//nolint:golint
 func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch certmanager.CertificatePatch) (certmanager.CertificateRead, *shared.APIResponse, error) {
 	certResponse, apiResponse, err := c.sdkClient.CertificateApi.CertificatesPatch(ctx, certId).CertificatePatch(certPatch).Execute()
 	apiResponse.LogInfo()
 	return certResponse, apiResponse, err
 }
 
-//nolint:golint
 func (c *Client) DeleteCertificate(ctx context.Context, certId string) (*shared.APIResponse, error) {
 	apiResponse, err := c.sdkClient.CertificateApi.CertificatesDelete(ctx, certId).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-//nolint:golint
 func (c *Client) IsCertReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	cert, _, err := c.GetCertificate(ctx, d.Id())
 	if err != nil {
@@ -56,7 +50,6 @@ func (c *Client) IsCertReady(ctx context.Context, d *schema.ResourceData) (bool,
 	return strings.EqualFold(cert.Metadata.State, constant.Available), nil
 }
 
-//nolint:golint
 func (c *Client) IsCertDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := c.GetCertificate(ctx, d.Id())
 	if err != nil {
@@ -68,7 +61,7 @@ func (c *Client) IsCertDeleted(ctx context.Context, d *schema.ResourceData) (boo
 	return false, nil
 }
 
-//nolint:golint
+// SetCertificateData is used to populate the resource data of a certificate
 func SetCertificateData(d *schema.ResourceData, cert *certmanager.CertificateRead) error {
 	d.SetId(cert.Id)
 
@@ -87,7 +80,6 @@ func SetCertificateData(d *schema.ResourceData, cert *certmanager.CertificateRea
 	return nil
 }
 
-//nolint:golint
 func GetCertPostDto(d *schema.ResourceData) (*certmanager.CertificateCreate, error) {
 
 	certificatePostDto := certmanager.CertificateCreate{
@@ -125,7 +117,6 @@ func GetCertPostDto(d *schema.ResourceData) (*certmanager.CertificateCreate, err
 	return &certificatePostDto, nil
 }
 
-//nolint:golint
 func GetCertPatchDto(d *schema.ResourceData) *certmanager.CertificatePatch {
 	certificatePatchDto := certmanager.CertificatePatch{
 		Properties: certmanager.PatchName{},

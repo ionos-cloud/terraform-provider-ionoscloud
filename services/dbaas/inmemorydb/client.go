@@ -18,7 +18,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-//nolint:golint
 type Client struct {
 	sdkClient  *inMemoryDB.APIClient
 	fileConfig *fileconfiguration.FileConfig
