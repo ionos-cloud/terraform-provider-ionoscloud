@@ -28,14 +28,14 @@ func (c *Client) CreateRegistry(ctx context.Context, registryInput cr.PostRegist
 	return registry, apiResponse, err
 }
 
-func (c *Client) DeleteRegistry(ctx context.Context, registryId string) (*cr.APIResponse, error) {
-	apiResponse, err := c.sdkClient.RegistriesApi.RegistriesDelete(ctx, registryId).Execute()
+func (c *Client) DeleteRegistry(ctx context.Context, registryID string) (*cr.APIResponse, error) {
+	apiResponse, err := c.sdkClient.RegistriesApi.RegistriesDelete(ctx, registryID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-func (c *Client) GetRegistry(ctx context.Context, registryId string) (cr.RegistryResponse, *cr.APIResponse, error) {
-	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesFindById(ctx, registryId).Execute()
+func (c *Client) GetRegistry(ctx context.Context, registryID string) (cr.RegistryResponse, *cr.APIResponse, error) {
+	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesFindById(ctx, registryID).Execute()
 	apiResponse.LogInfo()
 	return registries, apiResponse, err
 }
@@ -66,60 +66,60 @@ func (c *Client) IsRegistryReady(ctx context.Context, d *schema.ResourceData) (b
 	return strings.EqualFold(*creg.Metadata.State, "RUNNING"), nil
 }
 
-func (c *Client) PatchRegistry(ctx context.Context, registryId string, registryInput cr.PatchRegistryInput) (cr.RegistryResponse, *cr.APIResponse, error) {
-	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesPatch(ctx, registryId).PatchRegistryInput(registryInput).Execute()
+func (c *Client) PatchRegistry(ctx context.Context, registryID string, registryInput cr.PatchRegistryInput) (cr.RegistryResponse, *cr.APIResponse, error) {
+	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesPatch(ctx, registryID).PatchRegistryInput(registryInput).Execute()
 	apiResponse.LogInfo()
 	return registries, apiResponse, err
 }
 
-func (c *Client) PutRegistry(ctx context.Context, registryId string, registryInput cr.PutRegistryInput) (cr.PutRegistryOutput, *cr.APIResponse, error) {
-	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesPut(ctx, registryId).PutRegistryInput(registryInput).Execute()
+func (c *Client) PutRegistry(ctx context.Context, registryID string, registryInput cr.PutRegistryInput) (cr.PutRegistryOutput, *cr.APIResponse, error) {
+	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesPut(ctx, registryID).PutRegistryInput(registryInput).Execute()
 	apiResponse.LogInfo()
 	return registries, apiResponse, err
 }
 
-func (c *Client) DeleteRepositories(ctx context.Context, registryId, repositoryId string) (*cr.APIResponse, error) {
-	apiResponse, err := c.sdkClient.RepositoriesApi.RegistriesRepositoriesDelete(ctx, registryId, repositoryId).Execute()
+func (c *Client) DeleteRepositories(ctx context.Context, registryID, repositoryID string) (*cr.APIResponse, error) {
+	apiResponse, err := c.sdkClient.RepositoriesApi.RegistriesRepositoriesDelete(ctx, registryID, repositoryID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-func (c *Client) ListTokens(ctx context.Context, registryId string) (cr.TokensResponse, *cr.APIResponse, error) {
-	tokens, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensGet(ctx, registryId).Execute()
+func (c *Client) ListTokens(ctx context.Context, registryID string) (cr.TokensResponse, *cr.APIResponse, error) {
+	tokens, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensGet(ctx, registryID).Execute()
 	apiResponse.LogInfo()
 	return tokens, apiResponse, err
 
 }
 
-func (c *Client) CreateTokens(ctx context.Context, registryId string, tokenInput cr.PostTokenInput) (cr.PostTokenOutput, *cr.APIResponse, error) {
-	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPost(ctx, registryId).PostTokenInput(tokenInput).Execute()
+func (c *Client) CreateTokens(ctx context.Context, registryID string, tokenInput cr.PostTokenInput) (cr.PostTokenOutput, *cr.APIResponse, error) {
+	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPost(ctx, registryID).PostTokenInput(tokenInput).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err
 
 }
 
-func (c *Client) DeleteToken(ctx context.Context, registryId, tokenId string) (*cr.APIResponse, error) {
-	apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensDelete(ctx, registryId, tokenId).Execute()
+func (c *Client) DeleteToken(ctx context.Context, registryID, tokenID string) (*cr.APIResponse, error) {
+	apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensDelete(ctx, registryID, tokenID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-func (c *Client) GetToken(ctx context.Context, registryId, tokenId string) (cr.TokenResponse, *cr.APIResponse, error) {
-	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensFindById(ctx, registryId, tokenId).Execute()
+func (c *Client) GetToken(ctx context.Context, registryID, tokenID string) (cr.TokenResponse, *cr.APIResponse, error) {
+	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensFindById(ctx, registryID, tokenID).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err
 
 }
 
-func (c *Client) PatchToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PatchTokenInput) (cr.TokenResponse, *cr.APIResponse, error) {
-	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPatch(ctx, registryId, tokenId).PatchTokenInput(tokenInput).Execute()
+func (c *Client) PatchToken(ctx context.Context, registryID, tokenID string, tokenInput cr.PatchTokenInput) (cr.TokenResponse, *cr.APIResponse, error) {
+	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPatch(ctx, registryID, tokenID).PatchTokenInput(tokenInput).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err
 
 }
 
-func (c *Client) PutToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PutTokenInput) (cr.PutTokenOutput, *cr.APIResponse, error) {
-	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPut(ctx, registryId, tokenId).PutTokenInput(tokenInput).Execute()
+func (c *Client) PutToken(ctx context.Context, registryID, tokenID string, tokenInput cr.PutTokenInput) (cr.PutTokenOutput, *cr.APIResponse, error) {
+	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPut(ctx, registryID, tokenID).PutTokenInput(tokenInput).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err
 
