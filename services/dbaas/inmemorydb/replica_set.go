@@ -73,6 +73,7 @@ func (c *Client) IsReplicaSetReady(ctx context.Context, d *schema.ResourceData) 
 	return strings.EqualFold(*replicaSet.Metadata.State, constant.Available), nil
 }
 
+// DeleteReplicaSet sends a 'DELETE' request to the API to delete a replica set.
 func (c *Client) DeleteReplicaSet(ctx context.Context, replicaSetID, location string) (*inMemoryDB.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsDelete(ctx, replicaSetID).Execute()
@@ -80,6 +81,7 @@ func (c *Client) DeleteReplicaSet(ctx context.Context, replicaSetID, location st
 	return apiResponse, err
 }
 
+// UpdateReplicaSet sends a 'PUT' request to the API to update a replica set.
 func (c *Client) UpdateReplicaSet(ctx context.Context, replicaSetID, location string, replicaSet inMemoryDB.ReplicaSetEnsure) (inMemoryDB.ReplicaSetRead, *inMemoryDB.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	replicaSetResponse, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsPut(ctx, replicaSetID).ReplicaSetEnsure(replicaSet).Execute()
@@ -87,6 +89,7 @@ func (c *Client) UpdateReplicaSet(ctx context.Context, replicaSetID, location st
 	return replicaSetResponse, apiResponse, err
 }
 
+// IsReplicaSetDeleted checks if the replica set is deleted.
 func (c *Client) IsReplicaSetDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	replicaSetID := d.Id()
 	_, apiResponse, err := c.GetReplicaSet(ctx, replicaSetID, d.Get("location").(string))
@@ -99,6 +102,7 @@ func (c *Client) IsReplicaSetDeleted(ctx context.Context, d *schema.ResourceData
 	return false, nil
 }
 
+// GetReplicaSet sends a 'GET' request to the API to get a replica set.
 func (c *Client) GetReplicaSet(ctx context.Context, replicaSetID, location string) (inMemoryDB.ReplicaSetRead, *inMemoryDB.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	replicaSet, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsFindById(ctx, replicaSetID).Execute()
@@ -106,6 +110,7 @@ func (c *Client) GetReplicaSet(ctx context.Context, replicaSetID, location strin
 	return replicaSet, apiResponse, err
 }
 
+// GetSnapshot sends a 'GET' request to the API to get a snapshot.
 func (c *Client) GetSnapshot(ctx context.Context, snapshotID, location string) (inMemoryDB.SnapshotRead, *inMemoryDB.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	snapshot, apiResponse, err := c.sdkClient.SnapshotApi.SnapshotsFindById(ctx, snapshotID).Execute()
@@ -113,6 +118,7 @@ func (c *Client) GetSnapshot(ctx context.Context, snapshotID, location string) (
 	return snapshot, apiResponse, err
 }
 
+// ListReplicaSets sends a 'GET' request to the API to get a list of replica sets.
 func (c *Client) ListReplicaSets(ctx context.Context, filterName, location string) (inMemoryDB.ReplicaSetReadList, *inMemoryDB.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	request := c.sdkClient.ReplicaSetApi.ReplicasetsGet(ctx)
