@@ -1,3 +1,7 @@
+## 6.7.6 (future release)
+### Refactor
+- Use SDK Bundle instead of the Kafka SDK
+
 ## 6.7.5
 ## Refactor
 - Use SDK bundle for Object Storage Management

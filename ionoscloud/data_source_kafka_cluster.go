@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	kafkaSdk "github.com/ionos-cloud/sdk-go-kafka"
+	kafkaSdk "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
@@ -124,8 +124,8 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching Kafka Cluster: %w", err))
 		}
 
-		for _, cluster := range *clusters.Items {
-			if cluster.Properties != nil && cluster.Properties.Name != nil && utils.NameMatches(*cluster.Properties.Name, name, partialMatch) {
+		for _, cluster := range clusters.Items {
+			if utils.NameMatches(cluster.Properties.Name, name, partialMatch) {
 				results = append(results, cluster)
 			}
 		}

@@ -3,14 +3,12 @@ package kafka
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"runtime"
 
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	kafka "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	kafka "github.com/ionos-cloud/sdk-go-kafka"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -28,7 +26,7 @@ func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 }
 
 // GetConfig returns the configuration
-func (c *Client) GetConfig() *kafka.Configuration {
+func (c *Client) GetConfig() *shared.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
@@ -52,28 +50,29 @@ var (
 
 // NewClient creates a new Kafka client
 func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	config := kafka.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
-	if os.Getenv(constant.IonosDebug) != "" {
-		config.Debug = true
-	}
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
-	config.HTTPClient = http.DefaultClient
-	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-kafka/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		clientOptions.Version, kafka.Version, clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
-	client := Client{sdkClient: *kafka.NewAPIClient(config),
+
+	client := Client{
+		sdkClient:  *kafka.NewAPIClient(config),
 		fileConfig: fileConfig,
 	}
+	client.sdkClient.GetConfig().HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
+
 	return &client
 }
-func (c *Client) changeConfigURL(location string) {
+
+// ChangeConfigURL changes the url in the config based on the location
+func (c *Client) ChangeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
-	config.Servers = kafka.ServerConfigurations{
+	config.Servers = shared.ServerConfigurations{
 		{
 			URL: locationToURL[location],
 		},
