@@ -3,6 +3,8 @@
 - Add backup to mariadb
 ## Refactor
 - Use MariaDB bundle product instead of sdk-go-dbaas-mariadb
+### Chore
+- Remove nolint, add comments
 
 ## 6.7.5
 ## Refactor

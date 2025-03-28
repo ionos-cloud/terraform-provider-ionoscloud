@@ -16,7 +16,7 @@ import (
 
 var zoneResourceName = "DNS Zone"
 
-//nolint:golint
+// CreateZone creates a new DNS Zone
 func (c *Client) CreateZone(ctx context.Context, d *schema.ResourceData) (zoneResponse dns.ZoneRead, responseInfo utils.ApiResponseInfo, err error) {
 	zoneUuid := uuidgen.ResourceUuid()
 	request := setZonePutRequest(d)
@@ -25,7 +25,7 @@ func (c *Client) CreateZone(ctx context.Context, d *schema.ResourceData) (zoneRe
 	return responseData, apiResponse, err
 }
 
-//nolint:golint
+// IsZoneCreated checks if a zone is created
 func (c *Client) IsZoneCreated(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	zoneID := d.Id()
 	zone, _, err := c.GetZoneById(ctx, zoneID)
@@ -38,14 +38,14 @@ func (c *Client) IsZoneCreated(ctx context.Context, d *schema.ResourceData) (boo
 	return strings.EqualFold((string)(zone.Metadata.State), (string)(dns.PROVISIONINGSTATE_AVAILABLE)), nil
 }
 
-//nolint:golint
+// GetZoneById gets a zone by ID
 func (c *Client) GetZoneById(ctx context.Context, id string) (dns.ZoneRead, *shared.APIResponse, error) {
 	zone, apiResponse, err := c.sdkClient.ZonesApi.ZonesFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return zone, apiResponse, err
 }
 
-//nolint:golint
+// ListZones lists all zones
 func (c *Client) ListZones(ctx context.Context, filterName string) (dns.ZoneReadList, *shared.APIResponse, error) {
 	request := c.sdkClient.ZonesApi.ZonesGet(ctx)
 	if filterName != "" {
@@ -56,7 +56,7 @@ func (c *Client) ListZones(ctx context.Context, filterName string) (dns.ZoneRead
 	return zones, apiResponse, err
 }
 
-//nolint:golint
+// SetZoneData sets the data of a zone
 func (c *Client) SetZoneData(d *schema.ResourceData, zone dns.ZoneRead) error {
 	d.SetId(zone.Id)
 
@@ -83,7 +83,7 @@ func (c *Client) SetZoneData(d *schema.ResourceData, zone dns.ZoneRead) error {
 	return nil
 }
 
-//nolint:golint
+// UpdateZone updates a zone
 func (c *Client) UpdateZone(ctx context.Context, id string, d *schema.ResourceData) (dns.ZoneRead, utils.ApiResponseInfo, error) {
 	request := setZonePutRequest(d)
 	zoneResponse, apiResponse, err := c.sdkClient.ZonesApi.ZonesPut(ctx, id).ZoneEnsure(*request).Execute()
@@ -91,14 +91,14 @@ func (c *Client) UpdateZone(ctx context.Context, id string, d *schema.ResourceDa
 	return zoneResponse, apiResponse, err
 }
 
-//nolint:golint
+// DeleteZone deletes a zone
 func (c *Client) DeleteZone(ctx context.Context, id string) (utils.ApiResponseInfo, error) {
 	_, apiResponse, err := c.sdkClient.ZonesApi.ZonesDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-//nolint:golint
+// IsZoneDeleted checks if a zone is deleted
 func (c *Client) IsZoneDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := c.sdkClient.ZonesApi.ZonesFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
