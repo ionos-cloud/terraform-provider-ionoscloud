@@ -1,11 +1,11 @@
 ## 6.7.6
-### Chore
-- Remove nolint, add comments
-## 6.7.5
 ## Refactor
-- Use SDK bundle for Object Storage Management
+- Use SDK bundle instead of the Object Storage Management SDK
+- Use SDK Bundle instead of the Mongo SDK
 ### Fixes
 - Save `ionoscloud_container_registry_token` password to `password` field in the resource state
+### Chore
+- Remove nolint, add comments
 
 ## 6.7.4
 ### Fixes
