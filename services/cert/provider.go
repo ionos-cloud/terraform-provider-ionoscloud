@@ -39,7 +39,7 @@ func (c *Client) ChangeConfigURL(location string) {
 	}
 }
 
-//nolint:golint
+// GetProvider gets a provider
 func (c *Client) GetProvider(ctx context.Context, providerID, location string) (certmanager.ProviderRead, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersFindById(ctx, providerID).Execute()
@@ -47,7 +47,7 @@ func (c *Client) GetProvider(ctx context.Context, providerID, location string) (
 	return provider, apiResponse, err
 }
 
-//nolint:golint
+// ListProviders lists all providers
 func (c *Client) ListProviders(ctx context.Context, location string) (certmanager.ProviderReadList, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	providers, apiResponse, err := c.sdkClient.ProviderApi.ProvidersGet(ctx).Execute()
@@ -55,7 +55,7 @@ func (c *Client) ListProviders(ctx context.Context, location string) (certmanage
 	return providers, apiResponse, err
 }
 
-//nolint:golint
+// CreateProvider creates a provider
 func (c *Client) CreateProvider(ctx context.Context, providerPostData certmanager.ProviderCreate, location string) (certmanager.ProviderRead, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersPost(ctx).ProviderCreate(providerPostData).Execute()
@@ -63,7 +63,7 @@ func (c *Client) CreateProvider(ctx context.Context, providerPostData certmanage
 	return provider, apiResponse, err
 }
 
-//nolint:golint
+// UpdateProvider updates a provider
 func (c *Client) UpdateProvider(ctx context.Context, providerID, location string, providerPatchData certmanager.ProviderPatch) (certmanager.ProviderRead, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersPatch(ctx, providerID).ProviderPatch(providerPatchData).Execute()
@@ -71,7 +71,7 @@ func (c *Client) UpdateProvider(ctx context.Context, providerID, location string
 	return provider, apiResponse, err
 }
 
-//nolint:golint
+// DeleteProvider deletes a provider
 func (c *Client) DeleteProvider(ctx context.Context, providerID, location string) (*shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	apiResponse, err := c.sdkClient.ProviderApi.ProvidersDelete(ctx, providerID).Execute()
@@ -79,7 +79,7 @@ func (c *Client) DeleteProvider(ctx context.Context, providerID, location string
 	return apiResponse, err
 }
 
-//nolint:golint
+// IsProviderReady checks if a provider is in available state
 func (c *Client) IsProviderReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	providerID := d.Id()
 	location := d.Get("location").(string)
@@ -93,7 +93,7 @@ func (c *Client) IsProviderReady(ctx context.Context, d *schema.ResourceData) (b
 	return strings.EqualFold(provider.Metadata.State, constant.Available), nil
 }
 
-//nolint:golint
+// IsProviderDeleted checks if a provider is deleted
 func (c *Client) IsProviderDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	providerID := d.Id()
 	location := d.Get("location").(string)
@@ -110,7 +110,7 @@ func (c *Client) IsProviderDeleted(ctx context.Context, d *schema.ResourceData) 
 	return false, nil
 }
 
-//nolint:golint
+// GetProviderDataCreate gets the data for creating a provider
 func GetProviderDataCreate(d *schema.ResourceData) *certmanager.ProviderCreate {
 	provider := certmanager.ProviderCreate{
 		Properties: certmanager.Provider{},
@@ -133,7 +133,7 @@ func GetProviderDataCreate(d *schema.ResourceData) *certmanager.ProviderCreate {
 	return &provider
 }
 
-//nolint:golint
+// SetProviderData sets the data of a provider
 func SetProviderData(d *schema.ResourceData, provider certmanager.ProviderRead) error {
 	resourceName := "Auto-certificate provider"
 	d.SetId(provider.Id)
@@ -151,12 +151,11 @@ func SetProviderData(d *schema.ResourceData, provider certmanager.ProviderRead) 
 	return nil
 }
 
-//nolint:golint
+// GetProviderDataUpdate gets the data for updating a provider
 func GetProviderDataUpdate(d *schema.ResourceData) *certmanager.ProviderPatch {
 	provider := certmanager.ProviderPatch{
 		Properties: certmanager.PatchName{},
 	}
-
 	if d.HasChange("name") {
 		_, newValue := d.GetChange("name")
 		newValueStr := newValue.(string)

@@ -1,3 +1,6 @@
+## 6.7.6
+### Chore
+- Remove nolint, add comments
 ## 6.7.5
 ## Refactor
 - Use SDK bundle for Object Storage Management

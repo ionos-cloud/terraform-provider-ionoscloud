@@ -111,7 +111,7 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	registryTokenResponse, _, err := client.CreateTokens(ctx, registryId, *registryToken)
+	registryTokenResponse, _, err := client.CreateToken(ctx, registryId, *registryToken)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while creating the registry token: %w", err))
 	}
