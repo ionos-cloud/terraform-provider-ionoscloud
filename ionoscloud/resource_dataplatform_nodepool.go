@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -255,22 +256,31 @@ func resourceDataplatformNodePoolDelete(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceDataplatformNodePoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import format: %v, expected: {dataplatformClusterID}/{dataplatformNodePoolID}", d.Id())
+	}
+	clusterID := parts[0]
+	nodePoolID := parts[1]
+
 	client := meta.(bundleclient.SdkBundle).DataplatformClient
 
-	clusterId := d.Get("cluster_id").(string)
-	nodePoolId := d.Id()
-
-	dataplatformNodePool, apiResponse, err := client.GetNodePool(ctx, clusterId, nodePoolId)
+	dataplatformNodePool, apiResponse, err := client.GetNodePool(ctx, clusterID, nodePoolID)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("dataplatform Node Pool does not exist %q", nodePoolId)
+			return nil, fmt.Errorf("dataplatform Node Pool with ID: %v does not exist", nodePoolID)
 		}
-		return nil, fmt.Errorf("an error occurred while trying to fetch the import of Dataplatform Node Pool %q, error:%w", nodePoolId, err)
+		return nil, fmt.Errorf("an error occurred while trying to import Dataplatform Node Pool with ID: %v, error: %w", nodePoolID, err)
 	}
 
 	log.Printf("[INFO] Dataplatform Node Pool found: %+v", dataplatformNodePool)
+
+	if err := d.Set("cluster_id", clusterID); err != nil {
+		return nil, fmt.Errorf("error while setting 'cluster_id' property for Dataplatform Node Pool with ID: %v, error: %w", nodePoolID, err)
+	}
 
 	if err := dataplatformService.SetDataplatformNodePoolData(d, dataplatformNodePool); err != nil {
 		return nil, err

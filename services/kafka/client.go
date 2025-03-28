@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"runtime"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	kafka "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -55,8 +57,9 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
 	config.UserAgent = fmt.Sprintf(
-		"terraform-provider/_ionos-cloud-sdk-go-kafka/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		kafka.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+		"terraform-provider/%s_ionos-cloud-sdk-go-kafka/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		clientOptions.Version, kafka.Version, clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 
 	client := Client{

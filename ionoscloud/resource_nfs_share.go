@@ -130,7 +130,7 @@ func resourceNFSShareCreate(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating NFS Share: %w", err))
 	}
-	shareID := *response.Id
+	shareID := response.Id
 	d.SetId(shareID)
 
 	if err := client.SetNFSShareData(d, response); err != nil {
