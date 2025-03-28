@@ -150,6 +150,7 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 				Description: "Properties configuring the backup of the cluster. Immutable, change forces re-creation of the cluster.",
 				Optional:    true,
 				ForceNew:    true,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"location": {

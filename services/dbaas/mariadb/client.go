@@ -2,7 +2,6 @@ package mariadb
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -54,39 +53,9 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	return client
 }
 
-// overrideClientEndpoint todo - after move to bundle, replace with generic function from fileConfig
-func (c *Client) overrideClientEndpoint(productName, location string) {
-	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
-	defer c.changeConfigURL(location)
-	if os.Getenv(ionosAPIURLMariaDB) != "" {
-		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(ionosAPIURLMariaDB))
-		return
-	}
-	fileConfig := c.GetFileConfig()
-	if fileConfig == nil {
-		return
-	}
-	config := c.GetConfig()
-	if config == nil {
-		return
-	}
-	endpoint := fileConfig.GetProductLocationOverrides(productName, location)
-	if endpoint == nil {
-		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
-		return
-	}
-	config.Servers = shared.ServerConfigurations{
-		{
-			URL:         endpoint.Name,
-			Description: shared.EndpointOverridden + location,
-		},
-	}
-	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
-}
-
-// changeConfigURL modifies the URL inside the client configuration.
+// ChangeConfigURL modifies the URL inside the client configuration.
 // This function is required in order to make requests to different endpoints based on location.
-func (c *Client) changeConfigURL(location string) {
+func (c *Client) ChangeConfigURL(location string) {
 	clientConfig := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLMariaDB) != "" {
 		clientConfig.Servers = shared.ServerConfigurations{
