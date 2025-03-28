@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	kafka "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -63,14 +61,15 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	)
 
 	client := Client{
-		sdkClient: *kafka.NewAPIClient(config),
+		sdkClient:  *kafka.NewAPIClient(config),
+		fileConfig: fileConfig,
 	}
 	client.sdkClient.GetConfig().HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
 
 	return &client
 }
 
-func (c *Client) changeConfigURL(location string) {
+func (c *Client) ChangeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	config.Servers = shared.ServerConfigurations{
 		{
