@@ -202,7 +202,7 @@ func GetReplicaSetDataUpdate(d *schema.ResourceData) inMemoryDB.ReplicaSetEnsure
 	}
 }
 
-//nolint:all
+// SetReplicaSetData populates the tf resource data with the response from the API.
 func (c *Client) SetReplicaSetData(d *schema.ResourceData, replicaSet inMemoryDB.ReplicaSetRead) error {
 	resourceName := "InMemoryDB replica set"
 	if replicaSet.Id != nil {
@@ -297,6 +297,7 @@ func (c *Client) SetReplicaSetData(d *schema.ResourceData, replicaSet inMemoryDB
 	return nil
 }
 
+// SetSnapshotData populates the tf resource data with the response from the API.
 func (c *Client) SetSnapshotData(d *schema.ResourceData, snapshot inMemoryDB.SnapshotRead) error {
 	if snapshot.Id == nil {
 		return fmt.Errorf("expected a valid ID for InMemoryDB snapshot, but got 'nil' instead")
