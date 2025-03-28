@@ -37,6 +37,25 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 		CheckDestroy:             testAccCheckDBaaSMariaDBClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
+				Config: mariaDBClusterConfigBasicNoBackup,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDBaaSMariaDBClusterExists(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, &cluster),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterVersionAttribute, clusterVersionValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterInstancesAttribute, clusterInstancesValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCoresAttribute, clusterCoresValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterRamAttribute, clusterRamValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterStorageSizeAttribute, clusterStorageSizeValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterDisplayNameAttribute, clusterDisplayNameValue),
+					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
+					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
+					resource.TestCheckResourceAttrSet(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterBackupAttribute+".0."+clusterBackupLocationAttribute),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameValue),
+					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsPasswordAttribute, constant.RandomPassword+".cluster_password", "result"),
+				),
+			},
+			{
 				Config: mariaDBClusterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDBaaSMariaDBClusterExists(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, &cluster),
@@ -232,6 +251,27 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
   ` + connections + `
   ` + maintenanceWindow + `
   ` + backup + `
+  ` + credentials + `
+}
+
+# Wait few seconds after cluster creation so the backups can be properly retrieved
+resource "time_sleep" "wait_5_minutes" {
+  depends_on = [` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `]
+  create_duration = "300s"
+}
+`
+
+const mariaDBClusterConfigBasicNoBackup = mariaDBTestInfraConfig + `
+resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
+  ` + clusterVersionAttribute + ` = "` + clusterVersionValue + `"
+  ` + clusterInstancesAttribute + ` = "` + clusterInstancesValue + `"
+  ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
+  ` + clusterCoresAttribute + ` = "` + clusterCoresValue + `"
+  ` + clusterRamAttribute + ` = "` + clusterRamValue + `"
+  ` + clusterStorageSizeAttribute + ` = "` + clusterStorageSizeValue + `"
+  ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameValue + `"
+  ` + connections + `
+  ` + maintenanceWindow + `
   ` + credentials + `
 }
 
