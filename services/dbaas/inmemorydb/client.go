@@ -18,6 +18,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// Client is a wrapper for the in-memory db client that has file configuration
 type Client struct {
 	sdkClient  *inMemoryDB.APIClient
 	fileConfig *fileconfiguration.FileConfig
