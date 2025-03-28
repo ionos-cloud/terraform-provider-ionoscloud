@@ -69,6 +69,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	return &client
 }
 
+// ChangeConfigURL changes the url in the config based on the location
 func (c *Client) ChangeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	config.Servers = shared.ServerConfigurations{
