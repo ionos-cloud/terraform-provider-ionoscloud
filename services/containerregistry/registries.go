@@ -10,31 +10,36 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	cr "github.com/ionos-cloud/sdk-go-container-registry"
+	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-func (c *Client) ListRegistries(ctx context.Context) (cr.RegistriesResponse, *cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) ListRegistries(ctx context.Context) (cr.RegistriesResponse, *shared.APIResponse, error) {
 	registry, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return registry, apiResponse, err
 }
 
-func (c *Client) CreateRegistry(ctx context.Context, registryInput cr.PostRegistryInput) (cr.PostRegistryOutput, *cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) CreateRegistry(ctx context.Context, registryInput cr.PostRegistryInput) (cr.PostRegistryOutput, *shared.APIResponse, error) {
 	registry, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesPost(ctx).PostRegistryInput(registryInput).Execute()
 	apiResponse.LogInfo()
 	return registry, apiResponse, err
 }
 
-func (c *Client) DeleteRegistry(ctx context.Context, registryId string) (*cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) DeleteRegistry(ctx context.Context, registryId string) (*shared.APIResponse, error) {
 	apiResponse, err := c.sdkClient.RegistriesApi.RegistriesDelete(ctx, registryId).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-func (c *Client) GetRegistry(ctx context.Context, registryId string) (cr.RegistryResponse, *cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) GetRegistry(ctx context.Context, registryId string) (cr.RegistryResponse, *shared.APIResponse, error) {
 	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesFindById(ctx, registryId).Execute()
 	apiResponse.LogInfo()
 	return registries, apiResponse, err
@@ -57,68 +62,72 @@ func (c *Client) IsRegistryReady(ctx context.Context, d *schema.ResourceData) (b
 	if err != nil {
 		return true, fmt.Errorf("status check failed for container registry creg with ID: %v, error: %w", ID, err)
 	}
-
-	if creg.Metadata == nil || creg.Metadata.State == nil {
-		return false, fmt.Errorf("metadata or state is empty for container registry with ID: %v", ID)
-	}
-
-	log.Printf("[INFO] state of the container registry with ID: %v is: %s ", ID, *creg.Metadata.State)
-	return strings.EqualFold(*creg.Metadata.State, "RUNNING"), nil
+	log.Printf("[INFO] state of the container registry with ID: %v is: %s ", ID, creg.Metadata.State)
+	return strings.EqualFold(creg.Metadata.State, "RUNNING"), nil
 }
 
-func (c *Client) PatchRegistry(ctx context.Context, registryId string, registryInput cr.PatchRegistryInput) (cr.RegistryResponse, *cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) PatchRegistry(ctx context.Context, registryId string, registryInput cr.PatchRegistryInput) (cr.RegistryResponse, *shared.APIResponse, error) {
 	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesPatch(ctx, registryId).PatchRegistryInput(registryInput).Execute()
 	apiResponse.LogInfo()
 	return registries, apiResponse, err
 }
 
-func (c *Client) PutRegistry(ctx context.Context, registryId string, registryInput cr.PutRegistryInput) (cr.PutRegistryOutput, *cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) PutRegistry(ctx context.Context, registryId string, registryInput cr.PutRegistryInput) (cr.PutRegistryOutput, *shared.APIResponse, error) {
 	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesPut(ctx, registryId).PutRegistryInput(registryInput).Execute()
 	apiResponse.LogInfo()
 	return registries, apiResponse, err
 }
 
-func (c *Client) DeleteRepositories(ctx context.Context, registryId, repositoryId string) (*cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) DeleteRepositories(ctx context.Context, registryId, repositoryId string) (*shared.APIResponse, error) {
 	apiResponse, err := c.sdkClient.RepositoriesApi.RegistriesRepositoriesDelete(ctx, registryId, repositoryId).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-func (c *Client) ListTokens(ctx context.Context, registryId string) (cr.TokensResponse, *cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) ListTokens(ctx context.Context, registryId string) (cr.TokensResponse, *shared.APIResponse, error) {
 	tokens, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensGet(ctx, registryId).Execute()
 	apiResponse.LogInfo()
 	return tokens, apiResponse, err
 
 }
 
-func (c *Client) CreateTokens(ctx context.Context, registryId string, tokenInput cr.PostTokenInput) (cr.PostTokenOutput, *cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) CreateTokens(ctx context.Context, registryId string, tokenInput cr.PostTokenInput) (cr.PostTokenOutput, *shared.APIResponse, error) {
 	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPost(ctx, registryId).PostTokenInput(tokenInput).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err
 
 }
 
-func (c *Client) DeleteToken(ctx context.Context, registryId, tokenId string) (*cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) DeleteToken(ctx context.Context, registryId, tokenId string) (*shared.APIResponse, error) {
 	apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensDelete(ctx, registryId, tokenId).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-func (c *Client) GetToken(ctx context.Context, registryId, tokenId string) (cr.TokenResponse, *cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) GetToken(ctx context.Context, registryId, tokenId string) (cr.TokenResponse, *shared.APIResponse, error) {
 	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensFindById(ctx, registryId, tokenId).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err
 
 }
 
-func (c *Client) PatchToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PatchTokenInput) (cr.TokenResponse, *cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) PatchToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PatchTokenInput) (cr.TokenResponse, *shared.APIResponse, error) {
 	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPatch(ctx, registryId, tokenId).PatchTokenInput(tokenInput).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err
 
 }
 
-func (c *Client) PutToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PutTokenInput) (cr.PutTokenOutput, *cr.APIResponse, error) {
+//nolint:golint
+func (c *Client) PutToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PutTokenInput) (cr.PutTokenOutput, *shared.APIResponse, error) {
 	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPut(ctx, registryId, tokenId).PutTokenInput(tokenInput).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err
@@ -129,32 +138,32 @@ func (c *Client) PutToken(ctx context.Context, registryId, tokenId string, token
 func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error) {
 
 	registry := cr.PostRegistryInput{
-		Properties: &cr.PostRegistryProperties{},
+		Properties: cr.PostRegistryProperties{},
 	}
 
 	if _, ok := d.GetOk("garbage_collection_schedule"); ok {
-		registry.Properties.GarbageCollectionSchedule = GetWeeklySchedule(d, "garbage_collection_schedule")
+		registry.Properties.GarbageCollectionSchedule = getWeeklySchedule(d, "garbage_collection_schedule")
 	}
 
 	if location, ok := d.GetOk("location"); ok {
 		location := location.(string)
-		registry.Properties.Location = &location
+		registry.Properties.Location = location
 	}
 
 	if name, ok := d.GetOk("name"); ok {
 		name := name.(string)
-		registry.Properties.Name = &name
+		registry.Properties.Name = name
 	}
 
 	if v, ok := d.GetOk("api_subnet_allow_list"); ok {
-		raw := v.([]interface{})
+		raw := v.([]any)
 		ips := make([]string, len(raw))
 		err := utils.DecodeInterfaceToStruct(raw, ips)
 		if err != nil {
 			return nil, err
 		}
 		if len(ips) > 0 {
-			registry.Properties.ApiSubnetAllowList = &ips
+			registry.Properties.ApiSubnetAllowList = ips
 		}
 	}
 
@@ -167,7 +176,7 @@ func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, erro
 	registry := cr.PatchRegistryInput{}
 
 	if _, ok := d.GetOk("garbage_collection_schedule"); ok {
-		registry.GarbageCollectionSchedule = GetWeeklySchedule(d, "garbage_collection_schedule")
+		registry.GarbageCollectionSchedule = getWeeklySchedule(d, "garbage_collection_schedule")
 	}
 
 	// When api_subnet_allow_list = [] in the TF plan:
@@ -176,37 +185,38 @@ func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, erro
 	// We don't want to ignore the cases in which we modify the api_subnet_allow_list to an empty list, so
 	// here we need to use 'GetOkExists'.
 	if v, ok := d.GetOkExists("api_subnet_allow_list"); ok { //nolint:staticcheck
-		raw := v.([]interface{})
+		raw := v.([]any)
 		ips := make([]string, len(raw))
 		err := utils.DecodeInterfaceToStruct(raw, ips)
 		if err != nil {
 			return nil, err
 		}
-		registry.ApiSubnetAllowList = &ips
+		registry.ApiSubnetAllowList = ips
 	}
 
 	return &registry, nil
 }
 
-func GetWeeklySchedule(d *schema.ResourceData, property string) *cr.WeeklySchedule {
+func getWeeklySchedule(d *schema.ResourceData, property string) *cr.WeeklySchedule {
 	var weeklySchedule cr.WeeklySchedule
 
 	if days, ok := d.GetOk(fmt.Sprintf("%v.0.days", property)); ok {
 		var daysToAdd []cr.Day
-		for _, day := range days.([]interface{}) {
+		for _, day := range days.([]any) {
 			daysToAdd = append(daysToAdd, cr.Day(day.(string)))
 		}
-		weeklySchedule.Days = &daysToAdd
+		weeklySchedule.Days = daysToAdd
 	}
 
 	if timeField, ok := d.GetOk(fmt.Sprintf("%v.0.time", property)); ok {
 		timeStr := timeField.(string)
-		weeklySchedule.Time = &timeStr
+		weeklySchedule.Time = timeStr
 	}
 
 	return &weeklySchedule
 }
 
+// SetRegistryData sets the registry data for the container registry
 func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error {
 
 	resourceName := "registry"
@@ -216,8 +226,8 @@ func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error
 	}
 
 	if registry.Properties.GarbageCollectionSchedule != nil {
-		var schedule []interface{}
-		scheduleEntry := SetWeeklySchedule(*registry.Properties.GarbageCollectionSchedule)
+		var schedule []any
+		scheduleEntry := setWeeklySchedule(*registry.Properties.GarbageCollectionSchedule)
 		schedule = append(schedule, scheduleEntry)
 		if err := d.Set("garbage_collection_schedule", schedule); err != nil {
 			return utils.GenerateSetError(resourceName, "garbage_collection_schedule", err)
@@ -230,31 +240,25 @@ func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error
 		}
 	}
 
-	if registry.Properties.Location != nil {
-		if err := d.Set("location", *registry.Properties.Location); err != nil {
-			return utils.GenerateSetError(resourceName, "location", err)
-		}
+	if err := d.Set("location", registry.Properties.Location); err != nil {
+		return utils.GenerateSetError(resourceName, "location", err)
 	}
 
-	if registry.Properties.Name != nil {
-		if err := d.Set("name", *registry.Properties.Name); err != nil {
-			return utils.GenerateSetError(resourceName, "name", err)
-		}
+	if err := d.Set("name", registry.Properties.Name); err != nil {
+		return utils.GenerateSetError(resourceName, "name", err)
 	}
 
 	if registry.Properties.StorageUsage != nil {
-		var storage []interface{}
-		storageEntry := SetStorageUsage(*registry.Properties.StorageUsage)
+		var storage []any
+		storageEntry := setStorageUsage(*registry.Properties.StorageUsage)
 		storage = append(storage, storageEntry)
 		if err := d.Set("storage_usage", storage); err != nil {
 			return utils.GenerateSetError(resourceName, "storage_usage", err)
 		}
 	}
 
-	if registry.Properties.ApiSubnetAllowList != nil {
-		if err := d.Set("api_subnet_allow_list", *registry.Properties.ApiSubnetAllowList); err != nil {
-			return fmt.Errorf("error setting api_subnet_allow_list %w", err)
-		}
+	if err := d.Set("api_subnet_allow_list", registry.Properties.ApiSubnetAllowList); err != nil {
+		return fmt.Errorf("error setting api_subnet_allow_list %w", err)
 	}
 
 	if registry.Properties.Features != nil {
@@ -270,9 +274,9 @@ func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error
 	return nil
 }
 
-func SetWeeklySchedule(weeklySchedule cr.WeeklySchedule) map[string]interface{} {
+func setWeeklySchedule(weeklySchedule cr.WeeklySchedule) map[string]any {
 
-	schedule := map[string]interface{}{}
+	schedule := map[string]any{}
 
 	utils.SetPropWithNilCheck(schedule, "time", weeklySchedule.Time)
 	utils.SetPropWithNilCheck(schedule, "days", weeklySchedule.Days)
@@ -280,9 +284,9 @@ func SetWeeklySchedule(weeklySchedule cr.WeeklySchedule) map[string]interface{} 
 	return schedule
 }
 
-func SetStorageUsage(storageUsage cr.StorageUsage) map[string]interface{} {
+func setStorageUsage(storageUsage cr.StorageUsage) map[string]any {
 
-	storage := map[string]interface{}{}
+	storage := map[string]any{}
 
 	utils.SetPropWithNilCheck(storage, "bytes", storageUsage.Bytes)
 	if storageUsage.UpdatedAt != nil {
@@ -292,23 +296,25 @@ func SetStorageUsage(storageUsage cr.StorageUsage) map[string]interface{} {
 	return storage
 }
 
+// GetTokenDataCreate returns the token data for the registry token
 func GetTokenDataCreate(d *schema.ResourceData) (*cr.PostTokenInput, error) {
 
 	token := cr.PostTokenInput{
-		Properties: &cr.PostTokenProperties{},
+		Properties: cr.PostTokenProperties{},
 	}
 
 	if expiryDate, ok := d.GetOk("expiry_date"); ok {
-		expiryDate, err := convertToIonosTime(expiryDate.(string))
+		expiryDate, err := convertToTime(expiryDate.(string))
 		if err != nil {
 			return nil, err
 		}
-		token.Properties.ExpiryDate = expiryDate
+		nullableIonosTime := cr.NullableIonosTime{NullableTime: *(cr.NewNullableTime(expiryDate))}
+		token.Properties.ExpiryDate = &nullableIonosTime
 	}
 
 	if name, ok := d.GetOk("name"); ok {
 		name := name.(string)
-		token.Properties.Name = &name
+		token.Properties.Name = name
 	}
 
 	if _, ok := d.GetOk("scopes"); ok {
@@ -323,18 +329,21 @@ func GetTokenDataCreate(d *schema.ResourceData) (*cr.PostTokenInput, error) {
 	return &token, nil
 }
 
+// GetTokenDataUpdate returns the token data for the registry token
 func GetTokenDataUpdate(d *schema.ResourceData) (*cr.PatchTokenInput, error) {
 
 	token := cr.PatchTokenInput{}
 
 	if expiryDate, ok := d.GetOk("expiry_date"); ok {
-		expiryDate, err := convertToIonosTime(expiryDate.(string))
+		expiryDate, err := convertToTime(expiryDate.(string))
 		if err != nil {
 			return nil, err
 		}
-		token.ExpiryDate = expiryDate
+		nullableIonosTime := cr.NullableIonosTime{NullableTime: *(cr.NewNullableTime(expiryDate))}
+		token.ExpiryDate = &nullableIonosTime
 	} else {
-		token.ExpiryDate = nil
+		nullableIonosTime := cr.NullableIonosTime{NullableTime: *(cr.NewNullableTime(nil))}
+		token.ExpiryDate = &nullableIonosTime
 	}
 
 	if _, ok := d.GetOk("scopes"); ok {
@@ -349,79 +358,66 @@ func GetTokenDataUpdate(d *schema.ResourceData) (*cr.PatchTokenInput, error) {
 	return &token, nil
 }
 
-func GetScopes(d *schema.ResourceData) *[]cr.Scope {
+// GetScopes returns the scopes for the registry token
+func GetScopes(d *schema.ResourceData) []cr.Scope {
 	scopes := make([]cr.Scope, 0)
 
 	if scopeValue, ok := d.GetOk("scopes"); ok {
-		scopeValue := scopeValue.([]interface{})
-		if scopeValue != nil {
-			for _, item := range scopeValue {
+		scopeValue := scopeValue.([]any)
+		for _, item := range scopeValue {
 
-				scopeContent := item.(map[string]interface{})
-				connection := cr.Scope{}
+			scopeContent := item.(map[string]any)
+			connection := cr.Scope{}
 
-				if actions, ok := scopeContent["actions"]; ok {
-					actions := actions.([]interface{})
-					var actionsToAdd []string
-					if actions != nil && len(actions) > 0 {
-						for _, action := range actions {
-							actionsToAdd = append(actionsToAdd, action.(string))
-						}
+			if actions, ok := scopeContent["actions"]; ok {
+				actions := actions.([]any)
+				var actionsToAdd []string
+				if len(actions) > 0 {
+					for _, action := range actions {
+						actionsToAdd = append(actionsToAdd, action.(string))
 					}
-					connection.Actions = &actionsToAdd
 				}
-
-				if name, ok := scopeContent["name"]; ok {
-					name := name.(string)
-					connection.Name = &name
-				}
-
-				if scopeType, ok := scopeContent["type"]; ok {
-					scopeType := scopeType.(string)
-					connection.Type = &scopeType
-				}
-
-				scopes = append(scopes, connection)
+				connection.Actions = actionsToAdd
 			}
+
+			if name, ok := scopeContent["name"]; ok {
+				name := name.(string)
+				connection.Name = name
+			}
+
+			if scopeType, ok := scopeContent["type"]; ok {
+				scopeType := scopeType.(string)
+				connection.Type = scopeType
+			}
+
+			scopes = append(scopes, connection)
 		}
 
 	}
 
-	return &scopes
+	return scopes
 
 }
 
+// SetTokenData sets the token data for the registry token. Does not set credentials, as they never change once created
 func SetTokenData(d *schema.ResourceData, tokenProps cr.TokenProperties) error {
 
 	regToken := "registry token "
 
-	if tokenProps.Credentials != nil {
-		var credentials []interface{}
-		credentialsEntry := SetCredentials(*tokenProps.Credentials)
-		credentials = append(credentials, credentialsEntry)
-		if err := d.Set("credentials", credentials); err != nil {
-			return utils.GenerateSetError(regToken, "credentials", err)
-		}
-	}
-
 	if tokenProps.ExpiryDate != nil {
-		timeValue := (*tokenProps.ExpiryDate).Time
-		if err := d.Set("expiry_date", timeValue.String()); err != nil {
+		timeValue := tokenProps.ExpiryDate.NullableTime
+		if err := d.Set("expiry_date", timeValue.Get().String()); err != nil {
 			return utils.GenerateSetError(regToken, "expiry_date", err)
 		}
 	}
 
-	if tokenProps.Name != nil {
-		if err := d.Set("name", *tokenProps.Name); err != nil {
-			return utils.GenerateSetError(regToken, "name", err)
-		}
+	if err := d.Set("name", tokenProps.Name); err != nil {
+		return utils.GenerateSetError(regToken, "name", err)
 	}
 
-	if tokenProps.Scopes != nil {
-		scopes := SetScopes(*tokenProps.Scopes)
-		if err := d.Set("scopes", scopes); err != nil {
-			return utils.GenerateSetError(regToken, "scopes", err)
-		}
+	scopes := setScopes(tokenProps.Scopes)
+	if err := d.Set("scopes", scopes); err != nil {
+		return utils.GenerateSetError(regToken, "scopes", err)
 	}
 
 	if tokenProps.Status != nil {
@@ -433,32 +429,29 @@ func SetTokenData(d *schema.ResourceData, tokenProps cr.TokenProperties) error {
 	return nil
 }
 
-func SetCredentials(credentials cr.Credentials) map[string]interface{} {
+// SetCredentials sets the credentials for the registry token. username can be set on read, password will be set only on create
+func SetCredentials(credentials cr.Credentials) map[string]any {
 
-	credentialsEntry := map[string]interface{}{}
-
-	utils.SetPropWithNilCheck(credentialsEntry, "username", credentials.Username)
+	credentialsEntry := map[string]any{}
+	credentialsEntry["username"] = credentials.Username
+	if credentials.Password != "" {
+		credentialsEntry["password"] = credentials.Password
+	}
 
 	return credentialsEntry
 }
 
-func SetScopes(scopes []cr.Scope) []interface{} {
+func setScopes(scopes []cr.Scope) []any {
 
-	var tokenScopes []interface{}
+	var tokenScopes []any //nolint:prealloc
 	for _, scope := range scopes {
-		scopeEntry := make(map[string]interface{})
+		scopeEntry := make(map[string]any)
 
 		if scope.Actions != nil {
-			scopeEntry["actions"] = *scope.Actions
+			scopeEntry["actions"] = scope.Actions
 		}
-
-		if scope.Name != nil {
-			scopeEntry["name"] = *scope.Name
-		}
-
-		if scope.Type != nil {
-			scopeEntry["type"] = *scope.Type
-		}
+		scopeEntry["name"] = scope.Name
+		scopeEntry["type"] = scope.Type
 
 		tokenScopes = append(tokenScopes, scopeEntry)
 	}
@@ -503,7 +496,7 @@ func GetRegistryFeatures(d *schema.ResourceData) (*cr.RegistryFeatures, diag.Dia
 	registryFeatures.VulnerabilityScanning = cr.NewFeatureVulnerabilityScanning(true)
 	if vulnerabilityScanning, ok := d.GetOkExists("features.0.vulnerability_scanning"); ok { //nolint:staticcheck
 		vulnerabilityScanning := vulnerabilityScanning.(bool)
-		registryFeatures.VulnerabilityScanning.Enabled = &vulnerabilityScanning
+		registryFeatures.VulnerabilityScanning.Enabled = vulnerabilityScanning
 		warnings = diag.Diagnostics{crfWarnings.warnCRVScanningOff}
 
 		if vulnerabilityScanning {
@@ -515,8 +508,7 @@ func GetRegistryFeatures(d *schema.ResourceData) (*cr.RegistryFeatures, diag.Dia
 
 }
 
-func convertToIonosTime(targetTime string) (*cr.IonosTime, error) {
-	var ionosTime cr.IonosTime
+func convertToTime(targetTime string) (*time.Time, error) {
 	var convertedTime time.Time
 	var err error
 
@@ -526,6 +518,5 @@ func convertToIonosTime(targetTime string) (*cr.IonosTime, error) {
 			return nil, fmt.Errorf("an error occurred while converting from IonosTime string to time.Time: %w", err)
 		}
 	}
-	ionosTime.Time = convertedTime
-	return &ionosTime, nil
+	return &convertedTime, nil
 }

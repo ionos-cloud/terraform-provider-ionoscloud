@@ -2,10 +2,12 @@ package provider
 
 import (
 	"context"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 	"os"
+	"runtime/debug"
 	"strconv"
+
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -14,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
@@ -136,7 +137,11 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	region := os.Getenv("IONOS_S3_REGION")
 	endpoint := os.Getenv("IONOS_API_URL")
 	terraformVersion := req.TerraformVersion
-	version := ionoscloud.Version
+	version := "DEV"
+	info, ok := debug.ReadBuildInfo()
+	if ok {
+		version = info.Main.Version
+	}
 
 	insecureStr := os.Getenv("IONOS_ALLOW_INSECURE")
 	insecureBool := false

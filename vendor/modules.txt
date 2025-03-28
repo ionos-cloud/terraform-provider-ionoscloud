@@ -320,6 +320,12 @@ github.com/ionos-cloud/sdk-go-api-gateway
 # github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.2.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/cert/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2
@@ -335,6 +341,9 @@ github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
@@ -342,12 +351,6 @@ github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
 ## explicit; go 1.20
 github.com/ionos-cloud/sdk-go-bundle/shared
 github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration
-# github.com/ionos-cloud/sdk-go-cert-manager v1.3.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-cert-manager
-# github.com/ionos-cloud/sdk-go-container-registry v1.2.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-container-registry
 # github.com/ionos-cloud/sdk-go-dataplatform v1.1.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dataplatform
@@ -366,9 +369,6 @@ github.com/ionos-cloud/sdk-go-kafka
 # github.com/ionos-cloud/sdk-go-object-storage v1.1.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-object-storage
-# github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-object-storage-management
 # github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-vm-autoscaling

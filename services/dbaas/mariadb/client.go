@@ -40,8 +40,10 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	newConfig.MaxWaitTime = constant.MaxWaitTime
 
 	newConfig.UserAgent = fmt.Sprintf(
-		"terraform-provider/ionos-cloud-sdk-go-dbaas-mariadb/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		mariadb.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mariadb/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		clientOptions.Version, mariadb.Version, clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	)
 
 	client := &Client{
 		sdkClient:  mariadb.NewAPIClient(newConfig),

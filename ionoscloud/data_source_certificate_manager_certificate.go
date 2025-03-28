@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
+	certmanager "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
@@ -70,15 +70,12 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 			return diag.FromErr(fmt.Errorf("error getting certificate with id %s %w", idStr, err))
 		}
 		if nameOk {
-			if certificate.Properties != nil && certificate.Properties.Name != nil &&
-				!strings.EqualFold(*certificate.Properties.Name, name) {
+			if !strings.EqualFold(certificate.Properties.Name, name) {
 				return diag.FromErr(fmt.Errorf("name of cert (UUID=%s, name=%s) does not match expected name: %s",
-					*certificate.Id, *certificate.Properties.Name, name))
+					certificate.Id, certificate.Properties.Name, name))
 			}
 		}
-		if certificate.Properties != nil {
-			log.Printf("[INFO] Got certificate [Name=%s]", *certificate.Properties.Name)
-		}
+		log.Printf("[INFO] Got certificate [Name=%s]", certificate.Properties.Name)
 
 	} else {
 		log.Printf("[INFO] Using data source for certificate with name: %s", name)
@@ -92,8 +89,8 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 
 		if certificates.Items != nil {
 			var certsFound []certmanager.CertificateRead
-			for _, certItem := range *certificates.Items {
-				if certItem.Properties != nil && certItem.Properties.Name != nil && *certItem.Properties.Name == name {
+			for _, certItem := range certificates.Items {
+				if certItem.Properties.Name == name {
 					certsFound = append(certsFound, certItem)
 				}
 			}
