@@ -23,17 +23,15 @@ type Volume struct {
 	// The URL to the object representation (absolute path).
 	Href       *string                    `json:"href,omitempty"`
 	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties *VolumeProperties          `json:"properties"`
+	Properties *VolumeProperties          `json:"properties,omitempty"`
 }
 
 // NewVolume instantiates a new Volume object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVolume(properties VolumeProperties) *Volume {
+func NewVolume() *Volume {
 	this := Volume{}
-
-	this.Properties = &properties
 
 	return &this
 }

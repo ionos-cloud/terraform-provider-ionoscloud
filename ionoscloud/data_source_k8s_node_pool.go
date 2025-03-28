@@ -53,6 +53,11 @@ func dataSourceK8sNodePool() *schema.Resource {
 				Description: "CPU Family",
 				Computed:    true,
 			},
+			"server_type": {
+				Type:        schema.TypeString,
+				Description: "The server type for the compute engine",
+				Computed:    true,
+			},
 			"cores_count": {
 				Type:        schema.TypeInt,
 				Description: "CPU cores count",

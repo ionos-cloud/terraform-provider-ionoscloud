@@ -69,6 +69,7 @@ resource "ionoscloud_k8s_node_pool" "example" {
   cores_count           = 2
   ram_size              = 2048
   storage_size          = 40
+  server_type           = "DedicatedCore"
   public_ips            = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1], ionoscloud_ipblock.example.ips[2] ]
   lans {
     id                  = ionoscloud_lan.example.id
@@ -111,7 +112,8 @@ The following arguments are supported:
     - `day_of_the_week` - (Required)[string] Day of the week when maintenance is allowed
 - `datacenter_id` - (Required)[string] A Datacenter's UUID
 - `k8s_cluster_id`- (Required)[string] A k8s cluster's UUID
-- `cpu_family` - (Required)[string] The desired CPU Family - See the API documentation for more information. *This attribute is immutable*.
+- `cpu_family` - (Optional)[string] The desired CPU Family - See the API documentation for more information. *This attribute is immutable*.
+- `server_type` - (Optional)[string] The server type for the compute engine - See the API documentation for more information. Possible values: `DedicatedCore`, `VCPU`
 - `availability_zone` - (Required)[string] - The desired Compute availability zone - See the API documentation for more information. *This attribute is immutable*.
 - `storage_type` -(Required)[string] - The desired storage type - SSD/HDD. *This attribute is immutable*.
 - `node_count` -(Required)[int] - The desired number of nodes in the node pool

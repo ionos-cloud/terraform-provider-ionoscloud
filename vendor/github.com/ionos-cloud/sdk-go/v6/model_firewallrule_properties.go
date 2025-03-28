@@ -19,7 +19,7 @@ type FirewallruleProperties struct {
 	// The name of the  resource.
 	Name *string `json:"name,omitempty"`
 	// The protocol for the rule. Property cannot be modified after it is created (disallowed in update requests).
-	Protocol *string `json:"protocol"`
+	Protocol *string `json:"protocol,omitempty"`
 	// Only traffic originating from the respective MAC address is allowed. Valid format: aa:bb:cc:dd:ee:ff. Value null allows traffic from any MAC address.
 	// to set this field to `nil` in order to be marshalled, the explicit nil address `Nilstring` can be used, or the setter `SetSourceMacNil`
 	SourceMac *string `json:"sourceMac,omitempty"`
@@ -50,10 +50,8 @@ type FirewallruleProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewFirewallruleProperties(protocol string) *FirewallruleProperties {
+func NewFirewallruleProperties() *FirewallruleProperties {
 	this := FirewallruleProperties{}
-
-	this.Protocol = &protocol
 
 	return &this
 }

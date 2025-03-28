@@ -21,7 +21,7 @@ type VolumeProperties struct {
 	// Hardware type of the volume. DAS (Direct Attached Storage) could be used only in a composite call with a Cube server.
 	Type *string `json:"type,omitempty"`
 	// The size of the volume in GB.
-	Size *float32 `json:"size"`
+	Size *float32 `json:"size,omitempty"`
 	// The availability zone in which the volume should be provisioned. The storage volume will be provisioned on as few physical storage devices as possible, but this cannot be guaranteed upfront. This is uavailable for DAS (Direct Attached Storage), and subject to availability for SSD.
 	AvailabilityZone *string `json:"availabilityZone,omitempty"`
 	// Image or snapshot ID to be used as template for this volume.
@@ -68,10 +68,9 @@ type VolumeProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVolumeProperties(size float32) *VolumeProperties {
+func NewVolumeProperties() *VolumeProperties {
 	this := VolumeProperties{}
 
-	this.Size = &size
 	var exposeSerial bool = false
 	this.ExposeSerial = &exposeSerial
 	var bootOrder = "AUTO"

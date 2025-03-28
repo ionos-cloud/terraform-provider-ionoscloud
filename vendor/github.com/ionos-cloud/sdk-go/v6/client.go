@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "6.3.2"
+	Version = "v1.0.0"
 )
 
 // Constants for APIs
@@ -339,8 +339,15 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 			}
 		}
 
-		if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Trace) {
-			dump, err := httputil.DumpRequestOut(clonedRequest, true)
+		if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
+			logRequest := request.Clone(request.Context())
+
+			// Remove the Authorization header if Debug is enabled (but not in Trace mode)
+			if !c.cfg.LogLevel.Satisfies(Trace) {
+				logRequest.Header.Del("Authorization")
+			}
+
+			dump, err := httputil.DumpRequestOut(logRequest, true)
 			if err == nil {
 				c.cfg.Logger.Printf(" DumpRequestOut : %s\n", string(dump))
 			} else {
@@ -357,7 +364,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 			return resp, httpRequestTime, err
 		}
 
-		if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Trace) {
+		if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
 			dump, err := httputil.DumpResponse(resp, true)
 			if err == nil {
 				c.cfg.Logger.Printf("\n DumpResponse : %s\n", string(dump))
