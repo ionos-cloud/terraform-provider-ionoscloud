@@ -368,8 +368,8 @@ func SetMongoClusterPatchProperties(d *schema.ResourceData) *mongo.PatchClusterR
 	}
 
 	if d.HasChange("mongodb_version") {
-		_, mongodb_version := d.GetChange("mongodb_version")
-		mongodbVersionStr := mongodb_version.(string)
+		_, mongodbVersion := d.GetChange("mongodb_version")
+		mongodbVersionStr := mongodbVersion.(string)
 		patchRequest.Properties.MongoDBVersion = &mongodbVersionStr
 	}
 
