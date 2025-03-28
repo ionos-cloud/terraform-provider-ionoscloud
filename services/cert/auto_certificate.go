@@ -13,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// GetAutoCertificate gets an auto-certificate
 func (c *Client) GetAutoCertificate(ctx context.Context, autoCertificateID, location string) (certmanager.AutoCertificateRead, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	autoCertificate, apiResponse, err := c.sdkClient.AutoCertificateApi.AutoCertificatesFindById(ctx, autoCertificateID).Execute()
@@ -20,6 +21,7 @@ func (c *Client) GetAutoCertificate(ctx context.Context, autoCertificateID, loca
 	return autoCertificate, apiResponse, err
 }
 
+// ListAutoCertificates lists all auto-certificates
 func (c *Client) ListAutoCertificates(ctx context.Context, location string) (certmanager.AutoCertificateReadList, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	autoCertificates, apiResponse, err := c.sdkClient.AutoCertificateApi.AutoCertificatesGet(ctx).Execute()
@@ -27,6 +29,7 @@ func (c *Client) ListAutoCertificates(ctx context.Context, location string) (cer
 	return autoCertificates, apiResponse, err
 }
 
+// CreateAutoCertificate creates an auto-certificate
 func (c *Client) CreateAutoCertificate(ctx context.Context, location string, autoCertificatePostData certmanager.AutoCertificateCreate) (certmanager.AutoCertificateRead, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	autoCertificate, apiResponse, err := c.sdkClient.AutoCertificateApi.AutoCertificatesPost(ctx).AutoCertificateCreate(autoCertificatePostData).Execute()
@@ -34,6 +37,7 @@ func (c *Client) CreateAutoCertificate(ctx context.Context, location string, aut
 	return autoCertificate, apiResponse, err
 }
 
+// UpdateAutoCertificate updates an auto-certificate
 func (c *Client) UpdateAutoCertificate(ctx context.Context, autoCertificateID, location string, autoCertificatePatchData certmanager.AutoCertificatePatch) (certmanager.AutoCertificateRead, *shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	autoCertificate, apiResponse, err := c.sdkClient.AutoCertificateApi.AutoCertificatesPatch(ctx, autoCertificateID).AutoCertificatePatch(autoCertificatePatchData).Execute()
@@ -41,6 +45,7 @@ func (c *Client) UpdateAutoCertificate(ctx context.Context, autoCertificateID, l
 	return autoCertificate, apiResponse, err
 }
 
+// DeleteAutoCertificate deletes an auto-certificate
 func (c *Client) DeleteAutoCertificate(ctx context.Context, autoCertificateID, location string) (*shared.APIResponse, error) {
 	c.ChangeConfigURL(location)
 	apiResponse, err := c.sdkClient.AutoCertificateApi.AutoCertificatesDelete(ctx, autoCertificateID).Execute()
@@ -48,6 +53,7 @@ func (c *Client) DeleteAutoCertificate(ctx context.Context, autoCertificateID, l
 	return apiResponse, err
 }
 
+// IsAutoCertificateReady checks if an auto-certificate is in available state
 func (c *Client) IsAutoCertificateReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	autoCertificateID := d.Id()
 	location := d.Get("location").(string)
@@ -61,6 +67,7 @@ func (c *Client) IsAutoCertificateReady(ctx context.Context, d *schema.ResourceD
 	return strings.EqualFold(autoCertificate.Metadata.State, constant.Available), nil
 }
 
+// IsAutoCertificateDeleted checks if an auto-certificate is deleted
 func (c *Client) IsAutoCertificateDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	autoCertificateID := d.Id()
 	location := d.Get("location").(string)
@@ -77,6 +84,7 @@ func (c *Client) IsAutoCertificateDeleted(ctx context.Context, d *schema.Resourc
 	return false, nil
 }
 
+// GetAutoCertificateDataCreate returns the auto-certificate data for a create request
 func GetAutoCertificateDataCreate(d *schema.ResourceData) *certmanager.AutoCertificateCreate {
 	autoCertificate := certmanager.AutoCertificateCreate{
 		Properties: certmanager.AutoCertificate{},
@@ -102,6 +110,7 @@ func GetAutoCertificateDataCreate(d *schema.ResourceData) *certmanager.AutoCerti
 	return &autoCertificate
 }
 
+// GetAutoCertificateDataUpdate returns the auto-certificate data for an update request
 func GetAutoCertificateDataUpdate(d *schema.ResourceData) *certmanager.AutoCertificatePatch {
 	autoCertificate := certmanager.AutoCertificatePatch{
 		Properties: certmanager.PatchName{},
@@ -114,6 +123,7 @@ func GetAutoCertificateDataUpdate(d *schema.ResourceData) *certmanager.AutoCerti
 	return &autoCertificate
 }
 
+// SetAutoCertificateData sets the auto-certificate data to the terraform schema
 func SetAutoCertificateData(d *schema.ResourceData, autoCertificate certmanager.AutoCertificateRead) error {
 	resourceName := "Auto-certificate"
 	d.SetId(autoCertificate.Id)
