@@ -1,4 +1,6 @@
 ## 6.7.6
+### Features
+- Add `password_wo` and `password_wo_version` to `ionoscloud_user` resource. Write only field that is not stored in state. Can be used only with Terraform 1.11 or higher.
 ### Chore
 - Remove nolint, add comments
 ## 6.7.5

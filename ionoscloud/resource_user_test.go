@@ -5,6 +5,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"regexp"
 	"testing"
 
@@ -127,10 +129,44 @@ func TestAccUserBasic(t *testing.T) {
 					})),
 			},
 			{
-				Config:             testAccCheckNewUserGroup,
-				ExpectNonEmptyPlan: true,
+				Config: testAccCheckNewUserGroup,
 				Check: resource.ComposeTestCheckFunc(
 					testAccRemoveUserFromGroup(constant.GroupResource+".group1", constant.UserResource+"."+constant.NewUserResource)),
+			},
+		},
+	})
+}
+
+func TestUser_writeOnly(t *testing.T) {
+	var user ionoscloud.User
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ExternalProviders: randomProviderVersion343(),
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(version.Must(version.NewVersion("1.11.0"))),
+		},
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckUserDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckUserConfigBasicWriteOnly,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUserExists(constant.UserResource+"."+constant.UserTestResource, &user),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "password_wo_version", "1"),
+					resource.TestCheckNoResourceAttr(constant.UserResource+"."+constant.UserTestResource, "password"),
+					resource.TestCheckNoResourceAttr(constant.UserResource+"."+constant.UserTestResource, "password_wo"),
+				),
+			},
+			{
+				Config: testAccCheckUserConfigBasicWriteOnlyUpdated,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUserExists(constant.UserResource+"."+constant.UserTestResource, &user),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "password_wo_version", "2"),
+					resource.TestCheckNoResourceAttr(constant.UserResource+"."+constant.UserTestResource, "password"),
+				),
 			},
 		},
 	})
@@ -517,5 +553,43 @@ data ` + constant.UserResource + ` ` + constant.UserDataSourceByName + ` {
 var testAccDataSourceUserWrongEmail = testAccCheckUserConfigBasic + `
 data ` + constant.UserResource + ` ` + constant.UserDataSourceByName + ` {
   email			= "wrong_email"
+}
+`
+
+var testAccCheckUserConfigBasicWriteOnly = `
+resource ` + constant.RandomPassword + ` "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+  first_name = "` + constant.UserTestResource + `"
+  last_name = "` + constant.UserTestResource + `"
+  email = "` + utils.GenerateEmail() + `"
+  password_wo =  ` + constant.RandomPassword + `.user_password.result
+  password_wo_version = 1
+  administrator = true
+  force_sec_auth= true
+  active  = true
+}
+`
+
+var testAccCheckUserConfigBasicWriteOnlyUpdated = `
+resource ` + constant.RandomPassword + ` "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+  first_name = "` + constant.UserTestResource + `"
+  last_name = "` + constant.UserTestResource + `"
+  email = "` + utils.GenerateEmail() + `"
+  password_wo =  ` + constant.RandomPassword + `.user_password.result
+  password_wo_version = 2
+  administrator = true
+  force_sec_auth= true
+  active  = true
 }
 `
