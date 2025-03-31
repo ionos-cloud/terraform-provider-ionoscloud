@@ -149,7 +149,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
   }
-  mongodb_version = "7.0"
+  mongodb_version = "` + constant.MongoVersion + `"
   instances          = 3
   display_name = "` + constant.DBaaSClusterTestResource + `"
   location = ` + constant.DatacenterResource + `.datacenter_example.location
@@ -199,7 +199,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
   }
-  mongodb_version = "7.0"
+  mongodb_version = "` + constant.MongoVersion + `"
   instances          = 3
   display_name = "` + constant.DBaaSClusterTestResource + `"
   location = ` + constant.DatacenterResource + `.datacenter_example.location

@@ -270,6 +270,9 @@ const (
 	DBaaSClusterTestDataSourceByName = "test_dbaas_cluster_name"
 	DBaaSReplicaSetTestResource      = "test_dbaas_replicaset"
 
+	// Mongo constants
+	MongoVersion = "7.0"
+
 	// PgSql constants
 	PsqlClusterResource          = "ionoscloud_pg_cluster"
 	PsqlDatabaseResource         = "ionoscloud_pg_database"
