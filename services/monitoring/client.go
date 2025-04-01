@@ -17,7 +17,7 @@ import (
 )
 
 // Client is a wrapper for the Monitoring SDK
-type Client struct { //nolint:golint
+type Client struct {
 	sdkClient  monitoring.APIClient
 	fileConfig *fileconfiguration.FileConfig
 }

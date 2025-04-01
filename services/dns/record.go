@@ -16,7 +16,7 @@ import (
 
 var recordResourceName = "DNS Record"
 
-//nolint:golint
+// CreateRecord creates a new record
 func (c *Client) CreateRecord(ctx context.Context, zoneId string, d *schema.ResourceData) (recordResponse dns.RecordRead, responseInfo utils.ApiResponseInfo, err error) {
 	recordUUID := uuidgen.ResourceUuid()
 	request := setRecordPutRequest(d)
@@ -25,7 +25,7 @@ func (c *Client) CreateRecord(ctx context.Context, zoneId string, d *schema.Reso
 	return recordResponse, apiResponse, err
 }
 
-//nolint:golint
+// IsRecordCreated checks if record is created
 func (c *Client) IsRecordCreated(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	zoneId := d.Get("zone_id").(string)
 	recordID := d.Id()
@@ -39,14 +39,14 @@ func (c *Client) IsRecordCreated(ctx context.Context, d *schema.ResourceData) (b
 	return strings.EqualFold((string)(record.Metadata.State), (string)(dns.PROVISIONINGSTATE_AVAILABLE)), nil
 }
 
-//nolint:golint
+// GetRecordById gets a record by ID
 func (c *Client) GetRecordById(ctx context.Context, zoneId, recordID string) (dns.RecordRead, *shared.APIResponse, error) {
 	record, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsFindById(ctx, zoneId, recordID).Execute()
 	apiResponse.LogInfo()
 	return record, apiResponse, err
 }
 
-//nolint:golint
+// ListRecords lists records
 func (c *Client) ListRecords(ctx context.Context, recordName string) (dns.RecordReadList, *shared.APIResponse, error) {
 	request := c.sdkClient.RecordsApi.RecordsGet(ctx)
 	if recordName != "" {
@@ -57,7 +57,6 @@ func (c *Client) ListRecords(ctx context.Context, recordName string) (dns.Record
 	return records, apiResponse, err
 }
 
-//nolint:golint
 func (c *Client) SetRecordData(d *schema.ResourceData, record dns.RecordRead) error {
 	d.SetId(record.Id)
 
@@ -98,14 +97,12 @@ func (c *Client) SetRecordData(d *schema.ResourceData, record dns.RecordRead) er
 	return nil
 }
 
-//nolint:golint
 func (c *Client) DeleteRecord(ctx context.Context, zoneId, recordID string) (utils.ApiResponseInfo, error) {
 	_, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsDelete(ctx, zoneId, recordID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-//nolint:golint
 func (c *Client) IsRecordDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	zoneId := d.Get("zone_id").(string)
 	recordID := d.Id()
@@ -114,7 +111,6 @@ func (c *Client) IsRecordDeleted(ctx context.Context, d *schema.ResourceData) (b
 	return apiResponse.HttpNotFound(), err
 }
 
-//nolint:golint
 func (c *Client) UpdateRecord(ctx context.Context, zoneId, recordID string, d *schema.ResourceData) (dns.RecordRead, utils.ApiResponseInfo, error) {
 	request := setRecordPutRequest(d)
 	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordID).RecordEnsure(request).Execute()
