@@ -117,27 +117,6 @@ func testAccCheckNFSClusterExists(n string) resource.TestCheckFunc {
 	}
 }
 
-// This configuration is used because there are some problems with the API and the creation/deletion
-// of the setup resources (datacenter, lan, server) is not possible (there are some problems with
-// LAN deletion). Because of that, for the moment, only to test the NFS functionality, we
-// will use data sources for already existing setup resources.
-
-const temporaryConfigSetupNFS = `
-data "ionoscloud_datacenter" "datacenterDS" {
-	id = "88eeae0d-515d-44c1-b142-d9293c20e676"
-}
-
-data "ionoscloud_lan" "lanDS" {
-	id = "1"
-	datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
-}
-
-data "ionoscloud_server" "serverDS" {
-	id = "1f77a37e-2b38-49f2-b2e1-61a47ccf5f15"
-	datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
-}
-`
-
 const testAccCheckNFSClusterConfig = `
 resource "ionoscloud_datacenter" "nfs_dc" {
   name                = "NFS Datacenter"

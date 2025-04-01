@@ -1,10 +1,25 @@
+## 6.7.6
+### Chore
+- Remove nolint, add comments
+## 6.7.5
+## Refactor
+- Use SDK bundle for Object Storage Management
+### Fixes
+- Save `ionoscloud_container_registry_token` password to `password` field in the resource state
+
 ## 6.7.4
+### Fixes
+- Trying to get Ionoscloud provider version for user agent
 ### Docs
 - Added links in resources
+### Refactor
+- Use DNS bundle product instead of sdk-go-dns
+- Use Container Registry bundle product instead of sdk-go-container-registry
+- Use Certificate Manager bundle product instead of sdk-go-cert-manager
 
 ## 6.7.3
 ### Fixes
-- Remove cpu_family, availability_zone and rockylinux-8-GenericCloud-20230518 from docs
+- Remove `cpu_family`, `availability_zone` and` rockylinux-8-GenericCloud-20230518` from docs
 - Do not return an error if `ionoscloud_object_storage_acesskey` is not found
 - Return early if dataplatform cluster is in `FAILED` state
 - `ionoscloud_s3_key` data source should require only `user_id`
@@ -23,7 +38,7 @@
 
 ## 6.7.0
 ### Fixes
-- Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nill values.
+- Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nil values.
 - Fix [#748](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/748) by removing unecessary error check
 - S3 key creation fails with 422 if s3 key not found. Add function to check for that specific response from the API.
 ### Features
