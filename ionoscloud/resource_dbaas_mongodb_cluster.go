@@ -54,7 +54,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 			},
 			"mongodb_version": {
 				Type:             schema.TypeString,
-				Description:      "The MongoDB version of your cluster. Update forces cluster re-creation.",
+				Description:      "The MongoDB version of your cluster. Downgrade is not possible and will throw an error.",
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
