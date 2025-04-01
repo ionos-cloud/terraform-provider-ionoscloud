@@ -3,6 +3,9 @@
 - Add `password_wo` and `password_wo_version` to `ionoscloud_user` resource. Write only field that is not stored in state. Can be used only with Terraform 1.11 or higher.
 ### Chore
 - Remove nolint, add comments
+- Update golangci-lint to v2
+- Update go version to v1.23
+- Updates plugin framework and sdkv2 deps
 ## 6.7.5
 ## Refactor
 - Use SDK bundle for Object Storage Management
