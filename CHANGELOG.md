@@ -10,8 +10,6 @@
 - Use Object Storage Management bundle product instead of sdk-go-object-storage-management
 ### Fixes
 - Save `ionoscloud_container_registry_token` password to `password` field in the resource state
-### Chore
-- Remove nolint, add comments
 
 ## 6.7.4
 ### Fixes
