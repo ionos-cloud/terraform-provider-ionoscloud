@@ -12,6 +12,7 @@ package ionoscloud
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -787,4 +788,24 @@ func IsNil(i interface{}) bool {
 		return reflect.ValueOf(i).IsZero()
 	}
 	return false
+}
+
+// EnsureURLFormat checks that the URL has the correct format (no trailing slash,
+// has http/https scheme prefix) and updates it if necessary
+func EnsureURLFormat(url string) string {
+	length := len(url)
+
+	if length <= 1 {
+		return url
+	}
+
+	if url[length-1] == '/' {
+		url = url[:length-1]
+	}
+
+	if !strings.HasPrefix(url, "https://") && !strings.HasPrefix(url, "http://") {
+		url = fmt.Sprintf("https://%s", url)
+	}
+
+	return url
 }

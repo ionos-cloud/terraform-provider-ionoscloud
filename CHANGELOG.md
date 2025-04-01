@@ -1,6 +1,9 @@
 ## 6.7.6
 ### Features
+- Add `server_type` optional attribute to `ionoscloud_k8s_nodepool` resource and data source
 - Add `password_wo` and `password_wo_version` to `ionoscloud_user` resource. Write only field that is not stored in state. Can be used only with Terraform 1.11 or higher.
+### Changed
+- `cpu_family` is now optional for `ionoscloud_k8s_nodepool` resource
 ### Refactor
 - Use SDK Bundle instead of the Kafka SDK
 ### Chore

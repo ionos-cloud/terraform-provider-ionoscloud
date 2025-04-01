@@ -56,6 +56,11 @@ By default, *https://api.ionos.com/cloudapi/v6* is used, however this can be ove
 by setting the `IONOS_API_URL` environment variable or by specifying the `hostUrl` parameter when
 initializing the sdk client.
 
+**NOTE**: We recommend passing the URL without the `https://` or `http://` prefix. The SDK
+checks and adds it if necessary when configurations are created using `NewConfiguration` or
+`NewConfigurationFromEnv`. This is to avoid issues caused by typos in the prefix that cannot
+ be easily detected and debugged.
+
 ## Environment Variables
 
 | Environment Variable    | Description                                                                                                                                                                                                                    |
@@ -644,6 +649,7 @@ All URIs are relative to *https://api.ionos.com/cloudapi/v6*
  - [KubernetesNodePoolProperties](docs/models/KubernetesNodePoolProperties)
  - [KubernetesNodePoolPropertiesForPost](docs/models/KubernetesNodePoolPropertiesForPost)
  - [KubernetesNodePoolPropertiesForPut](docs/models/KubernetesNodePoolPropertiesForPut)
+ - [KubernetesNodePoolServerType](docs/models/KubernetesNodePoolServerType)
  - [KubernetesNodePools](docs/models/KubernetesNodePools)
  - [KubernetesNodeProperties](docs/models/KubernetesNodeProperties)
  - [KubernetesNodes](docs/models/KubernetesNodes)
