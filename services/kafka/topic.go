@@ -2,23 +2,23 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	kafka "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	kafka "github.com/ionos-cloud/sdk-go-kafka"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 // CreateTopic creates a new Kafka Cluster Topic
 func (c *Client) CreateTopic(ctx context.Context, d *schema.ResourceData) (
 	kafka.TopicRead, utils.ApiResponseInfo, error,
 ) {
-	overrideClientFromFileConfig(c, fileconfiguration.Kafka, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, d.Get("location").(string))
 
 	topic := setTopicPostRequest(d)
 	clusterID := d.Get("cluster_id").(string)
@@ -33,7 +33,7 @@ func (c *Client) CreateTopic(ctx context.Context, d *schema.ResourceData) (
 func (c *Client) GetTopicByID(ctx context.Context, clusterID string, topicID string, location string) (
 	kafka.TopicRead, utils.ApiResponseInfo, error,
 ) {
-	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 
 	topic, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()
@@ -45,7 +45,7 @@ func (c *Client) GetTopicByID(ctx context.Context, clusterID string, topicID str
 func (c *Client) ListTopics(ctx context.Context, clusterID string, location string) (
 	kafka.TopicReadList, utils.ApiResponseInfo, error,
 ) {
-	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 
 	topics, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
@@ -55,7 +55,7 @@ func (c *Client) ListTopics(ctx context.Context, clusterID string, location stri
 
 // DeleteTopic deletes a Kafka Cluster Topic
 func (c *Client) DeleteTopic(ctx context.Context, clusterID string, topicID string, location string) (utils.ApiResponseInfo, error) {
-	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 
 	apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsDelete(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()
@@ -72,11 +72,8 @@ func (c *Client) IsTopicAvailable(ctx context.Context, d *schema.ResourceData) (
 	if err != nil {
 		return false, err
 	}
-	if topic.Metadata == nil || topic.Metadata.State == nil {
-		return false, fmt.Errorf("expected metadata, got empty for Topic with ID: %s", clusterID)
-	}
-	log.Printf("[DEBUG] Topic status: %s", *topic.Metadata.State)
-	return strings.EqualFold(*topic.Metadata.State, constant.Available), nil
+	log.Printf("[DEBUG] Topic status: %s", topic.Metadata.State)
+	return strings.EqualFold(topic.Metadata.State, constant.Available), nil
 }
 
 // IsTopicDeleted checks if a Kafka Cluster Topic has been deleted
@@ -85,7 +82,7 @@ func (c *Client) IsTopicDeleted(ctx context.Context, d *schema.ResourceData) (bo
 	topicID := d.Id()
 	location := d.Get("location").(string)
 
-	overrideClientFromFileConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 
 	_, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()
@@ -95,18 +92,10 @@ func (c *Client) IsTopicDeleted(ctx context.Context, d *schema.ResourceData) (bo
 
 // SetKafkaTopicData sets the Kafka Cluster Topic data to the Terraform Resource Data
 func (c *Client) SetKafkaTopicData(d *schema.ResourceData, topic *kafka.TopicRead) error {
-	if topic.Id != nil {
-		d.SetId(*topic.Id)
-	}
+	d.SetId(topic.Id)
 
-	if topic.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the Kafka Cluster Topic with ID: %s, but received 'nil' instead", *topic.Id)
-	}
-
-	if topic.Properties.Name != nil {
-		if err := d.Set("name", *topic.Properties.Name); err != nil {
-			return err
-		}
+	if err := d.Set("name", topic.Properties.Name); err != nil {
+		return err
 	}
 	if topic.Properties.NumberOfPartitions != nil {
 		if err := d.Set("number_of_partitions", *topic.Properties.NumberOfPartitions); err != nil {
@@ -145,7 +134,7 @@ func setTopicPostRequest(d *schema.ResourceData) *kafka.TopicCreate {
 
 	return kafka.NewTopicCreate(
 		kafka.Topic{
-			Name:               &topicName,
+			Name:               topicName,
 			NumberOfPartitions: &partitionCount,
 			ReplicationFactor:  &replicationFactor,
 			LogRetention: &kafka.TopicLogRetention{
