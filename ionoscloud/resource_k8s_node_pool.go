@@ -153,7 +153,7 @@ func resourceK8sNodePool() *schema.Resource {
 				Description:      "The server type for the compute engine",
 				Optional:         true,
 				Default:          "DedicatedCore",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"DedicatedCore", "VCPU"}, true)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"DedicatedCore", "VCPU"}, false)),
 			},
 			"availability_zone": {
 				Type:             schema.TypeString,
