@@ -1902,7 +1902,7 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
     time                  = "09:00:00"
   }
   backup {
-	loc = "de"
+	loc = "` + clusterBackupLocationValue + `"
   }
   tier = "STANDARD"
 }` // nolint:unused
