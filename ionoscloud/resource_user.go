@@ -49,6 +49,7 @@ func resourceUser() *schema.Resource {
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Sensitive:        true,
+				Description:      "A password for the user. If you are using terraform 1.11 or higher, you can use `password_wo` instead of `password` to avoid storing the password in the state file.",
 				ConflictsWith:    []string{"password_wo"},
 				ExactlyOneOf:     []string{"password", "password_wo"},
 			},

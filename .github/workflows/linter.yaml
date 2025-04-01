@@ -5,7 +5,6 @@ on:
     types: [ assigned, opened, synchronize, reopened ]
 
 env:
-  GOLANGCI_VERSION: 'v1.54.0'
   DOCKER_BUILDX_VERSION: 'v0.11.2'
 
 jobs:
@@ -54,8 +53,8 @@ jobs:
 #      - name: Vendor Dependencies
 #        run: make vendor vendor.check
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
+          version: 2.0
           only-new-issues: true
-          version: ${{ env.GOLANGCI_VERSION }}
           args: --timeout 10m0s --verbose
