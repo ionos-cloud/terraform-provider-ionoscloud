@@ -38,7 +38,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "auto_scaling.#", "0"),
-					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "server_type", "DedicatedCore"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_type", "SSD"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "node_count", "1"),
@@ -62,7 +62,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "k8s_version", constant.ResourceNameK8sNodePool, "k8s_version"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "maintenance_window.0.day_of_the_week", constant.ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "maintenance_window.0.time", constant.ResourceNameK8sNodePool, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "cpu_family", constant.ResourceNameK8sNodePool, "cpu_family"),
+					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "server_type", constant.ResourceNameK8sNodePool, "server_type"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "availability_zone", constant.ResourceNameK8sNodePool, "availability_zone"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "storage_type", constant.ResourceNameK8sNodePool, "storage_type"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "node_count", constant.ResourceNameK8sNodePool, "node_count"),
@@ -83,7 +83,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "k8s_version", constant.ResourceNameK8sNodePool, "k8s_version"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "maintenance_window.0.day_of_the_week", constant.ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "maintenance_window.0.time", constant.ResourceNameK8sNodePool, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "cpu_family", constant.ResourceNameK8sNodePool, "cpu_family"),
+					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "server_type", constant.ResourceNameK8sNodePool, "server_type"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "availability_zone", constant.ResourceNameK8sNodePool, "availability_zone"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "storage_type", constant.ResourceNameK8sNodePool, "storage_type"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "node_count", constant.ResourceNameK8sNodePool, "node_count"),
@@ -111,7 +111,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "maintenance_window.0.time", "10:00:00Z"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "auto_scaling.0.max_node_count", "2"),
-					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "server_type", "VCPU"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_type", "SSD"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "node_count", "2"),
@@ -147,7 +147,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Tuesday"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "maintenance_window.0.time", "10:00:00Z"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "auto_scaling.#", "0"),
-					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "server_type", "DedicatedCore"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_type", "SSD"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "node_count", "2"),
@@ -222,7 +222,6 @@ func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 					testAccCheckK8sNodePoolExists(constant.ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "name", constant.K8sNodePoolTestResource),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "k8s_version", K8sVersion),
-					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_type", "SSD"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "node_count", "2"),
@@ -237,7 +236,6 @@ func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 					testAccCheckK8sNodePoolExists(constant.ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "name", constant.K8sNodePoolTestResource),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "k8s_version", K8sVersion),
-					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_type", "SSD"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "node_count", "1"),
@@ -349,7 +347,7 @@ resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResour
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
   }
-  cpu_family        = "INTEL_XEON"
+  server_type       = "DedicatedCore"
   availability_zone = "AUTO"
   storage_type      = "SSD"
   node_count        = 1
@@ -416,7 +414,7 @@ resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResour
     day_of_the_week = "Tuesday"
     time            = "10:00:00Z"
   }
-  cpu_family        = "INTEL_XEON"
+  server_type       = "VCPU"
   availability_zone = "AUTO"
   storage_type      = "SSD"
   node_count        = 2
@@ -494,7 +492,7 @@ resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResour
     day_of_the_week = "Tuesday"
     time            = "10:00:00Z"
   }
-  cpu_family        = "INTEL_XEON"
+  server_type       = "DedicatedCore"
   availability_zone = "AUTO"
   storage_type      = "SSD"
   node_count        = 2
@@ -552,7 +550,7 @@ resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResour
     min_node_count = 1
     max_node_count = 1
   }
-  cpu_family        = "INTEL_XEON"
+  server_type       = "DedicatedCore"
   availability_zone = "AUTO"
   storage_type      = "SSD"
   node_count        = 1
@@ -623,7 +621,6 @@ resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResour
     min_node_count = 1
     max_node_count = 3
   }
-  cpu_family        = "INTEL_XEON"
   availability_zone = "AUTO"
   storage_type      = "SSD"
   node_count        = 2
@@ -656,7 +653,6 @@ resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResour
     min_node_count = 1
     max_node_count = 3
   }
-  cpu_family        = "INTEL_XEON"
   availability_zone = "AUTO"
   storage_type      = "SSD"
   node_count        = 1
