@@ -1,6 +1,9 @@
 ## 6.7.6
+### Refactor
+- Use SDK Bundle instead of the Kafka SDK
 ### Chore
 - Remove nolint, add comments
+
 ## 6.7.5
 ## Refactor
 - Use SDK bundle for Object Storage Management
