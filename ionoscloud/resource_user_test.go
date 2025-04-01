@@ -137,7 +137,7 @@ func TestAccUserBasic(t *testing.T) {
 	})
 }
 
-func TestUser_writeOnly(t *testing.T) {
+func TestUserWriteOnlyPassword(t *testing.T) {
 	var user ionoscloud.User
 
 	resource.Test(t, resource.TestCase{
