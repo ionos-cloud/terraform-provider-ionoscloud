@@ -247,6 +247,95 @@ func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 	})
 }
 
+func TestAccK8sNodePoolCPUFamilyAndServerType(t *testing.T) {
+	var k8sNodepool ionoscloud.KubernetesNodePool
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sNodePoolDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckK8sNodePoolConfigCPUFamilyAndServerType,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sNodePoolExists(constant.ResourceNameK8sNodePool, &k8sNodepool),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "name", constant.K8sNodePoolTestResource),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "k8s_version", K8sVersion),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "server_type", "DedicatedCore"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_type", "SSD"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "node_count", "1"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cores_count", "1"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_size", "40"),
+				),
+			},
+			{
+				Config: testAccCheckK8sNodePoolConfigCPUFamilyAndServerTypeUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sNodePoolExists(constant.ResourceNameK8sNodePool, &k8sNodepool),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "name", constant.K8sNodePoolTestResource),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "k8s_version", K8sVersion),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "server_type", "VCPU"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_type", "SSD"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "node_count", "1"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cores_count", "1"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_size", "40")),
+			},
+			{
+				Config: testAccCheckK8sNodePoolConfigCPUFamilyRemoveServerTypeUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sNodePoolExists(constant.ResourceNameK8sNodePool, &k8sNodepool),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "name", constant.K8sNodePoolTestResource),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "k8s_version", K8sVersion),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "server_type", "DedicatedCore"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_type", "SSD"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "node_count", "1"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cores_count", "1"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_size", "40")),
+			},
+		},
+	})
+}
+
+func TestAccK8sNodePoolCPUFamilyNoServerType(t *testing.T) {
+	var k8sNodepool ionoscloud.KubernetesNodePool
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckK8sNodePoolDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckK8sNodePoolConfigCPUFamilyNoServerType,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sNodePoolExists(constant.ResourceNameK8sNodePool, &k8sNodepool),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "name", constant.K8sNodePoolTestResource),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "k8s_version", K8sVersion),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_type", "SSD"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "node_count", "1"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "cores_count", "1"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_size", "40"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckK8sNodePoolDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 
@@ -656,6 +745,152 @@ resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResour
   availability_zone = "AUTO"
   storage_type      = "SSD"
   node_count        = 1
+  cores_count       = 1
+  ram_size          = 2048
+  storage_size      = 40
+}
+data ` + constant.K8sNodePoolNodesResource + ` nodes{
+  k8s_cluster_id   = ` + constant.K8sClusterResource + `.terraform_acctest.id
+  node_pool_id     = ` + constant.K8sNodePoolResource + `.` + constant.K8sNodePoolTestResource + `.id
+}`
+
+const testAccCheckK8sNodePoolConfigCPUFamilyAndServerType = `
+resource ` + constant.DatacenterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
+  location    = "us/las"
+  description = "Datacenter created through terraform"
+}
+
+resource ` + constant.K8sClusterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
+  k8s_version = "` + K8sVersion + `"
+  maintenance_window {
+    day_of_the_week = "Monday"
+    time            = "09:00:00Z"
+  }
+}
+resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResource + ` {
+  datacenter_id     = ` + constant.DatacenterResource + `.terraform_acctest.id
+  k8s_cluster_id    = ` + constant.K8sClusterResource + `.terraform_acctest.id
+  k8s_version = ` + constant.K8sClusterResource + `.terraform_acctest.k8s_version
+  name        = "` + constant.K8sNodePoolTestResource + `"
+  auto_scaling {
+    min_node_count = 1
+    max_node_count = 3
+  }
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 2
+  server_type       = "DedicatedCore"
+  cpu_family        = "INTEL_XEON"
+  cores_count       = 1
+  ram_size          = 2048
+  storage_size      = 40
+}`
+
+const testAccCheckK8sNodePoolConfigCPUFamilyAndServerTypeUpdate = `
+resource ` + constant.DatacenterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
+  location    = "us/las"
+  description = "Datacenter created through terraform"
+}
+
+resource ` + constant.K8sClusterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
+  k8s_version = "` + K8sVersion + `"
+  maintenance_window {
+    day_of_the_week = "Monday"
+    time            = "09:00:00Z"
+  }
+}
+resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResource + ` {
+  datacenter_id     = ` + constant.DatacenterResource + `.terraform_acctest.id
+  k8s_cluster_id    = ` + constant.K8sClusterResource + `.terraform_acctest.id
+  name        = "` + constant.K8sNodePoolTestResource + `"
+  k8s_version = ` + constant.K8sClusterResource + `.terraform_acctest.k8s_version
+  auto_scaling {
+    min_node_count = 1
+    max_node_count = 3
+  }
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 1
+  server_type       = "VCPU"
+  cpu_family        = "INTEL_XEON"
+  cores_count       = 1
+  ram_size          = 2048
+  storage_size      = 40
+}
+data ` + constant.K8sNodePoolNodesResource + ` nodes{
+  k8s_cluster_id   = ` + constant.K8sClusterResource + `.terraform_acctest.id
+  node_pool_id     = ` + constant.K8sNodePoolResource + `.` + constant.K8sNodePoolTestResource + `.id
+}`
+
+const testAccCheckK8sNodePoolConfigCPUFamilyRemoveServerTypeUpdate = `
+resource ` + constant.DatacenterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
+  location    = "us/las"
+  description = "Datacenter created through terraform"
+}
+
+resource ` + constant.K8sClusterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
+  k8s_version = "` + K8sVersion + `"
+  maintenance_window {
+    day_of_the_week = "Monday"
+    time            = "09:00:00Z"
+  }
+}
+resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResource + ` {
+  datacenter_id     = ` + constant.DatacenterResource + `.terraform_acctest.id
+  k8s_cluster_id    = ` + constant.K8sClusterResource + `.terraform_acctest.id
+  name        = "` + constant.K8sNodePoolTestResource + `"
+  k8s_version = ` + constant.K8sClusterResource + `.terraform_acctest.k8s_version
+  auto_scaling {
+    min_node_count = 1
+    max_node_count = 3
+  }
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 1
+  cpu_family        = "INTEL_XEON"
+  cores_count       = 1
+  ram_size          = 2048
+  storage_size      = 40
+}
+data ` + constant.K8sNodePoolNodesResource + ` nodes{
+  k8s_cluster_id   = ` + constant.K8sClusterResource + `.terraform_acctest.id
+  node_pool_id     = ` + constant.K8sNodePoolResource + `.` + constant.K8sNodePoolTestResource + `.id
+}`
+
+const testAccCheckK8sNodePoolConfigCPUFamilyNoServerType = `
+resource ` + constant.DatacenterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
+  location    = "us/las"
+  description = "Datacenter created through terraform"
+}
+
+resource ` + constant.K8sClusterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
+  k8s_version = "` + K8sVersion + `"
+  maintenance_window {
+    day_of_the_week = "Monday"
+    time            = "09:00:00Z"
+  }
+}
+resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResource + ` {
+  datacenter_id     = ` + constant.DatacenterResource + `.terraform_acctest.id
+  k8s_cluster_id    = ` + constant.K8sClusterResource + `.terraform_acctest.id
+  name        = "` + constant.K8sNodePoolTestResource + `"
+  k8s_version = ` + constant.K8sClusterResource + `.terraform_acctest.k8s_version
+  auto_scaling {
+    min_node_count = 1
+    max_node_count = 3
+  }
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 1
+  cpu_family        = "INTEL_XEON"
   cores_count       = 1
   ram_size          = 2048
   storage_size      = 40
