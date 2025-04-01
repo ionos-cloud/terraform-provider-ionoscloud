@@ -1,7 +1,13 @@
 ## 6.7.6
+### Refactor
+- Use Kafka bundle product instead of sdk-go-kafka
+- Use Mongo bundle product instead of sdk-go-dbaas-mongo
+### Chore
+- Remove nolint, add comments
+
+## 6.7.5
 ## Refactor
-- Use SDK bundle instead of the Object Storage Management SDK
-- Use SDK Bundle instead of the Mongo SDK
+- Use Object Storage Management bundle product instead of sdk-go-object-storage-management
 ### Fixes
 - Save `ionoscloud_container_registry_token` password to `password` field in the resource state
 ### Chore

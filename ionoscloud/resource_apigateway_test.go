@@ -19,7 +19,7 @@ var testAccCheckAPIGatewayConfig_basic = `
 resource "ionoscloud_apigateway" "example" {
   name = "example"
   logs = false
-  metrics = true
+  metrics = false
 }
 `
 
@@ -53,7 +53,7 @@ var testAccDataSourceAPIGatewayMultipleResultsError = testAccCheckAPIGatewayConf
 resource "ionoscloud_apigateway" "example_multiple" {
   name = "example"
   logs = false
-  metrics = true
+  metrics = false
 }
 
 data "ionoscloud_apigateway" "example_matching" {
@@ -83,9 +83,9 @@ func TestAccAPIGateway_basic(t *testing.T) {
 					testAccCheckAPIGatewayExists("ionoscloud_apigateway.example", &apiGateway),
 					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "name", "example"),
 					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "logs", "false"),
-					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "metrics", "true"),
+					resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "metrics", "false"),
 					// can't be used in tests, as it requires a reachable domain name
-					// resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.name", "example.com"),
+					//resource.TestCheckResourceAttr("ionoscloud_apigateway.example", "custom_domains.0.name", "example.com"),
 				),
 			},
 			{
