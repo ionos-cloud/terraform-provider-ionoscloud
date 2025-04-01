@@ -780,7 +780,7 @@ resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResour
   }
   availability_zone = "AUTO"
   storage_type      = "SSD"
-  node_count        = 2
+  node_count        = 1
   server_type       = "DedicatedCore"
   cpu_family        = "INTEL_XEON"
   cores_count       = 1
