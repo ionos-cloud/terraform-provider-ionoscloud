@@ -1901,9 +1901,6 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
     day_of_the_week       = "Monday"
     time                  = "09:00:00"
   }
-  backup {
-	loc = "` + clusterBackupLocationValue + `"
-  }
   tier = "STANDARD"
 }` // nolint:unused
 
