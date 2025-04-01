@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "v1.0.0"
+	Version = "6.3.3"
 )
 
 // Constants for APIs
@@ -741,7 +741,7 @@ type DeleteStateChannel struct {
 // fn() is a function that returns from the API the resource you want to check it's state.
 // Successful states that can be checked: Available, or Active
 func (c *APIClient) WaitForState(ctx context.Context, fn resourceGetCallFn, resourceID string) (bool, error) {
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(c.cfg.PollInterval)
 	defer ticker.Stop()
 
 	for {
@@ -776,7 +776,7 @@ func (c *APIClient) WaitForState(ctx context.Context, fn resourceGetCallFn, reso
 // fn() is a function that returns from the API the resource you want to check it's state
 // the channel is of type StateChannel and it represents the state of the resource. Successful states that can be checked: Available, or Active
 func (c *APIClient) waitForStateWithChanel(ctx context.Context, fn resourceGetCallFn, resourceID string, ch chan<- StateChannel) {
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(c.cfg.PollInterval)
 	defer ticker.Stop()
 	done := make(chan bool, 1)
 
@@ -838,7 +838,7 @@ func (c *APIClient) WaitForStateAsync(ctx context.Context, fn resourceGetCallFn,
 // fn() is a function that returns from the API the resource you want to check it's state.
 // a resource is deleted when status code 404 is returned from the get call to API
 func (c *APIClient) WaitForDeletion(ctx context.Context, fn resourceDeleteCallFn, resourceID string) (bool, error) {
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(c.cfg.PollInterval)
 	defer ticker.Stop()
 
 	for {
@@ -866,7 +866,7 @@ func (c *APIClient) WaitForDeletion(ctx context.Context, fn resourceDeleteCallFn
 // fn() is a function that returns from the API the resource you want to check it's state
 // the channel is of type int and it represents the status response of the resource, which in this case is 404 to check when the resource is not found.
 func (c *APIClient) waitForDeletionWithChannel(ctx context.Context, fn resourceDeleteCallFn, resourceID string, ch chan<- DeleteStateChannel) {
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(c.cfg.PollInterval)
 	defer ticker.Stop()
 	done := make(chan bool, 1)
 
@@ -934,7 +934,7 @@ func (c *APIClient) WaitForRequest(ctx context.Context, path string) (*APIRespon
 		return nil, err
 	}
 
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(c.cfg.PollInterval)
 	defer ticker.Stop()
 	for {
 		resp, httpRequestTime, err := c.callAPI(r)

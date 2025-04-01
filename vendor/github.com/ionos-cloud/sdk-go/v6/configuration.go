@@ -32,8 +32,9 @@ const (
 	DefaultIonosServerUrl = "https://api.ionos.com/cloudapi/v6"
 	DefaultIonosBasePath  = "/cloudapi/v6"
 	defaultMaxRetries     = 3
-	defaultWaitTime       = time.Duration(100) * time.Millisecond
-	defaultMaxWaitTime    = time.Duration(2000) * time.Millisecond
+	defaultWaitTime       = 100 * time.Millisecond
+	defaultMaxWaitTime    = 2000 * time.Millisecond
+	defaultPollInterval   = 1 * time.Second
 )
 
 // contextKeys are used to identify the type of value in the context.
@@ -122,6 +123,7 @@ type Configuration struct {
 	MaxRetries       int           `json:"maxRetries,omitempty"`
 	WaitTime         time.Duration `json:"waitTime,omitempty"`
 	MaxWaitTime      time.Duration `json:"maxWaitTime,omitempty"`
+	PollInterval     time.Duration `json:"pollInterval,omitempty"`
 	LogLevel         LogLevel
 	Logger           Logger
 }
@@ -131,7 +133,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go/v1.0.0",
+		UserAgent:          "ionos-cloud-sdk-go/v6.3.3",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -139,6 +141,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		MaxRetries:         defaultMaxRetries,
 		MaxWaitTime:        defaultMaxWaitTime,
 		WaitTime:           defaultWaitTime,
+		PollInterval:       defaultPollInterval,
 		Logger:             NewDefaultLogger(),
 		LogLevel:           getLogLevelFromEnv(),
 		Host:               getHost(hostUrl),

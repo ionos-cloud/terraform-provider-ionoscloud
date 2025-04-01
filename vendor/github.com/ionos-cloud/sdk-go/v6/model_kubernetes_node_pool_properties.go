@@ -21,10 +21,10 @@ type KubernetesNodePoolProperties struct {
 	// The unique identifier of the VDC where the worker nodes of the node pool are provisioned.Note that the data center is located in the exact place where the parent cluster of the node pool is located.
 	DatacenterId *string `json:"datacenterId"`
 	// The number of worker nodes of the node pool.
-	NodeCount  *int32                        `json:"nodeCount"`
-	ServerType *KubernetesNodePoolServerType `json:"serverType,omitempty"`
+	NodeCount *int32 `json:"nodeCount"`
 	// The CPU type for the nodes.
-	CpuFamily *string `json:"cpuFamily,omitempty"`
+	CpuFamily  *string                       `json:"cpuFamily,omitempty"`
+	ServerType *KubernetesNodePoolServerType `json:"serverType,omitempty"`
 	// The total number of cores for the nodes.
 	CoresCount *int32 `json:"coresCount"`
 	// The RAM size for the nodes. Must be specified in multiples of 1024 MB, with a minimum size of 2048 MB.
@@ -196,44 +196,6 @@ func (o *KubernetesNodePoolProperties) HasNodeCount() bool {
 	return false
 }
 
-// GetServerType returns the ServerType field value
-// If the value is explicit nil, nil is returned
-func (o *KubernetesNodePoolProperties) GetServerType() *KubernetesNodePoolServerType {
-	if o == nil {
-		return nil
-	}
-
-	return o.ServerType
-
-}
-
-// GetServerTypeOk returns a tuple with the ServerType field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *KubernetesNodePoolProperties) GetServerTypeOk() (*KubernetesNodePoolServerType, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.ServerType, true
-}
-
-// SetServerType sets field value
-func (o *KubernetesNodePoolProperties) SetServerType(v KubernetesNodePoolServerType) {
-
-	o.ServerType = &v
-
-}
-
-// HasServerType returns a boolean if a field has been set.
-func (o *KubernetesNodePoolProperties) HasServerType() bool {
-	if o != nil && o.ServerType != nil {
-		return true
-	}
-
-	return false
-}
-
 // GetCpuFamily returns the CpuFamily field value
 // If the value is explicit nil, nil is returned
 func (o *KubernetesNodePoolProperties) GetCpuFamily() *string {
@@ -266,6 +228,44 @@ func (o *KubernetesNodePoolProperties) SetCpuFamily(v string) {
 // HasCpuFamily returns a boolean if a field has been set.
 func (o *KubernetesNodePoolProperties) HasCpuFamily() bool {
 	if o != nil && o.CpuFamily != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetServerType returns the ServerType field value
+// If the value is explicit nil, nil is returned
+func (o *KubernetesNodePoolProperties) GetServerType() *KubernetesNodePoolServerType {
+	if o == nil {
+		return nil
+	}
+
+	return o.ServerType
+
+}
+
+// GetServerTypeOk returns a tuple with the ServerType field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *KubernetesNodePoolProperties) GetServerTypeOk() (*KubernetesNodePoolServerType, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.ServerType, true
+}
+
+// SetServerType sets field value
+func (o *KubernetesNodePoolProperties) SetServerType(v KubernetesNodePoolServerType) {
+
+	o.ServerType = &v
+
+}
+
+// HasServerType returns a boolean if a field has been set.
+func (o *KubernetesNodePoolProperties) HasServerType() bool {
+	if o != nil && o.ServerType != nil {
 		return true
 	}
 
@@ -780,12 +780,12 @@ func (o KubernetesNodePoolProperties) MarshalJSON() ([]byte, error) {
 		toSerialize["nodeCount"] = o.NodeCount
 	}
 
-	if o.ServerType != nil {
-		toSerialize["serverType"] = o.ServerType
-	}
-
 	if o.CpuFamily != nil {
 		toSerialize["cpuFamily"] = o.CpuFamily
+	}
+
+	if o.ServerType != nil {
+		toSerialize["serverType"] = o.ServerType
 	}
 
 	if o.CoresCount != nil {
