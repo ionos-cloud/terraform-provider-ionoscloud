@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -83,7 +83,7 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 	var templates []mongo.TemplateResponse
 	partialMatch := d.Get("partial_match").(bool)
 	if retrievedTemplates.Items != nil {
-		for _, retrievedTemplate := range *retrievedTemplates.Items {
+		for _, retrievedTemplate := range retrievedTemplates.Items {
 			// Filter using the template ID or name.
 			if (idOk && *retrievedTemplate.Id == id.(string)) ||
 				(nameOk && matchesName(retrievedTemplate, name.(string), partialMatch)) {

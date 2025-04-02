@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -76,11 +76,11 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 	username := ""
 	if d.Get("username") != nil {
 		username = d.Get("username").(string)
-		request.Properties.Username = &username
+		request.Properties.Username = username
 	}
 	if d.Get("password") != nil {
 		password := d.Get("password").(string)
-		request.Properties.Password = &password
+		request.Properties.Password = password
 	}
 	if rolesValue, ok := d.GetOk("roles"); ok {
 		roles := make([]mongo.UserRoles, 0)
@@ -97,7 +97,7 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 				roles = append(roles, mongoRole)
 			}
 		}
-		request.Properties.Roles = &roles
+		request.Properties.Roles = roles
 	}
 
 	user, _, err := client.CreateUser(ctx, clusterId, request)
@@ -106,8 +106,8 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 		return diags
 	}
 
-	if user.Properties != nil && user.Properties.Username != nil {
-		d.SetId(clusterId + *user.Properties.Username)
+	if user.Properties != nil {
+		d.SetId(clusterId + user.Properties.Username)
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsUserReady)
@@ -153,7 +153,7 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 				roles = append(roles, mongoRole)
 			}
 		}
-		request.Properties.Roles = &roles
+		request.Properties.Roles = roles
 	}
 
 	user, _, err := client.UpdateUser(ctx, clusterId, username, request)
