@@ -1,5 +1,8 @@
 ## 6.7.7
+### Features
+- Add backup to mariadb
 ### Refactor
+- Use MariaDB bundle product instead of sdk-go-dbaas-mariadb
 - Use Mongo bundle product instead of sdk-go-dbaas-mongo
 
 ## 6.7.6

@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	mariadbSDK "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
+	mariadbSDK "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
@@ -109,7 +109,7 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 		if backupsResponse.Items == nil {
 			return diag.FromErr(fmt.Errorf("expected valid properties in the API response for cluster backups, but received 'nil' instead, cluster ID: %s", clusterId))
 		}
-		backups = *backupsResponse.Items
+		backups = backupsResponse.Items
 	} else {
 		var backup mariadbSDK.BackupResponse
 		backup, _, err = client.FindBackupByID(ctx, backupId, location)
