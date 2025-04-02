@@ -1,3 +1,7 @@
+## 6.7.7
+### Refactor
+- Use Mongo bundle product instead of sdk-go-dbaas-mongo
+
 ## 6.7.6
 ### Features
 - Add `server_type` optional attribute to `ionoscloud_k8s_nodepool` resource and data source
@@ -5,7 +9,7 @@
 ### Changed
 - `cpu_family` is now optional for `ionoscloud_k8s_nodepool` resource
 ### Refactor
-- Use SDK Bundle instead of the Kafka SDK
+- Use Kafka bundle product instead of sdk-go-kafka
 ### Chore
 - Remove nolint, add comments
 - Update golangci-lint to v2
@@ -14,7 +18,7 @@
 
 ## 6.7.5
 ## Refactor
-- Use SDK bundle for Object Storage Management
+- Use Object Storage Management bundle product instead of sdk-go-object-storage-management
 ### Fixes
 - Save `ionoscloud_container_registry_token` password to `password` field in the resource state
 

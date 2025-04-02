@@ -231,7 +231,6 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
   ` + credentials + `
 }
 
-# Wait few seconds after cluster creation so the backups can be properly retrieved
 resource "time_sleep" "wait_30_seconds" {
   depends_on = [` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `]
   create_duration = "30s"

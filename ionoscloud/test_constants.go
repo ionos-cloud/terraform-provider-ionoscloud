@@ -1859,6 +1859,7 @@ const clusterCredentialsPasswordAttribute = "password"
 const datacenterResourceName = "datacenter_example"
 const lanResourceName = "lan_example"
 const mongoVersion = "7.0"
+const mongoVersionOld = "6.0"
 
 // Values
 const clusterMaintenanceWindowDayOfTheWeekValue = "Sunday"

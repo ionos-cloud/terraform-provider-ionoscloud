@@ -9,8 +9,8 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
@@ -28,7 +28,7 @@ type PsqlClient struct {
 
 func NewMongoClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *MongoClient {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Mongo)
-	config := mongo.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
+	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
@@ -36,16 +36,12 @@ func NewMongoClient(clientOptions clientoptions.TerraformClientOptions, fileConf
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 
-	if os.Getenv(constant.IonosDebug) != "" {
-		config.Debug = true
-	}
 	config.MaxRetries = constant.MaxRetries
 	config.WaitTime = constant.MaxWaitTime
-	config.HTTPClient = http.DefaultClient
-	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	client := MongoClient{
 		sdkClient: mongo.NewAPIClient(config),
 	}
+	client.sdkClient.GetConfig().HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
 	return &client
 }
 

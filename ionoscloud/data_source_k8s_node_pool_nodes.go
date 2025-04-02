@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -102,13 +102,13 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 func setK8sNodesDataToMap(node ionoscloud.KubernetesNode) map[string]interface{} {
 	nodeEntry := make(map[string]interface{})
 	if node.Id != nil {
-		nodeEntry["id"] = mongo.ToValueDefault(node.Id)
+		nodeEntry["id"] = shared.ToValueDefault(node.Id)
 	}
 	if node.Properties != nil {
-		nodeEntry["name"] = mongo.ToValueDefault(node.Properties.Name)
-		nodeEntry["public_ip"] = mongo.ToValueDefault(node.Properties.PublicIP)
-		nodeEntry["private_ip"] = mongo.ToValueDefault(node.Properties.PrivateIP)
-		nodeEntry["k8s_version"] = mongo.ToValueDefault(node.Properties.K8sVersion)
+		nodeEntry["name"] = shared.ToValueDefault(node.Properties.Name)
+		nodeEntry["public_ip"] = shared.ToValueDefault(node.Properties.PublicIP)
+		nodeEntry["private_ip"] = shared.ToValueDefault(node.Properties.PrivateIP)
+		nodeEntry["k8s_version"] = shared.ToValueDefault(node.Properties.K8sVersion)
 	}
 	return nodeEntry
 }
