@@ -62,6 +62,7 @@ The following attributes are returned by the datasource:
   "TERMINATED"
 * `node_count` - The number of nodes in this node pool
 * `cpu_family` - CPU Family
+* `server_type` - The server type for the compute engine
 * `cores_count` - CPU cores count
 * `ram_size` - The amount of RAM in MB
 * `availability_zone` - The compute availability zone in which the nodes should exist

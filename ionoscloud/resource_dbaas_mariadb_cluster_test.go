@@ -396,6 +396,4 @@ const (
 	clusterConnectionsCidrValue     = "local.database_ip_cidr"
 	clusterDisplayNameValue         = constant.DBaaSClusterTestResource
 	clusterCredentialsUsernameValue = "username"
-	datacenterResourceName          = "datacenter_example"
-	lanResourceName                 = "lan_example"
 )
