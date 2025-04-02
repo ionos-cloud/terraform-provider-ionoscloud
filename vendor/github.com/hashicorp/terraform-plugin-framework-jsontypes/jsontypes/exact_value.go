@@ -8,12 +8,16 @@ import (
 	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/attr/xattr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var (
-	_ basetypes.StringValuable = (*Exact)(nil)
+	_ basetypes.StringValuable       = (*Exact)(nil)
+	_ xattr.ValidateableAttribute    = (*Exact)(nil)
+	_ function.ValidateableParameter = (*Exact)(nil)
 )
 
 // Exact represents a valid JSON string (RFC 7159). No semantic equality logic is defined for Exact,
@@ -37,6 +41,44 @@ func (v Exact) Equal(o attr.Value) bool {
 	}
 
 	return v.StringValue.Equal(other.StringValue)
+}
+
+// ValidateAttribute implements attribute value validation. This type requires the value provided to be a String
+// value that is valid JSON format (RFC 7159).
+func (v Exact) ValidateAttribute(ctx context.Context, req xattr.ValidateAttributeRequest, resp *xattr.ValidateAttributeResponse) {
+	if v.IsUnknown() || v.IsNull() {
+		return
+	}
+
+	if ok := json.Valid([]byte(v.ValueString())); !ok {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Invalid JSON String Value",
+			"A string value was provided that is not valid JSON string format (RFC 7159).\n\n"+
+				"Given Value: "+v.ValueString()+"\n",
+		)
+
+		return
+	}
+}
+
+// ValidateParameter implements provider-defined function parameter value validation. This type requires the value
+// provided to be a String value that is valid JSON format (RFC 7159).
+func (v Exact) ValidateParameter(ctx context.Context, req function.ValidateParameterRequest, resp *function.ValidateParameterResponse) {
+	if v.IsUnknown() || v.IsNull() {
+		return
+	}
+
+	if ok := json.Valid([]byte(v.ValueString())); !ok {
+		resp.Error = function.NewArgumentFuncError(
+			req.Position,
+			"Invalid JSON String Value: "+
+				"A string value was provided that is not valid JSON string format (RFC 7159).\n\n"+
+				"Given Value: "+v.ValueString()+"\n",
+		)
+
+		return
+	}
 }
 
 // Unmarshal calls (encoding/json).Unmarshal with the Exact StringValue and `target` input. A null or unknown value will produce an error diagnostic.

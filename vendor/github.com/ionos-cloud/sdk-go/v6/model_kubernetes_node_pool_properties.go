@@ -23,7 +23,8 @@ type KubernetesNodePoolProperties struct {
 	// The number of worker nodes of the node pool.
 	NodeCount *int32 `json:"nodeCount"`
 	// The CPU type for the nodes.
-	CpuFamily *string `json:"cpuFamily"`
+	CpuFamily  *string                       `json:"cpuFamily,omitempty"`
+	ServerType *KubernetesNodePoolServerType `json:"serverType,omitempty"`
 	// The total number of cores for the nodes.
 	CoresCount *int32 `json:"coresCount"`
 	// The RAM size for the nodes. Must be specified in multiples of 1024 MB, with a minimum size of 2048 MB.
@@ -54,13 +55,14 @@ type KubernetesNodePoolProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewKubernetesNodePoolProperties(name string, datacenterId string, nodeCount int32, cpuFamily string, coresCount int32, ramSize int32, availabilityZone string, storageType string, storageSize int32) *KubernetesNodePoolProperties {
+func NewKubernetesNodePoolProperties(name string, datacenterId string, nodeCount int32, coresCount int32, ramSize int32, availabilityZone string, storageType string, storageSize int32) *KubernetesNodePoolProperties {
 	this := KubernetesNodePoolProperties{}
 
 	this.Name = &name
 	this.DatacenterId = &datacenterId
 	this.NodeCount = &nodeCount
-	this.CpuFamily = &cpuFamily
+	var serverType KubernetesNodePoolServerType = DEDICATED_CORE
+	this.ServerType = &serverType
 	this.CoresCount = &coresCount
 	this.RamSize = &ramSize
 	this.AvailabilityZone = &availabilityZone
@@ -75,6 +77,8 @@ func NewKubernetesNodePoolProperties(name string, datacenterId string, nodeCount
 // but it doesn't guarantee that properties required by API are set
 func NewKubernetesNodePoolPropertiesWithDefaults() *KubernetesNodePoolProperties {
 	this := KubernetesNodePoolProperties{}
+	var serverType KubernetesNodePoolServerType = DEDICATED_CORE
+	this.ServerType = &serverType
 	return &this
 }
 
@@ -224,6 +228,44 @@ func (o *KubernetesNodePoolProperties) SetCpuFamily(v string) {
 // HasCpuFamily returns a boolean if a field has been set.
 func (o *KubernetesNodePoolProperties) HasCpuFamily() bool {
 	if o != nil && o.CpuFamily != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetServerType returns the ServerType field value
+// If the value is explicit nil, nil is returned
+func (o *KubernetesNodePoolProperties) GetServerType() *KubernetesNodePoolServerType {
+	if o == nil {
+		return nil
+	}
+
+	return o.ServerType
+
+}
+
+// GetServerTypeOk returns a tuple with the ServerType field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *KubernetesNodePoolProperties) GetServerTypeOk() (*KubernetesNodePoolServerType, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.ServerType, true
+}
+
+// SetServerType sets field value
+func (o *KubernetesNodePoolProperties) SetServerType(v KubernetesNodePoolServerType) {
+
+	o.ServerType = &v
+
+}
+
+// HasServerType returns a boolean if a field has been set.
+func (o *KubernetesNodePoolProperties) HasServerType() bool {
+	if o != nil && o.ServerType != nil {
 		return true
 	}
 
@@ -740,6 +782,10 @@ func (o KubernetesNodePoolProperties) MarshalJSON() ([]byte, error) {
 
 	if o.CpuFamily != nil {
 		toSerialize["cpuFamily"] = o.CpuFamily
+	}
+
+	if o.ServerType != nil {
+		toSerialize["serverType"] = o.ServerType
 	}
 
 	if o.CoresCount != nil {

@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tf/writeonly"
 	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -44,9 +46,29 @@ func resourceUser() *schema.Resource {
 			},
 			"password": {
 				Type:             schema.TypeString,
-				Required:         true,
+				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Sensitive:        true,
+				Description:      "A password for the user. If you are using terraform 1.11 or higher, you can use `password_wo` instead of `password` to avoid storing the password in the state file.",
+				ConflictsWith:    []string{"password_wo"},
+				ExactlyOneOf:     []string{"password", "password_wo"},
+			},
+			"password_wo": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				WriteOnly:     true,
+				Sensitive:     true,
+				Description:   "Write-only attribute. Password for the user. To modify, must change the password_wo_version attribute.",
+				ConflictsWith: []string{"password"},
+				ExactlyOneOf:  []string{"password", "password_wo"},
+				RequiredWith:  []string{"password_wo_version"},
+			},
+			"password_wo_version": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				RequiredWith: []string{"password_wo"},
+				Description:  "Version of the password_wo attribute. Must be incremented to apply changes to the password_wo attribute.",
+				ValidateFunc: validation.IntAtLeast(1),
 			},
 			"administrator": {
 				Type:        schema.TypeBool,
@@ -106,9 +128,16 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		email := d.Get("email").(string)
 		request.Properties.Email = &email
 	}
-	if d.Get("password") != nil {
+	if _, isSet := d.GetOk("password"); isSet {
 		password := d.Get("password").(string)
 		request.Properties.Password = &password
+	} else {
+		// get write-only value from configuration
+		passwordWO, err := writeonly.GetStringValue(d, "password_wo")
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		request.Properties.Password = shared.ToPtr(passwordWO)
 	}
 
 	administrator := d.Get("administrator").(bool)
@@ -239,6 +268,12 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	if d.HasChange("password") {
 		password := d.Get("password").(string)
 		userReq.Properties.Password = &password
+	} else if d.HasChange("password_wo_version") {
+		passwordWO, err := writeonly.GetStringValue(d, "password_wo")
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		userReq.Properties.Password = shared.ToPtr(passwordWO)
 	}
 
 	if d.HasChange("group_ids") {
