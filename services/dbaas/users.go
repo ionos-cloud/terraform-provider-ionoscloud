@@ -146,7 +146,7 @@ func SetUserMongoData(d *schema.ResourceData, user *mongo.User) error {
 		}
 		d.SetId(uuidgen.GenerateUuidFromName(user.Properties.Username))
 
-		if user.Properties.Roles != nil && len(user.Properties.Roles) > 0 {
+		if len(user.Properties.Roles) > 0 {
 			userRoles := make([]interface{}, len(user.Properties.Roles))
 			for index, user := range user.Properties.Roles {
 				userEntry := make(map[string]interface{})
