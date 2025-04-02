@@ -1,3 +1,7 @@
+## 6.7.7
+### Refactor
+- Use Mongo bundle product instead of sdk-go-dbaas-mongo
+
 ## 6.7.6
 ### Features
 - Add `server_type` optional attribute to `ionoscloud_k8s_nodepool` resource and data source
@@ -6,7 +10,6 @@
 - `cpu_family` is now optional for `ionoscloud_k8s_nodepool` resource
 ### Refactor
 - Use Kafka bundle product instead of sdk-go-kafka
-- Use Mongo bundle product instead of sdk-go-dbaas-mongo
 ### Chore
 - Remove nolint, add comments
 - Update golangci-lint to v2
