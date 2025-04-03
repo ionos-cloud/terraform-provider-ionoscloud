@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
+	dataplatform "github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
@@ -206,9 +206,9 @@ func filterNodePools(ctx context.Context, d *schema.ResourceData, client *datapl
 		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform NodePools: %w", err))
 		return nil, diags
 	}
-	if nodePools.Items != nil && len(*nodePools.Items) > 0 {
-		for _, nodePoolItem := range *nodePools.Items {
-			if nodePoolItem.Properties != nil && nodePoolItem.Properties.Name != nil && (partialMatch && strings.Contains(*nodePoolItem.Properties.Name, name) ||
+	if len(nodePools.Items) > 0 {
+		for _, nodePoolItem := range nodePools.Items {
+			if nodePoolItem.Properties.Name != nil && (partialMatch && strings.Contains(*nodePoolItem.Properties.Name, name) ||
 				!partialMatch && strings.EqualFold(*nodePoolItem.Properties.Name, name)) {
 				if len(results) > 1 {
 					break
