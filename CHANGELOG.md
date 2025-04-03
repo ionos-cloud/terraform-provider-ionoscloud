@@ -1,9 +1,10 @@
-## 6.7.7
+## 6.7.7 -- upcoming release
 ### Features
 - Add backup to mariadb
 ### Refactor
 - Use MariaDB bundle product instead of sdk-go-dbaas-mariadb
 - Use Mongo bundle product instead of sdk-go-dbaas-mongo
+- Use Dataplatform bundle product instead of sdk-go-dataplatform
 ### Documentation 
 - Add better documentation for dedicated core for servers
 ## 6.7.6

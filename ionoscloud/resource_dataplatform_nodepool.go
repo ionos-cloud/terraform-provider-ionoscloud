@@ -93,6 +93,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Description: "Starting time of a weekly 4 hour-long window, during which maintenance might occur in hh:mm:ss format",
 				Optional:    true,
 				Computed:    true,
+				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
@@ -175,7 +176,7 @@ func resourceDataplatformNodePoolCreate(ctx context.Context, d *schema.ResourceD
 		return diags
 	}
 
-	d.SetId(*dataplatformNodePoolResponse.Id)
+	d.SetId(dataplatformNodePoolResponse.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsNodePoolReady)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while dataplaform nodepool waiting to be ready: %w", err))
@@ -223,7 +224,7 @@ func resourceDataplatformNodePoolUpdate(ctx context.Context, d *schema.ResourceD
 		return diags
 	}
 
-	d.SetId(*dataplatformNodePoolResponse.Id)
+	d.SetId(dataplatformNodePoolResponse.Id)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsNodePoolReady)
 	if err != nil {

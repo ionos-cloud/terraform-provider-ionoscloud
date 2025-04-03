@@ -11,14 +11,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
+	dataplatform "github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 var nodePoolResourceName = "Dataplatform Node Pool"
 
-func (c *Client) GetNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
+func (c *Client) GetNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *shared.APIResponse, error) {
 	cluster, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.ClustersNodepoolsFindById(ctx, clusterId, nodePoolId).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
@@ -36,13 +37,13 @@ func (c *Client) IsNodePoolDeleted(ctx context.Context, d *schema.ResourceData) 
 	return apiResponse.HttpNotFound(), err
 }
 
-func (c *Client) ListNodePools(ctx context.Context, clusterId string) (dataplatform.NodePoolListResponseData, *dataplatform.APIResponse, error) {
+func (c *Client) ListNodePools(ctx context.Context, clusterId string) (dataplatform.NodePoolListResponseData, *shared.APIResponse, error) {
 	nodePool, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.ClustersNodepoolsGet(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return nodePool, apiResponse, err
 }
 
-func (c *Client) CreateNodePool(ctx context.Context, clusterId string, d *schema.ResourceData) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
+func (c *Client) CreateNodePool(ctx context.Context, clusterId string, d *schema.ResourceData) (dataplatform.NodePoolResponseData, *shared.APIResponse, error) {
 	dataplatformNodePool, err := GetDataplatformNodePoolDataCreate(d)
 	if err != nil {
 		return dataplatform.NodePoolResponseData{}, nil, err
@@ -62,7 +63,7 @@ func (c *Client) UpdateNodePool(ctx context.Context, clusterId, nodePoolId strin
 	return clusterResponse, apiResponse, err
 }
 
-func (c *Client) DeleteNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
+func (c *Client) DeleteNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.ClustersNodepoolsDelete(ctx, clusterId, nodePoolId).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
@@ -78,7 +79,7 @@ func (c *Client) IsNodePoolReady(ctx context.Context, d *schema.ResourceData) (b
 		return false, fmt.Errorf("checking Dataplatform Node Pool status: %w", err)
 	}
 
-	if subjectNodePool.Metadata == nil || subjectNodePool.Metadata.State == nil {
+	if subjectNodePool.Metadata.State == nil {
 		return false, fmt.Errorf("expected nodepool metadata, got empty for id %s", d.Id())
 	}
 	log.Printf("[DEBUG] dataplatform cluster nodepool state %s", *subjectNodePool.Metadata.State)
@@ -93,17 +94,17 @@ func (c *Client) IsNodePoolReady(ctx context.Context, d *schema.ResourceData) (b
 func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) (*dataplatform.CreateNodePoolRequest, error) {
 
 	dataplatformNodePool := dataplatform.CreateNodePoolRequest{
-		Properties: &dataplatform.CreateNodePoolProperties{},
+		Properties: dataplatform.CreateNodePoolProperties{},
 	}
 
 	if nameValue, ok := d.GetOk("name"); ok {
 		name := nameValue.(string)
-		dataplatformNodePool.Properties.Name = &name
+		dataplatformNodePool.Properties.Name = name
 	}
 
 	if nodeCountValue, ok := d.GetOk("node_count"); ok {
 		nodeCount := int32(nodeCountValue.(int))
-		dataplatformNodePool.Properties.NodeCount = &nodeCount
+		dataplatformNodePool.Properties.NodeCount = nodeCount
 	}
 
 	if cpuFamilyValue, ok := d.GetOk("cpu_family"); ok {
@@ -145,7 +146,7 @@ func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) (*dataplatform.Cr
 		for k, v := range labelsValue.(map[string]interface{}) {
 			labels[k] = v.(string)
 		}
-		dataplatformNodePool.Properties.Labels = &labels
+		dataplatformNodePool.Properties.Labels = labels
 	}
 
 	if annotationsValue, ok := d.GetOk("annotations"); ok {
@@ -153,7 +154,7 @@ func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) (*dataplatform.Cr
 		for k, v := range annotationsValue.(map[string]interface{}) {
 			annotations[k] = v.(string)
 		}
-		dataplatformNodePool.Properties.Annotations = &annotations
+		dataplatformNodePool.Properties.Annotations = annotations
 	}
 	var autoscaling *dataplatform.AutoScaling
 	var err error
@@ -169,7 +170,7 @@ func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) (*dataplatform.Cr
 func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) (*dataplatform.PatchNodePoolRequest, error) {
 
 	dataplatformNodePool := dataplatform.PatchNodePoolRequest{
-		Properties: &dataplatform.PatchNodePoolProperties{},
+		Properties: dataplatform.PatchNodePoolProperties{},
 	}
 
 	if nodeCountValue, ok := d.GetOk("node_count"); ok {
@@ -186,7 +187,7 @@ func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) (*dataplatform.Pa
 		for k, v := range labelsValue.(map[string]interface{}) {
 			labels[k] = v.(string)
 		}
-		dataplatformNodePool.Properties.Labels = &labels
+		dataplatformNodePool.Properties.Labels = labels
 	}
 
 	if annotationsValue, ok := d.GetOk("annotations"); ok {
@@ -194,7 +195,7 @@ func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) (*dataplatform.Pa
 		for k, v := range annotationsValue.(map[string]interface{}) {
 			annotations[k] = v.(string)
 		}
-		dataplatformNodePool.Properties.Annotations = &annotations
+		dataplatformNodePool.Properties.Annotations = annotations
 	}
 
 	if d.HasChange("auto_scaling.0.min_node_count") {
@@ -211,19 +212,15 @@ func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) (*dataplatform.Pa
 	if autoscaling, err = getAutoscalingData(d); err != nil {
 		return &dataplatformNodePool, err
 	}
-	dataplatformNodePool.Properties.AutoScaling = autoscaling
+
+	autoscalingNullableAS := dataplatform.NewNullableAutoScaling(autoscaling)
+	dataplatformNodePool.Properties.AutoScaling = *autoscalingNullableAS
 	return &dataplatformNodePool, nil
 }
 
 func SetDataplatformNodePoolData(d *schema.ResourceData, nodePool dataplatform.NodePoolResponseData) error {
 
-	if nodePool.Id != nil {
-		d.SetId(*nodePool.Id)
-	}
-
-	if nodePool.Properties == nil {
-		return fmt.Errorf("node pool properties should not be empty for ID %s", *nodePool.Id)
-	}
+	d.SetId(nodePool.Id)
 
 	if nodePool.Properties.Name != nil {
 		if err := d.Set("name", *nodePool.Properties.Name); err != nil {
@@ -295,24 +292,23 @@ func SetDataplatformNodePoolData(d *schema.ResourceData, nodePool dataplatform.N
 	}
 
 	if nodePool.Properties.Labels != nil {
-		if err := d.Set("labels", *nodePool.Properties.Labels); err != nil {
+		if err := d.Set("labels", nodePool.Properties.Labels); err != nil {
 			return utils.GenerateSetError(nodePoolResourceName, "labels", err)
 		}
 	}
 
 	if nodePool.Properties.Annotations != nil {
-		if err := d.Set("annotations", *nodePool.Properties.Annotations); err != nil {
+		if err := d.Set("annotations", nodePool.Properties.Annotations); err != nil {
 			return utils.GenerateSetError(nodePoolResourceName, "annotations", err)
 		}
 	}
 
-	if nodePool.Properties.AutoScaling != nil && nodePool.Properties.AutoScaling.MinNodeCount != nil &&
-		nodePool.Properties.AutoScaling.MaxNodeCount != nil && (*nodePool.Properties.AutoScaling.MinNodeCount != 0 &&
-		*nodePool.Properties.AutoScaling.MaxNodeCount != 0) {
+	if nodePool.Properties.AutoScaling != nil && (nodePool.Properties.AutoScaling.MinNodeCount != 0 &&
+		nodePool.Properties.AutoScaling.MaxNodeCount != 0) {
 		if err := d.Set("auto_scaling", []map[string]uint32{
 			{
-				"min_node_count": uint32(*nodePool.Properties.AutoScaling.MinNodeCount),
-				"max_node_count": uint32(*nodePool.Properties.AutoScaling.MaxNodeCount),
+				"min_node_count": uint32(nodePool.Properties.AutoScaling.MinNodeCount),
+				"max_node_count": uint32(nodePool.Properties.AutoScaling.MaxNodeCount),
 			},
 		}); err != nil {
 			return err
@@ -330,26 +326,24 @@ func SetNodePoolsData(d *schema.ResourceData, results []dataplatform.NodePoolRes
 		var nodePools []interface{}
 		for _, nodePool := range results {
 			nodePoolEntry := make(map[string]interface{})
-			if nodePool.Properties != nil {
-				utils.SetPropWithNilCheck(nodePoolEntry, "name", nodePool.Properties.Name)
-				utils.SetPropWithNilCheck(nodePoolEntry, "version", nodePool.Properties.DataPlatformVersion)
-				utils.SetPropWithNilCheck(nodePoolEntry, "datacenter_id", nodePool.Properties.DatacenterId)
-				utils.SetPropWithNilCheck(nodePoolEntry, "node_count", nodePool.Properties.NodeCount)
-				utils.SetPropWithNilCheck(nodePoolEntry, "cpu_family", nodePool.Properties.CpuFamily)
-				utils.SetPropWithNilCheck(nodePoolEntry, "cores_count", nodePool.Properties.CoresCount)
-				utils.SetPropWithNilCheck(nodePoolEntry, "ram_size", nodePool.Properties.RamSize)
-				utils.SetPropWithNilCheck(nodePoolEntry, "availability_zone", nodePool.Properties.AvailabilityZone)
-				utils.SetPropWithNilCheck(nodePoolEntry, "storage_type", nodePool.Properties.StorageType)
-				utils.SetPropWithNilCheck(nodePoolEntry, "storage_size", nodePool.Properties.StorageSize)
-				if nodePool.Properties.MaintenanceWindow != nil {
-					var maintenanceWindow []interface{}
-					maintenanceWindowEntry := SetMaintenanceWindowProperties(*nodePool.Properties.MaintenanceWindow)
-					maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
-					utils.SetPropWithNilCheck(nodePoolEntry, "maintenance_window", maintenanceWindow)
-				}
-				utils.SetPropWithNilCheck(nodePoolEntry, "labels", nodePool.Properties.Labels)
-				utils.SetPropWithNilCheck(nodePoolEntry, "annotations", nodePool.Properties.Annotations)
+			utils.SetPropWithNilCheck(nodePoolEntry, "name", nodePool.Properties.Name)
+			utils.SetPropWithNilCheck(nodePoolEntry, "version", nodePool.Properties.DataPlatformVersion)
+			utils.SetPropWithNilCheck(nodePoolEntry, "datacenter_id", nodePool.Properties.DatacenterId)
+			utils.SetPropWithNilCheck(nodePoolEntry, "node_count", nodePool.Properties.NodeCount)
+			utils.SetPropWithNilCheck(nodePoolEntry, "cpu_family", nodePool.Properties.CpuFamily)
+			utils.SetPropWithNilCheck(nodePoolEntry, "cores_count", nodePool.Properties.CoresCount)
+			utils.SetPropWithNilCheck(nodePoolEntry, "ram_size", nodePool.Properties.RamSize)
+			utils.SetPropWithNilCheck(nodePoolEntry, "availability_zone", nodePool.Properties.AvailabilityZone)
+			utils.SetPropWithNilCheck(nodePoolEntry, "storage_type", nodePool.Properties.StorageType)
+			utils.SetPropWithNilCheck(nodePoolEntry, "storage_size", nodePool.Properties.StorageSize)
+			if nodePool.Properties.MaintenanceWindow != nil {
+				var maintenanceWindow []interface{}
+				maintenanceWindowEntry := SetMaintenanceWindowProperties(*nodePool.Properties.MaintenanceWindow)
+				maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
+				utils.SetPropWithNilCheck(nodePoolEntry, "maintenance_window", maintenanceWindow)
 			}
+			utils.SetPropWithNilCheck(nodePoolEntry, "labels", nodePool.Properties.Labels)
+			utils.SetPropWithNilCheck(nodePoolEntry, "annotations", nodePool.Properties.Annotations)
 			nodePools = append(nodePools, nodePoolEntry)
 		}
 
@@ -386,9 +380,9 @@ func getAutoscalingData(d *schema.ResourceData) (*dataplatform.AutoScaling, erro
 	}
 
 	log.Printf("[INFO] Setting Autoscaling minimum node count to : %d", asmnVal)
-	autoscaling.MinNodeCount = &asmnVal
+	autoscaling.MinNodeCount = asmnVal
 	log.Printf("[INFO] Setting Autoscaling maximum node count to : %d", asmxnVal)
-	autoscaling.MaxNodeCount = &asmxnVal
+	autoscaling.MaxNodeCount = asmxnVal
 
 	return &autoscaling, nil
 }

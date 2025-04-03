@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
+	dataplatform "github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
@@ -154,7 +154,7 @@ func dataSourceNodePoolsRead(ctx context.Context, d *schema.ResourceData, meta i
 			return diags
 		}
 		if nodePools.Items != nil {
-			results = *nodePools.Items
+			results = nodePools.Items
 		}
 	}
 
