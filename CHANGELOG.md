@@ -1,6 +1,7 @@
-## 6.7.7
+## 6.7.7 - upcoming release
 ### Refactor
 - Use Mongo bundle product instead of sdk-go-dbaas-mongo
+- Use Dataplatform bundle product instead of sdk-go-dataplatform
 
 ## 6.7.6
 ### Features

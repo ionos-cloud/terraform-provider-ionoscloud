@@ -53,6 +53,7 @@ func resourceDataplatformCluster() *schema.Resource {
 				Description: "Starting time of a weekly 4 hour-long window, during which maintenance might occur in hh:mm:ss format",
 				Optional:    true,
 				Computed:    true,
+				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {

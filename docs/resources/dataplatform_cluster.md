@@ -33,7 +33,7 @@ resource "ionoscloud_dataplatform_cluster" "example" {
     day_of_the_week  	= "Sunday"
     time				= "09:00:00"
   }
-  version	= "23.11"
+  version	= "24.11"
   lans {
     lan_id = ionoscloud_lan.example.id
     dhcp = false

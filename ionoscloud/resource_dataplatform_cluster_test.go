@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
+	dataplatform "github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -146,7 +146,7 @@ func testAccCheckDataplatformClusterExists(n string, cluster *dataplatform.Clust
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching Dataplatform Cluster %s: %w", rs.Primary.ID, err)
 		}
-		if *foundCluster.Id != rs.Primary.ID {
+		if foundCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
 		}
 		cluster = &foundCluster
