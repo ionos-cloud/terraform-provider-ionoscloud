@@ -144,6 +144,25 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 					},
 				},
 			},
+			"backup": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Description: "Properties configuring the backup of the cluster. Immutable, change forces re-creation of the cluster.",
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"location": {
+							Type:             schema.TypeString,
+							Description:      "The IONOS Object Storage location where the backups will be stored.",
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+						},
+					},
+				},
+			},
 			"dns_name": {
 				Type:        schema.TypeString,
 				Description: "The DNS name pointing to your cluster.",

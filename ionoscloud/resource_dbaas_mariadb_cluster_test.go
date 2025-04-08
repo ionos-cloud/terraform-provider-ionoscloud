@@ -14,7 +14,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
+	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
 )
 
 func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
@@ -37,6 +37,25 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 		CheckDestroy:             testAccCheckDBaaSMariaDBClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
+				Config: mariaDBClusterConfigBasicNoBackup,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDBaaSMariaDBClusterExists(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, &cluster),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterVersionAttribute, clusterVersionValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterInstancesAttribute, clusterInstancesValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCoresAttribute, clusterCoresValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterRamAttribute, clusterRamValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterStorageSizeAttribute, clusterStorageSizeValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterDisplayNameAttribute, clusterDisplayNameValue),
+					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
+					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
+					resource.TestCheckResourceAttrSet(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterBackupAttribute+".0."+clusterBackupLocationAttribute),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameValue),
+					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsPasswordAttribute, constant.RandomPassword+".cluster_password", "result"),
+				),
+			},
+			{
 				Config: mariaDBClusterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDBaaSMariaDBClusterExists(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, &cluster),
@@ -50,6 +69,7 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterBackupAttribute+".0."+clusterBackupLocationAttribute, clusterBackupLocationValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameValue),
 					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsPasswordAttribute, constant.RandomPassword+".cluster_password", "result"),
 				),
@@ -67,6 +87,7 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterBackupAttribute+".0."+clusterBackupLocationAttribute, clusterBackupLocationValue),
 				),
 			},
 			{
@@ -82,6 +103,7 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+"."+lanResourceName, "id"),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceByName, clusterBackupAttribute+".0."+clusterBackupLocationAttribute, clusterBackupLocationValue),
 				),
 			},
 			{
@@ -228,12 +250,33 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
   ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameValue + `"
   ` + connections + `
   ` + maintenanceWindow + `
+  ` + backup + `
   ` + credentials + `
 }
 
-resource "time_sleep" "wait_30_seconds" {
+resource "time_sleep" "wait_5_minutes" {
   depends_on = [` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `]
-  create_duration = "30s"
+  create_duration = "300s"
+}
+`
+
+const mariaDBClusterConfigBasicNoBackup = mariaDBTestInfraConfig + `
+resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
+  ` + clusterVersionAttribute + ` = "` + clusterVersionValue + `"
+  ` + clusterInstancesAttribute + ` = "` + clusterInstancesValue + `"
+  ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
+  ` + clusterCoresAttribute + ` = "` + clusterCoresValue + `"
+  ` + clusterRamAttribute + ` = "` + clusterRamValue + `"
+  ` + clusterStorageSizeAttribute + ` = "` + clusterStorageSizeValue + `"
+  ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameValue + `"
+  ` + connections + `
+  ` + maintenanceWindow + `
+  ` + credentials + `
+}
+
+resource "time_sleep" "wait_5_minutes" {
+  depends_on = [` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `]
+  create_duration = "300s"
 }
 `
 
@@ -248,6 +291,7 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
   ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameValue + `"
   ` + connections + `
   ` + maintenanceWindowUpdated + `
+  ` + backup + `
   ` + credentials + `
 }
 `
@@ -265,6 +309,7 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
   ` + clusterDisplayNameAttribute + ` = "` + clusterDisplayNameValue + `"
   ` + connections + `
   ` + maintenanceWindowUpdated + `
+  ` + backup + `
   ` + credentials + `
 }
 `
@@ -288,7 +333,7 @@ data ` + constant.DBaaSMariaDBBackupsDataSource + ` ` + constant.DBaasMariaDBBac
 	cluster_id = ` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 	` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
     # Use the previously created 'time' resource to delay information retrieval for the data source
-	depends_on = [time_sleep.wait_30_seconds]
+	depends_on = [time_sleep.wait_5_minutes]
 }
 `
 const mariaDBClusterDataSourceWrongName = `
@@ -321,6 +366,10 @@ const maintenanceWindow = clusterMaintenanceWindowAttribute + `{
 const maintenanceWindowUpdated = clusterMaintenanceWindowAttribute + `{
 	` + clusterMaintenanceWindowDayOfTheWeekAttribute + ` = "` + clusterMaintenanceWindowDayOfTheWeekUpdateValue + `"
 	` + clusterMaintenanceWindowTimeAttribute + ` = "` + clusterMaintenanceWindowTimeUpdateValue + `"
+}`
+
+const backup = clusterBackupAttribute + `{
+	` + clusterBackupLocationAttribute + ` = "` + clusterBackupLocationValue + `"
 }`
 
 const credentials = clusterCredentialsAttribute + `{
