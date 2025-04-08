@@ -11,13 +11,35 @@ description: |-
 
 Manages **Users** and list users and groups associated with that user.
 
+## Example Usage with write only password that is not saved in state:
+
+Note: Requires Terraform 1.11 or higher. In this way, the password is not saved in state. `password_wo` must be used along with `password_wo_version`. Updating `password_wo_version` will trigger an update to the value of `password_wo`.
+
+```hcl
+resource "ionoscloud_user" "example" {
+  first_name              = "example"
+  last_name               = "example"
+  email                   = "example@ionos.com"
+  password_wo             = random_password.user_password.result
+  password_wo_version     = "1"
+  administrator           = false
+  force_sec_auth          = false
+  active                  = true
+}
+resource "random_password" "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+```
+
 ## Example Usage
 
 ```hcl
 resource "ionoscloud_user" "example" {
   first_name              = "example"
   last_name               = "example"
-  email                   = "unique@email.com"
+  email                   = "example@ionos.com"
   password                = random_password.user_password.result
   administrator           = false
   force_sec_auth          = false
