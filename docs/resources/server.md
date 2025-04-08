@@ -17,7 +17,7 @@ Check out [Limitations](https://docs.ionos.com/cloud/compute-services/compute-en
 
 This resource will create an operational server. After this section completes, the provisioner can be called.
 
-### ENTERPRISE Server
+### Dedicated Core Server
 
 ```hcl
 data "ionoscloud_image" "example" {
@@ -266,7 +266,7 @@ resource "ionoscloud_server" "test" {
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist. E.g: `AUTO`, `ZONE_1`, `ZONE_2`. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
 - `cpu_family` - (Optional)[string] CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource. E.g.: "INTEL_SKYLAKE" or "INTEL_XEON".
-- `vm_state` - (Optional)[string] Sets the power state of the server. E.g: `RUNNING`, `SHUTOFF` or `SUSPENDED`. SUSPENDED state is only valid for cube. SHUTOFF state is only valid for enterprise.
+- `vm_state` - (Optional)[string] Sets the power state of the server. E.g: `RUNNING`, `SHUTOFF` or `SUSPENDED`. SUSPENDED state is only valid for cube. SHUTOFF state is only valid for enterprise(dedicated core).
 - `volume` - (Optional) See the [Volume](volume.md) section.
 - `nic` - (Optional) See the [Nic](nic.md) section.
 - `firewall` - (Optional) Allows to define firewall rules inline in the server. See the [Firewall](firewall.md) section.
@@ -280,7 +280,7 @@ resource "ionoscloud_server" "test" {
 - `ssh_key_path` - (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided. Does not support `~` expansion to homedir in the given path. This property is immutable.
 - `ssh_keys` - (Optional)[list] Immutable List of absolute or relative paths to files containing public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation. Does not support `~` expansion to homedir in the given path.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
-- `type` - (Optional)(Computed)[string] Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes). This property is immutable.
+- `type` - (Optional)(Computed)[string] Server usages: * `type` - Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-services/compute-engine/dedicated-core) now named dedicated core, [CUBE](https://docs.ionos.com/cloud/compute-services/cubes) or [VCPU](https://docs.ionos.com/cloud/compute-services/compute-engine/vcpu-server). This property is immutable.
 - `label` - (Optional)[set] A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.
     - `key` - (Required)[string] The key of the label.
     - `value` - (Required)[string] The value of the label.
