@@ -6,6 +6,7 @@
 - Use Mongo bundle product instead of sdk-go-dbaas-mongo
 ### Documentation 
 - Add better documentation for dedicated core for servers
+- Add example for `user` field `password_wo` write only field.
 ## 6.7.6
 ### Features
 - Add `server_type` optional attribute to `ionoscloud_k8s_nodepool` resource and data source
