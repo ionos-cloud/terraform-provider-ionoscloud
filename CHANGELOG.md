@@ -1,7 +1,8 @@
 ## 6.7.7
 ### Refactor
 - Use Mongo bundle product instead of sdk-go-dbaas-mongo
-
+### Documentation 
+- Add better documentation for dedicated core for servers
 ## 6.7.6
 ### Features
 - Add `server_type` optional attribute to `ionoscloud_k8s_nodepool` resource and data source
