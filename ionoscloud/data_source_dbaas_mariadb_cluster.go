@@ -111,7 +111,7 @@ func dataSourceDBaaSMariaDBCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"location": {
 							Type:        schema.TypeString,
-							Description: "The S3 location where the backups will be stored.",
+							Description: "The IONOS Object Storage location where the backups will be stored.",
 							Computed:    true,
 						},
 					},

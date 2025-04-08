@@ -58,6 +58,6 @@ The following attributes are returned by the datasource:
   * `time` - [string] Start of the maintenance window in UTC time.
   * `day_of_the_week` - [string] The name of the week day.
 * `backup` - Properties configuring the backup of the cluster.
-  * `location` - [string] The S3 location where the backups will be stored.
+  * `location` - [string] The IONOS Object Storage location where the backups will be stored.
 * `dns_name` - [string] The DNS name pointing to your cluster.
   

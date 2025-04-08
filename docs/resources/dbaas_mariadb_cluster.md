@@ -97,7 +97,7 @@ resource "random_password" "cluster_password" {
   * `time` - (Required)[string] Start of the maintenance window in UTC time.
   * `day_of_the_week` - (Required)[string] The name of the week day.
 * `backup` - (Optional) Properties configuring the backup of the cluster. Immutable, change forces re-creation of the cluster.
-  * `location` - (Required)[string] The S3 location where the backups will be stored.
+  * `location` - (Required)[string] The IONOS Object Storage location where the backups will be stored.
 * `credentials` - (Required) Credentials for the database user to be created.
     * `username` - (Required)[string] The username for the initial MariaDB user. Some system usernames are restricted (e.g 'mariadb', 'admin', 'standby').
     * `password` - (Required)[string] The password for a MariaDB user.
