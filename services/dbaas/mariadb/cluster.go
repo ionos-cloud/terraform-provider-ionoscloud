@@ -7,24 +7,26 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
+	shared "github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	mariadb "github.com/ionos-cloud/sdk-go-dbaas-mariadb"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 // GetCluster retrieves a cluster by its ID and the location in which the cluster is created.
-func (c *Client) GetCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
+func (c *Client) GetCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
 
 // ListClusters retrieves a list of clusters based on the location. Filters can be used.
-func (c *Client) ListClusters(ctx context.Context, filterName, location string) (mariadb.ClusterList, *mariadb.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
+func (c *Client) ListClusters(ctx context.Context, filterName, location string) (mariadb.ClusterList, *shared.APIResponse, error) {
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
 	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)
@@ -35,24 +37,24 @@ func (c *Client) ListClusters(ctx context.Context, filterName, location string) 
 }
 
 // CreateCluster creates a new cluster using the provided data in the request and the location.
-func (c *Client) CreateCluster(ctx context.Context, cluster mariadb.CreateClusterRequest, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
+func (c *Client) CreateCluster(ctx context.Context, cluster mariadb.CreateClusterRequest, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
 // UpdateCluster updates a cluster by its ID and the location in which the cluster is created.
-func (c *Client) UpdateCluster(ctx context.Context, cluster mariadb.PatchClusterRequest, clusterID, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
+func (c *Client) UpdateCluster(ctx context.Context, cluster mariadb.PatchClusterRequest, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterID).PatchClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
 // DeleteCluster deletes a cluster by its ID and the location in which the cluster is created.
-func (c *Client) DeleteCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *mariadb.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.Mariadb, location)
+func (c *Client) DeleteCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
@@ -93,27 +95,27 @@ func GetMariaDBClusterDataCreate(d *schema.ResourceData) (*mariadb.CreateCluster
 
 	if mariaDBVersion, ok := d.GetOk("mariadb_version"); ok {
 		mariaDBVersion := mariaDBVersion.(string)
-		cluster.Properties.MariadbVersion = (*mariadb.MariadbVersion)(&mariaDBVersion)
+		cluster.Properties.MariadbVersion = (mariadb.MariadbVersion)(mariaDBVersion)
 	}
 
 	if instances, ok := d.GetOk("instances"); ok {
 		instances := int32(instances.(int))
-		cluster.Properties.Instances = &instances
+		cluster.Properties.Instances = instances
 	}
 
 	if cores, ok := d.GetOk("cores"); ok {
 		cores := int32(cores.(int))
-		cluster.Properties.Cores = &cores
+		cluster.Properties.Cores = cores
 	}
 
 	if ram, ok := d.GetOk("ram"); ok {
 		ram := int32(ram.(int))
-		cluster.Properties.Ram = &ram
+		cluster.Properties.Ram = ram
 	}
 
 	if storageSize, ok := d.GetOk("storage_size"); ok {
 		storageSize := int32(storageSize.(int))
-		cluster.Properties.StorageSize = &storageSize
+		cluster.Properties.StorageSize = storageSize
 	}
 
 	if _, ok := d.GetOk("connections"); ok {
@@ -122,13 +124,17 @@ func GetMariaDBClusterDataCreate(d *schema.ResourceData) (*mariadb.CreateCluster
 
 	if displayName, ok := d.GetOk("display_name"); ok {
 		displayName := displayName.(string)
-		cluster.Properties.DisplayName = &displayName
+		cluster.Properties.DisplayName = displayName
 	}
 
 	cluster.Properties.Credentials = GetMariaClusterCredentialsData(d)
 
 	if _, ok := d.GetOk("maintenance_window"); ok {
 		cluster.Properties.MaintenanceWindow = GetMariaClusterMaintenanceWindowData(d)
+	}
+
+	if _, ok := d.GetOk("backup"); ok {
+		cluster.Properties.Backup = getMariaClusterBackupData(d)
 	}
 
 	return &cluster, nil
@@ -179,10 +185,12 @@ func GetMariaDBClusterDataUpdate(d *schema.ResourceData) (*mariadb.PatchClusterR
 	if d.HasChange("maintenance_window") {
 		cluster.Properties.MaintenanceWindow = GetMariaClusterMaintenanceWindowData(d)
 	}
+
 	return &cluster, nil
 }
 
-func GetMariaClusterConnectionsData(d *schema.ResourceData) *[]mariadb.Connection {
+// GetMariaClusterConnectionsData retrieves the data from the terraform resource and sets it in the MariaDB connection struct.
+func GetMariaClusterConnectionsData(d *schema.ResourceData) []mariadb.Connection {
 	connections := make([]mariadb.Connection, 0)
 
 	if connectionsIntf, ok := d.GetOk("connections"); ok {
@@ -192,54 +200,68 @@ func GetMariaClusterConnectionsData(d *schema.ResourceData) *[]mariadb.Connectio
 
 			if datacenterID, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", connectionIdx)); ok {
 				datacenterID := datacenterID.(string)
-				connection.DatacenterId = &datacenterID
+				connection.DatacenterId = datacenterID
 			}
 
 			if lanID, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", connectionIdx)); ok {
 				lanID := lanID.(string)
-				connection.LanId = &lanID
+				connection.LanId = lanID
 			}
 
 			if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.cidr", connectionIdx)); ok {
 				cidr := cidr.(string)
-				connection.Cidr = &cidr
+				connection.Cidr = cidr
 			}
 			connections = append(connections, connection)
 		}
 	}
-	return &connections
+	return connections
 }
 
+// GetMariaClusterMaintenanceWindowData retrieves the data from the terraform resource and sets it in the MariaDB MaintenanceWindow struct.
 func GetMariaClusterMaintenanceWindowData(d *schema.ResourceData) *mariadb.MaintenanceWindow {
 	var maintenanceWindow mariadb.MaintenanceWindow
 
 	if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
 		timeV := timeV.(string)
-		maintenanceWindow.Time = &timeV
+		maintenanceWindow.Time = timeV
 	}
 
 	if dayOfTheWeek, ok := d.GetOk("maintenance_window.0.day_of_the_week"); ok {
 		dayOfTheWeek := mariadb.DayOfTheWeek(dayOfTheWeek.(string))
-		maintenanceWindow.DayOfTheWeek = &dayOfTheWeek
+		maintenanceWindow.DayOfTheWeek = dayOfTheWeek
 	}
 
 	return &maintenanceWindow
 }
 
-func GetMariaClusterCredentialsData(d *schema.ResourceData) *mariadb.DBUser {
+// getMariaClusterBackupData retrieves the data from the terraform resource and sets it in the MariaDB Backup struct.
+func getMariaClusterBackupData(d *schema.ResourceData) *mariadb.BackupProperties {
+	var backup mariadb.BackupProperties
+
+	if loc, ok := d.GetOk("backup.0.location"); ok {
+		loc := loc.(string)
+		backup.Location = &loc
+	}
+
+	return &backup
+}
+
+// GetMariaClusterCredentialsData retrieves the data from the terraform resource and sets it in the MariaDB DBUser struct.
+func GetMariaClusterCredentialsData(d *schema.ResourceData) mariadb.DBUser {
 	var user mariadb.DBUser
 
 	if username, ok := d.GetOk("credentials.0.username"); ok {
 		username := username.(string)
-		user.Username = &username
+		user.Username = username
 	}
 
 	if password, ok := d.GetOk("credentials.0.password"); ok {
 		password := password.(string)
-		user.Password = &password
+		user.Password = password
 	}
 
-	return &user
+	return user
 }
 
 func (c *Client) SetMariaDBClusterData(d *schema.ResourceData, cluster mariadb.ClusterResponse) error {
@@ -284,9 +306,9 @@ func (c *Client) SetMariaDBClusterData(d *schema.ResourceData, cluster mariadb.C
 		}
 	}
 
-	if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
+	if len(cluster.Properties.Connections) > 0 {
 		var connections []interface{}
-		for _, connection := range *cluster.Properties.Connections {
+		for _, connection := range cluster.Properties.Connections {
 			connectionEntry := c.SetConnectionProperties(connection)
 			connections = append(connections, connectionEntry)
 		}
@@ -307,6 +329,15 @@ func (c *Client) SetMariaDBClusterData(d *schema.ResourceData, cluster mariadb.C
 		maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
 		if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
 			return utils.GenerateSetError(resourceName, "maintenance_window", err)
+		}
+	}
+
+	if cluster.Properties.Backup != nil {
+		var bac []any
+		backupEntry := c.setBackupProperties(*cluster.Properties.Backup)
+		bac = append(bac, backupEntry)
+		if err := d.Set("backup", bac); err != nil {
+			return utils.GenerateSetError(resourceName, "backup", err)
 		}
 	}
 
@@ -336,4 +367,12 @@ func (c *Client) SetMaintenanceWindowProperties(maintenanceWindow mariadb.Mainte
 	utils.SetPropWithNilCheck(maintenance, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
 
 	return maintenance
+}
+
+func (c *Client) setBackupProperties(backup mariadb.BackupProperties) map[string]any {
+	bac := map[string]any{}
+
+	utils.SetPropWithNilCheck(bac, "location", backup.Location)
+
+	return bac
 }

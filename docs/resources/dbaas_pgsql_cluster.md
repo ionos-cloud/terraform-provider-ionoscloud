@@ -19,7 +19,7 @@ Manages a [DbaaS PgSql Cluster](https://docs.ionos.com/cloud/databases/postgresq
 resource "ionoscloud_datacenter" "example" {
   name                    = "example"
   location                = "de/txl"
-  description             = "Datacenter for testing dbaas cluster"
+  description             = "Datacenter for testing psql cluster"
 }
 
 resource "ionoscloud_lan"  "example" {

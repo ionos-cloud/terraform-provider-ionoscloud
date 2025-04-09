@@ -10,7 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	objectstoragemanagementApi "github.com/ionos-cloud/sdk-go-object-storage-management"
+	objectstoragemanagementApi "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 var _ datasource.DataSourceWithConfigure = (*accessKeyDataSource)(nil)
@@ -100,7 +101,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 	var accessKey objectstoragemanagementApi.AccessKeyRead
 	var accessKeys objectstoragemanagementApi.AccessKeyReadList
-	var apiResponse *objectstoragemanagementApi.APIResponse
+	var apiResponse *shared.APIResponse
 	var err error
 	switch {
 	case !data.ID.IsNull():
@@ -114,22 +115,22 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			resp.Diagnostics.AddError("an error occurred while fetching the accesskey with", err.Error())
 			return
 		}
-		if !data.AccessKey.IsNull() && *accessKey.Properties.AccessKey != accessKeyID {
+		if !data.AccessKey.IsNull() && accessKey.Properties.AccessKey != accessKeyID {
 			resp.Diagnostics.AddError(
 				"accesskeyID does not match",
 				fmt.Sprintf(
 					"accesskey property of Accesskey (UUID=%s, accesskey=%s) does not match expected accesskey: %s",
-					*accessKey.Id, *accessKey.Properties.AccessKey, accessKeyID,
+					accessKey.Id, accessKey.Properties.AccessKey, accessKeyID,
 				),
 			)
 			return
 		}
-		if !data.Description.IsNull() && *accessKey.Properties.Description != description {
+		if !data.Description.IsNull() && accessKey.Properties.Description != description {
 			resp.Diagnostics.AddError(
 				"accesskeyID does not match",
 				fmt.Sprintf(
 					"description of Accesskey (UUID=%s, description=%s) does not match expected description: %s",
-					*accessKey.Id, *accessKey.Properties.Description, description,
+					accessKey.Id, accessKey.Properties.Description, description,
 				),
 			)
 			return
@@ -140,18 +141,18 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", err.Error())
 			return
 		}
-		if len(*accessKeys.Items) != 0 {
-			accessKey = (*accessKeys.Items)[0]
+		if len(accessKeys.Items) != 0 {
+			accessKey = (accessKeys.Items)[0]
 		} else {
 			resp.Diagnostics.AddError("accesskey not found", "The accesskey was not found")
 			return
 		}
-		if !data.Description.IsNull() && *accessKey.Properties.Description != description {
+		if !data.Description.IsNull() && accessKey.Properties.Description != description {
 			resp.Diagnostics.AddError(
 				"accesskeyID does not match",
 				fmt.Sprintf(
 					"description of Accesskey (UUID=%s, description=%s) does not match expected description: %s",
-					*accessKey.Id, *accessKey.Properties.Description, description,
+					accessKey.Id, accessKey.Properties.Description, description,
 				),
 			)
 			return
@@ -163,8 +164,8 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 		found := false
-		for _, item := range *accessKeys.Items {
-			if *item.Properties.Description == description {
+		for _, item := range accessKeys.Items {
+			if item.Properties.Description == description {
 				accessKey = item
 				found = true
 				break

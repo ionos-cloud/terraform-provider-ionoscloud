@@ -100,6 +100,14 @@ func (o *ProviderPatch) SetProperties(v PatchName) {
 	o.Properties = v
 }
 
+func (o ProviderPatch) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ProviderPatch) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Metadata) {

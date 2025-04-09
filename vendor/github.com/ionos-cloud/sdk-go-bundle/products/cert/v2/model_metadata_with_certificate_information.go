@@ -578,6 +578,14 @@ func (o *MetadataWithCertificateInformation) SetSubjectAlternativeNames(v []stri
 	o.SubjectAlternativeNames = v
 }
 
+func (o MetadataWithCertificateInformation) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o MetadataWithCertificateInformation) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.CreatedDate) {

@@ -100,6 +100,14 @@ func (o *ProviderCreate) SetProperties(v Provider) {
 	o.Properties = v
 }
 
+func (o ProviderCreate) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o ProviderCreate) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Metadata) {

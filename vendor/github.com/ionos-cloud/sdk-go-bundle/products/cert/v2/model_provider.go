@@ -154,6 +154,14 @@ func (o *Provider) SetExternalAccountBinding(v ProviderExternalAccountBinding) {
 	o.ExternalAccountBinding = &v
 }
 
+func (o Provider) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o Provider) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name

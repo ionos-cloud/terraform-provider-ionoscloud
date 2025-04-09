@@ -11,7 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -28,12 +28,12 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 		CheckDestroy:             testAccCheckDbaasMongoClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckDbaasMongoClusterConfigBasic,
+				Config: testAccCheckDbaasMongoClusterConfigOldVersion,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasMongoClusterExists(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
-					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "mongodb_version", "5.0"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "mongodb_version", mongoVersionOld),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "1"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "display_name", constant.DBaaSClusterTestResource),
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example", "location"),
@@ -42,6 +42,26 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list.0", "192.168.1.108/24"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "template_id", "33457e53-1f8b-4ed2-8a12-2d42355aa759"),
 				),
+			},
+			{
+				Config: testAccCheckDbaasMongoClusterConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDbaasMongoClusterExists(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "mongodb_version", mongoVersion),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "1"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "display_name", constant.DBaaSClusterTestResource),
+					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example", "location"),
+					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example", "id"),
+					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example", "id"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.cidr_list.0", "192.168.1.108/24"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "template_id", "33457e53-1f8b-4ed2-8a12-2d42355aa759"),
+				),
+			},
+			{
+				Config:      testAccCheckDbaasMongoClusterConfigOldVersion,
+				ExpectError: regexp.MustCompile(fmt.Sprintf("downgrade is not supported from %s to %s", mongoVersion, mongoVersionOld)),
 			},
 			{
 				Config: testAccDataSourceDBaaSMongoClusterMatchId,
@@ -81,7 +101,7 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 					testAccCheckDbaasMongoClusterExists(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "mongodb_version", "5.0"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "mongodb_version", mongoVersion),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "3"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "display_name", constant.DBaaSClusterTestResource+"update"),
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example", "location"),
@@ -97,7 +117,7 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 					testAccCheckDbaasMongoClusterExists(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "mongodb_version", "5.0"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "mongodb_version", mongoVersion),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "3"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "display_name", constant.DBaaSClusterTestResource+"update"),
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example", "location"),
@@ -128,7 +148,7 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 					testAccCheckDbaasMongoClusterExists(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
-					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "mongodb_version", "5.0"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "mongodb_version", mongoVersion),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "3"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "display_name", constant.DBaaSClusterTestResource),
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example", "location"),
@@ -152,7 +172,7 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 					testAccCheckDbaasMongoClusterExists(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "mongodb_version", "5.0"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "mongodb_version", mongoVersion),
 					resource.TestCheckResourceAttr(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "3"),
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "location", constant.DatacenterResource+".datacenter_example", "location"),
 					resource.TestCheckResourceAttrPair(constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example", "id"),
@@ -333,7 +353,38 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     day_of_the_week  = "Monday"
     time             = "09:00:00"
   }
-  mongodb_version = "5.0"
+  mongodb_version = "` + mongoVersion + `"
+  instances          = 1
+  display_name = "` + constant.DBaaSClusterTestResource + `"
+  location = ` + constant.DatacenterResource + `.datacenter_example.location
+  connections   {
+    datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
+    lan_id          =  ` + constant.LanResource + `.lan_example.id 
+    cidr_list            =  ["192.168.1.108/24"]
+  }
+  template_id = "33457e53-1f8b-4ed2-8a12-2d42355aa759"
+}
+`
+
+const testAccCheckDbaasMongoClusterConfigOldVersion = `
+resource ` + constant.DatacenterResource + ` "datacenter_example" {
+  name        = "datacenter_example"
+  location    = "gb/lhr"
+  description = "Datacenter for testing dbaas cluster"
+}
+
+resource ` + constant.LanResource + ` "lan_example" {
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example.id 
+  public        = false
+  name          = "lan_example"
+}
+
+resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
+  maintenance_window {
+    day_of_the_week  = "Monday"
+    time             = "09:00:00"
+  }
+  mongodb_version = "` + mongoVersionOld + `"
   instances          = 1
   display_name = "` + constant.DBaaSClusterTestResource + `"
   location = ` + constant.DatacenterResource + `.datacenter_example.location
@@ -376,7 +427,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
   }
-  mongodb_version = "5.0"
+  mongodb_version = "` + mongoVersion + `"
   instances       = 3
   display_name    = "` + constant.DBaaSClusterTestResource + `update"
   location        = ` + constant.DatacenterResource + `.datacenter_example.location
@@ -407,7 +458,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
   }
-  mongodb_version = "5.0"
+  mongodb_version = "` + mongoVersion + `"
   instances          = 3
   display_name = "` + constant.DBaaSClusterTestResource + `update"
   location = ` + constant.DatacenterResource + `.datacenter_example.location
@@ -444,7 +495,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     day_of_the_week  = "Monday"
     time             = "09:00:00"
   }
-  mongodb_version = "5.0"
+  mongodb_version = "` + mongoVersion + `"
   instances       = 3
   display_name    = "` + constant.DBaaSClusterTestResource + `"
   location        = ` + constant.DatacenterResource + `.datacenter_example.location
@@ -483,7 +534,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
   }
-  mongodb_version    = "5.0"
+  mongodb_version    = "` + mongoVersion + `"
   instances          = 3
   display_name       = "` + constant.DBaaSClusterTestResource + `update"
   location           = ` + constant.DatacenterResource + `.datacenter_example.location

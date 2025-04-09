@@ -16,7 +16,7 @@ Manages a [CM AutoCertificate](https://docs.ionos.com/cloud/network-services/cer
 ```hcl
 resource "ionoscloud_auto_certificate_provider" "example" {
   name = "Let's Encrypt"
-  email = "user@example.com"
+  email = "user@ionos.com"
   location = "de/fra"
   server = "https://acme-v02.api.letsencrypt.org/directory"
   external_account_binding {
