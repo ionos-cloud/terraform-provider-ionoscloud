@@ -305,10 +305,10 @@ func SetDataplatformNodePoolData(d *schema.ResourceData, nodePool dataplatform.N
 
 	if nodePool.Properties.AutoScaling != nil && (nodePool.Properties.AutoScaling.MinNodeCount != 0 &&
 		nodePool.Properties.AutoScaling.MaxNodeCount != 0) {
-		if err := d.Set("auto_scaling", []map[string]uint32{
+		if err := d.Set("auto_scaling", []map[string]int32{
 			{
-				"min_node_count": uint32(nodePool.Properties.AutoScaling.MinNodeCount),
-				"max_node_count": uint32(nodePool.Properties.AutoScaling.MaxNodeCount),
+				"min_node_count": nodePool.Properties.AutoScaling.MinNodeCount,
+				"max_node_count": nodePool.Properties.AutoScaling.MaxNodeCount,
 			},
 		}); err != nil {
 			return err
