@@ -20,11 +20,11 @@ type ResourceType string
 
 // List of ResourceType
 const (
-	COLLECTION ResourceType = "collection"
-	CLUSTER    ResourceType = "cluster"
-	BACKUP     ResourceType = "backup"
-	USER       ResourceType = "user"
-	DATABASE   ResourceType = "database"
+	RESOURCETYPE_COLLECTION ResourceType = "collection"
+	RESOURCETYPE_CLUSTER    ResourceType = "cluster"
+	RESOURCETYPE_BACKUP     ResourceType = "backup"
+	RESOURCETYPE_USER       ResourceType = "user"
+	RESOURCETYPE_DATABASE   ResourceType = "database"
 )
 
 func (v *ResourceType) UnmarshalJSON(src []byte) error {

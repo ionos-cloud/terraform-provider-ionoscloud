@@ -34,6 +34,12 @@ const (
 	defaultMaxWaitTime    = time.Duration(2000) * time.Millisecond
 )
 
+var (
+	IonosServerUrls = []string{
+		"https://api.ionos.com/databases/postgresql",
+	}
+)
+
 // contextKeys are used to identify the type of value in the context.
 // Since these are string, it is possible to get a short description of the
 // context key for logging and debugging using key.String().
@@ -113,14 +119,14 @@ type Configuration struct {
 	Servers            ServerConfigurations
 	OperationServers   map[string]ServerConfigurations
 	HTTPClient         *http.Client
+	LogLevel           LogLevel
+	Logger             Logger
 	Username           string        `json:"username,omitempty"`
 	Password           string        `json:"password,omitempty"`
 	Token              string        `json:"token,omitempty"`
 	MaxRetries         int           `json:"maxRetries,omitempty"`
 	WaitTime           time.Duration `json:"waitTime,omitempty"`
 	MaxWaitTime        time.Duration `json:"maxWaitTime,omitempty"`
-	LogLevel           LogLevel
-	Logger             Logger
 }
 
 // NewConfiguration returns a new Configuration object
@@ -128,7 +134,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go-dbaas-postgres/v1.1.3",
+		UserAgent:          "ionos-cloud-sdk-go-dbaas-postgres/v1.1.4",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -140,11 +146,19 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		LogLevel:           getLogLevelFromEnv(),
 		Servers: ServerConfigurations{
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://api.ionos.com/databases/postgresql",
 				Description: "Production",
 			},
 		},
 		OperationServers: map[string]ServerConfigurations{},
+	}
+	if hostUrl != "" {
+		cfg.Servers = ServerConfigurations{
+			{
+				URL:         getServerUrl(hostUrl),
+				Description: "overriden endpoint",
+			},
+		}
 	}
 	return cfg
 }
@@ -169,6 +183,12 @@ func (sc ServerConfigurations) URL(index int, variables map[string]string) (stri
 	}
 	server := sc[index]
 	url := server.URL
+	if !strings.Contains(url, "http://") && !strings.Contains(url, "https://") {
+		return "", fmt.Errorf(
+			"the URL provided appears to be missing the protocol scheme prefix (\"https://\" or \"http://\"), please verify and try again: %s",
+			url,
+		)
+	}
 
 	// go through variables and replace placeholders
 	for name, variable := range server.Variables {
@@ -251,13 +271,12 @@ func getServerUrl(serverUrl string) string {
 	if serverUrl == "" {
 		return DefaultIonosServerUrl
 	}
-	if !strings.HasPrefix(serverUrl, "https://") && !strings.HasPrefix(serverUrl, "http://") {
-		serverUrl = fmt.Sprintf("https://%s", serverUrl)
-	}
+
 	if !strings.HasSuffix(serverUrl, DefaultIonosBasePath) {
 		serverUrl = fmt.Sprintf("%s%s", serverUrl, DefaultIonosBasePath)
 	}
-	return serverUrl
+
+	return EnsureURLFormat(serverUrl)
 }
 
 // ServerURLWithContext returns a new server URL given an endpoint
