@@ -9,8 +9,8 @@ github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki
 github.com/apparentlymart/go-textseg/v12 v12.0.0/go.mod h1:S/4uRK2UtaQttw1GenVJEynmyUenKwP++x/+DdGV/Ec=
 github.com/apparentlymart/go-textseg/v15 v15.0.0 h1:uYvfpb3DyLSCGWnctWKGj857c6ew1u1fNQOlOtuGxQY=
 github.com/apparentlymart/go-textseg/v15 v15.0.0/go.mod h1:K8XmNZdhEBkdlyDdvbmmsvpAG721bKi0joRfFdHIWJ4=
-github.com/aws/aws-sdk-go v1.55.5 h1:KKUZBfBoyqy5d3swXyiC7Q76ic40rYcbqH7qjh59kzU=
-github.com/aws/aws-sdk-go v1.55.5/go.mod h1:eRwEWoyTWFMVYVQzKMNHWP5/RV4xIUGMQfXQHfHkpNU=
+github.com/aws/aws-sdk-go v1.55.6 h1:cSg4pvZ3m8dgYcgqB97MrcdjUmZ1BeMYKUxMMB89IPk=
+github.com/aws/aws-sdk-go v1.55.6/go.mod h1:eRwEWoyTWFMVYVQzKMNHWP5/RV4xIUGMQfXQHfHkpNU=
 github.com/bufbuild/protocompile v0.4.0 h1:LbFKd2XowZvQ/kajzguUp2DC9UEIQhIq77fZZlaQsNA=
 github.com/bufbuild/protocompile v0.4.0/go.mod h1:3v93+mbWn/v3xzN+31nwkJfrEpAUwp+BagBSZWx+TP8=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
@@ -126,10 +126,12 @@ github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0 h1:gVh+jd0o8R
 github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0/go.mod h1:PRdc/x/r7tMEV7rh2uZYJ8ososjfIF/cXiGX/D6FdTs=
 github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0 h1:QaGzJr7yqINXSleJ5YlCmtnjNWFBu8QaebHu4w+VjWU=
 github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0/go.mod h1:c+o7CXsZLcJeqBpVHGeYI+o55FHjBam3Fwnt9g4xQgg=
+github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0-20250409092809-6c10fbcbaa75 h1:PuOua4xa8k+LguiBIN1+LaJNMaW7tClaeu+ENuHwWng=
+github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0-20250409092809-6c10fbcbaa75/go.mod h1:ORYCHtOmUNHPumw2WLvEBPveAmIgFmD//gJKUy64l50=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2 h1:qR/ul88v/3ZF+ZLFFv6LE9TrjZS1qM4R10UlXCaQzcs=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2/go.mod h1:V6WHbWsQDlZsLtHqgsXO81Z9eJBsczE3Q6VY8J+rutc=
-github.com/ionos-cloud/sdk-go-bundle/shared v0.1.3 h1:4SbhbE56lGQPXa0WfabKu8BxxmmjitcPZSAGSn9dV2g=
-github.com/ionos-cloud/sdk-go-bundle/shared v0.1.3/go.mod h1:pegcRdbZYXLhkMy+mbzDzkLHQpGSPyDsmTa1nIbKAOE=
+github.com/ionos-cloud/sdk-go-bundle/shared v0.1.4 h1:z3NaijMuUFFmAAFOToG8s4V4UMLPOgSlxZKt1wHQqoQ=
+github.com/ionos-cloud/sdk-go-bundle/shared v0.1.4/go.mod h1:3hFdLduyrL77x9nJNQt16QARgkXgHoOHmW696waUhIk=
 github.com/ionos-cloud/sdk-go-container-registry v1.2.0 h1:C5r2XleKLbSFw9kmb4N8ImqJ/HtLus3yh/R5BHy/6sg=
 github.com/ionos-cloud/sdk-go-container-registry v1.2.0/go.mod h1:woBP1+A4N0KXiRj9jG4y/hEXgrVjJv0CUlAvc24mCeo=
 github.com/ionos-cloud/sdk-go-dataplatform v1.1.1 h1:Wu9TAiphRyMEweUcQlMblhVCl9qVxQlOYEOw+jJS+Ss=
@@ -144,8 +146,6 @@ github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3 h1:T05nbKqBIw2zmPwaV2pWyFcUV
 github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3/go.mod h1:5cKJUIcXfMbG5vVkz6cYjnToZvaQylkLsIuhOW7PhEI=
 github.com/ionos-cloud/sdk-go-kafka v1.1.2 h1:q4PV4DGlWwgvvkLmVxl5ffWWYVQcKr8EpEklGc9+9z0=
 github.com/ionos-cloud/sdk-go-kafka v1.1.2/go.mod h1:TfGSquLvfwlnc0Yt0t8OzUEmKHG+2TqoKsV+JZSnM6w=
-github.com/ionos-cloud/sdk-go-object-storage v1.1.0 h1:4JTsxrbzFltF9liAHZ2I9f53rpkrXm8642UwQoQ+pMc=
-github.com/ionos-cloud/sdk-go-object-storage v1.1.0/go.mod h1:GMNkyZp5B70QInLTS79LWbZ7hoEy4F8TWL82zeInwBo=
 github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0 h1:pHRKSNT+cCcr5ghWMkCgY2ErxrcQCAjlCJu/VrdexUw=
 github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0/go.mod h1:BnEapZcQp6FEirEin6pY9NICXD1mCrI4sJ+wOSKpyCY=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1 h1:KABL25MC7DrIHn9lQzKSPkwXhqvRkPYtFd+1HEogmAE=

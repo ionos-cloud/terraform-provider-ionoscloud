@@ -3,7 +3,7 @@ module github.com/ionos-cloud/terraform-provider-ionoscloud/v6
 go 1.22.0
 
 require (
-	github.com/aws/aws-sdk-go v1.55.5
+	github.com/aws/aws-sdk-go v1.55.6
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/gofrs/uuid/v5 v5.3.0
 	github.com/hashicorp/terraform-plugin-framework v1.13.0
@@ -22,8 +22,9 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 	github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0
+	github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0-20250409092809-6c10fbcbaa75
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
-	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.3
+	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.4
 	github.com/ionos-cloud/sdk-go-container-registry v1.2.0
 	github.com/ionos-cloud/sdk-go-dataplatform v1.1.1
 	github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1
@@ -31,7 +32,6 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3
 	github.com/ionos-cloud/sdk-go-kafka v1.1.2
-	github.com/ionos-cloud/sdk-go-object-storage v1.1.0
 	github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0
 	github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1
 	github.com/ionos-cloud/sdk-go/v6 v6.3.2
