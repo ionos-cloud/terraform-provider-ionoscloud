@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -153,24 +153,24 @@ func setBucketPolicyData(policyResponse *objstorage.BucketPolicy, data *BucketPo
 	}
 
 	if policyResponse.Statement != nil {
-		policyData.Statement = make([]bucketPolicyStatement, 0, len(*policyResponse.Statement))
-		for _, statementResponse := range *policyResponse.Statement {
+		policyData.Statement = make([]bucketPolicyStatement, 0, len(policyResponse.Statement))
+		for _, statementResponse := range policyResponse.Statement {
 			statementData := bucketPolicyStatement{
 				SID:       statementResponse.Sid,
-				Effect:    *statementResponse.Effect,
-				Action:    *statementResponse.Action,
-				Resources: *statementResponse.Resource,
+				Effect:    statementResponse.Effect,
+				Action:    statementResponse.Action,
+				Resources: statementResponse.Resource,
 			}
 			if statementResponse.Principal != nil && statementResponse.Principal.AWS != nil {
-				statementData.Principal = *statementResponse.Principal.AWS
+				statementData.Principal = statementResponse.Principal.AWS
 			}
 			if statementResponse.Condition != nil {
 				conditionData := bucketPolicyStatementCondition{}
 				if statementResponse.Condition.IpAddress != nil && statementResponse.Condition.IpAddress.AwsSourceIp != nil {
-					conditionData.IPs = *statementResponse.Condition.IpAddress.AwsSourceIp
+					conditionData.IPs = statementResponse.Condition.IpAddress.AwsSourceIp
 				}
 				if statementResponse.Condition.NotIpAddress != nil && statementResponse.Condition.NotIpAddress.AwsSourceIp != nil {
-					conditionData.ExcludedIPs = *statementResponse.Condition.NotIpAddress.AwsSourceIp
+					conditionData.ExcludedIPs = statementResponse.Condition.NotIpAddress.AwsSourceIp
 				}
 				if statementResponse.Condition.DateGreaterThan != nil {
 					dateString := statementResponse.Condition.DateGreaterThan.AwsCurrentTime.Format(constant.DatetimeZLayout)
@@ -218,12 +218,12 @@ func buildBucketPolicyFromModel(policyModel *BucketPolicyModel) (objstorage.Buck
 			if statementData.Condition.IPs != nil {
 				statementInput.Condition.IpAddress = objstorage.NewBucketPolicyConditionIpAddress()
 				ips := statementData.Condition.IPs
-				statementInput.Condition.IpAddress.AwsSourceIp = &ips
+				statementInput.Condition.IpAddress.AwsSourceIp = ips
 			}
 			if statementData.Condition.ExcludedIPs != nil {
 				statementInput.Condition.NotIpAddress = objstorage.NewBucketPolicyConditionIpAddress()
 				excludedIPs := statementData.Condition.ExcludedIPs
-				statementInput.Condition.NotIpAddress.AwsSourceIp = &excludedIPs
+				statementInput.Condition.NotIpAddress.AwsSourceIp = excludedIPs
 			}
 			if statementData.Condition.DateGreaterThan != nil {
 				var t *objstorage.IonosTime
@@ -248,7 +248,7 @@ func buildBucketPolicyFromModel(policyModel *BucketPolicyModel) (objstorage.Buck
 		}
 		statement = append(statement, *statementInput)
 	}
-	policyInput.Statement = &statement
+	policyInput.Statement = statement
 
 	return policyInput, diags
 }

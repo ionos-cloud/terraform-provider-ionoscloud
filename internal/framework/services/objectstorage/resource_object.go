@@ -20,7 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	objectstorage "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 )
 
 var (
@@ -100,7 +100,7 @@ func (r *objectResource) Schema(_ context.Context, req resource.SchemaRequest, r
 				Description: "The server-side encryption algorithm used when storing this object in IONOS Object Storage Object Storage (AES256).",
 				Optional:    true,
 				Computed:    true,
-				Validators:  []validator.String{stringvalidator.OneOf("", "AES256")},
+				Validators:  []validator.String{stringvalidator.OneOf("AES256")},
 			},
 			"storage_class": schema.StringAttribute{
 				Description: "The storage class of the object. Valid value is 'STANDARD'.",

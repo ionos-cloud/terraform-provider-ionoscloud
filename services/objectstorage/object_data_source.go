@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 // GetObjectForDataSource retrieves an object for a data source.
@@ -37,7 +37,7 @@ func (c *Client) GetObjectForDataSource(ctx context.Context, data *ObjectDataSou
 	return data, true, nil
 }
 
-func (c *Client) setObjectDataSourceModelData(ctx context.Context, apiResponse *objstorage.APIResponse, data *ObjectDataSourceModel) error {
+func (c *Client) setObjectDataSourceModelData(ctx context.Context, apiResponse *shared.APIResponse, data *ObjectDataSourceModel) error {
 	if err := c.setObjectDataSourceCommonAttributes(ctx, data, apiResponse); err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (c *Client) setObjectDataSourceModelData(ctx context.Context, apiResponse *
 	return nil
 }
 
-func (c *Client) setObjectDataSourceCommonAttributes(ctx context.Context, data *ObjectDataSourceModel, apiResponse *objstorage.APIResponse) error {
+func (c *Client) setObjectDataSourceCommonAttributes(ctx context.Context, data *ObjectDataSourceModel, apiResponse *shared.APIResponse) error {
 	setObjectDataSourceContentData(data, apiResponse)
 	setObjectDataSourceServerSideEncryptionData(data, apiResponse)
 	if err := setObjectDataSourceObjectLockData(data, apiResponse); err != nil {
@@ -98,7 +98,7 @@ func (c *Client) setObjectDataSourceCommonAttributes(ctx context.Context, data *
 	return nil
 }
 
-func setObjectDataSourceContentData(data *ObjectDataSourceModel, apiResponse *objstorage.APIResponse) {
+func setObjectDataSourceContentData(data *ObjectDataSourceModel, apiResponse *shared.APIResponse) {
 	contentType := apiResponse.Header.Get("Content-Type")
 	if contentType != "" {
 		data.ContentType = types.StringValue(contentType)
@@ -137,7 +137,7 @@ func setObjectDataSourceContentData(data *ObjectDataSourceModel, apiResponse *ob
 	}
 }
 
-func setObjectDataSourceServerSideEncryptionData(data *ObjectDataSourceModel, apiResponse *objstorage.APIResponse) {
+func setObjectDataSourceServerSideEncryptionData(data *ObjectDataSourceModel, apiResponse *shared.APIResponse) {
 	serverSideEncryption := apiResponse.Header.Get("x-amz-server-side-encryption")
 	if serverSideEncryption != "" {
 		data.ServerSideEncryption = types.StringValue(serverSideEncryption)
@@ -160,7 +160,7 @@ func setObjectDataSourceServerSideEncryptionData(data *ObjectDataSourceModel, ap
 
 }
 
-func setObjectDataSourceObjectLockData(data *ObjectDataSourceModel, apiResponse *objstorage.APIResponse) error {
+func setObjectDataSourceObjectLockData(data *ObjectDataSourceModel, apiResponse *shared.APIResponse) error {
 	objectLockMode := apiResponse.Header.Get("x-amz-object-lock-mode")
 	if objectLockMode != "" {
 		data.ObjectLockMode = types.StringValue(objectLockMode)

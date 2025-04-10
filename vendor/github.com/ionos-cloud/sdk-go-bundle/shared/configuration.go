@@ -5,16 +5,21 @@
 package shared
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
 )
 
 var DefaultIonosBasePath = ""
@@ -28,6 +33,8 @@ const (
 	IonosLogLevelEnvVar       = "IONOS_LOG_LEVEL"
 	IonosFilePathEnvVar       = "IONOS_CONFIG_FILE"
 	IonosCurrentProfileEnvVar = "IONOS_CURRENT_PROFILE"
+	IonosS3AccessKeyEnvVar    = "IONOS_S3_ACCESS_KEY"
+	IonosS3SecretKeyEnvVar    = "IONOS_S3_SECRET_KEY"
 	DefaultIonosServerUrl     = "https://api.ionos.com/"
 
 	defaultMaxRetries  = 3
@@ -103,6 +110,15 @@ type ServerConfiguration struct {
 // ServerConfigurations stores multiple ServerConfiguration items
 type ServerConfigurations []ServerConfiguration
 
+// MiddlewareFunction provides way to implement custom middleware in the prepareRequest
+type MiddlewareFunction func(*http.Request)
+
+// MiddlewareFunctionWithError provides way to implement custom middleware with errors in the prepareRequest
+type MiddlewareFunctionWithError func(*http.Request) error
+
+// ResponseMiddlewareFunction provides way to implement custom middleware with errors after the response is received
+type ResponseMiddlewareFunction func(*http.Response, []byte) error
+
 // Configuration stores the configuration of the API client
 type Configuration struct {
 	Host               string            `json:"host,omitempty"`
@@ -119,6 +135,10 @@ type Configuration struct {
 	MaxRetries         int           `json:"maxRetries,omitempty"`
 	WaitTime           time.Duration `json:"waitTime,omitempty"`
 	MaxWaitTime        time.Duration `json:"maxWaitTime,omitempty"`
+
+	Middleware          MiddlewareFunction          `json:"-"`
+	MiddlewareWithError MiddlewareFunctionWithError `json:"-"`
+	ResponseMiddleware  ResponseMiddlewareFunction  `json:"-"`
 }
 
 // NewConfiguration returns a new shared.Configuration object
@@ -161,9 +181,11 @@ type ClientOptions struct {
 
 // Credentials are the credentials that will be used for authentication
 type Credentials struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Token    string `yaml:"token"`
+	Username    string `yaml:"username"`
+	Password    string `yaml:"password"`
+	Token       string `yaml:"token"`
+	S3AccessKey string `yaml:"s3AccessKey"`
+	S3SecretKey string `yaml:"s3SecretKey"`
 }
 
 // NewConfigurationFromOptions returns a new shared.Configuration object created from the client options
@@ -217,7 +239,10 @@ func CreateTransport(insecure bool, certificate string) *http.Transport {
 }
 
 func NewConfigurationFromEnv() *Configuration {
-	return NewConfiguration(os.Getenv(IonosUsernameEnvVar), os.Getenv(IonosPasswordEnvVar), os.Getenv(IonosTokenEnvVar), os.Getenv(IonosApiUrlEnvVar))
+	return NewConfiguration(
+		os.Getenv(IonosUsernameEnvVar), os.Getenv(IonosPasswordEnvVar), os.Getenv(IonosTokenEnvVar),
+		os.Getenv(IonosApiUrlEnvVar),
+	)
 }
 
 // AddDefaultHeader adds a new HTTP header to the default header in the request
@@ -236,6 +261,12 @@ func (sc ServerConfigurations) URL(index int, variables map[string]string) (stri
 	}
 	server := sc[index]
 	serverUrl := server.URL
+	if !strings.Contains(serverUrl, "http://") && !strings.Contains(serverUrl, "https://") {
+		return "", fmt.Errorf(
+			"the URL you provided appears to be missing the protocol scheme prefix (\"https://\" or \"http://\"), please verify and try again: %s",
+			serverUrl,
+		)
+	}
 
 	// go through variables and replace placeholders
 	for name, variable := range server.Variables {
@@ -247,7 +278,10 @@ func (sc ServerConfigurations) URL(index int, variables map[string]string) (stri
 				}
 			}
 			if !found {
-				return "", fmt.Errorf("the variable %s in the server URL has invalid value %v. Must be %v", name, value, variable.EnumValues)
+				return "", fmt.Errorf(
+					"the variable %s in the server URL has invalid value %v. Must be %v", name, value,
+					variable.EnumValues,
+				)
 			}
 			serverUrl = strings.Replace(serverUrl, "{"+name+"}", value, -1)
 		} else {
@@ -299,7 +333,9 @@ func getServerVariables(ctx context.Context) (map[string]string, error) {
 		if variables, ok := sv.(map[string]string); ok {
 			return variables, nil
 		}
-		return nil, reportError("ctx value of ContextServerVariables has invalid type %T should be map[string]string", sv)
+		return nil, reportError(
+			"ctx value of ContextServerVariables has invalid type %T should be map[string]string", sv,
+		)
 	}
 	return nil, nil
 }
@@ -308,7 +344,10 @@ func getServerOperationVariables(ctx context.Context, endpoint string) (map[stri
 	osv := ctx.Value(ContextOperationServerVariables)
 	if osv != nil {
 		if operationVariables, ok := osv.(map[string]map[string]string); !ok {
-			return nil, reportError("ctx value of ContextOperationServerVariables has invalid type %T should be map[string]map[string]string", osv)
+			return nil, reportError(
+				"ctx value of ContextOperationServerVariables has invalid type %T should be map[string]map[string]string",
+				osv,
+			)
 		} else {
 			variables, ok := operationVariables[endpoint]
 			if ok {
@@ -325,14 +364,12 @@ func getServerUrl(serverUrl string) string {
 	if serverUrl == "" {
 		return DefaultIonosServerUrl + DefaultIonosBasePath
 	}
-	// Support both HTTPS & HTTP schemas
-	if !strings.HasPrefix(serverUrl, "https://") && !strings.HasPrefix(serverUrl, "http://") {
-		serverUrl = fmt.Sprintf("https://%s", serverUrl)
-	}
+
 	if !strings.HasSuffix(serverUrl, DefaultIonosBasePath) {
 		serverUrl = fmt.Sprintf("%s%s", serverUrl, DefaultIonosBasePath)
 	}
-	return serverUrl
+
+	return EnsureURLFormat(serverUrl)
 }
 
 // ServerURLWithContext returns a new server URL given an endpoint
@@ -398,10 +435,12 @@ func OverrideLocationFor(configProvider ConfigProvider, location, endpoint strin
 		}
 	}
 	SdkLogger.Printf("[DEBUG] Adding new server configuration for location %s", location)
-	configProvider.GetConfig().Servers = append(configProvider.GetConfig().Servers, ServerConfiguration{
-		URL:         endpoint,
-		Description: EndpointOverridden + location,
-	})
+	configProvider.GetConfig().Servers = append(
+		configProvider.GetConfig().Servers, ServerConfiguration{
+			URL:         endpoint,
+			Description: EndpointOverridden + location,
+		},
+	)
 }
 
 func SetSkipTLSVerify(configProvider ConfigProvider, skipTLSVerify bool) {
@@ -420,4 +459,28 @@ func AddCertsToClient(authorityData string) *x509.CertPool {
 		SdkLogger.Printf("No certs appended, using system certs only")
 	}
 	return rootCAs
+}
+
+func SignerMiddleware(region, service, accessKey, secretKey string) MiddlewareFunctionWithError {
+	signer := awsv4.NewSigner(credentials.NewStaticCredentials(accessKey, secretKey, ""))
+
+	// Define default values for region and service to maintain backward compatibility
+	if region == "" {
+		region = "eu-central-3"
+	}
+	if service == "" {
+		service = "s3"
+	}
+	return func(r *http.Request) error {
+		var reader io.ReadSeeker
+		if r.Body != nil {
+			bodyBytes, err := io.ReadAll(r.Body)
+			if err != nil {
+				return err
+			}
+			reader = bytes.NewReader(bodyBytes)
+		}
+		_, err := signer.Sign(r, reader, service, region, time.Now())
+		return err
+	}
 }

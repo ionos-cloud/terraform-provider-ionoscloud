@@ -7,7 +7,7 @@ import (
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 )
 
 // DeleteRequest represents a request to delete an object from a general purpose bucket.
@@ -72,7 +72,7 @@ func DeleteAllObjectVersions(ctx context.Context, client *objstorage.APIClient, 
 	return objCount, nil
 }
 
-func deleteObject(ctx context.Context, client *objstorage.APIClient, req *DeleteRequest) (*objstorage.APIResponse, error) {
+func deleteObject(ctx context.Context, client *objstorage.APIClient, req *DeleteRequest) (*shared.APIResponse, error) {
 	r := client.ObjectsApi.DeleteObject(ctx, req.Bucket, req.Key)
 	if req.VersionID != "" {
 		r = r.VersionId(req.VersionID)
@@ -86,7 +86,7 @@ func deleteObject(ctx context.Context, client *objstorage.APIClient, req *Delete
 	return apiResponse, err
 }
 
-func deleteVersionsPage(ctx context.Context, client *objstorage.APIClient, versions *[]objstorage.ObjectVersion, bucket, key string, force bool) (int, error) {
+func deleteVersionsPage(ctx context.Context, client *objstorage.APIClient, versions []objstorage.ObjectVersion, bucket, key string, force bool) (int, error) {
 	var (
 		objCount int
 		lastErr  error
@@ -96,7 +96,7 @@ func deleteVersionsPage(ctx context.Context, client *objstorage.APIClient, versi
 		return objCount, nil
 	}
 
-	for _, v := range *versions {
+	for _, v := range versions {
 		if key != shared.ToValueDefault(v.Key) {
 			continue
 		}
@@ -145,7 +145,7 @@ func deleteVersionsPage(ctx context.Context, client *objstorage.APIClient, versi
 	return objCount, lastErr
 }
 
-func deleteMarkersPage(ctx context.Context, client *objstorage.APIClient, markers *[]objstorage.DeleteMarkerEntry, bucket, key string) (int, error) {
+func deleteMarkersPage(ctx context.Context, client *objstorage.APIClient, markers []objstorage.DeleteMarkerEntry, bucket, key string) (int, error) {
 	var (
 		objCount int
 		lastErr  error
@@ -155,7 +155,7 @@ func deleteMarkersPage(ctx context.Context, client *objstorage.APIClient, marker
 		return objCount, nil
 	}
 
-	for _, m := range *markers {
+	for _, m := range markers {
 		if key != shared.ToValueDefault(m.Key) {
 			continue
 		}
@@ -200,6 +200,6 @@ func tryDisableLegalHold(ctx context.Context, client *objstorage.APIClient, buck
 	return true, nil
 }
 
-func httpForbidden(response *objstorage.APIResponse) bool {
+func httpForbidden(response *shared.APIResponse) bool {
 	return response != nil && response.Response != nil && response.StatusCode == http.StatusForbidden
 }

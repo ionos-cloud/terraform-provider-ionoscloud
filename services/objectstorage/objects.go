@@ -53,14 +53,14 @@ pageLoop:
 		}
 
 		if page.CommonPrefixes != nil {
-			data.CommonPrefixes = make([]types.String, len(*page.CommonPrefixes))
-			for i, prefix := range *page.CommonPrefixes {
+			data.CommonPrefixes = make([]types.String, len(page.CommonPrefixes))
+			for i, prefix := range page.CommonPrefixes {
 				data.CommonPrefixes[i] = types.StringPointerValue(prefix.Prefix)
 			}
 		}
 
 		if page.Contents != nil {
-			for _, v := range *page.Contents {
+			for _, v := range page.Contents {
 				if nKeys >= maxKeys {
 					// The break statement with label is used to break out of the keys loop and the page loop when
 					// the number of keys fetched is equal to or greater than the max keys specified.
