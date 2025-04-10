@@ -21,6 +21,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.2.0
 	github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0
+	github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.0
@@ -31,7 +32,6 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.3
-	github.com/ionos-cloud/sdk-go-dataplatform v1.1.1
 	github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3
 	github.com/ionos-cloud/sdk-go-object-storage v1.1.0
