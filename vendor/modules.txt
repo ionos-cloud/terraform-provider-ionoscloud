@@ -344,7 +344,7 @@ github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2
-# github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0-20250409092809-6c10fbcbaa75
+# github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0

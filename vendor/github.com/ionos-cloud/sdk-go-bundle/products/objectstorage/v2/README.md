@@ -135,12 +135,14 @@ checks and adds it if necessary when configurations are created using `NewConfig
 `NewConfigurationFromEnv`. This is to avoid issues caused by typos in the prefix that cannot
  be easily detected and debugged.
 
-The username and password or the authentication token can be manually specified when initializing
-the sdk client:
+In order to authenticate, the only credentials needed are the IONOS S3 access and secret keys,
+username and password or token are not required. Also, a middleware function needs to be added
+to the configuration to sign the requests with the IONOS S3 credentials.
 
 ```golang
-
-client := objectstorage.NewAPIClient(objectstorage.NewConfiguration(username, password, token, hostUrl))
+configuration := shared.NewConfiguration("", "", "", hostUrl)
+configuration.MiddlewareWithError = shared.SignerMiddleware(region, "s3", s3AccessKey, s3SecretKey)
+client := objectstorage.NewAPIClient(configuration)
 
 ```
 
@@ -152,8 +154,11 @@ Environment variables can also be used. The sdk uses the following variables:
 In this case, the client configuration needs to be initialized using `NewConfigurationFromEnv()`.
 
 ```golang
-
-client := objectstorage.NewAPIClient(objectstorage.NewConfigurationFromEnv())
+configuration := shared.NewConfigurationFromEnv()
+configuration.MiddlewareWithError = shared.SignerMiddleware(
+    region, "s3", os.Getenv(IonosS3AccessKeyEnvVar), os.Getenv(IonosS3SecretKeyEnvVar),
+)
+client := objectstorage.NewAPIClient(configuration)
 
 ```
 

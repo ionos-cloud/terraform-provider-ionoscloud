@@ -138,8 +138,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0 h1:gVh+jd0o8R
 github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0/go.mod h1:PRdc/x/r7tMEV7rh2uZYJ8ososjfIF/cXiGX/D6FdTs=
 github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0 h1:QaGzJr7yqINXSleJ5YlCmtnjNWFBu8QaebHu4w+VjWU=
 github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0/go.mod h1:c+o7CXsZLcJeqBpVHGeYI+o55FHjBam3Fwnt9g4xQgg=
-github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0-20250409092809-6c10fbcbaa75 h1:PuOua4xa8k+LguiBIN1+LaJNMaW7tClaeu+ENuHwWng=
-github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0-20250409092809-6c10fbcbaa75/go.mod h1:ORYCHtOmUNHPumw2WLvEBPveAmIgFmD//gJKUy64l50=
+github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0 h1:TzmrQ6mnx8+kCvAtJaSqEvOQmn2B1B1a6Wt8kGqLM7Q=
+github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0/go.mod h1:ORYCHtOmUNHPumw2WLvEBPveAmIgFmD//gJKUy64l50=
 github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0 h1:6xP8S4gGu+n8xpvyvVuWjWljeuPduCA+mvpb2rgqDt0=
 github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0/go.mod h1:Zzv2k/EXEYp+nwGk2s86jkvUJLa4ebWJoOdGfYcb8mQ=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2 h1:qR/ul88v/3ZF+ZLFFv6LE9TrjZS1qM4R10UlXCaQzcs=
