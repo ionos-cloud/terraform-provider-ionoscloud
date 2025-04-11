@@ -20,8 +20,8 @@ type PoolMode string
 
 // List of PoolMode
 const (
-	TRANSACTION PoolMode = "transaction"
-	SESSION     PoolMode = "session"
+	POOLMODE_TRANSACTION PoolMode = "transaction"
+	POOLMODE_SESSION     PoolMode = "session"
 )
 
 func (v *PoolMode) UnmarshalJSON(src []byte) error {

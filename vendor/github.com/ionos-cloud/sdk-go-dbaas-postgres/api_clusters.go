@@ -117,13 +117,14 @@ func (a *ClustersApiService) ClusterPostgresVersionsGetExecute(r ApiClusterPostg
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse{
-		Response:   localVarHTTPResponse,
-		Method:     localVarHTTPMethod,
-		RequestURL: localVarPath,
-		Operation:  "ClusterPostgresVersionsGet",
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestTime: httpRequestTime,
+		RequestURL:  localVarPath,
+		Operation:   "ClusterPostgresVersionsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -253,13 +254,14 @@ func (a *ClustersApiService) ClustersDeleteExecute(r ApiClustersDeleteRequest) (
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse{
-		Response:   localVarHTTPResponse,
-		Method:     localVarHTTPMethod,
-		RequestURL: localVarPath,
-		Operation:  "ClustersDelete",
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestTime: httpRequestTime,
+		RequestURL:  localVarPath,
+		Operation:   "ClustersDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -393,13 +395,14 @@ func (a *ClustersApiService) ClustersFindByIdExecute(r ApiClustersFindByIdReques
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse{
-		Response:   localVarHTTPResponse,
-		Method:     localVarHTTPMethod,
-		RequestURL: localVarPath,
-		Operation:  "ClustersFindById",
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestTime: httpRequestTime,
+		RequestURL:  localVarPath,
+		Operation:   "ClustersFindById",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -550,13 +553,14 @@ func (a *ClustersApiService) ClustersGetExecute(r ApiClustersGetRequest) (Cluste
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse{
-		Response:   localVarHTTPResponse,
-		Method:     localVarHTTPMethod,
-		RequestURL: localVarPath,
-		Operation:  "ClustersGet",
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestTime: httpRequestTime,
+		RequestURL:  localVarPath,
+		Operation:   "ClustersGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -697,13 +701,14 @@ func (a *ClustersApiService) ClustersPatchExecute(r ApiClustersPatchRequest) (Cl
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse{
-		Response:   localVarHTTPResponse,
-		Method:     localVarHTTPMethod,
-		RequestURL: localVarPath,
-		Operation:  "ClustersPatch",
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestTime: httpRequestTime,
+		RequestURL:  localVarPath,
+		Operation:   "ClustersPatch",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -844,13 +849,151 @@ func (a *ClustersApiService) ClustersPostExecute(r ApiClustersPostRequest) (Clus
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse{
-		Response:   localVarHTTPResponse,
-		Method:     localVarHTTPMethod,
-		RequestURL: localVarPath,
-		Operation:  "ClustersPost",
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestTime: httpRequestTime,
+		RequestURL:  localVarPath,
+		Operation:   "ClustersPost",
+	}
+
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarAPIResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarAPIResponse.Payload = localVarBody
+	if err != nil {
+		return localVarReturnValue, localVarAPIResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := GenericOpenAPIError{
+			statusCode: localVarHTTPResponse.StatusCode,
+			body:       localVarBody,
+			error:      fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+		}
+		var v ErrorResponse
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
+		return localVarReturnValue, localVarAPIResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := GenericOpenAPIError{
+			statusCode: localVarHTTPResponse.StatusCode,
+			body:       localVarBody,
+			error:      err.Error(),
+		}
+		return localVarReturnValue, localVarAPIResponse, newErr
+	}
+
+	return localVarReturnValue, localVarAPIResponse, nil
+}
+
+type ApiClustersVersionsGetRequest struct {
+	ctx        _context.Context
+	ApiService *ClustersApiService
+	clusterId  string
+}
+
+func (r ApiClustersVersionsGetRequest) Execute() (PostgresVersionList, *APIResponse, error) {
+	return r.ApiService.ClustersVersionsGetExecute(r)
+}
+
+/*
+ * ClustersVersionsGet Supported PostgreSQL versions of cluster
+ * Retrieves a list of all PostgreSQL versions available for this cluster.
+ * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param clusterId The unique ID of the cluster.
+ * @return ApiClustersVersionsGetRequest
+ */
+func (a *ClustersApiService) ClustersVersionsGet(ctx _context.Context, clusterId string) ApiClustersVersionsGetRequest {
+	return ApiClustersVersionsGetRequest{
+		ApiService: a,
+		ctx:        ctx,
+		clusterId:  clusterId,
+	}
+}
+
+/*
+ * Execute executes the request
+ * @return PostgresVersionList
+ */
+func (a *ClustersApiService) ClustersVersionsGetExecute(r ApiClustersVersionsGetRequest) (PostgresVersionList, *APIResponse, error) {
+	var (
+		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarPostBody     interface{}
+		localVarFormFileName string
+		localVarFileName     string
+		localVarFileBytes    []byte
+		localVarReturnValue  PostgresVersionList
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.ClustersVersionsGet")
+	if err != nil {
+		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{clusterId}/versions"
+	localVarPath = strings.Replace(localVarPath, "{"+"clusterId"+"}", _neturl.PathEscape(parameterToString(r.clusterId, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := _neturl.Values{}
+	localVarFormParams := _neturl.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["tokenAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
+
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestTime: httpRequestTime,
+		RequestURL:  localVarPath,
+		Operation:   "ClustersVersionsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -903,7 +1046,7 @@ func (r ApiPostgresVersionsGetRequest) Execute() (PostgresVersionList, *APIRespo
 }
 
 /*
- * PostgresVersionsGet List PostgreSQL versions
+ * PostgresVersionsGet List all PostgreSQL versions
  * Retrieves a list of all available PostgreSQL versions.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @return ApiPostgresVersionsGetRequest
@@ -976,13 +1119,14 @@ func (a *ClustersApiService) PostgresVersionsGetExecute(r ApiPostgresVersionsGet
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse{
-		Response:   localVarHTTPResponse,
-		Method:     localVarHTTPMethod,
-		RequestURL: localVarPath,
-		Operation:  "PostgresVersionsGet",
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestTime: httpRequestTime,
+		RequestURL:  localVarPath,
+		Operation:   "PostgresVersionsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {

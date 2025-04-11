@@ -20,13 +20,13 @@ type DayOfTheWeek string
 
 // List of DayOfTheWeek
 const (
-	SUNDAY    DayOfTheWeek = "Sunday"
-	MONDAY    DayOfTheWeek = "Monday"
-	TUESDAY   DayOfTheWeek = "Tuesday"
-	WEDNESDAY DayOfTheWeek = "Wednesday"
-	THURSDAY  DayOfTheWeek = "Thursday"
-	FRIDAY    DayOfTheWeek = "Friday"
-	SATURDAY  DayOfTheWeek = "Saturday"
+	DAYOFTHEWEEK_SUNDAY    DayOfTheWeek = "Sunday"
+	DAYOFTHEWEEK_MONDAY    DayOfTheWeek = "Monday"
+	DAYOFTHEWEEK_TUESDAY   DayOfTheWeek = "Tuesday"
+	DAYOFTHEWEEK_WEDNESDAY DayOfTheWeek = "Wednesday"
+	DAYOFTHEWEEK_THURSDAY  DayOfTheWeek = "Thursday"
+	DAYOFTHEWEEK_FRIDAY    DayOfTheWeek = "Friday"
+	DAYOFTHEWEEK_SATURDAY  DayOfTheWeek = "Saturday"
 )
 
 func (v *DayOfTheWeek) UnmarshalJSON(src []byte) error {

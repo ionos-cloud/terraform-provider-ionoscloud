@@ -20,12 +20,12 @@ type State string
 
 // List of State
 const (
-	AVAILABLE  State = "AVAILABLE"
-	BUSY       State = "BUSY"
-	DESTROYING State = "DESTROYING"
-	DEGRADED   State = "DEGRADED"
-	FAILED     State = "FAILED"
-	UNKNOWN    State = "UNKNOWN"
+	STATE_AVAILABLE  State = "AVAILABLE"
+	STATE_BUSY       State = "BUSY"
+	STATE_DESTROYING State = "DESTROYING"
+	STATE_DEGRADED   State = "DEGRADED"
+	STATE_FAILED     State = "FAILED"
+	STATE_UNKNOWN    State = "UNKNOWN"
 )
 
 func (v *State) UnmarshalJSON(src []byte) error {
