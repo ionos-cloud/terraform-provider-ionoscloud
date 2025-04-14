@@ -13,7 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"

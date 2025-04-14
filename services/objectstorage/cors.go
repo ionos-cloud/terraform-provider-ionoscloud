@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/convptr"
 )
@@ -80,13 +80,13 @@ func buildBucketCorsConfigurationModelFromAPIResponse(output *objstorage.GetBuck
 	return data
 }
 
-func buildCorsRulesFromAPIResponse(rules *[]objstorage.CORSRule) []corsRule {
+func buildCorsRulesFromAPIResponse(rules []objstorage.CORSRule) []corsRule {
 	if rules == nil {
 		return nil
 	}
 
-	result := make([]corsRule, 0, len(*rules))
-	for _, r := range *rules {
+	result := make([]corsRule, 0, len(rules))
+	for _, r := range rules {
 		result = append(result, corsRule{
 			ID:             types.Int64PointerValue(convptr.Int32ToInt64(r.ID)),
 			AllowedHeaders: toTFStrings(r.AllowedHeaders),
@@ -105,7 +105,7 @@ func buildBucketCorsConfigurationFromModel(data *BucketCorsConfigurationModel) o
 	}
 }
 
-func buildCorsRulesFromModel(rules []corsRule) *[]objstorage.CORSRule {
+func buildCorsRulesFromModel(rules []corsRule) []objstorage.CORSRule {
 	result := make([]objstorage.CORSRule, 0, len(rules))
 	for _, r := range rules {
 		result = append(result, objstorage.CORSRule{
@@ -118,10 +118,10 @@ func buildCorsRulesFromModel(rules []corsRule) *[]objstorage.CORSRule {
 		})
 	}
 
-	return &result
+	return result
 }
 
-func toStrings(s []types.String) *[]string {
+func toStrings(s []types.String) []string {
 	if len(s) == 0 {
 		return nil
 	}
@@ -131,16 +131,16 @@ func toStrings(s []types.String) *[]string {
 		result = append(result, v.ValueString())
 	}
 
-	return &result
+	return result
 }
 
-func toTFStrings(s *[]string) []types.String {
+func toTFStrings(s []string) []types.String {
 	if s == nil {
 		return nil
 	}
 
-	result := make([]types.String, 0, len(*s))
-	for _, v := range *s {
+	result := make([]types.String, 0, len(s))
+	for _, v := range s {
 		result = append(result, types.StringValue(v))
 	}
 

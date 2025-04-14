@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 )
 
 // BucketWebsiteConfigurationModel defines the expected inputs for creating a new BucketWebsiteConfiguration.
@@ -101,40 +101,38 @@ func buildBucketWebsiteConfigurationModelFromAPIResponse(output *objstorage.GetB
 
 	if output.IndexDocument != nil {
 		built.IndexDocument = &indexDocument{
-			Suffix: types.StringPointerValue(output.IndexDocument.Suffix),
+			Suffix: types.StringValue(output.IndexDocument.Suffix),
 		}
 	}
 
 	if output.ErrorDocument != nil {
 		built.ErrorDocument = &errorDocument{
-			Key: types.StringPointerValue(output.ErrorDocument.Key),
+			Key: types.StringValue(output.ErrorDocument.Key),
 		}
 	}
 
 	if output.RedirectAllRequestsTo != nil {
 		built.RedirectAllRequestsTo = &redirectAllRequestsTo{
-			HostName: types.StringPointerValue(output.RedirectAllRequestsTo.HostName),
-			Protocol: types.StringPointerValue(output.RedirectAllRequestsTo.Protocol),
+			HostName: types.StringValue(output.RedirectAllRequestsTo.HostName),
+			Protocol: types.StringValue(*output.RedirectAllRequestsTo.Protocol),
 		}
 	}
 
 	if output.RoutingRules != nil {
-		built.RoutingRule = make([]routingRule, 0, len(*output.RoutingRules))
-		for _, r := range *output.RoutingRules {
+		built.RoutingRule = make([]routingRule, 0, len(output.RoutingRules))
+		for _, r := range output.RoutingRules {
 			var rl routingRule
 			if r.Condition != nil {
 				rl.Condition = &condition{
 					HTTPErrorCodeReturnedEquals: types.StringPointerValue(r.Condition.HttpErrorCodeReturnedEquals),
 				}
 			}
-			if r.Redirect != nil {
-				rl.Redirect = &redirect{
-					HostName:             types.StringPointerValue(r.Redirect.HostName),
-					HTTPRedirectCode:     types.StringPointerValue(r.Redirect.HttpRedirectCode),
-					Protocol:             types.StringPointerValue(r.Redirect.Protocol),
-					ReplaceKeyPrefixWith: types.StringPointerValue(r.Redirect.ReplaceKeyPrefixWith),
-					ReplaceKeyWith:       types.StringPointerValue(r.Redirect.ReplaceKeyWith),
-				}
+			rl.Redirect = &redirect{
+				HostName:             types.StringPointerValue(r.Redirect.HostName),
+				HTTPRedirectCode:     types.StringPointerValue(r.Redirect.HttpRedirectCode),
+				Protocol:             types.StringPointerValue(r.Redirect.Protocol),
+				ReplaceKeyPrefixWith: types.StringPointerValue(r.Redirect.ReplaceKeyPrefixWith),
+				ReplaceKeyWith:       types.StringPointerValue(r.Redirect.ReplaceKeyWith),
 			}
 			built.RoutingRule = append(built.RoutingRule, rl)
 		}
@@ -158,7 +156,7 @@ func buildIndexDocumentFromModel(data *indexDocument) *objstorage.IndexDocument 
 	}
 
 	return &objstorage.IndexDocument{
-		Suffix: data.Suffix.ValueStringPointer(),
+		Suffix: data.Suffix.ValueString(),
 	}
 }
 
@@ -168,7 +166,7 @@ func buildErrorDocumentFromModel(data *errorDocument) *objstorage.ErrorDocument 
 	}
 
 	return &objstorage.ErrorDocument{
-		Key: data.Key.ValueStringPointer(),
+		Key: data.Key.ValueString(),
 	}
 }
 
@@ -178,12 +176,12 @@ func buildRedirectAllRequestsToFromModel(data *redirectAllRequestsTo) *objstorag
 	}
 
 	return &objstorage.RedirectAllRequestsTo{
-		HostName: data.HostName.ValueStringPointer(),
+		HostName: data.HostName.ValueString(),
 		Protocol: data.Protocol.ValueStringPointer(),
 	}
 }
 
-func buildRoutingRulesFromModel(data []routingRule) *[]objstorage.RoutingRule {
+func buildRoutingRulesFromModel(data []routingRule) []objstorage.RoutingRule {
 	if len(data) == 0 {
 		return nil
 	}
@@ -198,7 +196,7 @@ func buildRoutingRulesFromModel(data []routingRule) *[]objstorage.RoutingRule {
 			}
 		}
 		if r.Redirect != nil {
-			rl.Redirect = &objstorage.Redirect{
+			rl.Redirect = objstorage.Redirect{
 				HostName:             r.Redirect.HostName.ValueStringPointer(),
 				HttpRedirectCode:     r.Redirect.HTTPRedirectCode.ValueStringPointer(),
 				Protocol:             r.Redirect.Protocol.ValueStringPointer(),
@@ -209,5 +207,5 @@ func buildRoutingRulesFromModel(data []routingRule) *[]objstorage.RoutingRule {
 		rules = append(rules, rl)
 	}
 
-	return &rules
+	return rules
 }

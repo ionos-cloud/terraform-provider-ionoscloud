@@ -13,9 +13,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 )
@@ -54,7 +54,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, config *filec
 			certificateAuthData = endpointOverrides.CertificateAuthData
 		}
 	}
-	cfg := objstorage.NewConfiguration(clientOptions.Endpoint)
+	cfg := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)
 	signer := awsv4.NewSigner(credentials.NewStaticCredentials(clientOptions.StorageOptions.AccessKey, clientOptions.StorageOptions.SecretKey, ""))
 	cfg.MiddlewareWithError = func(r *http.Request) error {
 		var reader io.ReadSeeker
@@ -77,7 +77,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, config *filec
 	}
 	cfg.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		clientOptions.Version, "1.1.0", clientOptions.TerraformVersion,
+		clientOptions.Version, objstorage.Version, clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 

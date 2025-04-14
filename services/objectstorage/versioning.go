@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 )
 
 // BucketVersioningResourceModel defines the expected inputs for creating a new BucketVersioning.

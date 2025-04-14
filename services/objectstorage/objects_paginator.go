@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 )
 
 // ListObjectsV2Input represents the input for the ListObjectsV2Paginator.
@@ -85,7 +85,7 @@ func (p *ListObjectsV2Paginator) NextPage(ctx context.Context) (*objstorage.List
 		return nil, err
 	}
 
-	if output.IsTruncated != nil && *output.IsTruncated {
+	if output.IsTruncated {
 		p.input.ContinuationToken = output.NextContinuationToken
 	} else {
 		p.hasMore = false

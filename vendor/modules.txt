@@ -347,13 +347,16 @@ github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0
+## explicit; go 1.18
+github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
-# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.3
+# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.4
 ## explicit; go 1.20
 github.com/ionos-cloud/sdk-go-bundle/shared
 github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration
@@ -363,9 +366,6 @@ github.com/ionos-cloud/sdk-go-dbaas-in-memory-db
 # github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.4
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dbaas-postgres
-# github.com/ionos-cloud/sdk-go-object-storage v1.1.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-object-storage
 # github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-vm-autoscaling

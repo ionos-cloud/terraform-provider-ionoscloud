@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 
 	convptr "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/convptr"
 	hash2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/hash"
@@ -107,17 +107,17 @@ func buildBucketLifecycleConfigurationModelFromAPIResponse(output *objstorage.Ge
 	return data
 }
 
-func buildRulesFromAPIResponse(rules *[]objstorage.Rule) []lifecycleRule {
+func buildRulesFromAPIResponse(rules []objstorage.Rule) []lifecycleRule {
 	if rules == nil {
 		return nil
 	}
 
-	result := make([]lifecycleRule, 0, len(*rules))
-	for _, r := range *rules {
+	result := make([]lifecycleRule, 0, len(rules))
+	for _, r := range rules {
 		result = append(result, lifecycleRule{
 			ID:                             types.StringPointerValue(r.ID),
-			Prefix:                         types.StringPointerValue(r.Prefix),
-			Status:                         types.StringValue(string(*r.Status)),
+			Prefix:                         types.StringPointerValue(&r.Prefix),
+			Status:                         types.StringValue(string(r.Status)),
 			Expiration:                     buildExpirationFromAPIResponse(r.Expiration),
 			NoncurrentVersionExpiration:    buildNoncurrentVersionExpirationFromAPIResponse(r.NoncurrentVersionExpiration),
 			AbortIncompleteMultipartUpload: buildAbortIncompleteMultipartUploadFromAPIResponse(r.AbortIncompleteMultipartUpload),
@@ -165,7 +165,7 @@ func buildBucketLifecycleConfigurationFromModel(data *BucketLifecycleConfigurati
 	}
 }
 
-func buildRulesFromModel(rules []lifecycleRule) *[]objstorage.Rule {
+func buildRulesFromModel(rules []lifecycleRule) []objstorage.Rule {
 	if rules == nil {
 		return nil
 	}
@@ -174,15 +174,15 @@ func buildRulesFromModel(rules []lifecycleRule) *[]objstorage.Rule {
 	for _, r := range rules {
 		result = append(result, objstorage.Rule{
 			ID:                             r.ID.ValueStringPointer(),
-			Prefix:                         r.Prefix.ValueStringPointer(),
-			Status:                         objstorage.ExpirationStatus(r.Status.ValueString()).Ptr(),
+			Prefix:                         r.Prefix.ValueString(),
+			Status:                         objstorage.ExpirationStatus(r.Status.ValueString()),
 			Expiration:                     buildExpirationFromModel(r.Expiration),
 			NoncurrentVersionExpiration:    buildNoncurrentVersionExpirationFromModel(r.NoncurrentVersionExpiration),
 			AbortIncompleteMultipartUpload: buildAbortIncompleteMultipartUploadFromModel(r.AbortIncompleteMultipartUpload),
 		})
 	}
 
-	return &result
+	return result
 }
 
 func buildExpirationFromModel(expiration *expiration) *objstorage.LifecycleExpiration {
