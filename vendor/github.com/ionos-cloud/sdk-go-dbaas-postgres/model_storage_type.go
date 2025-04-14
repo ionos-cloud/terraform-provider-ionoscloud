@@ -20,10 +20,10 @@ type StorageType string
 
 // List of StorageType
 const (
-	HDD          StorageType = "HDD"
-	SSD          StorageType = "SSD"
-	SSD_STANDARD StorageType = "SSD Standard"
-	SSD_PREMIUM  StorageType = "SSD Premium"
+	STORAGETYPE_HDD          StorageType = "HDD"
+	STORAGETYPE_SSD          StorageType = "SSD"
+	STORAGETYPE_SSD_STANDARD StorageType = "SSD Standard"
+	STORAGETYPE_SSD_PREMIUM  StorageType = "SSD Premium"
 )
 
 func (v *StorageType) UnmarshalJSON(src []byte) error {

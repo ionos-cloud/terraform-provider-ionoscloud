@@ -22,7 +22,7 @@ type PatchClusterProperties struct {
 	Ram *int32 `json:"ram,omitempty"`
 	// The amount of storage per instance in megabytes.
 	StorageSize *int32        `json:"storageSize,omitempty"`
-	Connections *[]Connection `json:"connections,omitempty"`
+	Connections *[]Connection `json:"connections"`
 	// The friendly name of your cluster.
 	DisplayName       *string            `json:"displayName,omitempty"`
 	MaintenanceWindow *MaintenanceWindow `json:"maintenanceWindow,omitempty"`
@@ -37,8 +37,10 @@ type PatchClusterProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPatchClusterProperties() *PatchClusterProperties {
+func NewPatchClusterProperties(connections []Connection) *PatchClusterProperties {
 	this := PatchClusterProperties{}
+
+	this.Connections = &connections
 
 	return &this
 }

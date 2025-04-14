@@ -20,9 +20,9 @@ type SynchronizationMode string
 
 // List of SynchronizationMode
 const (
-	ASYNCHRONOUS         SynchronizationMode = "ASYNCHRONOUS"
-	SYNCHRONOUS          SynchronizationMode = "SYNCHRONOUS"
-	STRICTLY_SYNCHRONOUS SynchronizationMode = "STRICTLY_SYNCHRONOUS"
+	SYNCHRONIZATIONMODE_ASYNCHRONOUS         SynchronizationMode = "ASYNCHRONOUS"
+	SYNCHRONIZATIONMODE_SYNCHRONOUS          SynchronizationMode = "SYNCHRONOUS"
+	SYNCHRONIZATIONMODE_STRICTLY_SYNCHRONOUS SynchronizationMode = "STRICTLY_SYNCHRONOUS"
 )
 
 func (v *SynchronizationMode) UnmarshalJSON(src []byte) error {

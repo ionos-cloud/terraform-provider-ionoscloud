@@ -13,6 +13,7 @@ package ionoscloud
 import (
 	"log"
 	"net/http"
+	"time"
 )
 
 // APIResponse stores the API response returned by the server.
@@ -24,6 +25,9 @@ type APIResponse struct {
 	// RequestURL is the request URL. This value is always available, even if the
 	// embedded *http.Response is nil.
 	RequestURL string `json:"url,omitempty"`
+	// RequestTime is the time duration from the moment the APIClient sends
+	// the HTTP request to the moment it receives an HTTP response.
+	RequestTime time.Duration `json:"duration,omitempty"`
 	// Method is the HTTP method used for the request.  This value is always
 	// available, even if the embedded *http.Response is nil.
 	Method string `json:"method,omitempty"`
@@ -33,7 +37,7 @@ type APIResponse struct {
 	Payload []byte `json:"-"`
 }
 
-// NewAPIResponse returns a new APIResonse object.
+// NewAPIResponse returns a new APIResponse object.
 func NewAPIResponse(r *http.Response) *APIResponse {
 
 	response := &APIResponse{Response: r}
@@ -60,8 +64,8 @@ func (resp *APIResponse) HttpNotFound() bool {
 // does not print anything for nil APIResponse values
 func (resp *APIResponse) LogInfo() {
 	if resp != nil {
-		log.Printf("[DEBUG] operation : %s",
-			resp.Operation)
+		log.Printf("[DEBUG] Request time : %s for operation : %s",
+			resp.RequestTime, resp.Operation)
 		if resp.Response != nil {
 			log.Printf("[DEBUG] response status code : %d\n", resp.StatusCode)
 		}

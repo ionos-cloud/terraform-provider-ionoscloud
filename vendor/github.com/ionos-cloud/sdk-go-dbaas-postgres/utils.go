@@ -12,6 +12,7 @@ package ionoscloud
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -754,11 +755,6 @@ func (t *IonosTime) UnmarshalJSON(data []byte) error {
 	if str[len(str)-1] == '"' {
 		str = str[:len(str)-1]
 	}
-	if !strings.Contains(str, "Z") {
-		/* forcefully adding timezone suffix to be able to parse the
-		 * string using RFC3339 */
-		str += "Z"
-	}
 	tt, err := time.Parse(time.RFC3339, str)
 	if err != nil {
 		return err
@@ -779,4 +775,24 @@ func IsNil(i interface{}) bool {
 		return reflect.ValueOf(i).IsZero()
 	}
 	return false
+}
+
+// EnsureURLFormat checks that the URL has the correct format (no trailing slash,
+// has http/https scheme prefix) and updates it if necessary
+func EnsureURLFormat(url string) string {
+	length := len(url)
+
+	if length <= 1 {
+		return url
+	}
+
+	if url[length-1] == '/' {
+		url = url[:length-1]
+	}
+
+	if !strings.HasPrefix(url, "https://") && !strings.HasPrefix(url, "http://") {
+		url = fmt.Sprintf("https://%s", url)
+	}
+
+	return url
 }
