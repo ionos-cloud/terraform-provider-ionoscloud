@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	pgsql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -51,10 +51,10 @@ func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 	name := d.Get("name").(string)
 	owner := d.Get("owner").(string)
 	request := pgsql.Database{
-		Properties: &pgsql.DatabaseProperties{},
+		Properties: pgsql.DatabaseProperties{},
 	}
-	request.Properties.Name = &name
-	request.Properties.Owner = &owner
+	request.Properties.Name = name
+	request.Properties.Owner = owner
 
 	database, _, err := client.CreateDatabase(ctx, clusterId, request)
 	if err != nil {

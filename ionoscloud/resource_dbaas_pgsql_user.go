@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	pgsql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -59,16 +59,16 @@ func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, m
 	password := d.Get("password").(string)
 
 	request := pgsql.User{
-		Properties: &pgsql.UserProperties{},
+		Properties: pgsql.UserProperties{},
 	}
-	request.Properties.Username = &username
+	request.Properties.Username = username
 	request.Properties.Password = &password
 
 	user, _, err := client.CreateUser(ctx, clusterId, request)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while adding the user: %s to the PgSql cluster with ID: %s, error: %w", username, clusterId, err))
 	}
-	d.SetId(*user.Id)
+	d.SetId(user.Id)
 	// Wait for the cluster to be ready again (when creating/updating the user, the cluster enters
 	// 'BUSY' state).
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
@@ -82,7 +82,7 @@ func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, m
 	client := meta.(bundleclient.SdkBundle).PsqlClient
 
 	request := pgsql.UsersPatchRequest{
-		Properties: pgsql.NewPatchUserProperties(),
+		Properties: *pgsql.NewPatchUserProperties(),
 	}
 
 	clusterId := d.Get("cluster_id").(string)

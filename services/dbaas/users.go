@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
-	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	pgsql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -176,12 +176,10 @@ func SetUserMongoData(d *schema.ResourceData, user *mongo.User) error {
 // SetUserPgSqlData - sets the user data for the pgsql user
 func SetUserPgSqlData(d *schema.ResourceData, user *pgsql.UserResource) error {
 	resourceName := "PgSQL user"
-	d.SetId(*user.Id)
-	if user.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the PgSql user with ID: %s, but received 'nil' instead", *user.Id)
-	}
-	if user.Properties.Username != nil {
-		if err := d.Set("username", *user.Properties.Username); err != nil {
+	d.SetId(user.Id)
+
+	if user.Properties.Username != "" {
+		if err := d.Set("username", user.Properties.Username); err != nil {
 			return utils.GenerateSetError(resourceName, "username", err)
 		}
 	}

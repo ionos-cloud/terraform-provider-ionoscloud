@@ -7,18 +7,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	psql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
+func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *shared.APIResponse, error) {
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
@@ -31,7 +32,7 @@ func (c *MongoClient) GetCluster(ctx context.Context, clusterID string) (mongo.C
 	return cluster, apiResponse, err
 }
 
-func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.ClusterList, *psql.APIResponse, error) {
+func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.ClusterList, *shared.APIResponse, error) {
 	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)
@@ -59,7 +60,7 @@ func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *sh
 	return templates, apiResponse, err
 }
 
-func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
+func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClusterRequest) (psql.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
@@ -79,13 +80,13 @@ func (c *MongoClient) UpdateCluster(ctx context.Context, clusterID string, clust
 	return clusterResponse, apiResponse, err
 }
 
-func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
+func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
-func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
+func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
@@ -165,32 +166,32 @@ func GetPgSqlClusterDataCreate(d *schema.ResourceData) (*psql.CreateClusterReque
 
 	if postgresVersion, ok := d.GetOk("postgres_version"); ok {
 		postgresVersion := postgresVersion.(string)
-		dbaasCluster.Properties.PostgresVersion = &postgresVersion
+		dbaasCluster.Properties.PostgresVersion = postgresVersion
 	}
 
 	if instances, ok := d.GetOk("instances"); ok {
 		instances := int32(instances.(int))
-		dbaasCluster.Properties.Instances = &instances
+		dbaasCluster.Properties.Instances = instances
 	}
 
 	if cores, ok := d.GetOk("cores"); ok {
 		cores := int32(cores.(int))
-		dbaasCluster.Properties.Cores = &cores
+		dbaasCluster.Properties.Cores = cores
 	}
 
 	if ram, ok := d.GetOk("ram"); ok {
 		ram := int32(ram.(int))
-		dbaasCluster.Properties.Ram = &ram
+		dbaasCluster.Properties.Ram = ram
 	}
 
 	if storageSize, ok := d.GetOk("storage_size"); ok {
 		storageSize := int32(storageSize.(int))
-		dbaasCluster.Properties.StorageSize = &storageSize
+		dbaasCluster.Properties.StorageSize = storageSize
 	}
 
 	if storageType, ok := d.GetOk("storage_type"); ok {
 		storageType := psql.StorageType(storageType.(string))
-		dbaasCluster.Properties.StorageType = &storageType
+		dbaasCluster.Properties.StorageType = storageType
 	}
 
 	if _, ok := d.GetOk("connection_pooler"); ok {
@@ -205,7 +206,7 @@ func GetPgSqlClusterDataCreate(d *schema.ResourceData) (*psql.CreateClusterReque
 
 	if location, ok := d.GetOk("location"); ok {
 		location := location.(string)
-		dbaasCluster.Properties.Location = &location
+		dbaasCluster.Properties.Location = location
 	}
 
 	if backupLocation, ok := d.GetOk("backup_location"); ok {
@@ -215,7 +216,7 @@ func GetPgSqlClusterDataCreate(d *schema.ResourceData) (*psql.CreateClusterReque
 
 	if displayName, ok := d.GetOk("display_name"); ok {
 		displayName := displayName.(string)
-		dbaasCluster.Properties.DisplayName = &displayName
+		dbaasCluster.Properties.DisplayName = displayName
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {
@@ -226,7 +227,7 @@ func GetPgSqlClusterDataCreate(d *schema.ResourceData) (*psql.CreateClusterReque
 
 	if synchronizationMode, ok := d.GetOk("synchronization_mode"); ok {
 		synchronizationMode := psql.SynchronizationMode(synchronizationMode.(string))
-		dbaasCluster.Properties.SynchronizationMode = &synchronizationMode
+		dbaasCluster.Properties.SynchronizationMode = synchronizationMode
 	}
 
 	if _, ok := d.GetOk("from_backup"); ok {
@@ -493,7 +494,7 @@ func GetPgSqlClusterDataUpdate(d *schema.ResourceData) (*psql.PatchClusterReques
 	return &dbaasCluster, nil
 }
 
-func GetPsqlClusterConnectionsData(d *schema.ResourceData) *[]psql.Connection {
+func GetPsqlClusterConnectionsData(d *schema.ResourceData) []psql.Connection {
 	connections := make([]psql.Connection, 0)
 
 	if vdcValue, ok := d.GetOk("connections"); ok {
@@ -505,17 +506,17 @@ func GetPsqlClusterConnectionsData(d *schema.ResourceData) *[]psql.Connection {
 
 				if datacenterId, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", vdcIndex)); ok {
 					datacenterId := datacenterId.(string)
-					connection.DatacenterId = &datacenterId
+					connection.DatacenterId = datacenterId
 				}
 
 				if lanId, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", vdcIndex)); ok {
 					lanId := lanId.(string)
-					connection.LanId = &lanId
+					connection.LanId = lanId
 				}
 
 				if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.cidr", vdcIndex)); ok {
 					cidr := cidr.(string)
-					connection.Cidr = &cidr
+					connection.Cidr = cidr
 				}
 
 				connections = append(connections, connection)
@@ -524,7 +525,7 @@ func GetPsqlClusterConnectionsData(d *schema.ResourceData) *[]psql.Connection {
 
 	}
 
-	return &connections
+	return connections
 }
 
 // GetMongoClusterConnectionsData creates an sdk object for the Mongo connection list from the plan
@@ -583,12 +584,12 @@ func GetPsqlClusterMaintenanceWindowData(d *schema.ResourceData) *psql.Maintenan
 
 	if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
 		timeV := timeV.(string)
-		maintenanceWindow.Time = &timeV
+		maintenanceWindow.Time = timeV
 	}
 
 	if dayOfTheWeek, ok := d.GetOk("maintenance_window.0.day_of_the_week"); ok {
 		dayOfTheWeek := psql.DayOfTheWeek(dayOfTheWeek.(string))
-		maintenanceWindow.DayOfTheWeek = &dayOfTheWeek
+		maintenanceWindow.DayOfTheWeek = dayOfTheWeek
 	}
 
 	return &maintenanceWindow
@@ -631,20 +632,20 @@ func GetMongoBiConnectorData(d *schema.ResourceData) *mongo.BiConnectorPropertie
 	return &biConnector
 }
 
-func GetPsqlClusterCredentialsData(d *schema.ResourceData) *psql.DBUser {
+func GetPsqlClusterCredentialsData(d *schema.ResourceData) psql.DBUser {
 	var user psql.DBUser
 
 	if username, ok := d.GetOk("credentials.0.username"); ok {
 		username := username.(string)
-		user.Username = &username
+		user.Username = username
 	}
 
 	if password, ok := d.GetOk("credentials.0.password"); ok {
 		password := password.(string)
-		user.Password = &password
+		user.Password = password
 	}
 
-	return &user
+	return user
 }
 
 func GetPsqlClusterFromBackupData(d *schema.ResourceData) (*psql.CreateRestoreRequest, error) {
@@ -652,7 +653,7 @@ func GetPsqlClusterFromBackupData(d *schema.ResourceData) (*psql.CreateRestoreRe
 
 	if backupId, ok := d.GetOk("from_backup.0.backup_id"); ok {
 		backupId := backupId.(string)
-		restore.BackupId = &backupId
+		restore.BackupId = backupId
 	}
 
 	if targetTime, ok := d.GetOk("from_backup.0.recovery_target_time"); ok {
@@ -805,9 +806,9 @@ func SetPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterResponse) e
 		}
 	}
 
-	if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
+	if len(cluster.Properties.Connections) > 0 {
 		var connections []interface{}
-		for _, connection := range *cluster.Properties.Connections {
+		for _, connection := range cluster.Properties.Connections {
 			connectionEntry := SetConnectionProperties(connection)
 			connections = append(connections, connectionEntry)
 		}
