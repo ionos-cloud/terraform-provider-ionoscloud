@@ -18,7 +18,6 @@ import (
 func resourceDbaasPgSqlDatabase() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDbaasPgSqlDatabaseCreate,
-		UpdateContext: resourceDbaasPgSqlDatabaseUpdate,
 		ReadContext:   resourceDbaasPgSqlDatabaseRead,
 		DeleteContext: resourceDbaasPgSqlDatabaseDelete,
 		Importer: &schema.ResourceImporter{
@@ -28,17 +27,20 @@ func resourceDbaasPgSqlDatabase() *schema.Resource {
 			"cluster_id": {
 				Type:             schema.TypeString,
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The databasename of a given database.",
 				Required:    true,
+				ForceNew:    true,
 			},
 			"owner": {
 				Type:        schema.TypeString,
 				Description: "The name of the role owning a given database.",
 				Required:    true,
+				ForceNew:    true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -61,10 +63,6 @@ func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(fmt.Errorf("an error occurred while creating the PgSql database named: %s inside the cluster with ID: %s, error: %w", name, clusterId, err))
 	}
 	return diag.FromErr(dbaas.SetDatabasePgSqlData(d, &database))
-}
-
-func resourceDbaasPgSqlDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return nil
 }
 
 func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

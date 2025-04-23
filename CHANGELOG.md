@@ -1,6 +1,8 @@
 ## 6.7.7 -- upcoming release
 ### Features
 - Add backup to mariadb
+### Fixes
+- Fix [#813](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/813) by adding `ForceNew: true` for all attributes for `ionoscloud_pg_database` resource
 ### Refactor
 - Use MariaDB bundle product instead of sdk-go-dbaas-mariadb
 - Use Mongo bundle product instead of sdk-go-dbaas-mongo

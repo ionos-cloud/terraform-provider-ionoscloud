@@ -26,9 +26,9 @@ resource "ionoscloud_pg_database" "example_pg_database" {
 
 ## Argument reference
 
-* `cluster_id` - (Required)[string] The unique ID of the cluster.
-* `name` - (Required)[string] The name of the database.
-* `owner` - (Required)[string] The owner of the database.
+* `cluster_id` - (Required)[string] The unique ID of the cluster. Immutable, forces re-creation.
+* `name` - (Required)[string] The name of the database. Immutable, forces re-creation.
+* `owner` - (Required)[string] The owner of the database. Immutable, forces re-creation.
 
 ## Import
 
