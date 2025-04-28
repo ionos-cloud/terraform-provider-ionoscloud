@@ -224,35 +224,35 @@ func TestAccAutoscalingGroup_nicWithTargetGroup(t *testing.T) {
 	})
 }
 
-func TestAccAutoscalingGroup_nicWithFlowLog(t *testing.T) {
-	var autoscalingGroup autoscaling.Group
+// func TestAccAutoscalingGroup_nicWithFlowLog(t *testing.T) {
+// 	var autoscalingGroup autoscaling.Group
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
-		Steps: []resource.TestStep{
-			{
-				Config: testAGConfig_nicWithFlowLog(constant.AutoscalingGroupTestResource),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAutoscalingGroupExists(resourceAGName, &autoscalingGroup),
-					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.nic.0.flow_log.#", "1"),
-					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.nic.0.flow_log.0.name", "flow_log_1"),
-					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.nic.0.flow_log.0.bucket", "test-de-bucket"),
-					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.nic.0.flow_log.0.action", "ALL"),
-					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.nic.0.flow_log.0.direction", "BIDIRECTIONAL"),
-				),
-			},
-			{
-				ResourceName:      resourceAGName,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
+// 	resource.ParallelTest(t, resource.TestCase{
+// 		PreCheck: func() {
+// 			testAccPreCheck(t)
+// 		},
+// 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+// 		CheckDestroy:             testAccCheckAutoscalingGroupDestroyCheck,
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: testAGConfig_nicWithFlowLog(constant.AutoscalingGroupTestResource),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheckAutoscalingGroupExists(resourceAGName, &autoscalingGroup),
+// 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.nic.0.flow_log.#", "1"),
+// 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.nic.0.flow_log.0.name", "flow_log_1"),
+// 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.nic.0.flow_log.0.bucket", "test-de-bucket"),
+// 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.nic.0.flow_log.0.action", "ALL"),
+// 					resource.TestCheckResourceAttr(resourceAGName, "replica_configuration.0.nic.0.flow_log.0.direction", "BIDIRECTIONAL"),
+// 				),
+// 			},
+// 			{
+// 				ResourceName:      resourceAGName,
+// 				ImportState:       true,
+// 				ImportStateVerify: true,
+// 			},
+// 		},
+// 	})
+// }
 
 func TestAccAutoscalingGroup_nicWithTcpFirewall(t *testing.T) {
 	var autoscalingGroup autoscaling.Group

@@ -32,7 +32,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
-	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.2
+	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.4
 	github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1
@@ -42,8 +42,6 @@ require (
 	golang.org/x/crypto v0.36.0
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-replace github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 => /home/radu/work/sdk-go-bundle/products/vmautoscaling
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
