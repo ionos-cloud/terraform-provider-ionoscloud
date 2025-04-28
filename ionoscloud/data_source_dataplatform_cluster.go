@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
+	dataplatform "github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
@@ -265,7 +265,7 @@ func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceDa
 				return diags
 			}
 			if clusters.Items != nil {
-				results = *clusters.Items
+				results = clusters.Items
 			}
 		} else {
 			clusters, _, err := client.ListClusters(ctx, "")
@@ -273,12 +273,12 @@ func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceDa
 				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform Clusters: %w", err))
 				return diags
 			}
-			if clusters.Items != nil && len(*clusters.Items) > 0 {
-				for _, clusterItem := range *clusters.Items {
+			if len(clusters.Items) > 0 {
+				for _, clusterItem := range clusters.Items {
 					if len(results) > 1 {
 						break
 					}
-					if clusterItem.Properties != nil && clusterItem.Properties.Name != nil && strings.EqualFold(*clusterItem.Properties.Name, name) {
+					if clusterItem.Properties.Name != nil && strings.EqualFold(*clusterItem.Properties.Name, name) {
 						results = append(results, clusterItem)
 					}
 				}
@@ -309,24 +309,22 @@ func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceDa
 func setAdditionalDataplatformClusterData(ctx context.Context, d *schema.ResourceData, cluster *dataplatform.ClusterResponseData, client *dataplatformService.Client) error {
 
 	/* get from api and set in schema the kubeconfig*/
-	if cluster.Id != nil {
-		kubeConfigMap, _, err := client.GetClusterKubeConfig(ctx, *cluster.Id)
-		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %w", *cluster.Id, err)
-		}
+	kubeConfigMap, _, err := client.GetClusterKubeConfig(ctx, cluster.Id)
+	if err != nil {
+		return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %w", cluster.Id, err)
+	}
 
-		kubeConfig, err := json.Marshal(kubeConfigMap)
-		if err != nil {
-			return err
-		}
-		kubeConfigString := string(kubeConfig)
-		if err := d.Set("kube_config", kubeConfigString); err != nil {
-			return err
-		}
+	kubeConfig, err := json.Marshal(kubeConfigMap)
+	if err != nil {
+		return err
+	}
+	kubeConfigString := string(kubeConfig)
+	if err := d.Set("kube_config", kubeConfigString); err != nil {
+		return err
+	}
 
-		if err := setDataplatformConfigData(d, kubeConfigString); err != nil {
-			return err
-		}
+	if err := setDataplatformConfigData(d, kubeConfigString); err != nil {
+		return err
 	}
 
 	return nil

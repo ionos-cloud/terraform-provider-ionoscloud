@@ -1,4 +1,4 @@
-# github.com/ProtonMail/go-crypto v1.1.0-alpha.5-proton
+# github.com/ProtonMail/go-crypto v1.1.3
 ## explicit; go 1.17
 github.com/ProtonMail/go-crypto/bitcurves
 github.com/ProtonMail/go-crypto/brainpool
@@ -17,12 +17,9 @@ github.com/ProtonMail/go-crypto/openpgp/elgamal
 github.com/ProtonMail/go-crypto/openpgp/errors
 github.com/ProtonMail/go-crypto/openpgp/internal/algorithm
 github.com/ProtonMail/go-crypto/openpgp/internal/ecc
-github.com/ProtonMail/go-crypto/openpgp/internal/ecc/curve25519
-github.com/ProtonMail/go-crypto/openpgp/internal/ecc/curve25519/field
 github.com/ProtonMail/go-crypto/openpgp/internal/encoding
 github.com/ProtonMail/go-crypto/openpgp/packet
 github.com/ProtonMail/go-crypto/openpgp/s2k
-github.com/ProtonMail/go-crypto/openpgp/symmetric
 github.com/ProtonMail/go-crypto/openpgp/x25519
 github.com/ProtonMail/go-crypto/openpgp/x448
 # github.com/agext/levenshtein v1.2.3
@@ -31,7 +28,7 @@ github.com/agext/levenshtein
 # github.com/apparentlymart/go-textseg/v15 v15.0.0
 ## explicit; go 1.16
 github.com/apparentlymart/go-textseg/v15/textseg
-# github.com/aws/aws-sdk-go v1.55.5
+# github.com/aws/aws-sdk-go v1.55.6
 ## explicit; go 1.19
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
@@ -75,15 +72,15 @@ github.com/davecgh/go-spew/spew
 github.com/fatih/color
 # github.com/go-test/deep v1.0.6
 ## explicit; go 1.13
-# github.com/gofrs/uuid/v5 v5.3.0
+# github.com/gofrs/uuid/v5 v5.3.2
 ## explicit; go 1.19
 github.com/gofrs/uuid/v5
 # github.com/golang/protobuf v1.5.4
 ## explicit; go 1.17
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes/empty
-# github.com/google/go-cmp v0.6.0
-## explicit; go 1.13
+# github.com/google/go-cmp v0.7.0
+## explicit; go 1.21
 github.com/google/go-cmp/cmp
 github.com/google/go-cmp/cmp/cmpopts
 github.com/google/go-cmp/cmp/internal/diff
@@ -102,7 +99,7 @@ github.com/hashicorp/go-checkpoint
 # github.com/hashicorp/go-cleanhttp v0.5.2
 ## explicit; go 1.13
 github.com/hashicorp/go-cleanhttp
-# github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
+# github.com/hashicorp/go-cty v1.5.0
 ## explicit; go 1.12
 github.com/hashicorp/go-cty/cty
 github.com/hashicorp/go-cty/cty/convert
@@ -132,8 +129,8 @@ github.com/hashicorp/go-uuid
 # github.com/hashicorp/go-version v1.7.0
 ## explicit
 github.com/hashicorp/go-version
-# github.com/hashicorp/hc-install v0.8.0
-## explicit; go 1.18
+# github.com/hashicorp/hc-install v0.9.1
+## explicit; go 1.22.0
 github.com/hashicorp/hc-install
 github.com/hashicorp/hc-install/checkpoint
 github.com/hashicorp/hc-install/errors
@@ -148,7 +145,7 @@ github.com/hashicorp/hc-install/product
 github.com/hashicorp/hc-install/releases
 github.com/hashicorp/hc-install/src
 github.com/hashicorp/hc-install/version
-# github.com/hashicorp/hcl/v2 v2.22.0
+# github.com/hashicorp/hcl/v2 v2.23.0
 ## explicit; go 1.18
 github.com/hashicorp/hcl/v2
 github.com/hashicorp/hcl/v2/ext/customdecode
@@ -156,14 +153,14 @@ github.com/hashicorp/hcl/v2/hclsyntax
 # github.com/hashicorp/logutils v1.0.0
 ## explicit
 github.com/hashicorp/logutils
-# github.com/hashicorp/terraform-exec v0.21.0
-## explicit; go 1.18
+# github.com/hashicorp/terraform-exec v0.22.0
+## explicit; go 1.22.0
 github.com/hashicorp/terraform-exec/internal/version
 github.com/hashicorp/terraform-exec/tfexec
-# github.com/hashicorp/terraform-json v0.22.1
+# github.com/hashicorp/terraform-json v0.24.0
 ## explicit; go 1.18
 github.com/hashicorp/terraform-json
-# github.com/hashicorp/terraform-plugin-framework v1.13.0
+# github.com/hashicorp/terraform-plugin-framework v1.14.1
 ## explicit; go 1.22.0
 github.com/hashicorp/terraform-plugin-framework/attr
 github.com/hashicorp/terraform-plugin-framework/attr/xattr
@@ -207,14 +204,14 @@ github.com/hashicorp/terraform-plugin-framework/schema/validator
 github.com/hashicorp/terraform-plugin-framework/tfsdk
 github.com/hashicorp/terraform-plugin-framework/types
 github.com/hashicorp/terraform-plugin-framework/types/basetypes
-# github.com/hashicorp/terraform-plugin-framework-jsontypes v0.1.0
-## explicit; go 1.19
+# github.com/hashicorp/terraform-plugin-framework-jsontypes v0.2.0
+## explicit; go 1.22.0
 github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes
-# github.com/hashicorp/terraform-plugin-framework-timeouts v0.4.1
-## explicit; go 1.19
+# github.com/hashicorp/terraform-plugin-framework-timeouts v0.5.0
+## explicit; go 1.22.0
 github.com/hashicorp/terraform-plugin-framework-timeouts/internal/validators
 github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts
-# github.com/hashicorp/terraform-plugin-framework-validators v0.16.0
+# github.com/hashicorp/terraform-plugin-framework-validators v0.17.0
 ## explicit; go 1.22.0
 github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator
 github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag
@@ -227,7 +224,7 @@ github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator
 github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator
 github.com/hashicorp/terraform-plugin-framework-validators/setvalidator
 github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator
-# github.com/hashicorp/terraform-plugin-go v0.25.0
+# github.com/hashicorp/terraform-plugin-go v0.26.0
 ## explicit; go 1.22.0
 github.com/hashicorp/terraform-plugin-go/internal/logging
 github.com/hashicorp/terraform-plugin-go/tfprotov5
@@ -254,16 +251,16 @@ github.com/hashicorp/terraform-plugin-log/internal/hclogutils
 github.com/hashicorp/terraform-plugin-log/internal/logging
 github.com/hashicorp/terraform-plugin-log/tflog
 github.com/hashicorp/terraform-plugin-log/tfsdklog
-# github.com/hashicorp/terraform-plugin-mux v0.16.0
-## explicit; go 1.21
+# github.com/hashicorp/terraform-plugin-mux v0.18.0
+## explicit; go 1.22.0
 github.com/hashicorp/terraform-plugin-mux/internal/logging
 github.com/hashicorp/terraform-plugin-mux/internal/tfprotov5tov6
 github.com/hashicorp/terraform-plugin-mux/internal/tfprotov6tov5
 github.com/hashicorp/terraform-plugin-mux/tf5muxserver
 github.com/hashicorp/terraform-plugin-mux/tf5to6server
 github.com/hashicorp/terraform-plugin-mux/tf6muxserver
-# github.com/hashicorp/terraform-plugin-sdk/v2 v2.34.0
-## explicit; go 1.21
+# github.com/hashicorp/terraform-plugin-sdk/v2 v2.36.1
+## explicit; go 1.22.0
 github.com/hashicorp/terraform-plugin-sdk/v2/diag
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry
@@ -281,8 +278,8 @@ github.com/hashicorp/terraform-plugin-sdk/v2/internal/tfdiags
 github.com/hashicorp/terraform-plugin-sdk/v2/meta
 github.com/hashicorp/terraform-plugin-sdk/v2/plugin
 github.com/hashicorp/terraform-plugin-sdk/v2/terraform
-# github.com/hashicorp/terraform-plugin-testing v1.10.0
-## explicit; go 1.21
+# github.com/hashicorp/terraform-plugin-testing v1.12.0
+## explicit; go 1.23.0
 github.com/hashicorp/terraform-plugin-testing/compare
 github.com/hashicorp/terraform-plugin-testing/config
 github.com/hashicorp/terraform-plugin-testing/helper/resource
@@ -299,7 +296,7 @@ github.com/hashicorp/terraform-plugin-testing/statecheck
 github.com/hashicorp/terraform-plugin-testing/terraform
 github.com/hashicorp/terraform-plugin-testing/tfjsonpath
 github.com/hashicorp/terraform-plugin-testing/tfversion
-# github.com/hashicorp/terraform-registry-address v0.2.3
+# github.com/hashicorp/terraform-registry-address v0.2.4
 ## explicit; go 1.19
 github.com/hashicorp/terraform-registry-address
 # github.com/hashicorp/terraform-svchost v0.1.1
@@ -320,59 +317,59 @@ github.com/ionos-cloud/sdk-go-api-gateway
 # github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.2.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/cert/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2 v2.1.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.4
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/dns/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2 v2.1.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0
+## explicit; go 1.18
+github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.2 => /home/radu/work/sdk-go-bundle/products/vmautoscaling
-## explicit; go 1.22.0
+## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
-# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.3
+# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.4
 ## explicit; go 1.20
 github.com/ionos-cloud/sdk-go-bundle/shared
 github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration
-# github.com/ionos-cloud/sdk-go-cert-manager v1.3.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-cert-manager
-# github.com/ionos-cloud/sdk-go-container-registry v1.2.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-container-registry
-# github.com/ionos-cloud/sdk-go-dataplatform v1.1.1
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-dataplatform
 # github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dbaas-in-memory-db
-# github.com/ionos-cloud/sdk-go-dbaas-mariadb v1.1.3
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-dbaas-mariadb
-# github.com/ionos-cloud/sdk-go-dbaas-mongo v1.3.1
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-dbaas-mongo
-# github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.3
-## explicit; go 1.21
-github.com/ionos-cloud/sdk-go-dbaas-postgres
-# github.com/ionos-cloud/sdk-go-dns v1.2.1
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-dns
-# github.com/ionos-cloud/sdk-go-kafka v1.1.2
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-kafka
-# github.com/ionos-cloud/sdk-go-nfs v1.1.3
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-nfs
-# github.com/ionos-cloud/sdk-go-object-storage v1.1.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-object-storage
-# github.com/ionos-cloud/sdk-go-object-storage-management v1.0.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-object-storage-management
-# github.com/ionos-cloud/sdk-go/v6 v6.3.2
+# github.com/ionos-cloud/sdk-go/v6 v6.3.3
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jmespath/go-jmespath v0.4.0
@@ -429,7 +426,7 @@ github.com/vmihailenco/msgpack/v5/msgpcode
 github.com/vmihailenco/tagparser/v2
 github.com/vmihailenco/tagparser/v2/internal
 github.com/vmihailenco/tagparser/v2/internal/parser
-# github.com/zclconf/go-cty v1.15.0
+# github.com/zclconf/go-cty v1.16.2
 ## explicit; go 1.18
 github.com/zclconf/go-cty/cty
 github.com/zclconf/go-cty/cty/convert
@@ -439,8 +436,8 @@ github.com/zclconf/go-cty/cty/function/stdlib
 github.com/zclconf/go-cty/cty/gocty
 github.com/zclconf/go-cty/cty/json
 github.com/zclconf/go-cty/cty/set
-# golang.org/x/crypto v0.33.0
-## explicit; go 1.20
+# golang.org/x/crypto v0.36.0
+## explicit; go 1.23.0
 golang.org/x/crypto/argon2
 golang.org/x/crypto/blake2b
 golang.org/x/crypto/blowfish
@@ -453,14 +450,14 @@ golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/sha3
 golang.org/x/crypto/ssh
 golang.org/x/crypto/ssh/internal/bcrypt_pbkdf
-# golang.org/x/mod v0.20.0
-## explicit; go 1.18
+# golang.org/x/mod v0.22.0
+## explicit; go 1.22.0
 golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/modfile
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.35.0
-## explicit; go 1.18
+# golang.org/x/net v0.37.0
+## explicit; go 1.23.0
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
@@ -468,20 +465,20 @@ golang.org/x/net/idna
 golang.org/x/net/internal/httpcommon
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/oauth2 v0.25.0
-## explicit; go 1.18
+# golang.org/x/oauth2 v0.28.0
+## explicit; go 1.23.0
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sync v0.11.0
-## explicit; go 1.18
+# golang.org/x/sync v0.12.0
+## explicit; go 1.23.0
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.30.0
-## explicit; go 1.18
+# golang.org/x/sys v0.31.0
+## explicit; go 1.23.0
 golang.org/x/sys/cpu
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/text v0.22.0
-## explicit; go 1.18
+# golang.org/x/text v0.23.0
+## explicit; go 1.23.0
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
@@ -518,11 +515,11 @@ google.golang.org/appengine/internal/datastore
 google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/modules
 google.golang.org/appengine/internal/remote_api
-# google.golang.org/genproto/googleapis/rpc v0.0.0-20240827150818-7e3bb234dfed
+# google.golang.org/genproto/googleapis/rpc v0.0.0-20241015192408-796eee8c2d53
 ## explicit; go 1.21
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.67.1
-## explicit; go 1.21
+# google.golang.org/grpc v1.69.4
+## explicit; go 1.22
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
@@ -530,6 +527,8 @@ google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/base
 google.golang.org/grpc/balancer/grpclb/state
 google.golang.org/grpc/balancer/pickfirst
+google.golang.org/grpc/balancer/pickfirst/internal
+google.golang.org/grpc/balancer/pickfirst/pickfirstleaf
 google.golang.org/grpc/balancer/roundrobin
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/channelz
@@ -584,7 +583,7 @@ google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
-# google.golang.org/protobuf v1.35.1
+# google.golang.org/protobuf v1.36.3
 ## explicit; go 1.21
 google.golang.org/protobuf/encoding/protojson
 google.golang.org/protobuf/encoding/prototext
@@ -607,6 +606,7 @@ google.golang.org/protobuf/internal/genid
 google.golang.org/protobuf/internal/impl
 google.golang.org/protobuf/internal/order
 google.golang.org/protobuf/internal/pragma
+google.golang.org/protobuf/internal/protolazy
 google.golang.org/protobuf/internal/set
 google.golang.org/protobuf/internal/strs
 google.golang.org/protobuf/internal/version

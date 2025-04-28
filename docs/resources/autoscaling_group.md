@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_autoscaling_group
 
-Manages an Autoscaling Group on IonosCloud.
+Manages an [Autoscaling Group](https://docs.ionos.com/cloud/compute-services/vm-auto-scaling/overview#components-of-vm-auto-scaling) on IonosCloud.
 
 ## Example Usage
 

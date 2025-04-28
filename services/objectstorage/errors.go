@@ -5,11 +5,12 @@ import (
 	"errors"
 	"log"
 
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 func isBucketNotEmptyError(err error) bool {
-	var apiErr objstorage.GenericOpenAPIError
+	var apiErr shared.GenericOpenAPIError
 	if errors.As(err, &apiErr) {
 		body := apiErr.Body()
 		var objStoreErr objstorage.Error
@@ -26,7 +27,7 @@ func isBucketNotEmptyError(err error) bool {
 }
 
 func isInvalidStateBucketWithObjectLock(err error) bool {
-	var apiErr objstorage.GenericOpenAPIError
+	var apiErr shared.GenericOpenAPIError
 	if errors.As(err, &apiErr) {
 		body := apiErr.Body()
 		var objStoreErr objstorage.Error

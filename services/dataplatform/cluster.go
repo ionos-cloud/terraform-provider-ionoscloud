@@ -6,12 +6,12 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	dataplatform "github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
-
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 var clusterResourceName = "Dataplatform Cluster"
@@ -21,7 +21,7 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 	if err != nil {
 		return false, err
 	}
-	if cluster.Metadata == nil || cluster.Metadata.State == nil {
+	if cluster.Metadata.State == nil {
 		return false, fmt.Errorf("expected metadata, got empty for cluster id %s", d.Id())
 	}
 	if utils.IsStateFailed(*cluster.Metadata.State) {
@@ -31,7 +31,7 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 	return strings.EqualFold(*cluster.Metadata.State, constant.Available), nil
 }
 
-func (c *Client) GetClusterById(ctx context.Context, id string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {
+func (c *Client) GetClusterById(ctx context.Context, id string) (dataplatform.ClusterResponseData, *shared.APIResponse, error) {
 	cluster, apiResponse, err := c.sdkClient.DataPlatformClusterApi.ClustersFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
@@ -45,13 +45,13 @@ func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (
 }
 
 // GetClusterKubeConfig - gets the kube config for the cluster
-func (c *Client) GetClusterKubeConfig(ctx context.Context, clusterID string) (map[string]interface{}, *dataplatform.APIResponse, error) {
+func (c *Client) GetClusterKubeConfig(ctx context.Context, clusterID string) (map[string]interface{}, *shared.APIResponse, error) {
 	kubeConfig, apiResponse, err := c.sdkClient.DataPlatformClusterApi.ClustersKubeconfigFindByClusterId(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return kubeConfig, apiResponse, err
 }
 
-func (c *Client) ListClusters(ctx context.Context, filterName string) (dataplatform.ClusterListResponseData, *dataplatform.APIResponse, error) {
+func (c *Client) ListClusters(ctx context.Context, filterName string) (dataplatform.ClusterListResponseData, *shared.APIResponse, error) {
 	request := c.sdkClient.DataPlatformClusterApi.ClustersGet(ctx)
 	if filterName != "" {
 		request = request.Name(filterName)
@@ -70,7 +70,7 @@ func (c *Client) CreateCluster(ctx context.Context, d *schema.ResourceData) (id 
 	if err != nil {
 		return "", apiResponse, err
 	}
-	return *clusterResponse.Id, apiResponse, err
+	return clusterResponse.Id, apiResponse, err
 }
 
 func (c *Client) UpdateCluster(ctx context.Context, id string, d *schema.ResourceData) (utils.ApiResponseInfo, error) {
@@ -89,17 +89,17 @@ func (c *Client) DeleteCluster(ctx context.Context, id string) (utils.ApiRespons
 func setCreateClusterRequestProperties(d *schema.ResourceData) *dataplatform.CreateClusterRequest {
 
 	dataplatformCluster := dataplatform.CreateClusterRequest{
-		Properties: &dataplatform.CreateClusterProperties{},
+		Properties: dataplatform.CreateClusterProperties{},
 	}
 
 	if nameValue, ok := d.GetOk("name"); ok {
 		name := nameValue.(string)
-		dataplatformCluster.Properties.Name = &name
+		dataplatformCluster.Properties.Name = name
 	}
 
 	if datacenterIdValue, ok := d.GetOk("datacenter_id"); ok {
 		datacenterId := datacenterIdValue.(string)
-		dataplatformCluster.Properties.DatacenterId = &datacenterId
+		dataplatformCluster.Properties.DatacenterId = datacenterId
 	}
 
 	if dataPlatformVersionValue, ok := d.GetOk("version"); ok {
@@ -111,7 +111,7 @@ func setCreateClusterRequestProperties(d *schema.ResourceData) *dataplatform.Cre
 		dataplatformCluster.Properties.MaintenanceWindow = setMaintenanceWindowData(d)
 	}
 
-	dataplatformCluster.Properties.Lans = setLansData(d)
+	dataplatformCluster.Properties.Lans = *setLansData(d)
 
 	return &dataplatformCluster
 }
@@ -119,7 +119,7 @@ func setCreateClusterRequestProperties(d *schema.ResourceData) *dataplatform.Cre
 func setPatchClusterRequestProperties(d *schema.ResourceData) *dataplatform.PatchClusterRequest {
 
 	dataplatformCluster := dataplatform.PatchClusterRequest{
-		Properties: &dataplatform.PatchClusterProperties{},
+		Properties: dataplatform.PatchClusterProperties{},
 	}
 
 	if nameValue, ok := d.GetOk("name"); ok {
@@ -136,7 +136,7 @@ func setPatchClusterRequestProperties(d *schema.ResourceData) *dataplatform.Patc
 		dataplatformCluster.Properties.MaintenanceWindow = setMaintenanceWindowData(d)
 	}
 
-	dataplatformCluster.Properties.Lans = setLansData(d)
+	dataplatformCluster.Properties.Lans = *setLansData(d)
 
 	return &dataplatformCluster
 }
@@ -150,9 +150,9 @@ func setLansData(d *schema.ResourceData) *[]dataplatform.Lan {
 					lanID := lan["lan_id"].(string)
 					dhcp := lan["dhcp"].(bool)
 					var lanBody dataplatform.Lan
-					lanBody.LanId = &lanID
+					lanBody.LanId = lanID
 					lanBody.Dhcp = &dhcp
-					lanBody.Routes = setRoutesData(lan)
+					lanBody.Routes = *setRoutesData(lan)
 					lansBody = append(lansBody, lanBody)
 				}
 			}
@@ -169,8 +169,8 @@ func setRoutesData(lan map[string]interface{}) *[]dataplatform.Route {
 				network := route["network"].(string)
 				gateway := route["gateway"].(string)
 				var routeBody dataplatform.Route
-				routeBody.Network = &network
-				routeBody.Gateway = &gateway
+				routeBody.Network = network
+				routeBody.Gateway = gateway
 				routesBody = append(routesBody, routeBody)
 			}
 		}
@@ -183,12 +183,12 @@ func setMaintenanceWindowData(d *schema.ResourceData) *dataplatform.MaintenanceW
 
 	if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
 		timeV := timeV.(string)
-		maintenanceWindow.Time = &timeV
+		maintenanceWindow.Time = timeV
 	}
 
 	if dayOfTheWeek, ok := d.GetOk("maintenance_window.0.day_of_the_week"); ok {
 		dayOfTheWeek := dayOfTheWeek.(string)
-		maintenanceWindow.DayOfTheWeek = &dayOfTheWeek
+		maintenanceWindow.DayOfTheWeek = dayOfTheWeek
 	}
 
 	return &maintenanceWindow
@@ -196,12 +196,8 @@ func setMaintenanceWindowData(d *schema.ResourceData) *dataplatform.MaintenanceW
 
 func SetDataplatformClusterData(d *schema.ResourceData, cluster dataplatform.ClusterResponseData) error {
 
-	if cluster.Id != nil {
-		d.SetId(*cluster.Id)
-	}
-	if cluster.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the Dataplatform Cluster with ID: %s, but received 'nil' instead", d.Id())
-	}
+	d.SetId(cluster.Id)
+
 	if cluster.Properties.Name != nil {
 		if err := d.Set("name", *cluster.Properties.Name); err != nil {
 			return utils.GenerateSetError(clusterResourceName, "name", err)
@@ -230,7 +226,7 @@ func SetDataplatformClusterData(d *schema.ResourceData, cluster dataplatform.Clu
 	}
 
 	if cluster.Properties.Lans != nil {
-		if err := d.Set("lans", setLansProperties(*cluster.Properties.Lans)); err != nil {
+		if err := d.Set("lans", setLansProperties(cluster.Properties.Lans)); err != nil {
 			return utils.GenerateSetError(clusterResourceName, "lans", err)
 		}
 	}
@@ -245,8 +241,8 @@ func setLansProperties(retrievedLans []dataplatform.Lan) []interface{} {
 		utils.SetPropWithNilCheck(lanEntry, "lan_id", lanElem.LanId)
 		utils.SetPropWithNilCheck(lanEntry, "dhcp", lanElem.Dhcp)
 		if lanElem.Routes != nil {
-			routes := make([]interface{}, len(*lanElem.Routes))
-			for i, routeElem := range *lanElem.Routes {
+			routes := make([]interface{}, len(lanElem.Routes))
+			for i, routeElem := range lanElem.Routes {
 				routeEntry := make(map[string]interface{})
 				utils.SetPropWithNilCheck(routeEntry, "network", routeElem.Network)
 				utils.SetPropWithNilCheck(routeEntry, "gateway", routeElem.Gateway)

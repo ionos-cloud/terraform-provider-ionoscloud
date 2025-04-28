@@ -7,10 +7,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
-func (c *Client) GetVersions(ctx context.Context) ([]string, *dataplatform.APIResponse, error) {
+func (c *Client) GetVersions(ctx context.Context) ([]string, *shared.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.DataPlatformMetaDataApi.VersionsGet(ctx).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -19,7 +19,7 @@ func (c *Client) GetVersions(ctx context.Context) ([]string, *dataplatform.APIRe
 	if versions.Items == nil {
 		return nil, nil, fmt.Errorf("expected a list of Dataplatform versions but received 'nil' instead")
 	}
-	return *versions.Items, apiResponse, err
+	return versions.Items, apiResponse, err
 }
 
 func SetVersionsData(d *schema.ResourceData, versions []string) diag.Diagnostics {

@@ -1,12 +1,52 @@
-## 6.8.1
-### Refactor
-- Use bundle SDK for VM Autoscaling
+## 6.7.7 -- upcoming release
+### Features
+- Add backup to mariadb
 ### Fixes
+- Fix [#813](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/813) by adding `ForceNew: true` for all attributes for `ionoscloud_pg_database` resource
 - Keep the VM autoscaling group in state if the action fails
 - Fix VM Autoscaling tests and examples
+### Refactor
+- Use VM Autoscaling bundle product instead of sdk-go-vm-autoscaling
+- Use MariaDB bundle product instead of sdk-go-dbaas-mariadb
+- Use Mongo bundle product instead of sdk-go-dbaas-mongo
+- Use Dataplatform bundle product instead of sdk-go-dataplatform
+- Use PostgreSQL bundle product instead of sdk-go-dbaas-postgres
+- Update `sdk-go-dbaas-postgres` to version `v1.1.4` and use the new sdk methods for PG versions (done before bundle integration)
+### Documentation
+- Add better documentation for dedicated core for servers
+## 6.7.6
+### Features
+- Add `server_type` optional attribute to `ionoscloud_k8s_nodepool` resource and data source
+- Add `password_wo` and `password_wo_version` to `ionoscloud_user` resource. Write only field that is not stored in state. Can be used only with Terraform 1.11 or higher.
+### Changed
+- `cpu_family` is now optional for `ionoscloud_k8s_nodepool` resource
+### Refactor
+- Use Kafka bundle product instead of sdk-go-kafka
+### Chore
+- Remove nolint, add comments
+- Update golangci-lint to v2
+- Update go version to v1.23
+- Updates plugin framework and sdkv2 deps
+
+## 6.7.5
+## Refactor
+- Use Object Storage Management bundle product instead of sdk-go-object-storage-management
+### Fixes
+- Save `ionoscloud_container_registry_token` password to `password` field in the resource state
+
+## 6.7.4
+### Fixes
+- Trying to get Ionoscloud provider version for user agent
+### Docs
+- Added links in resources
+### Refactor
+- Use DNS bundle product instead of sdk-go-dns
+- Use Container Registry bundle product instead of sdk-go-container-registry
+- Use Certificate Manager bundle product instead of sdk-go-cert-manager
+
 ## 6.7.3
 ### Fixes
-- Remove cpu_family, availability_zone and rockylinux-8-GenericCloud-20230518 from docs
+- Remove `cpu_family`, `availability_zone` and` rockylinux-8-GenericCloud-20230518` from docs
 - Do not return an error if `ionoscloud_object_storage_acesskey` is not found
 - Return early if dataplatform cluster is in `FAILED` state
 - `ionoscloud_s3_key` data source should require only `user_id`
@@ -25,7 +65,7 @@
 
 ## 6.7.0
 ### Fixes
-- Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nill values.
+- Fix [#735](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/735) by reading all values for `api_subnet_allow_list`, not only non-nil values.
 - Fix [#748](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/748) by removing unecessary error check
 - S3 key creation fails with 422 if s3 key not found. Add function to check for that specific response from the API.
 ### Features

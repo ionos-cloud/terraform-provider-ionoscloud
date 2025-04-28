@@ -14,14 +14,14 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
+	"github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	sdk "github.com/ionos-cloud/sdk-go-nfs"
 )
 
 // Client is a wrapper for the NFS SDK
 type Client struct {
-	sdkClient  sdk.APIClient
+	sdkClient  nfs.APIClient
 	fileConfig *fileconfiguration.FileConfig
 }
 
@@ -31,23 +31,23 @@ func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 }
 
 // GetConfig returns the configuration
-func (c *Client) GetConfig() *sdk.Configuration {
+func (c *Client) GetConfig() *shared.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
 func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	config := sdk.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
-	if os.Getenv(constant.IonosDebug) != "" {
-		config.Debug = true
-	}
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
 	config.HTTPClient = &http.Client{Transport: utils.CreateTransport(clientOptions.SkipTLSVerify)}
-	config.UserAgent = fmt.Sprintf("terraform-provider/ionos-cloud-sdk-go-nfs/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		sdk.Version, clientOptions.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH) // nolint:staticcheck
+	config.UserAgent = fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-nfs/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		clientOptions.Version, nfs.Version, clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, // nolint:staticcheck
+	)
 
-	return &Client{sdkClient: *sdk.NewAPIClient(config),
+	return &Client{sdkClient: *nfs.NewAPIClient(config),
 		fileConfig: fileConfig}
 }
 
@@ -58,7 +58,7 @@ func (c *Client) changeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	// if there is no location set, return the client as is. allows to overwrite the url with IONOS_API_URL
 	if location == "" && os.Getenv(ionosAPIURLNFS) != "" {
-		config.Servers = sdk.ServerConfigurations{
+		config.Servers = shared.ServerConfigurations{
 			{
 				URL: utils.CleanURL(os.Getenv(ionosAPIURLNFS)),
 			},
@@ -68,7 +68,7 @@ func (c *Client) changeConfigURL(location string) {
 
 	for _, server := range config.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
-			config.Servers = sdk.ServerConfigurations{
+			config.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
 					Description: shared.EndpointOverridden + location,
@@ -83,8 +83,8 @@ func (c *Client) changeConfigURL(location string) {
 func (c *Client) overrideClientEndpoint(productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer c.changeConfigURL(location)
-	if os.Getenv(sdk.IonosApiUrlEnvVar) != "" {
-		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(sdk.IonosApiUrlEnvVar))
+	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
+		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(shared.IonosApiUrlEnvVar))
 		return
 	}
 	fileConfig := c.GetFileConfig()
@@ -100,7 +100,7 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
 		return
 	}
-	config.Servers = sdk.ServerConfigurations{
+	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
 			Description: shared.EndpointOverridden + location,

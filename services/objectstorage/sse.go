@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 )
 
 // ServerSideEncryptionConfigurationModel defines the expected inputs for creating a new ServerSideEncryptionConfiguration.
@@ -75,24 +75,20 @@ func buildServerSideEncryptionConfigurationModelFromAPIResponse(output *objstora
 	}
 }
 
-func buildServerSideEncryptionRulesFromAPIResponse(data *[]objstorage.ServerSideEncryptionRule) []sseRule {
+func buildServerSideEncryptionRulesFromAPIResponse(data []objstorage.ServerSideEncryptionRule) []sseRule {
 	if data == nil {
 		return nil
 	}
 
-	rules := make([]sseRule, 0, len(*data))
-	for _, r := range *data {
+	rules := make([]sseRule, 0, len(data))
+	for _, r := range data {
 		if r.ApplyServerSideEncryptionByDefault == nil {
-			continue
-		}
-
-		if r.ApplyServerSideEncryptionByDefault.SSEAlgorithm == nil {
 			continue
 		}
 
 		rules = append(rules, sseRule{
 			ApplyServerSideEncryptionByDefault: applyServerSideEncryptionByDefault{
-				SSEAlgorithm: types.StringValue(string(*r.ApplyServerSideEncryptionByDefault.SSEAlgorithm)),
+				SSEAlgorithm: types.StringValue(string(r.ApplyServerSideEncryptionByDefault.SSEAlgorithm)),
 			},
 		})
 	}
@@ -106,15 +102,15 @@ func buildServerSideEncryptionConfigurationFromModel(data *ServerSideEncryptionC
 	}
 }
 
-func buildServerSideEncryptionRulesFromModel(data []sseRule) *[]objstorage.ServerSideEncryptionRule {
+func buildServerSideEncryptionRulesFromModel(data []sseRule) []objstorage.ServerSideEncryptionRule {
 	rules := make([]objstorage.ServerSideEncryptionRule, 0, len(data))
 	for _, r := range data {
 		rules = append(rules, objstorage.ServerSideEncryptionRule{
 			ApplyServerSideEncryptionByDefault: &objstorage.ServerSideEncryptionByDefault{
-				SSEAlgorithm: objstorage.ServerSideEncryption(r.ApplyServerSideEncryptionByDefault.SSEAlgorithm.ValueString()).Ptr(),
+				SSEAlgorithm: objstorage.ServerSideEncryption(r.ApplyServerSideEncryptionByDefault.SSEAlgorithm.ValueString()),
 			},
 		})
 	}
 
-	return &rules
+	return rules
 }

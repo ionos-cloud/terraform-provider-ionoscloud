@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_kafka_cluster
 
-Manages a **Kafka Cluster** on IonosCloud.
+Manages a [Kafka Cluster](https://docs.ionos.com/cloud/data-analytics/kafka/overview) on IonosCloud.
 
 ## Example Usage
 

@@ -9,6 +9,8 @@ description: |-
 
 # ionoscloud_dataplatform_node_pool
 
+Manages a [Dataplatform Node Pool](https://docs.ionos.com/cloud/data-analytics/managed-stackable/overview#platform-components)
+
 ## Example Usage
 
 ```hcl
@@ -25,7 +27,7 @@ resource "ionoscloud_dataplatform_cluster" "example" {
     day_of_the_week  	= "Sunday"
     time				= "09:00:00"
   }
-  version	= "23.7"
+  version	= "24.11"
 }
 
 resource "ionoscloud_dataplatform_node_pool" "example" {

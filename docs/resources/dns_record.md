@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_dns_record
 
-Manages a **DNS Record**.
+Manages a [DNS Record](https://docs.ionos.com/cloud/network-services/cloud-dns/overview).
 
 > ⚠️  Only tokens are accepted for authorization in the **ionoscloud_dns_record** resource. Please ensure you are using tokens as other methods will not be valid.
 

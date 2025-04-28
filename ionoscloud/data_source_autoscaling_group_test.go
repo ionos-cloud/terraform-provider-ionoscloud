@@ -160,7 +160,7 @@ resource "ionoscloud_target_group" "autoscaling_target_group" {
     name                      = "Target Group Example" 
     algorithm                 = "ROUND_ROBIN"
     protocol                  = "HTTP"
-  	protocol_version          = "HTTP1"
+    protocol_version          = "HTTP1"
 }
 
 // This resource is used to wait for the target group to be destroyed after clearing all resources from autoscaling group

@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_mongo_cluster
 
-Manages a **DbaaS Mongo Cluster**.
+Manages a [DbaaS Mongo Cluster](https://docs.ionos.com/cloud/databases/mongodb/overview).
 
 ## Example Usage for playground or business editions. They require template_id defined.
 
@@ -99,7 +99,7 @@ resource "random_password" "cluster_password" {
 ## Argument reference
 
 * `edition` - (Optional)(Computed)[string] Cluster edition. Playground, business or enterprise.
-* `mongodb_version` - (Required)[string] The MongoDB version of your cluster. Updates to the value of the field force the cluster to be re-created.
+* `mongodb_version` - (Required)[string] The MongoDB version of your cluster. Downgrade is not possible and will throw an error.
 * `template_id` - (Optional)[string] The unique ID of the template, which specifies the number of cores, storage size, and memory. Updates to the value of the field force the cluster to be re-created. Required for playground and business editions. Must not be provided for enterprise edition.
 * `instances` - (Required)[int] The total number of instances in the cluster (one master and n-1 standbys). Example: 1, 3, 5, 7. Updates to the value of the field force the cluster to be re-created.
 * `display_name` - (Required)[string] The name of your cluster. Updates to the value of the field force the cluster to be re-created.

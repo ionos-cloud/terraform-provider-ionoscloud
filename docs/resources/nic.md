@@ -9,7 +9,8 @@ description: |-
 
 # ionoscloud_nic
 
-Manages a **NIC** on IonosCloud.
+Manages a [NIC](https://docs.ionos.com/cloud/set-up-ionos-cloud/get-started/configure-data-center#connect-to-the-internet) on IonosCloud.
+
 ## Example Usage
 
 ```hcl

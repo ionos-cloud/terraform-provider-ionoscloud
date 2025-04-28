@@ -7,7 +7,7 @@ import (
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
-	objstorage "github.com/ionos-cloud/sdk-go-object-storage"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 )
 
 const errAccessDenied = "AccessDenied"
@@ -68,10 +68,10 @@ func getObjectsToDelete(page *objstorage.ListObjectVersionsOutput) []objstorage.
 		return nil
 	}
 
-	toDelete := make([]objstorage.ObjectIdentifier, 0, len(*page.Versions))
-	for _, v := range *page.Versions {
+	toDelete := make([]objstorage.ObjectIdentifier, 0, len(page.Versions))
+	for _, v := range page.Versions {
 		toDelete = append(toDelete, objstorage.ObjectIdentifier{
-			Key:       v.Key,
+			Key:       *v.Key,
 			VersionId: v.VersionId,
 		})
 	}
@@ -84,10 +84,10 @@ func getDeleteMarkersToDelete(page *objstorage.ListObjectVersionsOutput) []objst
 		return nil
 	}
 
-	toDelete := make([]objstorage.ObjectIdentifier, 0, len(*page.DeleteMarkers))
-	for _, v := range *page.DeleteMarkers {
+	toDelete := make([]objstorage.ObjectIdentifier, 0, len(page.DeleteMarkers))
+	for _, v := range page.DeleteMarkers {
 		toDelete = append(toDelete, objstorage.ObjectIdentifier{
-			Key:       v.Key,
+			Key:       *v.Key,
 			VersionId: v.VersionId,
 		})
 	}
@@ -103,7 +103,7 @@ func deletePageOfObjectVersions(ctx context.Context, conn *objstorage.APIClient,
 	}
 
 	req := conn.ObjectsApi.DeleteObjects(ctx, bucket).DeleteObjectsRequest(objstorage.DeleteObjectsRequest{
-		Objects: &toDelete,
+		Objects: toDelete,
 		Quiet:   shared.ToPtr(true),
 	})
 	if force {
@@ -123,9 +123,9 @@ func deletePageOfObjectVersions(ctx context.Context, conn *objstorage.APIClient,
 		return objCount, nil
 	}
 
-	objCount -= int64(len(*output.Errors))
+	objCount -= int64(len(output.Errors))
 	var errs []error
-	for _, v := range *output.Errors {
+	for _, v := range output.Errors {
 		if force && shared.ToValueDefault(v.Code) == errAccessDenied {
 			_, err := tryDisableLegalHold(ctx, conn, bucket, shared.ToValueDefault(v.Key), shared.ToValueDefault(v.VersionId))
 			if err != nil {
@@ -162,7 +162,7 @@ func deletePageOfDeleteMarkers(ctx context.Context, conn *objstorage.APIClient, 
 	}
 
 	output, apiResponse, err := conn.ObjectsApi.DeleteObjects(ctx, bucket).DeleteObjectsRequest(objstorage.DeleteObjectsRequest{
-		Objects: &toDelete,
+		Objects: toDelete,
 		Quiet:   shared.ToPtr(true),
 	}).Execute()
 	if apiResponse.HttpNotFound() {
@@ -177,9 +177,9 @@ func deletePageOfDeleteMarkers(ctx context.Context, conn *objstorage.APIClient, 
 		return objCount, nil
 	}
 
-	objCount -= int64(len(*output.Errors))
-	errs := make([]error, 0, len(*output.Errors))
-	for _, v := range *output.Errors {
+	objCount -= int64(len(output.Errors))
+	errs := make([]error, 0, len(output.Errors))
+	for _, v := range output.Errors {
 		errs = append(errs, newDeleteObjectVersionError(v))
 	}
 

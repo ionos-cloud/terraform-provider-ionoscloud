@@ -6,11 +6,12 @@ import (
 	"log"
 	"time"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
+	semversion "github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -28,6 +29,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDbaasMongoClusterImport,
 		},
+		CustomizeDiff: errorOnMongoVersionDowngrade,
 		Schema: map[string]*schema.Schema{
 			"maintenance_window": {
 				Type:        schema.TypeList,
@@ -52,9 +54,8 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 			},
 			"mongodb_version": {
 				Type:             schema.TypeString,
-				Description:      "The MongoDB version of your cluster. Update forces cluster re-creation.",
+				Description:      "The MongoDB version of your cluster. Downgrade is not possible and will throw an error.",
 				Required:         true,
-				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"instances": {
@@ -304,6 +305,30 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
+}
+
+func errorOnMongoVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	// we do not want to check in case of resource creation
+	if diff.Id() == "" {
+		return nil
+	}
+	if diff.HasChange("mongodb_version") {
+		oldValue, newValue := diff.GetChange("mongodb_version")
+		oldVersionStr := oldValue.(string)
+		newVersionStr := newValue.(string)
+		oldVersion, err := semversion.NewVersion(oldVersionStr)
+		if err != nil {
+			return err
+		}
+		newVersion, err := semversion.NewVersion(newVersionStr)
+		if err != nil {
+			return err
+		}
+		if newVersion.LessThan(oldVersion) {
+			return fmt.Errorf("downgrade is not supported from %s to %s", oldVersionStr, newVersionStr)
+		}
+	}
+	return nil
 }
 
 func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

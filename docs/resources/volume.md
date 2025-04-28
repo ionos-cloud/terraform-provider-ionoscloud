@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_volume
 
-Manages a **Volume** on IonosCloud.
+Manages a [Volume](https://docs.ionos.com/cloud/storage-and-backup/block-storage) on IonosCloud.
 
 ## Example Usage
 

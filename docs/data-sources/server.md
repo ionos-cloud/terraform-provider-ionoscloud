@@ -47,7 +47,7 @@ The following attributes are returned by the datasource:
 * `hostname` - The hostname of the resource.
 * `id` - The id of that resource
 * `name` - The name of that resource
-* `type` - Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes)
+* `type` - Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-services/compute-engine/dedicated-core) now named dedicated core, [CUBE](https://docs.ionos.com/cloud/compute-services/cubes) or [VCPU](https://docs.ionos.com/cloud/compute-services/compute-engine/vcpu-server)
 * `vm_state`- Status of the virtual Machine
 * `datacenter_id` - The id of the datacenter
 * `cores` - The total number of cores for the server

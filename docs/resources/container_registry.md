@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_container_registry
 
-Manages an **Container Registry** on IonosCloud.
+Manages an [Container Registry](https://docs.ionos.com/cloud/containers/private-container-registry/overview) on IonosCloud.
 
 ## Example Usage
 

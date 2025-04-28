@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"testing"
 
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -149,7 +149,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
   }
-  mongodb_version = "5.0"
+  mongodb_version = "` + mongoVersion + `"
   instances          = 3
   display_name = "` + constant.DBaaSClusterTestResource + `"
   location = ` + constant.DatacenterResource + `.datacenter_example.location
@@ -199,7 +199,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
   }
-  mongodb_version = "5.0"
+  mongodb_version = "` + mongoVersion + `"
   instances          = 3
   display_name = "` + constant.DBaaSClusterTestResource + `"
   location = ` + constant.DatacenterResource + `.datacenter_example.location

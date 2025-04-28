@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	pgsql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -18,7 +18,6 @@ import (
 func resourceDbaasPgSqlDatabase() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDbaasPgSqlDatabaseCreate,
-		UpdateContext: resourceDbaasPgSqlDatabaseUpdate,
 		ReadContext:   resourceDbaasPgSqlDatabaseRead,
 		DeleteContext: resourceDbaasPgSqlDatabaseDelete,
 		Importer: &schema.ResourceImporter{
@@ -28,17 +27,20 @@ func resourceDbaasPgSqlDatabase() *schema.Resource {
 			"cluster_id": {
 				Type:             schema.TypeString,
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The databasename of a given database.",
 				Required:    true,
+				ForceNew:    true,
 			},
 			"owner": {
 				Type:        schema.TypeString,
 				Description: "The name of the role owning a given database.",
 				Required:    true,
+				ForceNew:    true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -51,20 +53,16 @@ func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 	name := d.Get("name").(string)
 	owner := d.Get("owner").(string)
 	request := pgsql.Database{
-		Properties: &pgsql.DatabaseProperties{},
+		Properties: pgsql.DatabaseProperties{},
 	}
-	request.Properties.Name = &name
-	request.Properties.Owner = &owner
+	request.Properties.Name = name
+	request.Properties.Owner = owner
 
 	database, _, err := client.CreateDatabase(ctx, clusterId, request)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while creating the PgSql database named: %s inside the cluster with ID: %s, error: %w", name, clusterId, err))
 	}
 	return diag.FromErr(dbaas.SetDatabasePgSqlData(d, &database))
-}
-
-func resourceDbaasPgSqlDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return nil
 }
 
 func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
