@@ -18,6 +18,7 @@ const MaxWaitTime = 4 * time.Second
 const SleepInterval = 5 * time.Second
 
 const Available = "AVAILABLE"
+const Failed = "FAILED"
 
 // Datetime formats
 const (
