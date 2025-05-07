@@ -164,7 +164,7 @@ resource "ionoscloud_server" "nfs_server" {
 }
 `
 
-const testAccCheckNFSClusterConfigBasic = temporaryConfigSetupNFS + `
+const testAccCheckNFSClusterConfigBasic = temporaryConfigSetup + `
 resource "ionoscloud_nfs_cluster" "example" {
   name = "example"
   location = "de/txl"
@@ -182,7 +182,7 @@ resource "ionoscloud_nfs_cluster" "example" {
 }
 `
 
-const testAccCheckNFSClusterConfigUpdate = temporaryConfigSetupNFS + `
+const testAccCheckNFSClusterConfigUpdate = temporaryConfigSetup + `
 resource "ionoscloud_nfs_cluster" "example" {
   name = "example_updated"
   location = "de/txl"
