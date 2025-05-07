@@ -142,7 +142,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go-dbaas-in-memory-db/v1.0.0",
+		UserAgent:          "ionos-cloud-sdk-go-dbaas-in-memory-db/v1.1.1",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -154,35 +154,35 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		LogLevel:           getLogLevelFromEnv(),
 		Servers: ServerConfigurations{
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://in-memory-db.de-fra.ionos.com",
 				Description: "Production de-fra",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://in-memory-db.de-txl.ionos.com",
 				Description: "Production de-txl",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://in-memory-db.es-vit.ionos.com",
 				Description: "Production es-vit",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://in-memory-db.gb-lhr.ionos.com",
 				Description: "Production gb-lhr",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://in-memory-db.us-ewr.ionos.com",
 				Description: "Production us-ewr",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://in-memory-db.us-las.ionos.com",
 				Description: "Production us-las",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://in-memory-db.us-mci.ionos.com",
 				Description: "Production us-mci",
 			},
 			{
-				URL:         getServerUrl(hostUrl),
+				URL:         "https://in-memory-db.fr-par.ionos.com",
 				Description: "Production fr-par",
 			},
 		},
