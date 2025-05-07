@@ -130,8 +130,12 @@ github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0 h1:KRyWPSo
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0/go.mod h1:viTYczukRYE3C94NUyKrSc2yEZvOq6mCbFwzVnjJnM4=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.0 h1:Ial6fztU2ilhX0CXjfqt4i9d4R1WE1tgQEuzRNApB00=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.0/go.mod h1:cI558LGis0dz/l1CiCIpGLI9gmcBqZenCeg2GYPpZrM=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1 h1:eH4AZ7YCXKNwuwvUNtlBnrzt/BnU19AkENrWNHmKcsM=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1/go.mod h1:wSlye7CEzwnHow17pvGiwBvlfihh9QhowFXJBFhSFXQ=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.4 h1:I+pNmTV/ykpPFE/FTRZWip5tqDT1zTpz9GYx38RF3pw=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.4/go.mod h1:ZD2RWeT6hesv6OO7R/0DuQdwKu8/mF602ktbTIgSp50=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.5 h1:wlqzODzGihO/q9LgzaH+8IrrC86QQ4yLVehBU0O9xIU=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.5/go.mod h1:V+PguySovCY0Ajdg8+GYVXem32tNB8iBXOhqIukT1xE=
 github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.0 h1:LsRmU3eb6MeI+t3OP3kEVvP0TSp0UzPRmw1GWLRbu/0=
 github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.0/go.mod h1:S8SBfF2bJkW902JKSQ/O6zn3sXPgeLvaa8hUG/oycNg=
 github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2 v2.1.0 h1:QkMyUjp1Lfc84oaWRG6CJ9SvXsGaaYnpqfnmBCbV/B0=
@@ -152,6 +156,8 @@ github.com/ionos-cloud/sdk-go-bundle/shared v0.1.4 h1:z3NaijMuUFFmAAFOToG8s4V4UM
 github.com/ionos-cloud/sdk-go-bundle/shared v0.1.4/go.mod h1:3hFdLduyrL77x9nJNQt16QARgkXgHoOHmW696waUhIk=
 github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1 h1:vd3SCqZ1OI5l7Tzql7NDb5Zlpna8e2SsfEYZRGHOkOo=
 github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.0.1/go.mod h1:JLbyt5wj7+f/njy7pnWD6K+cCfe32p8VrjmKks055+w=
+github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.1.2 h1:Ig0lqdno6Vz4i4BjsmtGCK+8sTomDhgRJ9tXEfHERrI=
+github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.1.2/go.mod h1:Dot/ShoGZLZQZTv0PqRr+P0Qe2upUyD8IH1uCV4xRUI=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1 h1:KABL25MC7DrIHn9lQzKSPkwXhqvRkPYtFd+1HEogmAE=
 github.com/ionos-cloud/sdk-go-vm-autoscaling v1.0.1/go.mod h1:Q5d1R6silarsX5jWLPBHd/1PSC5zZNf2ONvXB+fygC0=
 github.com/ionos-cloud/sdk-go/v6 v6.3.3 h1:q33Sw1ZqsvqDkFaKG53dGk7BCOvPCPbGZpYqsF6tdjw=

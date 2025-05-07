@@ -51,7 +51,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.0.0"
+	Version = "1.1.1"
 )
 
 // APIClient manages communication with the In-Memory DB API API v1.0.0
