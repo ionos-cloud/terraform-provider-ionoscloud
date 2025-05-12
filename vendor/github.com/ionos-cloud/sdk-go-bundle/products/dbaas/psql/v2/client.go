@@ -53,7 +53,9 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "products/dbaas/psql/v2.0.4"
+	Version               = "products/dbaas/psql/v2.0.5"
+	DefaultIonosServerUrl = "https://api.ionos.com/databases/postgresql"
+	DefaultIonosBasePath  = "/databases/postgresql"
 )
 
 // APIClient manages communication with the IONOS DBaaS PostgreSQL REST API API v1.0.0
@@ -116,7 +118,7 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 		*cfgCopy = *cfg
 	}
 
-	cfgCopy.UserAgent = "sdk-go-bundle/products/dbaas/psql/v2.0.4"
+	cfgCopy.UserAgent = "sdk-go-bundle/products/dbaas/psql/v2.0.5"
 
 	// Initialize default values in the copied configuration
 	if cfgCopy.HTTPClient == nil {
@@ -129,6 +131,13 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 				URL:         "https://api.ionos.com/databases/postgresql",
 				Description: "Production",
 			},
+		}
+	} else {
+		// If the user has provided a custom server configuration, we need to ensure that the basepath is set
+		for i := range cfgCopy.Servers {
+			if cfgCopy.Servers[i].URL != "" && !strings.HasSuffix(cfgCopy.Servers[i].URL, DefaultIonosBasePath) {
+				cfgCopy.Servers[i].URL = fmt.Sprintf("%s%s", cfgCopy.Servers[i].URL, DefaultIonosBasePath)
+			}
 		}
 	}
 
