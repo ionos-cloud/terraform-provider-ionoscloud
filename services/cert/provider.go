@@ -32,10 +32,12 @@ func (c *Client) ChangeConfigURL(location string) {
 		}
 		return
 	}
-	clientConfig.Servers = shared.ServerConfigurations{
-		{
-			URL: locationToURL[location],
-		},
+	if loc, ok := locationToURL[location]; ok {
+		clientConfig.Servers = shared.ServerConfigurations{
+			{
+				URL: loc,
+			},
+		}
 	}
 }
 
