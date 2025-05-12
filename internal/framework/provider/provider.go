@@ -199,6 +199,22 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		username = profile.Credentials.Username
 		password = profile.Credentials.Password
 	}
+	if accessKey == "" || secretKey == "" {
+		if readFileErr != nil {
+			resp.Diagnostics.AddWarning("missing credentials", "either accessKey or secretKey is not set")
+			resp.Diagnostics.AddWarning("while opening file", readFileErr.Error())
+			return
+		} else {
+			profile := fileConfig.GetCurrentProfile()
+			if profile == nil {
+				resp.Diagnostics.AddWarning("missing credentials", "either accessKey or secretKey is not set")
+			} else {
+				accessKey = profile.Credentials.S3AccessKey
+				secretKey = profile.Credentials.S3SecretKey
+
+			}
+		}
+	}
 	cleanedEndpoint := utils.CleanURL(endpoint)
 
 	if insecureBool == true {
