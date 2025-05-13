@@ -3,6 +3,7 @@
 - Add backup to mariadb
 ### Fixes
 - Fix [#813](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/813) by adding `ForceNew: true` for all attributes for `ionoscloud_pg_database` resource
+- Instantiate new http clients for each product (instead of http.Default client) so that insecure mode and certificate can be set independently
 ### Refactor
 - Use MariaDB bundle product instead of sdk-go-dbaas-mariadb
 - Use Mongo bundle product instead of sdk-go-dbaas-mongo

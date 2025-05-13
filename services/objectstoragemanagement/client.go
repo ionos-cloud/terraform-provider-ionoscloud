@@ -34,7 +34,6 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
-	config.HTTPClient = http.DefaultClient
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		clientOptions.Version, objectstoragemanagement.Version, clientOptions.TerraformVersion,
