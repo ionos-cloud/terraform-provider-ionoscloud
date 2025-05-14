@@ -1,6 +1,7 @@
 ## 6.7.7 -- upcoming release
 ### Features
 - Add backup to mariadb
+- Add `ionoscloud_contracts` data source
 ### Fixes
 - Fix [#813](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/813) by adding `ForceNew: true` for all attributes for `ionoscloud_pg_database` resource
 ### Refactor
