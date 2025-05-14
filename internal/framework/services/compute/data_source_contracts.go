@@ -186,15 +186,15 @@ func (d *contractsDataSource) Configure(_ context.Context, req datasource.Config
 	d.client = client.CloudApiClient
 }
 
-// ContractAttributesModel defines the attributes for a contract.
-var ContractAttributesModel = map[string]attr.Type{
+// contractAttributesModel defines the attributes for a contract.
+var contractAttributesModel = map[string]attr.Type{
 	"contract_number": types.Int64Type,
 	"owner":           types.StringType,
 	"status":          types.StringType,
 	"reg_domain":      types.StringType,
-	"resource_limits": types.ObjectType{AttrTypes: ResourceLimitsModel},
+	"resource_limits": types.ObjectType{AttrTypes: resourceLimitsModel},
 }
-var ResourceLimitsModel = map[string]attr.Type{
+var resourceLimitsModel = map[string]attr.Type{
 	"cores_per_server":             types.Int64Type,
 	"ram_per_server":               types.Int64Type,
 	"ram_per_contract":             types.Int64Type,
@@ -241,13 +241,13 @@ func (d *contractsDataSource) Read(ctx context.Context, req datasource.ReadReque
 	contractList := make([]attr.Value, len(*contracts.Items))
 	var diags diag.Diagnostics
 	for i, contract := range *contracts.Items {
-		resourceLimits := types.ObjectNull(ResourceLimitsModel)
+		resourceLimits := types.ObjectNull(resourceLimitsModel)
 		if contract.Properties == nil {
 			resp.Diagnostics.AddError("Error reading contracts", "Contract properties are nil")
 			return
 		}
 		if contract.Properties.ResourceLimits != nil {
-			resourceLimits, diags = types.ObjectValue(ResourceLimitsModel, map[string]attr.Value{
+			resourceLimits, diags = types.ObjectValue(resourceLimitsModel, map[string]attr.Value{
 				"cores_per_server":             types.Int64Value(int64(*contract.Properties.ResourceLimits.CoresPerServer)),
 				"ram_per_server":               types.Int64Value(int64(*contract.Properties.ResourceLimits.RamPerServer)),
 				"ram_per_contract":             types.Int64Value(int64(*contract.Properties.ResourceLimits.RamPerContract)),
@@ -280,7 +280,7 @@ func (d *contractsDataSource) Read(ctx context.Context, req datasource.ReadReque
 			}
 		}
 
-		contractData, diags := types.ObjectValue(ContractAttributesModel, map[string]attr.Value{
+		contractData, diags := types.ObjectValue(contractAttributesModel, map[string]attr.Value{
 			"contract_number": types.Int64Value(*contract.Properties.ContractNumber),
 			"owner":           types.StringValue(*contract.Properties.Owner),
 			"status":          types.StringValue(*contract.Properties.Status),
@@ -294,14 +294,14 @@ func (d *contractsDataSource) Read(ctx context.Context, req datasource.ReadReque
 		contractList[i] = contractData
 	}
 
-	contractsValue, diags := types.ListValue(types.ObjectType{AttrTypes: ContractAttributesModel}, contractList)
+	contractsValue, diags := types.ListValue(types.ObjectType{AttrTypes: contractAttributesModel}, contractList)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	stateValue, diags := types.ObjectValue(map[string]attr.Type{
-		"contracts": types.ListType{ElemType: types.ObjectType{AttrTypes: ContractAttributesModel}},
+		"contracts": types.ListType{ElemType: types.ObjectType{AttrTypes: contractAttributesModel}},
 	}, map[string]attr.Value{
 		"contracts": contractsValue,
 	})
