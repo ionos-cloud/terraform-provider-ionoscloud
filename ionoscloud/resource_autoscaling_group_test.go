@@ -224,6 +224,7 @@ func TestAccAutoscalingGroup_nicWithTargetGroup(t *testing.T) {
 	})
 }
 
+// TODO uncomment when creating autoscaling group with flowlog works again
 // func TestAccAutoscalingGroup_nicWithFlowLog(t *testing.T) {
 // 	var autoscalingGroup autoscaling.Group
 
