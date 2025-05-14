@@ -146,8 +146,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0 h1:TzmrQ6m
 github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0/go.mod h1:ORYCHtOmUNHPumw2WLvEBPveAmIgFmD//gJKUy64l50=
 github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0 h1:6xP8S4gGu+n8xpvyvVuWjWljeuPduCA+mvpb2rgqDt0=
 github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0/go.mod h1:Zzv2k/EXEYp+nwGk2s86jkvUJLa4ebWJoOdGfYcb8mQ=
-github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.0 h1:rQsUmfo0zc+fs8OIJUPp0PWSDMP6EcTaTAagcdXbg40=
-github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.0/go.mod h1:InNuTTzgLZker3i9JpyTho9mHr5DDIFnEPwykbSIfyw=
+github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1 h1:FOwVFj5BP+7XQMLSPd66MR91Pi1YRFK6IoUDymtf28s=
+github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1/go.mod h1:InNuTTzgLZker3i9JpyTho9mHr5DDIFnEPwykbSIfyw=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2 h1:qR/ul88v/3ZF+ZLFFv6LE9TrjZS1qM4R10UlXCaQzcs=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2/go.mod h1:V6WHbWsQDlZsLtHqgsXO81Z9eJBsczE3Q6VY8J+rutc=
 github.com/ionos-cloud/sdk-go-bundle/shared v0.1.4 h1:z3NaijMuUFFmAAFOToG8s4V4UMLPOgSlxZKt1wHQqoQ=

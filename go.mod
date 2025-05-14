@@ -32,7 +32,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
-	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.0
+	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.4
 	github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.1.2

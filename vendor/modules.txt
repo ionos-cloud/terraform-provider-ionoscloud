@@ -356,7 +356,7 @@ github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2
-# github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.0
+# github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
