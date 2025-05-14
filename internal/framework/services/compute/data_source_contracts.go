@@ -234,10 +234,13 @@ func (d *contractsDataSource) Read(ctx context.Context, req datasource.ReadReque
 		resp.Diagnostics.AddError("Error reading contracts", fmt.Sprintf("Could not read contracts, unexpected error: %s", err.Error()))
 		return
 	}
-
-	var contractList []attr.Value
+	if contracts.Items == nil {
+		resp.Diagnostics.AddError("Error reading contracts", "No contracts found")
+		return
+	}
+	contractList := make([]attr.Value, len(*contracts.Items))
 	var diags diag.Diagnostics
-	for _, contract := range *contracts.Items {
+	for i, contract := range *contracts.Items {
 		resourceLimits := types.ObjectNull(ResourceLimitsModel)
 		if contract.Properties == nil {
 			resp.Diagnostics.AddError("Error reading contracts", "Contract properties are nil")
@@ -288,7 +291,7 @@ func (d *contractsDataSource) Read(ctx context.Context, req datasource.ReadReque
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		contractList = append(contractList, contractData)
+		contractList[i] = contractData
 	}
 
 	contractsValue, diags := types.ListValue(types.ObjectType{AttrTypes: ContractAttributesModel}, contractList)
