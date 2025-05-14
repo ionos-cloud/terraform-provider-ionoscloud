@@ -56,6 +56,14 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceProfitBricksK8sNodePoolNodesMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(constant.DataSourceK8sNodePoolNodesId, "nodes.0.public_ip"),
+					resource.TestCheckResourceAttrSet(constant.DataSourceK8sNodePoolNodesId, "nodes.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolNodesId, "nodes.0.k8s_version", constant.ResourceNameK8sNodePool, "k8s_version"),
+				),
+			},
+			{
 				Config: testAccDataSourceProfitBricksK8sNodePoolMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "name", constant.ResourceNameK8sNodePool, "name"),
@@ -669,6 +677,13 @@ const testAccDataSourceProfitBricksK8sNodePoolMatchId = testAccCheckK8sNodePoolC
 data ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolDataSourceById + ` {
 	k8s_cluster_id  = ` + constant.K8sClusterResource + `.terraform_acctest.id
 	id				= ` + constant.K8sNodePoolResource + `.` + constant.K8sNodePoolTestResource + `.id
+}
+`
+
+const testAccDataSourceProfitBricksK8sNodePoolNodesMatchId = testAccCheckK8sNodePoolConfigBasic + `
+data ` + constant.K8sNodePoolNodesResource + ` ` + constant.K8sNodePoolDataSourceById + ` {
+	k8s_cluster_id  = ` + constant.K8sClusterResource + `.terraform_acctest.id
+	node_pool_id	= ` + constant.K8sNodePoolResource + `.` + constant.K8sNodePoolTestResource + `.id
 }
 `
 
