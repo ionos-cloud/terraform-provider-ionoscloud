@@ -146,10 +146,11 @@ const (
 	K8sNodePoolDataSourceById   = "test_k8s_node_pool_id"
 	K8sNodePoolDataSourceByName = "test_k8s_node_pool_name"
 
-	ResourceNameK8sNodePool   = K8sNodePoolResource + "." + K8sNodePoolTestResource
-	DataSourceK8sNodePoolId   = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceById
-	DataSourceK8sNodePoolName = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceByName
-	K8sNodePoolTimeout        = 3 * time.Hour
+	ResourceNameK8sNodePool      = K8sNodePoolResource + "." + K8sNodePoolTestResource
+	DataSourceK8sNodePoolId      = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceById
+	DataSourceK8sNodePoolNodesId = DataSource + "." + K8sNodePoolNodesResource + "." + K8sNodePoolDataSourceById
+	DataSourceK8sNodePoolName    = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceByName
+	K8sNodePoolTimeout           = 3 * time.Hour
 )
 
 var ResourceK8sNodePoolTimeout = schema.ResourceTimeout{

@@ -24,7 +24,6 @@ data "ionoscloud_k8s_node_pool_nodes" "example" {
 ## Argument Reference
 
 * `k8s_cluster_id` (Required) K8s Cluster' UUID
-* `name` - (Optional) Name of an existing node pool that you want to search for.
 * `id` - (Optional) ID of the node pool you want to search for.
 
 `k8s_cluster_id` and `node_pool_id` must be provided.
@@ -36,5 +35,5 @@ The following attributes are returned by the datasource:
   * `id` - id of the node in the nodepool
   * `name` - name of the node
   * `k8s_version` - The kubernetes version
-  * `public_ip` - public ip of the node
-  * `private_ip` - private ip of the node
+  * `public_ip` - public ip of the node. Only present if the k8s clsuter is public
+  * `private_ip` - private ip of the node. Only present if the k8s cluster is private.
