@@ -35,5 +35,5 @@ The following attributes are returned by the datasource:
   * `id` - id of the node in the nodepool
   * `name` - name of the node
   * `k8s_version` - The kubernetes version
-  * `public_ip` - public ip of the node. Only present if the k8s clsuter is public
+  * `public_ip` - public ip of the node. Only present if the k8s cluster is public
   * `private_ip` - private ip of the node. Only present if the k8s cluster is private.

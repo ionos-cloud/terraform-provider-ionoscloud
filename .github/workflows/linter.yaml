@@ -27,7 +27,7 @@ jobs:
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
     steps:
-      - name: Checkoutad
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: true
