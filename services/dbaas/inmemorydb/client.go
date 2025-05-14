@@ -2,7 +2,6 @@ package inmemorydb
 
 import (
 	"fmt"
-
 	"net/http"
 	"os"
 	"runtime"

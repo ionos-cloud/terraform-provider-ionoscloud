@@ -4,8 +4,10 @@
 ### Fixes
 - Fix [#813](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/813) by adding `ForceNew: true` for all attributes for `ionoscloud_pg_database` resource
 - Check if url is found in locationToURL before overwriting endpoint for certificate manager
-
+- Keep the VM autoscaling group in state if the action fails
+- Fix VM Autoscaling tests and examples
 ### Refactor
+- Use VM Autoscaling bundle product instead of sdk-go-vm-autoscaling
 - Use MariaDB bundle product instead of sdk-go-dbaas-mariadb
 - Use Mongo bundle product instead of sdk-go-dbaas-mongo
 - Use Dataplatform bundle product instead of sdk-go-dataplatform
