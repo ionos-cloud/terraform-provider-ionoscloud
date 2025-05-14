@@ -1,5 +1,6 @@
-// //go:build all || objectstorage || objectstoragemanagement
-// // +build all objectstorage objectstoragemanagement
+//go:build all || compute || contract
+// +build all compute contract
+
 package compute_test
 
 import (
