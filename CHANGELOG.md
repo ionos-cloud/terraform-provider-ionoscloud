@@ -3,6 +3,7 @@
 - Add backup to mariadb
 ### Fixes
 - Fix [#813](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/813) by adding `ForceNew: true` for all attributes for `ionoscloud_pg_database` resource
+- Instantiate new http clients for each product (instead of http.Default client) so that insecure mode and certificate can be set independently
 - Retrieve accessKey and secretKey from the config file if they are not found
 - Check if url is found in locationToURL before overwriting endpoint for certificate manager
 - Keep the VM autoscaling group in state if the action fails

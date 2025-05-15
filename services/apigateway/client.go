@@ -30,7 +30,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	}
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime
-	config.HTTPClient = http.DefaultClient
+	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-apigateway/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",

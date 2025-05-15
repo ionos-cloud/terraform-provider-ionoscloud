@@ -30,7 +30,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	}
 	config.MaxRetries = constant.MaxRetries
 	config.WaitTime = constant.MaxWaitTime
-	config.HTTPClient = http.DefaultClient
+	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
 	client := ionoscloud.NewAPIClient(config)
 	return client
