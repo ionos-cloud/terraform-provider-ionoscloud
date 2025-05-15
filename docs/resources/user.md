@@ -19,7 +19,7 @@ Note: Requires Terraform 1.11 or higher. In this way, the password is not saved 
 resource "ionoscloud_user" "example" {
   first_name              = "example"
   last_name               = "example"
-  email                   = "example@ionos.com"
+  email                   = "unique@ionos.com"
   password_wo             = random_password.user_password.result
   password_wo_version     = "1"
   administrator           = false
@@ -39,7 +39,7 @@ resource "random_password" "user_password" {
 resource "ionoscloud_user" "example" {
   first_name              = "example"
   last_name               = "example"
-  email                   = "example@ionos.com"
+  email                   = "unique@ionos.com"
   password                = random_password.user_password.result
   administrator           = false
   force_sec_auth          = false
