@@ -46,12 +46,12 @@ func dataSourceK8sNodePoolNodes() *schema.Resource {
 						},
 						"public_ip": {
 							Type:        schema.TypeString,
-							Description: "A valid public IP",
+							Description: "A valid public IP. Only present if the k8s cluster is public.",
 							Computed:    true,
 						},
 						"private_ip": {
 							Type:        schema.TypeString,
-							Description: "A valid private IP",
+							Description: "A valid private IP. Only present if the k8s cluster is private.",
 							Computed:    true,
 						},
 						"k8s_version": {
