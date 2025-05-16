@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
@@ -63,6 +62,9 @@ func (c *Client) IsRegistryReady(ctx context.Context, d *schema.ResourceData) (b
 		return true, fmt.Errorf("status check failed for container registry creg with ID: %v, error: %w", ID, err)
 	}
 	log.Printf("[INFO] state of the container registry with ID: %v is: %s ", ID, creg.Metadata.State)
+	if utils.IsStateFailed(creg.Metadata.State) {
+		return false, fmt.Errorf("container registry  %s is in a failed state", d.Id())
+	}
 	return strings.EqualFold(creg.Metadata.State, "RUNNING"), nil
 }
 

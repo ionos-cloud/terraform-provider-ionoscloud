@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	cdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -168,5 +168,9 @@ func (c *Client) IsDistributionReady(ctx context.Context, d *schema.ResourceData
 	}
 
 	log.Printf("[INFO] state of the distribution with ID: %v is: %s ", distributionID, distribution.Metadata.State)
+	if utils.IsStateFailed(distribution.Metadata.State) {
+		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
+	}
+
 	return strings.EqualFold(distribution.Metadata.State, constant.Available), nil
 }

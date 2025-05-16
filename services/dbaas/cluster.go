@@ -7,16 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
-	psql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *shared.APIResponse, error) {
@@ -117,8 +115,10 @@ func (c *PsqlClient) IsClusterReady(ctx context.Context, d *schema.ResourceData)
 	if cluster.Metadata == nil || cluster.Metadata.State == nil {
 		return false, fmt.Errorf("cluster metadata or state is empty for id %s", clusterId)
 	}
-
 	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))
+	if utils.IsStateFailed(string(*cluster.Metadata.State)) {
+		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
+	}
 	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
 }
 
@@ -144,6 +144,9 @@ func (c *MongoClient) IsClusterReady(ctx context.Context, d *schema.ResourceData
 	}
 
 	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))
+	if utils.IsStateFailed(string(*cluster.Metadata.State)) {
+		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
+	}
 	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
 }
 
@@ -333,7 +336,7 @@ func SetMongoClusterCreateProperties(d *schema.ResourceData) (*mongo.CreateClust
 	//		return nil, err
 	//	}
 	//	mongoCluster.Properties.FromBackup = fromBackup
-	//}
+	// }
 
 	if _, ok := d.GetOk("backup"); ok {
 		var backup *mongo.BackupProperties
@@ -570,7 +573,7 @@ func GetMongoClusterConnectionsData(d *schema.ResourceData) ([]mongo.Connection,
 				//			connection.Whitelist = &list
 				//		}
 				//	}
-				//}
+				// }
 				connections = append(connections, connection)
 			}
 		}
@@ -702,22 +705,22 @@ func GetMongoClusterBackupData(d *schema.ResourceData) *mongo.BackupProperties {
 	// if val, ok := d.GetOk("backup.0.snapshot_interval_hours"); ok {
 	//	interval := int32(val.(int))
 	//	backup.SnapshotIntervalHours = &interval
-	//}
+	// }
 	//
-	//if val, ok := d.GetOk("backup.0.point_in_time_window_hours"); ok {
+	// if val, ok := d.GetOk("backup.0.point_in_time_window_hours"); ok {
 	//	pointInTime := int32(val.(int))
 	//	backup.PointInTimeWindowHours = &pointInTime
-	//}
+	// }
 
 	if val, ok := d.GetOk("backup.0.location"); ok {
 		location := val.(string)
 		backup.Location = &location
 	}
 	// to be added at a later date
-	//if _, ok := d.GetOk("backup.0.backup_retention"); ok {
+	// if _, ok := d.GetOk("backup.0.backup_retention"); ok {
 	//	retention := GetMongoClusterBackupRetentionData(d)
 	//	backup.BackupRetention = retention
-	//}
+	// }
 
 	return &backup
 }
@@ -747,7 +750,7 @@ func GetMongoClusterBackupData(d *schema.ResourceData) *mongo.BackupProperties {
 //	}
 //
 //	return &backup
-//}
+// }
 
 func SetPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterResponse) error {
 
@@ -1003,9 +1006,9 @@ func SetMongoConnectionProperties(vdcConnection mongo.Connection) map[string]int
 	utils.SetPropWithNilCheck(connection, "lan_id", vdcConnection.LanId)
 	utils.SetPropWithNilCheck(connection, "cidr_list", vdcConnection.CidrList)
 	// to ba added when there is backend support
-	//if vdcConnection.Whitelist != nil {
+	// if vdcConnection.Whitelist != nil {
 	//	utils.SetPropWithNilCheck(connection, "whitelist", vdcConnection.Whitelist)
-	//}
+	// }
 
 	return connection
 }
@@ -1078,7 +1081,7 @@ func MongoClusterCheckRequiredFieldsSet(d *schema.ResourceData) error {
 	requiredNotSet := "%s argument must be set for %s edition of mongo cluster"
 	// if clusterTYpe != "" {
 	//	server.Properties.Type = &serverType
-	//}
+	// }
 	switch strings.ToLower(clusterType) {
 	case "enterprise":
 

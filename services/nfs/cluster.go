@@ -11,6 +11,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -108,6 +109,9 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 	}
 
 	log.Printf("[INFO] state of the cluster with ID %s is: %s", clusterID, cluster.Metadata.Status)
+	if utils.IsStateFailed(cluster.Metadata.Status) {
+		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
+	}
 	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
 }
 
