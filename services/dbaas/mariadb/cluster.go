@@ -72,6 +72,9 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 		return false, fmt.Errorf("cluster metadata or state is empty for MariaDB cluster with ID: %v", clusterID)
 	}
 
+	if utils.IsStateFailed(string(*cluster.Metadata.State)) {
+		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
+	}
 	log.Printf("[INFO] state of the MariaDB cluster with ID: %v is: %s ", clusterID, string(*cluster.Metadata.State))
 	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
 }

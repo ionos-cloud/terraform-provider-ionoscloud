@@ -6,15 +6,13 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 	pgsql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 )
 
 // CreateUser - creates a user for the mongo cluster
@@ -100,6 +98,9 @@ func (c *MongoClient) IsUserReady(ctx context.Context, d *schema.ResourceData) (
 		return false, fmt.Errorf("cluster metadata or state is empty for id %s", d.Id())
 	}
 	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))
+	if utils.IsStateFailed(string(*cluster.Metadata.State)) {
+		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
+	}
 	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
 }
 

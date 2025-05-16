@@ -2,6 +2,7 @@
 ### Features
 - Add backup to mariadb
 ### Fixes
+- Error on `FAILED` for `cdn`, `api_gateway`, `dataplatform`, `inmemorydb`, `mariadb`, `nfs`, `mongo` resources
 - Fix [#813](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/813) by adding `ForceNew: true` for all attributes for `ionoscloud_pg_database` resource
 - Instantiate new http clients for each product (instead of http.Default client) so that insecure mode and certificate can be set independently
 - Retrieve accessKey and secretKey from the config file if they are not found
