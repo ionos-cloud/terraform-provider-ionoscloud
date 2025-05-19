@@ -119,7 +119,7 @@ func (c *Client) IsGatewayReady(ctx context.Context, d *schema.ResourceData) (bo
 
 	log.Printf("[INFO] state of the gateway with ID %s is: %s ", gatewayID, *gateway.Metadata.Status)
 	if utils.IsStateFailed(*gateway.Metadata.Status) {
-		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
+		return false, fmt.Errorf("gateway %s is in a failed state", d.Id())
 	}
 	return strings.EqualFold(*gateway.Metadata.Status, constant.Available), nil
 }
