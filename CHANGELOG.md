@@ -19,6 +19,7 @@
 - Update `sdk-go-dbaas-postgres` to version `v1.1.4` and use the new sdk methods for PG versions (done before bundle integration)
 ### Documentation
 - Add better documentation for dedicated core for servers
+- Add example for `user` field `password_wo` write only field.
 ## 6.7.6
 ### Features
 - Add `server_type` optional attribute to `ionoscloud_k8s_nodepool` resource and data source
