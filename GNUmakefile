@@ -20,7 +20,7 @@ test: fmtcheck
 		xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
 
 testacc: fmtcheck
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m -tags $(TAGS)
+	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout $(TIMEOUT) -tags $(TAGS)
 
 vet:
 	@echo "go vet ."
@@ -66,4 +66,3 @@ endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
 .PHONY: build test testacc vet fmt fmtcheck errcheck vendor-status test-compile website website-test
-

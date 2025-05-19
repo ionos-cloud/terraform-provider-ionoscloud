@@ -22,6 +22,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.2.0
 	github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2 v2.1.0
+	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.5
@@ -42,6 +43,8 @@ require (
 	golang.org/x/crypto v0.36.0
 	gopkg.in/yaml.v3 v3.0.1
 )
+
+replace github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2 => /tmp/sdk-go-bundle/products/dbaas/in-memory-db
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

@@ -11,7 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
+	inMemoryDB "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -215,7 +215,7 @@ func testAccCheckDBaaSInMemoryDBReplicaSetExists(n string, replicaSet *inMemoryD
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching InMemoryDB replica set with ID: %v, error: %w", rs.Primary.ID, err)
 		}
-		if *foundReplicaSet.Id != rs.Primary.ID {
+		if foundReplicaSet.Id != rs.Primary.ID {
 			return fmt.Errorf("resource not found")
 		}
 		replicaSet = &foundReplicaSet
@@ -416,7 +416,7 @@ const (
 
 // Values
 const (
-	replicaSetLocationValue              = "es/vit"
+	replicaSetLocationValue              = "de/txl"
 	replicaSetLocationUpdateValue        = "de/txl"
 	replicaSetVersionValue               = "7.2"
 	replicaSetDisplayNameValue           = "TerraformTestReplicaSet"
@@ -434,4 +434,5 @@ const (
 	replicaSetConnectionsCidrValue       = "local.database_ip_cidr"
 	replicaSetHashValue                  = "492f3f38d6b5d3ca859514e250e25ba65935bcdd9f4f40c124b773fe536fee7d"
 	replicaSetAlgorithmValue             = "SHA-256"
+	clusterCredentialsUsernameValue      = "username"
 )

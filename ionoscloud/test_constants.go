@@ -1915,7 +1915,7 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
 
 const temporaryConfigSetup = `
 data "ionoscloud_datacenter" "datacenterDS" {
-	id = "88eeae0d-515d-44c1-b142-d9293c20e676"
+	id = "f5c2df66-3ba8-42d4-9f0a-35a64b989843"
 }
 
 data "ionoscloud_lan" "lanDS" {
@@ -1924,7 +1924,7 @@ data "ionoscloud_lan" "lanDS" {
 }
 
 data "ionoscloud_server" "serverDS" {
-	id = "1f77a37e-2b38-49f2-b2e1-61a47ccf5f15"
+	id = "97e33180-42d9-4cf5-87ec-f04998fbc8fa"
 	datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
 }
 

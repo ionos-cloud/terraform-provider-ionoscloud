@@ -326,6 +326,9 @@ github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2 v2.0.0 => /tmp/sdk-go-bundle/products/dbaas/in-memory-db
+## explicit; go 1.22
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2
@@ -368,7 +371,6 @@ github.com/ionos-cloud/sdk-go-bundle/shared
 github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration
 # github.com/ionos-cloud/sdk-go-dbaas-in-memory-db v1.1.2
 ## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-dbaas-in-memory-db
 # github.com/ionos-cloud/sdk-go/v6 v6.3.3
 ## explicit; go 1.21
 github.com/ionos-cloud/sdk-go/v6
@@ -630,3 +632,4 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
+# github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2 => /tmp/sdk-go-bundle/products/dbaas/in-memory-db
