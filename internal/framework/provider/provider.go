@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
@@ -222,7 +223,6 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		ClientOptions: shared.ClientOptions{
 			Endpoint:      cleanedEndpoint,
 			SkipTLSVerify: insecureBool,
-			//Certificate:   "",
 			Credentials: shared.Credentials{
 				Username: username,
 				Password: password,
@@ -266,6 +266,7 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		objectstorage.DataSources(),
 		objectstoragemanagement.DataSources(),
 		monitoring.DataSources(),
+		compute.DataSources(),
 	}
 
 	for _, r := range dataSources {
