@@ -1,4 +1,4 @@
-## 6.7.7 -- upcoming release
+## 6.7.7
 ### Features
 - Add backup to mariadb
 - Add `ionoscloud_contracts` data source
