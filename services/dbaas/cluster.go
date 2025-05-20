@@ -116,9 +116,10 @@ func (c *PsqlClient) IsClusterReady(ctx context.Context, d *schema.ResourceData)
 		return false, fmt.Errorf("cluster metadata or state is empty for id %s", clusterId)
 	}
 	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))
-	if utils.IsStateFailed(string(*cluster.Metadata.State)) {
-		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
-	}
+	// todo - add back after DB-4696 is fixed
+	// if utils.IsStateFailed(string(*cluster.Metadata.State)) {
+	// 	return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
+	// }
 	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
 }
 
