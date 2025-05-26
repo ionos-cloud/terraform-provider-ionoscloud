@@ -29,7 +29,7 @@ func HashedPasswordAsUserPassword(v *HashedPassword) UserPassword {
 }
 
 // PlainTextPasswordAsUserPassword is a convenience function that returns PlainTextPassword wrapped in UserPassword
-func PlainTextPassowrdAsUserPassword(v *string) UserPassword {
+func PlainTextPasswordAsUserPassword(v *string) UserPassword {
 	return UserPassword{PlainTextPassword: v}
 }
 

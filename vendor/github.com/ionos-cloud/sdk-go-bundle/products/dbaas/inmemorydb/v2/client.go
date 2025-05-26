@@ -54,7 +54,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version               = "2.0.0"
+	Version               = "products/dbaas/inmemorydb/v2.0.0"
 	DefaultIonosServerUrl = "https://in-memory-db.de-fra.ionos.com"
 	DefaultIonosBasePath  = ""
 )
@@ -112,7 +112,7 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 	}
 
 	if cfgCopy.UserAgent == "" {
-		cfgCopy.UserAgent = "sdk-go-bundle/2.0.0"
+		cfgCopy.UserAgent = "sdk-go-bundle/products/dbaas/inmemorydb/v2.0.0"
 	}
 
 	// Initialize default values in the copied configuration
