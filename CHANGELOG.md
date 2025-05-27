@@ -1,3 +1,7 @@
+## 6.7.8
+### Documentation
+- Remove mentions of `kafka` 3.7.0 version as it is no longer supported.
+
 ## 6.7.7
 ### Features
 - Add backup to mariadb
