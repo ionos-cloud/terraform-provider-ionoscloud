@@ -5,17 +5,15 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
-	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccKeyBasic(t *testing.T) {
@@ -45,14 +43,14 @@ func TestAccKeyBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "active"),
 				),
 			},
-			// {
-			//	Config: testAccChecks3KeyConfigUpdate,
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
-			//		resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "secret_key"),
-			//		resource.TestCheckResourceAttr(S3KeyResource+"."+S3KeyTestResource, "active", "true"),
-			//	),
-			// },
+			{
+				Config: testAccChecks3KeyConfigUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckKeyExists(constant.S3KeyResource+"."+constant.S3KeyTestResource, &s3Key),
+					resource.TestCheckResourceAttrSet(constant.S3KeyResource+"."+constant.S3KeyTestResource, "secret_key"),
+					resource.TestCheckResourceAttr(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", "false"),
+				),
+			},
 		},
 	})
 }
@@ -117,12 +115,19 @@ func testAccCheckKeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestCheck
 
 var testAccChecks3KeyConfigBasic = `
 resource ` + constant.UserResource + ` "example" {
-  first_name = "terraform"
-  last_name = "test"
-  email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
-  administrator = false
-  force_sec_auth= false
+  first_name 	 = "terraform"
+  last_name 	 = "test"
+  email 		 = "` + utils.GenerateEmail() + `"
+  password 		 = "abc123-321CBA"
+  administrator  = false
+  force_sec_auth = false
+  active		 = true
+  group_ids      = [ ionoscloud_group.s3group.id]
+}
+
+resource "ionoscloud_group" "s3group" {
+  name          = "S3 test Group"
+  s3_privilege  = true
 }
 
 resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
@@ -130,27 +135,30 @@ resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
   active     = true
 }`
 
-// this step is commented since the current behaviour of Object Storage keys is that when you create an Object Storage key with active set on false
-// it is set to true by the API, so an update from false to true can not be done
+var testAccChecks3KeyConfigUpdate = `
+resource ` + constant.UserResource + ` "example" {
+  first_name 	 = "terraform"
+  last_name 	 = "test"
+  email 		 = "` + utils.GenerateEmail() + `"
+  password		 = "abc123-321CBA"
+  administrator  = false
+  force_sec_auth = false
+  active         = true
+  group_ids 	 = [ ionoscloud_group.s3group.id]
+}
 
-// var testAccChecks3KeyConfigUpdate = `
-//
-//	resource ` + UserResource + ` "example" {
-//	 first_name = "terraform"
-//	 last_name = "test"
-//	 email = "` + utils.GenerateEmail() + `"
-//	 password = "abc123-321CBA"
-//	 administrator = false
-//	 force_sec_auth= false
-//	}
-//
-//	resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
-//	 user_id    = ` + UserResource + `.example.id
-//	 active     = true
-//	}`
+resource "ionoscloud_group" "s3group" {
+  name         = "S3 test Group"
+  s3_privilege = true
+}
+
+resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
+  user_id = ` + constant.UserResource + `.example.id
+  active  = false
+}`
 var testAccDataSourceS3KeyMatchId = testAccChecks3KeyConfigBasic + `
 data ` + constant.S3KeyResource + ` ` + constant.S3KeyDataSourceById + ` {
-user_id    	= ` + constant.UserResource + `.example.id
-id			= ` + constant.S3KeyResource + `.` + constant.S3KeyTestResource + `.id
+user_id = ` + constant.UserResource + `.example.id
+id		= ` + constant.S3KeyResource + `.` + constant.S3KeyTestResource + `.id
 }
 `
