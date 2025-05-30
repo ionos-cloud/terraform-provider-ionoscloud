@@ -159,6 +159,6 @@ resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
 var testAccDataSourceS3KeyMatchId = testAccChecks3KeyConfigBasic + `
 data ` + constant.S3KeyResource + ` ` + constant.S3KeyDataSourceById + ` {
   user_id = ` + constant.UserResource + `.example.id
-  id		= ` + constant.S3KeyResource + `.` + constant.S3KeyTestResource + `.id
+  id      = ` + constant.S3KeyResource + `.` + constant.S3KeyTestResource + `.id
 }
 `
