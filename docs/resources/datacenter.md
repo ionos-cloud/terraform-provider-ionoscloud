@@ -65,5 +65,18 @@ The following arguments are supported:
 Resource Datacenter can be imported using the `resource id`, e.g.
 
 ```shell
+import {
+  to = ionoscloud_datacenter.example
+  id = "datacenter uuid" 
+}
+```
+Auto-generate the datacenter resource in the `dc.tf` file using the following command:
+```shell
+terraform plan -generate-config-out=dc.tf
+```
+The older syntax can be for importing the resource is still supported:
+
+```shell
 terraform import ionoscloud_datacenter.mydc datacenter uuid
 ```
+
