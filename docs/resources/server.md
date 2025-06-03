@@ -319,7 +319,7 @@ Auto-generate the server resource in the `generated.tf` file using the following
 terraform plan -generate-config-out=generated.tf
 ```
 
-You can use the older syntax for importing the server resource, which is still supported:
+The older syntax can be for importing the resource is still supported:
 ```shell
 terraform import ionoscloud_server.myserver datacenter uuid/server uuid
 ```

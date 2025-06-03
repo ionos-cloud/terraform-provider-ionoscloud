@@ -74,7 +74,7 @@ Auto-generate the datacenter resource in the `dc.tf` file using the following co
 ```shell
 terraform plan -generate-config-out=dc.tf
 ```
-Or
+The older syntax can be for importing the resource is still supported:
 
 ```shell
 terraform import ionoscloud_datacenter.mydc datacenter uuid
