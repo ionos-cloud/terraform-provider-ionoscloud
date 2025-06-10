@@ -3,6 +3,7 @@
 - Remove mentions of `kafka` 3.7.0 version as it is no longer supported.
 ### Fixes
 - Fix S3 key test, add back update test
+- `ionoscloud_logging_pipeline` crashes on read after create 
 
 ## 6.7.7
 ### Features
