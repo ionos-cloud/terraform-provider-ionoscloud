@@ -4,6 +4,8 @@
 ### Fixes
 - Fix S3 key test, add back update test
 - `ionoscloud_logging_pipeline` crashes on read after create 
+### Features
+- Move inmeorydb resources to sdk-go-bundle
 
 ## 6.7.7
 ### Features
