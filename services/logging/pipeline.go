@@ -201,17 +201,17 @@ func (c *Client) SetPipelineData(d *schema.ResourceData, pipeline logging.Pipeli
 		for i, logElem := range pipeline.Properties.Logs {
 			// Populate the logElem entry.
 			logEntry := make(map[string]interface{})
-			logEntry["source"] = *logElem.Source
-			logEntry["tag"] = *logElem.Tag
-			logEntry["protocol"] = *logElem.Protocol
-			logEntry["public"] = *logElem.Public
+			utils.SetPropWithNilCheck(logEntry, "source", logElem.Source)
+			utils.SetPropWithNilCheck(logEntry, "tag", logElem.Tag)
+			utils.SetPropWithNilCheck(logEntry, "protocol", logElem.Protocol)
+			utils.SetPropWithNilCheck(logEntry, "public", logElem.Public)
 
 			// Logic for destinations
 			destinations := make([]interface{}, len(logElem.Destinations))
 			for i, destination := range logElem.Destinations {
 				destinationEntry := make(map[string]interface{})
-				destinationEntry["type"] = *destination.Type
-				destinationEntry["retention_in_days"] = *destination.RetentionInDays
+				utils.SetPropWithNilCheck(destinationEntry, "type", destination.Type)
+				utils.SetPropWithNilCheck(destinationEntry, "retention_in_days", destination.RetentionInDays)
 				destinations[i] = destinationEntry
 			}
 			logEntry["destinations"] = destinations
