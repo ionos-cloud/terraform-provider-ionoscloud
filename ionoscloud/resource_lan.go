@@ -381,7 +381,7 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse.StatusCode == 403 && strings.Contains(err.Error(), "is delete-protected by") {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 403 && strings.Contains(err.Error(), "is delete-protected by") {
 			log.Printf("[INFO] LAN %s is delete-protected, keep trying", d.Id())
 			return false, nil
 		}
