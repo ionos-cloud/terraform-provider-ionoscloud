@@ -257,7 +257,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	err := retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
 		apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
 		if err != nil {
-			if apiResponse.Response != nil && apiResponse.StatusCode == 403 && strings.Contains(err.Error(), "is delete-protected by") {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 403 && strings.Contains(err.Error(), "is delete-protected by") {
 				log.Printf("[INFO] LAN %s is delete-protected, keep trying", d.Id())
 				return retry.RetryableError(fmt.Errorf("lan %s is delete-protected, keep trying %w", d.Id(), err))
 			}
@@ -271,8 +271,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 		return nil
 	})
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
-		return diags
+		return diag.FromErr(fmt.Errorf("an error occurred while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
 	}
 
 	if err := waitForLanDeletion(ctx, client, d); err != nil {
