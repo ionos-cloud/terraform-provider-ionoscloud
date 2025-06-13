@@ -4,7 +4,7 @@
 ### Fixes
 - Fix S3 key test, add back update test
 - `ionoscloud_logging_pipeline` crashes on read after create 
-
+- Retry if `ionoscloud_lan` is delete protected by a managed service
 ## 6.7.7
 ### Features
 - Add backup to mariadb
