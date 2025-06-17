@@ -267,7 +267,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 			}
 			return retry.NonRetryableError(fmt.Errorf("an error occurred while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
 		}
-		log.Printf("[DEBUG] resource with id %s still has not been deleted", d.Id())
+		log.Printf("[DEBUG] deletion started for LAN with ID: %v", d.Id())
 		return nil
 	})
 	if err != nil {
