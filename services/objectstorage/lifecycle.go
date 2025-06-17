@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 
-	convptr "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/convptr"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/convptr"
 	hash2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/hash"
 )
 
@@ -21,7 +21,7 @@ type BucketLifecycleConfigurationModel struct {
 
 type lifecycleRule struct {
 	ID                             types.String                    `tfsdk:"id"`
-	Prefix                         types.String                    `tfsdk:"prefix"`
+	Filter                         *filter                         `tfsdk:"filter"`
 	Status                         types.String                    `tfsdk:"status"`
 	Expiration                     *expiration                     `tfsdk:"expiration"`
 	NoncurrentVersionExpiration    *noncurrentVersionExpiration    `tfsdk:"noncurrent_version_expiration"`
@@ -32,6 +32,10 @@ type expiration struct {
 	Days                      types.Int64  `tfsdk:"days"`
 	Date                      types.String `tfsdk:"date"`
 	ExpiredObjectDeleteMarker types.Bool   `tfsdk:"expired_object_delete_marker"`
+}
+
+type filter struct {
+	Prefix types.String `tfsdk:"prefix"`
 }
 
 type noncurrentVersionExpiration struct {
@@ -115,8 +119,9 @@ func buildRulesFromAPIResponse(rules []objstorage.Rule) []lifecycleRule {
 	result := make([]lifecycleRule, 0, len(rules))
 	for _, r := range rules {
 		result = append(result, lifecycleRule{
-			ID:                             types.StringPointerValue(r.ID),
-			Prefix:                         types.StringPointerValue(&r.Prefix),
+			ID: types.StringPointerValue(r.ID),
+			// Prefix:                         types.StringPointerValue(&r.Prefix),
+			Filter:                         &filter{Prefix: types.StringValue(r.Filter.Prefix)},
 			Status:                         types.StringValue(string(r.Status)),
 			Expiration:                     buildExpirationFromAPIResponse(r.Expiration),
 			NoncurrentVersionExpiration:    buildNoncurrentVersionExpirationFromAPIResponse(r.NoncurrentVersionExpiration),
@@ -174,7 +179,7 @@ func buildRulesFromModel(rules []lifecycleRule) []objstorage.Rule {
 	for _, r := range rules {
 		result = append(result, objstorage.Rule{
 			ID:                             r.ID.ValueStringPointer(),
-			Prefix:                         r.Prefix.ValueString(),
+			Filter:                         objstorage.Filter{Prefix: r.Filter.Prefix.ValueString()},
 			Status:                         objstorage.ExpirationStatus(r.Status.ValueString()),
 			Expiration:                     buildExpirationFromModel(r.Expiration),
 			NoncurrentVersionExpiration:    buildNoncurrentVersionExpirationFromModel(r.NoncurrentVersionExpiration),

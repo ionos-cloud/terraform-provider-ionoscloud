@@ -48,7 +48,11 @@ var (
 	queryDescape    = strings.NewReplacer("%5B", "[", "%5D", "]")
 )
 
-const Version = "products/objectstorage/v2.0.0"
+const (
+	Version               = "1.0.0"
+	DefaultIonosServerUrl = "https://s3.eu-central-3.ionoscloud.com"
+	DefaultIonosBasePath  = ""
+)
 
 // APIClient manages communication with the IONOS Object Storage API for contract-owned buckets API v2.0.2
 // In most cases there should be only one, shared, APIClient.
@@ -123,8 +127,9 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 		cfgCopy = &shared.Configuration{}
 		*cfgCopy = *cfg
 	}
-
-	cfgCopy.UserAgent = "sdk-go-bundle/products/objectstorage/v2.0.0"
+	if cfgCopy.UserAgent == "" {
+		cfgCopy.UserAgent = "sdk-go-bundle/1.0.0"
+	}
 
 	if cfg.Middleware != nil {
 		cfgCopy.Middleware = cfg.Middleware
@@ -149,6 +154,13 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 				URL:         "https://s3.eu-central-3.ionoscloud.com",
 				Description: "The endpoint for the `eu-central-3` region (Berlin, Germany)",
 			},
+		}
+	} else {
+		// If the user has provided a custom server configuration, we need to ensure that the basepath is set
+		for i := range cfgCopy.Servers {
+			if cfgCopy.Servers[i].URL != "" && !strings.HasSuffix(cfgCopy.Servers[i].URL, DefaultIonosBasePath) {
+				cfgCopy.Servers[i].URL = fmt.Sprintf("%s%s", cfgCopy.Servers[i].URL, DefaultIonosBasePath)
+			}
 		}
 	}
 

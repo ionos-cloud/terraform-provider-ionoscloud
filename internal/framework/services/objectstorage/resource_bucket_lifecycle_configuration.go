@@ -60,13 +60,7 @@ func (r *bucketLifecycleConfiguration) Schema(ctx context.Context, req resource.
 								stringvalidator.LengthBetween(1, 255),
 							},
 						},
-						"prefix": schema.StringAttribute{
-							Required: true,
-							Validators: []validator.String{
-								stringvalidator.LengthBetween(0, 1024),
-							},
-							Description: "Object key prefix identifying one or more objects to which the rule applies.",
-						},
+
 						"status": schema.StringAttribute{
 							Required:    true,
 							Description: "Whether the rule is currently being applied. Valid values: Enabled or Disabled.",
@@ -76,6 +70,18 @@ func (r *bucketLifecycleConfiguration) Schema(ctx context.Context, req resource.
 						},
 					},
 					Blocks: map[string]schema.Block{
+						"filter": schema.SingleNestedBlock{
+							Description: "A filter.",
+							Attributes: map[string]schema.Attribute{
+								"prefix": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(0, 1024),
+									},
+									Description: "Object key prefix identifying one or more objects to which the rule applies.",
+								},
+							},
+						},
 						"expiration": schema.SingleNestedBlock{
 							Description: "A lifecycle rule for when an object expires.",
 							Attributes: map[string]schema.Attribute{

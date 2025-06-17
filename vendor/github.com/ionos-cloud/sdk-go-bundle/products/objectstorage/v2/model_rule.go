@@ -24,9 +24,8 @@ var _ MappedNullable = &Rule{}
 type Rule struct {
 	XMLName xml.Name `xml:"Rule"`
 	// Unique identifier for the rule. The value can't be longer than 255 characters.
-	ID *string `json:"ID,omitempty" xml:"ID"`
-	// Object key prefix that identifies one or more objects to which this rule applies. Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests.
-	Prefix                         string                          `json:"Prefix" xml:"Prefix"`
+	ID                             *string                         `json:"ID,omitempty" xml:"ID"`
+	Filter                         Filter                          `json:"Filter" xml:"Filter"`
 	Status                         ExpirationStatus                `json:"Status" xml:"Status"`
 	Expiration                     *LifecycleExpiration            `json:"Expiration,omitempty" xml:"Expiration"`
 	NoncurrentVersionExpiration    *NoncurrentVersionExpiration    `json:"NoncurrentVersionExpiration,omitempty" xml:"NoncurrentVersionExpiration"`
@@ -37,10 +36,10 @@ type Rule struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRule(prefix string, status ExpirationStatus) *Rule {
+func NewRule(filter Filter, status ExpirationStatus) *Rule {
 	this := Rule{}
 
-	this.Prefix = prefix
+	this.Filter = filter
 	this.Status = status
 
 	return &this
@@ -86,28 +85,28 @@ func (o *Rule) SetID(v string) {
 	o.ID = &v
 }
 
-// GetPrefix returns the Prefix field value
-func (o *Rule) GetPrefix() string {
+// GetFilter returns the Filter field value
+func (o *Rule) GetFilter() Filter {
 	if o == nil {
-		var ret string
+		var ret Filter
 		return ret
 	}
 
-	return o.Prefix
+	return o.Filter
 }
 
-// GetPrefixOk returns a tuple with the Prefix field value
+// GetFilterOk returns a tuple with the Filter field value
 // and a boolean to check if the value has been set.
-func (o *Rule) GetPrefixOk() (*string, bool) {
+func (o *Rule) GetFilterOk() (*Filter, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Prefix, true
+	return &o.Filter, true
 }
 
-// SetPrefix sets field value
-func (o *Rule) SetPrefix(v string) {
-	o.Prefix = v
+// SetFilter sets field value
+func (o *Rule) SetFilter(v Filter) {
+	o.Filter = v
 }
 
 // GetStatus returns the Status field value
@@ -243,7 +242,7 @@ func (o Rule) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ID) {
 		toSerialize["ID"] = o.ID
 	}
-	toSerialize["Prefix"] = o.Prefix
+	toSerialize["Filter"] = o.Filter
 	toSerialize["Status"] = o.Status
 	if !IsNil(o.Expiration) {
 		toSerialize["Expiration"] = o.Expiration
