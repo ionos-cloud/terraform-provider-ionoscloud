@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -176,7 +177,7 @@ func resourceKafkaTopicImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	diags := resourceKafkaTopicRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
-		return nil, fmt.Errorf(diags[0].Summary)
+		return nil, errors.New(diags[0].Summary)
 	}
 
 	return []*schema.ResourceData{d}, nil

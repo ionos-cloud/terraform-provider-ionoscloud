@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -333,7 +334,7 @@ func resourceVpnIPSecTunnelImport(ctx context.Context, d *schema.ResourceData, m
 
 	diags := resourceVpnIPSecTunnelRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
-		return nil, fmt.Errorf(diags[0].Summary)
+		return nil, errors.New(diags[0].Summary)
 	}
 	return []*schema.ResourceData{d}, nil
 }
