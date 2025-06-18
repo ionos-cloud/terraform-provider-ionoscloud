@@ -67,9 +67,9 @@ func TestAccDBaaSInMemoryDBReplicaSetBasic(t *testing.T) {
 			// This step deletes the replica set that was previously created, in order to make place
 			// for another replica set with different credentials.
 			// TODO -- Uncomment this when the API problem will be fixed
-			//{
+			// {
 			//	Config: inMemoryDBReplicaSetConfigSetup,
-			//},
+			// },
 			// TODO -- Remove this when the API problem will be fixed.
 			{
 				Config: temporaryConfigSetup,
@@ -94,7 +94,7 @@ func TestAccDBaaSInMemoryDBReplicaSetBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute),
 					resource.TestCheckResourceAttrSet(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute),
 					resource.TestCheckResourceAttrSet(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsCidrAttribute),
-					resource.TestCheckResourceAttr(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameValue),
+					resource.TestCheckResourceAttr(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameAttribute),
 					resource.TestCheckResourceAttrSet(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterCredentialsAttribute+".0."+replicaSetPlainTextPasswordAttribute),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterMaintenanceWindowAttribute+".*", map[string]string{
 						clusterMaintenanceWindowTimeAttribute:         clusterMaintenanceWindowTimeValue,
@@ -157,7 +157,7 @@ func TestAccDBaaSInMemoryDBReplicaSetBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute),
 					resource.TestCheckResourceAttrSet(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute),
 					resource.TestCheckResourceAttrSet(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterConnectionsAttribute+".0."+clusterConnectionsCidrAttribute),
-					resource.TestCheckResourceAttr(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameValue),
+					resource.TestCheckResourceAttr(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameAttribute),
 					resource.TestCheckResourceAttrSet(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterCredentialsAttribute+".0."+replicaSetPlainTextPasswordAttribute),
 					resource.TestCheckTypeSetElemNestedAttrs(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, clusterMaintenanceWindowAttribute+".*", map[string]string{
 						clusterMaintenanceWindowTimeAttribute:         clusterMaintenanceWindowTimeUpdateValue,
@@ -384,12 +384,12 @@ const maintenanceWindowUpdate = clusterMaintenanceWindowAttribute + `{
 	` + clusterMaintenanceWindowTimeAttribute + ` = "` + clusterMaintenanceWindowTimeUpdateValue + `"
 }`
 const credentialsPlainTextPassword = clusterCredentialsAttribute + `{
-	` + clusterCredentialsUsernameAttribute + ` = "` + clusterCredentialsUsernameValue + `"
+	` + clusterCredentialsUsernameAttribute + ` = "` + clusterCredentialsUsernameAttribute + `"
 	` + replicaSetPlainTextPasswordAttribute + ` = ` + constant.RandomPassword + `.replicaset_password.result
 }`
 
 const credentialsHashedPassword = clusterCredentialsAttribute + `{
-	` + clusterCredentialsUsernameAttribute + ` = "` + clusterCredentialsUsernameValue + `"
+	` + clusterCredentialsUsernameAttribute + ` = "` + clusterCredentialsUsernameAttribute + `"
 	` + hashedPasswordObject + `
 }`
 

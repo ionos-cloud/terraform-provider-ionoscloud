@@ -14,7 +14,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
 )
 
 func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
@@ -51,7 +51,7 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
 					resource.TestCheckResourceAttrSet(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterBackupAttribute+".0."+clusterBackupLocationAttribute),
-					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameAttribute),
 					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsPasswordAttribute, constant.RandomPassword+".cluster_password", "result"),
 				),
 			},
@@ -70,7 +70,7 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
 					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterBackupAttribute+".0."+clusterBackupLocationAttribute, clusterBackupLocationValue),
-					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameValue),
+					resource.TestCheckResourceAttr(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsUsernameAttribute, clusterCredentialsUsernameAttribute),
 					resource.TestCheckResourceAttrPair(constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestResource, clusterCredentialsAttribute+".0."+clusterCredentialsPasswordAttribute, constant.RandomPassword+".cluster_password", "result"),
 				),
 			},
@@ -373,7 +373,7 @@ const backup = clusterBackupAttribute + `{
 }`
 
 const credentials = clusterCredentialsAttribute + `{
-	` + clusterCredentialsUsernameAttribute + ` = "` + clusterCredentialsUsernameValue + `"
+	` + clusterCredentialsUsernameAttribute + ` = "` + clusterCredentialsUsernameAttribute + `"
 	` + clusterCredentialsPasswordAttribute + ` = ` + constant.RandomPassword + `.cluster_password.result
 }`
 
@@ -382,18 +382,17 @@ const clusterVersionAttribute = "mariadb_version"
 
 // Values
 const (
-	clusterVersionValue             = "10.6"
-	clusterVersionUpdatedValue      = "10.11"
-	clusterInstancesValue           = "1"
-	clusterInstancesUpdatedValue    = "2"
-	clusterLocationValue            = "fr/par"
-	clusterCoresValue               = "4"
-	clusterCoresUpdatedValue        = "5"
-	clusterRamValue                 = "4"
-	clusterRamUpdatedValue          = "5"
-	clusterStorageSizeValue         = "10"
-	clusterStorageSizeUpdatedValue  = "11"
-	clusterConnectionsCidrValue     = "local.database_ip_cidr"
-	clusterDisplayNameValue         = constant.DBaaSClusterTestResource
-	clusterCredentialsUsernameValue = "username"
+	clusterVersionValue            = "10.6"
+	clusterVersionUpdatedValue     = "10.11"
+	clusterInstancesValue          = "1"
+	clusterInstancesUpdatedValue   = "2"
+	clusterLocationValue           = "fr/par"
+	clusterCoresValue              = "4"
+	clusterCoresUpdatedValue       = "5"
+	clusterRamValue                = "4"
+	clusterRamUpdatedValue         = "5"
+	clusterStorageSizeValue        = "10"
+	clusterStorageSizeUpdatedValue = "11"
+	clusterConnectionsCidrValue    = "local.database_ip_cidr"
+	clusterDisplayNameValue        = constant.DBaaSClusterTestResource
 )
