@@ -4,7 +4,10 @@
 ### Documentation
 - Remove mentions of `kafka` 3.7.0 version as it is no longer supported.
 - Update import method for `ionoscloud_datacenter` and `ionoscloud_server` resources.
-
+### Fixes
+- Fix S3 key test, add back update test
+- `ionoscloud_logging_pipeline` crashes on read after create 
+- Retry if `ionoscloud_lan` is delete protected by a managed service
 ## 6.7.7
 ### Features
 - Add backup to mariadb

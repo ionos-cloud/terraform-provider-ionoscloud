@@ -7,7 +7,9 @@ import (
 	"strings"
 	"time"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
@@ -252,13 +254,24 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.FromErr(err)
 	}
 
-	apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
-	logApiRequestTime(apiResponse)
-
+	err := retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
+		apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
+		if err != nil {
+			if isDeleteProtected(apiResponse) {
+				log.Printf("[INFO] LAN %s is delete-protected, keep trying", d.Id())
+				return retry.RetryableError(fmt.Errorf("lan %s is delete-protected, keep trying %w", d.Id(), err))
+			}
+			if httpNotFound(apiResponse) {
+				log.Printf("[INFO] LAN already deleted %s", d.Id())
+				return nil
+			}
+			return retry.NonRetryableError(fmt.Errorf("an error occurred while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
+		}
+		log.Printf("[DEBUG] deletion started for LAN with ID: %v", d.Id())
+		return nil
+	})
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
-		return diags
-
+		return diag.FromErr(fmt.Errorf("an error occurred while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
 	}
 
 	if err := waitForLanDeletion(ctx, client, d); err != nil {
@@ -267,6 +280,14 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	d.SetId("")
 	return nil
+}
+func isDeleteProtected(apiResponse *ionoscloud.APIResponse) bool {
+	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 403 {
+		if strings.Contains(apiResponse.Message, "is delete-protected by") {
+			return true
+		}
+	}
+	return false
 }
 
 func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -368,6 +389,10 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
+		if isDeleteProtected(apiResponse) {
+			log.Printf("[INFO] LAN %s is delete-protected, keep trying", d.Id())
+			return false, nil
+		}
 		if httpNotFound(apiResponse) {
 			log.Printf("[INFO] LAN deleted %s", d.Id())
 			return true, nil
