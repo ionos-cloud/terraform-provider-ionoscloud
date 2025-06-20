@@ -307,6 +307,19 @@ resource "ionoscloud_server" "test" {
 
 Resource Server can be imported using the `resource id` and the `datacenter id`, e.g.. Passing only resource id and datacenter id means that the first nic found linked to the server will be attached to it.
 
+```hcl
+import {
+    to = ionoscloud_server.example
+    id = "datacenter id/server id"
+}
+```
+Auto-generate the server resource in the `generated.tf` file using the following command:
+
+```shell
+terraform plan -generate-config-out=generated.tf
+```
+
+The older syntax can be for importing the resource is still supported:
 ```shell
 terraform import ionoscloud_server.myserver datacenter uuid/server uuid
 ```
