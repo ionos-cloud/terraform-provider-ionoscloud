@@ -257,7 +257,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	err := retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
 		apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
 		if err != nil {
-			if isDeleteProtected(apiResponse) {
+			if isDeleteProtected(apiResponse, err.Error()) {
 				log.Printf("[INFO] LAN %s is delete-protected, keep trying", d.Id())
 				return retry.RetryableError(fmt.Errorf("lan %s is delete-protected, keep trying %w", d.Id(), err))
 			}
@@ -281,9 +281,9 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	d.SetId("")
 	return nil
 }
-func isDeleteProtected(apiResponse *ionoscloud.APIResponse) bool {
+func isDeleteProtected(apiResponse *ionoscloud.APIResponse, errMessage string) bool {
 	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 403 {
-		if strings.Contains(apiResponse.Message, "is delete-protected by") {
+		if strings.Contains(errMessage, "is delete-protected by") {
 			return true
 		}
 	}
@@ -389,7 +389,7 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if isDeleteProtected(apiResponse) {
+		if isDeleteProtected(apiResponse, err.Error()) {
 			log.Printf("[INFO] LAN %s is delete-protected, keep trying", d.Id())
 			return false, nil
 		}

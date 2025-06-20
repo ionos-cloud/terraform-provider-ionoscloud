@@ -1,5 +1,5 @@
-//go:build all || dbaas || inMemoryDB
-// +build all dbaas inMemoryDB
+//go:build all || dbaas || inmemorydb
+// +build all dbaas inmemorydb
 
 package ionoscloud
 
@@ -11,14 +11,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccDBaaSInMemoryDBReplicaSetBasic(t *testing.T) {
-	var replicaSet inMemoryDB.ReplicaSetRead
+	var replicaSet inmemorydb.ReplicaSetRead
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -64,15 +64,8 @@ func TestAccDBaaSInMemoryDBReplicaSetBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestResource, replicaSetDNSNameAttribute),
 				),
 			},
-			// This step deletes the replica set that was previously created, in order to make place
-			// for another replica set with different credentials.
-			// TODO -- Uncomment this when the API problem will be fixed
-			// {
-			//	Config: inMemoryDBReplicaSetConfigSetup,
-			// },
-			// TODO -- Remove this when the API problem will be fixed.
 			{
-				Config: temporaryConfigSetup,
+				Config: inMemoryDBReplicaSetConfigSetup,
 			},
 			// This step tests a configuration that uses the plain text password, this configuration
 			// will be also used for 'update' tests.
@@ -113,9 +106,8 @@ func TestAccDBaaSInMemoryDBReplicaSetBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetResourcesAttribute+".0."+clusterCoresAttribute, replicaSetCoresValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, replicaSetResourcesAttribute+".0."+clusterRamAttribute, replicaSetRAMValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterDisplayNameAttribute, replicaSetDisplayNameValue),
-					// TODO -- Replace lan_id and datacenter_id checks with the ones from the setup configuration once the API is fixed.
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, "data.ionoscloud_datacenter.datacenterDS", "id"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, "data.ionoscloud_lan.lanDS", "id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+`.`+lanResourceName, "id"),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByID, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue),
 				),
@@ -130,9 +122,8 @@ func TestAccDBaaSInMemoryDBReplicaSetBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetResourcesAttribute+".0."+clusterCoresAttribute, replicaSetCoresValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, replicaSetResourcesAttribute+".0."+clusterRamAttribute, replicaSetRAMValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterDisplayNameAttribute, replicaSetDisplayNameValue),
-					// TODO -- Replace lan_id and datacenter_id checks with the ones from the setup configuration once the API is fixed.
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, "data.ionoscloud_datacenter.datacenterDS", "id"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, "data.ionoscloud_lan.lanDS", "id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsDatacenterIDAttribute, constant.DatacenterResource+"."+datacenterResourceName, "id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterConnectionsAttribute+".0."+clusterConnectionsLanIDAttribute, constant.LanResource+`.`+lanResourceName, "id"),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowDayOfTheWeekAttribute, clusterMaintenanceWindowDayOfTheWeekValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSInMemoryDBReplicaSetResource+"."+constant.DBaaSReplicaSetTestDataSourceByName, clusterMaintenanceWindowAttribute+".0."+clusterMaintenanceWindowTimeAttribute, clusterMaintenanceWindowTimeValue)),
 			},
@@ -198,7 +189,7 @@ func testAccCheckDBaaSInMemoryDBReplicaSetDestroyCheck(s *terraform.State) error
 	return nil
 }
 
-func testAccCheckDBaaSInMemoryDBReplicaSetExists(n string, replicaSet *inMemoryDB.ReplicaSetRead) resource.TestCheckFunc {
+func testAccCheckDBaaSInMemoryDBReplicaSetExists(n string, replicaSet *inmemorydb.ReplicaSetRead) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(bundleclient.SdkBundle).InMemoryDBClient
 		rs, ok := s.RootModule().Resources[n]
@@ -215,7 +206,7 @@ func testAccCheckDBaaSInMemoryDBReplicaSetExists(n string, replicaSet *inMemoryD
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching InMemoryDB replica set with ID: %v, error: %w", rs.Primary.ID, err)
 		}
-		if *foundReplicaSet.Id != rs.Primary.ID {
+		if foundReplicaSet.Id != rs.Primary.ID {
 			return fmt.Errorf("resource not found")
 		}
 		replicaSet = &foundReplicaSet
@@ -270,9 +261,7 @@ resource ` + constant.RandomPassword + ` "replicaset_password" {
 }
 ` + ServerImagePassword
 
-// TODO -- Replace temporaryConfigSetup with inMemoryDBReplicaSetConfigSetup when the API problem
-// will be fixed.
-const inMemoryDBReplicaSetConfigHashedPassword = temporaryConfigSetup + `
+const inMemoryDBReplicaSetConfigHashedPassword = inMemoryDBReplicaSetConfigSetup + `
 resource ` + constant.DBaaSInMemoryDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestResource + ` {
   ` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"  
   ` + replicaSetVersionAttribute + ` = "` + replicaSetVersionValue + `"
@@ -281,15 +270,13 @@ resource ` + constant.DBaaSInMemoryDBReplicaSetResource + ` ` + constant.DBaaSRe
   ` + replicaSetPersistenceModeAttribute + ` = "` + replicaSetPersistenceModeValue + `"
   ` + replicaSetEvictionPolicyAttribute + ` = "` + replicaSetEvictionPolicyValue + `"
   ` + resources + `
-  ` + temporaryReplicaSetConnections + `
+  ` + replicaSetConnections + `
   ` + replicaSetMaintenanceWindow + `
   ` + credentialsHashedPassword + `
 }
 `
 
-// TODO -- Replace temporaryConfigSetup with inMemoryDBReplicaSetConfigSetup when the API problem
-// will be fixed.
-const inMemoryDBReplicaSetConfigPlainTextPassword = temporaryConfigSetup + `
+const inMemoryDBReplicaSetConfigPlainTextPassword = inMemoryDBReplicaSetConfigSetup + `
 resource ` + constant.DBaaSInMemoryDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestResource + ` {
   ` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"  
   ` + replicaSetVersionAttribute + ` = "` + replicaSetVersionValue + `"
@@ -298,15 +285,13 @@ resource ` + constant.DBaaSInMemoryDBReplicaSetResource + ` ` + constant.DBaaSRe
   ` + replicaSetPersistenceModeAttribute + ` = "` + replicaSetPersistenceModeValue + `"
   ` + replicaSetEvictionPolicyAttribute + ` = "` + replicaSetEvictionPolicyValue + `"
   ` + resources + `
-  ` + temporaryReplicaSetConnections + `
+  ` + replicaSetConnections + `
   ` + replicaSetMaintenanceWindow + `
   ` + credentialsPlainTextPassword + `
 }
 `
 
-// TODO -- Replace temporaryConfigSetup with inMemoryDBReplicaSetConfigSetup when the API problem
-// will be fixed.
-const inMemoryDBReplicaSetConfigUpdate = temporaryConfigSetup + `
+const inMemoryDBReplicaSetConfigUpdate = inMemoryDBReplicaSetConfigSetup + `
 resource ` + constant.DBaaSInMemoryDBReplicaSetResource + ` ` + constant.DBaaSReplicaSetTestResource + ` {
   ` + clusterLocationAttribute + ` = "` + replicaSetLocationValue + `"  
   ` + replicaSetVersionAttribute + ` = "` + replicaSetVersionValue + `"
@@ -315,7 +300,7 @@ resource ` + constant.DBaaSInMemoryDBReplicaSetResource + ` ` + constant.DBaaSRe
   ` + replicaSetPersistenceModeAttribute + ` = "` + replicaSetPersistenceModeUpdateValue + `"
   ` + replicaSetEvictionPolicyAttribute + ` = "` + replicaSetEvictionPolicyUpdateValue + `"
   ` + resourcesUpdate + `
-  ` + temporaryReplicaSetConnections + `
+  ` + replicaSetConnections + `
   ` + maintenanceWindowUpdate + `
   ` + credentialsPlainTextPassword + `
 }
@@ -366,14 +351,6 @@ const replicaSetConnections = clusterConnectionsAttribute + `{
 	` + clusterConnectionsCidrAttribute + ` = ` + replicaSetConnectionsCidrValue + `
 }`
 
-// All the constants marked with 'temporary' will be used until the API problem is fixed. Search
-// in this file using 'API' to find the description of the problem.
-const temporaryReplicaSetConnections = clusterConnectionsAttribute + `{
-	` + clusterConnectionsDatacenterIDAttribute + ` = data.ionoscloud_datacenter.datacenterDS.id
-    ` + clusterConnectionsLanIDAttribute + ` = data.ionoscloud_lan.lanDS.id
-	` + clusterConnectionsCidrAttribute + ` = ` + replicaSetConnectionsCidrValue + `
-}`
-
 const replicaSetMaintenanceWindow = clusterMaintenanceWindowAttribute + `{
 	` + clusterMaintenanceWindowDayOfTheWeekAttribute + ` = "` + clusterMaintenanceWindowDayOfTheWeekValue + `"
 	` + clusterMaintenanceWindowTimeAttribute + ` = "` + clusterMaintenanceWindowTimeValue + `"
@@ -416,22 +393,22 @@ const (
 
 // Values
 const (
-	replicaSetLocationValue              = "es/vit"
+	replicaSetLocationValue              = "gb/lhr"
 	replicaSetLocationUpdateValue        = "de/txl"
 	replicaSetVersionValue               = "7.2"
-	replicaSetDisplayNameValue           = "TerraformTestReplicaSet"
+	replicaSetDisplayNameValue           = "test"
 	replicaSetDisplayNameUpdateValue     = "UpdatedReplicaSet"
-	replicaSetReplicasValue              = "4"
+	replicaSetReplicasValue              = "3"
 	replicaSetReplicasUpdateValue        = "5"
 	replicaSetPersistenceModeValue       = "RDB"
 	replicaSetPersistenceModeUpdateValue = "AOF"
-	replicaSetEvictionPolicyValue        = "noeviction"
+	replicaSetEvictionPolicyValue        = "allkeys-lru"
 	replicaSetEvictionPolicyUpdateValue  = "allkeys-lru"
-	replicaSetCoresValue                 = "1"
-	replicaSetCoresValueUpdate           = "2"
-	replicaSetRAMValue                   = "6"
-	replicaSetRAMValueUpdate             = "8"
+	replicaSetCoresValue                 = "4"
+	replicaSetCoresValueUpdate           = "6"
+	replicaSetRAMValue                   = "4"
+	replicaSetRAMValueUpdate             = "6"
 	replicaSetConnectionsCidrValue       = "local.database_ip_cidr"
-	replicaSetHashValue                  = "492f3f38d6b5d3ca859514e250e25ba65935bcdd9f4f40c124b773fe536fee7d"
+	replicaSetHashValue                  = "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"
 	replicaSetAlgorithmValue             = "SHA-256"
 )

@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -20,8 +20,8 @@ import (
 func (c *Client) overrideClientEndpoint(productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer c.changeConfigURL(location)
-	if os.Getenv(inMemoryDB.IonosApiUrlEnvVar) != "" {
-		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(inMemoryDB.IonosApiUrlEnvVar))
+	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
+		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(shared.IonosApiUrlEnvVar))
 		return
 	}
 	fileConfig := c.GetFileConfig()
@@ -37,7 +37,7 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
 		return
 	}
-	config.Servers = inMemoryDB.ServerConfigurations{
+	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
 			Description: shared.EndpointOverridden + location,
@@ -47,7 +47,7 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 }
 
 // CreateReplicaSet sends a 'POST' request to the API to create a replica set.
-func (c *Client) CreateReplicaSet(ctx context.Context, replicaSet inMemoryDB.ReplicaSetCreate, location string) (inMemoryDB.ReplicaSetRead, *inMemoryDB.APIResponse, error) {
+func (c *Client) CreateReplicaSet(ctx context.Context, replicaSet inmemorydb.ReplicaSetCreate, location string) (inmemorydb.ReplicaSetRead, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	replicaSetResponse, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsPost(ctx).ReplicaSetCreate(replicaSet).Execute()
 	apiResponse.LogInfo()
@@ -62,19 +62,17 @@ func (c *Client) IsReplicaSetReady(ctx context.Context, d *schema.ResourceData) 
 	if err != nil {
 		return false, fmt.Errorf("status check failed for InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err)
 	}
-	if replicaSet.Metadata == nil || replicaSet.Metadata.State == nil {
-		return false, fmt.Errorf("metadata or state is empty for InMemoryDB replica set with ID: %v", replicaSetID)
-	}
-	log.Printf("[INFO] state of the InMemoryDB replica set with ID: %v is: %v", replicaSetID, *replicaSet.Metadata.State)
-	if utils.IsStateFailed(*replicaSet.Metadata.State) {
+
+	log.Printf("[INFO] state of the InMemoryDB replica set with ID: %v is: %v", replicaSetID, replicaSet.Metadata.State)
+	if utils.IsStateFailed(replicaSet.Metadata.State) {
 		return false, fmt.Errorf("replica set with ID: %v is in FAILED state", replicaSetID)
 	}
 
-	return strings.EqualFold(*replicaSet.Metadata.State, constant.Available), nil
+	return strings.EqualFold(replicaSet.Metadata.State, constant.Available), nil
 }
 
 // DeleteReplicaSet sends a 'DELETE' request to the API to delete a replica set.
-func (c *Client) DeleteReplicaSet(ctx context.Context, replicaSetID, location string) (*inMemoryDB.APIResponse, error) {
+func (c *Client) DeleteReplicaSet(ctx context.Context, replicaSetID, location string) (*shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsDelete(ctx, replicaSetID).Execute()
 	apiResponse.LogInfo()
@@ -82,7 +80,7 @@ func (c *Client) DeleteReplicaSet(ctx context.Context, replicaSetID, location st
 }
 
 // UpdateReplicaSet sends a 'PUT' request to the API to update a replica set.
-func (c *Client) UpdateReplicaSet(ctx context.Context, replicaSetID, location string, replicaSet inMemoryDB.ReplicaSetEnsure) (inMemoryDB.ReplicaSetRead, *inMemoryDB.APIResponse, error) {
+func (c *Client) UpdateReplicaSet(ctx context.Context, replicaSetID, location string, replicaSet inmemorydb.ReplicaSetEnsure) (inmemorydb.ReplicaSetRead, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	replicaSetResponse, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsPut(ctx, replicaSetID).ReplicaSetEnsure(replicaSet).Execute()
 	apiResponse.LogInfo()
@@ -103,7 +101,7 @@ func (c *Client) IsReplicaSetDeleted(ctx context.Context, d *schema.ResourceData
 }
 
 // GetReplicaSet sends a 'GET' request to the API to get a replica set.
-func (c *Client) GetReplicaSet(ctx context.Context, replicaSetID, location string) (inMemoryDB.ReplicaSetRead, *inMemoryDB.APIResponse, error) {
+func (c *Client) GetReplicaSet(ctx context.Context, replicaSetID, location string) (inmemorydb.ReplicaSetRead, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	replicaSet, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsFindById(ctx, replicaSetID).Execute()
 	apiResponse.LogInfo()
@@ -111,7 +109,7 @@ func (c *Client) GetReplicaSet(ctx context.Context, replicaSetID, location strin
 }
 
 // GetSnapshot sends a 'GET' request to the API to get a snapshot.
-func (c *Client) GetSnapshot(ctx context.Context, snapshotID, location string) (inMemoryDB.SnapshotRead, *inMemoryDB.APIResponse, error) {
+func (c *Client) GetSnapshot(ctx context.Context, snapshotID, location string) (inmemorydb.SnapshotRead, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	snapshot, apiResponse, err := c.sdkClient.SnapshotApi.SnapshotsFindById(ctx, snapshotID).Execute()
 	apiResponse.LogInfo()
@@ -119,7 +117,7 @@ func (c *Client) GetSnapshot(ctx context.Context, snapshotID, location string) (
 }
 
 // ListReplicaSets sends a 'GET' request to the API to get a list of replica sets.
-func (c *Client) ListReplicaSets(ctx context.Context, filterName, location string) (inMemoryDB.ReplicaSetReadList, *inMemoryDB.APIResponse, error) {
+func (c *Client) ListReplicaSets(ctx context.Context, filterName, location string) (inmemorydb.ReplicaSetReadList, *shared.APIResponse, error) {
 	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
 	request := c.sdkClient.ReplicaSetApi.ReplicasetsGet(ctx)
 	if filterName != "" {
@@ -132,32 +130,32 @@ func (c *Client) ListReplicaSets(ctx context.Context, filterName, location strin
 
 // GetReplicaSetDataProperties reads all the properties from the configuration file and returns
 // a structure that will be used to populate update/create requests.
-func GetReplicaSetDataProperties(d *schema.ResourceData) *inMemoryDB.ReplicaSet {
-	replicaSet := inMemoryDB.ReplicaSet{}
+func GetReplicaSetDataProperties(d *schema.ResourceData) inmemorydb.ReplicaSet {
+	replicaSet := inmemorydb.ReplicaSet{}
 
 	if displayName, ok := d.GetOk("display_name"); ok {
 		displayName := displayName.(string)
-		replicaSet.DisplayName = &displayName
+		replicaSet.DisplayName = displayName
 	}
 
 	if inMemoryDBVersion, ok := d.GetOk("version"); ok {
 		inMemoryDBVersion := inMemoryDBVersion.(string)
-		replicaSet.Version = &inMemoryDBVersion
+		replicaSet.Version = inMemoryDBVersion
 	}
 
 	if replicas, ok := d.GetOk("replicas"); ok {
 		replicas := int32(replicas.(int))
-		replicaSet.Replicas = &replicas
+		replicaSet.Replicas = replicas
 	}
 
 	if persistenceMode, ok := d.GetOk("persistence_mode"); ok {
-		persistenceMode := inMemoryDB.PersistenceMode(persistenceMode.(string))
-		replicaSet.PersistenceMode = &persistenceMode
+		persistenceMode := inmemorydb.PersistenceMode(persistenceMode.(string))
+		replicaSet.PersistenceMode = persistenceMode
 	}
 
 	if evictionPolicy, ok := d.GetOk("eviction_policy"); ok {
-		evictionPolicy := inMemoryDB.EvictionPolicy(evictionPolicy.(string))
-		replicaSet.EvictionPolicy = &evictionPolicy
+		evictionPolicy := inmemorydb.EvictionPolicy(evictionPolicy.(string))
+		replicaSet.EvictionPolicy = evictionPolicy
 	}
 
 	if initialSnapshotID, ok := d.GetOk("initial_snapshot_id"); ok {
@@ -181,70 +179,51 @@ func GetReplicaSetDataProperties(d *schema.ResourceData) *inMemoryDB.ReplicaSet 
 		replicaSet.MaintenanceWindow = getMaintenanceWindow(d)
 	}
 
-	return &replicaSet
+	return replicaSet
 }
 
 // GetReplicaSetDataCreate reads the data from the tf configuration files and populates a
 // create request.
-func GetReplicaSetDataCreate(d *schema.ResourceData) inMemoryDB.ReplicaSetCreate {
-	return inMemoryDB.ReplicaSetCreate{
+func GetReplicaSetDataCreate(d *schema.ResourceData) inmemorydb.ReplicaSetCreate {
+	return inmemorydb.ReplicaSetCreate{
 		Properties: GetReplicaSetDataProperties(d),
 	}
 }
 
 // GetReplicaSetDataUpdate reads the data from the tf configuration files and populates an
 // update request.
-func GetReplicaSetDataUpdate(d *schema.ResourceData) inMemoryDB.ReplicaSetEnsure {
+func GetReplicaSetDataUpdate(d *schema.ResourceData) inmemorydb.ReplicaSetEnsure {
 	replicaStateID := d.Id()
-	return inMemoryDB.ReplicaSetEnsure{
-		Id:         &replicaStateID,
+	return inmemorydb.ReplicaSetEnsure{
+		Id:         replicaStateID,
 		Properties: GetReplicaSetDataProperties(d),
 	}
 }
 
 // SetReplicaSetData populates the tf resource data with the response from the API.
-func (c *Client) SetReplicaSetData(d *schema.ResourceData, replicaSet inMemoryDB.ReplicaSetRead) error {
+func (c *Client) SetReplicaSetData(d *schema.ResourceData, replicaSet inmemorydb.ReplicaSetRead) error {
 	resourceName := "InMemoryDB replica set"
-	if replicaSet.Id != nil {
-		d.SetId(*replicaSet.Id)
+
+	d.SetId(replicaSet.Id)
+
+	if err := d.Set("display_name", replicaSet.Properties.DisplayName); err != nil {
+		return utils.GenerateSetError(resourceName, "display_name", err)
 	}
 
-	if replicaSet.Metadata == nil {
-		return fmt.Errorf("response metadata should not be empty for InMemoryDB replica set with ID: %v", *replicaSet.Id)
+	if err := d.Set("version", replicaSet.Properties.Version); err != nil {
+		return utils.GenerateSetError(resourceName, "version", err)
 	}
 
-	if replicaSet.Properties == nil {
-		return fmt.Errorf("response properties should not be empty for InMemoryDB replica set with ID: %v", *replicaSet.Id)
+	if err := d.Set("replicas", replicaSet.Properties.Replicas); err != nil {
+		return utils.GenerateSetError(resourceName, "replicas", err)
 	}
 
-	if replicaSet.Properties.DisplayName != nil {
-		if err := d.Set("display_name", *replicaSet.Properties.DisplayName); err != nil {
-			return utils.GenerateSetError(resourceName, "display_name", err)
-		}
+	if err := d.Set("persistence_mode", replicaSet.Properties.PersistenceMode); err != nil {
+		return utils.GenerateSetError(resourceName, "persistence_mode", err)
 	}
 
-	if replicaSet.Properties.Version != nil {
-		if err := d.Set("version", *replicaSet.Properties.Version); err != nil {
-			return utils.GenerateSetError(resourceName, "version", err)
-		}
-	}
-
-	if replicaSet.Properties.Replicas != nil {
-		if err := d.Set("replicas", *replicaSet.Properties.Replicas); err != nil {
-			return utils.GenerateSetError(resourceName, "replicas", err)
-		}
-	}
-
-	if replicaSet.Properties.PersistenceMode != nil {
-		if err := d.Set("persistence_mode", *replicaSet.Properties.PersistenceMode); err != nil {
-			return utils.GenerateSetError(resourceName, "persistence_mode", err)
-		}
-	}
-
-	if replicaSet.Properties.EvictionPolicy != nil {
-		if err := d.Set("eviction_policy", *replicaSet.Properties.EvictionPolicy); err != nil {
-			return utils.GenerateSetError(resourceName, "eviction_policy", err)
-		}
+	if err := d.Set("eviction_policy", replicaSet.Properties.EvictionPolicy); err != nil {
+		return utils.GenerateSetError(resourceName, "eviction_policy", err)
 	}
 
 	if replicaSet.Properties.InitialSnapshotId != nil {
@@ -253,24 +232,20 @@ func (c *Client) SetReplicaSetData(d *schema.ResourceData, replicaSet inMemoryDB
 		}
 	}
 
-	if replicaSet.Metadata.DnsName != nil {
-		if err := d.Set("dns_name", *replicaSet.Metadata.DnsName); err != nil {
-			return utils.GenerateSetError(resourceName, "dns_name", err)
-		}
+	if err := d.Set("dns_name", replicaSet.Metadata.DnsName); err != nil {
+		return utils.GenerateSetError(resourceName, "dns_name", err)
 	}
 
-	if replicaSet.Properties.Resources != nil {
-		var resources []interface{}
-		resourceEntry := setResourceProperties(*replicaSet.Properties.Resources)
-		resources = append(resources, resourceEntry)
-		if err := d.Set("resources", resources); err != nil {
-			return utils.GenerateSetError(resourceName, "resources", err)
-		}
+	var resources []interface{}
+	resourceEntry := setResourceProperties(replicaSet.Properties.Resources)
+	resources = append(resources, resourceEntry)
+	if err := d.Set("resources", resources); err != nil {
+		return utils.GenerateSetError(resourceName, "resources", err)
 	}
 
 	if replicaSet.Properties.Connections != nil {
 		var connections []interface{}
-		for _, connection := range *replicaSet.Properties.Connections {
+		for _, connection := range replicaSet.Properties.Connections {
 			connectionEntry := setConnectionProperties(connection)
 			connections = append(connections, connectionEntry)
 		}
@@ -288,24 +263,18 @@ func (c *Client) SetReplicaSetData(d *schema.ResourceData, replicaSet inMemoryDB
 		}
 	}
 
-	if replicaSet.Metadata != nil && replicaSet.Metadata.DnsName != nil {
-		if err := d.Set("dns_name", *replicaSet.Metadata.DnsName); err != nil {
-			return utils.GenerateSetError(resourceName, "dns_name", err)
-		}
+	if err := d.Set("dns_name", replicaSet.Metadata.DnsName); err != nil {
+		return utils.GenerateSetError(resourceName, "dns_name", err)
 	}
 
 	return nil
 }
 
 // SetSnapshotData populates the tf resource data with the response from the API.
-func (c *Client) SetSnapshotData(d *schema.ResourceData, snapshot inMemoryDB.SnapshotRead) error {
-	if snapshot.Id == nil {
-		return fmt.Errorf("expected a valid ID for InMemoryDB snapshot, but got 'nil' instead")
-	}
-	d.SetId(*snapshot.Id)
-	if snapshot.Metadata == nil {
-		return fmt.Errorf("response metadata should not be empty for InMemoryDB snapshot with ID: %v", *snapshot.Id)
-	}
+func (c *Client) SetSnapshotData(d *schema.ResourceData, snapshot inmemorydb.SnapshotRead) error {
+
+	d.SetId(snapshot.Id)
+
 	var metadata []interface{}
 	metadataEntry := make(map[string]interface{})
 	if snapshot.Metadata.CreatedDate != nil {
@@ -314,15 +283,15 @@ func (c *Client) SetSnapshotData(d *schema.ResourceData, snapshot inMemoryDB.Sna
 	if snapshot.Metadata.LastModifiedDate != nil {
 		metadataEntry["last_modified_date"] = (snapshot.Metadata.LastModifiedDate).Time.Format(constant.DatetimeZLayout)
 	}
-	if snapshot.Metadata.ReplicasetId != nil {
-		metadataEntry["replica_set_id"] = *snapshot.Metadata.ReplicasetId
-	}
+
+	metadataEntry["replica_set_id"] = snapshot.Metadata.ReplicasetId
+
 	if snapshot.Metadata.SnapshotTime != nil {
 		metadataEntry["snapshot_time"] = (snapshot.Metadata.SnapshotTime).Time.Format(constant.DatetimeZLayout)
 	}
-	if snapshot.Metadata.DatacenterId != nil {
-		metadataEntry["datacenter_id"] = *snapshot.Metadata.DatacenterId
-	}
+
+	metadataEntry["datacenter_id"] = snapshot.Metadata.DatacenterId
+
 	metadata = append(metadata, metadataEntry)
 	if err := d.Set("metadata", metadata); err != nil {
 		return utils.GenerateSetError(constant.DBaaSInMemoryDBSnapshotResource, "metadata", err)
@@ -332,46 +301,46 @@ func (c *Client) SetSnapshotData(d *schema.ResourceData, snapshot inMemoryDB.Sna
 
 // getResources returns information about the 'resources' attribute defined in the tf configuration
 // for the ReplicaSet resource, this information will be latter used to populate the request.
-func getResources(d *schema.ResourceData) *inMemoryDB.Resources {
-	var resources inMemoryDB.Resources
+func getResources(d *schema.ResourceData) inmemorydb.Resources {
+	var resources inmemorydb.Resources
 	if cores, ok := d.GetOk("resources.0.cores"); ok {
 		cores := int32(cores.(int))
-		resources.Cores = &cores
+		resources.Cores = cores
 	}
 	if ram, ok := d.GetOk("resources.0.ram"); ok {
 		ram := int32(ram.(int))
-		resources.Ram = &ram
+		resources.Ram = ram
 	}
-	return &resources
+	return resources
 }
 
 // getConnections returns information about the 'connections' attribute defined in the tf configuration.
-func getConnections(d *schema.ResourceData) *[]inMemoryDB.Connection {
-	var connections []inMemoryDB.Connection
-	var connection inMemoryDB.Connection
+func getConnections(d *schema.ResourceData) []inmemorydb.Connection {
+	var connections []inmemorydb.Connection
+	var connection inmemorydb.Connection
 	if datacenterID, ok := d.GetOk("connections.0.datacenter_id"); ok {
 		datacenterID := datacenterID.(string)
-		connection.DatacenterId = &datacenterID
+		connection.DatacenterId = datacenterID
 	}
 	if lanID, ok := d.GetOk("connections.0.lan_id"); ok {
 		lanID := lanID.(string)
-		connection.LanId = &lanID
+		connection.LanId = lanID
 	}
 	if cidr, ok := d.GetOk("connections.0.cidr"); ok {
 		cidr := cidr.(string)
-		connection.Cidr = &cidr
+		connection.Cidr = cidr
 	}
 	connections = append(connections, connection)
-	return &connections
+	return connections
 }
 
 // getCredentials returns information about the 'credentials' attribute defined in the tf configuration.
-func getCredentials(d *schema.ResourceData) *inMemoryDB.User {
-	var user inMemoryDB.User
-	var password inMemoryDB.UserPassword
+func getCredentials(d *schema.ResourceData) inmemorydb.User {
+	var user inmemorydb.User
+	var password inmemorydb.UserPassword
 	if username, ok := d.GetOk("credentials.0.username"); ok {
 		username := username.(string)
-		user.Username = &username
+		user.Username = username
 	}
 	if plainTextPassword, ok := d.GetOk("credentials.0.plain_text_password"); ok {
 		plainTextPassword := plainTextPassword.(string)
@@ -381,38 +350,38 @@ func getCredentials(d *schema.ResourceData) *inMemoryDB.User {
 		password.HashedPassword = getHashPasswordInfo(d)
 	}
 	user.Password = &password
-	return &user
+	return user
 }
 
 // getHashPasswordInfo returns information about the 'hashed_password' attribute defined in the tf configuration.
-func getHashPasswordInfo(d *schema.ResourceData) *inMemoryDB.HashedPassword {
-	var hashedPassword inMemoryDB.HashedPassword
+func getHashPasswordInfo(d *schema.ResourceData) *inmemorydb.HashedPassword {
+	var hashedPassword inmemorydb.HashedPassword
 	if algorithm, ok := d.GetOk("credentials.0.hashed_password.0.algorithm"); ok {
 		algorithm := algorithm.(string)
-		hashedPassword.Algorithm = &algorithm
+		hashedPassword.Algorithm = algorithm
 	}
 	if hash, ok := d.GetOk("credentials.0.hashed_password.0.hash"); ok {
 		hash := hash.(string)
-		hashedPassword.Hash = &hash
+		hashedPassword.Hash = hash
 	}
 	return &hashedPassword
 }
 
 // getMaintenanceWindow returns information about the 'maintenance_window' attribute defined in the tf configuration.
-func getMaintenanceWindow(d *schema.ResourceData) *inMemoryDB.MaintenanceWindow {
-	var maintenanceWindow inMemoryDB.MaintenanceWindow
+func getMaintenanceWindow(d *schema.ResourceData) *inmemorydb.MaintenanceWindow {
+	var maintenanceWindow inmemorydb.MaintenanceWindow
 	if dayOfTheWeek, ok := d.GetOk("maintenance_window.0.day_of_the_week"); ok {
-		dayOfTheWeek := inMemoryDB.DayOfTheWeek(dayOfTheWeek.(string))
-		maintenanceWindow.DayOfTheWeek = &dayOfTheWeek
+		dayOfTheWeek := inmemorydb.DayOfTheWeek(dayOfTheWeek.(string))
+		maintenanceWindow.DayOfTheWeek = dayOfTheWeek
 	}
 	if time, ok := d.GetOk("maintenance_window.0.time"); ok {
 		time := time.(string)
-		maintenanceWindow.Time = &time
+		maintenanceWindow.Time = time
 	}
 	return &maintenanceWindow
 }
 
-func setConnectionProperties(connection inMemoryDB.Connection) map[string]interface{} {
+func setConnectionProperties(connection inmemorydb.Connection) map[string]interface{} {
 	connectionMap := make(map[string]interface{})
 
 	utils.SetPropWithNilCheck(connectionMap, "datacenter_id", connection.DatacenterId)
@@ -422,7 +391,7 @@ func setConnectionProperties(connection inMemoryDB.Connection) map[string]interf
 	return connectionMap
 }
 
-func setResourceProperties(resource inMemoryDB.Resources) map[string]interface{} {
+func setResourceProperties(resource inmemorydb.Resources) map[string]interface{} {
 	resourceMap := make(map[string]interface{})
 
 	utils.SetPropWithNilCheck(resourceMap, "cores", resource.Cores)
@@ -432,7 +401,7 @@ func setResourceProperties(resource inMemoryDB.Resources) map[string]interface{}
 	return resourceMap
 }
 
-func setMaintenanceWindowProperties(maintenanceWindow inMemoryDB.MaintenanceWindow) map[string]interface{} {
+func setMaintenanceWindowProperties(maintenanceWindow inmemorydb.MaintenanceWindow) map[string]interface{} {
 	maintenanceWindowMap := make(map[string]interface{})
 
 	utils.SetPropWithNilCheck(maintenanceWindowMap, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
