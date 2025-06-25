@@ -60,7 +60,15 @@ func (r *bucketLifecycleConfiguration) Schema(ctx context.Context, req resource.
 								stringvalidator.LengthBetween(1, 255),
 							},
 						},
-
+						"prefix": schema.StringAttribute{
+							Optional: true,
+							Validators: []validator.String{
+								stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("filter")), // .AtName("prefix")
+								stringvalidator.LengthBetween(0, 1024),
+							},
+							Description:        "Object key prefix identifying one or more objects to which the rule applies.",
+							DeprecationMessage: "This field is deprecated and will be removed in a future version. It does nothing. Use 'filter' block instead.",
+						},
 						"status": schema.StringAttribute{
 							Required:    true,
 							Description: "Whether the rule is currently being applied. Valid values: Enabled or Disabled.",
@@ -71,12 +79,15 @@ func (r *bucketLifecycleConfiguration) Schema(ctx context.Context, req resource.
 					},
 					Blocks: map[string]schema.Block{
 						"filter": schema.SingleNestedBlock{
+							Validators: []validator.Object{
+								objectvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("prefix")), // .AtName("prefix")
+							},
 							Description: "A filter.",
 							Attributes: map[string]schema.Attribute{
 								"prefix": schema.StringAttribute{
-									Required: true,
+									Optional: true,
 									Validators: []validator.String{
-										stringvalidator.LengthBetween(0, 1024),
+										stringvalidator.LengthBetween(1, 1024),
 									},
 									Description: "Object key prefix identifying one or more objects to which the rule applies.",
 								},
