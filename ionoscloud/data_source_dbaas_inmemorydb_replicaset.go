@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
@@ -157,7 +157,7 @@ func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("please provide either the InMemoryDB replicaset ID or display_name"))
 	}
 
-	var replica inMemoryDB.ReplicaSetRead
+	var replica inmemorydb.ReplicaSetRead
 	var err error
 
 	if idOk {
@@ -173,11 +173,11 @@ func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching InMemoryDB replica sets: %w", err))
 		}
 
-		var results []inMemoryDB.ReplicaSetRead
+		var results []inmemorydb.ReplicaSetRead
 
 		if clusters.Items != nil {
-			for _, clusterItem := range *clusters.Items {
-				if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, displayName.(string)) {
+			for _, clusterItem := range clusters.Items {
+				if strings.EqualFold(clusterItem.Properties.DisplayName, displayName.(string)) {
 					results = append(results, clusterItem)
 				}
 			}
@@ -189,7 +189,7 @@ func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta 
 		if len(results) > 1 {
 			var ids []string
 			for _, r := range results {
-				ids = append(ids, *r.Id)
+				ids = append(ids, r.Id)
 			}
 			return diag.FromErr(fmt.Errorf("more than one InMemoryDB replica set found with the specified criteria name '%v': (%v)", displayName, strings.Join(ids, ", ")))
 		}

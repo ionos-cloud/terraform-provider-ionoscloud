@@ -3,11 +3,17 @@
 - Add `filter` object with `prefix` field so prefix is actually set for lifecycle rules in `ionoscloud_s3_bucket_lifecycle_configuration` resource. Deprecate `prefix` field as it does nothing..
 
 ## 6.7.8
+### Chore
+- Update `github.com/hashicorp/terraform-plugin-sdk/v2` dependency to latest version
 ### Documentation
 - Remove mentions of `kafka` 3.7.0 version as it is no longer supported.
+- Update import method for `ionoscloud_datacenter` and `ionoscloud_server` resources.
 ### Fixes
 - Fix S3 key test, add back update test
 - `ionoscloud_logging_pipeline` crashes on read after create
+- Retry if `ionoscloud_lan` is delete protected by a managed service
+### Features
+- Move inmemorydb resources to sdk-go-bundle
 
 ## 6.7.7
 ### Features

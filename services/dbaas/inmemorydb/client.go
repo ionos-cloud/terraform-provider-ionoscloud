@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	inMemoryDB "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	inMemoryDB "github.com/ionos-cloud/sdk-go-dbaas-in-memory-db"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -29,18 +29,15 @@ func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 }
 
 // GetConfig - returns the configuration
-func (c *Client) GetConfig() *inMemoryDB.Configuration {
+func (c *Client) GetConfig() *shared.Configuration {
 	return c.sdkClient.GetConfig()
 }
 
 // NewClient creates a new in-memory db client. fileConfig is used to set/override the client options if it exists
 func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	newConfigDbaas := inMemoryDB.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
+	newConfigDbaas := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password,
 		clientOptions.Credentials.Token, clientOptions.Endpoint)
 
-	if os.Getenv(constant.IonosDebug) != "" {
-		newConfigDbaas.Debug = true
-	}
 	newConfigDbaas.MaxRetries = constant.MaxRetries
 	newConfigDbaas.MaxWaitTime = constant.MaxWaitTime
 
@@ -77,7 +74,7 @@ var (
 func (c *Client) changeConfigURL(location string) {
 	clientConfig := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLInMemoryDB) != "" {
-		clientConfig.Servers = inMemoryDB.ServerConfigurations{
+		clientConfig.Servers = shared.ServerConfigurations{
 			{
 				URL: utils.CleanURL(os.Getenv(ionosAPIURLInMemoryDB)),
 			},
@@ -86,7 +83,7 @@ func (c *Client) changeConfigURL(location string) {
 	}
 	for _, server := range clientConfig.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
-			clientConfig.Servers = inMemoryDB.ServerConfigurations{
+			clientConfig.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
 					Description: shared.EndpointOverridden + location,

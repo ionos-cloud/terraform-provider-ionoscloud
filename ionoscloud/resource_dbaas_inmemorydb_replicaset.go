@@ -209,7 +209,7 @@ func replicaSetCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while creating an InMemoryDB replica set: %w", err))
 	}
-	replicaSetID := *response.Id
+	replicaSetID := response.Id
 	d.SetId(replicaSetID)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsReplicaSetReady)
 	if err != nil {
