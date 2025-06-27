@@ -104,3 +104,14 @@ func resourceMissingError(typeName string) *tfprotov6.Diagnostic {
 			"Missing resource type: " + typeName,
 	}
 }
+
+func resourceIdentityDuplicateError(typeName string) *tfprotov6.Diagnostic {
+	return &tfprotov6.Diagnostic{
+		Severity: tfprotov6.DiagnosticSeverityError,
+		Summary:  "Invalid Provider Server Combination",
+		Detail: "The combined provider has multiple implementations of the same resource identity across underlying providers. " +
+			"Resource identity types must be implemented by only one underlying provider. " +
+			"This is always an issue in the provider implementation and should be reported to the provider developers.\n\n" +
+			"Duplicate identity type for resource: " + typeName,
+	}
+}
