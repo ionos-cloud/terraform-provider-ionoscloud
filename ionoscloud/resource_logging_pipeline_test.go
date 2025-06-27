@@ -17,7 +17,7 @@ import (
 )
 
 func TestAccLoggingPipeline(t *testing.T) {
-	var Pipeline logging.Pipeline
+	var Pipeline logging.PipelineRead
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -40,7 +40,10 @@ func TestAccLoggingPipeline(t *testing.T) {
 						pipelineLogDestinationTypeAttribute:      pipelineLogDestinationTypeValue,
 						pipelineLogDestinationRetentionAttribute: pipelineLogDestinationRetentionValue,
 					}),
+					resource.TestCheckResourceAttrSet(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, "http_address"),
+					resource.TestCheckNoResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, "tcp_address"),
 					resource.TestCheckResourceAttrSet(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineGrafanaAddressAttribute),
+					resource.TestCheckResourceAttrSet(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, "key"),
 				),
 			},
 			{
@@ -58,6 +61,8 @@ func TestAccLoggingPipeline(t *testing.T) {
 						pipelineLogDestinationRetentionAttribute: pipelineLogDestinationRetentionValue,
 					}),
 					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineGrafanaAddressAttribute),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, "http_address"),
+					resource.TestCheckNoResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, "tcp_address"),
 				),
 			},
 			{
@@ -75,6 +80,8 @@ func TestAccLoggingPipeline(t *testing.T) {
 						pipelineLogDestinationRetentionAttribute: pipelineLogDestinationRetentionValue,
 					}),
 					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineGrafanaAddressAttribute),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, "http_address"),
+					resource.TestCheckNoResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, "tcp_address"),
 				),
 			},
 			{
@@ -131,7 +138,7 @@ func testAccLoggingPipelineDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccLoggingPipelineExistenceCheck(path string, pipeline *logging.Pipeline) resource.TestCheckFunc {
+func testAccLoggingPipelineExistenceCheck(path string, pipeline *logging.PipelineRead) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(bundleclient.SdkBundle).LoggingClient
 		rs, ok := s.RootModule().Resources[path]

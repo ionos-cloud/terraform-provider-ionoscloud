@@ -2,7 +2,6 @@ package logging
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 
@@ -19,11 +18,11 @@ import (
 var pipelineResourceName = "Logging Pipeline"
 
 // CreatePipeline creates a new pipeline
-func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.ProvisioningPipeline, utils.ApiResponseInfo, error) {
+func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.PipelineRead, utils.ApiResponseInfo, error) {
 	location := d.Get("location").(string)
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
 	request := setPipelinePostRequest(d)
-	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPost(ctx).Pipeline(*request).Execute()
+	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPost(ctx).PipelineCreate(*request).Execute()
 	apiResponse.LogInfo()
 	return pipeline, apiResponse, err
 }
@@ -36,18 +35,15 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return false, err
 	}
-	if pipeline.Metadata == nil || pipeline.Metadata.State == nil {
-		return false, fmt.Errorf("expected metadata, got empty for pipeline with ID: %s", pipelineID)
-	}
-	log.Printf("[DEBUG] pipeline status: %s", *pipeline.Metadata.State)
-	return strings.EqualFold(*pipeline.Metadata.State, constant.Available), nil
+	log.Printf("[DEBUG] pipeline status: %s", pipeline.Metadata.State)
+	return strings.EqualFold(pipeline.Metadata.State, constant.Available), nil
 }
 
 // UpdatePipeline updates a pipeline
-func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (logging.Pipeline, utils.ApiResponseInfo, error) {
+func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (logging.PipelineRead, utils.ApiResponseInfo, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, d.Get("location").(string))
 	request := setPipelinePatchRequest(d)
-	pipelineResponse, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPatch(ctx, id).Pipeline(*request).Execute()
+	pipelineResponse, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPatch(ctx, id).PipelinePatch(*request).Execute()
 	apiResponse.LogInfo()
 	return pipelineResponse, apiResponse, err
 }
@@ -55,7 +51,7 @@ func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.Resour
 // DeletePipeline deletes a pipeline
 func (c *Client) DeletePipeline(ctx context.Context, location, id string) (utils.ApiResponseInfo, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
-	_, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesDelete(ctx, id).Execute()
+	apiResponse, err := c.sdkClient.PipelinesApi.PipelinesDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
@@ -69,7 +65,7 @@ func (c *Client) IsPipelineDeleted(ctx context.Context, d *schema.ResourceData) 
 }
 
 // GetPipelineByID returns a pipeline by its ID
-func (c *Client) GetPipelineByID(ctx context.Context, location, id string) (logging.Pipeline, *shared.APIResponse, error) {
+func (c *Client) GetPipelineByID(ctx context.Context, location, id string) (logging.PipelineRead, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
@@ -77,7 +73,7 @@ func (c *Client) GetPipelineByID(ctx context.Context, location, id string) (logg
 }
 
 // ListPipelines returns a list of all pipelines
-func (c *Client) ListPipelines(ctx context.Context, location string) (logging.PipelineListResponse, *shared.APIResponse, error) {
+func (c *Client) ListPipelines(ctx context.Context, location string) (logging.PipelineReadList, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
 	pipelines, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesGet(ctx).Execute()
 	apiResponse.LogInfo()
@@ -85,14 +81,14 @@ func (c *Client) ListPipelines(ctx context.Context, location string) (logging.Pi
 }
 
 func setPipelinePostRequest(d *schema.ResourceData) *logging.PipelineCreate {
-	request := logging.PipelineCreate{Properties: logging.PipelineCreateProperties{}}
+	request := logging.PipelineCreate{Properties: logging.PipelineNoAddr{}}
 
 	if nameValue, ok := d.GetOk("name"); ok {
 		name := nameValue.(string)
 		request.Properties.Name = name
 	}
 
-	var logs []logging.PipelineCreatePropertiesLogs
+	var logs []logging.PipelineNoAddrLogs
 	if logsValue, ok := d.GetOk("log"); ok {
 		for _, logData := range logsValue.([]interface{}) {
 			if logElem, ok := logData.(map[string]interface{}); ok {
@@ -100,24 +96,19 @@ func setPipelinePostRequest(d *schema.ResourceData) *logging.PipelineCreate {
 				logSource := logElem["source"].(string)
 				logTag := logElem["tag"].(string)
 				logProtocol := logElem["protocol"].(string)
-				newLog := *logging.NewPipelineCreatePropertiesLogs()
-				newLog.Source = &logSource
-				newLog.Tag = &logTag
-				newLog.Protocol = &logProtocol
 
 				// Logic for destinations.
-				var destinations []logging.Destination
+				var destinations []logging.PipelineNoAddrLogsDestinations
 				for _, destinationData := range logElem["destinations"].([]interface{}) {
 					if destination, ok := destinationData.(map[string]interface{}); ok {
 						destinationType := destination["type"].(string)
 						retentionInDays := int32(destination["retention_in_days"].(int))
-						newDestination := *logging.NewDestination()
-						newDestination.Type = &destinationType
-						newDestination.RetentionInDays = &retentionInDays
+						newDestination := *logging.NewPipelineNoAddrLogsDestinations(destinationType, retentionInDays)
 						destinations = append(destinations, newDestination)
 					}
 				}
-				newLog.Destinations = destinations
+				newLog := *logging.NewPipelineNoAddrLogs(logSource, logTag, logProtocol, destinations)
+
 				logs = append(logs, newLog)
 			}
 		}
@@ -129,14 +120,14 @@ func setPipelinePostRequest(d *schema.ResourceData) *logging.PipelineCreate {
 }
 
 func setPipelinePatchRequest(d *schema.ResourceData) *logging.PipelinePatch {
-	request := logging.PipelinePatch{Properties: logging.PipelinePatchProperties{}}
+	request := logging.PipelinePatch{Properties: logging.PipelineNoAddr{}}
 
 	if nameValue, ok := d.GetOk("name"); ok {
 		name := nameValue.(string)
-		request.Properties.Name = &name
+		request.Properties.Name = name
 	}
 
-	var logs []logging.PipelineCreatePropertiesLogs
+	var logs []logging.PipelineNoAddrLogs
 	if logsValue, ok := d.GetOk("log"); ok {
 		for _, logData := range logsValue.([]interface{}) {
 			if logElem, ok := logData.(map[string]interface{}); ok {
@@ -144,24 +135,18 @@ func setPipelinePatchRequest(d *schema.ResourceData) *logging.PipelinePatch {
 				logSource := logElem["source"].(string)
 				logTag := logElem["tag"].(string)
 				logProtocol := logElem["protocol"].(string)
-				newLog := *logging.NewPipelineCreatePropertiesLogs()
-				newLog.Source = &logSource
-				newLog.Tag = &logTag
-				newLog.Protocol = &logProtocol
 
 				// Logic for destinations.
-				var destinations []logging.Destination
+				var destinations []logging.PipelineNoAddrLogsDestinations
 				for _, destinationData := range logElem["destinations"].([]interface{}) {
 					if destination, ok := destinationData.(map[string]interface{}); ok {
 						destinationType := destination["type"].(string)
 						retentionInDays := int32(destination["retention_in_days"].(int))
-						newDestination := *logging.NewDestination()
-						newDestination.Type = &destinationType
-						newDestination.RetentionInDays = &retentionInDays
+						newDestination := *logging.NewPipelineNoAddrLogsDestinations(destinationType, retentionInDays)
 						destinations = append(destinations, newDestination)
 					}
 				}
-				newLog.Destinations = destinations
+				newLog := *logging.NewPipelineNoAddrLogs(logSource, logTag, logProtocol, destinations)
 				logs = append(logs, newLog)
 			}
 		}
@@ -173,26 +158,26 @@ func setPipelinePatchRequest(d *schema.ResourceData) *logging.PipelinePatch {
 }
 
 // SetPipelineData sets the pipeline data
-func (c *Client) SetPipelineData(d *schema.ResourceData, pipeline logging.Pipeline) error {
-	d.SetId(*pipeline.Id)
+func (c *Client) SetPipelineData(d *schema.ResourceData, pipeline logging.PipelineRead) error {
+	d.SetId(pipeline.Id)
 
-	if pipeline.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the Logging pipeline with ID: %s, but received 'nil' instead", *pipeline.Id)
-	}
-
-	if pipeline.Metadata == nil {
-		return fmt.Errorf("expected metadata in the response for the Logging pipeline with ID: %s, but received 'nil' instead", *pipeline.Id)
-	}
-
-	if pipeline.Properties.Name != nil {
-		if err := d.Set("name", *pipeline.Properties.Name); err != nil {
-			return utils.GenerateSetError(pipelineResourceName, "name", err)
-		}
+	if err := d.Set("name", pipeline.Properties.Name); err != nil {
+		return utils.GenerateSetError(pipelineResourceName, "name", err)
 	}
 
 	if pipeline.Properties.GrafanaAddress != nil {
 		if err := d.Set("grafana_address", *pipeline.Properties.GrafanaAddress); err != nil {
 			return utils.GenerateSetError(pipelineResourceName, "grafana_address", err)
+		}
+	}
+	if pipeline.Properties.HttpAddress != nil && *pipeline.Properties.HttpAddress != "" {
+		if err := d.Set("http_address", *pipeline.Properties.HttpAddress); err != nil {
+			return utils.GenerateSetError(pipelineResourceName, "http_address", err)
+		}
+	}
+	if pipeline.Properties.TcpAddress != nil && *pipeline.Properties.TcpAddress != "" {
+		if err := d.Set("tcp_address", *pipeline.Properties.TcpAddress); err != nil {
+			return utils.GenerateSetError(pipelineResourceName, "tcp_address", err)
 		}
 	}
 
@@ -204,8 +189,6 @@ func (c *Client) SetPipelineData(d *schema.ResourceData, pipeline logging.Pipeli
 			utils.SetPropWithNilCheck(logEntry, "source", logElem.Source)
 			utils.SetPropWithNilCheck(logEntry, "tag", logElem.Tag)
 			utils.SetPropWithNilCheck(logEntry, "protocol", logElem.Protocol)
-			utils.SetPropWithNilCheck(logEntry, "public", logElem.Public)
-
 			// Logic for destinations
 			destinations := make([]interface{}, len(logElem.Destinations))
 			for i, destination := range logElem.Destinations {

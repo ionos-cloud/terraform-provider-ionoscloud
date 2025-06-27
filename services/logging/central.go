@@ -8,8 +8,8 @@ import (
 )
 
 // GetCentralLogging will retrieve the central logging configuration
-func (c *Client) GetCentralLogging(ctx context.Context) (logging.CentralLoggingResponse, *shared.APIResponse, error) {
-	centralLogging, apiResponse, err := c.sdkClient.CentralApi.CentralLoggingGet(ctx).Execute()
+func (c *Client) GetCentralLogging(ctx context.Context) (logging.CentralLoggingReadList, *shared.APIResponse, error) {
+	centralLogging, apiResponse, err := c.sdkClient.CentralApi.CentralGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return centralLogging, apiResponse, err
 }

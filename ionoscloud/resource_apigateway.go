@@ -86,8 +86,11 @@ func resourceAPIGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error getting Central Logging: %w", err))
 		}
-
-		if central.Properties == nil || central.Properties.Enabled == nil || !*central.Properties.Enabled {
+		if central.Items == nil || len(central.Items) == 0 {
+			return diag.FromErr(fmt.Errorf("central Logging is not enabled, please use Logging API to enable Central Logging"))
+		}
+		// will only be one item in the list, we just have to check if it is enabled
+		if !central.Items[0].Properties.Enabled {
 			return diag.FromErr(fmt.Errorf("cannot create API Gateway with logs enabled, please use Logging API to enable Central Logging"))
 		}
 	}
@@ -116,8 +119,11 @@ func resourceAPIGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error getting Central Logging: %w", err))
 		}
-
-		if central.Properties == nil || central.Properties.Enabled == nil || !*central.Properties.Enabled {
+		if central.Items == nil || len(central.Items) == 0 {
+			return diag.FromErr(fmt.Errorf("central Logging is not enabled, please use Logging API to enable Central Logging"))
+		}
+		// will only be one item in the list, we just have to check if it is enabled
+		if !central.Items[0].Properties.Enabled {
 			return diag.FromErr(fmt.Errorf("cannot create API Gateway with logs enabled, please use Logging API to enable Central Logging"))
 		}
 	}

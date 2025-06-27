@@ -49,6 +49,16 @@ func dataSourceLoggingPipeline() *schema.Resource {
 				Description: "The address of the client's grafana instance",
 				Computed:    true,
 			},
+			"http_address": {
+				Type:        schema.TypeString,
+				Description: "The HTTP address of the Logging pipeline",
+				Computed:    true,
+			},
+			"tcp_address": {
+				Type:        schema.TypeString,
+				Description: "The TCP address of the Logging pipeline",
+				Computed:    true,
+			},
 			"log": {
 				Type:        schema.TypeSet,
 				Description: "The logs for the Logging pipeline",
@@ -115,7 +125,7 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(fmt.Errorf("please provide either the Logging pipeline ID or name"))
 	}
 
-	var pipeline logging.Pipeline
+	var pipeline logging.PipelineRead
 	var err error
 	if idOk {
 		pipeline, _, err = client.GetPipelineByID(ctx, location, id)
@@ -123,13 +133,13 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta in
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Logging pipeline with ID: %s, error: %w", id, err))
 		}
 	} else {
-		var results []logging.Pipeline
+		var results []logging.PipelineRead
 		pipelines, _, err := client.ListPipelines(ctx, location)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching Logging pipelines: %w", err))
 		}
 		for _, pipelineItem := range pipelines.Items {
-			if pipelineItem.Properties != nil && pipelineItem.Properties.Name != nil && strings.EqualFold(*pipelineItem.Properties.Name, name) {
+			if strings.EqualFold(pipelineItem.Properties.Name, name) {
 				results = append(results, pipelineItem)
 			}
 		}
