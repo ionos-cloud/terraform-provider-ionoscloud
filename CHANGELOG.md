@@ -1,3 +1,7 @@
+## 6.7.9
+### Features
+- Add `filter` object with `prefix` field so prefix is actually set for lifecycle rules in `ionoscloud_s3_bucket_lifecycle_configuration` resource. Deprecate `prefix` field as it does nothing..
+
 ## 6.7.8
 ### Chore
 - Update `github.com/hashicorp/terraform-plugin-sdk/v2` dependency to latest version

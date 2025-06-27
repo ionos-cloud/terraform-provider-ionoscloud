@@ -31,7 +31,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
 	github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0
-	github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.0
+	github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2

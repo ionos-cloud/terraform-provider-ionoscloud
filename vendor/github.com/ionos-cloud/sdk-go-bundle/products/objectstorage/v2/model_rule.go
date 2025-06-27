@@ -27,6 +27,7 @@ type Rule struct {
 	ID *string `json:"ID,omitempty" xml:"ID"`
 	// Object key prefix that identifies one or more objects to which this rule applies. Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests.
 	Prefix                         string                          `json:"Prefix" xml:"Prefix"`
+	Filter                         *Filter                         `json:"Filter,omitempty" xml:"Filter"`
 	Status                         ExpirationStatus                `json:"Status" xml:"Status"`
 	Expiration                     *LifecycleExpiration            `json:"Expiration,omitempty" xml:"Expiration"`
 	NoncurrentVersionExpiration    *NoncurrentVersionExpiration    `json:"NoncurrentVersionExpiration,omitempty" xml:"NoncurrentVersionExpiration"`
@@ -108,6 +109,38 @@ func (o *Rule) GetPrefixOk() (*string, bool) {
 // SetPrefix sets field value
 func (o *Rule) SetPrefix(v string) {
 	o.Prefix = v
+}
+
+// GetFilter returns the Filter field value if set, zero value otherwise.
+func (o *Rule) GetFilter() Filter {
+	if o == nil || IsNil(o.Filter) {
+		var ret Filter
+		return ret
+	}
+	return *o.Filter
+}
+
+// GetFilterOk returns a tuple with the Filter field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Rule) GetFilterOk() (*Filter, bool) {
+	if o == nil || IsNil(o.Filter) {
+		return nil, false
+	}
+	return o.Filter, true
+}
+
+// HasFilter returns a boolean if a field has been set.
+func (o *Rule) HasFilter() bool {
+	if o != nil && !IsNil(o.Filter) {
+		return true
+	}
+
+	return false
+}
+
+// SetFilter gets a reference to the given Filter and assigns it to the Filter field.
+func (o *Rule) SetFilter(v Filter) {
+	o.Filter = &v
 }
 
 // GetStatus returns the Status field value
@@ -244,6 +277,9 @@ func (o Rule) ToMap() (map[string]interface{}, error) {
 		toSerialize["ID"] = o.ID
 	}
 	toSerialize["Prefix"] = o.Prefix
+	if !IsNil(o.Filter) {
+		toSerialize["Filter"] = o.Filter
+	}
 	toSerialize["Status"] = o.Status
 	if !IsNil(o.Expiration) {
 		toSerialize["Expiration"] = o.Expiration
