@@ -45,7 +45,23 @@ func resourceLoggingPipeline() *schema.Resource {
 			"grafana_address": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The address of the client's grafana instance",
+				Description: "The Grafana address is where user can access their logs, create dashboards, and set up alerts",
+			},
+			"http_address": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The HTTP address of the pipeline. This is the address to which logs are sent using the HTTP protocol",
+			},
+			"tcp_address": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The TCP address of the pipeline. This is the address to which logs are sent using the TCP protocol",
+			},
+			"key": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "The key is shared once and is used to authenticate the logs sent to the pipeline",
 			},
 			"log": {
 				Type:     schema.TypeList,
@@ -109,10 +125,17 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while creating a Logging pipeline: %w", err))
 	}
-	d.SetId(*pipelineResponse.Id)
+	d.SetId(pipelineResponse.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the pipeline with ID: %s to become available: %w", *pipelineResponse.Id, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the pipeline with ID: %s to become available: %w", pipelineResponse.Id, err))
+	}
+	// only received in the create response
+	if pipelineResponse.Properties.Key != nil {
+		err = d.Set("key", pipelineResponse.Properties.Key)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("an error occurred while setting the key for the Logging pipeline with ID: %s, error: %w", pipelineResponse.Id, err))
+		}
 	}
 	// Make another read and set the data in the state because 'grafanaAddress` is not returned in the create response
 	return pipelineRead(ctx, d, meta)

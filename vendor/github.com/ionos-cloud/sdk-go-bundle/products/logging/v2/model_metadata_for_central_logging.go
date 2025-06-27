@@ -16,11 +16,11 @@ import (
 	"time"
 )
 
-// checks if the Metadata type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &Metadata{}
+// checks if the MetadataForCentralLogging type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &MetadataForCentralLogging{}
 
-// Metadata Metadata of the resource.
-type Metadata struct {
+// MetadataForCentralLogging struct for MetadataForCentralLogging
+type MetadataForCentralLogging struct {
 	// The ISO 8601 creation timestamp.
 	CreatedDate *IonosTime `json:"createdDate,omitempty"`
 	// Unique name of the identity that created the resource.
@@ -35,28 +35,32 @@ type Metadata struct {
 	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
 	// Unique name of the resource.
 	ResourceURN *string `json:"resourceURN,omitempty"`
+	// The endpoint of the Grafana instance.
+	GrafanaEndpoint string `json:"grafanaEndpoint"`
 }
 
-// NewMetadata instantiates a new Metadata object
+// NewMetadataForCentralLogging instantiates a new MetadataForCentralLogging object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMetadata() *Metadata {
-	this := Metadata{}
+func NewMetadataForCentralLogging(grafanaEndpoint string) *MetadataForCentralLogging {
+	this := MetadataForCentralLogging{}
+
+	this.GrafanaEndpoint = grafanaEndpoint
 
 	return &this
 }
 
-// NewMetadataWithDefaults instantiates a new Metadata object
+// NewMetadataForCentralLoggingWithDefaults instantiates a new MetadataForCentralLogging object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewMetadataWithDefaults() *Metadata {
-	this := Metadata{}
+func NewMetadataForCentralLoggingWithDefaults() *MetadataForCentralLogging {
+	this := MetadataForCentralLogging{}
 	return &this
 }
 
 // GetCreatedDate returns the CreatedDate field value if set, zero value otherwise.
-func (o *Metadata) GetCreatedDate() time.Time {
+func (o *MetadataForCentralLogging) GetCreatedDate() time.Time {
 	if o == nil || IsNil(o.CreatedDate) {
 		var ret time.Time
 		return ret
@@ -66,7 +70,7 @@ func (o *Metadata) GetCreatedDate() time.Time {
 
 // GetCreatedDateOk returns a tuple with the CreatedDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Metadata) GetCreatedDateOk() (*time.Time, bool) {
+func (o *MetadataForCentralLogging) GetCreatedDateOk() (*time.Time, bool) {
 	if o == nil || IsNil(o.CreatedDate) {
 		return nil, false
 	}
@@ -74,7 +78,7 @@ func (o *Metadata) GetCreatedDateOk() (*time.Time, bool) {
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
-func (o *Metadata) HasCreatedDate() bool {
+func (o *MetadataForCentralLogging) HasCreatedDate() bool {
 	if o != nil && !IsNil(o.CreatedDate) {
 		return true
 	}
@@ -83,12 +87,12 @@ func (o *Metadata) HasCreatedDate() bool {
 }
 
 // SetCreatedDate gets a reference to the given time.Time and assigns it to the CreatedDate field.
-func (o *Metadata) SetCreatedDate(v time.Time) {
+func (o *MetadataForCentralLogging) SetCreatedDate(v time.Time) {
 	o.CreatedDate = &IonosTime{v}
 }
 
 // GetCreatedBy returns the CreatedBy field value if set, zero value otherwise.
-func (o *Metadata) GetCreatedBy() string {
+func (o *MetadataForCentralLogging) GetCreatedBy() string {
 	if o == nil || IsNil(o.CreatedBy) {
 		var ret string
 		return ret
@@ -98,7 +102,7 @@ func (o *Metadata) GetCreatedBy() string {
 
 // GetCreatedByOk returns a tuple with the CreatedBy field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Metadata) GetCreatedByOk() (*string, bool) {
+func (o *MetadataForCentralLogging) GetCreatedByOk() (*string, bool) {
 	if o == nil || IsNil(o.CreatedBy) {
 		return nil, false
 	}
@@ -106,7 +110,7 @@ func (o *Metadata) GetCreatedByOk() (*string, bool) {
 }
 
 // HasCreatedBy returns a boolean if a field has been set.
-func (o *Metadata) HasCreatedBy() bool {
+func (o *MetadataForCentralLogging) HasCreatedBy() bool {
 	if o != nil && !IsNil(o.CreatedBy) {
 		return true
 	}
@@ -115,12 +119,12 @@ func (o *Metadata) HasCreatedBy() bool {
 }
 
 // SetCreatedBy gets a reference to the given string and assigns it to the CreatedBy field.
-func (o *Metadata) SetCreatedBy(v string) {
+func (o *MetadataForCentralLogging) SetCreatedBy(v string) {
 	o.CreatedBy = &v
 }
 
 // GetCreatedByUserId returns the CreatedByUserId field value if set, zero value otherwise.
-func (o *Metadata) GetCreatedByUserId() string {
+func (o *MetadataForCentralLogging) GetCreatedByUserId() string {
 	if o == nil || IsNil(o.CreatedByUserId) {
 		var ret string
 		return ret
@@ -130,7 +134,7 @@ func (o *Metadata) GetCreatedByUserId() string {
 
 // GetCreatedByUserIdOk returns a tuple with the CreatedByUserId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Metadata) GetCreatedByUserIdOk() (*string, bool) {
+func (o *MetadataForCentralLogging) GetCreatedByUserIdOk() (*string, bool) {
 	if o == nil || IsNil(o.CreatedByUserId) {
 		return nil, false
 	}
@@ -138,7 +142,7 @@ func (o *Metadata) GetCreatedByUserIdOk() (*string, bool) {
 }
 
 // HasCreatedByUserId returns a boolean if a field has been set.
-func (o *Metadata) HasCreatedByUserId() bool {
+func (o *MetadataForCentralLogging) HasCreatedByUserId() bool {
 	if o != nil && !IsNil(o.CreatedByUserId) {
 		return true
 	}
@@ -147,12 +151,12 @@ func (o *Metadata) HasCreatedByUserId() bool {
 }
 
 // SetCreatedByUserId gets a reference to the given string and assigns it to the CreatedByUserId field.
-func (o *Metadata) SetCreatedByUserId(v string) {
+func (o *MetadataForCentralLogging) SetCreatedByUserId(v string) {
 	o.CreatedByUserId = &v
 }
 
 // GetLastModifiedDate returns the LastModifiedDate field value if set, zero value otherwise.
-func (o *Metadata) GetLastModifiedDate() time.Time {
+func (o *MetadataForCentralLogging) GetLastModifiedDate() time.Time {
 	if o == nil || IsNil(o.LastModifiedDate) {
 		var ret time.Time
 		return ret
@@ -162,7 +166,7 @@ func (o *Metadata) GetLastModifiedDate() time.Time {
 
 // GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Metadata) GetLastModifiedDateOk() (*time.Time, bool) {
+func (o *MetadataForCentralLogging) GetLastModifiedDateOk() (*time.Time, bool) {
 	if o == nil || IsNil(o.LastModifiedDate) {
 		return nil, false
 	}
@@ -170,7 +174,7 @@ func (o *Metadata) GetLastModifiedDateOk() (*time.Time, bool) {
 }
 
 // HasLastModifiedDate returns a boolean if a field has been set.
-func (o *Metadata) HasLastModifiedDate() bool {
+func (o *MetadataForCentralLogging) HasLastModifiedDate() bool {
 	if o != nil && !IsNil(o.LastModifiedDate) {
 		return true
 	}
@@ -179,12 +183,12 @@ func (o *Metadata) HasLastModifiedDate() bool {
 }
 
 // SetLastModifiedDate gets a reference to the given time.Time and assigns it to the LastModifiedDate field.
-func (o *Metadata) SetLastModifiedDate(v time.Time) {
+func (o *MetadataForCentralLogging) SetLastModifiedDate(v time.Time) {
 	o.LastModifiedDate = &IonosTime{v}
 }
 
 // GetLastModifiedBy returns the LastModifiedBy field value if set, zero value otherwise.
-func (o *Metadata) GetLastModifiedBy() string {
+func (o *MetadataForCentralLogging) GetLastModifiedBy() string {
 	if o == nil || IsNil(o.LastModifiedBy) {
 		var ret string
 		return ret
@@ -194,7 +198,7 @@ func (o *Metadata) GetLastModifiedBy() string {
 
 // GetLastModifiedByOk returns a tuple with the LastModifiedBy field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Metadata) GetLastModifiedByOk() (*string, bool) {
+func (o *MetadataForCentralLogging) GetLastModifiedByOk() (*string, bool) {
 	if o == nil || IsNil(o.LastModifiedBy) {
 		return nil, false
 	}
@@ -202,7 +206,7 @@ func (o *Metadata) GetLastModifiedByOk() (*string, bool) {
 }
 
 // HasLastModifiedBy returns a boolean if a field has been set.
-func (o *Metadata) HasLastModifiedBy() bool {
+func (o *MetadataForCentralLogging) HasLastModifiedBy() bool {
 	if o != nil && !IsNil(o.LastModifiedBy) {
 		return true
 	}
@@ -211,12 +215,12 @@ func (o *Metadata) HasLastModifiedBy() bool {
 }
 
 // SetLastModifiedBy gets a reference to the given string and assigns it to the LastModifiedBy field.
-func (o *Metadata) SetLastModifiedBy(v string) {
+func (o *MetadataForCentralLogging) SetLastModifiedBy(v string) {
 	o.LastModifiedBy = &v
 }
 
 // GetLastModifiedByUserId returns the LastModifiedByUserId field value if set, zero value otherwise.
-func (o *Metadata) GetLastModifiedByUserId() string {
+func (o *MetadataForCentralLogging) GetLastModifiedByUserId() string {
 	if o == nil || IsNil(o.LastModifiedByUserId) {
 		var ret string
 		return ret
@@ -226,7 +230,7 @@ func (o *Metadata) GetLastModifiedByUserId() string {
 
 // GetLastModifiedByUserIdOk returns a tuple with the LastModifiedByUserId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Metadata) GetLastModifiedByUserIdOk() (*string, bool) {
+func (o *MetadataForCentralLogging) GetLastModifiedByUserIdOk() (*string, bool) {
 	if o == nil || IsNil(o.LastModifiedByUserId) {
 		return nil, false
 	}
@@ -234,7 +238,7 @@ func (o *Metadata) GetLastModifiedByUserIdOk() (*string, bool) {
 }
 
 // HasLastModifiedByUserId returns a boolean if a field has been set.
-func (o *Metadata) HasLastModifiedByUserId() bool {
+func (o *MetadataForCentralLogging) HasLastModifiedByUserId() bool {
 	if o != nil && !IsNil(o.LastModifiedByUserId) {
 		return true
 	}
@@ -243,12 +247,12 @@ func (o *Metadata) HasLastModifiedByUserId() bool {
 }
 
 // SetLastModifiedByUserId gets a reference to the given string and assigns it to the LastModifiedByUserId field.
-func (o *Metadata) SetLastModifiedByUserId(v string) {
+func (o *MetadataForCentralLogging) SetLastModifiedByUserId(v string) {
 	o.LastModifiedByUserId = &v
 }
 
 // GetResourceURN returns the ResourceURN field value if set, zero value otherwise.
-func (o *Metadata) GetResourceURN() string {
+func (o *MetadataForCentralLogging) GetResourceURN() string {
 	if o == nil || IsNil(o.ResourceURN) {
 		var ret string
 		return ret
@@ -258,7 +262,7 @@ func (o *Metadata) GetResourceURN() string {
 
 // GetResourceURNOk returns a tuple with the ResourceURN field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Metadata) GetResourceURNOk() (*string, bool) {
+func (o *MetadataForCentralLogging) GetResourceURNOk() (*string, bool) {
 	if o == nil || IsNil(o.ResourceURN) {
 		return nil, false
 	}
@@ -266,7 +270,7 @@ func (o *Metadata) GetResourceURNOk() (*string, bool) {
 }
 
 // HasResourceURN returns a boolean if a field has been set.
-func (o *Metadata) HasResourceURN() bool {
+func (o *MetadataForCentralLogging) HasResourceURN() bool {
 	if o != nil && !IsNil(o.ResourceURN) {
 		return true
 	}
@@ -275,11 +279,35 @@ func (o *Metadata) HasResourceURN() bool {
 }
 
 // SetResourceURN gets a reference to the given string and assigns it to the ResourceURN field.
-func (o *Metadata) SetResourceURN(v string) {
+func (o *MetadataForCentralLogging) SetResourceURN(v string) {
 	o.ResourceURN = &v
 }
 
-func (o Metadata) MarshalJSON() ([]byte, error) {
+// GetGrafanaEndpoint returns the GrafanaEndpoint field value
+func (o *MetadataForCentralLogging) GetGrafanaEndpoint() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.GrafanaEndpoint
+}
+
+// GetGrafanaEndpointOk returns a tuple with the GrafanaEndpoint field value
+// and a boolean to check if the value has been set.
+func (o *MetadataForCentralLogging) GetGrafanaEndpointOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.GrafanaEndpoint, true
+}
+
+// SetGrafanaEndpoint sets field value
+func (o *MetadataForCentralLogging) SetGrafanaEndpoint(v string) {
+	o.GrafanaEndpoint = v
+}
+
+func (o MetadataForCentralLogging) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -287,7 +315,7 @@ func (o Metadata) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o Metadata) ToMap() (map[string]interface{}, error) {
+func (o MetadataForCentralLogging) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.CreatedDate) {
 		toSerialize["createdDate"] = o.CreatedDate
@@ -310,41 +338,42 @@ func (o Metadata) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ResourceURN) {
 		toSerialize["resourceURN"] = o.ResourceURN
 	}
+	toSerialize["grafanaEndpoint"] = o.GrafanaEndpoint
 	return toSerialize, nil
 }
 
-type NullableMetadata struct {
-	value *Metadata
+type NullableMetadataForCentralLogging struct {
+	value *MetadataForCentralLogging
 	isSet bool
 }
 
-func (v NullableMetadata) Get() *Metadata {
+func (v NullableMetadataForCentralLogging) Get() *MetadataForCentralLogging {
 	return v.value
 }
 
-func (v *NullableMetadata) Set(val *Metadata) {
+func (v *NullableMetadataForCentralLogging) Set(val *MetadataForCentralLogging) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableMetadata) IsSet() bool {
+func (v NullableMetadataForCentralLogging) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableMetadata) Unset() {
+func (v *NullableMetadataForCentralLogging) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableMetadata(val *Metadata) *NullableMetadata {
-	return &NullableMetadata{value: val, isSet: true}
+func NewNullableMetadataForCentralLogging(val *MetadataForCentralLogging) *NullableMetadataForCentralLogging {
+	return &NullableMetadataForCentralLogging{value: val, isSet: true}
 }
 
-func (v NullableMetadata) MarshalJSON() ([]byte, error) {
+func (v NullableMetadataForCentralLogging) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableMetadata) UnmarshalJSON(src []byte) error {
+func (v *NullableMetadataForCentralLogging) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -1,3 +1,7 @@
+## 6.7.9
+### Features
+- Add `key` to `ionoscloud_logging_pipeline` resource
+- Add `tcp_address`, `http_address` and `key` to `ionoscloud_logging_pipeline` resource and data source
 ## 6.7.8
 ### Chore
 - Update `github.com/hashicorp/terraform-plugin-sdk/v2` dependency to latest version
