@@ -110,6 +110,18 @@ func (s v5tov6Server) GetProviderSchema(ctx context.Context, req *tfprotov6.GetP
 	return tfprotov5tov6.GetProviderSchemaResponse(v5Resp), nil
 }
 
+func (s v5tov6Server) GetResourceIdentitySchemas(ctx context.Context, req *tfprotov6.GetResourceIdentitySchemasRequest) (*tfprotov6.GetResourceIdentitySchemasResponse, error) {
+
+	v5Req := tfprotov6tov5.GetResourceIdentitySchemasRequest(req)
+	v5Resp, err := s.v5Server.GetResourceIdentitySchemas(ctx, v5Req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return tfprotov5tov6.GetResourceIdentitySchemasResponse(v5Resp), nil
+}
+
 func (s v5tov6Server) ImportResourceState(ctx context.Context, req *tfprotov6.ImportResourceStateRequest) (*tfprotov6.ImportResourceStateResponse, error) {
 	v5Req := tfprotov6tov5.ImportResourceStateRequest(req)
 	v5Resp, err := s.v5Server.ImportResourceState(ctx, v5Req)
@@ -212,6 +224,17 @@ func (s v5tov6Server) UpgradeResourceState(ctx context.Context, req *tfprotov6.U
 	}
 
 	return tfprotov5tov6.UpgradeResourceStateResponse(v5Resp), nil
+}
+
+func (s v5tov6Server) UpgradeResourceIdentity(ctx context.Context, req *tfprotov6.UpgradeResourceIdentityRequest) (*tfprotov6.UpgradeResourceIdentityResponse, error) {
+	v5Req := tfprotov6tov5.UpgradeResourceIdentityRequest(req)
+	v5Resp, err := s.v5Server.UpgradeResourceIdentity(ctx, v5Req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return tfprotov5tov6.UpgradeResourceIdentityResponse(v5Resp), nil
 }
 
 func (s v5tov6Server) ValidateDataResourceConfig(ctx context.Context, req *tfprotov6.ValidateDataResourceConfigRequest) (*tfprotov6.ValidateDataResourceConfigResponse, error) {
