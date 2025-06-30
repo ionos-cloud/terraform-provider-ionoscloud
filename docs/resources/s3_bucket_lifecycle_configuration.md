@@ -25,7 +25,9 @@ resource "ionoscloud_s3_bucket_lifecycle_configuration" "example" {
   rule {
     id     = "1"
     status = "Enabled"
-    prefix = "/logs"
+    filter {
+      prefix = "/logs"
+    }
     expiration {
       days = 90
     }
@@ -34,7 +36,9 @@ resource "ionoscloud_s3_bucket_lifecycle_configuration" "example" {
   rule {
     id     = "2"
     status = "Enabled"
-    prefix = "/logs"
+    filter {
+      prefix = "/logs"
+    }
     noncurrent_version_expiration {
       noncurrent_days = 90
     }
@@ -43,7 +47,9 @@ resource "ionoscloud_s3_bucket_lifecycle_configuration" "example" {
   rule {
     id     = "3"
     status = "Enabled"
-    prefix = "/logs"
+    filter {
+      prefix = "/logs"
+    }
     abort_incomplete_multipart_upload {
       days_after_initiation = 90
     }
@@ -58,7 +64,9 @@ The following arguments are supported:
 - `bucket` - (Required)[string] The name of the bucket where the object will be stored.
 - `lifecycle_rule` - (Required)[block] A block of lifecycle_rule as defined below.
   - `id` - (Optional)[int] Container for the Contract Number of the owner
-  - `prefix` - (Required)[string] Prefix identifying one or more objects to which the rule applies.
+  - `prefix` - (Required)[string] DEPRECATED! This field does not do anything! Will be removed in a future version, use `filter` instead. Prefix identifying one or more objects to which the rule applies.
+  - `filter - (Optional)[block] A filter identifying one or more objects to which the rule applies.`
+    - `prefix` - (Optional)[string] Prefix identifying one or more objects to which the rule applies. Cannot be used at the same time as `prefix` in the lifecycle rule.
   - `status` - (Required)[string] The lifecycle rule status. Valid values are `Enabled` or `Disabled`.
   - `expiration` - (Optional)[block]  A lifecycle rule for when an object expires.
     - `days` - (Optional)[int] Specifies the number of days after object creation when the object expires. Required if 'date' is not specified.

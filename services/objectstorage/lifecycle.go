@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 
-	convptr "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/convptr"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/convptr"
 	hash2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/hash"
 )
 
@@ -22,6 +22,7 @@ type BucketLifecycleConfigurationModel struct {
 type lifecycleRule struct {
 	ID                             types.String                    `tfsdk:"id"`
 	Prefix                         types.String                    `tfsdk:"prefix"`
+	Filter                         *filter                         `tfsdk:"filter"`
 	Status                         types.String                    `tfsdk:"status"`
 	Expiration                     *expiration                     `tfsdk:"expiration"`
 	NoncurrentVersionExpiration    *noncurrentVersionExpiration    `tfsdk:"noncurrent_version_expiration"`
@@ -32,6 +33,10 @@ type expiration struct {
 	Days                      types.Int64  `tfsdk:"days"`
 	Date                      types.String `tfsdk:"date"`
 	ExpiredObjectDeleteMarker types.Bool   `tfsdk:"expired_object_delete_marker"`
+}
+
+type filter struct {
+	Prefix types.String `tfsdk:"prefix"`
 }
 
 type noncurrentVersionExpiration struct {
@@ -103,28 +108,33 @@ func (c *Client) DeleteBucketLifecycle(ctx context.Context, bucketName types.Str
 }
 
 func buildBucketLifecycleConfigurationModelFromAPIResponse(output *objstorage.GetBucketLifecycleOutput, data *BucketLifecycleConfigurationModel) *BucketLifecycleConfigurationModel {
-	data.Rule = buildRulesFromAPIResponse(output.Rules)
-	return data
-}
-
-func buildRulesFromAPIResponse(rules []objstorage.Rule) []lifecycleRule {
-	if rules == nil {
-		return nil
+	if output.Rules == nil {
+		data.Rule = nil
+		return data
 	}
-
+	rules := output.Rules
 	result := make([]lifecycleRule, 0, len(rules))
 	for _, r := range rules {
-		result = append(result, lifecycleRule{
+		rule := lifecycleRule{
 			ID:                             types.StringPointerValue(r.ID),
-			Prefix:                         types.StringPointerValue(&r.Prefix),
 			Status:                         types.StringValue(string(r.Status)),
 			Expiration:                     buildExpirationFromAPIResponse(r.Expiration),
 			NoncurrentVersionExpiration:    buildNoncurrentVersionExpirationFromAPIResponse(r.NoncurrentVersionExpiration),
 			AbortIncompleteMultipartUpload: buildAbortIncompleteMultipartUploadFromAPIResponse(r.AbortIncompleteMultipartUpload),
-		})
+		}
+		rule.Filter = nil
+		if r.Filter != nil && r.Filter.Prefix != "" {
+			rule.Filter = &filter{Prefix: types.StringValue(r.Filter.Prefix)}
+		}
+		rule.Prefix = types.StringNull()
+		if r.Prefix != "" {
+			rule.Prefix = types.StringValue(r.Prefix)
+		}
+		result = append(result, rule)
 	}
 
-	return result
+	data.Rule = result
+	return data
 }
 
 func buildExpirationFromAPIResponse(exp *objstorage.LifecycleExpiration) *expiration {
@@ -172,14 +182,22 @@ func buildRulesFromModel(rules []lifecycleRule) []objstorage.Rule {
 
 	result := make([]objstorage.Rule, 0, len(rules))
 	for _, r := range rules {
-		result = append(result, objstorage.Rule{
+		rule := objstorage.Rule{
 			ID:                             r.ID.ValueStringPointer(),
-			Prefix:                         r.Prefix.ValueString(),
 			Status:                         objstorage.ExpirationStatus(r.Status.ValueString()),
 			Expiration:                     buildExpirationFromModel(r.Expiration),
 			NoncurrentVersionExpiration:    buildNoncurrentVersionExpirationFromModel(r.NoncurrentVersionExpiration),
 			AbortIncompleteMultipartUpload: buildAbortIncompleteMultipartUploadFromModel(r.AbortIncompleteMultipartUpload),
-		})
+		}
+		if r.Prefix.ValueString() != "" {
+			rule.Prefix = r.Prefix.ValueString()
+		}
+		if r.Filter != nil && r.Filter.Prefix.String() != "" {
+			rule.Filter = &objstorage.Filter{
+				Prefix: r.Filter.Prefix.ValueString(),
+			}
+		}
+		result = append(result, rule)
 	}
 
 	return result

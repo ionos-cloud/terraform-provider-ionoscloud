@@ -176,7 +176,7 @@ func resourceKafkaTopicImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	diags := resourceKafkaTopicRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
-		return nil, fmt.Errorf(diags[0].Summary)
+		return nil, fmt.Errorf("%s", diags[0].Summary)
 	}
 
 	return []*schema.ResourceData{d}, nil
