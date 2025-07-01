@@ -1,7 +1,7 @@
 ## 6.7.10
 ### Features
 - Add `key` to `ionoscloud_logging_pipeline` resource
-- Add `tcp_address`, `http_address` and `key` to `ionoscloud_logging_pipeline` resource and data source
+- Add `tcp_address` and`http_address` to `ionoscloud_logging_pipeline` resource and data source
 - ## 6.7.9
 ### Features
 - Add `filter` object with `prefix` field so prefix is actually set for lifecycle rules in `ionoscloud_s3_bucket_lifecycle_configuration` resource. Deprecate `prefix` field as it does nothing..
