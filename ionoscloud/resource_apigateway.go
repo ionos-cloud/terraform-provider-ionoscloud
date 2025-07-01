@@ -124,7 +124,7 @@ func resourceAPIGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		// will only be one item in the list, we just have to check if it is enabled
 		if !central.Items[0].Properties.Enabled {
-			return diag.FromErr(fmt.Errorf("cannot create API Gateway with logs enabled, please use Logging API to enable Central Logging"))
+			return diag.FromErr(fmt.Errorf("cannot create API Gateway with logs disabled, please use Logging API to enable Central Logging"))
 		}
 	}
 
