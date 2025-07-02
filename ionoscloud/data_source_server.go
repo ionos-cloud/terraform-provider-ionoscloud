@@ -180,6 +180,13 @@ func dataSourceServer() *schema.Resource {
 							Description: "The UUID of the attached server.",
 							Computed:    true,
 						},
+						"expose_serial": {
+							Type:     schema.TypeBool,
+							Computed: true,
+							Description: "If set to `true` will expose the serial id of the disk attached to the server. " +
+								"If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. " +
+								"Exposing the serial can influence licensed software (e.g. Windows) behavior",
+						},
 					},
 				},
 			},
@@ -334,6 +341,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["availability_zone"] = ionoscloud.ToValueDefault(volume.Properties.AvailabilityZone)
 			entry["image_name"] = ionoscloud.ToValueDefault(volume.Properties.Image)
 			entry["image_password"] = ionoscloud.ToValueDefault(volume.Properties.ImagePassword)
+			entry["expose_serial"] = boolOrDefault(volume.Properties.ExposeSerial, false)
 
 			if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
 				var sshKeys []interface{}

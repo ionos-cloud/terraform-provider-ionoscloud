@@ -43,6 +43,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
+//replace github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2 => /tmp/sdk-go
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
@@ -53,6 +55,7 @@ require (
 	golang.org/x/sync v0.15.0 // indirect
 	golang.org/x/tools v0.33.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+	gopkg.in/validator.v2 v2.0.1 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 

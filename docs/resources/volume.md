@@ -140,6 +140,8 @@ resource "random_password" "volume_image_password" {
 * `disc_virtio_hot_plug` - (Computed)[string] Is capable of Virt-IO drive hot plug (no reboot required)
 * `disc_virtio_hot_unplug` - (Computed)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 * `boot_server` - (Computed)[string] The UUID of the attached server.
+* `expose_serial` - (Optional)[boolean] Defaults to `false`. If set to `true` will expose the serial id of the disk attached to the server. If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. Exposing the serial can influence licensed software (e.g. Windows) behavior
+
 > **⚠ WARNING**
 >
 > ssh_key_path and ssh_keys fields are immutable.

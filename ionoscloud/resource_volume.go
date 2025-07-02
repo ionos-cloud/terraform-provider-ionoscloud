@@ -154,6 +154,14 @@ func resourceVolume() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"expose_serial": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				Description: "If set to `true` will expose the serial id of the disk attached to the server. " +
+					"If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. " +
+					"Exposing the serial can influence licensed software (e.g. Windows) behavior",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -354,6 +362,12 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, newValue := d.GetChange("bus")
 		newValueStr := newValue.(string)
 		properties.Bus = &newValueStr
+	}
+
+	if d.HasChange("expose_serial") {
+		_, n := d.GetChange("expose_serial")
+		nBool := n.(bool)
+		properties.ExposeSerial = &nBool
 	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
@@ -574,6 +588,14 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 			return fmt.Errorf("error while setting boot_server property for volume %s: %w", d.Id(), err)
 		}
 	}
+
+	if volume.Properties.ExposeSerial != nil {
+		err := d.Set("expose_serial", *volume.Properties.ExposeSerial)
+		if err != nil {
+			return fmt.Errorf("error while setting exposeSerial property for volume %s: %w", d.Id(), err)
+		}
+	}
+
 	return nil
 
 }
@@ -660,6 +682,11 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 		if len(publicKeys) > 0 {
 			volume.SshKeys = &publicKeys
 		}
+	}
+
+	if v, ok := d.GetOk(path + "expose_serial"); ok {
+		val := v.(bool)
+		volume.ExposeSerial = &val
 	}
 	return &volume, nil
 }
@@ -761,7 +788,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				logApiRequestTime(apiResponse)
 				if err != nil {
 					// we want to search for snapshot again, but we check for
-					//image != "" to be sure we didn't find it when we searched above for it
+					// image != "" to be sure we didn't find it when we searched above for it
 					if (apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404) && (image != "") {
 						snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageName).Execute()
 						logApiRequestTime(apiResponse)

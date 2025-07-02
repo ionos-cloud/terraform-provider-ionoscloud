@@ -330,6 +330,14 @@ func resourceServer() *schema.Resource {
 							Description: "The UUID of the attached server.",
 							Computed:    true,
 						},
+						"expose_serial": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+							Description: "If set to `true` will expose the serial id of the disk attached to the server. " +
+								"If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. " +
+								"Exposing the serial can influence licensed software (e.g. Windows) behavior",
+						},
 					},
 				},
 			},
@@ -612,6 +620,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			volume.UserData = &userData
 
 		}
+		if val, ok := d.GetOk("volume.0.expose_serial"); ok {
+			exposeSerial := val.(bool)
+			volume.ExposeSerial = &exposeSerial
+		}
 		// add volume object to serverReq
 		serverReq.Entities.Volumes = &ionoscloud.AttachedVolumes{
 			Items: &[]ionoscloud.Volume{
@@ -869,6 +881,7 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 		utils.SetPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
 		utils.SetPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
 		utils.SetPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
+		utils.SetPropWithNilCheck(volumeMap, "expose_serial", volume.Properties.ExposeSerial)
 	}
 	return volumeMap
 }
@@ -994,6 +1007,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				if v, ok := d.GetOk(volumePath + "bus"); ok {
 					vStr := v.(string)
 					properties.Bus = &vStr
+				}
+				if changed := d.HasChange(volumePath + "expose_serial"); changed {
+					_, newVal := d.GetChange(volumePath + "expose_serial")
+					exposeSerial := newVal.(bool)
+					properties.ExposeSerial = &exposeSerial
 				}
 
 				_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), volumeIdStr).Volume(properties).Execute()
