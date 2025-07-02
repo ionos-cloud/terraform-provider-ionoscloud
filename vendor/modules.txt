@@ -345,8 +345,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/dns/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2
-# github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1
-## explicit; go 1.21
+# github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.2.0
+## explicit; go 1.24
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0
 ## explicit; go 1.22

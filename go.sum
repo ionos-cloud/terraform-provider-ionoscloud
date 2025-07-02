@@ -168,6 +168,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2 v2.1.0 h1:QkMyUjp1Lfc84oa
 github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2 v2.1.0/go.mod h1:FveJvw/9hh+eo42FEXrUFTLJWqNJvsm7pXeEDph3rJM=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1 h1:GXxdNKl7haQnHO1QewZeXazur5+LDCpHqvP+nNObGaA=
 github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.1.1/go.mod h1:N0ifRq3ENqGg6qht1WPrVgSkcavPS5SRWlNfkHUZbfQ=
+github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.2.0 h1:SyqfL5W7Ora2GZ5tnTEyd02VrBZaSb9I31XgLxf5qEU=
+github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.2.0/go.mod h1:NbpqnqfYM/+mlelgB5bokwjynZUteYrbBp+/cCAGqTM=
 github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0 h1:gVh+jd0o8ROtJLWqUB6/VU8vSLdj/kRYAz/qbMO7z7I=
 github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0/go.mod h1:PRdc/x/r7tMEV7rh2uZYJ8ososjfIF/cXiGX/D6FdTs=
 github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0 h1:QaGzJr7yqINXSleJ5YlCmtnjNWFBu8QaebHu4w+VjWU=

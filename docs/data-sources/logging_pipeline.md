@@ -45,7 +45,9 @@ The following attributes are returned by the datasource:
 
 * `id` - The UUID of the Logging pipeline.
 * `name` - The name of the Logging pipeline.
-* `grafana_address` - The address of the client's grafana instance.
+* `grafana_address` - The Grafana address is where user can access their logs, create dashboards, and set up alerts.
+* `tcp_address` - The TCP address of the pipeline. This is the address to which logs are sent using the TCP protocol.
+* `http_address` - The HTTP address of the pipeline. This is the address to which logs are sent using the HTTP protocol.
 * `log` - [list] Pipeline logs, a list that contains elements with the following structure:
   * `source` - [string] The source parser to be used.
   * `tag` - [string] The tag is used to distinguish different pipelines. Must be unique amongst the pipeline's array items.

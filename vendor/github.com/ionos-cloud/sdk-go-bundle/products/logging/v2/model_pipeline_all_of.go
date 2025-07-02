@@ -14,14 +14,11 @@ import (
 	"encoding/json"
 )
 
-// checks if the Pipeline type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &Pipeline{}
+// checks if the PipelineAllOf type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &PipelineAllOf{}
 
-// Pipeline struct for Pipeline
-type Pipeline struct {
-	// The name of the pipeline. Must be not more that 20 characters long.
-	Name string               `json:"name"`
-	Logs []PipelineNoAddrLogs `json:"logs,omitempty"`
+// PipelineAllOf struct for PipelineAllOf
+type PipelineAllOf struct {
 	// The TCP address of the pipeline. This is the address to which logs are sent using the TCP protocol.
 	TcpAddress *string `json:"tcpAddress,omitempty"`
 	// The HTTP address of the pipeline. This is the address to which logs are sent using the HTTP protocol.
@@ -33,84 +30,26 @@ type Pipeline struct {
 	Key *string `json:"key,omitempty"`
 }
 
-// NewPipeline instantiates a new Pipeline object
+// NewPipelineAllOf instantiates a new PipelineAllOf object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPipeline(name string) *Pipeline {
-	this := Pipeline{}
-
-	this.Name = name
+func NewPipelineAllOf() *PipelineAllOf {
+	this := PipelineAllOf{}
 
 	return &this
 }
 
-// NewPipelineWithDefaults instantiates a new Pipeline object
+// NewPipelineAllOfWithDefaults instantiates a new PipelineAllOf object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewPipelineWithDefaults() *Pipeline {
-	this := Pipeline{}
+func NewPipelineAllOfWithDefaults() *PipelineAllOf {
+	this := PipelineAllOf{}
 	return &this
-}
-
-// GetName returns the Name field value
-func (o *Pipeline) GetName() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Name
-}
-
-// GetNameOk returns a tuple with the Name field value
-// and a boolean to check if the value has been set.
-func (o *Pipeline) GetNameOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Name, true
-}
-
-// SetName sets field value
-func (o *Pipeline) SetName(v string) {
-	o.Name = v
-}
-
-// GetLogs returns the Logs field value if set, zero value otherwise.
-func (o *Pipeline) GetLogs() []PipelineNoAddrLogs {
-	if o == nil || IsNil(o.Logs) {
-		var ret []PipelineNoAddrLogs
-		return ret
-	}
-	return o.Logs
-}
-
-// GetLogsOk returns a tuple with the Logs field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Pipeline) GetLogsOk() ([]PipelineNoAddrLogs, bool) {
-	if o == nil || IsNil(o.Logs) {
-		return nil, false
-	}
-	return o.Logs, true
-}
-
-// HasLogs returns a boolean if a field has been set.
-func (o *Pipeline) HasLogs() bool {
-	if o != nil && !IsNil(o.Logs) {
-		return true
-	}
-
-	return false
-}
-
-// SetLogs gets a reference to the given []PipelineNoAddrLogs and assigns it to the Logs field.
-func (o *Pipeline) SetLogs(v []PipelineNoAddrLogs) {
-	o.Logs = v
 }
 
 // GetTcpAddress returns the TcpAddress field value if set, zero value otherwise.
-func (o *Pipeline) GetTcpAddress() string {
+func (o *PipelineAllOf) GetTcpAddress() string {
 	if o == nil || IsNil(o.TcpAddress) {
 		var ret string
 		return ret
@@ -120,7 +59,7 @@ func (o *Pipeline) GetTcpAddress() string {
 
 // GetTcpAddressOk returns a tuple with the TcpAddress field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Pipeline) GetTcpAddressOk() (*string, bool) {
+func (o *PipelineAllOf) GetTcpAddressOk() (*string, bool) {
 	if o == nil || IsNil(o.TcpAddress) {
 		return nil, false
 	}
@@ -128,7 +67,7 @@ func (o *Pipeline) GetTcpAddressOk() (*string, bool) {
 }
 
 // HasTcpAddress returns a boolean if a field has been set.
-func (o *Pipeline) HasTcpAddress() bool {
+func (o *PipelineAllOf) HasTcpAddress() bool {
 	if o != nil && !IsNil(o.TcpAddress) {
 		return true
 	}
@@ -137,12 +76,12 @@ func (o *Pipeline) HasTcpAddress() bool {
 }
 
 // SetTcpAddress gets a reference to the given string and assigns it to the TcpAddress field.
-func (o *Pipeline) SetTcpAddress(v string) {
+func (o *PipelineAllOf) SetTcpAddress(v string) {
 	o.TcpAddress = &v
 }
 
 // GetHttpAddress returns the HttpAddress field value if set, zero value otherwise.
-func (o *Pipeline) GetHttpAddress() string {
+func (o *PipelineAllOf) GetHttpAddress() string {
 	if o == nil || IsNil(o.HttpAddress) {
 		var ret string
 		return ret
@@ -152,7 +91,7 @@ func (o *Pipeline) GetHttpAddress() string {
 
 // GetHttpAddressOk returns a tuple with the HttpAddress field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Pipeline) GetHttpAddressOk() (*string, bool) {
+func (o *PipelineAllOf) GetHttpAddressOk() (*string, bool) {
 	if o == nil || IsNil(o.HttpAddress) {
 		return nil, false
 	}
@@ -160,7 +99,7 @@ func (o *Pipeline) GetHttpAddressOk() (*string, bool) {
 }
 
 // HasHttpAddress returns a boolean if a field has been set.
-func (o *Pipeline) HasHttpAddress() bool {
+func (o *PipelineAllOf) HasHttpAddress() bool {
 	if o != nil && !IsNil(o.HttpAddress) {
 		return true
 	}
@@ -169,12 +108,12 @@ func (o *Pipeline) HasHttpAddress() bool {
 }
 
 // SetHttpAddress gets a reference to the given string and assigns it to the HttpAddress field.
-func (o *Pipeline) SetHttpAddress(v string) {
+func (o *PipelineAllOf) SetHttpAddress(v string) {
 	o.HttpAddress = &v
 }
 
 // GetGrafanaAddress returns the GrafanaAddress field value if set, zero value otherwise.
-func (o *Pipeline) GetGrafanaAddress() string {
+func (o *PipelineAllOf) GetGrafanaAddress() string {
 	if o == nil || IsNil(o.GrafanaAddress) {
 		var ret string
 		return ret
@@ -184,7 +123,7 @@ func (o *Pipeline) GetGrafanaAddress() string {
 
 // GetGrafanaAddressOk returns a tuple with the GrafanaAddress field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Pipeline) GetGrafanaAddressOk() (*string, bool) {
+func (o *PipelineAllOf) GetGrafanaAddressOk() (*string, bool) {
 	if o == nil || IsNil(o.GrafanaAddress) {
 		return nil, false
 	}
@@ -192,7 +131,7 @@ func (o *Pipeline) GetGrafanaAddressOk() (*string, bool) {
 }
 
 // HasGrafanaAddress returns a boolean if a field has been set.
-func (o *Pipeline) HasGrafanaAddress() bool {
+func (o *PipelineAllOf) HasGrafanaAddress() bool {
 	if o != nil && !IsNil(o.GrafanaAddress) {
 		return true
 	}
@@ -201,12 +140,12 @@ func (o *Pipeline) HasGrafanaAddress() bool {
 }
 
 // SetGrafanaAddress gets a reference to the given string and assigns it to the GrafanaAddress field.
-func (o *Pipeline) SetGrafanaAddress(v string) {
+func (o *PipelineAllOf) SetGrafanaAddress(v string) {
 	o.GrafanaAddress = &v
 }
 
 // GetResourceTier returns the ResourceTier field value if set, zero value otherwise.
-func (o *Pipeline) GetResourceTier() string {
+func (o *PipelineAllOf) GetResourceTier() string {
 	if o == nil || IsNil(o.ResourceTier) {
 		var ret string
 		return ret
@@ -216,7 +155,7 @@ func (o *Pipeline) GetResourceTier() string {
 
 // GetResourceTierOk returns a tuple with the ResourceTier field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Pipeline) GetResourceTierOk() (*string, bool) {
+func (o *PipelineAllOf) GetResourceTierOk() (*string, bool) {
 	if o == nil || IsNil(o.ResourceTier) {
 		return nil, false
 	}
@@ -224,7 +163,7 @@ func (o *Pipeline) GetResourceTierOk() (*string, bool) {
 }
 
 // HasResourceTier returns a boolean if a field has been set.
-func (o *Pipeline) HasResourceTier() bool {
+func (o *PipelineAllOf) HasResourceTier() bool {
 	if o != nil && !IsNil(o.ResourceTier) {
 		return true
 	}
@@ -233,12 +172,12 @@ func (o *Pipeline) HasResourceTier() bool {
 }
 
 // SetResourceTier gets a reference to the given string and assigns it to the ResourceTier field.
-func (o *Pipeline) SetResourceTier(v string) {
+func (o *PipelineAllOf) SetResourceTier(v string) {
 	o.ResourceTier = &v
 }
 
 // GetKey returns the Key field value if set, zero value otherwise.
-func (o *Pipeline) GetKey() string {
+func (o *PipelineAllOf) GetKey() string {
 	if o == nil || IsNil(o.Key) {
 		var ret string
 		return ret
@@ -248,7 +187,7 @@ func (o *Pipeline) GetKey() string {
 
 // GetKeyOk returns a tuple with the Key field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Pipeline) GetKeyOk() (*string, bool) {
+func (o *PipelineAllOf) GetKeyOk() (*string, bool) {
 	if o == nil || IsNil(o.Key) {
 		return nil, false
 	}
@@ -256,7 +195,7 @@ func (o *Pipeline) GetKeyOk() (*string, bool) {
 }
 
 // HasKey returns a boolean if a field has been set.
-func (o *Pipeline) HasKey() bool {
+func (o *PipelineAllOf) HasKey() bool {
 	if o != nil && !IsNil(o.Key) {
 		return true
 	}
@@ -265,11 +204,11 @@ func (o *Pipeline) HasKey() bool {
 }
 
 // SetKey gets a reference to the given string and assigns it to the Key field.
-func (o *Pipeline) SetKey(v string) {
+func (o *PipelineAllOf) SetKey(v string) {
 	o.Key = &v
 }
 
-func (o Pipeline) MarshalJSON() ([]byte, error) {
+func (o PipelineAllOf) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -277,12 +216,8 @@ func (o Pipeline) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o Pipeline) ToMap() (map[string]interface{}, error) {
+func (o PipelineAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["name"] = o.Name
-	if !IsNil(o.Logs) {
-		toSerialize["logs"] = o.Logs
-	}
 	if !IsNil(o.TcpAddress) {
 		toSerialize["tcpAddress"] = o.TcpAddress
 	}
@@ -301,38 +236,38 @@ func (o Pipeline) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullablePipeline struct {
-	value *Pipeline
+type NullablePipelineAllOf struct {
+	value *PipelineAllOf
 	isSet bool
 }
 
-func (v NullablePipeline) Get() *Pipeline {
+func (v NullablePipelineAllOf) Get() *PipelineAllOf {
 	return v.value
 }
 
-func (v *NullablePipeline) Set(val *Pipeline) {
+func (v *NullablePipelineAllOf) Set(val *PipelineAllOf) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullablePipeline) IsSet() bool {
+func (v NullablePipelineAllOf) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullablePipeline) Unset() {
+func (v *NullablePipelineAllOf) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullablePipeline(val *Pipeline) *NullablePipeline {
-	return &NullablePipeline{value: val, isSet: true}
+func NewNullablePipelineAllOf(val *PipelineAllOf) *NullablePipelineAllOf {
+	return &NullablePipelineAllOf{value: val, isSet: true}
 }
 
-func (v NullablePipeline) MarshalJSON() ([]byte, error) {
+func (v NullablePipelineAllOf) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullablePipeline) UnmarshalJSON(src []byte) error {
+func (v *NullablePipelineAllOf) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
