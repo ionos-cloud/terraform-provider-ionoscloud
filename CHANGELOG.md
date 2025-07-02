@@ -2,12 +2,14 @@
 ### Features
 - Add `key` to `ionoscloud_logging_pipeline` resource
 - Add `tcp_address` and`http_address` to `ionoscloud_logging_pipeline` resource and data source
-- Add `expose_serial` attribute to `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server` resources. If set to `true` will expose the serial id of the disk attached to the server. 
-If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. Exposing the serial can influence licensed software (e.g. Windows) behavior
+- Add `expose_serial` attribute to `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server` resources. If set to `true` will expose the serial id of the disk attached to the server.
+Some operating systems or software solutions require the serial id to be exposed to work properly. Exposing the serial can influence licensed software (e.g. Windows) behavior
 
 ## 6.7.9
 ### Features
-- Add `filter` object with `prefix` field so prefix is actually set for lifecycle rules in `ionoscloud_s3_bucket_lifecycle_configuration` resource. Deprecate `prefix` field as it does nothing.
+- Add `filter` object with `prefix` field so prefix is actually set for lifecycle rules in `ionoscloud_s3_bucket_lifecycle_configuration` resource. Deprecate `prefix` field as it does nothing..
+### Fixes
+- Terraform provider not working with latest Terraform version 1.12.2
 ## 6.7.8
 ### Chore
 - Update `github.com/hashicorp/terraform-plugin-sdk/v2` dependency to latest version
