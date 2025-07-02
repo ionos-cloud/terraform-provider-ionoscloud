@@ -6,21 +6,43 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
+	userobjstorage "github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2"
 )
 
 // KeyValueTags is a map of key-value tags.
 type KeyValueTags map[string]string
 
+type HasKeyAndValue interface {
+	GetKey() string
+	GetValue() string
+}
+
+type HasTagsSet interface {
+	GetTagSet() []HasKeyAndValue
+}
+
 // New creates a new KeyValueTags from a list of objstorage.Tag.
-func New(tags []objstorage.Tag) KeyValueTags {
+func New(tagset []HasKeyAndValue) KeyValueTags {
+
 	result := make(KeyValueTags)
 
-	for _, tag := range tags {
-		result[tag.Key] = tag.Value
+	for _, tag := range tagset {
+		result[tag.GetKey()] = tag.GetValue()
 	}
 
 	return result
 }
+
+// func New(tagset HasTagsSet) KeyValueTags {
+// 	tags := tagset.GetTagSet()
+// 	result := make(KeyValueTags)
+//
+// 	for _, tag := range tags {
+// 		result[tag.GetKey()] = tag.GetValue()
+// 	}
+//
+// 	return result
+// }
 
 // ToMap converts KeyValueTags to a Terraform map.
 func (t KeyValueTags) ToMap(ctx context.Context) (types.Map, error) {
@@ -77,8 +99,8 @@ func (t KeyValueTags) Ignore(ignoreTags KeyValueTags) KeyValueTags {
 	return result
 }
 
-// ToList converts KeyValueTags to a list of objstorage.Tag.
-func (t KeyValueTags) ToList() []objstorage.Tag {
+// ObjectStorageList converts KeyValueTags to a list of objstorage.Tag.
+func (t KeyValueTags) ObjectStorageList() []objstorage.Tag {
 	tags := make([]objstorage.Tag, 0, len(t))
 	for key, value := range t {
 		tags = append(tags, objstorage.Tag{Key: key, Value: value})
@@ -87,8 +109,18 @@ func (t KeyValueTags) ToList() []objstorage.Tag {
 	return tags
 }
 
+// UserObjectStorageList converts KeyValueTags to a list of objstorage.Tag.
+func (t KeyValueTags) UserObjectStorageList() []userobjstorage.Tag {
+	tags := make([]userobjstorage.Tag, 0, len(t))
+	for key, value := range t {
+		tags = append(tags, userobjstorage.Tag{Key: key, Value: value})
+	}
+
+	return tags
+}
+
 // ToListPointer converts KeyValueTags to a pointer to a list of objstorage.Tag.
 func (t KeyValueTags) ToListPointer() *[]objstorage.Tag {
-	tags := t.ToList()
+	tags := t.ObjectStorageList()
 	return &tags
 }

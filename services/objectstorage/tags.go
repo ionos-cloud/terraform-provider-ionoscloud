@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
 )
 
@@ -29,7 +30,7 @@ func (c *Client) UpdateBucketTags(ctx context.Context, bucketName string, new, o
 	if len(new)+len(tagsToKeep) > 0 { // The API overwrite the tags list every time, so we need to merge new and the ones we want to keep.
 		if _, err = c.client.TaggingApi.PutBucketTagging(ctx, bucketName).PutBucketTaggingRequest(
 			objstorage.PutBucketTaggingRequest{
-				TagSet: new.Merge(tagsToKeep).ToList(),
+				TagSet: new.Merge(tagsToKeep).ObjectStorageList(),
 			}).Execute(); err != nil {
 			return fmt.Errorf("failed to update bucket tags: %w", err)
 		}
@@ -56,8 +57,11 @@ func (c *Client) ListBucketTags(ctx context.Context, bucketName string) (tags.Ke
 	if output.TagSet == nil {
 		return tags.New(nil), nil
 	}
-
-	return tags.New(output.TagSet), nil
+	wrappedTags := make([]tags.HasKeyAndValue, len(output.TagSet))
+	for i, tag := range output.TagSet {
+		wrappedTags[i] = &tag
+	}
+	return tags.New(wrappedTags), nil
 }
 
 // ListObjectTags lists tags for an object.
@@ -74,8 +78,11 @@ func (c *Client) ListObjectTags(ctx context.Context, bucketName, objectName stri
 	if output.TagSet == nil {
 		return tags.New(nil), nil
 	}
-
-	return tags.New(output.TagSet), nil
+	wrappedTags := make([]tags.HasKeyAndValue, len(output.TagSet))
+	for i, tag := range output.TagSet {
+		wrappedTags[i] = &tag
+	}
+	return tags.New(wrappedTags), nil
 }
 
 // UpdateObjectTags updates tags for an object.
@@ -90,7 +97,7 @@ func (c *Client) UpdateObjectTags(ctx context.Context, bucketName, objectName st
 	if len(new)+len(tagsToKeep) > 0 { // The API overwrite the tags list every time, so we need to merge new and the ones we want to keep.
 		if _, _, err = c.client.TaggingApi.PutObjectTagging(ctx, bucketName, objectName).PutObjectTaggingRequest(
 			objstorage.PutObjectTaggingRequest{
-				TagSet: new.Merge(tagsToKeep).ToList(),
+				TagSet: new.Merge(tagsToKeep).ObjectStorageList(),
 			}).Execute(); err != nil {
 			return fmt.Errorf("failed to update object tags: %w", err)
 		}

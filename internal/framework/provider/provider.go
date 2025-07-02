@@ -21,6 +21,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/userobjectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -245,6 +246,7 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		objectstorage.Resources(),
 		objectstoragemanagement.Resources(),
 		monitoring.Resources(),
+		userobjectstorage.Resources(),
 	}
 
 	for _, r := range resources {

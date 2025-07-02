@@ -360,6 +360,9 @@ github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2 v2.0.0
+## explicit; go 1.24
+github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2
@@ -632,6 +635,8 @@ google.golang.org/protobuf/types/known/emptypb
 google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 ## explicit; go 1.11
+# gopkg.in/validator.v2 v2.0.1
+## explicit; go 1.18
 # gopkg.in/yaml.v2 v2.3.0
 ## explicit
 # gopkg.in/yaml.v3 v3.0.1
