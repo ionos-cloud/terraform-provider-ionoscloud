@@ -705,12 +705,12 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
-  
   volume {
     name = "system"
     licence_type    = "LINUX"
     disk_type = "DAS"
-}
+	expose_serial = true
+  }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"

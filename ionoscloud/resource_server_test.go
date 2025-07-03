@@ -309,6 +309,7 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.licence_type", "UNKNOWN"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "volume.0.expose_serial", "true"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.name", "system"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
@@ -1891,6 +1892,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     licence_type = "UNKNOWN"
     disk_type = "SSD Standard"
     bus = "VIRTIO"
+	expose_serial = true
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id

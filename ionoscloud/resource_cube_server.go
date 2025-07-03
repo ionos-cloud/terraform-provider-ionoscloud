@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
@@ -236,6 +236,14 @@ func resourceCubeServer() *schema.Resource {
 							Type:        schema.TypeString,
 							Description: "The UUID of the attached server.",
 							Computed:    true,
+						},
+						"expose_serial": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+							Description: "If set to `true` will expose the serial id of the disk attached to the server. " +
+								"If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. " +
+								"Exposing the serial can influence licensed software (e.g. Windows) behavior",
 						},
 					},
 				},
@@ -904,6 +912,12 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 					properties.Bus = &vStr
 				}
 
+				if changed := d.HasChange(volumePath + "expose_serial"); changed {
+					_, newVal := d.GetChange(volumePath + "expose_serial")
+					exposeSerial := newVal.(bool)
+					properties.ExposeSerial = &exposeSerial
+				}
+
 				_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), volumeIdStr).Volume(properties).Execute()
 				logApiRequestTime(apiResponse)
 
@@ -1103,6 +1117,7 @@ func SetCubeVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 		utils.SetPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
 		utils.SetPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
 		utils.SetPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
+		utils.SetPropWithNilCheck(volumeMap, "expose_serial", volume.Properties.ExposeSerial)
 	}
 	return volumeMap
 }

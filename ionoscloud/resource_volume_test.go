@@ -45,6 +45,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(constant.VolumeResource+"."+constant.VolumeTestResource, "image_name"),
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_server", constant.ServerResource+"."+constant.ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "expose_serial", "true"),
 					utils.TestImageNotNull(constant.VolumeResource, "image")),
 			},
 			{
@@ -64,6 +65,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "disc_virtio_hot_unplug", constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_unplug"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "device_number", constant.VolumeResource+"."+constant.VolumeTestResource, "device_number"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "boot_server", constant.ServerResource+"."+constant.ServerTestResource, "id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "expose_serial", constant.VolumeResource+"."+constant.VolumeTestResource, "expose_serial"),
 				),
 			},
 			{
@@ -96,6 +98,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "size", "6"),
 					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "bus", "VIRTIO"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "expose_serial", "false"),
 					resource.TestCheckResourceAttrSet(constant.VolumeResource+"."+constant.VolumeTestResource, "image_name"),
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_server", constant.ServerResource+"."+constant.ServerTestResource+"updated", "id"),
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "image_password", constant.RandomPassword+".server_image_password_updated", "result"),
@@ -255,6 +258,7 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
 	image_name ="ubuntu:latest"
 	image_password = ` + constant.RandomPassword + `.server_image_password.result
 	user_data = "foo"
+	expose_serial = true
 }
 ` + ServerImagePassword
 
@@ -318,6 +322,7 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
 	image_name ="ubuntu:latest"
 	image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
 	user_data = "foo"
+	expose_serial = false
 }
 ` + ServerImagePassword + ServerImagePasswordUpdated
 

@@ -37,7 +37,6 @@ resource "ionoscloud_lan" "example" {
 
 resource "ionoscloud_cube_server" "example" {
   name              = "Server Example"
-  availability_zone = "ZONE_2"
   image_name        = "ubuntu:latest"
   template_uuid     = data.ionoscloud_template.example.id
   image_password    = random_password.server_image_password.result
