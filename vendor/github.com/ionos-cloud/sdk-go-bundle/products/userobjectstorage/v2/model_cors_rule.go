@@ -15,23 +15,26 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the CORSRule type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CORSRule{}
 
 // CORSRule Specifies a cross-origin access rule for an IONOS Object Storage bucket.
 type CORSRule struct {
+	XMLName xml.Name `xml:"CORSRule"`
 	// Container for the Contract Number of the owner.
-	ID *int32 `json:"ID,omitempty"`
+	ID *string `json:"ID,omitempty" xml:"ID"`
 	// Headers that are specified in the `Access-Control-Request-Headers` header. These headers are allowed in a preflight OPTIONS request. In response to any preflight OPTIONS request, IONOS Object Storage returns any requested headers that are allowed.
-	AllowedHeaders []string `json:"AllowedHeaders,omitempty"`
+	AllowedHeaders []string `json:"AllowedHeaders,omitempty" xml:"AllowedHeader"`
 	// An HTTP method that you allow the origin to execute. Valid values are `GET`, `PUT`, `HEAD`, `POST`, and `DELETE`.
-	AllowedMethods []string `json:"AllowedMethods"`
+	AllowedMethods []string `json:"AllowedMethods" xml:"AllowedMethod"`
 	// One or more origins you want customers to be able to access the bucket from.
-	AllowedOrigins []string `json:"AllowedOrigins"`
+	AllowedOrigins []string `json:"AllowedOrigins" xml:"AllowedOrigin"`
 	// One or more headers in the response that you want customers to be able to access from their applications (for example, from a JavaScript `XMLHttpRequest` object).
-	ExposeHeaders []string `json:"ExposeHeaders,omitempty"`
+	ExposeHeaders []string `json:"ExposeHeaders,omitempty" xml:"ExposeHeader"`
 	// The time in seconds that your browser is to cache the preflight response for the specified resource.
-	MaxAgeSeconds *int32 `json:"MaxAgeSeconds,omitempty"`
+	MaxAgeSeconds *int32 `json:"MaxAgeSeconds,omitempty" xml:"MaxAgeSeconds"`
 }
 
 // NewCORSRule instantiates a new CORSRule object
@@ -56,9 +59,9 @@ func NewCORSRuleWithDefaults() *CORSRule {
 }
 
 // GetID returns the ID field value if set, zero value otherwise.
-func (o *CORSRule) GetID() int32 {
+func (o *CORSRule) GetID() string {
 	if o == nil || IsNil(o.ID) {
-		var ret int32
+		var ret string
 		return ret
 	}
 	return *o.ID
@@ -66,7 +69,7 @@ func (o *CORSRule) GetID() int32 {
 
 // GetIDOk returns a tuple with the ID field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CORSRule) GetIDOk() (*int32, bool) {
+func (o *CORSRule) GetIDOk() (*string, bool) {
 	if o == nil || IsNil(o.ID) {
 		return nil, false
 	}
@@ -82,8 +85,8 @@ func (o *CORSRule) HasID() bool {
 	return false
 }
 
-// SetID gets a reference to the given int32 and assigns it to the ID field.
-func (o *CORSRule) SetID(v int32) {
+// SetID gets a reference to the given string and assigns it to the ID field.
+func (o *CORSRule) SetID(v string) {
 	o.ID = &v
 }
 

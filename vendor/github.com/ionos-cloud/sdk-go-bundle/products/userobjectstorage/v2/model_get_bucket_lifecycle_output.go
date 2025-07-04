@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the GetBucketLifecycleOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &GetBucketLifecycleOutput{}
 
 // GetBucketLifecycleOutput struct for GetBucketLifecycleOutput
 type GetBucketLifecycleOutput struct {
+	XMLName xml.Name `xml:"LifecycleConfiguration"`
 	// Container for a lifecycle rules.
-	Rules []Rule `json:"Rules,omitempty"`
+	Rules []Rule `json:"Rules,omitempty" xml:"Rule"`
 }
 
 // NewGetBucketLifecycleOutput instantiates a new GetBucketLifecycleOutput object

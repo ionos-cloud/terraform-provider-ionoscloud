@@ -1,4 +1,4 @@
-package objectstorage
+package userobjectstorage
 
 import (
 	"context"
@@ -59,7 +59,7 @@ func (c *Client) GetObjectLock(ctx context.Context, name types.String) (*ObjectL
 		return nil, false, err
 	}
 
-	builtModel := buildObjectLockConfigurationModelFromAPIResponse(&output, &ObjectLockConfigurationModel{Bucket: name})
+	builtModel := buildObjectLockConfigurationModelFromAPIResponse(output, &ObjectLockConfigurationModel{Bucket: name})
 	return builtModel, true, nil
 }
 
@@ -74,9 +74,8 @@ func (c *Client) GetObjectLockEnabled(ctx context.Context, name types.String) (t
 		return types.BoolNull(), fmt.Errorf("failed to get object lock: %w", err)
 	}
 
-	if output.ObjectLockConfiguration != nil &&
-		output.ObjectLockConfiguration.ObjectLockEnabled != nil &&
-		*output.ObjectLockConfiguration.ObjectLockEnabled == objectLockEnabled {
+	if output.ObjectLockEnabled != nil &&
+		*output.ObjectLockEnabled == objectLockEnabled {
 		return types.BoolValue(true), nil
 	}
 
@@ -105,14 +104,14 @@ func (c *Client) UpdateObjectLock(ctx context.Context, data *ObjectLockConfigura
 func buildObjectLockConfigurationModelFromAPIResponse(output *objstorage.GetObjectLockConfigurationOutput, data *ObjectLockConfigurationModel) *ObjectLockConfigurationModel {
 	built := &ObjectLockConfigurationModel{
 		Bucket:            data.Bucket,
-		ObjectLockEnabled: types.StringPointerValue(output.ObjectLockConfiguration.ObjectLockEnabled),
+		ObjectLockEnabled: types.StringPointerValue(output.ObjectLockEnabled),
 	}
-	if output.ObjectLockConfiguration.Rule != nil {
+	if output.Rule != nil {
 		built.Rule = &rule{
 			DefaultRetention: &defaultRetention{
-				Mode:  types.StringPointerValue(output.ObjectLockConfiguration.Rule.DefaultRetention.Mode),
-				Days:  types.Int64PointerValue(convptr.Int32ToInt64(output.ObjectLockConfiguration.Rule.DefaultRetention.Days)),
-				Years: types.Int64PointerValue(convptr.Int32ToInt64(output.ObjectLockConfiguration.Rule.DefaultRetention.Years)),
+				Mode:  types.StringPointerValue(output.Rule.DefaultRetention.Mode),
+				Days:  types.Int64PointerValue(convptr.Int32ToInt64(output.Rule.DefaultRetention.Days)),
+				Years: types.Int64PointerValue(convptr.Int32ToInt64(output.Rule.DefaultRetention.Years)),
 			},
 		}
 	}
@@ -122,14 +121,12 @@ func buildObjectLockConfigurationModelFromAPIResponse(output *objstorage.GetObje
 
 func buildObjectLockConfigurationFromModel(data *ObjectLockConfigurationModel) objstorage.PutObjectLockConfigurationRequest {
 	req := objstorage.PutObjectLockConfigurationRequest{
-		ObjectLockConfiguration: &objstorage.PutObjectLockConfigurationRequestObjectLockConfiguration{
-			ObjectLockEnabled: data.ObjectLockEnabled.ValueStringPointer(),
-			Rule: &objstorage.PutObjectLockConfigurationRequestObjectLockConfigurationRule{
-				DefaultRetention: &objstorage.DefaultRetention{
-					Mode:  data.Rule.DefaultRetention.Mode.ValueStringPointer(),
-					Days:  convptr.Int64ToInt32(data.Rule.DefaultRetention.Days.ValueInt64Pointer()),
-					Years: convptr.Int64ToInt32(data.Rule.DefaultRetention.Years.ValueInt64Pointer()),
-				},
+		ObjectLockEnabled: data.ObjectLockEnabled.ValueStringPointer(),
+		Rule: &objstorage.PutObjectLockConfigurationRequestRule{
+			DefaultRetention: &objstorage.DefaultRetention{
+				Mode:  data.Rule.DefaultRetention.Mode.ValueStringPointer(),
+				Days:  convptr.Int64ToInt32(data.Rule.DefaultRetention.Days.ValueInt64Pointer()),
+				Years: convptr.Int64ToInt32(data.Rule.DefaultRetention.Years.ValueInt64Pointer()),
 			},
 		},
 	}

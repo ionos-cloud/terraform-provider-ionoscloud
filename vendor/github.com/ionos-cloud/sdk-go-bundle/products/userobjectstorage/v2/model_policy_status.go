@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the PolicyStatus type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PolicyStatus{}
 
 // PolicyStatus The container element for a bucket's policy status.
 type PolicyStatus struct {
+	XMLName xml.Name `xml:"PolicyStatus"`
 	// The policy status for this bucket: - `true` indicates that this bucket is public. - `false` indicates that this bucket is private.
-	IsPublic *bool `json:"IsPublic,omitempty"`
+	IsPublic *bool `json:"IsPublic,omitempty" xml:"IsPublic"`
 }
 
 // NewPolicyStatus instantiates a new PolicyStatus object

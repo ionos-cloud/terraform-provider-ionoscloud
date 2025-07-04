@@ -15,12 +15,15 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the UploadPartCopyOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &UploadPartCopyOutput{}
 
 // UploadPartCopyOutput struct for UploadPartCopyOutput
 type UploadPartCopyOutput struct {
-	CopyPartResult *CopyPartResult `json:"CopyPartResult,omitempty"`
+	XMLName        xml.Name        `xml:"UploadPartCopyOutput"`
+	CopyPartResult *CopyPartResult `json:"CopyPartResult,omitempty" xml:"CopyPartResult"`
 }
 
 // NewUploadPartCopyOutput instantiates a new UploadPartCopyOutput object

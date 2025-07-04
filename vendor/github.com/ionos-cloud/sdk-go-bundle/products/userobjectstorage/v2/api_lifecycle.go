@@ -12,33 +12,23 @@
 package userobjectstorage
 
 import (
-	_context "context"
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"net/http"
+	"net/url"
 	"strings"
-)
-
-// Linger please
-var (
-	_ _context.Context
 )
 
 // LifecycleApiService LifecycleApi service
 type LifecycleApiService service
 
 type ApiDeleteBucketLifecycleRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *LifecycleApiService
 	bucket     string
-	lifecycle  *bool
-}
-
-func (r ApiDeleteBucketLifecycleRequest) Lifecycle(lifecycle bool) ApiDeleteBucketLifecycleRequest {
-	r.lifecycle = &lifecycle
-	return r
 }
 
 func (r ApiDeleteBucketLifecycleRequest) Execute() (*shared.APIResponse, error) {
@@ -46,9 +36,9 @@ func (r ApiDeleteBucketLifecycleRequest) Execute() (*shared.APIResponse, error) 
 }
 
 /*
-  - DeleteBucketLifecycle DeleteBucketLifecycle
-  - Deletes the lifecycle configuration from the specified bucket.
+DeleteBucketLifecycle DeleteBucketLifecycle
 
+Deletes the lifecycle configuration from the specified bucket.
 As a result, objects within the bucket will neither expire nor be automatically deleted based
 on any rules from the deleted configuration.
 
@@ -59,11 +49,11 @@ to perform the `s3:PutLifecycleConfiguration` operation using [Bucket Policy](#t
 **Note:** A brief delay may occur before the lifecycle configuration deletion is fully
 propagated across all IONOS Object Storage systems. During this time, lifecycle rules may remain temporarily active.
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiDeleteBucketLifecycleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiDeleteBucketLifecycleRequest
 */
-func (a *LifecycleApiService) DeleteBucketLifecycle(ctx _context.Context, bucket string) ApiDeleteBucketLifecycleRequest {
+func (a *LifecycleApiService) DeleteBucketLifecycle(ctx context.Context, bucket string) ApiDeleteBucketLifecycleRequest {
 	return ApiDeleteBucketLifecycleRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -71,16 +61,12 @@ func (a *LifecycleApiService) DeleteBucketLifecycle(ctx _context.Context, bucket
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *LifecycleApiService) DeleteBucketLifecycleExecute(r ApiDeleteBucketLifecycleRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodDelete
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LifecycleApiService.DeleteBucketLifecycle")
@@ -91,22 +77,18 @@ func (a *LifecycleApiService) DeleteBucketLifecycleExecute(r ApiDeleteBucketLife
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?lifecycle"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.lifecycle == nil {
-		return nil, reportError("lifecycle is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "lifecycle", r.lifecycle, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -138,13 +120,12 @@ func (a *LifecycleApiService) DeleteBucketLifecycleExecute(r ApiDeleteBucketLife
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -152,7 +133,6 @@ func (a *LifecycleApiService) DeleteBucketLifecycleExecute(r ApiDeleteBucketLife
 		RequestURL:  localVarPath,
 		Operation:   "DeleteBucketLifecycle",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -160,6 +140,7 @@ func (a *LifecycleApiService) DeleteBucketLifecycleExecute(r ApiDeleteBucketLife
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}
@@ -176,34 +157,29 @@ func (a *LifecycleApiService) DeleteBucketLifecycleExecute(r ApiDeleteBucketLife
 }
 
 type ApiGetBucketLifecycleRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *LifecycleApiService
 	bucket     string
-	lifecycle  *bool
 }
 
-func (r ApiGetBucketLifecycleRequest) Lifecycle(lifecycle bool) ApiGetBucketLifecycleRequest {
-	r.lifecycle = &lifecycle
-	return r
-}
-
-func (r ApiGetBucketLifecycleRequest) Execute() (GetBucketLifecycleOutput, *shared.APIResponse, error) {
+func (r ApiGetBucketLifecycleRequest) Execute() (*GetBucketLifecycleOutput, *shared.APIResponse, error) {
 	return r.ApiService.GetBucketLifecycleExecute(r)
 }
 
 /*
-  - GetBucketLifecycle GetBucketLifecycle
-  - Returns the lifecycle configuration for the specified object storage bucket.
+GetBucketLifecycle GetBucketLifecycle
+
+Returns the lifecycle configuration for the specified Object Storage bucket.
 
 #### Permissions
 You must be the contract owner or an administrator to perform this operation. If not, they can grant you permission
 to perform the `s3:GetLifecycleConfiguration` operation using [Bucket Policy](#tag/Policy/operation/PutBucketPolicy).
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiGetBucketLifecycleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiGetBucketLifecycleRequest
 */
-func (a *LifecycleApiService) GetBucketLifecycle(ctx _context.Context, bucket string) ApiGetBucketLifecycleRequest {
+func (a *LifecycleApiService) GetBucketLifecycle(ctx context.Context, bucket string) ApiGetBucketLifecycleRequest {
 	return ApiGetBucketLifecycleRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -211,18 +187,15 @@ func (a *LifecycleApiService) GetBucketLifecycle(ctx _context.Context, bucket st
 	}
 }
 
-/*
- * Execute executes the request
- * @return GetBucketLifecycleOutput
- */
-func (a *LifecycleApiService) GetBucketLifecycleExecute(r ApiGetBucketLifecycleRequest) (GetBucketLifecycleOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return GetBucketLifecycleOutput
+func (a *LifecycleApiService) GetBucketLifecycleExecute(r ApiGetBucketLifecycleRequest) (*GetBucketLifecycleOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  GetBucketLifecycleOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetBucketLifecycleOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LifecycleApiService.GetBucketLifecycle")
@@ -233,22 +206,18 @@ func (a *LifecycleApiService) GetBucketLifecycleExecute(r ApiGetBucketLifecycleR
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?lifecycle"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.lifecycle == nil {
-		return localVarReturnValue, nil, reportError("lifecycle is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "lifecycle", r.lifecycle, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -280,13 +249,12 @@ func (a *LifecycleApiService) GetBucketLifecycleExecute(r ApiGetBucketLifecycleR
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -294,7 +262,6 @@ func (a *LifecycleApiService) GetBucketLifecycleExecute(r ApiGetBucketLifecycleR
 		RequestURL:  localVarPath,
 		Operation:   "GetBucketLifecycle",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -302,6 +269,7 @@ func (a *LifecycleApiService) GetBucketLifecycleExecute(r ApiGetBucketLifecycleR
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -336,11 +304,10 @@ func (a *LifecycleApiService) GetBucketLifecycleExecute(r ApiGetBucketLifecycleR
 }
 
 type ApiPutBucketLifecycleRequest struct {
-	ctx                       _context.Context
+	ctx                       context.Context
 	ApiService                *LifecycleApiService
 	bucket                    string
 	contentMD5                *string
-	lifecycle                 *bool
 	putBucketLifecycleRequest *PutBucketLifecycleRequest
 }
 
@@ -348,10 +315,7 @@ func (r ApiPutBucketLifecycleRequest) ContentMD5(contentMD5 string) ApiPutBucket
 	r.contentMD5 = &contentMD5
 	return r
 }
-func (r ApiPutBucketLifecycleRequest) Lifecycle(lifecycle bool) ApiPutBucketLifecycleRequest {
-	r.lifecycle = &lifecycle
-	return r
-}
+
 func (r ApiPutBucketLifecycleRequest) PutBucketLifecycleRequest(putBucketLifecycleRequest PutBucketLifecycleRequest) ApiPutBucketLifecycleRequest {
 	r.putBucketLifecycleRequest = &putBucketLifecycleRequest
 	return r
@@ -362,9 +326,9 @@ func (r ApiPutBucketLifecycleRequest) Execute() (*shared.APIResponse, error) {
 }
 
 /*
-  - PutBucketLifecycle PutBucketLifecycle
-  - Creates a new lifecycle configuration for a specified bucket, or replaces an existing configuration.</p>
+PutBucketLifecycle PutBucketLifecycle
 
+Creates a new lifecycle configuration for a specified bucket, or replaces an existing configuration.</p>
 This lifecycle configuration allows automatic management of the objects within the bucket.
 Typical actions can include the deletion of objects after a certain period or deletion of non-current
 versions of objects.
@@ -377,11 +341,11 @@ to perform the `s3:PutLifecycleConfiguration` operation using [Bucket Policy](#t
 - The `NewerNoncurrentVersions` setting is not supported for the `NoncurrentVersionExpiration` option.
 - The `Transition` and the `NoncurrentVersionTransition` options are omitted as only the `STANDARD` storage class is currenly supported.
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiPutBucketLifecycleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiPutBucketLifecycleRequest
 */
-func (a *LifecycleApiService) PutBucketLifecycle(ctx _context.Context, bucket string) ApiPutBucketLifecycleRequest {
+func (a *LifecycleApiService) PutBucketLifecycle(ctx context.Context, bucket string) ApiPutBucketLifecycleRequest {
 	return ApiPutBucketLifecycleRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -389,16 +353,12 @@ func (a *LifecycleApiService) PutBucketLifecycle(ctx _context.Context, bucket st
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *LifecycleApiService) PutBucketLifecycleExecute(r ApiPutBucketLifecycleRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LifecycleApiService.PutBucketLifecycle")
@@ -409,11 +369,11 @@ func (a *LifecycleApiService) PutBucketLifecycleExecute(r ApiPutBucketLifecycleR
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?lifecycle"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
@@ -423,14 +383,10 @@ func (a *LifecycleApiService) PutBucketLifecycleExecute(r ApiPutBucketLifecycleR
 	if r.contentMD5 == nil {
 		return nil, reportError("contentMD5 is required and must be specified")
 	}
-	if r.lifecycle == nil {
-		return nil, reportError("lifecycle is required and must be specified")
-	}
 	if r.putBucketLifecycleRequest == nil {
 		return nil, reportError("putBucketLifecycleRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "lifecycle", r.lifecycle, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 
@@ -465,13 +421,12 @@ func (a *LifecycleApiService) PutBucketLifecycleExecute(r ApiPutBucketLifecycleR
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -479,7 +434,6 @@ func (a *LifecycleApiService) PutBucketLifecycleExecute(r ApiPutBucketLifecycleR
 		RequestURL:  localVarPath,
 		Operation:   "PutBucketLifecycle",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -487,6 +441,7 @@ func (a *LifecycleApiService) PutBucketLifecycleExecute(r ApiPutBucketLifecycleR
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}

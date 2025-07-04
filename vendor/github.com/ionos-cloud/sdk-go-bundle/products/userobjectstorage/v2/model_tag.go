@@ -15,15 +15,18 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the Tag type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Tag{}
 
 // Tag A container of a key value name pair.
 type Tag struct {
+	XMLName xml.Name `xml:"Tag"`
 	// The object key.
-	Key string `json:"Key"`
+	Key string `json:"Key" xml:"Key"`
 	// Value of the tag.
-	Value string `json:"Value"`
+	Value string `json:"Value" xml:"Value"`
 }
 
 // NewTag instantiates a new Tag object

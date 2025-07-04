@@ -13,19 +13,21 @@ package userobjectstorage
 
 import (
 	"encoding/json"
-
 	"time"
 )
+
+import "encoding/xml"
 
 // checks if the Bucket type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Bucket{}
 
 // Bucket A bucket in object storage is a flat container used to store an unlimited number of objects (files).
 type Bucket struct {
+	XMLName xml.Name `xml:"Bucket"`
 	// The bucket name.
-	Name *string `json:"Name,omitempty"`
+	Name *string `json:"Name,omitempty" xml:"Name"`
 	// Represents the UTC date and time of bucket creation.
-	CreationDate *IonosTime `json:"CreationDate,omitempty"`
+	CreationDate *IonosTime `json:"CreationDate,omitempty" xml:"CreationDate"`
 }
 
 // NewBucket instantiates a new Bucket object

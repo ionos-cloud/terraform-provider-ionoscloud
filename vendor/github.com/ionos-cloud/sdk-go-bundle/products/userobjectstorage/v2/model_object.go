@@ -13,25 +13,27 @@ package userobjectstorage
 
 import (
 	"encoding/json"
-
 	"time"
 )
+
+import "encoding/xml"
 
 // checks if the Object type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Object{}
 
 // Object An object consists of data and its descriptive metadata.
 type Object struct {
+	XMLName xml.Name `xml:"Contents"`
 	// The object key.
-	Key *string `json:"Key,omitempty"`
+	Key *string `json:"Key,omitempty" xml:"Key"`
 	// Creation date of the object.
-	LastModified *IonosTime          `json:"LastModified,omitempty"`
-	StorageClass *ObjectStorageClass `json:"StorageClass,omitempty"`
+	LastModified *IonosTime          `json:"LastModified,omitempty" xml:"LastModified"`
+	StorageClass *ObjectStorageClass `json:"StorageClass,omitempty" xml:"StorageClass"`
 	// Size in bytes of the object
-	Size *int32 `json:"Size,omitempty"`
+	Size *int32 `json:"Size,omitempty" xml:"Size"`
 	// Entity tag that identifies the object's data. Objects with different object data will have different entity tags. The entity tag is an opaque string. The entity tag may or may not be an MD5 digest of the object data. If the entity tag is not an MD5 digest of the object data, it will contain one or more nonhexadecimal characters and/or will consist of less than 32 or more than 32 hexadecimal digits.
-	ETag  *string `json:"ETag,omitempty"`
-	Owner *Owner  `json:"Owner,omitempty"`
+	ETag  *string `json:"ETag,omitempty" xml:"ETag"`
+	Owner *Owner  `json:"Owner,omitempty" xml:"Owner"`
 }
 
 // NewObject instantiates a new Object object

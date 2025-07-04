@@ -13,19 +13,21 @@ package userobjectstorage
 
 import (
 	"encoding/json"
-
 	"time"
 )
+
+import "encoding/xml"
 
 // checks if the CopyPartResult type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CopyPartResult{}
 
 // CopyPartResult Container for all response elements.
 type CopyPartResult struct {
+	XMLName xml.Name `xml:"CopyPartResult"`
 	// Entity tag that identifies the object's data. Objects with different object data will have different entity tags. The entity tag is an opaque string. The entity tag may or may not be an MD5 digest of the object data. If the entity tag is not an MD5 digest of the object data, it will contain one or more nonhexadecimal characters and/or will consist of less than 32 or more than 32 hexadecimal digits.
-	ETag *string `json:"ETag,omitempty"`
+	ETag *string `json:"ETag,omitempty" xml:"ETag"`
 	// Creation date of the object.
-	LastModified *IonosTime `json:"LastModified,omitempty"`
+	LastModified *IonosTime `json:"LastModified,omitempty" xml:"LastModified"`
 }
 
 // NewCopyPartResult instantiates a new CopyPartResult object

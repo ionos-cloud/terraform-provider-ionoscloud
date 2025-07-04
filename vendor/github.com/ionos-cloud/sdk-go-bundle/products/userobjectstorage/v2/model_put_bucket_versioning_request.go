@@ -15,22 +15,24 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the PutBucketVersioningRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PutBucketVersioningRequest{}
 
 // PutBucketVersioningRequest struct for PutBucketVersioningRequest
 type PutBucketVersioningRequest struct {
-	VersioningConfiguration PutBucketVersioningRequestVersioningConfiguration `json:"VersioningConfiguration"`
+	XMLName   xml.Name                `xml:"VersioningConfiguration"`
+	Status    *BucketVersioningStatus `json:"Status,omitempty" xml:"Status"`
+	MfaDelete *MfaDeleteStatus        `json:"MfaDelete,omitempty" xml:"MfaDelete"`
 }
 
 // NewPutBucketVersioningRequest instantiates a new PutBucketVersioningRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPutBucketVersioningRequest(versioningConfiguration PutBucketVersioningRequestVersioningConfiguration) *PutBucketVersioningRequest {
+func NewPutBucketVersioningRequest() *PutBucketVersioningRequest {
 	this := PutBucketVersioningRequest{}
-
-	this.VersioningConfiguration = versioningConfiguration
 
 	return &this
 }
@@ -43,28 +45,68 @@ func NewPutBucketVersioningRequestWithDefaults() *PutBucketVersioningRequest {
 	return &this
 }
 
-// GetVersioningConfiguration returns the VersioningConfiguration field value
-func (o *PutBucketVersioningRequest) GetVersioningConfiguration() PutBucketVersioningRequestVersioningConfiguration {
-	if o == nil {
-		var ret PutBucketVersioningRequestVersioningConfiguration
+// GetStatus returns the Status field value if set, zero value otherwise.
+func (o *PutBucketVersioningRequest) GetStatus() BucketVersioningStatus {
+	if o == nil || IsNil(o.Status) {
+		var ret BucketVersioningStatus
 		return ret
 	}
-
-	return o.VersioningConfiguration
+	return *o.Status
 }
 
-// GetVersioningConfigurationOk returns a tuple with the VersioningConfiguration field value
+// GetStatusOk returns a tuple with the Status field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PutBucketVersioningRequest) GetVersioningConfigurationOk() (*PutBucketVersioningRequestVersioningConfiguration, bool) {
-	if o == nil {
+func (o *PutBucketVersioningRequest) GetStatusOk() (*BucketVersioningStatus, bool) {
+	if o == nil || IsNil(o.Status) {
 		return nil, false
 	}
-	return &o.VersioningConfiguration, true
+	return o.Status, true
 }
 
-// SetVersioningConfiguration sets field value
-func (o *PutBucketVersioningRequest) SetVersioningConfiguration(v PutBucketVersioningRequestVersioningConfiguration) {
-	o.VersioningConfiguration = v
+// HasStatus returns a boolean if a field has been set.
+func (o *PutBucketVersioningRequest) HasStatus() bool {
+	if o != nil && !IsNil(o.Status) {
+		return true
+	}
+
+	return false
+}
+
+// SetStatus gets a reference to the given BucketVersioningStatus and assigns it to the Status field.
+func (o *PutBucketVersioningRequest) SetStatus(v BucketVersioningStatus) {
+	o.Status = &v
+}
+
+// GetMfaDelete returns the MfaDelete field value if set, zero value otherwise.
+func (o *PutBucketVersioningRequest) GetMfaDelete() MfaDeleteStatus {
+	if o == nil || IsNil(o.MfaDelete) {
+		var ret MfaDeleteStatus
+		return ret
+	}
+	return *o.MfaDelete
+}
+
+// GetMfaDeleteOk returns a tuple with the MfaDelete field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *PutBucketVersioningRequest) GetMfaDeleteOk() (*MfaDeleteStatus, bool) {
+	if o == nil || IsNil(o.MfaDelete) {
+		return nil, false
+	}
+	return o.MfaDelete, true
+}
+
+// HasMfaDelete returns a boolean if a field has been set.
+func (o *PutBucketVersioningRequest) HasMfaDelete() bool {
+	if o != nil && !IsNil(o.MfaDelete) {
+		return true
+	}
+
+	return false
+}
+
+// SetMfaDelete gets a reference to the given MfaDeleteStatus and assigns it to the MfaDelete field.
+func (o *PutBucketVersioningRequest) SetMfaDelete(v MfaDeleteStatus) {
+	o.MfaDelete = &v
 }
 
 func (o PutBucketVersioningRequest) MarshalJSON() ([]byte, error) {
@@ -77,7 +119,12 @@ func (o PutBucketVersioningRequest) MarshalJSON() ([]byte, error) {
 
 func (o PutBucketVersioningRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["VersioningConfiguration"] = o.VersioningConfiguration
+	if !IsNil(o.Status) {
+		toSerialize["Status"] = o.Status
+	}
+	if !IsNil(o.MfaDelete) {
+		toSerialize["MfaDelete"] = o.MfaDelete
+	}
 	return toSerialize, nil
 }
 

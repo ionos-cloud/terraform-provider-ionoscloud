@@ -15,33 +15,37 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ListObjectVersionsOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ListObjectVersionsOutput{}
 
 // ListObjectVersionsOutput struct for ListObjectVersionsOutput
 type ListObjectVersionsOutput struct {
+	XMLName xml.Name `xml:"ListVersionsResult"`
 	// A flag that indicates whether IONOS Object Storage returned all of the results that satisfied the search criteria. If your results were truncated, you can make a follow-up paginated request using the NextKeyMarker and NextVersionIdMarker response parameters as a starting place in another request to return the rest of the results.
-	IsTruncated *bool `json:"IsTruncated,omitempty"`
+	IsTruncated *bool `json:"IsTruncated,omitempty" xml:"IsTruncated"`
 	// Marks the last key returned in a truncated response.
-	KeyMarker *string `json:"KeyMarker,omitempty"`
+	KeyMarker *string `json:"KeyMarker,omitempty" xml:"KeyMarker"`
 	// Marks the last version of the key returned in a truncated response.
-	VersionIdMarker *string `json:"VersionIdMarker,omitempty"`
+	VersionIdMarker *string `json:"VersionIdMarker,omitempty" xml:"VersionIdMarker"`
 	// When the number of responses exceeds the value of `MaxKeys`, `NextKeyMarker` specifies the first key not returned that satisfies the search criteria. Use this value for the key-marker request parameter in a subsequent request.
-	NextKeyMarker *string `json:"NextKeyMarker,omitempty"`
+	NextKeyMarker *string `json:"NextKeyMarker,omitempty" xml:"NextKeyMarker"`
 	// When the number of responses exceeds the value of `MaxKeys`, `NextVersionIdMarker` specifies the first object version not returned that satisfies the search criteria. Use this value for the version-id-marker request parameter in a subsequent request.
-	NextVersionIdMarker *string `json:"NextVersionIdMarker,omitempty"`
+	NextVersionIdMarker *string `json:"NextVersionIdMarker,omitempty" xml:"NextVersionIdMarker"`
 	// Container for version information.
-	Versions []ObjectVersion `json:"Versions,omitempty"`
+	Versions      []ObjectVersion     `json:"Versions,omitempty" xml:"Version"`
+	DeleteMarkers []DeleteMarkerEntry `json:"DeleteMarkers,omitempty" xml:"DeleteMarker"`
 	// The bucket name.
-	Name *string `json:"Name,omitempty"`
+	Name *string `json:"Name,omitempty" xml:"Name"`
 	// Selects objects that start with the value supplied by this parameter.
-	Prefix    *string `json:"Prefix,omitempty"`
-	Delimiter *string `json:"Delimiter,omitempty"`
+	Prefix    *string `json:"Prefix,omitempty" xml:"Prefix"`
+	Delimiter *string `json:"Delimiter,omitempty" xml:"Delimiter"`
 	// The maximum number of keys returned in the response. By default the operation returns up to 1000 key names. The response might contain fewer keys but will never contain more.
-	MaxKeys *int32 `json:"MaxKeys,omitempty"`
+	MaxKeys *int32 `json:"MaxKeys,omitempty" xml:"MaxKeys"`
 	// All of the keys rolled up into a common prefix count as a single return when calculating the number of returns.
-	CommonPrefixes []CommonPrefix `json:"CommonPrefixes,omitempty"`
-	EncodingType   *EncodingType  `json:"EncodingType,omitempty"`
+	CommonPrefixes []CommonPrefix `json:"CommonPrefixes,omitempty" xml:"CommonPrefixes"`
+	EncodingType   *EncodingType  `json:"EncodingType,omitempty" xml:"EncodingType"`
 }
 
 // NewListObjectVersionsOutput instantiates a new ListObjectVersionsOutput object
@@ -252,6 +256,38 @@ func (o *ListObjectVersionsOutput) HasVersions() bool {
 // SetVersions gets a reference to the given []ObjectVersion and assigns it to the Versions field.
 func (o *ListObjectVersionsOutput) SetVersions(v []ObjectVersion) {
 	o.Versions = v
+}
+
+// GetDeleteMarkers returns the DeleteMarkers field value if set, zero value otherwise.
+func (o *ListObjectVersionsOutput) GetDeleteMarkers() []DeleteMarkerEntry {
+	if o == nil || IsNil(o.DeleteMarkers) {
+		var ret []DeleteMarkerEntry
+		return ret
+	}
+	return o.DeleteMarkers
+}
+
+// GetDeleteMarkersOk returns a tuple with the DeleteMarkers field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ListObjectVersionsOutput) GetDeleteMarkersOk() ([]DeleteMarkerEntry, bool) {
+	if o == nil || IsNil(o.DeleteMarkers) {
+		return nil, false
+	}
+	return o.DeleteMarkers, true
+}
+
+// HasDeleteMarkers returns a boolean if a field has been set.
+func (o *ListObjectVersionsOutput) HasDeleteMarkers() bool {
+	if o != nil && !IsNil(o.DeleteMarkers) {
+		return true
+	}
+
+	return false
+}
+
+// SetDeleteMarkers gets a reference to the given []DeleteMarkerEntry and assigns it to the DeleteMarkers field.
+func (o *ListObjectVersionsOutput) SetDeleteMarkers(v []DeleteMarkerEntry) {
+	o.DeleteMarkers = v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
@@ -473,6 +509,9 @@ func (o ListObjectVersionsOutput) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Versions) {
 		toSerialize["Versions"] = o.Versions
+	}
+	if !IsNil(o.DeleteMarkers) {
+		toSerialize["DeleteMarkers"] = o.DeleteMarkers
 	}
 	if !IsNil(o.Name) {
 		toSerialize["Name"] = o.Name

@@ -12,33 +12,23 @@
 package userobjectstorage
 
 import (
-	_context "context"
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"net/http"
+	"net/url"
 	"strings"
-)
-
-// Linger please
-var (
-	_ _context.Context
 )
 
 // WebsiteApiService WebsiteApi service
 type WebsiteApiService service
 
 type ApiDeleteBucketWebsiteRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *WebsiteApiService
 	bucket     string
-	website    *bool
-}
-
-func (r ApiDeleteBucketWebsiteRequest) Website(website bool) ApiDeleteBucketWebsiteRequest {
-	r.website = &website
-	return r
 }
 
 func (r ApiDeleteBucketWebsiteRequest) Execute() (*shared.APIResponse, error) {
@@ -46,13 +36,15 @@ func (r ApiDeleteBucketWebsiteRequest) Execute() (*shared.APIResponse, error) {
 }
 
 /*
- * DeleteBucketWebsite DeleteBucketWebsite
- * <p>This operation removes the website configuration for a bucket. IONOS Object Storage returns a `200 OK` response upon successfully deleting a website configuration on the specified bucket. You will get a `200 OK` response if the website configuration you are trying to delete does not exist on the bucket. IONOS Object Storage returns a `404` response if the bucket specified in the request does not exist.</p> <p>This DELETE operation requires the `DeleteBucketWebsite` permission. By default, only the bucket owner can delete the website configuration attached to a bucket. However, bucket owners can grant other users permission to delete the website configuration by writing a bucket policy granting them the `DeleteBucketWebsite` permission.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @return ApiDeleteBucketWebsiteRequest
- */
-func (a *WebsiteApiService) DeleteBucketWebsite(ctx _context.Context, bucket string) ApiDeleteBucketWebsiteRequest {
+DeleteBucketWebsite DeleteBucketWebsite
+
+<p>This operation removes the website configuration for a bucket. IONOS Object Storage returns a `200 OK` response upon successfully deleting a website configuration on the specified bucket. You will get a `200 OK` response if the website configuration you are trying to delete does not exist on the bucket. IONOS Object Storage returns a `404` response if the bucket specified in the request does not exist.</p> <p>This DELETE operation requires the `DeleteBucketWebsite` permission. By default, only the bucket owner can delete the website configuration attached to a bucket. However, bucket owners can grant other users permission to delete the website configuration by writing a bucket policy granting them the `DeleteBucketWebsite` permission.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiDeleteBucketWebsiteRequest
+*/
+func (a *WebsiteApiService) DeleteBucketWebsite(ctx context.Context, bucket string) ApiDeleteBucketWebsiteRequest {
 	return ApiDeleteBucketWebsiteRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -60,16 +52,12 @@ func (a *WebsiteApiService) DeleteBucketWebsite(ctx _context.Context, bucket str
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *WebsiteApiService) DeleteBucketWebsiteExecute(r ApiDeleteBucketWebsiteRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodDelete
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebsiteApiService.DeleteBucketWebsite")
@@ -80,22 +68,18 @@ func (a *WebsiteApiService) DeleteBucketWebsiteExecute(r ApiDeleteBucketWebsiteR
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?website"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.website == nil {
-		return nil, reportError("website is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "website", r.website, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -127,13 +111,12 @@ func (a *WebsiteApiService) DeleteBucketWebsiteExecute(r ApiDeleteBucketWebsiteR
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -141,7 +124,6 @@ func (a *WebsiteApiService) DeleteBucketWebsiteExecute(r ApiDeleteBucketWebsiteR
 		RequestURL:  localVarPath,
 		Operation:   "DeleteBucketWebsite",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -149,6 +131,7 @@ func (a *WebsiteApiService) DeleteBucketWebsiteExecute(r ApiDeleteBucketWebsiteR
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}
@@ -165,29 +148,25 @@ func (a *WebsiteApiService) DeleteBucketWebsiteExecute(r ApiDeleteBucketWebsiteR
 }
 
 type ApiGetBucketWebsiteRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *WebsiteApiService
 	bucket     string
-	website    *bool
 }
 
-func (r ApiGetBucketWebsiteRequest) Website(website bool) ApiGetBucketWebsiteRequest {
-	r.website = &website
-	return r
-}
-
-func (r ApiGetBucketWebsiteRequest) Execute() (GetBucketWebsiteOutput, *shared.APIResponse, error) {
+func (r ApiGetBucketWebsiteRequest) Execute() (*GetBucketWebsiteOutput, *shared.APIResponse, error) {
 	return r.ApiService.GetBucketWebsiteExecute(r)
 }
 
 /*
- * GetBucketWebsite GetBucketWebsite
- * <p>Returns the website configuration for a bucket. </p> <p>This GET operation requires the `GetBucketWebsite` permission. By default, only the bucket owner can read the bucket website configuration. However, bucket owners can allow other users to read the website configuration by writing a bucket policy granting them the `GetBucketWebsite` permission.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @return ApiGetBucketWebsiteRequest
- */
-func (a *WebsiteApiService) GetBucketWebsite(ctx _context.Context, bucket string) ApiGetBucketWebsiteRequest {
+GetBucketWebsite GetBucketWebsite
+
+<p>Returns the website configuration for a bucket. </p> <p>This GET operation requires the `GetBucketWebsite` permission. By default, only the bucket owner can read the bucket website configuration. However, bucket owners can allow other users to read the website configuration by writing a bucket policy granting them the `GetBucketWebsite` permission.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiGetBucketWebsiteRequest
+*/
+func (a *WebsiteApiService) GetBucketWebsite(ctx context.Context, bucket string) ApiGetBucketWebsiteRequest {
 	return ApiGetBucketWebsiteRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -195,18 +174,15 @@ func (a *WebsiteApiService) GetBucketWebsite(ctx _context.Context, bucket string
 	}
 }
 
-/*
- * Execute executes the request
- * @return GetBucketWebsiteOutput
- */
-func (a *WebsiteApiService) GetBucketWebsiteExecute(r ApiGetBucketWebsiteRequest) (GetBucketWebsiteOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return GetBucketWebsiteOutput
+func (a *WebsiteApiService) GetBucketWebsiteExecute(r ApiGetBucketWebsiteRequest) (*GetBucketWebsiteOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  GetBucketWebsiteOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetBucketWebsiteOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebsiteApiService.GetBucketWebsite")
@@ -217,22 +193,18 @@ func (a *WebsiteApiService) GetBucketWebsiteExecute(r ApiGetBucketWebsiteRequest
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?website"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.website == nil {
-		return localVarReturnValue, nil, reportError("website is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "website", r.website, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -264,13 +236,12 @@ func (a *WebsiteApiService) GetBucketWebsiteExecute(r ApiGetBucketWebsiteRequest
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -278,7 +249,6 @@ func (a *WebsiteApiService) GetBucketWebsiteExecute(r ApiGetBucketWebsiteRequest
 		RequestURL:  localVarPath,
 		Operation:   "GetBucketWebsite",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -286,6 +256,7 @@ func (a *WebsiteApiService) GetBucketWebsiteExecute(r ApiGetBucketWebsiteRequest
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -311,22 +282,18 @@ func (a *WebsiteApiService) GetBucketWebsiteExecute(r ApiGetBucketWebsiteRequest
 }
 
 type ApiPutBucketWebsiteRequest struct {
-	ctx                     _context.Context
+	ctx                     context.Context
 	ApiService              *WebsiteApiService
 	bucket                  string
-	website                 *bool
 	putBucketWebsiteRequest *PutBucketWebsiteRequest
 	contentMD5              *string
 }
 
-func (r ApiPutBucketWebsiteRequest) Website(website bool) ApiPutBucketWebsiteRequest {
-	r.website = &website
-	return r
-}
 func (r ApiPutBucketWebsiteRequest) PutBucketWebsiteRequest(putBucketWebsiteRequest PutBucketWebsiteRequest) ApiPutBucketWebsiteRequest {
 	r.putBucketWebsiteRequest = &putBucketWebsiteRequest
 	return r
 }
+
 func (r ApiPutBucketWebsiteRequest) ContentMD5(contentMD5 string) ApiPutBucketWebsiteRequest {
 	r.contentMD5 = &contentMD5
 	return r
@@ -337,13 +304,15 @@ func (r ApiPutBucketWebsiteRequest) Execute() (*shared.APIResponse, error) {
 }
 
 /*
- * PutBucketWebsite PutBucketWebsite
- * <p>Sets the configuration of the website that is specified in the `website` subresource. To configure a bucket as a website, you can add this subresource on the bucket with website configuration information such as the file name of the index document and any redirect rules. </p>                  <p>This PUT operation requires the `PutBucketWebsite` permission. By default, only the bucket owner can configure the website attached to a bucket; however, bucket owners can allow other users to set the website configuration by writing a bucket policy that grants them the `PutBucketWebsite` permission.</p> <p>To redirect all website requests sent to the bucket's website endpoint, you add a website configuration with the following elements. Because all requests are sent to another website, you don't need to provide index document name for the bucket.</p> <ul> <li> <p> `WebsiteConfiguration` </p> </li> <li> <p> `RedirectAllRequestsTo` </p> </li> <li> <p> `HostName` </p> </li> <li> <p> `Protocol` </p> </li> </ul> <p>If you want granular control over redirects, you can use the following elements to add routing rules that describe conditions for redirecting requests and information about the redirect destination. In this case, the website configuration must provide an index document for the bucket, because some requests might not be redirected. </p> <ul> <li> <p> `WebsiteConfiguration` </p> </li> <li> <p> `IndexDocument` </p> </li> <li> <p> `Suffix` </p> </li> <li> <p> `ErrorDocument` </p> </li> <li> <p> `Key` </p> </li> <li> <p> `RoutingRules` </p> </li> <li> <p> `RoutingRule` </p> </li> <li> <p> `Condition` </p> </li> <li> <p> `HttpErrorCodeReturnedEquals` </p> </li> <li> <p> `KeyPrefixEquals` </p> </li> <li> <p> `Redirect` </p> </li> <li> <p> `Protocol` </p> </li> <li> <p> `HostName` </p> </li> <li> <p> `ReplaceKeyPrefixWith` </p> </li> <li> <p> `ReplaceKeyWith` </p> </li> <li> <p> `HttpRedirectCode` </p> </li> </ul>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @return ApiPutBucketWebsiteRequest
- */
-func (a *WebsiteApiService) PutBucketWebsite(ctx _context.Context, bucket string) ApiPutBucketWebsiteRequest {
+PutBucketWebsite PutBucketWebsite
+
+<p>Sets the configuration of the website that is specified in the `website` subresource. To configure a bucket as a website, you can add this subresource on the bucket with website configuration information such as the file name of the index document and any redirect rules. </p>                  <p>This PUT operation requires the `PutBucketWebsite` permission. By default, only the bucket owner can configure the website attached to a bucket; however, bucket owners can allow other users to set the website configuration by writing a bucket policy that grants them the `PutBucketWebsite` permission.</p> <p>To redirect all website requests sent to the bucket's website endpoint, you add a website configuration with the following elements. Because all requests are sent to another website, you don't need to provide index document name for the bucket.</p> <ul> <li> <p> `WebsiteConfiguration` </p> </li> <li> <p> `RedirectAllRequestsTo` </p> </li> <li> <p> `HostName` </p> </li> <li> <p> `Protocol` </p> </li> </ul> <p>If you want granular control over redirects, you can use the following elements to add routing rules that describe conditions for redirecting requests and information about the redirect destination. In this case, the website configuration must provide an index document for the bucket, because some requests might not be redirected. </p> <ul> <li> <p> `WebsiteConfiguration` </p> </li> <li> <p> `IndexDocument` </p> </li> <li> <p> `Suffix` </p> </li> <li> <p> `ErrorDocument` </p> </li> <li> <p> `Key` </p> </li> <li> <p> `RoutingRules` </p> </li> <li> <p> `RoutingRule` </p> </li> <li> <p> `Condition` </p> </li> <li> <p> `HttpErrorCodeReturnedEquals` </p> </li> <li> <p> `KeyPrefixEquals` </p> </li> <li> <p> `Redirect` </p> </li> <li> <p> `Protocol` </p> </li> <li> <p> `HostName` </p> </li> <li> <p> `ReplaceKeyPrefixWith` </p> </li> <li> <p> `ReplaceKeyWith` </p> </li> <li> <p> `HttpRedirectCode` </p> </li> </ul>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiPutBucketWebsiteRequest
+*/
+func (a *WebsiteApiService) PutBucketWebsite(ctx context.Context, bucket string) ApiPutBucketWebsiteRequest {
 	return ApiPutBucketWebsiteRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -351,16 +320,12 @@ func (a *WebsiteApiService) PutBucketWebsite(ctx _context.Context, bucket string
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *WebsiteApiService) PutBucketWebsiteExecute(r ApiPutBucketWebsiteRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebsiteApiService.PutBucketWebsite")
@@ -371,25 +336,21 @@ func (a *WebsiteApiService) PutBucketWebsiteExecute(r ApiPutBucketWebsiteRequest
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?website"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.website == nil {
-		return nil, reportError("website is required and must be specified")
-	}
 	if r.putBucketWebsiteRequest == nil {
 		return nil, reportError("putBucketWebsiteRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "website", r.website, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 
@@ -426,13 +387,12 @@ func (a *WebsiteApiService) PutBucketWebsiteExecute(r ApiPutBucketWebsiteRequest
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -440,7 +400,6 @@ func (a *WebsiteApiService) PutBucketWebsiteExecute(r ApiPutBucketWebsiteRequest
 		RequestURL:  localVarPath,
 		Operation:   "PutBucketWebsite",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -448,6 +407,7 @@ func (a *WebsiteApiService) PutBucketWebsiteExecute(r ApiPutBucketWebsiteRequest
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}

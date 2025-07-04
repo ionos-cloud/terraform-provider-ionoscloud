@@ -1,4 +1,4 @@
-package objectstorage
+package userobjectstorage
 
 import (
 	"context"
@@ -30,9 +30,7 @@ func (c *Client) UpdateBucketTags(ctx context.Context, bucketName string, new, o
 	if len(new)+len(tagsToKeep) > 0 { // The API overwrite the tags list every time, so we need to merge new and the ones we want to keep.
 		if _, err = c.client.TaggingApi.PutBucketTagging(ctx, bucketName).PutBucketTaggingRequest(
 			objstorage.PutBucketTaggingRequest{
-				Tagging: objstorage.PutBucketTaggingRequestTagging{
-					TagSet: new.Merge(tagsToKeep).UserObjectStorageList(),
-				},
+				TagSet: new.Merge(tagsToKeep).UserObjectStorageList(),
 				// Tagging: new.Merge(tagsToKeep).UserObjectStorageList(),
 			}).Execute(); err != nil {
 			return fmt.Errorf("failed to update bucket tags: %w", err)
@@ -98,11 +96,9 @@ func (c *Client) UpdateObjectTags(ctx context.Context, bucketName, objectName st
 	// Keep only the tags that are not in the old or new tags.
 	tagsToKeep := allTags.Ignore(old).Ignore(new)
 	if len(new)+len(tagsToKeep) > 0 { // The API overwrite the tags list every time, so we need to merge new and the ones we want to keep.
-		if _, _, err = c.client.TaggingApi.PutObjectTagging(ctx, bucketName, objectName).PutBucketTaggingRequest(
-			objstorage.PutBucketTaggingRequest{
-				Tagging: objstorage.PutBucketTaggingRequestTagging{
-					TagSet: new.Merge(tagsToKeep).UserObjectStorageList(),
-				},
+		if _, _, err = c.client.TaggingApi.PutObjectTagging(ctx, bucketName, objectName).PutObjectTaggingRequest(
+			objstorage.PutObjectTaggingRequest{
+				TagSet: new.Merge(tagsToKeep).UserObjectStorageList(),
 				// TagSet: new.Merge(tagsToKeep).ObjectStorageList(),
 			}).Execute(); err != nil {
 			return fmt.Errorf("failed to update object tags: %w", err)

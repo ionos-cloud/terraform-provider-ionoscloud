@@ -15,19 +15,22 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the CompleteMultipartUploadOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CompleteMultipartUploadOutput{}
 
 // CompleteMultipartUploadOutput struct for CompleteMultipartUploadOutput
 type CompleteMultipartUploadOutput struct {
+	XMLName xml.Name `xml:"CompleteMultipartUploadOutput"`
 	// The URI that identifies the newly created object.
-	Location *string `json:"Location,omitempty"`
+	Location *string `json:"Location,omitempty" xml:"Location"`
 	// The bucket name.
-	Bucket *string `json:"Bucket,omitempty"`
+	Bucket *string `json:"Bucket,omitempty" xml:"Name"`
 	// The object key.
-	Key *string `json:"Key,omitempty"`
+	Key *string `json:"Key,omitempty" xml:"Key"`
 	// Entity tag that identifies the object's data. Objects with different object data will have different entity tags. The entity tag is an opaque string. The entity tag may or may not be an MD5 digest of the object data. If the entity tag is not an MD5 digest of the object data, it will contain one or more nonhexadecimal characters and/or will consist of less than 32 or more than 32 hexadecimal digits.
-	ETag *string `json:"ETag,omitempty"`
+	ETag *string `json:"ETag,omitempty" xml:"ETag"`
 }
 
 // NewCompleteMultipartUploadOutput instantiates a new CompleteMultipartUploadOutput object

@@ -15,12 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the PutObjectLockConfigurationRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PutObjectLockConfigurationRequest{}
 
-// PutObjectLockConfigurationRequest struct for PutObjectLockConfigurationRequest
+// PutObjectLockConfigurationRequest A container for an object lock configuration.
 type PutObjectLockConfigurationRequest struct {
-	ObjectLockConfiguration *PutObjectLockConfigurationRequestObjectLockConfiguration `json:"ObjectLockConfiguration,omitempty"`
+	XMLName           xml.Name                               `xml:"ObjectLockConfiguration"`
+	ObjectLockEnabled *string                                `json:"ObjectLockEnabled,omitempty" xml:"ObjectLockEnabled"`
+	Rule              *PutObjectLockConfigurationRequestRule `json:"Rule,omitempty" xml:"Rule"`
 }
 
 // NewPutObjectLockConfigurationRequest instantiates a new PutObjectLockConfigurationRequest object
@@ -41,36 +45,68 @@ func NewPutObjectLockConfigurationRequestWithDefaults() *PutObjectLockConfigurat
 	return &this
 }
 
-// GetObjectLockConfiguration returns the ObjectLockConfiguration field value if set, zero value otherwise.
-func (o *PutObjectLockConfigurationRequest) GetObjectLockConfiguration() PutObjectLockConfigurationRequestObjectLockConfiguration {
-	if o == nil || IsNil(o.ObjectLockConfiguration) {
-		var ret PutObjectLockConfigurationRequestObjectLockConfiguration
+// GetObjectLockEnabled returns the ObjectLockEnabled field value if set, zero value otherwise.
+func (o *PutObjectLockConfigurationRequest) GetObjectLockEnabled() string {
+	if o == nil || IsNil(o.ObjectLockEnabled) {
+		var ret string
 		return ret
 	}
-	return *o.ObjectLockConfiguration
+	return *o.ObjectLockEnabled
 }
 
-// GetObjectLockConfigurationOk returns a tuple with the ObjectLockConfiguration field value if set, nil otherwise
+// GetObjectLockEnabledOk returns a tuple with the ObjectLockEnabled field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PutObjectLockConfigurationRequest) GetObjectLockConfigurationOk() (*PutObjectLockConfigurationRequestObjectLockConfiguration, bool) {
-	if o == nil || IsNil(o.ObjectLockConfiguration) {
+func (o *PutObjectLockConfigurationRequest) GetObjectLockEnabledOk() (*string, bool) {
+	if o == nil || IsNil(o.ObjectLockEnabled) {
 		return nil, false
 	}
-	return o.ObjectLockConfiguration, true
+	return o.ObjectLockEnabled, true
 }
 
-// HasObjectLockConfiguration returns a boolean if a field has been set.
-func (o *PutObjectLockConfigurationRequest) HasObjectLockConfiguration() bool {
-	if o != nil && !IsNil(o.ObjectLockConfiguration) {
+// HasObjectLockEnabled returns a boolean if a field has been set.
+func (o *PutObjectLockConfigurationRequest) HasObjectLockEnabled() bool {
+	if o != nil && !IsNil(o.ObjectLockEnabled) {
 		return true
 	}
 
 	return false
 }
 
-// SetObjectLockConfiguration gets a reference to the given PutObjectLockConfigurationRequestObjectLockConfiguration and assigns it to the ObjectLockConfiguration field.
-func (o *PutObjectLockConfigurationRequest) SetObjectLockConfiguration(v PutObjectLockConfigurationRequestObjectLockConfiguration) {
-	o.ObjectLockConfiguration = &v
+// SetObjectLockEnabled gets a reference to the given string and assigns it to the ObjectLockEnabled field.
+func (o *PutObjectLockConfigurationRequest) SetObjectLockEnabled(v string) {
+	o.ObjectLockEnabled = &v
+}
+
+// GetRule returns the Rule field value if set, zero value otherwise.
+func (o *PutObjectLockConfigurationRequest) GetRule() PutObjectLockConfigurationRequestRule {
+	if o == nil || IsNil(o.Rule) {
+		var ret PutObjectLockConfigurationRequestRule
+		return ret
+	}
+	return *o.Rule
+}
+
+// GetRuleOk returns a tuple with the Rule field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *PutObjectLockConfigurationRequest) GetRuleOk() (*PutObjectLockConfigurationRequestRule, bool) {
+	if o == nil || IsNil(o.Rule) {
+		return nil, false
+	}
+	return o.Rule, true
+}
+
+// HasRule returns a boolean if a field has been set.
+func (o *PutObjectLockConfigurationRequest) HasRule() bool {
+	if o != nil && !IsNil(o.Rule) {
+		return true
+	}
+
+	return false
+}
+
+// SetRule gets a reference to the given PutObjectLockConfigurationRequestRule and assigns it to the Rule field.
+func (o *PutObjectLockConfigurationRequest) SetRule(v PutObjectLockConfigurationRequestRule) {
+	o.Rule = &v
 }
 
 func (o PutObjectLockConfigurationRequest) MarshalJSON() ([]byte, error) {
@@ -83,8 +119,11 @@ func (o PutObjectLockConfigurationRequest) MarshalJSON() ([]byte, error) {
 
 func (o PutObjectLockConfigurationRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.ObjectLockConfiguration) {
-		toSerialize["ObjectLockConfiguration"] = o.ObjectLockConfiguration
+	if !IsNil(o.ObjectLockEnabled) {
+		toSerialize["ObjectLockEnabled"] = o.ObjectLockEnabled
+	}
+	if !IsNil(o.Rule) {
+		toSerialize["Rule"] = o.Rule
 	}
 	return toSerialize, nil
 }

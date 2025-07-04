@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the Encryption type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Encryption{}
 
 // Encryption struct for Encryption
 type Encryption struct {
+	XMLName xml.Name `xml:"Encryption"`
 	// The server-side encryption algorithm used when storing job results in IONOS Object Storage (AES256).
-	EncryptionType string `json:"EncryptionType"`
+	EncryptionType string `json:"EncryptionType" xml:"EncryptionType"`
 }
 
 // NewEncryption instantiates a new Encryption object

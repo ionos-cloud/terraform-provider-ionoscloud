@@ -18,7 +18,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/userobjectstorage"
+	objectstorage "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/userobjectstorage"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -49,7 +49,7 @@ type bucketResourceModel struct {
 
 // Metadata returns the metadata for the bucket resource.
 func (r *bucketResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_user_object_storage_bucket"
+	resp.TypeName = req.ProviderTypeName + "_user_bucket"
 }
 
 // Schema returns the schema for the bucket resource.
@@ -77,7 +77,7 @@ func (r *bucketResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Description: "Whether object lock is enabled for the bucket",
 				Optional:    true,
 				Computed:    true,
-				Default:     booldefault.StaticBool(false),
+				Default:     booldefault.StaticBool(true),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.RequiresReplace(),
 				},
@@ -148,14 +148,13 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	// Set computed values
-	location, err := r.client.GetBucketLocation(ctx, data.Name)
-	if err != nil {
-		resp.Diagnostics.AddError("failed to get bucket location", err.Error())
-		return
-	}
+	// location, err := r.client.GetBucketLocation(ctx, data.Name)
+	// if err != nil {
+	// 	resp.Diagnostics.AddError("failed to get bucket location", err.Error())
+	// 	return
+	// }
 
 	data.ID = data.Name
-	data.Region = location
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -184,7 +183,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	data.Tags = bucket.Tags
-	data.Region = bucket.Region
+	// data.Region = bucket.Region
 	data.ObjectLockEnabled = bucket.ObjectLockEnabled
 	data.ID = data.Name
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

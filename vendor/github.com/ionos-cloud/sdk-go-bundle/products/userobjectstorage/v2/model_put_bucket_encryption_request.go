@@ -15,22 +15,23 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the PutBucketEncryptionRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PutBucketEncryptionRequest{}
 
-// PutBucketEncryptionRequest struct for PutBucketEncryptionRequest
+// PutBucketEncryptionRequest Specifies the default server-side-encryption configuration. The valid value is AES256.
 type PutBucketEncryptionRequest struct {
-	ServerSideEncryptionConfiguration PutBucketEncryptionRequestServerSideEncryptionConfiguration `json:"ServerSideEncryptionConfiguration"`
+	XMLName xml.Name                   `xml:"ServerSideEncryptionConfiguration"`
+	Rules   []ServerSideEncryptionRule `json:"Rules,omitempty" xml:"Rule"`
 }
 
 // NewPutBucketEncryptionRequest instantiates a new PutBucketEncryptionRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPutBucketEncryptionRequest(serverSideEncryptionConfiguration PutBucketEncryptionRequestServerSideEncryptionConfiguration) *PutBucketEncryptionRequest {
+func NewPutBucketEncryptionRequest() *PutBucketEncryptionRequest {
 	this := PutBucketEncryptionRequest{}
-
-	this.ServerSideEncryptionConfiguration = serverSideEncryptionConfiguration
 
 	return &this
 }
@@ -43,28 +44,36 @@ func NewPutBucketEncryptionRequestWithDefaults() *PutBucketEncryptionRequest {
 	return &this
 }
 
-// GetServerSideEncryptionConfiguration returns the ServerSideEncryptionConfiguration field value
-func (o *PutBucketEncryptionRequest) GetServerSideEncryptionConfiguration() PutBucketEncryptionRequestServerSideEncryptionConfiguration {
-	if o == nil {
-		var ret PutBucketEncryptionRequestServerSideEncryptionConfiguration
+// GetRules returns the Rules field value if set, zero value otherwise.
+func (o *PutBucketEncryptionRequest) GetRules() []ServerSideEncryptionRule {
+	if o == nil || IsNil(o.Rules) {
+		var ret []ServerSideEncryptionRule
 		return ret
 	}
-
-	return o.ServerSideEncryptionConfiguration
+	return o.Rules
 }
 
-// GetServerSideEncryptionConfigurationOk returns a tuple with the ServerSideEncryptionConfiguration field value
+// GetRulesOk returns a tuple with the Rules field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PutBucketEncryptionRequest) GetServerSideEncryptionConfigurationOk() (*PutBucketEncryptionRequestServerSideEncryptionConfiguration, bool) {
-	if o == nil {
+func (o *PutBucketEncryptionRequest) GetRulesOk() ([]ServerSideEncryptionRule, bool) {
+	if o == nil || IsNil(o.Rules) {
 		return nil, false
 	}
-	return &o.ServerSideEncryptionConfiguration, true
+	return o.Rules, true
 }
 
-// SetServerSideEncryptionConfiguration sets field value
-func (o *PutBucketEncryptionRequest) SetServerSideEncryptionConfiguration(v PutBucketEncryptionRequestServerSideEncryptionConfiguration) {
-	o.ServerSideEncryptionConfiguration = v
+// HasRules returns a boolean if a field has been set.
+func (o *PutBucketEncryptionRequest) HasRules() bool {
+	if o != nil && !IsNil(o.Rules) {
+		return true
+	}
+
+	return false
+}
+
+// SetRules gets a reference to the given []ServerSideEncryptionRule and assigns it to the Rules field.
+func (o *PutBucketEncryptionRequest) SetRules(v []ServerSideEncryptionRule) {
+	o.Rules = v
 }
 
 func (o PutBucketEncryptionRequest) MarshalJSON() ([]byte, error) {
@@ -77,7 +86,9 @@ func (o PutBucketEncryptionRequest) MarshalJSON() ([]byte, error) {
 
 func (o PutBucketEncryptionRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["ServerSideEncryptionConfiguration"] = o.ServerSideEncryptionConfiguration
+	if !IsNil(o.Rules) {
+		toSerialize["Rules"] = o.Rules
+	}
 	return toSerialize, nil
 }
 

@@ -15,14 +15,17 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ReplicationConfiguration type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ReplicationConfiguration{}
 
 // ReplicationConfiguration A container for replication rules. You can add up to 1,000 rules. The maximum size of a replication configuration is 2 MB.
 type ReplicationConfiguration struct {
+	XMLName xml.Name `xml:"ReplicationConfiguration"`
 	// The Resource Name of the Identity and Access Management (IAM) role that IONOS Object Storage assumes when replicating objects.
-	Role  string            `json:"Role"`
-	Rules []ReplicationRule `json:"Rules"`
+	Role  string            `json:"Role" xml:"Role"`
+	Rules []ReplicationRule `json:"Rules" xml:"Rules"`
 }
 
 // NewReplicationConfiguration instantiates a new ReplicationConfiguration object

@@ -15,12 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the PutBucketLifecycleRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PutBucketLifecycleRequest{}
 
-// PutBucketLifecycleRequest struct for PutBucketLifecycleRequest
+// PutBucketLifecycleRequest Container for lifecycle rules. You can add as many as 1000 rules.
 type PutBucketLifecycleRequest struct {
-	LifecycleConfiguration *PutBucketLifecycleRequestLifecycleConfiguration `json:"LifecycleConfiguration,omitempty"`
+	XMLName xml.Name `xml:"LifecycleConfiguration"`
+	// Container for a lifecycle rules.
+	Rules []Rule `json:"Rules,omitempty" xml:"Rule"`
 }
 
 // NewPutBucketLifecycleRequest instantiates a new PutBucketLifecycleRequest object
@@ -41,36 +45,36 @@ func NewPutBucketLifecycleRequestWithDefaults() *PutBucketLifecycleRequest {
 	return &this
 }
 
-// GetLifecycleConfiguration returns the LifecycleConfiguration field value if set, zero value otherwise.
-func (o *PutBucketLifecycleRequest) GetLifecycleConfiguration() PutBucketLifecycleRequestLifecycleConfiguration {
-	if o == nil || IsNil(o.LifecycleConfiguration) {
-		var ret PutBucketLifecycleRequestLifecycleConfiguration
+// GetRules returns the Rules field value if set, zero value otherwise.
+func (o *PutBucketLifecycleRequest) GetRules() []Rule {
+	if o == nil || IsNil(o.Rules) {
+		var ret []Rule
 		return ret
 	}
-	return *o.LifecycleConfiguration
+	return o.Rules
 }
 
-// GetLifecycleConfigurationOk returns a tuple with the LifecycleConfiguration field value if set, nil otherwise
+// GetRulesOk returns a tuple with the Rules field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PutBucketLifecycleRequest) GetLifecycleConfigurationOk() (*PutBucketLifecycleRequestLifecycleConfiguration, bool) {
-	if o == nil || IsNil(o.LifecycleConfiguration) {
+func (o *PutBucketLifecycleRequest) GetRulesOk() ([]Rule, bool) {
+	if o == nil || IsNil(o.Rules) {
 		return nil, false
 	}
-	return o.LifecycleConfiguration, true
+	return o.Rules, true
 }
 
-// HasLifecycleConfiguration returns a boolean if a field has been set.
-func (o *PutBucketLifecycleRequest) HasLifecycleConfiguration() bool {
-	if o != nil && !IsNil(o.LifecycleConfiguration) {
+// HasRules returns a boolean if a field has been set.
+func (o *PutBucketLifecycleRequest) HasRules() bool {
+	if o != nil && !IsNil(o.Rules) {
 		return true
 	}
 
 	return false
 }
 
-// SetLifecycleConfiguration gets a reference to the given PutBucketLifecycleRequestLifecycleConfiguration and assigns it to the LifecycleConfiguration field.
-func (o *PutBucketLifecycleRequest) SetLifecycleConfiguration(v PutBucketLifecycleRequestLifecycleConfiguration) {
-	o.LifecycleConfiguration = &v
+// SetRules gets a reference to the given []Rule and assigns it to the Rules field.
+func (o *PutBucketLifecycleRequest) SetRules(v []Rule) {
+	o.Rules = v
 }
 
 func (o PutBucketLifecycleRequest) MarshalJSON() ([]byte, error) {
@@ -83,8 +87,8 @@ func (o PutBucketLifecycleRequest) MarshalJSON() ([]byte, error) {
 
 func (o PutBucketLifecycleRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.LifecycleConfiguration) {
-		toSerialize["LifecycleConfiguration"] = o.LifecycleConfiguration
+	if !IsNil(o.Rules) {
+		toSerialize["Rules"] = o.Rules
 	}
 	return toSerialize, nil
 }

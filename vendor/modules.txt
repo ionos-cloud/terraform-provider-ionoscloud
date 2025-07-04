@@ -360,7 +360,7 @@ github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2
-# github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2 v2.0.0
+# github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2 v2.0.0 => /tmp/sdk-go
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
@@ -642,3 +642,4 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
+# github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2 => /tmp/sdk-go

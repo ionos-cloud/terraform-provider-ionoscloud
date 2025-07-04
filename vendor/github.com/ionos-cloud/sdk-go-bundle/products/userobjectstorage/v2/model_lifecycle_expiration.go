@@ -13,21 +13,22 @@ package userobjectstorage
 
 import (
 	"encoding/json"
-
-	"time"
 )
+
+import "encoding/xml"
 
 // checks if the LifecycleExpiration type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &LifecycleExpiration{}
 
 // LifecycleExpiration Specifies when the object expires based on the values defined in the lifecycle configuration.
 type LifecycleExpiration struct {
+	XMLName xml.Name `xml:"Expiration"`
 	// Indicates at what date the object is to be moved or deleted. Should be in GMT ISO 8601 Format.
-	Date *IonosTime `json:"Date,omitempty"`
+	Date *string `json:"Date,omitempty" xml:"Date"`
 	// Indicates the lifetime, in days, of the objects that are subject to the rule. The value must be a non-zero positive integer.
-	Days *int32 `json:"Days,omitempty"`
+	Days *int32 `json:"Days,omitempty" xml:"Days"`
 	// Indicates whether IONOS Object Storage will remove a delete marker with no noncurrent versions. If set to true, the delete marker will be expired; if set to false the policy takes no operation. This cannot be specified with Days or Date in a Lifecycle Expiration Policy.
-	ExpiredObjectDeleteMarker *bool `json:"ExpiredObjectDeleteMarker,omitempty"`
+	ExpiredObjectDeleteMarker *bool `json:"ExpiredObjectDeleteMarker,omitempty" xml:"ExpiredObjectDeleteMarker"`
 }
 
 // NewLifecycleExpiration instantiates a new LifecycleExpiration object
@@ -49,21 +50,21 @@ func NewLifecycleExpirationWithDefaults() *LifecycleExpiration {
 }
 
 // GetDate returns the Date field value if set, zero value otherwise.
-func (o *LifecycleExpiration) GetDate() time.Time {
+func (o *LifecycleExpiration) GetDate() string {
 	if o == nil || IsNil(o.Date) {
-		var ret time.Time
+		var ret string
 		return ret
 	}
-	return o.Date.Time
+	return *o.Date
 }
 
 // GetDateOk returns a tuple with the Date field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *LifecycleExpiration) GetDateOk() (*time.Time, bool) {
+func (o *LifecycleExpiration) GetDateOk() (*string, bool) {
 	if o == nil || IsNil(o.Date) {
 		return nil, false
 	}
-	return &o.Date.Time, true
+	return o.Date, true
 }
 
 // HasDate returns a boolean if a field has been set.
@@ -75,9 +76,9 @@ func (o *LifecycleExpiration) HasDate() bool {
 	return false
 }
 
-// SetDate gets a reference to the given time.Time and assigns it to the Date field.
-func (o *LifecycleExpiration) SetDate(v time.Time) {
-	o.Date = &IonosTime{v}
+// SetDate gets a reference to the given string and assigns it to the Date field.
+func (o *LifecycleExpiration) SetDate(v string) {
+	o.Date = &v
 }
 
 // GetDays returns the Days field value if set, zero value otherwise.

@@ -15,15 +15,18 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ObjectLockRetention type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ObjectLockRetention{}
 
 // ObjectLockRetention A Retention configuration for an object.
 type ObjectLockRetention struct {
+	XMLName xml.Name `xml:"Retention"`
 	// Indicates the Retention mode for the specified object.
-	Mode *string `json:"Mode,omitempty"`
+	Mode *string `json:"Mode,omitempty" xml:"Mode"`
 	// The date on which this Object Lock Retention will expire.
-	RetainUntilDate *string `json:"RetainUntilDate,omitempty"`
+	RetainUntilDate *string `json:"RetainUntilDate,omitempty" xml:"RetainUntilDate"`
 }
 
 // NewObjectLockRetention instantiates a new ObjectLockRetention object

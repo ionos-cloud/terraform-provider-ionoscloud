@@ -15,15 +15,18 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the MetadataEntry type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &MetadataEntry{}
 
 // MetadataEntry A metadata key-value pair to store with an object.
 type MetadataEntry struct {
+	XMLName xml.Name `xml:"MetadataEntry"`
 	// Name of the Object.
-	Name *string `json:"Name,omitempty"`
+	Name *string `json:"Name,omitempty" xml:"Name"`
 	// Value of the Object.
-	Value *string `json:"Value,omitempty"`
+	Value *string `json:"Value,omitempty" xml:"Value"`
 }
 
 // NewMetadataEntry instantiates a new MetadataEntry object

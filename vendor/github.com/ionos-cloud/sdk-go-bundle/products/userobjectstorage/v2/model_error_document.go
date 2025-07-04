@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ErrorDocument type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ErrorDocument{}
 
 // ErrorDocument The object key name to use when a 4XX class error occurs. Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests.
 type ErrorDocument struct {
+	XMLName xml.Name `xml:"ErrorDocument"`
 	// The object key.
-	Key string `json:"Key"`
+	Key string `json:"Key" xml:"Key"`
 }
 
 // NewErrorDocument instantiates a new ErrorDocument object

@@ -15,15 +15,18 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the GetBucketWebsiteOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &GetBucketWebsiteOutput{}
 
 // GetBucketWebsiteOutput struct for GetBucketWebsiteOutput
 type GetBucketWebsiteOutput struct {
-	RedirectAllRequestsTo *RedirectAllRequestsTo `json:"RedirectAllRequestsTo,omitempty"`
-	IndexDocument         *IndexDocument         `json:"IndexDocument,omitempty"`
-	ErrorDocument         *ErrorDocument         `json:"ErrorDocument,omitempty"`
-	RoutingRules          []RoutingRule          `json:"RoutingRules,omitempty"`
+	XMLName               xml.Name               `xml:"WebsiteConfiguration"`
+	RedirectAllRequestsTo *RedirectAllRequestsTo `json:"RedirectAllRequestsTo,omitempty" xml:"RedirectAllRequestsTo"`
+	IndexDocument         *IndexDocument         `json:"IndexDocument,omitempty" xml:"IndexDocument"`
+	ErrorDocument         *ErrorDocument         `json:"ErrorDocument,omitempty" xml:"ErrorDocument"`
+	RoutingRules          []RoutingRule          `json:"RoutingRules,omitempty" xml:"RoutingRules"`
 }
 
 // NewGetBucketWebsiteOutput instantiates a new GetBucketWebsiteOutput object

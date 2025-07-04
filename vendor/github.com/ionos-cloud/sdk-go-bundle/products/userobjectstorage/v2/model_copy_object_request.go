@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the CopyObjectRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CopyObjectRequest{}
 
 // CopyObjectRequest struct for CopyObjectRequest
 type CopyObjectRequest struct {
-	// A map of metadata to store with the object.
-	XAmzMeta *map[string]string `json:"x-amz-meta-,omitempty"`
+	XMLName xml.Name `xml:"CopyObjectRequest"`
+	// A map of metadata to store with the object in S3.
+	XAmzMeta *map[string]string `json:"x-amz-meta-,omitempty" xml:"x-amz-meta-"`
 }
 
 // NewCopyObjectRequest instantiates a new CopyObjectRequest object

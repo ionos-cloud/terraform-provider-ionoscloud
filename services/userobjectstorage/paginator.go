@@ -1,4 +1,4 @@
-package objectstorage
+package userobjectstorage
 
 import (
 	"context"
@@ -71,5 +71,5 @@ func (p *ListObjectVersionsPaginator) NextPage(ctx context.Context) (*objstorage
 		p.hasMore = false
 	}
 
-	return &output, nil
+	return output, nil
 }

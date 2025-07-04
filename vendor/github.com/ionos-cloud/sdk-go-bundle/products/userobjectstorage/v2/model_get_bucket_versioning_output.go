@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the GetBucketVersioningOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &GetBucketVersioningOutput{}
 
 // GetBucketVersioningOutput The versioning configuration of the bucket.
 type GetBucketVersioningOutput struct {
-	Status    *BucketVersioningStatus `json:"Status,omitempty"`
-	MfaDelete *MfaDeleteStatus        `json:"MfaDelete,omitempty"`
+	XMLName   xml.Name                `xml:"VersioningConfiguration"`
+	Status    *BucketVersioningStatus `json:"Status,omitempty" xml:"Status"`
+	MfaDelete *MfaDeleteStatus        `json:"MfaDelete,omitempty" xml:"MfaDelete"`
 }
 
 // NewGetBucketVersioningOutput instantiates a new GetBucketVersioningOutput object

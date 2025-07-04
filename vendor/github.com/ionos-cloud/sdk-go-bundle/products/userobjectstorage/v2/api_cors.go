@@ -12,33 +12,23 @@
 package userobjectstorage
 
 import (
-	_context "context"
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"net/http"
+	"net/url"
 	"strings"
-)
-
-// Linger please
-var (
-	_ _context.Context
 )
 
 // CORSApiService CORSApi service
 type CORSApiService service
 
 type ApiDeleteBucketCorsRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *CORSApiService
 	bucket     string
-	cors       *bool
-}
-
-func (r ApiDeleteBucketCorsRequest) Cors(cors bool) ApiDeleteBucketCorsRequest {
-	r.cors = &cors
-	return r
 }
 
 func (r ApiDeleteBucketCorsRequest) Execute() (*shared.APIResponse, error) {
@@ -46,15 +36,16 @@ func (r ApiDeleteBucketCorsRequest) Execute() (*shared.APIResponse, error) {
 }
 
 /*
-  - DeleteBucketCors DeleteBucketCors
-  - Deletes the `CORS` configuration information set for the bucket.</p> <p>To use this operation, you must have permission to perform the `PutBucketCORS` operation. The bucket owner has this permission by default and can grant this permission to others.
+DeleteBucketCors DeleteBucketCors
 
+<p>Deletes the `CORS` configuration information set for the bucket.</p> <p>To use this operation, you must have permission to perform the `PutBucketCORS` operation. The bucket owner has this permission by default and can grant this permission to others. </p>
 #### S3 API Compatibility - The `x-amz-expected-bucket-owner` header isn't supported.
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiDeleteBucketCorsRequest
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiDeleteBucketCorsRequest
 */
-func (a *CORSApiService) DeleteBucketCors(ctx _context.Context, bucket string) ApiDeleteBucketCorsRequest {
+func (a *CORSApiService) DeleteBucketCors(ctx context.Context, bucket string) ApiDeleteBucketCorsRequest {
 	return ApiDeleteBucketCorsRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -62,16 +53,12 @@ func (a *CORSApiService) DeleteBucketCors(ctx _context.Context, bucket string) A
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *CORSApiService) DeleteBucketCorsExecute(r ApiDeleteBucketCorsRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodDelete
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CORSApiService.DeleteBucketCors")
@@ -82,22 +69,18 @@ func (a *CORSApiService) DeleteBucketCorsExecute(r ApiDeleteBucketCorsRequest) (
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?cors"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.cors == nil {
-		return nil, reportError("cors is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "cors", r.cors, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -129,13 +112,12 @@ func (a *CORSApiService) DeleteBucketCorsExecute(r ApiDeleteBucketCorsRequest) (
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -143,7 +125,6 @@ func (a *CORSApiService) DeleteBucketCorsExecute(r ApiDeleteBucketCorsRequest) (
 		RequestURL:  localVarPath,
 		Operation:   "DeleteBucketCors",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -151,6 +132,7 @@ func (a *CORSApiService) DeleteBucketCorsExecute(r ApiDeleteBucketCorsRequest) (
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}
@@ -167,32 +149,27 @@ func (a *CORSApiService) DeleteBucketCorsExecute(r ApiDeleteBucketCorsRequest) (
 }
 
 type ApiGetBucketCorsRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *CORSApiService
 	bucket     string
-	cors       *bool
 }
 
-func (r ApiGetBucketCorsRequest) Cors(cors bool) ApiGetBucketCorsRequest {
-	r.cors = &cors
-	return r
-}
-
-func (r ApiGetBucketCorsRequest) Execute() (GetBucketCorsOutput, *shared.APIResponse, error) {
+func (r ApiGetBucketCorsRequest) Execute() (*GetBucketCorsOutput, *shared.APIResponse, error) {
 	return r.ApiService.GetBucketCorsExecute(r)
 }
 
 /*
-  - GetBucketCors GetBucketCors
-  - Returns the cors configuration information set for the bucket.
+GetBucketCors GetBucketCors
 
+Returns the cors configuration information set for the bucket.
 To use this operation, you must have permission to perform the GetBucketCORS operation. By default, the bucket owner has this permission and can grant it to others.
 #### S3 API Compatibility - The `x-amz-expected-bucket-owner` header isn't supported.
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiGetBucketCorsRequest
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiGetBucketCorsRequest
 */
-func (a *CORSApiService) GetBucketCors(ctx _context.Context, bucket string) ApiGetBucketCorsRequest {
+func (a *CORSApiService) GetBucketCors(ctx context.Context, bucket string) ApiGetBucketCorsRequest {
 	return ApiGetBucketCorsRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -200,18 +177,15 @@ func (a *CORSApiService) GetBucketCors(ctx _context.Context, bucket string) ApiG
 	}
 }
 
-/*
- * Execute executes the request
- * @return GetBucketCorsOutput
- */
-func (a *CORSApiService) GetBucketCorsExecute(r ApiGetBucketCorsRequest) (GetBucketCorsOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return GetBucketCorsOutput
+func (a *CORSApiService) GetBucketCorsExecute(r ApiGetBucketCorsRequest) (*GetBucketCorsOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  GetBucketCorsOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetBucketCorsOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CORSApiService.GetBucketCors")
@@ -222,22 +196,18 @@ func (a *CORSApiService) GetBucketCorsExecute(r ApiGetBucketCorsRequest) (GetBuc
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?cors"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.cors == nil {
-		return localVarReturnValue, nil, reportError("cors is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "cors", r.cors, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -269,13 +239,12 @@ func (a *CORSApiService) GetBucketCorsExecute(r ApiGetBucketCorsRequest) (GetBuc
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -283,7 +252,6 @@ func (a *CORSApiService) GetBucketCorsExecute(r ApiGetBucketCorsRequest) (GetBuc
 		RequestURL:  localVarPath,
 		Operation:   "GetBucketCors",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -291,6 +259,7 @@ func (a *CORSApiService) GetBucketCorsExecute(r ApiGetBucketCorsRequest) (GetBuc
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -316,22 +285,18 @@ func (a *CORSApiService) GetBucketCorsExecute(r ApiGetBucketCorsRequest) (GetBuc
 }
 
 type ApiPutBucketCorsRequest struct {
-	ctx                  _context.Context
+	ctx                  context.Context
 	ApiService           *CORSApiService
 	bucket               string
-	cors                 *bool
 	putBucketCorsRequest *PutBucketCorsRequest
 	contentMD5           *string
 }
 
-func (r ApiPutBucketCorsRequest) Cors(cors bool) ApiPutBucketCorsRequest {
-	r.cors = &cors
-	return r
-}
 func (r ApiPutBucketCorsRequest) PutBucketCorsRequest(putBucketCorsRequest PutBucketCorsRequest) ApiPutBucketCorsRequest {
 	r.putBucketCorsRequest = &putBucketCorsRequest
 	return r
 }
+
 func (r ApiPutBucketCorsRequest) ContentMD5(contentMD5 string) ApiPutBucketCorsRequest {
 	r.contentMD5 = &contentMD5
 	return r
@@ -342,13 +307,15 @@ func (r ApiPutBucketCorsRequest) Execute() (*shared.APIResponse, error) {
 }
 
 /*
- * PutBucketCors PutBucketCors
- * <p>Sets the `CORS` configuration for your bucket. If the configuration exists, it will be overwritten and replaced.</p>          <p>To use this operation, you must be allowed to perform the `PutBucketCORS` operation. By default, the bucket owner has this permission and can grant it to others.</p> <p>You set this configuration on a bucket so that the bucket can service cross-origin requests. For example, you might want to enable a request whose origin is `http://www.example.com` to access your IONOS Object Storage bucket at `my.example.bucket.com` by using the browser's `XMLHttpRequest` capability.</p> <p>To enable cross-origin resource sharing (CORS) on a bucket, you add the `cors` subresource to the bucket. The `cors` subresource is an XML document in which you configure rules that identify origins and the HTTP methods that can be executed on your bucket. The document is limited to 64 KB in size. </p> <p>When IONOS Object Storage receives a cross-origin request (or a pre-flight OPTIONS request) against a bucket, it evaluates the `cors` configuration on the bucket and uses the first `CORSRule` rule that matches the incoming browser request to enable a cross-origin request. For a rule to match, the following conditions must be met:</p> <ul> <li> <p>The request's `Origin` header must match `AllowedOrigin` elements.</p> </li> <li> <p>The request method (for example, GET, PUT, HEAD, and so on) or the `Access-Control-Request-Method` header in case of a pre-flight `OPTIONS` request must be one of the `AllowedMethod` elements. </p> </li> <li> <p>Every header specified in the `Access-Control-Request-Headers` request header of a pre-flight request must match an `AllowedHeader` element. </p> </li> </ul>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @return ApiPutBucketCorsRequest
- */
-func (a *CORSApiService) PutBucketCors(ctx _context.Context, bucket string) ApiPutBucketCorsRequest {
+PutBucketCors PutBucketCors
+
+<p>Sets the `CORS` configuration for your bucket. If the configuration exists, it will be overwritten and replaced.</p>          <p>To use this operation, you must be allowed to perform the `PutBucketCORS` operation. By default, the bucket owner has this permission and can grant it to others.</p> <p>You set this configuration on a bucket so that the bucket can service cross-origin requests. For example, you might want to enable a request whose origin is `http://www.example.com` to access your IONOS Object Storage bucket at `my.example.bucket.com` by using the browser's `XMLHttpRequest` capability.</p> <p>To enable cross-origin resource sharing (CORS) on a bucket, you add the `cors` subresource to the bucket. The `cors` subresource is an XML document in which you configure rules that identify origins and the HTTP methods that can be executed on your bucket. The document is limited to 64 KB in size. </p> <p>When IONOS Object Storage receives a cross-origin request (or a pre-flight OPTIONS request) against a bucket, it evaluates the `cors` configuration on the bucket and uses the first `CORSRule` rule that matches the incoming browser request to enable a cross-origin request. For a rule to match, the following conditions must be met:</p> <ul> <li> <p>The request's `Origin` header must match `AllowedOrigin` elements.</p> </li> <li> <p>The request method (for example, GET, PUT, HEAD, and so on) or the `Access-Control-Request-Method` header in case of a pre-flight `OPTIONS` request must be one of the `AllowedMethod` elements. </p> </li> <li> <p>Every header specified in the `Access-Control-Request-Headers` request header of a pre-flight request must match an `AllowedHeader` element. </p> </li> </ul>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiPutBucketCorsRequest
+*/
+func (a *CORSApiService) PutBucketCors(ctx context.Context, bucket string) ApiPutBucketCorsRequest {
 	return ApiPutBucketCorsRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -356,16 +323,12 @@ func (a *CORSApiService) PutBucketCors(ctx _context.Context, bucket string) ApiP
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *CORSApiService) PutBucketCorsExecute(r ApiPutBucketCorsRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CORSApiService.PutBucketCors")
@@ -376,25 +339,21 @@ func (a *CORSApiService) PutBucketCorsExecute(r ApiPutBucketCorsRequest) (*share
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?cors"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.cors == nil {
-		return nil, reportError("cors is required and must be specified")
-	}
 	if r.putBucketCorsRequest == nil {
 		return nil, reportError("putBucketCorsRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "cors", r.cors, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 
@@ -431,13 +390,12 @@ func (a *CORSApiService) PutBucketCorsExecute(r ApiPutBucketCorsRequest) (*share
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -445,7 +403,6 @@ func (a *CORSApiService) PutBucketCorsExecute(r ApiPutBucketCorsRequest) (*share
 		RequestURL:  localVarPath,
 		Operation:   "PutBucketCors",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -453,6 +410,7 @@ func (a *CORSApiService) PutBucketCorsExecute(r ApiPutBucketCorsRequest) (*share
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}

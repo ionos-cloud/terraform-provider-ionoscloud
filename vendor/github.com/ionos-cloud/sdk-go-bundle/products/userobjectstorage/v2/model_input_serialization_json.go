@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the InputSerializationJSON type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &InputSerializationJSON{}
 
 // InputSerializationJSON Specifies JSON as object's input serialization format.
 type InputSerializationJSON struct {
+	XMLName xml.Name `xml:"InputSerializationJSON"`
 	// Specifies JSON as object's input serialization format.
-	Type *string `json:"Type,omitempty"`
+	Type *string `json:"Type,omitempty" xml:"Type"`
 }
 
 // NewInputSerializationJSON instantiates a new InputSerializationJSON object

@@ -15,30 +15,33 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ListPartsOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ListPartsOutput{}
 
 // ListPartsOutput struct for ListPartsOutput
 type ListPartsOutput struct {
+	XMLName xml.Name `xml:"ListPartsOutput"`
 	// The bucket name.
-	Bucket *string `json:"Bucket,omitempty"`
+	Bucket *string `json:"Bucket,omitempty" xml:"Name"`
 	// The object key.
-	Key *string `json:"Key,omitempty"`
+	Key *string `json:"Key,omitempty" xml:"Key"`
 	// ID of the multipart upload.
-	UploadId *string `json:"UploadId,omitempty"`
+	UploadId *string `json:"UploadId,omitempty" xml:"UploadId"`
 	// When a list is truncated, this element specifies the last part in the list, as well as the value to use for the part-number-marker request parameter in a subsequent request.
-	PartNumberMarker *int32 `json:"PartNumberMarker,omitempty"`
+	PartNumberMarker *int32 `json:"PartNumberMarker,omitempty" xml:"PartNumberMarker"`
 	// When a list is truncated, this element specifies the last part in the list, as well as the value to use for the part-number-marker request parameter in a subsequent request.
-	NextPartNumberMarker *string `json:"NextPartNumberMarker,omitempty"`
+	NextPartNumberMarker *string `json:"NextPartNumberMarker,omitempty" xml:"NextPartNumberMarker"`
 	// Maximum number of parts that were allowed in the response.
-	MaxParts *string `json:"MaxParts,omitempty"`
+	MaxParts *string `json:"MaxParts,omitempty" xml:"MaxParts"`
 	// A flag that indicates whether IONOS Object Storage returned all of the results that satisfied the search criteria. If your results were truncated, you can make a follow-up paginated request using the NextKeyMarker and NextVersionIdMarker response parameters as a starting place in another request to return the rest of the results.
-	IsTruncated *bool `json:"IsTruncated,omitempty"`
+	IsTruncated *bool `json:"IsTruncated,omitempty" xml:"IsTruncated"`
 	//  Container for elements related to a particular part. A response can contain zero or more `Part` elements.
-	Parts        []Part        `json:"Parts,omitempty"`
-	Initiator    *Initiator    `json:"Initiator,omitempty"`
-	Owner        *Owner        `json:"Owner,omitempty"`
-	StorageClass *StorageClass `json:"StorageClass,omitempty"`
+	Parts        []Part        `json:"Parts,omitempty" xml:"Parts"`
+	Initiator    *Initiator    `json:"Initiator,omitempty" xml:"Initiator"`
+	Owner        *Owner        `json:"Owner,omitempty" xml:"Owner"`
+	StorageClass *StorageClass `json:"StorageClass,omitempty" xml:"StorageClass"`
 }
 
 // NewListPartsOutput instantiates a new ListPartsOutput object

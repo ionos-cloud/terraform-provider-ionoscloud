@@ -15,19 +15,22 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the DeletedObject type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &DeletedObject{}
 
 // DeletedObject Information about the deleted object.
 type DeletedObject struct {
+	XMLName xml.Name `xml:"Deleted"`
 	// The object key.
-	Key *string `json:"Key,omitempty"`
+	Key *string `json:"Key,omitempty" xml:"Key"`
 	// Version ID of the deleted object
-	VersionId *string `json:"VersionId,omitempty"`
+	VersionId *string `json:"VersionId,omitempty" xml:"VersionId"`
 	// Specifies whether the versioned object that was permanently deleted was (true) or was not (false) a delete marker. In a simple DELETE, this header indicates whether (true) or not (false) a delete marker was created.
-	DeleteMarker *bool `json:"DeleteMarker,omitempty"`
+	DeleteMarker *bool `json:"DeleteMarker,omitempty" xml:"DeleteMarker"`
 	// The version ID of the delete marker created as a result of the DELETE operation. If you delete a specific object version, the value returned by this header is the version ID of the object version deleted.
-	DeleteMarkerVersionId *string `json:"DeleteMarkerVersionId,omitempty"`
+	DeleteMarkerVersionId *string `json:"DeleteMarkerVersionId,omitempty" xml:"DeleteMarkerVersionId"`
 }
 
 // NewDeletedObject instantiates a new DeletedObject object

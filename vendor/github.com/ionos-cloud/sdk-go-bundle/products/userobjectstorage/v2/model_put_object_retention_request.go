@@ -15,12 +15,18 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the PutObjectRetentionRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PutObjectRetentionRequest{}
 
-// PutObjectRetentionRequest struct for PutObjectRetentionRequest
+// PutObjectRetentionRequest A Retention configuration for an object.
 type PutObjectRetentionRequest struct {
-	Retention *PutObjectRetentionRequestRetention `json:"Retention,omitempty"`
+	XMLName xml.Name `xml:"Retention"`
+	// Indicates the Retention mode for the specified object.
+	Mode *string `json:"Mode,omitempty" xml:"Mode"`
+	// The date on which this Object Lock Retention will expire.
+	RetainUntilDate *string `json:"RetainUntilDate,omitempty" xml:"RetainUntilDate"`
 }
 
 // NewPutObjectRetentionRequest instantiates a new PutObjectRetentionRequest object
@@ -41,36 +47,68 @@ func NewPutObjectRetentionRequestWithDefaults() *PutObjectRetentionRequest {
 	return &this
 }
 
-// GetRetention returns the Retention field value if set, zero value otherwise.
-func (o *PutObjectRetentionRequest) GetRetention() PutObjectRetentionRequestRetention {
-	if o == nil || IsNil(o.Retention) {
-		var ret PutObjectRetentionRequestRetention
+// GetMode returns the Mode field value if set, zero value otherwise.
+func (o *PutObjectRetentionRequest) GetMode() string {
+	if o == nil || IsNil(o.Mode) {
+		var ret string
 		return ret
 	}
-	return *o.Retention
+	return *o.Mode
 }
 
-// GetRetentionOk returns a tuple with the Retention field value if set, nil otherwise
+// GetModeOk returns a tuple with the Mode field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PutObjectRetentionRequest) GetRetentionOk() (*PutObjectRetentionRequestRetention, bool) {
-	if o == nil || IsNil(o.Retention) {
+func (o *PutObjectRetentionRequest) GetModeOk() (*string, bool) {
+	if o == nil || IsNil(o.Mode) {
 		return nil, false
 	}
-	return o.Retention, true
+	return o.Mode, true
 }
 
-// HasRetention returns a boolean if a field has been set.
-func (o *PutObjectRetentionRequest) HasRetention() bool {
-	if o != nil && !IsNil(o.Retention) {
+// HasMode returns a boolean if a field has been set.
+func (o *PutObjectRetentionRequest) HasMode() bool {
+	if o != nil && !IsNil(o.Mode) {
 		return true
 	}
 
 	return false
 }
 
-// SetRetention gets a reference to the given PutObjectRetentionRequestRetention and assigns it to the Retention field.
-func (o *PutObjectRetentionRequest) SetRetention(v PutObjectRetentionRequestRetention) {
-	o.Retention = &v
+// SetMode gets a reference to the given string and assigns it to the Mode field.
+func (o *PutObjectRetentionRequest) SetMode(v string) {
+	o.Mode = &v
+}
+
+// GetRetainUntilDate returns the RetainUntilDate field value if set, zero value otherwise.
+func (o *PutObjectRetentionRequest) GetRetainUntilDate() string {
+	if o == nil || IsNil(o.RetainUntilDate) {
+		var ret string
+		return ret
+	}
+	return *o.RetainUntilDate
+}
+
+// GetRetainUntilDateOk returns a tuple with the RetainUntilDate field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *PutObjectRetentionRequest) GetRetainUntilDateOk() (*string, bool) {
+	if o == nil || IsNil(o.RetainUntilDate) {
+		return nil, false
+	}
+	return o.RetainUntilDate, true
+}
+
+// HasRetainUntilDate returns a boolean if a field has been set.
+func (o *PutObjectRetentionRequest) HasRetainUntilDate() bool {
+	if o != nil && !IsNil(o.RetainUntilDate) {
+		return true
+	}
+
+	return false
+}
+
+// SetRetainUntilDate gets a reference to the given string and assigns it to the RetainUntilDate field.
+func (o *PutObjectRetentionRequest) SetRetainUntilDate(v string) {
+	o.RetainUntilDate = &v
 }
 
 func (o PutObjectRetentionRequest) MarshalJSON() ([]byte, error) {
@@ -83,8 +121,11 @@ func (o PutObjectRetentionRequest) MarshalJSON() ([]byte, error) {
 
 func (o PutObjectRetentionRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Retention) {
-		toSerialize["Retention"] = o.Retention
+	if !IsNil(o.Mode) {
+		toSerialize["Mode"] = o.Mode
+	}
+	if !IsNil(o.RetainUntilDate) {
+		toSerialize["RetainUntilDate"] = o.RetainUntilDate
 	}
 	return toSerialize, nil
 }

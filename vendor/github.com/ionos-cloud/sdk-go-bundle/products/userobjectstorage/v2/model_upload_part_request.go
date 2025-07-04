@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the UploadPartRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &UploadPartRequest{}
 
 // UploadPartRequest struct for UploadPartRequest
 type UploadPartRequest struct {
+	XMLName xml.Name `xml:"UploadPartRequest"`
 	// Object data.
-	Body *string `json:"Body,omitempty"`
+	Body *string `json:"Body,omitempty" xml:"Body"`
 }
 
 // NewUploadPartRequest instantiates a new UploadPartRequest object

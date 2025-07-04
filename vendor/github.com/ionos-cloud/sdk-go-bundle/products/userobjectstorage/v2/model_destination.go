@@ -15,14 +15,17 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the Destination type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Destination{}
 
 // Destination A container for information about the replication destination.
 type Destination struct {
-	// Use the same \"Bucket\" value formatting as in the API specification, that is, `arn:aws:s3:::{Bucket}`.
-	Bucket       string        `json:"Bucket"`
-	StorageClass *StorageClass `json:"StorageClass,omitempty"`
+	XMLName xml.Name `xml:"Destination"`
+	// Use the same \"Bucket\" value formatting as in the S3 API specification, that is, `arn:aws:s3:::{Bucket}`.
+	Bucket       string        `json:"Bucket" xml:"Bucket"`
+	StorageClass *StorageClass `json:"StorageClass,omitempty" xml:"StorageClass"`
 }
 
 // NewDestination instantiates a new Destination object

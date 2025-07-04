@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the GetBucketCorsOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &GetBucketCorsOutput{}
 
 // GetBucketCorsOutput struct for GetBucketCorsOutput
 type GetBucketCorsOutput struct {
+	XMLName xml.Name `xml:"CORSConfiguration"`
 	// A set of origins and methods (cross-origin access that you want to allow). You can add up to 100 rules to the configuration.
-	CORSRules []CORSRule `json:"CORSRules,omitempty"`
+	CORSRules []CORSRule `json:"CORSRules,omitempty" xml:"CORSRule"`
 }
 
 // NewGetBucketCorsOutput instantiates a new GetBucketCorsOutput object

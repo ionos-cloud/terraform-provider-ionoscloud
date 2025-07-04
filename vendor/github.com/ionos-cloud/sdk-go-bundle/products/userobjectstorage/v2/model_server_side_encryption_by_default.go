@@ -15,12 +15,15 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ServerSideEncryptionByDefault type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ServerSideEncryptionByDefault{}
 
 // ServerSideEncryptionByDefault Describes the default server-side encryption to apply to new objects in the bucket. If a PUT Object request doesn't specify any server-side encryption, this default encryption will be applied.
 type ServerSideEncryptionByDefault struct {
-	SSEAlgorithm ServerSideEncryption `json:"SSEAlgorithm"`
+	XMLName      xml.Name             `xml:"ApplyServerSideEncryptionByDefault"`
+	SSEAlgorithm ServerSideEncryption `json:"SSEAlgorithm" xml:"SSEAlgorithm"`
 }
 
 // NewServerSideEncryptionByDefault instantiates a new ServerSideEncryptionByDefault object

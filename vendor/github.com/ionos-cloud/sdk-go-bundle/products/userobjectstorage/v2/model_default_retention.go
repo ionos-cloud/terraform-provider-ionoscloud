@@ -15,17 +15,20 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the DefaultRetention type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &DefaultRetention{}
 
 // DefaultRetention The default Object Lock retention mode and period for new objects placed in the specified bucket. Bucket settings require both a mode and a period. The period can be either `Days` or `Years` but you must select one. You cannot specify `Days` and `Years` at the same time.
 type DefaultRetention struct {
+	XMLName xml.Name `xml:"DefaultRetention"`
 	// The default Object Lock retention mode for new objects placed in the specified bucket. Must be used with either `Days` or `Years`.
-	Mode *string `json:"Mode,omitempty"`
+	Mode *string `json:"Mode,omitempty" xml:"Mode"`
 	// The number of days that you want to specify for the default retention period. Must be used with `Mode`.
-	Days *int32 `json:"Days,omitempty"`
+	Days *int32 `json:"Days,omitempty" xml:"Days"`
 	// The number of years that you want to specify for the default retention period. Must be used with `Mode`.
-	Years *int32 `json:"Years,omitempty"`
+	Years *int32 `json:"Years,omitempty" xml:"Years"`
 }
 
 // NewDefaultRetention instantiates a new DefaultRetention object

@@ -15,34 +15,36 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the BucketPolicyStatement type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &BucketPolicyStatement{}
 
 // BucketPolicyStatement struct for BucketPolicyStatement
 type BucketPolicyStatement struct {
+	XMLName xml.Name `xml:"BucketPolicyStatement"`
 	// Custom string identifying the statement.
-	Sid *string `json:"Sid,omitempty"`
+	Sid *string `json:"Sid,omitempty" xml:"Sid"`
 	// The array of allowed or denied actions.   IONOS Object Storage supports the use of a wildcard in your Action configuration (`\"Action\":[\"s3:*\"]`). When an Action wildcard is used together with an object-level Resource element (`\"arn:aws:s3:::<bucketName>/_*\"` or `\"arn:aws:s3:::<bucketName>/<objectName>\"`), the wildcard denotes all supported Object actions. When an Action wildcard is used together with bucket-level Resource element (`\"arn:aws:s3:::<bucketName>\"`), the wildcard denotes all the bucket actions and bucket subresource actions that IONOS Object Storage supports.
-	Action []string `json:"Action"`
+	Action []string `json:"Action" xml:"Action"`
 	// Specify the outcome when the user requests a particular action.
-	Effect string `json:"Effect"`
+	Effect string `json:"Effect" xml:"Effect"`
 	// The bucket or object that the policy applies to.   Must be one of the following: - `\"arn:aws:s3:::<bucketName>\"` - For bucket actions (such as `s3:ListBucket`) and bucket subresource actions (such as `s3:GetBucketAcl`). - `\"arn:aws:s3:::<bucketName>/_*\"` or `\"arn:aws:s3:::<bucketName>/<objectName>\"` - For object actions (such as `s3:PutObject`).
-	Resource  []string                        `json:"Resource"`
-	Condition *BucketPolicyStatementCondition `json:"Condition,omitempty"`
-	Principal BucketPolicyStatementPrincipal  `json:"Principal"`
+	Resource  []string               `json:"Resource" xml:"Resource"`
+	Condition *BucketPolicyCondition `json:"Condition,omitempty" xml:"Condition"`
+	Principal *Principal             `json:"Principal,omitempty" xml:"Principal"`
 }
 
 // NewBucketPolicyStatement instantiates a new BucketPolicyStatement object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBucketPolicyStatement(action []string, effect string, resource []string, principal BucketPolicyStatementPrincipal) *BucketPolicyStatement {
+func NewBucketPolicyStatement(action []string, effect string, resource []string) *BucketPolicyStatement {
 	this := BucketPolicyStatement{}
 
 	this.Action = action
 	this.Effect = effect
 	this.Resource = resource
-	this.Principal = principal
 
 	return &this
 }
@@ -160,9 +162,9 @@ func (o *BucketPolicyStatement) SetResource(v []string) {
 }
 
 // GetCondition returns the Condition field value if set, zero value otherwise.
-func (o *BucketPolicyStatement) GetCondition() BucketPolicyStatementCondition {
+func (o *BucketPolicyStatement) GetCondition() BucketPolicyCondition {
 	if o == nil || IsNil(o.Condition) {
-		var ret BucketPolicyStatementCondition
+		var ret BucketPolicyCondition
 		return ret
 	}
 	return *o.Condition
@@ -170,7 +172,7 @@ func (o *BucketPolicyStatement) GetCondition() BucketPolicyStatementCondition {
 
 // GetConditionOk returns a tuple with the Condition field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *BucketPolicyStatement) GetConditionOk() (*BucketPolicyStatementCondition, bool) {
+func (o *BucketPolicyStatement) GetConditionOk() (*BucketPolicyCondition, bool) {
 	if o == nil || IsNil(o.Condition) {
 		return nil, false
 	}
@@ -186,33 +188,41 @@ func (o *BucketPolicyStatement) HasCondition() bool {
 	return false
 }
 
-// SetCondition gets a reference to the given BucketPolicyStatementCondition and assigns it to the Condition field.
-func (o *BucketPolicyStatement) SetCondition(v BucketPolicyStatementCondition) {
+// SetCondition gets a reference to the given BucketPolicyCondition and assigns it to the Condition field.
+func (o *BucketPolicyStatement) SetCondition(v BucketPolicyCondition) {
 	o.Condition = &v
 }
 
-// GetPrincipal returns the Principal field value
-func (o *BucketPolicyStatement) GetPrincipal() BucketPolicyStatementPrincipal {
-	if o == nil {
-		var ret BucketPolicyStatementPrincipal
+// GetPrincipal returns the Principal field value if set, zero value otherwise.
+func (o *BucketPolicyStatement) GetPrincipal() Principal {
+	if o == nil || IsNil(o.Principal) {
+		var ret Principal
 		return ret
 	}
-
-	return o.Principal
+	return *o.Principal
 }
 
-// GetPrincipalOk returns a tuple with the Principal field value
+// GetPrincipalOk returns a tuple with the Principal field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *BucketPolicyStatement) GetPrincipalOk() (*BucketPolicyStatementPrincipal, bool) {
-	if o == nil {
+func (o *BucketPolicyStatement) GetPrincipalOk() (*Principal, bool) {
+	if o == nil || IsNil(o.Principal) {
 		return nil, false
 	}
-	return &o.Principal, true
+	return o.Principal, true
 }
 
-// SetPrincipal sets field value
-func (o *BucketPolicyStatement) SetPrincipal(v BucketPolicyStatementPrincipal) {
-	o.Principal = v
+// HasPrincipal returns a boolean if a field has been set.
+func (o *BucketPolicyStatement) HasPrincipal() bool {
+	if o != nil && !IsNil(o.Principal) {
+		return true
+	}
+
+	return false
+}
+
+// SetPrincipal gets a reference to the given Principal and assigns it to the Principal field.
+func (o *BucketPolicyStatement) SetPrincipal(v Principal) {
+	o.Principal = &v
 }
 
 func (o BucketPolicyStatement) MarshalJSON() ([]byte, error) {
@@ -234,7 +244,9 @@ func (o BucketPolicyStatement) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Condition) {
 		toSerialize["Condition"] = o.Condition
 	}
-	toSerialize["Principal"] = o.Principal
+	if !IsNil(o.Principal) {
+		toSerialize["Principal"] = o.Principal
+	}
 	return toSerialize, nil
 }
 

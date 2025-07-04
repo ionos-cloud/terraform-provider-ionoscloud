@@ -15,12 +15,15 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ServerSideEncryptionConfiguration type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ServerSideEncryptionConfiguration{}
 
 // ServerSideEncryptionConfiguration Specifies the default server-side-encryption configuration.
 type ServerSideEncryptionConfiguration struct {
-	Rules []ServerSideEncryptionRule `json:"Rules"`
+	XMLName xml.Name                   `xml:"ServerSideEncryptionConfiguration"`
+	Rules   []ServerSideEncryptionRule `json:"Rules" xml:"Rule"`
 }
 
 // NewServerSideEncryptionConfiguration instantiates a new ServerSideEncryptionConfiguration object

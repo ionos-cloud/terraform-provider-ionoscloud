@@ -12,32 +12,29 @@
 package userobjectstorage
 
 import (
-	_context "context"
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"net/http"
+	"net/url"
 	"strings"
 	"time"
-)
-
-// Linger please
-var (
-	_ _context.Context
 )
 
 // UploadsApiService UploadsApi service
 type UploadsApiService service
 
 type ApiAbortMultipartUploadRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *UploadsApiService
 	bucket     string
 	key        string
 	uploadId   *string
 }
 
+// Upload ID that identifies the multipart upload.
 func (r ApiAbortMultipartUploadRequest) UploadId(uploadId string) ApiAbortMultipartUploadRequest {
 	r.uploadId = &uploadId
 	return r
@@ -48,14 +45,16 @@ func (r ApiAbortMultipartUploadRequest) Execute() (map[string]interface{}, *shar
 }
 
 /*
- * AbortMultipartUpload AbortMultipartUpload
- * <p>This operation aborts a multipart upload. After a multipart upload is aborted, no additional parts can be uploaded using that upload ID. The storage consumed by any previously uploaded parts will be freed. However, if any part uploads are currently in progress, those part uploads might or might not succeed. As a result, it might be necessary to abort a given multipart upload multiple times in order to completely free all storage consumed by all parts. </p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @param key Key of the object for which the multipart upload was initiated. <p> **Possible values:** length ≥ 1 </p>
- * @return ApiAbortMultipartUploadRequest
- */
-func (a *UploadsApiService) AbortMultipartUpload(ctx _context.Context, bucket string, key string) ApiAbortMultipartUploadRequest {
+AbortMultipartUpload AbortMultipartUpload
+
+<p>This operation aborts a multipart upload. After a multipart upload is aborted, no additional parts can be uploaded using that upload ID. The storage consumed by any previously uploaded parts will be freed. However, if any part uploads are currently in progress, those part uploads might or might not succeed. As a result, it might be necessary to abort a given multipart upload multiple times in order to completely free all storage consumed by all parts. </p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key Key of the object for which the multipart upload was initiated. <p> **Possible values:** length ≥ 1 </p>
+	@return ApiAbortMultipartUploadRequest
+*/
+func (a *UploadsApiService) AbortMultipartUpload(ctx context.Context, bucket string, key string) ApiAbortMultipartUploadRequest {
 	return ApiAbortMultipartUploadRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -64,18 +63,15 @@ func (a *UploadsApiService) AbortMultipartUpload(ctx _context.Context, bucket st
 	}
 }
 
-/*
- * Execute executes the request
- * @return map[string]interface{}
- */
+// Execute executes the request
+//
+//	@return map[string]interface{}
 func (a *UploadsApiService) AbortMultipartUploadExecute(r ApiAbortMultipartUploadRequest) (map[string]interface{}, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodDelete
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UploadsApiService.AbortMultipartUpload")
@@ -86,12 +82,12 @@ func (a *UploadsApiService) AbortMultipartUploadExecute(r ApiAbortMultipartUploa
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}?uploadId"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -137,13 +133,12 @@ func (a *UploadsApiService) AbortMultipartUploadExecute(r ApiAbortMultipartUploa
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -151,7 +146,6 @@ func (a *UploadsApiService) AbortMultipartUploadExecute(r ApiAbortMultipartUploa
 		RequestURL:  localVarPath,
 		Operation:   "AbortMultipartUpload",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -159,6 +153,7 @@ func (a *UploadsApiService) AbortMultipartUploadExecute(r ApiAbortMultipartUploa
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -193,7 +188,7 @@ func (a *UploadsApiService) AbortMultipartUploadExecute(r ApiAbortMultipartUploa
 }
 
 type ApiCompleteMultipartUploadRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *UploadsApiService
 	bucket     string
 	key        string
@@ -201,28 +196,32 @@ type ApiCompleteMultipartUploadRequest struct {
 	example    *Example
 }
 
+// ID for the initiated multipart upload.
 func (r ApiCompleteMultipartUploadRequest) UploadId(uploadId string) ApiCompleteMultipartUploadRequest {
 	r.uploadId = &uploadId
 	return r
 }
+
 func (r ApiCompleteMultipartUploadRequest) Example(example Example) ApiCompleteMultipartUploadRequest {
 	r.example = &example
 	return r
 }
 
-func (r ApiCompleteMultipartUploadRequest) Execute() (CompleteMultipartUploadOutput, *shared.APIResponse, error) {
+func (r ApiCompleteMultipartUploadRequest) Execute() (*CompleteMultipartUploadOutput, *shared.APIResponse, error) {
 	return r.ApiService.CompleteMultipartUploadExecute(r)
 }
 
 /*
- * CompleteMultipartUpload CompleteMultipartUpload
- * <p>Completes a multipart upload by assembling previously uploaded parts.</p>          <p>After successfully uploading all relevant parts of an upload, you call this operation to complete the upload. When IONOS Object Storage  receives this request,  it concatenates all the parts in ascending  order by part number to create a new object. The parts  list must be included in the Complete Multipart Upload request. You must ensure that the parts list is complete. This operation concatenates the parts that you provide in the list. For each part in the list, you must provide the part number and the `ETag` value, returned after that part was uploaded.</p> <p>A Complete Multipart Upload request could take several minutes to process.  After IONOS Object Storage begins processing the request, it sends  an HTTP response header indicating a 200 OK response. While processing is  in progress, IONOS Object Storage sends white space characters  on a regular basis to keep the connection from timing out. Because a request  may fail after receiving the initial 200 OK response, it is advisable to  check the response body to establish whether the request was successful.</p>  <p> `CompleteMultipartUpload` has the following special errors:</p> <ul> <li> <p>Error code: `EntityTooSmall` </p> <ul> <li> <p>Description: Your proposed upload is smaller than the minimum allowed object size. Each part must be at least 5 MB in size, except the last part.</p> </li> <li> <p>400 Bad Request</p> </li> </ul> </li> <li> <p>Error code: `InvalidPart` </p> <ul> <li> <p>Description: One or more of the specified parts could not be found. The part might not have been uploaded, or the specified entity tag might not have matched the part's entity tag.</p> </li> <li> <p>400 Bad Request</p> </li> </ul> </li> <li> <p>Error code: `InvalidPartOrder` </p> <ul> <li> <p>Description: The list of parts was not in ascending order. The parts list must be specified in order by part number.</p> </li> <li> <p>400 Bad Request</p> </li> </ul> </li> <li> <p>Error code: `NoSuchUpload` </p> <ul> <li> <p>Description: The specified multipart upload does not exist. The upload ID might be invalid, or the multipart upload might have been aborted or completed.</p> </li> <li> <p>404 Not Found</p> </li> </ul> </li> </ul>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @param key Object key for which the multipart upload was initiated.
- * @return ApiCompleteMultipartUploadRequest
- */
-func (a *UploadsApiService) CompleteMultipartUpload(ctx _context.Context, bucket string, key string) ApiCompleteMultipartUploadRequest {
+CompleteMultipartUpload CompleteMultipartUpload
+
+<p>Completes a multipart upload by assembling previously uploaded parts.</p>          <p>After successfully uploading all relevant parts of an upload, you call this operation to complete the upload. When IONOS Object Storage  receives this request,  it concatenates all the parts in ascending  order by part number to create a new object. The parts  list must be included in the Complete Multipart Upload request. You must ensure that the parts list is complete. This operation concatenates the parts that you provide in the list. For each part in the list, you must provide the part number and the `ETag` value, returned after that part was uploaded.</p> <p>A Complete Multipart Upload request could take several minutes to process.  After IONOS Object Storage begins processing the request, it sends  an HTTP response header indicating a 200 OK response. While processing is  in progress, IONOS Object Storage sends white space characters  on a regular basis to keep the connection from timing out. Because a request  may fail after receiving the initial 200 OK response, it is advisable to  check the response body to establish whether the request was successful.</p>  <p> `CompleteMultipartUpload` has the following special errors:</p> <ul> <li> <p>Error code: `EntityTooSmall` </p> <ul> <li> <p>Description: Your proposed upload is smaller than the minimum allowed object size. Each part must be at least 5 MB in size, except the last part.</p> </li> <li> <p>400 Bad Request</p> </li> </ul> </li> <li> <p>Error code: `InvalidPart` </p> <ul> <li> <p>Description: One or more of the specified parts could not be found. The part might not have been uploaded, or the specified entity tag might not have matched the part's entity tag.</p> </li> <li> <p>400 Bad Request</p> </li> </ul> </li> <li> <p>Error code: `InvalidPartOrder` </p> <ul> <li> <p>Description: The list of parts was not in ascending order. The parts list must be specified in order by part number.</p> </li> <li> <p>400 Bad Request</p> </li> </ul> </li> <li> <p>Error code: `NoSuchUpload` </p> <ul> <li> <p>Description: The specified multipart upload does not exist. The upload ID might be invalid, or the multipart upload might have been aborted or completed.</p> </li> <li> <p>404 Not Found</p> </li> </ul> </li> </ul>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key Object key for which the multipart upload was initiated.
+	@return ApiCompleteMultipartUploadRequest
+*/
+func (a *UploadsApiService) CompleteMultipartUpload(ctx context.Context, bucket string, key string) ApiCompleteMultipartUploadRequest {
 	return ApiCompleteMultipartUploadRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -231,18 +230,15 @@ func (a *UploadsApiService) CompleteMultipartUpload(ctx _context.Context, bucket
 	}
 }
 
-/*
- * Execute executes the request
- * @return CompleteMultipartUploadOutput
- */
-func (a *UploadsApiService) CompleteMultipartUploadExecute(r ApiCompleteMultipartUploadRequest) (CompleteMultipartUploadOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return CompleteMultipartUploadOutput
+func (a *UploadsApiService) CompleteMultipartUploadExecute(r ApiCompleteMultipartUploadRequest) (*CompleteMultipartUploadOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPost
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  CompleteMultipartUploadOutput
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CompleteMultipartUploadOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UploadsApiService.CompleteMultipartUpload")
@@ -253,12 +249,12 @@ func (a *UploadsApiService) CompleteMultipartUploadExecute(r ApiCompleteMultipar
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}?uploadId"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -309,13 +305,12 @@ func (a *UploadsApiService) CompleteMultipartUploadExecute(r ApiCompleteMultipar
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -323,7 +318,6 @@ func (a *UploadsApiService) CompleteMultipartUploadExecute(r ApiCompleteMultipar
 		RequestURL:  localVarPath,
 		Operation:   "CompleteMultipartUpload",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -331,6 +325,7 @@ func (a *UploadsApiService) CompleteMultipartUploadExecute(r ApiCompleteMultipar
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -356,7 +351,7 @@ func (a *UploadsApiService) CompleteMultipartUploadExecute(r ApiCompleteMultipar
 }
 
 type ApiCreateMultipartUploadRequest struct {
-	ctx                                       _context.Context
+	ctx                                       context.Context
 	ApiService                                *UploadsApiService
 	bucket                                    string
 	key                                       string
@@ -375,87 +370,119 @@ type ApiCreateMultipartUploadRequest struct {
 	xAmzObjectLockMode                        *string
 	xAmzObjectLockRetainUntilDate             *time.Time
 	xAmzObjectLockLegalHold                   *string
-	xAmzMeta                                  *string
+	xAmzMeta                                  *map[string]string
 }
 
 func (r ApiCreateMultipartUploadRequest) Uploads(uploads bool) ApiCreateMultipartUploadRequest {
 	r.uploads = &uploads
 	return r
 }
+
+// Specifies caching behavior along the request/reply chain.
 func (r ApiCreateMultipartUploadRequest) CacheControl(cacheControl string) ApiCreateMultipartUploadRequest {
 	r.cacheControl = &cacheControl
 	return r
 }
+
+// Specifies presentational information for the object.
 func (r ApiCreateMultipartUploadRequest) ContentDisposition(contentDisposition string) ApiCreateMultipartUploadRequest {
 	r.contentDisposition = &contentDisposition
 	return r
 }
+
+// Specifies what content encodings have been applied to the object and thus what decoding mechanisms must be applied to obtain the media-type referenced by the Content-Type header field.
 func (r ApiCreateMultipartUploadRequest) ContentEncoding(contentEncoding string) ApiCreateMultipartUploadRequest {
 	r.contentEncoding = &contentEncoding
 	return r
 }
+
+// A standard MIME type describing the format of the object data.
 func (r ApiCreateMultipartUploadRequest) ContentType(contentType string) ApiCreateMultipartUploadRequest {
 	r.contentType = &contentType
 	return r
 }
+
+// The date and time at which the object is no longer cacheable.
 func (r ApiCreateMultipartUploadRequest) Expires(expires time.Time) ApiCreateMultipartUploadRequest {
 	r.expires = &expires
 	return r
 }
+
+// The server-side encryption algorithm used when storing this object in IONOS Object Storage (AES256).
 func (r ApiCreateMultipartUploadRequest) XAmzServerSideEncryption(xAmzServerSideEncryption string) ApiCreateMultipartUploadRequest {
 	r.xAmzServerSideEncryption = &xAmzServerSideEncryption
 	return r
 }
+
+// IONOS Object Storage uses the STANDARD Storage Class to store newly created objects. The STANDARD storage class provides high durability and high availability.
 func (r ApiCreateMultipartUploadRequest) XAmzStorageClass(xAmzStorageClass string) ApiCreateMultipartUploadRequest {
 	r.xAmzStorageClass = &xAmzStorageClass
 	return r
 }
+
+// If the bucket is configured as a website, redirects requests for this object to another object in the same bucket or to an external URL. IONOS Object Storage stores the value of this header in the object metadata.
 func (r ApiCreateMultipartUploadRequest) XAmzWebsiteRedirectLocation(xAmzWebsiteRedirectLocation string) ApiCreateMultipartUploadRequest {
 	r.xAmzWebsiteRedirectLocation = &xAmzWebsiteRedirectLocation
 	return r
 }
+
+// Specifies the algorithm to use to when encrypting the object (AES256).
 func (r ApiCreateMultipartUploadRequest) XAmzServerSideEncryptionCustomerAlgorithm(xAmzServerSideEncryptionCustomerAlgorithm string) ApiCreateMultipartUploadRequest {
 	r.xAmzServerSideEncryptionCustomerAlgorithm = &xAmzServerSideEncryptionCustomerAlgorithm
 	return r
 }
+
+// Specifies the customer-provided encryption key for IONOS Object Storage to use in encrypting data. This value is used to store the object and then it is discarded; IONOS Object Storage does not store the encryption key. The key must be appropriate for use with the algorithm specified in the &#x60;x-amz-server-side-encryption-customer-algorithm&#x60; header.
 func (r ApiCreateMultipartUploadRequest) XAmzServerSideEncryptionCustomerKey(xAmzServerSideEncryptionCustomerKey string) ApiCreateMultipartUploadRequest {
 	r.xAmzServerSideEncryptionCustomerKey = &xAmzServerSideEncryptionCustomerKey
 	return r
 }
+
+// Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS Object Storage uses this header for a message integrity check to ensure that the encryption key was transmitted without error.
 func (r ApiCreateMultipartUploadRequest) XAmzServerSideEncryptionCustomerKeyMD5(xAmzServerSideEncryptionCustomerKeyMD5 string) ApiCreateMultipartUploadRequest {
 	r.xAmzServerSideEncryptionCustomerKeyMD5 = &xAmzServerSideEncryptionCustomerKeyMD5
 	return r
 }
+
+// Specifies the Object Lock mode that you want to apply to the uploaded object.
 func (r ApiCreateMultipartUploadRequest) XAmzObjectLockMode(xAmzObjectLockMode string) ApiCreateMultipartUploadRequest {
 	r.xAmzObjectLockMode = &xAmzObjectLockMode
 	return r
 }
+
+// Specifies the date and time when you want the Object Lock to expire.
 func (r ApiCreateMultipartUploadRequest) XAmzObjectLockRetainUntilDate(xAmzObjectLockRetainUntilDate time.Time) ApiCreateMultipartUploadRequest {
 	r.xAmzObjectLockRetainUntilDate = &xAmzObjectLockRetainUntilDate
 	return r
 }
+
+// Specifies whether you want to apply a Legal Hold to the uploaded object.
 func (r ApiCreateMultipartUploadRequest) XAmzObjectLockLegalHold(xAmzObjectLockLegalHold string) ApiCreateMultipartUploadRequest {
 	r.xAmzObjectLockLegalHold = &xAmzObjectLockLegalHold
 	return r
 }
-func (r ApiCreateMultipartUploadRequest) XAmzMeta(xAmzMeta string) ApiCreateMultipartUploadRequest {
+
+// A map of metadata to store with the object in S3.
+func (r ApiCreateMultipartUploadRequest) XAmzMeta(xAmzMeta map[string]string) ApiCreateMultipartUploadRequest {
 	r.xAmzMeta = &xAmzMeta
 	return r
 }
 
-func (r ApiCreateMultipartUploadRequest) Execute() (CreateMultipartUploadOutput, *shared.APIResponse, error) {
+func (r ApiCreateMultipartUploadRequest) Execute() (*CreateMultipartUploadOutput, *shared.APIResponse, error) {
 	return r.ApiService.CreateMultipartUploadExecute(r)
 }
 
 /*
- * CreateMultipartUpload CreateMultipartUpload
- * <p>This operation initiates a multipart upload and returns an upload ID. This upload ID is used to associate all of the parts in the specific multipart upload. You specify this upload ID in each of your subsequent upload part requests. You also include this upload ID in the final request to either complete or abort the multipart upload request.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @param key Object key for which the multipart upload is to be initiated.
- * @return ApiCreateMultipartUploadRequest
- */
-func (a *UploadsApiService) CreateMultipartUpload(ctx _context.Context, bucket string, key string) ApiCreateMultipartUploadRequest {
+CreateMultipartUpload CreateMultipartUpload
+
+<p>This operation initiates a multipart upload and returns an upload ID. This upload ID is used to associate all of the parts in the specific multipart upload. You specify this upload ID in each of your subsequent upload part requests. You also include this upload ID in the final request to either complete or abort the multipart upload request.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key Object key for which the multipart upload is to be initiated.
+	@return ApiCreateMultipartUploadRequest
+*/
+func (a *UploadsApiService) CreateMultipartUpload(ctx context.Context, bucket string, key string) ApiCreateMultipartUploadRequest {
 	return ApiCreateMultipartUploadRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -464,18 +491,15 @@ func (a *UploadsApiService) CreateMultipartUpload(ctx _context.Context, bucket s
 	}
 }
 
-/*
- * Execute executes the request
- * @return CreateMultipartUploadOutput
- */
-func (a *UploadsApiService) CreateMultipartUploadExecute(r ApiCreateMultipartUploadRequest) (CreateMultipartUploadOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return CreateMultipartUploadOutput
+func (a *UploadsApiService) CreateMultipartUploadExecute(r ApiCreateMultipartUploadRequest) (*CreateMultipartUploadOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPost
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  CreateMultipartUploadOutput
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CreateMultipartUploadOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UploadsApiService.CreateMultipartUpload")
@@ -486,12 +510,12 @@ func (a *UploadsApiService) CreateMultipartUploadExecute(r ApiCreateMultipartUpl
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}?uploads"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -566,7 +590,7 @@ func (a *UploadsApiService) CreateMultipartUploadExecute(r ApiCreateMultipartUpl
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-object-lock-legal-hold", r.xAmzObjectLockLegalHold, "")
 	}
 	if r.xAmzMeta != nil {
-		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-meta-", r.xAmzMeta, "")
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-meta", r.xAmzMeta, "")
 	}
 	if r.ctx != nil {
 		// API Key Authentication
@@ -582,13 +606,12 @@ func (a *UploadsApiService) CreateMultipartUploadExecute(r ApiCreateMultipartUpl
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -596,7 +619,6 @@ func (a *UploadsApiService) CreateMultipartUploadExecute(r ApiCreateMultipartUpl
 		RequestURL:  localVarPath,
 		Operation:   "CreateMultipartUpload",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -604,6 +626,7 @@ func (a *UploadsApiService) CreateMultipartUploadExecute(r ApiCreateMultipartUpl
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -629,7 +652,7 @@ func (a *UploadsApiService) CreateMultipartUploadExecute(r ApiCreateMultipartUpl
 }
 
 type ApiListMultipartUploadsRequest struct {
-	ctx             _context.Context
+	ctx             context.Context
 	ApiService      *UploadsApiService
 	bucket          string
 	uploads         *bool
@@ -648,55 +671,74 @@ func (r ApiListMultipartUploadsRequest) Uploads(uploads bool) ApiListMultipartUp
 	r.uploads = &uploads
 	return r
 }
+
+// &lt;p&gt;Character you use to group keys.&lt;/p&gt; &lt;p&gt;All keys that contain the same string between the prefix, if specified, and the first occurrence of the delimiter after the prefix are grouped under a single result element, &#x60;CommonPrefixes&#x60;. If you don&#39;t specify the prefix parameter, then the substring starts at the beginning of the key. The keys that are grouped under &#x60;CommonPrefixes&#x60; result element are not returned elsewhere in the response.&lt;/p&gt;
 func (r ApiListMultipartUploadsRequest) Delimiter(delimiter string) ApiListMultipartUploadsRequest {
 	r.delimiter = &delimiter
 	return r
 }
+
 func (r ApiListMultipartUploadsRequest) EncodingType(encodingType string) ApiListMultipartUploadsRequest {
 	r.encodingType = &encodingType
 	return r
 }
+
+// &lt;p&gt;Together with upload-id-marker, this parameter specifies the multipart upload after which listing should begin.&lt;/p&gt; &lt;p&gt;If &#x60;upload-id-marker&#x60; is not specified, only the keys lexicographically greater than the specified &#x60;key-marker&#x60; will be included in the list.&lt;/p&gt; &lt;p&gt;If &#x60;upload-id-marker&#x60; is specified, any multipart uploads for a key equal to the &#x60;key-marker&#x60; might also be included, provided those multipart uploads have upload IDs lexicographically greater than the specified &#x60;upload-id-marker&#x60;.&lt;/p&gt;
 func (r ApiListMultipartUploadsRequest) KeyMarker(keyMarker string) ApiListMultipartUploadsRequest {
 	r.keyMarker = &keyMarker
 	return r
 }
+
+// Sets the maximum number of multipart uploads, from 1 to 1,000, to return in the response body. 1,000 is the maximum number of uploads that can be returned in a response.
 func (r ApiListMultipartUploadsRequest) MaxUploads(maxUploads int32) ApiListMultipartUploadsRequest {
 	r.maxUploads = &maxUploads
 	return r
 }
+
+// Lists in-progress uploads only for those keys that begin with the specified prefix. You can use prefixes to separate a bucket into different grouping of keys. (You can think of using prefix to make groups in the same way you&#39;d use a folder in a file system.)
 func (r ApiListMultipartUploadsRequest) Prefix(prefix string) ApiListMultipartUploadsRequest {
 	r.prefix = &prefix
 	return r
 }
+
+// Together with key-marker, specifies the multipart upload after which listing should begin. If key-marker is not specified, the upload-id-marker parameter is ignored. Otherwise, any multipart uploads for a key equal to the key-marker might be included in the list only if they have an upload ID lexicographically greater than the specified &#x60;upload-id-marker&#x60;.
 func (r ApiListMultipartUploadsRequest) UploadIdMarker(uploadIdMarker string) ApiListMultipartUploadsRequest {
 	r.uploadIdMarker = &uploadIdMarker
 	return r
 }
+
+// Pagination limit
 func (r ApiListMultipartUploadsRequest) MaxUploads2(maxUploads2 string) ApiListMultipartUploadsRequest {
 	r.maxUploads2 = &maxUploads2
 	return r
 }
+
+// Pagination token
 func (r ApiListMultipartUploadsRequest) KeyMarker2(keyMarker2 string) ApiListMultipartUploadsRequest {
 	r.keyMarker2 = &keyMarker2
 	return r
 }
+
+// Pagination token
 func (r ApiListMultipartUploadsRequest) UploadIdMarker2(uploadIdMarker2 string) ApiListMultipartUploadsRequest {
 	r.uploadIdMarker2 = &uploadIdMarker2
 	return r
 }
 
-func (r ApiListMultipartUploadsRequest) Execute() (ListMultipartUploadsOutput, *shared.APIResponse, error) {
+func (r ApiListMultipartUploadsRequest) Execute() (*ListMultipartUploadsOutput, *shared.APIResponse, error) {
 	return r.ApiService.ListMultipartUploadsExecute(r)
 }
 
 /*
- * ListMultipartUploads ListMultipartUploads
- * <p>This operation lists in-progress multipart uploads. An in-progress multipart upload is a multipart upload that has been initiated using the Initiate Multipart Upload request, but has not yet been completed or aborted.</p> <p>This operation returns at most 1,000 multipart uploads in the response. 1,000 multipart uploads is the maximum number of uploads a response can include, which is also the default value. You can further limit the number of uploads in a response by specifying the `max-uploads` parameter in the response. If additional multipart uploads satisfy the list criteria, the response will contain an `IsTruncated` element with the value true. To list the additional multipart uploads, use the `key-marker` and `upload-id-marker` request parameters.</p> <p>In the response, the uploads are sorted by key. If your application has initiated more than one multipart upload using the same object key, then uploads in the response are first sorted by key. Additionally, uploads are sorted in ascending order within each key by the upload initiation time.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @return ApiListMultipartUploadsRequest
- */
-func (a *UploadsApiService) ListMultipartUploads(ctx _context.Context, bucket string) ApiListMultipartUploadsRequest {
+ListMultipartUploads ListMultipartUploads
+
+<p>This operation lists in-progress multipart uploads. An in-progress multipart upload is a multipart upload that has been initiated using the Initiate Multipart Upload request, but has not yet been completed or aborted.</p> <p>This operation returns at most 1,000 multipart uploads in the response. 1,000 multipart uploads is the maximum number of uploads a response can include, which is also the default value. You can further limit the number of uploads in a response by specifying the `max-uploads` parameter in the response. If additional multipart uploads satisfy the list criteria, the response will contain an `IsTruncated` element with the value true. To list the additional multipart uploads, use the `key-marker` and `upload-id-marker` request parameters.</p> <p>In the response, the uploads are sorted by key. If your application has initiated more than one multipart upload using the same object key, then uploads in the response are first sorted by key. Additionally, uploads are sorted in ascending order within each key by the upload initiation time.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiListMultipartUploadsRequest
+*/
+func (a *UploadsApiService) ListMultipartUploads(ctx context.Context, bucket string) ApiListMultipartUploadsRequest {
 	return ApiListMultipartUploadsRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -704,18 +746,15 @@ func (a *UploadsApiService) ListMultipartUploads(ctx _context.Context, bucket st
 	}
 }
 
-/*
- * Execute executes the request
- * @return ListMultipartUploadsOutput
- */
-func (a *UploadsApiService) ListMultipartUploadsExecute(r ApiListMultipartUploadsRequest) (ListMultipartUploadsOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return ListMultipartUploadsOutput
+func (a *UploadsApiService) ListMultipartUploadsExecute(r ApiListMultipartUploadsRequest) (*ListMultipartUploadsOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  ListMultipartUploadsOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ListMultipartUploadsOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UploadsApiService.ListMultipartUploads")
@@ -726,11 +765,11 @@ func (a *UploadsApiService) ListMultipartUploadsExecute(r ApiListMultipartUpload
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?uploads"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -800,13 +839,12 @@ func (a *UploadsApiService) ListMultipartUploadsExecute(r ApiListMultipartUpload
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -814,7 +852,6 @@ func (a *UploadsApiService) ListMultipartUploadsExecute(r ApiListMultipartUpload
 		RequestURL:  localVarPath,
 		Operation:   "ListMultipartUploads",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -822,6 +859,7 @@ func (a *UploadsApiService) ListMultipartUploadsExecute(r ApiListMultipartUpload
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -847,7 +885,7 @@ func (a *UploadsApiService) ListMultipartUploadsExecute(r ApiListMultipartUpload
 }
 
 type ApiListPartsRequest struct {
-	ctx               _context.Context
+	ctx               context.Context
 	ApiService        *UploadsApiService
 	bucket            string
 	key               string
@@ -857,36 +895,45 @@ type ApiListPartsRequest struct {
 	partNumberMarker2 *string
 }
 
+// Upload ID identifying the multipart upload whose parts are being listed.
 func (r ApiListPartsRequest) UploadId(uploadId string) ApiListPartsRequest {
 	r.uploadId = &uploadId
 	return r
 }
+
+// Sets the maximum number of parts to return.
 func (r ApiListPartsRequest) MaxParts(maxParts int32) ApiListPartsRequest {
 	r.maxParts = &maxParts
 	return r
 }
+
+// Specifies the part after which listing should begin. Only parts with higher part numbers will be listed.
 func (r ApiListPartsRequest) PartNumberMarker(partNumberMarker int32) ApiListPartsRequest {
 	r.partNumberMarker = &partNumberMarker
 	return r
 }
+
+// Pagination token
 func (r ApiListPartsRequest) PartNumberMarker2(partNumberMarker2 string) ApiListPartsRequest {
 	r.partNumberMarker2 = &partNumberMarker2
 	return r
 }
 
-func (r ApiListPartsRequest) Execute() (ListPartsOutput, *shared.APIResponse, error) {
+func (r ApiListPartsRequest) Execute() (*ListPartsOutput, *shared.APIResponse, error) {
 	return r.ApiService.ListPartsExecute(r)
 }
 
 /*
- * ListParts ListParts
- * <p>Lists the parts that have been uploaded for a specific multipart upload. This operation must include the upload ID, which you obtain by sending the initiate multipart upload request. This request returns a maximum of 1,000 uploaded parts. The default number of parts returned is 1,000 parts. You can restrict the number of parts returned by specifying the `max-parts` request parameter. If your multipart upload consists of more than 1,000 parts, the response returns an `IsTruncated` field with the value of true, and a `NextPartNumberMarker` element. In subsequent `ListParts` requests you can include the part-number-marker query string parameter and set its value to the `NextPartNumberMarker` field value from the previous response.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @param key Object key for which the multipart upload was initiated.
- * @return ApiListPartsRequest
- */
-func (a *UploadsApiService) ListParts(ctx _context.Context, bucket string, key string) ApiListPartsRequest {
+ListParts ListParts
+
+<p>Lists the parts that have been uploaded for a specific multipart upload. This operation must include the upload ID, which you obtain by sending the initiate multipart upload request. This request returns a maximum of 1,000 uploaded parts. The default number of parts returned is 1,000 parts. You can restrict the number of parts returned by specifying the `max-parts` request parameter. If your multipart upload consists of more than 1,000 parts, the response returns an `IsTruncated` field with the value of true, and a `NextPartNumberMarker` element. In subsequent `ListParts` requests you can include the part-number-marker query string parameter and set its value to the `NextPartNumberMarker` field value from the previous response.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key Object key for which the multipart upload was initiated.
+	@return ApiListPartsRequest
+*/
+func (a *UploadsApiService) ListParts(ctx context.Context, bucket string, key string) ApiListPartsRequest {
 	return ApiListPartsRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -895,18 +942,15 @@ func (a *UploadsApiService) ListParts(ctx _context.Context, bucket string, key s
 	}
 }
 
-/*
- * Execute executes the request
- * @return ListPartsOutput
- */
-func (a *UploadsApiService) ListPartsExecute(r ApiListPartsRequest) (ListPartsOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return ListPartsOutput
+func (a *UploadsApiService) ListPartsExecute(r ApiListPartsRequest) (*ListPartsOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  ListPartsOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ListPartsOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UploadsApiService.ListParts")
@@ -917,12 +961,12 @@ func (a *UploadsApiService) ListPartsExecute(r ApiListPartsRequest) (ListPartsOu
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}?uploadId"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -977,13 +1021,12 @@ func (a *UploadsApiService) ListPartsExecute(r ApiListPartsRequest) (ListPartsOu
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -991,7 +1034,6 @@ func (a *UploadsApiService) ListPartsExecute(r ApiListPartsRequest) (ListPartsOu
 		RequestURL:  localVarPath,
 		Operation:   "ListParts",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -999,6 +1041,7 @@ func (a *UploadsApiService) ListPartsExecute(r ApiListPartsRequest) (ListPartsOu
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1024,7 +1067,7 @@ func (a *UploadsApiService) ListPartsExecute(r ApiListPartsRequest) (ListPartsOu
 }
 
 type ApiUploadPartRequest struct {
-	ctx                                       _context.Context
+	ctx                                       context.Context
 	ApiService                                *UploadsApiService
 	bucket                                    string
 	key                                       string
@@ -1038,34 +1081,47 @@ type ApiUploadPartRequest struct {
 	xAmzServerSideEncryptionCustomerKeyMD5    *string
 }
 
+// Part number of part being uploaded. This is a positive integer between 1 and 10,000.
 func (r ApiUploadPartRequest) PartNumber(partNumber int32) ApiUploadPartRequest {
 	r.partNumber = &partNumber
 	return r
 }
+
+// Upload ID identifying the multipart upload whose part is being uploaded.
 func (r ApiUploadPartRequest) UploadId(uploadId string) ApiUploadPartRequest {
 	r.uploadId = &uploadId
 	return r
 }
+
 func (r ApiUploadPartRequest) UploadPartRequest(uploadPartRequest UploadPartRequest) ApiUploadPartRequest {
 	r.uploadPartRequest = &uploadPartRequest
 	return r
 }
+
+// Size of the body in bytes. This parameter is useful when the size of the body cannot be determined automatically.
 func (r ApiUploadPartRequest) ContentLength(contentLength int32) ApiUploadPartRequest {
 	r.contentLength = &contentLength
 	return r
 }
+
 func (r ApiUploadPartRequest) ContentMD5(contentMD5 string) ApiUploadPartRequest {
 	r.contentMD5 = &contentMD5
 	return r
 }
+
+// Specifies the algorithm to use to when encrypting the object (AES256).
 func (r ApiUploadPartRequest) XAmzServerSideEncryptionCustomerAlgorithm(xAmzServerSideEncryptionCustomerAlgorithm string) ApiUploadPartRequest {
 	r.xAmzServerSideEncryptionCustomerAlgorithm = &xAmzServerSideEncryptionCustomerAlgorithm
 	return r
 }
+
+// Specifies the customer-provided encryption key for IONOS Object Storage to use in encrypting data. This value is used to store the object and then it is discarded; IONOS Object Storage does not store the encryption key. The key must be appropriate for use with the algorithm specified in the &#x60;x-amz-server-side-encryption-customer-algorithm header&#x60;. This must be the same encryption key specified in the initiate multipart upload request.
 func (r ApiUploadPartRequest) XAmzServerSideEncryptionCustomerKey(xAmzServerSideEncryptionCustomerKey string) ApiUploadPartRequest {
 	r.xAmzServerSideEncryptionCustomerKey = &xAmzServerSideEncryptionCustomerKey
 	return r
 }
+
+// Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS Object Storage uses this header for a message integrity check to ensure that the encryption key was transmitted without error.
 func (r ApiUploadPartRequest) XAmzServerSideEncryptionCustomerKeyMD5(xAmzServerSideEncryptionCustomerKeyMD5 string) ApiUploadPartRequest {
 	r.xAmzServerSideEncryptionCustomerKeyMD5 = &xAmzServerSideEncryptionCustomerKeyMD5
 	return r
@@ -1076,14 +1132,16 @@ func (r ApiUploadPartRequest) Execute() (map[string]interface{}, *shared.APIResp
 }
 
 /*
- * UploadPart UploadPart
- * <p>Uploads a part in a multipart upload.</p> <note> <p>In this operation, you provide part data in your request. However, you have an option to specify your existing IONOS Object Storage object as a data source for the part you are uploading. To upload a part from an existing object, you use the `UploadPartCopy` operation. </p> </note> <p>You must initiate a multipart upload (see `CreateMultipartUpload`) before you can upload any part. In response to your initiate request, IONOS Object Storage returns an upload ID, a unique identifier, that you must include in your upload part request.</p> <p>Part numbers can be any number from 1 to 10,000, inclusive. A part number uniquely identifies a part and also defines its position within the object being created. If you upload a new part using the same part number that was used with a previous part, the previously uploaded part is overwritten. Each part must be at least 5 MB in size, except the last part. There is no size limit on the last part of your multipart upload.</p> <p>To ensure that data is not corrupted when traversing the network, specify the `Content-MD5` header in the upload part request. IONOS Object Storage checks the part data against the provided MD5 value. If they do not match, IONOS Object Storage returns an error. </p> <p>If the upload request is signed with Signature Version 4, then IONOS Object Storage uses the `x-amz-content-sha256` header as a checksum instead of `Content-MD5`. </p> <p> <b>Note:</b> After you initiate multipart upload and upload one or more parts, you must either complete or abort multipart upload in order to stop getting charged for storage of the uploaded parts. Only after you either complete or abort multipart upload, IONOS Object Storage frees up the parts storage and stops charging you for the parts storage.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @param key Object key for which the multipart upload was initiated.
- * @return ApiUploadPartRequest
- */
-func (a *UploadsApiService) UploadPart(ctx _context.Context, bucket string, key string) ApiUploadPartRequest {
+UploadPart UploadPart
+
+<p>Uploads a part in a multipart upload.</p> <note> <p>In this operation, you provide part data in your request. However, you have an option to specify your existing IONOS Object Storage object as a data source for the part you are uploading. To upload a part from an existing object, you use the `UploadPartCopy` operation. </p> </note> <p>You must initiate a multipart upload (see `CreateMultipartUpload`) before you can upload any part. In response to your initiate request, IONOS Object Storage returns an upload ID, a unique identifier, that you must include in your upload part request.</p> <p>Part numbers can be any number from 1 to 10,000, inclusive. A part number uniquely identifies a part and also defines its position within the object being created. If you upload a new part using the same part number that was used with a previous part, the previously uploaded part is overwritten. Each part must be at least 5 MB in size, except the last part. There is no size limit on the last part of your multipart upload.</p> <p>To ensure that data is not corrupted when traversing the network, specify the `Content-MD5` header in the upload part request. IONOS Object Storage checks the part data against the provided MD5 value. If they do not match, IONOS Object Storage returns an error. </p> <p>If the upload request is signed with Signature Version 4, then IONOS Object Storage uses the `x-amz-content-sha256` header as a checksum instead of `Content-MD5`. </p> <p> <b>Note:</b> After you initiate multipart upload and upload one or more parts, you must either complete or abort multipart upload in order to stop getting charged for storage of the uploaded parts. Only after you either complete or abort multipart upload, IONOS Object Storage frees up the parts storage and stops charging you for the parts storage.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key Object key for which the multipart upload was initiated.
+	@return ApiUploadPartRequest
+*/
+func (a *UploadsApiService) UploadPart(ctx context.Context, bucket string, key string) ApiUploadPartRequest {
 	return ApiUploadPartRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -1092,18 +1150,15 @@ func (a *UploadsApiService) UploadPart(ctx _context.Context, bucket string, key 
 	}
 }
 
-/*
- * Execute executes the request
- * @return map[string]interface{}
- */
+// Execute executes the request
+//
+//	@return map[string]interface{}
 func (a *UploadsApiService) UploadPartExecute(r ApiUploadPartRequest) (map[string]interface{}, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UploadsApiService.UploadPart")
@@ -1114,12 +1169,12 @@ func (a *UploadsApiService) UploadPartExecute(r ApiUploadPartRequest) (map[strin
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}?uploadId"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -1189,13 +1244,12 @@ func (a *UploadsApiService) UploadPartExecute(r ApiUploadPartRequest) (map[strin
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -1203,7 +1257,6 @@ func (a *UploadsApiService) UploadPartExecute(r ApiUploadPartRequest) (map[strin
 		RequestURL:  localVarPath,
 		Operation:   "UploadPart",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1211,6 +1264,7 @@ func (a *UploadsApiService) UploadPartExecute(r ApiUploadPartRequest) (map[strin
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1236,7 +1290,7 @@ func (a *UploadsApiService) UploadPartExecute(r ApiUploadPartRequest) (map[strin
 }
 
 type ApiUploadPartCopyRequest struct {
-	ctx                                       _context.Context
+	ctx                                       context.Context
 	ApiService                                *UploadsApiService
 	bucket                                    string
 	xAmzCopySource                            *string
@@ -1251,56 +1305,75 @@ type ApiUploadPartCopyRequest struct {
 	xAmzServerSideEncryptionCustomerAlgorithm *string
 }
 
+// &lt;p&gt;Specifies the source object for the copy operation. &lt;/p&gt;
 func (r ApiUploadPartCopyRequest) XAmzCopySource(xAmzCopySource string) ApiUploadPartCopyRequest {
 	r.xAmzCopySource = &xAmzCopySource
 	return r
 }
+
+// Part number of part being copied. This is a positive integer between 1 and 10,000.
 func (r ApiUploadPartCopyRequest) PartNumber(partNumber int32) ApiUploadPartCopyRequest {
 	r.partNumber = &partNumber
 	return r
 }
+
+// Upload ID identifying the multipart upload whose part is being copied.
 func (r ApiUploadPartCopyRequest) UploadId(uploadId string) ApiUploadPartCopyRequest {
 	r.uploadId = &uploadId
 	return r
 }
+
+// Copies the object if its entity tag (ETag) matches the specified tag.
 func (r ApiUploadPartCopyRequest) XAmzCopySourceIfMatch(xAmzCopySourceIfMatch string) ApiUploadPartCopyRequest {
 	r.xAmzCopySourceIfMatch = &xAmzCopySourceIfMatch
 	return r
 }
+
+// Copies the object if it has been modified since the specified time.
 func (r ApiUploadPartCopyRequest) XAmzCopySourceIfModifiedSince(xAmzCopySourceIfModifiedSince time.Time) ApiUploadPartCopyRequest {
 	r.xAmzCopySourceIfModifiedSince = &xAmzCopySourceIfModifiedSince
 	return r
 }
+
+// Copies the object if its entity tag (ETag) is different than the specified ETag.
 func (r ApiUploadPartCopyRequest) XAmzCopySourceIfNoneMatch(xAmzCopySourceIfNoneMatch string) ApiUploadPartCopyRequest {
 	r.xAmzCopySourceIfNoneMatch = &xAmzCopySourceIfNoneMatch
 	return r
 }
+
+// Copies the object if it hasn&#39;t been modified since the specified time.
 func (r ApiUploadPartCopyRequest) XAmzCopySourceIfUnmodifiedSince(xAmzCopySourceIfUnmodifiedSince time.Time) ApiUploadPartCopyRequest {
 	r.xAmzCopySourceIfUnmodifiedSince = &xAmzCopySourceIfUnmodifiedSince
 	return r
 }
+
+// The range of bytes to copy from the source object. The range value must use the form bytes&#x3D;first-last, where the first and last are the zero-based byte offsets to copy. For example, bytes&#x3D;0-9 indicates that you want to copy the first 10 bytes of the source. You can copy a range only if the source object is greater than 5 MB.
 func (r ApiUploadPartCopyRequest) XAmzCopySourceRange(xAmzCopySourceRange string) ApiUploadPartCopyRequest {
 	r.xAmzCopySourceRange = &xAmzCopySourceRange
 	return r
 }
+
+// Specifies the algorithm to use to when encrypting the object (AES256).
 func (r ApiUploadPartCopyRequest) XAmzServerSideEncryptionCustomerAlgorithm(xAmzServerSideEncryptionCustomerAlgorithm string) ApiUploadPartCopyRequest {
 	r.xAmzServerSideEncryptionCustomerAlgorithm = &xAmzServerSideEncryptionCustomerAlgorithm
 	return r
 }
 
-func (r ApiUploadPartCopyRequest) Execute() (UploadPartCopyOutput, *shared.APIResponse, error) {
+func (r ApiUploadPartCopyRequest) Execute() (*UploadPartCopyOutput, *shared.APIResponse, error) {
 	return r.ApiService.UploadPartCopyExecute(r)
 }
 
 /*
- * UploadPartCopy UploadPartCopy
- * <p>Uploads a part by copying data from an existing object as data source. You specify the data source by adding the request header `x-amz-copy-source` in your request and a byte range by adding the request header `x-amz-copy-source-range` in your request. </p> <p>The minimum allowable part size for a multipart upload is 5 MB.</p> <note> <p>Instead of using an existing object as part data, you might use the `UploadPart` operation and provide data in your request.</p> </note> <p>You must initiate a multipart upload before you can upload any part. In response to your initiate request. IONOS Object Storage returns a unique identifier, the upload ID, that you must include in your upload part request.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @param key Object key for which the multipart upload was initiated.
- * @return ApiUploadPartCopyRequest
- */
-func (a *UploadsApiService) UploadPartCopy(ctx _context.Context, bucket string, key string) ApiUploadPartCopyRequest {
+UploadPartCopy UploadPartCopy
+
+<p>Uploads a part by copying data from an existing object as data source. You specify the data source by adding the request header `x-amz-copy-source` in your request and a byte range by adding the request header `x-amz-copy-source-range` in your request. </p> <p>The minimum allowable part size for a multipart upload is 5 MB.</p> <note> <p>Instead of using an existing object as part data, you might use the `UploadPart` operation and provide data in your request.</p> </note> <p>You must initiate a multipart upload before you can upload any part. In response to your initiate request. IONOS Object Storage returns a unique identifier, the upload ID, that you must include in your upload part request.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key Object key for which the multipart upload was initiated.
+	@return ApiUploadPartCopyRequest
+*/
+func (a *UploadsApiService) UploadPartCopy(ctx context.Context, bucket string, key string) ApiUploadPartCopyRequest {
 	return ApiUploadPartCopyRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -1309,18 +1382,15 @@ func (a *UploadsApiService) UploadPartCopy(ctx _context.Context, bucket string, 
 	}
 }
 
-/*
- * Execute executes the request
- * @return UploadPartCopyOutput
- */
-func (a *UploadsApiService) UploadPartCopyExecute(r ApiUploadPartCopyRequest) (UploadPartCopyOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return UploadPartCopyOutput
+func (a *UploadsApiService) UploadPartCopyExecute(r ApiUploadPartCopyRequest) (*UploadPartCopyOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  UploadPartCopyOutput
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *UploadPartCopyOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UploadsApiService.UploadPartCopy")
@@ -1331,12 +1401,12 @@ func (a *UploadsApiService) UploadPartCopyExecute(r ApiUploadPartCopyRequest) (U
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}?x-amz-copy-source&partNumber&uploadId"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -1408,13 +1478,12 @@ func (a *UploadsApiService) UploadPartCopyExecute(r ApiUploadPartCopyRequest) (U
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -1422,7 +1491,6 @@ func (a *UploadsApiService) UploadPartCopyExecute(r ApiUploadPartCopyRequest) (U
 		RequestURL:  localVarPath,
 		Operation:   "UploadPartCopy",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1430,6 +1498,7 @@ func (a *UploadsApiService) UploadPartCopyExecute(r ApiUploadPartCopyRequest) (U
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}

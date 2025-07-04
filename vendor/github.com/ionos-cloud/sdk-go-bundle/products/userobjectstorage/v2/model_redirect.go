@@ -15,21 +15,24 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the Redirect type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Redirect{}
 
 // Redirect Container for redirect information. You can redirect requests to another host, to another page, or with another protocol. In the event of an error, you can specify a different error code to return.
 type Redirect struct {
+	XMLName xml.Name `xml:"Redirect"`
 	// The host name to use in the redirect request.
-	HostName *string `json:"HostName,omitempty"`
+	HostName *string `json:"HostName,omitempty" xml:"HostName"`
 	// The HTTP redirect code to use on the response. Not required if one of the siblings is present.
-	HttpRedirectCode *string `json:"HttpRedirectCode,omitempty"`
+	HttpRedirectCode *string `json:"HttpRedirectCode,omitempty" xml:"HttpRedirectCode"`
 	// Protocol to use when redirecting requests. The default is the protocol that is used in the original request.
-	Protocol *string `json:"Protocol,omitempty"`
+	Protocol *string `json:"Protocol,omitempty" xml:"Protocol"`
 	// <p>The object key prefix to use in the redirect request. For example, to redirect requests for all pages with prefix `docs/` (objects in the `docs/` folder) to `documents/`, you can set a condition block with `KeyPrefixEquals` set to `docs/` and in the Redirect set `ReplaceKeyPrefixWith` to `/documents`. Not required if one of the siblings is present. Can be present only if `ReplaceKeyWith` is not provided.</p> <p>Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests. </p>
-	ReplaceKeyPrefixWith *string `json:"ReplaceKeyPrefixWith,omitempty"`
+	ReplaceKeyPrefixWith *string `json:"ReplaceKeyPrefixWith,omitempty" xml:"ReplaceKeyPrefixWith"`
 	// The specific object key to use in the redirect request. For example, redirect request to `error.html`. Not required if one of the siblings is present. Can be present only if `ReplaceKeyPrefixWith` is not provided. Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests.
-	ReplaceKeyWith *string `json:"ReplaceKeyWith,omitempty"`
+	ReplaceKeyWith *string `json:"ReplaceKeyWith,omitempty" xml:"ReplaceKeyWith"`
 }
 
 // NewRedirect instantiates a new Redirect object

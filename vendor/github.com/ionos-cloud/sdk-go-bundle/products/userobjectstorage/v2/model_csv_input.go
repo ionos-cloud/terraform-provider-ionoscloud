@@ -15,25 +15,28 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the CSVInput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CSVInput{}
 
 // CSVInput Describes how an uncompressed comma-separated values (CSV)-formatted input object is formatted.
 type CSVInput struct {
+	XMLName xml.Name `xml:"CSVInput"`
 	// <p>Describes the first line of input. Valid values are:</p> <ul> <li> <p> `NONE`: First line is not a header.</p> </li> <li> <p> `IGNORE`: First line is a header, but you can't use the header values to indicate the column in an expression. You can use column position (such as _1, _2, …) to indicate the column (`SELECT s._1 FROM OBJECT s`).</p> </li> <li> <p> `Use`: First line is a header, and you can use the header value to identify a column in an expression (`SELECT \"name\" FROM OBJECT`). </p> </li> </ul>
-	FileHeaderInfo *string `json:"FileHeaderInfo,omitempty"`
+	FileHeaderInfo *string `json:"FileHeaderInfo,omitempty" xml:"FileHeaderInfo"`
 	// A single character used to indicate that a row should be ignored when the character is present at the start of that row. You can specify any character to indicate a comment line.
-	Comments *string `json:"Comments,omitempty"`
+	Comments *string `json:"Comments,omitempty" xml:"Comments"`
 	// A single character used for escaping the quotation mark character inside an already escaped value. For example, the value \"\"\" a , b \"\"\" is parsed as \" a , b \".
-	QuoteEscapeCharacter *string `json:"QuoteEscapeCharacter,omitempty"`
+	QuoteEscapeCharacter *string `json:"QuoteEscapeCharacter,omitempty" xml:"QuoteEscapeCharacter"`
 	// A single character used to separate individual records in the input. Instead of the default value, you can specify an arbitrary delimiter.
-	RecordDelimiter *string `json:"RecordDelimiter,omitempty"`
+	RecordDelimiter *string `json:"RecordDelimiter,omitempty" xml:"RecordDelimiter"`
 	// A single character used to separate individual fields in a record. You can specify an arbitrary delimiter.
-	FieldDelimiter *string `json:"FieldDelimiter,omitempty"`
+	FieldDelimiter *string `json:"FieldDelimiter,omitempty" xml:"FieldDelimiter"`
 	// <p>A single character used for escaping when the field delimiter is part of the value. For example, if the value is `a, b`, IONOS Object Storage wraps this field value in quotation marks, as follows: `\" a , b \"`.</p> <p>Type: String</p> <p>Default: `\"` </p> <p>Ancestors: `CSV` </p>
-	QuoteCharacter *string `json:"QuoteCharacter,omitempty"`
+	QuoteCharacter *string `json:"QuoteCharacter,omitempty" xml:"QuoteCharacter"`
 	// Specifies that CSV field values may contain quoted record delimiters and such records should be allowed. Default value is FALSE. Setting this value to TRUE may lower performance.
-	AllowQuotedRecordDelimiter *bool `json:"AllowQuotedRecordDelimiter,omitempty"`
+	AllowQuotedRecordDelimiter *bool `json:"AllowQuotedRecordDelimiter,omitempty" xml:"AllowQuotedRecordDelimiter"`
 }
 
 // NewCSVInput instantiates a new CSVInput object

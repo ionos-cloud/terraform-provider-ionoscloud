@@ -15,14 +15,17 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the DeleteObjectsOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &DeleteObjectsOutput{}
 
 // DeleteObjectsOutput struct for DeleteObjectsOutput
 type DeleteObjectsOutput struct {
+	XMLName xml.Name `xml:"DeleteResult"`
 	// Container element for a successful delete. It identifies the object that was successfully deleted.
-	Deleted []DeletedObject `json:"Deleted,omitempty"`
-	Errors  []DeletionError `json:"Errors,omitempty"`
+	Deleted []DeletedObject `json:"Deleted,omitempty" xml:"Deleted"`
+	Errors  []DeletionError `json:"Errors,omitempty" xml:"Error"`
 }
 
 // NewDeleteObjectsOutput instantiates a new DeleteObjectsOutput object

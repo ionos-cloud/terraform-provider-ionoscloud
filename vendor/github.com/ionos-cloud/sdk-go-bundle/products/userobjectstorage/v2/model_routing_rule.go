@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the RoutingRule type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &RoutingRule{}
 
 // RoutingRule Specifies the redirect behavior and when a redirect is applied.
 type RoutingRule struct {
-	Condition *RoutingRuleCondition `json:"Condition,omitempty"`
-	Redirect  Redirect              `json:"Redirect"`
+	XMLName   xml.Name              `xml:"RoutingRule"`
+	Condition *RoutingRuleCondition `json:"Condition,omitempty" xml:"Condition"`
+	Redirect  Redirect              `json:"Redirect" xml:"Redirect"`
 }
 
 // NewRoutingRule instantiates a new RoutingRule object

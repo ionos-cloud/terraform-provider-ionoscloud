@@ -60,6 +60,8 @@ require (
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
+replace github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2 => /tmp/sdk-go
+
 require (
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect

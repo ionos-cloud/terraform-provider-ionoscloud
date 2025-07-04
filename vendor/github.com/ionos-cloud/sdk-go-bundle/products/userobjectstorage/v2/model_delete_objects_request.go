@@ -15,22 +15,25 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the DeleteObjectsRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &DeleteObjectsRequest{}
 
-// DeleteObjectsRequest struct for DeleteObjectsRequest
+// DeleteObjectsRequest Container for the objects to delete.
 type DeleteObjectsRequest struct {
-	Delete DeleteObjectsRequestDelete `json:"Delete"`
+	XMLName xml.Name `xml:"Delete"`
+	// The objects to delete.
+	Objects []ObjectIdentifier `json:"Objects,omitempty" xml:"Object"`
+	Quiet   *bool              `json:"Quiet,omitempty" xml:"Quiet"`
 }
 
 // NewDeleteObjectsRequest instantiates a new DeleteObjectsRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDeleteObjectsRequest(delete DeleteObjectsRequestDelete) *DeleteObjectsRequest {
+func NewDeleteObjectsRequest() *DeleteObjectsRequest {
 	this := DeleteObjectsRequest{}
-
-	this.Delete = delete
 
 	return &this
 }
@@ -43,28 +46,68 @@ func NewDeleteObjectsRequestWithDefaults() *DeleteObjectsRequest {
 	return &this
 }
 
-// GetDelete returns the Delete field value
-func (o *DeleteObjectsRequest) GetDelete() DeleteObjectsRequestDelete {
-	if o == nil {
-		var ret DeleteObjectsRequestDelete
+// GetObjects returns the Objects field value if set, zero value otherwise.
+func (o *DeleteObjectsRequest) GetObjects() []ObjectIdentifier {
+	if o == nil || IsNil(o.Objects) {
+		var ret []ObjectIdentifier
 		return ret
 	}
-
-	return o.Delete
+	return o.Objects
 }
 
-// GetDeleteOk returns a tuple with the Delete field value
+// GetObjectsOk returns a tuple with the Objects field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DeleteObjectsRequest) GetDeleteOk() (*DeleteObjectsRequestDelete, bool) {
-	if o == nil {
+func (o *DeleteObjectsRequest) GetObjectsOk() ([]ObjectIdentifier, bool) {
+	if o == nil || IsNil(o.Objects) {
 		return nil, false
 	}
-	return &o.Delete, true
+	return o.Objects, true
 }
 
-// SetDelete sets field value
-func (o *DeleteObjectsRequest) SetDelete(v DeleteObjectsRequestDelete) {
-	o.Delete = v
+// HasObjects returns a boolean if a field has been set.
+func (o *DeleteObjectsRequest) HasObjects() bool {
+	if o != nil && !IsNil(o.Objects) {
+		return true
+	}
+
+	return false
+}
+
+// SetObjects gets a reference to the given []ObjectIdentifier and assigns it to the Objects field.
+func (o *DeleteObjectsRequest) SetObjects(v []ObjectIdentifier) {
+	o.Objects = v
+}
+
+// GetQuiet returns the Quiet field value if set, zero value otherwise.
+func (o *DeleteObjectsRequest) GetQuiet() bool {
+	if o == nil || IsNil(o.Quiet) {
+		var ret bool
+		return ret
+	}
+	return *o.Quiet
+}
+
+// GetQuietOk returns a tuple with the Quiet field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DeleteObjectsRequest) GetQuietOk() (*bool, bool) {
+	if o == nil || IsNil(o.Quiet) {
+		return nil, false
+	}
+	return o.Quiet, true
+}
+
+// HasQuiet returns a boolean if a field has been set.
+func (o *DeleteObjectsRequest) HasQuiet() bool {
+	if o != nil && !IsNil(o.Quiet) {
+		return true
+	}
+
+	return false
+}
+
+// SetQuiet gets a reference to the given bool and assigns it to the Quiet field.
+func (o *DeleteObjectsRequest) SetQuiet(v bool) {
+	o.Quiet = &v
 }
 
 func (o DeleteObjectsRequest) MarshalJSON() ([]byte, error) {
@@ -77,7 +120,12 @@ func (o DeleteObjectsRequest) MarshalJSON() ([]byte, error) {
 
 func (o DeleteObjectsRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["Delete"] = o.Delete
+	if !IsNil(o.Objects) {
+		toSerialize["Objects"] = o.Objects
+	}
+	if !IsNil(o.Quiet) {
+		toSerialize["Quiet"] = o.Quiet
+	}
 	return toSerialize, nil
 }
 

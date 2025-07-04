@@ -12,25 +12,21 @@
 package userobjectstorage
 
 import (
-	_context "context"
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"net/http"
+	"net/url"
 	"strings"
-)
-
-// Linger please
-var (
-	_ _context.Context
 )
 
 // ReplicationApiService ReplicationApi service
 type ReplicationApiService service
 
 type ApiGetBucketReplicationRequest struct {
-	ctx         _context.Context
+	ctx         context.Context
 	ApiService  *ReplicationApiService
 	bucket      string
 	replication *bool
@@ -41,13 +37,14 @@ func (r ApiGetBucketReplicationRequest) Replication(replication bool) ApiGetBuck
 	return r
 }
 
-func (r ApiGetBucketReplicationRequest) Execute() (GetBucketReplicationOutput, *shared.APIResponse, error) {
+func (r ApiGetBucketReplicationRequest) Execute() (*GetBucketReplicationOutput, *shared.APIResponse, error) {
 	return r.ApiService.GetBucketReplicationExecute(r)
 }
 
 /*
-  - GetBucketReplication GetBucketReplication
-  - Returns the replication configuration of a bucket.
+GetBucketReplication GetBucketReplication
+
+Returns the replication configuration of a bucket.
 
 The replication configuration may take a while to propagate to all IONOS Object Storage systems.
 For example, when you apply a new configuration with a PUT request or delete a configuration using
@@ -61,11 +58,11 @@ to perform the `s3:GetBucketReplication` operation using [Bucket Policy](#tag/Po
 #### S3 API Compatibility
 - The `x-amz-expected-bucket-owner` header isn't supported.
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiGetBucketReplicationRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiGetBucketReplicationRequest
 */
-func (a *ReplicationApiService) GetBucketReplication(ctx _context.Context, bucket string) ApiGetBucketReplicationRequest {
+func (a *ReplicationApiService) GetBucketReplication(ctx context.Context, bucket string) ApiGetBucketReplicationRequest {
 	return ApiGetBucketReplicationRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -73,18 +70,15 @@ func (a *ReplicationApiService) GetBucketReplication(ctx _context.Context, bucke
 	}
 }
 
-/*
- * Execute executes the request
- * @return GetBucketReplicationOutput
- */
-func (a *ReplicationApiService) GetBucketReplicationExecute(r ApiGetBucketReplicationRequest) (GetBucketReplicationOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return GetBucketReplicationOutput
+func (a *ReplicationApiService) GetBucketReplicationExecute(r ApiGetBucketReplicationRequest) (*GetBucketReplicationOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  GetBucketReplicationOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetBucketReplicationOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ReplicationApiService.GetBucketReplication")
@@ -95,11 +89,11 @@ func (a *ReplicationApiService) GetBucketReplicationExecute(r ApiGetBucketReplic
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?replication"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -142,13 +136,12 @@ func (a *ReplicationApiService) GetBucketReplicationExecute(r ApiGetBucketReplic
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -156,7 +149,6 @@ func (a *ReplicationApiService) GetBucketReplicationExecute(r ApiGetBucketReplic
 		RequestURL:  localVarPath,
 		Operation:   "GetBucketReplication",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -164,6 +156,7 @@ func (a *ReplicationApiService) GetBucketReplicationExecute(r ApiGetBucketReplic
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}

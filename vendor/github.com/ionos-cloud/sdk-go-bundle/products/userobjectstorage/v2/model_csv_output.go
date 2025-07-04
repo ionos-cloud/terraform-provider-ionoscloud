@@ -15,21 +15,24 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the CSVOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CSVOutput{}
 
 // CSVOutput Describes how uncompressed comma-separated values (CSV)-formatted results are formatted.
 type CSVOutput struct {
+	XMLName xml.Name `xml:"CSVOutput"`
 	// <p>Indicates whether to use quotation marks around output fields. </p> <ul> <li> <p> `ALWAYS`: Always use quotation marks for output fields.</p> </li> <li> <p> `ASNEEDED`: Use quotation marks for output fields when needed.</p> </li> </ul>
-	QuoteFields *string `json:"QuoteFields,omitempty"`
+	QuoteFields *string `json:"QuoteFields,omitempty" xml:"QuoteFields"`
 	// The single character used for escaping the quote character inside an already escaped value.
-	QuoteEscapeCharacter *string `json:"QuoteEscapeCharacter,omitempty"`
+	QuoteEscapeCharacter *string `json:"QuoteEscapeCharacter,omitempty" xml:"QuoteEscapeCharacter"`
 	// A single character used to separate individual records in the output. Instead of the default value, you can specify an arbitrary delimiter.
-	RecordDelimiter *string `json:"RecordDelimiter,omitempty"`
+	RecordDelimiter *string `json:"RecordDelimiter,omitempty" xml:"RecordDelimiter"`
 	// The value used to separate individual fields in a record. You can specify an arbitrary delimiter.
-	FieldDelimiter interface{} `json:"FieldDelimiter,omitempty"`
+	FieldDelimiter interface{} `json:"FieldDelimiter,omitempty" xml:"FieldDelimiter"`
 	// A single character used for escaping when the field delimiter is part of the value. For example, if the value is `a, b`, IONOS Object Storage wraps this field value in quotation marks, as follows: `\" a , b \"`.
-	QuoteCharacter *string `json:"QuoteCharacter,omitempty"`
+	QuoteCharacter *string `json:"QuoteCharacter,omitempty" xml:"QuoteCharacter"`
 }
 
 // NewCSVOutput instantiates a new CSVOutput object

@@ -15,22 +15,24 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the PutBucketCorsRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PutBucketCorsRequest{}
 
-// PutBucketCorsRequest struct for PutBucketCorsRequest
+// PutBucketCorsRequest Describes the cross-origin access configuration for objects in an IONOS Object Storage bucket.
 type PutBucketCorsRequest struct {
-	CORSConfiguration PutBucketCorsRequestCORSConfiguration `json:"CORSConfiguration"`
+	XMLName xml.Name `xml:"CORSConfiguration"`
+	// A set of origins and methods (cross-origin access that you want to allow). You can add up to 100 rules to the configuration.
+	CORSRules []CORSRule `json:"CORSRules,omitempty" xml:"CORSRule"`
 }
 
 // NewPutBucketCorsRequest instantiates a new PutBucketCorsRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPutBucketCorsRequest(cORSConfiguration PutBucketCorsRequestCORSConfiguration) *PutBucketCorsRequest {
+func NewPutBucketCorsRequest() *PutBucketCorsRequest {
 	this := PutBucketCorsRequest{}
-
-	this.CORSConfiguration = cORSConfiguration
 
 	return &this
 }
@@ -43,28 +45,36 @@ func NewPutBucketCorsRequestWithDefaults() *PutBucketCorsRequest {
 	return &this
 }
 
-// GetCORSConfiguration returns the CORSConfiguration field value
-func (o *PutBucketCorsRequest) GetCORSConfiguration() PutBucketCorsRequestCORSConfiguration {
-	if o == nil {
-		var ret PutBucketCorsRequestCORSConfiguration
+// GetCORSRules returns the CORSRules field value if set, zero value otherwise.
+func (o *PutBucketCorsRequest) GetCORSRules() []CORSRule {
+	if o == nil || IsNil(o.CORSRules) {
+		var ret []CORSRule
 		return ret
 	}
-
-	return o.CORSConfiguration
+	return o.CORSRules
 }
 
-// GetCORSConfigurationOk returns a tuple with the CORSConfiguration field value
+// GetCORSRulesOk returns a tuple with the CORSRules field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PutBucketCorsRequest) GetCORSConfigurationOk() (*PutBucketCorsRequestCORSConfiguration, bool) {
-	if o == nil {
+func (o *PutBucketCorsRequest) GetCORSRulesOk() ([]CORSRule, bool) {
+	if o == nil || IsNil(o.CORSRules) {
 		return nil, false
 	}
-	return &o.CORSConfiguration, true
+	return o.CORSRules, true
 }
 
-// SetCORSConfiguration sets field value
-func (o *PutBucketCorsRequest) SetCORSConfiguration(v PutBucketCorsRequestCORSConfiguration) {
-	o.CORSConfiguration = v
+// HasCORSRules returns a boolean if a field has been set.
+func (o *PutBucketCorsRequest) HasCORSRules() bool {
+	if o != nil && !IsNil(o.CORSRules) {
+		return true
+	}
+
+	return false
+}
+
+// SetCORSRules gets a reference to the given []CORSRule and assigns it to the CORSRules field.
+func (o *PutBucketCorsRequest) SetCORSRules(v []CORSRule) {
+	o.CORSRules = v
 }
 
 func (o PutBucketCorsRequest) MarshalJSON() ([]byte, error) {
@@ -77,7 +87,9 @@ func (o PutBucketCorsRequest) MarshalJSON() ([]byte, error) {
 
 func (o PutBucketCorsRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["CORSConfiguration"] = o.CORSConfiguration
+	if !IsNil(o.CORSRules) {
+		toSerialize["CORSRules"] = o.CORSRules
+	}
 	return toSerialize, nil
 }
 

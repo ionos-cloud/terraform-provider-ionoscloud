@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the JSONOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &JSONOutput{}
 
 // JSONOutput Specifies JSON as request's output serialization format.
 type JSONOutput struct {
+	XMLName xml.Name `xml:"JSONOutput"`
 	// The value used to separate individual records in the output. If no value is specified, IONOS Object Storage uses a newline character ('\\n').
-	RecordDelimiter *string `json:"RecordDelimiter,omitempty"`
+	RecordDelimiter *string `json:"RecordDelimiter,omitempty" xml:"RecordDelimiter"`
 }
 
 // NewJSONOutput instantiates a new JSONOutput object

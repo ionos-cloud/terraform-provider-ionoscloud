@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the NoncurrentVersionExpiration type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &NoncurrentVersionExpiration{}
 
 // NoncurrentVersionExpiration Specifies when noncurrent object versions expire. Upon expiration, IONOS Object Storage permanently deletes the noncurrent object versions. You set this lifecycle configuration operation on a bucket that has versioning enabled (or suspended) to request that IONOS Object Storage delete noncurrent object versions at a specific period in the object's lifetime.
 type NoncurrentVersionExpiration struct {
+	XMLName xml.Name `xml:"NoncurrentVersionExpiration"`
 	// Specifies the number of days an object is noncurrent before IONOS Object Storage can perform the associated operation.
-	NoncurrentDays *int32 `json:"NoncurrentDays,omitempty"`
+	NoncurrentDays *int32 `json:"NoncurrentDays,omitempty" xml:"NoncurrentDays"`
 }
 
 // NewNoncurrentVersionExpiration instantiates a new NoncurrentVersionExpiration object

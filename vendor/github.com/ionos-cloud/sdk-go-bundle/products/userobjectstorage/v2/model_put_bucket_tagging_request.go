@@ -15,22 +15,24 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the PutBucketTaggingRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PutBucketTaggingRequest{}
 
-// PutBucketTaggingRequest struct for PutBucketTaggingRequest
+// PutBucketTaggingRequest Container for `TagSet` elements.
 type PutBucketTaggingRequest struct {
-	Tagging PutBucketTaggingRequestTagging `json:"Tagging"`
+	XMLName xml.Name `xml:"Tagging"`
+	// Contains the tag set.
+	TagSet []Tag `json:"TagSet,omitempty" xml:"TagSet>Tag"`
 }
 
 // NewPutBucketTaggingRequest instantiates a new PutBucketTaggingRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPutBucketTaggingRequest(tagging PutBucketTaggingRequestTagging) *PutBucketTaggingRequest {
+func NewPutBucketTaggingRequest() *PutBucketTaggingRequest {
 	this := PutBucketTaggingRequest{}
-
-	this.Tagging = tagging
 
 	return &this
 }
@@ -43,28 +45,36 @@ func NewPutBucketTaggingRequestWithDefaults() *PutBucketTaggingRequest {
 	return &this
 }
 
-// GetTagging returns the Tagging field value
-func (o *PutBucketTaggingRequest) GetTagging() PutBucketTaggingRequestTagging {
-	if o == nil {
-		var ret PutBucketTaggingRequestTagging
+// GetTagSet returns the TagSet field value if set, zero value otherwise.
+func (o *PutBucketTaggingRequest) GetTagSet() []Tag {
+	if o == nil || IsNil(o.TagSet) {
+		var ret []Tag
 		return ret
 	}
-
-	return o.Tagging
+	return o.TagSet
 }
 
-// GetTaggingOk returns a tuple with the Tagging field value
+// GetTagSetOk returns a tuple with the TagSet field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PutBucketTaggingRequest) GetTaggingOk() (*PutBucketTaggingRequestTagging, bool) {
-	if o == nil {
+func (o *PutBucketTaggingRequest) GetTagSetOk() ([]Tag, bool) {
+	if o == nil || IsNil(o.TagSet) {
 		return nil, false
 	}
-	return &o.Tagging, true
+	return o.TagSet, true
 }
 
-// SetTagging sets field value
-func (o *PutBucketTaggingRequest) SetTagging(v PutBucketTaggingRequestTagging) {
-	o.Tagging = v
+// HasTagSet returns a boolean if a field has been set.
+func (o *PutBucketTaggingRequest) HasTagSet() bool {
+	if o != nil && !IsNil(o.TagSet) {
+		return true
+	}
+
+	return false
+}
+
+// SetTagSet gets a reference to the given []Tag and assigns it to the TagSet field.
+func (o *PutBucketTaggingRequest) SetTagSet(v []Tag) {
+	o.TagSet = v
 }
 
 func (o PutBucketTaggingRequest) MarshalJSON() ([]byte, error) {
@@ -77,7 +87,9 @@ func (o PutBucketTaggingRequest) MarshalJSON() ([]byte, error) {
 
 func (o PutBucketTaggingRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["Tagging"] = o.Tagging
+	if !IsNil(o.TagSet) {
+		toSerialize["TagSet"] = o.TagSet
+	}
 	return toSerialize, nil
 }
 

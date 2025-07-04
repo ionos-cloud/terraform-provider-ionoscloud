@@ -15,19 +15,22 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the BlockPublicAccessOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &BlockPublicAccessOutput{}
 
 // BlockPublicAccessOutput struct for BlockPublicAccessOutput
 type BlockPublicAccessOutput struct {
+	XMLName xml.Name `xml:"BlockPublicAccessBlockConfiguration"`
 	// Indicates that access to the bucket via Access Control Lists (ACLs) that grant public access is blocked. In other words, ACLs that allow public access are not permitted.
-	BlockPublicAcls *bool `json:"BlockPublicAcls,omitempty"`
+	BlockPublicAcls *bool `json:"BlockPublicAcls,omitempty" xml:"BlockPublicAcls"`
 	// Instructs the system to ignore any ACLs that grant public access. Even if ACLs are set to allow public access, they will be disregarded.
-	IgnorePublicAcls *bool `json:"IgnorePublicAcls,omitempty"`
+	IgnorePublicAcls *bool `json:"IgnorePublicAcls,omitempty" xml:"IgnorePublicAcls"`
 	// Blocks public access to the bucket via bucket policies. Bucket policies that grant public access will not be allowed.
-	BlockPublicPolicy *bool `json:"BlockPublicPolicy,omitempty"`
+	BlockPublicPolicy *bool `json:"BlockPublicPolicy,omitempty" xml:"BlockPublicPolicy"`
 	// Restricts access to buckets that have public policies. Buckets with policies that grant public access will have their access restricted.
-	RestrictPublicBuckets *bool `json:"RestrictPublicBuckets,omitempty"`
+	RestrictPublicBuckets *bool `json:"RestrictPublicBuckets,omitempty" xml:"RestrictPublicBuckets"`
 }
 
 // NewBlockPublicAccessOutput instantiates a new BlockPublicAccessOutput object

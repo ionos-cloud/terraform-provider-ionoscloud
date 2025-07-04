@@ -13,7 +13,6 @@ package userobjectstorage
 
 import (
 	"encoding/json"
-
 	"fmt"
 )
 

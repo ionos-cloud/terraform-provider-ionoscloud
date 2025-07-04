@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ObjectLegalHoldConfiguration type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ObjectLegalHoldConfiguration{}
 
 // ObjectLegalHoldConfiguration A Legal Hold configuration for an object.
 type ObjectLegalHoldConfiguration struct {
+	XMLName xml.Name `xml:"LegalHold"`
 	// Object Legal Hold status
-	Status *string `json:"Status,omitempty"`
+	Status *string `json:"Status,omitempty" xml:"Status"`
 }
 
 // NewObjectLegalHoldConfiguration instantiates a new ObjectLegalHoldConfiguration object

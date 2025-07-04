@@ -15,12 +15,15 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the Example type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Example{}
 
 // Example struct for Example
 type Example struct {
-	CompleteMultipartUpload *ExampleCompleteMultipartUpload `json:"CompleteMultipartUpload,omitempty"`
+	XMLName                 xml.Name                        `xml:"Example"`
+	CompleteMultipartUpload *ExampleCompleteMultipartUpload `json:"CompleteMultipartUpload,omitempty" xml:"CompleteMultipartUpload"`
 }
 
 // NewExample instantiates a new Example object

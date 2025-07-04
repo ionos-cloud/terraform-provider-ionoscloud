@@ -6,5 +6,15 @@ import "github.com/hashicorp/terraform-plugin-framework/resource"
 func Resources() []func() resource.Resource {
 	return []func() resource.Resource{
 		NewBucketResource,
+		NewBucketPolicyResource,
+		NewObjectResource,
+		// NewObjectCopyResource,
+		NewBucketPublicAccessBlockResource,
+		NewBucketVersioningResource,
+		NewObjectLockConfigurationResource,
+		NewServerSideEncryptionConfigurationResource,
+		NewBucketCorsConfigurationResource,
+		NewBucketLifecycleConfigurationResource,
+		// NewBucketWebsiteConfigurationResource,
 	}
 }

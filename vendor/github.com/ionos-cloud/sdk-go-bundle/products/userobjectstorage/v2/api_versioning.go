@@ -12,42 +12,33 @@
 package userobjectstorage
 
 import (
-	_context "context"
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"net/http"
+	"net/url"
 	"strings"
-)
-
-// Linger please
-var (
-	_ _context.Context
 )
 
 // VersioningApiService VersioningApi service
 type VersioningApiService service
 
 type ApiGetBucketVersioningRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *VersioningApiService
 	bucket     string
-	versioning *bool
 }
 
-func (r ApiGetBucketVersioningRequest) Versioning(versioning bool) ApiGetBucketVersioningRequest {
-	r.versioning = &versioning
-	return r
-}
-
-func (r ApiGetBucketVersioningRequest) Execute() (GetBucketVersioningOutput, *shared.APIResponse, error) {
+func (r ApiGetBucketVersioningRequest) Execute() (*GetBucketVersioningOutput, *shared.APIResponse, error) {
 	return r.ApiService.GetBucketVersioningExecute(r)
 }
 
 /*
-  - GetBucketVersioning GetBucketVersioning
-  - Returns the versioning state of a bucket.
+GetBucketVersioning GetBucketVersioning
+
+Returns the versioning state of a bucket.
 
 #### Permissions
 You must be the contract owner or an administrator to perform this operation. If not, they can grant you permission
@@ -56,11 +47,11 @@ to perform the `s3:GetBucketVersioning` operation using [Bucket Policy](#tag/Pol
 #### S3 API Compatibility
 - The `x-amz-expected-bucket-owner` header isn't supported.
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiGetBucketVersioningRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiGetBucketVersioningRequest
 */
-func (a *VersioningApiService) GetBucketVersioning(ctx _context.Context, bucket string) ApiGetBucketVersioningRequest {
+func (a *VersioningApiService) GetBucketVersioning(ctx context.Context, bucket string) ApiGetBucketVersioningRequest {
 	return ApiGetBucketVersioningRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -68,18 +59,15 @@ func (a *VersioningApiService) GetBucketVersioning(ctx _context.Context, bucket 
 	}
 }
 
-/*
- * Execute executes the request
- * @return GetBucketVersioningOutput
- */
-func (a *VersioningApiService) GetBucketVersioningExecute(r ApiGetBucketVersioningRequest) (GetBucketVersioningOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return GetBucketVersioningOutput
+func (a *VersioningApiService) GetBucketVersioningExecute(r ApiGetBucketVersioningRequest) (*GetBucketVersioningOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  GetBucketVersioningOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetBucketVersioningOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VersioningApiService.GetBucketVersioning")
@@ -90,22 +78,18 @@ func (a *VersioningApiService) GetBucketVersioningExecute(r ApiGetBucketVersioni
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?versioning"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.versioning == nil {
-		return localVarReturnValue, nil, reportError("versioning is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "versioning", r.versioning, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -137,13 +121,12 @@ func (a *VersioningApiService) GetBucketVersioningExecute(r ApiGetBucketVersioni
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -151,7 +134,6 @@ func (a *VersioningApiService) GetBucketVersioningExecute(r ApiGetBucketVersioni
 		RequestURL:  localVarPath,
 		Operation:   "GetBucketVersioning",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -159,6 +141,7 @@ func (a *VersioningApiService) GetBucketVersioningExecute(r ApiGetBucketVersioni
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -184,22 +167,18 @@ func (a *VersioningApiService) GetBucketVersioningExecute(r ApiGetBucketVersioni
 }
 
 type ApiPutBucketVersioningRequest struct {
-	ctx                        _context.Context
+	ctx                        context.Context
 	ApiService                 *VersioningApiService
 	bucket                     string
-	versioning                 *bool
 	putBucketVersioningRequest *PutBucketVersioningRequest
 	contentMD5                 *string
 }
 
-func (r ApiPutBucketVersioningRequest) Versioning(versioning bool) ApiPutBucketVersioningRequest {
-	r.versioning = &versioning
-	return r
-}
 func (r ApiPutBucketVersioningRequest) PutBucketVersioningRequest(putBucketVersioningRequest PutBucketVersioningRequest) ApiPutBucketVersioningRequest {
 	r.putBucketVersioningRequest = &putBucketVersioningRequest
 	return r
 }
+
 func (r ApiPutBucketVersioningRequest) ContentMD5(contentMD5 string) ApiPutBucketVersioningRequest {
 	r.contentMD5 = &contentMD5
 	return r
@@ -210,8 +189,9 @@ func (r ApiPutBucketVersioningRequest) Execute() (*shared.APIResponse, error) {
 }
 
 /*
-  - PutBucketVersioning PutBucketVersioning
-  - Configures the versioning state of an object storage bucket. Versioning allows keeping multiple variants of an object in the same bucket.
+PutBucketVersioning PutBucketVersioning
+
+Configures the versioning state of an Object Storage bucket. Versioning allows keeping multiple variants of an object in the same bucket.
 
 The versioning state can be one of the following:
 - `Enabled`: Activates versioning for the bucket. All objects added receive a unique version ID.
@@ -229,11 +209,11 @@ to perform the `s3:PutBucketVersioning` operation using [Bucket Policy](#tag/Pol
 - The `x-amz-mfa` header is not supported.
 - The `MfaDelete` setting is ignored in the PUT request.
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiPutBucketVersioningRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiPutBucketVersioningRequest
 */
-func (a *VersioningApiService) PutBucketVersioning(ctx _context.Context, bucket string) ApiPutBucketVersioningRequest {
+func (a *VersioningApiService) PutBucketVersioning(ctx context.Context, bucket string) ApiPutBucketVersioningRequest {
 	return ApiPutBucketVersioningRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -241,16 +221,12 @@ func (a *VersioningApiService) PutBucketVersioning(ctx _context.Context, bucket 
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *VersioningApiService) PutBucketVersioningExecute(r ApiPutBucketVersioningRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VersioningApiService.PutBucketVersioning")
@@ -261,25 +237,21 @@ func (a *VersioningApiService) PutBucketVersioningExecute(r ApiPutBucketVersioni
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?versioning"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.versioning == nil {
-		return nil, reportError("versioning is required and must be specified")
-	}
 	if r.putBucketVersioningRequest == nil {
 		return nil, reportError("putBucketVersioningRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "versioning", r.versioning, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 
@@ -316,13 +288,12 @@ func (a *VersioningApiService) PutBucketVersioningExecute(r ApiPutBucketVersioni
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -330,7 +301,6 @@ func (a *VersioningApiService) PutBucketVersioningExecute(r ApiPutBucketVersioni
 		RequestURL:  localVarPath,
 		Operation:   "PutBucketVersioning",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -338,6 +308,7 @@ func (a *VersioningApiService) PutBucketVersioningExecute(r ApiPutBucketVersioni
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}
@@ -355,6 +326,7 @@ func (a *VersioningApiService) PutBucketVersioningExecute(r ApiPutBucketVersioni
 				return localVarAPIResponse, newErr
 			}
 			newErr.SetModel(v)
+			return localVarAPIResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 409 {
 			var v Error

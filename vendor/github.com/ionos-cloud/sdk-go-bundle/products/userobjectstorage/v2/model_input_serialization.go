@@ -15,17 +15,20 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the InputSerialization type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &InputSerialization{}
 
 // InputSerialization Describes the serialization format of the object.
 type InputSerialization struct {
-	CSV *CSVInput `json:"CSV,omitempty"`
+	XMLName xml.Name  `xml:"InputSerialization"`
+	CSV     *CSVInput `json:"CSV,omitempty" xml:"CSV"`
 	// Specifies object's compression format. Valid values: NONE, GZIP, BZIP2. Default Value: NONE.
-	CompressionType *string                 `json:"CompressionType,omitempty"`
-	JSON            *InputSerializationJSON `json:"JSON,omitempty"`
+	CompressionType *string                 `json:"CompressionType,omitempty" xml:"CompressionType"`
+	JSON            *InputSerializationJSON `json:"JSON,omitempty" xml:"JSON"`
 	// Specifies Parquet as object's input serialization format.
-	Parquet map[string]interface{} `json:"Parquet,omitempty"`
+	Parquet map[string]interface{} `json:"Parquet,omitempty" xml:"Parquet"`
 }
 
 // NewInputSerialization instantiates a new InputSerialization object

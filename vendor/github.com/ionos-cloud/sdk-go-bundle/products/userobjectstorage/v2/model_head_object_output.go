@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the HeadObjectOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &HeadObjectOutput{}
 
 // HeadObjectOutput struct for HeadObjectOutput
 type HeadObjectOutput struct {
+	XMLName xml.Name `xml:"HeadObjectOutput"`
 	// A map of metadata to store with the object. Each key must start with  `x-amz-meta-` prefix.
-	Metadata *map[string]Metadata1 `json:"Metadata,omitempty"`
+	Metadata *map[string]string `json:"Metadata,omitempty" xml:"Metadata"`
 }
 
 // NewHeadObjectOutput instantiates a new HeadObjectOutput object
@@ -43,9 +46,9 @@ func NewHeadObjectOutputWithDefaults() *HeadObjectOutput {
 }
 
 // GetMetadata returns the Metadata field value if set, zero value otherwise.
-func (o *HeadObjectOutput) GetMetadata() map[string]Metadata1 {
+func (o *HeadObjectOutput) GetMetadata() map[string]string {
 	if o == nil || IsNil(o.Metadata) {
-		var ret map[string]Metadata1
+		var ret map[string]string
 		return ret
 	}
 	return *o.Metadata
@@ -53,7 +56,7 @@ func (o *HeadObjectOutput) GetMetadata() map[string]Metadata1 {
 
 // GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *HeadObjectOutput) GetMetadataOk() (*map[string]Metadata1, bool) {
+func (o *HeadObjectOutput) GetMetadataOk() (*map[string]string, bool) {
 	if o == nil || IsNil(o.Metadata) {
 		return nil, false
 	}
@@ -69,8 +72,8 @@ func (o *HeadObjectOutput) HasMetadata() bool {
 	return false
 }
 
-// SetMetadata gets a reference to the given map[string]Metadata1 and assigns it to the Metadata field.
-func (o *HeadObjectOutput) SetMetadata(v map[string]Metadata1) {
+// SetMetadata gets a reference to the given map[string]string and assigns it to the Metadata field.
+func (o *HeadObjectOutput) SetMetadata(v map[string]string) {
 	o.Metadata = &v
 }
 

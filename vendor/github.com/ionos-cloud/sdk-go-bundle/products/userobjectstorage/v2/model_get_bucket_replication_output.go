@@ -15,12 +15,15 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the GetBucketReplicationOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &GetBucketReplicationOutput{}
 
 // GetBucketReplicationOutput struct for GetBucketReplicationOutput
 type GetBucketReplicationOutput struct {
-	ReplicationConfiguration *ReplicationConfiguration `json:"ReplicationConfiguration,omitempty"`
+	XMLName                  xml.Name                  `xml:"GetBucketReplicationOutput"`
+	ReplicationConfiguration *ReplicationConfiguration `json:"ReplicationConfiguration,omitempty" xml:"ReplicationConfiguration"`
 }
 
 // NewGetBucketReplicationOutput instantiates a new GetBucketReplicationOutput object

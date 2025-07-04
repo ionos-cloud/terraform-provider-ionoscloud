@@ -13,24 +13,26 @@ package userobjectstorage
 
 import (
 	"encoding/json"
-
 	"time"
 )
+
+import "encoding/xml"
 
 // checks if the MultipartUpload type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &MultipartUpload{}
 
 // MultipartUpload Container for the `MultipartUpload` for the IONOS Object Storage object.
 type MultipartUpload struct {
+	XMLName xml.Name `xml:"MultipartUpload"`
 	// ID of the multipart upload.
-	UploadId *string `json:"UploadId,omitempty"`
+	UploadId *string `json:"UploadId,omitempty" xml:"UploadId"`
 	// The object key.
-	Key *string `json:"Key,omitempty"`
+	Key *string `json:"Key,omitempty" xml:"Key"`
 	// Date and time at which the multipart upload was initiated.
-	Initiated    *IonosTime    `json:"Initiated,omitempty"`
-	StorageClass *StorageClass `json:"StorageClass,omitempty"`
-	Owner        *Owner        `json:"Owner,omitempty"`
-	Initiator    *Initiator    `json:"Initiator,omitempty"`
+	Initiated    *IonosTime    `json:"Initiated,omitempty" xml:"Initiated"`
+	StorageClass *StorageClass `json:"StorageClass,omitempty" xml:"StorageClass"`
+	Owner        *Owner        `json:"Owner,omitempty" xml:"Owner"`
+	Initiator    *Initiator    `json:"Initiator,omitempty" xml:"Initiator"`
 }
 
 // NewMultipartUpload instantiates a new MultipartUpload object

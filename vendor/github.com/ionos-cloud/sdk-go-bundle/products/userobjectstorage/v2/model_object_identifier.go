@@ -15,15 +15,18 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ObjectIdentifier type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ObjectIdentifier{}
 
 // ObjectIdentifier Object Identifier is unique value to identify objects.
 type ObjectIdentifier struct {
+	XMLName xml.Name `xml:"Object"`
 	// The object key.
-	Key string `json:"Key"`
+	Key string `json:"Key" xml:"Key"`
 	// VersionId for the specific version of the object to delete.
-	VersionId *string `json:"VersionId,omitempty"`
+	VersionId *string `json:"VersionId,omitempty" xml:"VersionId"`
 }
 
 // NewObjectIdentifier instantiates a new ObjectIdentifier object

@@ -15,16 +15,19 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the BucketPolicy type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &BucketPolicy{}
 
 // BucketPolicy struct for BucketPolicy
 type BucketPolicy struct {
+	XMLName xml.Name `xml:"BucketPolicy"`
 	// Specifies an optional identifier for the policy.
-	Id *string `json:"Id,omitempty"`
+	Id *string `json:"Id,omitempty" xml:"Id"`
 	// Policy version
-	Version   *string                 `json:"Version,omitempty"`
-	Statement []BucketPolicyStatement `json:"Statement"`
+	Version   *string                 `json:"Version,omitempty" xml:"Version"`
+	Statement []BucketPolicyStatement `json:"Statement" xml:"Statement"`
 }
 
 // NewBucketPolicy instantiates a new BucketPolicy object

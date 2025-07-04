@@ -1,11 +1,11 @@
-package objectstorage
+package userobjectstorage
 
 import (
 	"encoding/xml"
 	"errors"
 	"log"
 
-	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
+	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 

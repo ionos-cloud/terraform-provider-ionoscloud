@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ExampleCompleteMultipartUpload type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ExampleCompleteMultipartUpload{}
 
 // ExampleCompleteMultipartUpload The container for the completed multipart upload details.
 type ExampleCompleteMultipartUpload struct {
+	XMLName xml.Name `xml:"ExampleCompleteMultipartUpload"`
 	// Array of CompletedPart data types.
-	Parts []CompletedPart `json:"Parts,omitempty"`
+	Parts []CompletedPart `json:"Parts,omitempty" xml:"Parts"`
 }
 
 // NewExampleCompleteMultipartUpload instantiates a new ExampleCompleteMultipartUpload object

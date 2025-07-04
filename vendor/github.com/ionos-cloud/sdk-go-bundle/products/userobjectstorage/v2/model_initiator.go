@@ -15,15 +15,18 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the Initiator type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Initiator{}
 
 // Initiator Container element that identifies who initiated the multipart upload.
 type Initiator struct {
+	XMLName xml.Name `xml:"Initiator"`
 	// Container for the Contract Number of the owner.
-	ID *int32 `json:"ID,omitempty"`
+	ID *string `json:"ID,omitempty" xml:"ID"`
 	// Container for the display name of the owner.
-	DisplayName *string `json:"DisplayName,omitempty"`
+	DisplayName *string `json:"DisplayName,omitempty" xml:"DisplayName"`
 }
 
 // NewInitiator instantiates a new Initiator object
@@ -45,9 +48,9 @@ func NewInitiatorWithDefaults() *Initiator {
 }
 
 // GetID returns the ID field value if set, zero value otherwise.
-func (o *Initiator) GetID() int32 {
+func (o *Initiator) GetID() string {
 	if o == nil || IsNil(o.ID) {
-		var ret int32
+		var ret string
 		return ret
 	}
 	return *o.ID
@@ -55,7 +58,7 @@ func (o *Initiator) GetID() int32 {
 
 // GetIDOk returns a tuple with the ID field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Initiator) GetIDOk() (*int32, bool) {
+func (o *Initiator) GetIDOk() (*string, bool) {
 	if o == nil || IsNil(o.ID) {
 		return nil, false
 	}
@@ -71,8 +74,8 @@ func (o *Initiator) HasID() bool {
 	return false
 }
 
-// SetID gets a reference to the given int32 and assigns it to the ID field.
-func (o *Initiator) SetID(v int32) {
+// SetID gets a reference to the given string and assigns it to the ID field.
+func (o *Initiator) SetID(v string) {
 	o.ID = &v
 }
 

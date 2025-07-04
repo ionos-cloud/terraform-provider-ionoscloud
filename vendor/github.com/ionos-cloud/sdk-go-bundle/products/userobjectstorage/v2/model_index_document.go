@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the IndexDocument type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &IndexDocument{}
 
 // IndexDocument Container for the `Suffix` element.
 type IndexDocument struct {
+	XMLName xml.Name `xml:"IndexDocument"`
 	// A suffix that is appended to a request that is for a directory on the website endpoint (for example, if the suffix is index.html and you make a request to `samplebucket/images/` the data that is returned will be for the object with the key name `images/index.html`) The suffix must not be empty and must not include a slash character. Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests.
-	Suffix string `json:"Suffix"`
+	Suffix string `json:"Suffix" xml:"Suffix"`
 }
 
 // NewIndexDocument instantiates a new IndexDocument object

@@ -15,22 +15,26 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the PutBucketWebsiteRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PutBucketWebsiteRequest{}
 
-// PutBucketWebsiteRequest struct for PutBucketWebsiteRequest
+// PutBucketWebsiteRequest Specifies website configuration parameters for an IONOS Object Storage bucket.
 type PutBucketWebsiteRequest struct {
-	WebsiteConfiguration PutBucketWebsiteRequestWebsiteConfiguration `json:"WebsiteConfiguration"`
+	XMLName               xml.Name               `xml:"WebsiteConfiguration"`
+	ErrorDocument         *ErrorDocument         `json:"ErrorDocument,omitempty" xml:"ErrorDocument"`
+	IndexDocument         *IndexDocument         `json:"IndexDocument,omitempty" xml:"IndexDocument"`
+	RedirectAllRequestsTo *RedirectAllRequestsTo `json:"RedirectAllRequestsTo,omitempty" xml:"RedirectAllRequestsTo"`
+	RoutingRules          []RoutingRule          `json:"RoutingRules,omitempty" xml:"RoutingRules"`
 }
 
 // NewPutBucketWebsiteRequest instantiates a new PutBucketWebsiteRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPutBucketWebsiteRequest(websiteConfiguration PutBucketWebsiteRequestWebsiteConfiguration) *PutBucketWebsiteRequest {
+func NewPutBucketWebsiteRequest() *PutBucketWebsiteRequest {
 	this := PutBucketWebsiteRequest{}
-
-	this.WebsiteConfiguration = websiteConfiguration
 
 	return &this
 }
@@ -43,28 +47,132 @@ func NewPutBucketWebsiteRequestWithDefaults() *PutBucketWebsiteRequest {
 	return &this
 }
 
-// GetWebsiteConfiguration returns the WebsiteConfiguration field value
-func (o *PutBucketWebsiteRequest) GetWebsiteConfiguration() PutBucketWebsiteRequestWebsiteConfiguration {
-	if o == nil {
-		var ret PutBucketWebsiteRequestWebsiteConfiguration
+// GetErrorDocument returns the ErrorDocument field value if set, zero value otherwise.
+func (o *PutBucketWebsiteRequest) GetErrorDocument() ErrorDocument {
+	if o == nil || IsNil(o.ErrorDocument) {
+		var ret ErrorDocument
 		return ret
 	}
-
-	return o.WebsiteConfiguration
+	return *o.ErrorDocument
 }
 
-// GetWebsiteConfigurationOk returns a tuple with the WebsiteConfiguration field value
+// GetErrorDocumentOk returns a tuple with the ErrorDocument field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PutBucketWebsiteRequest) GetWebsiteConfigurationOk() (*PutBucketWebsiteRequestWebsiteConfiguration, bool) {
-	if o == nil {
+func (o *PutBucketWebsiteRequest) GetErrorDocumentOk() (*ErrorDocument, bool) {
+	if o == nil || IsNil(o.ErrorDocument) {
 		return nil, false
 	}
-	return &o.WebsiteConfiguration, true
+	return o.ErrorDocument, true
 }
 
-// SetWebsiteConfiguration sets field value
-func (o *PutBucketWebsiteRequest) SetWebsiteConfiguration(v PutBucketWebsiteRequestWebsiteConfiguration) {
-	o.WebsiteConfiguration = v
+// HasErrorDocument returns a boolean if a field has been set.
+func (o *PutBucketWebsiteRequest) HasErrorDocument() bool {
+	if o != nil && !IsNil(o.ErrorDocument) {
+		return true
+	}
+
+	return false
+}
+
+// SetErrorDocument gets a reference to the given ErrorDocument and assigns it to the ErrorDocument field.
+func (o *PutBucketWebsiteRequest) SetErrorDocument(v ErrorDocument) {
+	o.ErrorDocument = &v
+}
+
+// GetIndexDocument returns the IndexDocument field value if set, zero value otherwise.
+func (o *PutBucketWebsiteRequest) GetIndexDocument() IndexDocument {
+	if o == nil || IsNil(o.IndexDocument) {
+		var ret IndexDocument
+		return ret
+	}
+	return *o.IndexDocument
+}
+
+// GetIndexDocumentOk returns a tuple with the IndexDocument field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *PutBucketWebsiteRequest) GetIndexDocumentOk() (*IndexDocument, bool) {
+	if o == nil || IsNil(o.IndexDocument) {
+		return nil, false
+	}
+	return o.IndexDocument, true
+}
+
+// HasIndexDocument returns a boolean if a field has been set.
+func (o *PutBucketWebsiteRequest) HasIndexDocument() bool {
+	if o != nil && !IsNil(o.IndexDocument) {
+		return true
+	}
+
+	return false
+}
+
+// SetIndexDocument gets a reference to the given IndexDocument and assigns it to the IndexDocument field.
+func (o *PutBucketWebsiteRequest) SetIndexDocument(v IndexDocument) {
+	o.IndexDocument = &v
+}
+
+// GetRedirectAllRequestsTo returns the RedirectAllRequestsTo field value if set, zero value otherwise.
+func (o *PutBucketWebsiteRequest) GetRedirectAllRequestsTo() RedirectAllRequestsTo {
+	if o == nil || IsNil(o.RedirectAllRequestsTo) {
+		var ret RedirectAllRequestsTo
+		return ret
+	}
+	return *o.RedirectAllRequestsTo
+}
+
+// GetRedirectAllRequestsToOk returns a tuple with the RedirectAllRequestsTo field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *PutBucketWebsiteRequest) GetRedirectAllRequestsToOk() (*RedirectAllRequestsTo, bool) {
+	if o == nil || IsNil(o.RedirectAllRequestsTo) {
+		return nil, false
+	}
+	return o.RedirectAllRequestsTo, true
+}
+
+// HasRedirectAllRequestsTo returns a boolean if a field has been set.
+func (o *PutBucketWebsiteRequest) HasRedirectAllRequestsTo() bool {
+	if o != nil && !IsNil(o.RedirectAllRequestsTo) {
+		return true
+	}
+
+	return false
+}
+
+// SetRedirectAllRequestsTo gets a reference to the given RedirectAllRequestsTo and assigns it to the RedirectAllRequestsTo field.
+func (o *PutBucketWebsiteRequest) SetRedirectAllRequestsTo(v RedirectAllRequestsTo) {
+	o.RedirectAllRequestsTo = &v
+}
+
+// GetRoutingRules returns the RoutingRules field value if set, zero value otherwise.
+func (o *PutBucketWebsiteRequest) GetRoutingRules() []RoutingRule {
+	if o == nil || IsNil(o.RoutingRules) {
+		var ret []RoutingRule
+		return ret
+	}
+	return o.RoutingRules
+}
+
+// GetRoutingRulesOk returns a tuple with the RoutingRules field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *PutBucketWebsiteRequest) GetRoutingRulesOk() ([]RoutingRule, bool) {
+	if o == nil || IsNil(o.RoutingRules) {
+		return nil, false
+	}
+	return o.RoutingRules, true
+}
+
+// HasRoutingRules returns a boolean if a field has been set.
+func (o *PutBucketWebsiteRequest) HasRoutingRules() bool {
+	if o != nil && !IsNil(o.RoutingRules) {
+		return true
+	}
+
+	return false
+}
+
+// SetRoutingRules gets a reference to the given []RoutingRule and assigns it to the RoutingRules field.
+func (o *PutBucketWebsiteRequest) SetRoutingRules(v []RoutingRule) {
+	o.RoutingRules = v
 }
 
 func (o PutBucketWebsiteRequest) MarshalJSON() ([]byte, error) {
@@ -77,7 +185,18 @@ func (o PutBucketWebsiteRequest) MarshalJSON() ([]byte, error) {
 
 func (o PutBucketWebsiteRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["WebsiteConfiguration"] = o.WebsiteConfiguration
+	if !IsNil(o.ErrorDocument) {
+		toSerialize["ErrorDocument"] = o.ErrorDocument
+	}
+	if !IsNil(o.IndexDocument) {
+		toSerialize["IndexDocument"] = o.IndexDocument
+	}
+	if !IsNil(o.RedirectAllRequestsTo) {
+		toSerialize["RedirectAllRequestsTo"] = o.RedirectAllRequestsTo
+	}
+	if !IsNil(o.RoutingRules) {
+		toSerialize["RoutingRules"] = o.RoutingRules
+	}
 	return toSerialize, nil
 }
 

@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the OutputSerialization type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &OutputSerialization{}
 
 // OutputSerialization Describes how results of the Select job are serialized.
 type OutputSerialization struct {
-	CSV  *CSVOutput  `json:"CSV,omitempty"`
-	JSON *JSONOutput `json:"JSON,omitempty"`
+	XMLName xml.Name    `xml:"OutputSerialization"`
+	CSV     *CSVOutput  `json:"CSV,omitempty" xml:"CSV"`
+	JSON    *JSONOutput `json:"JSON,omitempty" xml:"JSON"`
 }
 
 // NewOutputSerialization instantiates a new OutputSerialization object

@@ -13,24 +13,26 @@ package userobjectstorage
 
 import (
 	"encoding/json"
-
 	"time"
 )
+
+import "encoding/xml"
 
 // checks if the DeleteMarkerEntry type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &DeleteMarkerEntry{}
 
 // DeleteMarkerEntry Information about the delete marker.
 type DeleteMarkerEntry struct {
-	Owner *Owner `json:"Owner,omitempty"`
+	XMLName xml.Name `xml:"DeleteMarker"`
+	Owner   *Owner   `json:"Owner,omitempty" xml:"Owner"`
 	// The object key.
-	Key *string `json:"Key,omitempty"`
+	Key *string `json:"Key,omitempty" xml:"Key"`
 	// Version ID of the Deletion Marker
-	VersionId *string `json:"VersionId,omitempty"`
+	VersionId *string `json:"VersionId,omitempty" xml:"VersionId"`
 	// Specifies whether the object is (true) or is not (false) the latest version of an object.
-	IsLatest *bool `json:"IsLatest,omitempty"`
+	IsLatest *bool `json:"IsLatest,omitempty" xml:"IsLatest"`
 	// Creation date of the object.
-	LastModified *IonosTime `json:"LastModified,omitempty"`
+	LastModified *IonosTime `json:"LastModified,omitempty" xml:"LastModified"`
 }
 
 // NewDeleteMarkerEntry instantiates a new DeleteMarkerEntry object

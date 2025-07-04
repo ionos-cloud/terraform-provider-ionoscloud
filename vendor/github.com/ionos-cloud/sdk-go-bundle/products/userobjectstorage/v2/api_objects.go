@@ -12,31 +12,27 @@
 package userobjectstorage
 
 import (
-	_context "context"
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"net/http"
+	"net/url"
+	"os"
 	"strings"
 	"time"
-)
-
-// Linger please
-var (
-	_ _context.Context
 )
 
 // ObjectsApiService ObjectsApi service
 type ObjectsApiService service
 
 type ApiCopyObjectRequest struct {
-	ctx                                                 _context.Context
+	ctx                                                 context.Context
 	ApiService                                          *ObjectsApiService
 	bucket                                              string
 	xAmzCopySource                                      *string
 	key                                                 string
-	copyObjectRequest                                   *CopyObjectRequest
 	cacheControl                                        *string
 	contentDisposition                                  *string
 	contentEncoding                                     *string
@@ -62,130 +58,192 @@ type ApiCopyObjectRequest struct {
 	xAmzObjectLockMode                                  *string
 	xAmzObjectLockRetainUntilDate                       *time.Time
 	xAmzObjectLockLegalHold                             *string
+	xAmzMeta                                            *map[string]string
+	copyObjectRequest                                   *CopyObjectRequest
 }
 
+// &lt;p&gt;Specifies the source object for the copy operation.
 func (r ApiCopyObjectRequest) XAmzCopySource(xAmzCopySource string) ApiCopyObjectRequest {
 	r.xAmzCopySource = &xAmzCopySource
 	return r
 }
-func (r ApiCopyObjectRequest) CopyObjectRequest(copyObjectRequest CopyObjectRequest) ApiCopyObjectRequest {
-	r.copyObjectRequest = &copyObjectRequest
-	return r
-}
+
+// Specifies caching behavior along the request/reply chain.
 func (r ApiCopyObjectRequest) CacheControl(cacheControl string) ApiCopyObjectRequest {
 	r.cacheControl = &cacheControl
 	return r
 }
+
+// Specifies presentational information for the object.
 func (r ApiCopyObjectRequest) ContentDisposition(contentDisposition string) ApiCopyObjectRequest {
 	r.contentDisposition = &contentDisposition
 	return r
 }
+
+// Specifies what content encodings have been applied to the object and thus what decoding mechanisms must be applied to obtain the media-type referenced by the Content-Type header field.
 func (r ApiCopyObjectRequest) ContentEncoding(contentEncoding string) ApiCopyObjectRequest {
 	r.contentEncoding = &contentEncoding
 	return r
 }
+
+// The language the content is in.
 func (r ApiCopyObjectRequest) ContentLanguage(contentLanguage string) ApiCopyObjectRequest {
 	r.contentLanguage = &contentLanguage
 	return r
 }
+
+// A standard MIME type describing the format of the object data.
 func (r ApiCopyObjectRequest) ContentType(contentType string) ApiCopyObjectRequest {
 	r.contentType = &contentType
 	return r
 }
+
+// Copies the object if its entity tag (ETag) matches the specified tag.
 func (r ApiCopyObjectRequest) XAmzCopySourceIfMatch(xAmzCopySourceIfMatch string) ApiCopyObjectRequest {
 	r.xAmzCopySourceIfMatch = &xAmzCopySourceIfMatch
 	return r
 }
+
+// Copies the object if it has been modified since the specified time.
 func (r ApiCopyObjectRequest) XAmzCopySourceIfModifiedSince(xAmzCopySourceIfModifiedSince time.Time) ApiCopyObjectRequest {
 	r.xAmzCopySourceIfModifiedSince = &xAmzCopySourceIfModifiedSince
 	return r
 }
+
+// Copies the object if its entity tag (ETag) is different than the specified ETag.
 func (r ApiCopyObjectRequest) XAmzCopySourceIfNoneMatch(xAmzCopySourceIfNoneMatch string) ApiCopyObjectRequest {
 	r.xAmzCopySourceIfNoneMatch = &xAmzCopySourceIfNoneMatch
 	return r
 }
+
+// Copies the object if it hasn&#39;t been modified since the specified time.
 func (r ApiCopyObjectRequest) XAmzCopySourceIfUnmodifiedSince(xAmzCopySourceIfUnmodifiedSince time.Time) ApiCopyObjectRequest {
 	r.xAmzCopySourceIfUnmodifiedSince = &xAmzCopySourceIfUnmodifiedSince
 	return r
 }
+
+// The date and time at which the object is no longer cacheable.
 func (r ApiCopyObjectRequest) Expires(expires time.Time) ApiCopyObjectRequest {
 	r.expires = &expires
 	return r
 }
+
+// Specifies whether the metadata is copied from the source object or replaced with metadata provided in the request.
 func (r ApiCopyObjectRequest) XAmzMetadataDirective(xAmzMetadataDirective string) ApiCopyObjectRequest {
 	r.xAmzMetadataDirective = &xAmzMetadataDirective
 	return r
 }
+
+// Specifies whether the object tag-set are copied from the source object or replaced with tag-set provided in the request.
 func (r ApiCopyObjectRequest) XAmzTaggingDirective(xAmzTaggingDirective string) ApiCopyObjectRequest {
 	r.xAmzTaggingDirective = &xAmzTaggingDirective
 	return r
 }
+
+// The server-side encryption algorithm used when storing this object in IONOS Object Storage (AES256).
 func (r ApiCopyObjectRequest) XAmzServerSideEncryption(xAmzServerSideEncryption string) ApiCopyObjectRequest {
 	r.xAmzServerSideEncryption = &xAmzServerSideEncryption
 	return r
 }
+
+// IONOS Object Storage uses the STANDARD Storage Class to store newly created objects. The STANDARD storage class provides high durability and high availability.
 func (r ApiCopyObjectRequest) XAmzStorageClass(xAmzStorageClass string) ApiCopyObjectRequest {
 	r.xAmzStorageClass = &xAmzStorageClass
 	return r
 }
+
+// If the bucket is configured as a website, redirects requests for this object to another object in the same bucket or to an external URL. IONOS Object Storage stores the value of this header in the object metadata.
 func (r ApiCopyObjectRequest) XAmzWebsiteRedirectLocation(xAmzWebsiteRedirectLocation string) ApiCopyObjectRequest {
 	r.xAmzWebsiteRedirectLocation = &xAmzWebsiteRedirectLocation
 	return r
 }
+
+// Specifies the algorithm to use to when encrypting the object (AES256).
 func (r ApiCopyObjectRequest) XAmzServerSideEncryptionCustomerAlgorithm(xAmzServerSideEncryptionCustomerAlgorithm string) ApiCopyObjectRequest {
 	r.xAmzServerSideEncryptionCustomerAlgorithm = &xAmzServerSideEncryptionCustomerAlgorithm
 	return r
 }
+
+// Specifies the customer-provided encryption key for IONOS Object Storage to use in encrypting data. This value is used to store the object and then it is discarded; IONOS Object Storage does not store the encryption key. The key must be appropriate for use with the algorithm specified in the &#x60;x-amz-server-side-encryption-customer-algorithm&#x60; header.
 func (r ApiCopyObjectRequest) XAmzServerSideEncryptionCustomerKey(xAmzServerSideEncryptionCustomerKey string) ApiCopyObjectRequest {
 	r.xAmzServerSideEncryptionCustomerKey = &xAmzServerSideEncryptionCustomerKey
 	return r
 }
+
+// Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS Object Storage uses this header for a message integrity check to ensure that the encryption key was transmitted without error.
 func (r ApiCopyObjectRequest) XAmzServerSideEncryptionCustomerKeyMD5(xAmzServerSideEncryptionCustomerKeyMD5 string) ApiCopyObjectRequest {
 	r.xAmzServerSideEncryptionCustomerKeyMD5 = &xAmzServerSideEncryptionCustomerKeyMD5
 	return r
 }
+
+// Specifies the algorithm to use when decrypting the source object (AES256).
 func (r ApiCopyObjectRequest) XAmzCopySourceServerSideEncryptionCustomerAlgorithm(xAmzCopySourceServerSideEncryptionCustomerAlgorithm string) ApiCopyObjectRequest {
 	r.xAmzCopySourceServerSideEncryptionCustomerAlgorithm = &xAmzCopySourceServerSideEncryptionCustomerAlgorithm
 	return r
 }
+
+// Specifies the customer-provided encryption key for IONOS Object Storage to use to decrypt the source object. The encryption key provided in this header must be one that was used when the source object was created.
 func (r ApiCopyObjectRequest) XAmzCopySourceServerSideEncryptionCustomerKey(xAmzCopySourceServerSideEncryptionCustomerKey string) ApiCopyObjectRequest {
 	r.xAmzCopySourceServerSideEncryptionCustomerKey = &xAmzCopySourceServerSideEncryptionCustomerKey
 	return r
 }
+
+// Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS Object Storage uses this header for a message integrity check to ensure that the encryption key was transmitted without error.
 func (r ApiCopyObjectRequest) XAmzCopySourceServerSideEncryptionCustomerKeyMD5(xAmzCopySourceServerSideEncryptionCustomerKeyMD5 string) ApiCopyObjectRequest {
 	r.xAmzCopySourceServerSideEncryptionCustomerKeyMD5 = &xAmzCopySourceServerSideEncryptionCustomerKeyMD5
 	return r
 }
+
+// The tag-set for the object destination object this value must be used in conjunction with the &#x60;TaggingDirective&#x60;. The tag-set must be encoded as URL Query parameters.
 func (r ApiCopyObjectRequest) XAmzTagging(xAmzTagging string) ApiCopyObjectRequest {
 	r.xAmzTagging = &xAmzTagging
 	return r
 }
+
+// The Object Lock mode that you want to apply to the copied object.
 func (r ApiCopyObjectRequest) XAmzObjectLockMode(xAmzObjectLockMode string) ApiCopyObjectRequest {
 	r.xAmzObjectLockMode = &xAmzObjectLockMode
 	return r
 }
+
+// The date and time when you want the copied object&#39;s Object Lock to expire.
 func (r ApiCopyObjectRequest) XAmzObjectLockRetainUntilDate(xAmzObjectLockRetainUntilDate time.Time) ApiCopyObjectRequest {
 	r.xAmzObjectLockRetainUntilDate = &xAmzObjectLockRetainUntilDate
 	return r
 }
+
+// Specifies whether you want to apply a Legal Hold to the copied object.
 func (r ApiCopyObjectRequest) XAmzObjectLockLegalHold(xAmzObjectLockLegalHold string) ApiCopyObjectRequest {
 	r.xAmzObjectLockLegalHold = &xAmzObjectLockLegalHold
 	return r
 }
 
-func (r ApiCopyObjectRequest) Execute() (CopyObjectOutput, *shared.APIResponse, error) {
+// A map of metadata to store with the object in S3.
+func (r ApiCopyObjectRequest) XAmzMeta(xAmzMeta map[string]string) ApiCopyObjectRequest {
+	r.xAmzMeta = &xAmzMeta
+	return r
+}
+
+func (r ApiCopyObjectRequest) CopyObjectRequest(copyObjectRequest CopyObjectRequest) ApiCopyObjectRequest {
+	r.copyObjectRequest = &copyObjectRequest
+	return r
+}
+
+func (r ApiCopyObjectRequest) Execute() (*CopyObjectResult, *shared.APIResponse, error) {
 	return r.ApiService.CopyObjectExecute(r)
 }
 
 /*
- * CopyObject CopyObject
- * <p>Creates a copy of an object that is already stored in IONOS Object Storage.</p> <note> <p>You can store individual objects of up to 5 TB in IONOS Object Storage. You create a copy of your object up to 5 GB in size in a single atomic operation using this API. However, to copy an object greater than 5 GB, you must use the multipart upload Upload Part - Copy API. </note> <p>All copy requests must be authenticated. Additionally, you must have <i>read</i> access to the source object and <i>write</i> access to the destination bucket. Both the Region that you want to copy the object from and the Region that you want to copy the object to must be enabled for your account.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @param key The key of the destination object.
- * @return ApiCopyObjectRequest
- */
-func (a *ObjectsApiService) CopyObject(ctx _context.Context, bucket string, key string) ApiCopyObjectRequest {
+CopyObject CopyObject
+
+<p>Creates a copy of an object that is already stored in IONOS Object Storage.</p> <note> <p>You can store individual objects of up to 5 TB in IONOS Object Storage. You create a copy of your object up to 5 GB in size in a single atomic operation using this API. However, to copy an object greater than 5 GB, you must use the multipart upload Upload Part - Copy API. </note> <p>All copy requests must be authenticated. Additionally, you must have <i>read</i> access to the source object and <i>write</i> access to the destination bucket. Both the Region that you want to copy the object from and the Region that you want to copy the object to must be enabled for your account.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key The key of the destination object.
+	@return ApiCopyObjectRequest
+*/
+func (a *ObjectsApiService) CopyObject(ctx context.Context, bucket string, key string) ApiCopyObjectRequest {
 	return ApiCopyObjectRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -194,18 +252,15 @@ func (a *ObjectsApiService) CopyObject(ctx _context.Context, bucket string, key 
 	}
 }
 
-/*
- * Execute executes the request
- * @return CopyObjectOutput
- */
-func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (CopyObjectOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return CopyObjectResult
+func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (*CopyObjectResult, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  CopyObjectOutput
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CopyObjectResult
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.CopyObject")
@@ -216,12 +271,12 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (CopyObjec
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}?x-amz-copy-source"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -233,9 +288,6 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (CopyObjec
 	}
 	if shared.Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
-	}
-	if r.copyObjectRequest == nil {
-		return localVarReturnValue, nil, reportError("copyObjectRequest is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -331,6 +383,9 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (CopyObjec
 	if r.xAmzObjectLockLegalHold != nil {
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-object-lock-legal-hold", r.xAmzObjectLockLegalHold, "")
 	}
+	if r.xAmzMeta != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-meta", r.xAmzMeta, "")
+	}
 	// body params
 	localVarPostBody = r.copyObjectRequest
 	if r.ctx != nil {
@@ -347,13 +402,12 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (CopyObjec
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -361,7 +415,6 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (CopyObjec
 		RequestURL:  localVarPath,
 		Operation:   "CopyObject",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -369,6 +422,7 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (CopyObjec
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -394,7 +448,7 @@ func (a *ObjectsApiService) CopyObjectExecute(r ApiCopyObjectRequest) (CopyObjec
 }
 
 type ApiDeleteObjectRequest struct {
-	ctx                           _context.Context
+	ctx                           context.Context
 	ApiService                    *ObjectsApiService
 	bucket                        string
 	key                           string
@@ -403,14 +457,19 @@ type ApiDeleteObjectRequest struct {
 	xAmzBypassGovernanceRetention *bool
 }
 
+// The concatenation of the authentication device&#39;s serial number, a space, and the value that is displayed on your authentication device. Required to permanently delete a versioned object if versioning is configured with MFA Delete enabled.
 func (r ApiDeleteObjectRequest) XAmzMfa(xAmzMfa string) ApiDeleteObjectRequest {
 	r.xAmzMfa = &xAmzMfa
 	return r
 }
+
+// VersionId used to reference a specific version of the object.
 func (r ApiDeleteObjectRequest) VersionId(versionId string) ApiDeleteObjectRequest {
 	r.versionId = &versionId
 	return r
 }
+
+// Indicates whether S3 Object Lock should bypass Governance-mode restrictions to process this operation. To use this header, you must have the &#x60;PutBucketPublicAccessBlock&#x60; permission.
 func (r ApiDeleteObjectRequest) XAmzBypassGovernanceRetention(xAmzBypassGovernanceRetention bool) ApiDeleteObjectRequest {
 	r.xAmzBypassGovernanceRetention = &xAmzBypassGovernanceRetention
 	return r
@@ -421,14 +480,16 @@ func (r ApiDeleteObjectRequest) Execute() (map[string]interface{}, *shared.APIRe
 }
 
 /*
- * DeleteObject DeleteObject
- * <p> Removes the null version (if there is one) of an object and inserts a delete marker, which becomes the latest version of the object. This operation is final - there is no way to recover a deleted object.  Data stored in IONOS Object Storage is erasure coded and distributed to multiple individual  storage devices in multiple data centers. When data is deleted, various mechanisms exist which prevent  recovery or reconstruction of the deleted objects. </p> <p> Deletion of an object undergoes various stages.  First, the metadata is marked to indicate the object is deleted, then, the data is removed. Eventually,  deleted metadata is overwritten and the deleted data blocks are overwritten  with new data in the course of normal operations. As soon as the metadata is marked deleted, it is not  possible to read an object remotely. </p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @param key Key name of the object to delete.
- * @return ApiDeleteObjectRequest
- */
-func (a *ObjectsApiService) DeleteObject(ctx _context.Context, bucket string, key string) ApiDeleteObjectRequest {
+DeleteObject DeleteObject
+
+<p> Removes the null version (if there is one) of an object and inserts a delete marker, which becomes the latest version of the object. This operation is final - there is no way to recover a deleted object.  Data stored in IONOS Object Storage is erasure coded and distributed to multiple individual  storage devices in multiple data centers. When data is deleted, various mechanisms exist which prevent  recovery or reconstruction of the deleted objects. </p> <p> Deletion of an object undergoes various stages.  First, the metadata is marked to indicate the object is deleted, then, the data is removed. Eventually,  deleted metadata is overwritten and the deleted data blocks are overwritten  with new data in the course of normal operations. As soon as the metadata is marked deleted, it is not  possible to read an object remotely. </p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key Key name of the object to delete.
+	@return ApiDeleteObjectRequest
+*/
+func (a *ObjectsApiService) DeleteObject(ctx context.Context, bucket string, key string) ApiDeleteObjectRequest {
 	return ApiDeleteObjectRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -437,18 +498,15 @@ func (a *ObjectsApiService) DeleteObject(ctx _context.Context, bucket string, ke
 	}
 }
 
-/*
- * Execute executes the request
- * @return map[string]interface{}
- */
+// Execute executes the request
+//
+//	@return map[string]interface{}
 func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[string]interface{}, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodDelete
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.DeleteObject")
@@ -459,12 +517,12 @@ func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[s
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -515,13 +573,12 @@ func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[s
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -529,7 +586,6 @@ func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[s
 		RequestURL:  localVarPath,
 		Operation:   "DeleteObject",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -537,6 +593,7 @@ func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[s
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -562,44 +619,45 @@ func (a *ObjectsApiService) DeleteObjectExecute(r ApiDeleteObjectRequest) (map[s
 }
 
 type ApiDeleteObjectsRequest struct {
-	ctx                           _context.Context
+	ctx                           context.Context
 	ApiService                    *ObjectsApiService
 	bucket                        string
-	delete                        *bool
 	deleteObjectsRequest          *DeleteObjectsRequest
 	xAmzMfa                       *string
 	xAmzBypassGovernanceRetention *bool
 }
 
-func (r ApiDeleteObjectsRequest) Delete(delete bool) ApiDeleteObjectsRequest {
-	r.delete = &delete
-	return r
-}
 func (r ApiDeleteObjectsRequest) DeleteObjectsRequest(deleteObjectsRequest DeleteObjectsRequest) ApiDeleteObjectsRequest {
 	r.deleteObjectsRequest = &deleteObjectsRequest
 	return r
 }
+
+// The concatenation of the authentication device&#39;s serial number, a space, and the value that is displayed on your authentication device. Required to permanently delete a versioned object if versioning is configured with MFA Delete enabled.
 func (r ApiDeleteObjectsRequest) XAmzMfa(xAmzMfa string) ApiDeleteObjectsRequest {
 	r.xAmzMfa = &xAmzMfa
 	return r
 }
+
+// Specifies whether you want to delete this object even if it has a Governance-type Object Lock in place. To use this header, you must have the &#x60;PutBucketPublicAccessBlock&#x60; permission.
 func (r ApiDeleteObjectsRequest) XAmzBypassGovernanceRetention(xAmzBypassGovernanceRetention bool) ApiDeleteObjectsRequest {
 	r.xAmzBypassGovernanceRetention = &xAmzBypassGovernanceRetention
 	return r
 }
 
-func (r ApiDeleteObjectsRequest) Execute() (DeleteObjectsOutput, *shared.APIResponse, error) {
+func (r ApiDeleteObjectsRequest) Execute() (*DeleteObjectsOutput, *shared.APIResponse, error) {
 	return r.ApiService.DeleteObjectsExecute(r)
 }
 
 /*
- * DeleteObjects DeleteObjects
- * <p>This operation enables you to delete multiple objects from a bucket using a single HTTP request. If you know the object keys that you want to delete, then this operation provides a suitable alternative to sending individual delete requests, reducing per-request overhead.</p> <p>The request contains a list of up to 1000 keys that you want to delete. In the XML, you provide the object key names, and optionally, version IDs if you want to delete a specific version of the object from a versioning-enabled bucket. For each key, IONOS Object Storage performs a delete operation and returns the result of that delete, success, or failure, in the response. Note that if the object specified in the request is not found, IONOS Object Storage returns the result as deleted.</p> <p> The operation supports two modes for the response: verbose and quiet. By default, the operation uses verbose mode in which the response includes the result of deletion of each key in your request. In quiet mode the response includes only keys where the delete operation encountered an error. For a successful deletion, the operation does not return any information about the delete in the response body.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @return ApiDeleteObjectsRequest
- */
-func (a *ObjectsApiService) DeleteObjects(ctx _context.Context, bucket string) ApiDeleteObjectsRequest {
+DeleteObjects DeleteObjects
+
+<p>This operation enables you to delete multiple objects from a bucket using a single HTTP request. If you know the object keys that you want to delete, then this operation provides a suitable alternative to sending individual delete requests, reducing per-request overhead.</p> <p>The request contains a list of up to 1000 keys that you want to delete. In the XML, you provide the object key names, and optionally, version IDs if you want to delete a specific version of the object from a versioning-enabled bucket. For each key, IONOS Object Storage performs a delete operation and returns the result of that delete, success, or failure, in the response. Note that if the object specified in the request is not found, IONOS Object Storage returns the result as deleted.</p> <p> The operation supports two modes for the response: verbose and quiet. By default, the operation uses verbose mode in which the response includes the result of deletion of each key in your request. In quiet mode the response includes only keys where the delete operation encountered an error. For a successful deletion, the operation does not return any information about the delete in the response body.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiDeleteObjectsRequest
+*/
+func (a *ObjectsApiService) DeleteObjects(ctx context.Context, bucket string) ApiDeleteObjectsRequest {
 	return ApiDeleteObjectsRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -607,18 +665,15 @@ func (a *ObjectsApiService) DeleteObjects(ctx _context.Context, bucket string) A
 	}
 }
 
-/*
- * Execute executes the request
- * @return DeleteObjectsOutput
- */
-func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (DeleteObjectsOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return DeleteObjectsOutput
+func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (*DeleteObjectsOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPost
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  DeleteObjectsOutput
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DeleteObjectsOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.DeleteObjects")
@@ -629,25 +684,21 @@ func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (Del
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?delete"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.delete == nil {
-		return localVarReturnValue, nil, reportError("delete is required and must be specified")
-	}
 	if r.deleteObjectsRequest == nil {
 		return localVarReturnValue, nil, reportError("deleteObjectsRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "delete", r.delete, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 
@@ -687,13 +738,12 @@ func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (Del
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -701,7 +751,6 @@ func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (Del
 		RequestURL:  localVarPath,
 		Operation:   "DeleteObjects",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -709,6 +758,7 @@ func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (Del
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -734,7 +784,7 @@ func (a *ObjectsApiService) DeleteObjectsExecute(r ApiDeleteObjectsRequest) (Del
 }
 
 type ApiGetObjectRequest struct {
-	ctx                                       _context.Context
+	ctx                                       context.Context
 	ApiService                                *ObjectsApiService
 	bucket                                    string
 	key                                       string
@@ -756,79 +806,110 @@ type ApiGetObjectRequest struct {
 	partNumber                                *int32
 }
 
+// Return the object only if its entity tag (ETag) is the same as the one specified, otherwise return a 412 (precondition failed).
 func (r ApiGetObjectRequest) IfMatch(ifMatch string) ApiGetObjectRequest {
 	r.ifMatch = &ifMatch
 	return r
 }
+
+// Return the object only if it has been modified since the specified time, otherwise return a 304 (not modified).
 func (r ApiGetObjectRequest) IfModifiedSince(ifModifiedSince time.Time) ApiGetObjectRequest {
 	r.ifModifiedSince = &ifModifiedSince
 	return r
 }
+
+// Return the object only if its entity tag (ETag) is different from the one specified, otherwise return a 304 (not modified).
 func (r ApiGetObjectRequest) IfNoneMatch(ifNoneMatch string) ApiGetObjectRequest {
 	r.ifNoneMatch = &ifNoneMatch
 	return r
 }
+
+// Return the object only if it has not been modified since the specified time, otherwise return a 412 (precondition failed).
 func (r ApiGetObjectRequest) IfUnmodifiedSince(ifUnmodifiedSince time.Time) ApiGetObjectRequest {
 	r.ifUnmodifiedSince = &ifUnmodifiedSince
 	return r
 }
+
+// &lt;p&gt;Downloads the specified range bytes of an object. For more information about the HTTP Range header, see &lt;a href&#x3D;\&quot;https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.35\&quot;&gt;Range&lt;/a&gt;.&lt;/p&gt; &lt;note&gt; &lt;p&gt;IONOS Object Storage doesn&#39;t support retrieving multiple ranges of data per &#x60;GET&#x60; request.&lt;/p&gt; &lt;/note&gt;
 func (r ApiGetObjectRequest) Range_(range_ string) ApiGetObjectRequest {
 	r.range_ = &range_
 	return r
 }
+
+// Sets the &#x60;Cache-Control&#x60; header of the response.
 func (r ApiGetObjectRequest) ResponseCacheControl(responseCacheControl string) ApiGetObjectRequest {
 	r.responseCacheControl = &responseCacheControl
 	return r
 }
+
+// Sets the &#x60;Content-Disposition&#x60; header of the response
 func (r ApiGetObjectRequest) ResponseContentDisposition(responseContentDisposition string) ApiGetObjectRequest {
 	r.responseContentDisposition = &responseContentDisposition
 	return r
 }
+
+// Sets the &#x60;Content-Encoding&#x60; header of the response.
 func (r ApiGetObjectRequest) ResponseContentEncoding(responseContentEncoding string) ApiGetObjectRequest {
 	r.responseContentEncoding = &responseContentEncoding
 	return r
 }
+
+// Sets the &#x60;Content-Language&#x60; header of the response.
 func (r ApiGetObjectRequest) ResponseContentLanguage(responseContentLanguage string) ApiGetObjectRequest {
 	r.responseContentLanguage = &responseContentLanguage
 	return r
 }
+
+// Sets the &#x60;Content-Type&#x60; header of the response.
 func (r ApiGetObjectRequest) ResponseContentType(responseContentType string) ApiGetObjectRequest {
 	r.responseContentType = &responseContentType
 	return r
 }
+
+// Sets the &#x60;Expires&#x60; header of the response.
 func (r ApiGetObjectRequest) ResponseExpires(responseExpires time.Time) ApiGetObjectRequest {
 	r.responseExpires = &responseExpires
 	return r
 }
+
+// VersionId used to reference a specific version of the object.
 func (r ApiGetObjectRequest) VersionId(versionId string) ApiGetObjectRequest {
 	r.versionId = &versionId
 	return r
 }
+
+// Specifies the algorithm to use to when decrypting the object (AES256).
 func (r ApiGetObjectRequest) XAmzServerSideEncryptionCustomerAlgorithm(xAmzServerSideEncryptionCustomerAlgorithm string) ApiGetObjectRequest {
 	r.xAmzServerSideEncryptionCustomerAlgorithm = &xAmzServerSideEncryptionCustomerAlgorithm
 	return r
 }
+
+// Specifies the customer-provided encryption key for IONOS Object Storage used to encrypt the data. This value is used to decrypt the object when recovering it and must match the one used when storing the data. The key must be appropriate for use with the algorithm specified in the &#x60;x-amz-server-side-encryption-customer-algorithm&#x60; header.
 func (r ApiGetObjectRequest) XAmzServerSideEncryptionCustomerKey(xAmzServerSideEncryptionCustomerKey string) ApiGetObjectRequest {
 	r.xAmzServerSideEncryptionCustomerKey = &xAmzServerSideEncryptionCustomerKey
 	return r
 }
+
+// Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS Object Storage uses this header for a message integrity check to ensure that the encryption key was transmitted without error.
 func (r ApiGetObjectRequest) XAmzServerSideEncryptionCustomerKeyMD5(xAmzServerSideEncryptionCustomerKeyMD5 string) ApiGetObjectRequest {
 	r.xAmzServerSideEncryptionCustomerKeyMD5 = &xAmzServerSideEncryptionCustomerKeyMD5
 	return r
 }
+
+// Part number of the object being read. This is a positive integer between 1 and 10,000. Effectively performs a &#39;ranged&#39; GET request for the part specified. Useful for downloading just a part of an object.
 func (r ApiGetObjectRequest) PartNumber(partNumber int32) ApiGetObjectRequest {
 	r.partNumber = &partNumber
 	return r
 }
 
-func (r ApiGetObjectRequest) Execute() (GetObjectOutput, *shared.APIResponse, error) {
+func (r ApiGetObjectRequest) Execute() (*os.File, *shared.APIResponse, error) {
 	return r.ApiService.GetObjectExecute(r)
 }
 
 /*
-  - GetObject GetObject
-  - Retrieves objects from IONOS Object Storage.
+GetObject GetObject
 
+Retrieves objects from IONOS Object Storage.
 An IONOS Object Storage bucket has no directory hierarchy such as you would find in a typical computer
 file system. You can, however, create a logical hierarchy by using object key names that imply a folder structure.
 For example, instead of naming an object `test.jpg`, you can name it `photos/2022/July/test.jpg`.
@@ -921,12 +1002,12 @@ For more information about conditional requests, see [RFC 7232](https://tools.ie
 #### S3 API Compatibility
 - The `x-amz-expected-bucket-owner` header isn't supported.
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @param key <p> Key of the object to get. </p> <p> <b> Possible values:</b> length ≥ 1 </p>
-  - @return ApiGetObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key <p> Key of the object to get. </p> <p> <b> Possible values:</b> length ≥ 1 </p>
+	@return ApiGetObjectRequest
 */
-func (a *ObjectsApiService) GetObject(ctx _context.Context, bucket string, key string) ApiGetObjectRequest {
+func (a *ObjectsApiService) GetObject(ctx context.Context, bucket string, key string) ApiGetObjectRequest {
 	return ApiGetObjectRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -935,18 +1016,15 @@ func (a *ObjectsApiService) GetObject(ctx _context.Context, bucket string, key s
 	}
 }
 
-/*
- * Execute executes the request
- * @return GetObjectOutput
- */
-func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (GetObjectOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return *os.File
+func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (*os.File, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  GetObjectOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *os.File
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.GetObject")
@@ -957,12 +1035,12 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (GetObjectOu
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -1052,13 +1130,12 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (GetObjectOu
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -1066,7 +1143,6 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (GetObjectOu
 		RequestURL:  localVarPath,
 		Operation:   "GetObject",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1074,6 +1150,7 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (GetObjectOu
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1091,6 +1168,7 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (GetObjectOu
 				return localVarReturnValue, localVarAPIResponse, newErr
 			}
 			newErr.SetModel(v)
+			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 412 {
 			var v Error
@@ -1100,6 +1178,7 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (GetObjectOu
 				return localVarReturnValue, localVarAPIResponse, newErr
 			}
 			newErr.SetModel(v)
+			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 481 {
 			var v Error
@@ -1126,7 +1205,7 @@ func (a *ObjectsApiService) GetObjectExecute(r ApiGetObjectRequest) (GetObjectOu
 }
 
 type ApiHeadObjectRequest struct {
-	ctx                                       _context.Context
+	ctx                                       context.Context
 	ApiService                                *ObjectsApiService
 	bucket                                    string
 	key                                       string
@@ -1142,60 +1221,81 @@ type ApiHeadObjectRequest struct {
 	partNumber                                *int32
 }
 
+// Return the object only if its entity tag (ETag) is the same as the one specified, otherwise return a 412 (precondition failed).
 func (r ApiHeadObjectRequest) IfMatch(ifMatch string) ApiHeadObjectRequest {
 	r.ifMatch = &ifMatch
 	return r
 }
+
+// Return the object only if it has been modified since the specified time, otherwise return a 304 (not modified).
 func (r ApiHeadObjectRequest) IfModifiedSince(ifModifiedSince time.Time) ApiHeadObjectRequest {
 	r.ifModifiedSince = &ifModifiedSince
 	return r
 }
+
+// Return the object only if its entity tag (ETag) is different from the one specified, otherwise return a 304 (not modified).
 func (r ApiHeadObjectRequest) IfNoneMatch(ifNoneMatch string) ApiHeadObjectRequest {
 	r.ifNoneMatch = &ifNoneMatch
 	return r
 }
+
+// Return the object only if it has not been modified since the specified time, otherwise return a 412 (precondition failed).
 func (r ApiHeadObjectRequest) IfUnmodifiedSince(ifUnmodifiedSince time.Time) ApiHeadObjectRequest {
 	r.ifUnmodifiedSince = &ifUnmodifiedSince
 	return r
 }
+
+// &lt;p&gt;Downloads the specified range bytes of an object. For more information about the HTTP Range header, see &lt;a href&#x3D;\&quot;https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.35\&quot;&gt;Range&lt;/a&gt;.&lt;/p&gt; &lt;note&gt; &lt;p&gt;IONOS Object Storage doesn&#39;t support retrieving multiple ranges of data per &#x60;GET&#x60; request.&lt;/p&gt; &lt;/note&gt;
 func (r ApiHeadObjectRequest) Range_(range_ string) ApiHeadObjectRequest {
 	r.range_ = &range_
 	return r
 }
+
+// VersionId used to reference a specific version of the object.
 func (r ApiHeadObjectRequest) VersionId(versionId string) ApiHeadObjectRequest {
 	r.versionId = &versionId
 	return r
 }
+
+// Specifies the algorithm to use to when encrypting the object (AES256).
 func (r ApiHeadObjectRequest) XAmzServerSideEncryptionCustomerAlgorithm(xAmzServerSideEncryptionCustomerAlgorithm string) ApiHeadObjectRequest {
 	r.xAmzServerSideEncryptionCustomerAlgorithm = &xAmzServerSideEncryptionCustomerAlgorithm
 	return r
 }
+
+// Specifies the customer-provided encryption key for IONOS Object Storage to use in encrypting data. This value is used to store the object and then it is discarded; IONOS Object Storage does not store the encryption key. The key must be appropriate for use with the algorithm specified in the &#x60;x-amz-server-side-encryption-customer-algorithm&#x60; header.
 func (r ApiHeadObjectRequest) XAmzServerSideEncryptionCustomerKey(xAmzServerSideEncryptionCustomerKey string) ApiHeadObjectRequest {
 	r.xAmzServerSideEncryptionCustomerKey = &xAmzServerSideEncryptionCustomerKey
 	return r
 }
+
+// Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS Object Storage uses this header for a message integrity check to ensure that the encryption key was transmitted without error.
 func (r ApiHeadObjectRequest) XAmzServerSideEncryptionCustomerKeyMD5(xAmzServerSideEncryptionCustomerKeyMD5 string) ApiHeadObjectRequest {
 	r.xAmzServerSideEncryptionCustomerKeyMD5 = &xAmzServerSideEncryptionCustomerKeyMD5
 	return r
 }
+
+// Part number of the object being read. This is a positive integer between 1 and 10,000. Effectively performs a &#39;ranged&#39; HEAD request for the part specified. Useful querying about the size of the part and the number of parts in this object.
 func (r ApiHeadObjectRequest) PartNumber(partNumber int32) ApiHeadObjectRequest {
 	r.partNumber = &partNumber
 	return r
 }
 
-func (r ApiHeadObjectRequest) Execute() (HeadObjectOutput, *shared.APIResponse, error) {
+func (r ApiHeadObjectRequest) Execute() (*HeadObjectOutput, *shared.APIResponse, error) {
 	return r.ApiService.HeadObjectExecute(r)
 }
 
 /*
- * HeadObject HeadObject
- * <p>The HEAD operation retrieves metadata from an object without returning the object itself. This operation is useful if you're only interested in an object's metadata. To use HEAD, you must have READ access to the object.</p> <p>A `HEAD` request has the same options as a `GET` operation on an object. The response is identical to the `GET` response except that there is no response body. Because of this, if the `HEAD` request generates an error, it returns a generic `404 Not Found` or `403 Forbidden` code. It is not possible to retrieve the exact exception beyond these error codes.</p> <p>If you encrypt an object by using server-side encryption with customer-provided encryption keys (SSE-C) when you store the object in IONOS Object Storage, then when you retrieve the metadata from the object, you must use the following headers:</p> <ul> <li> <p>`x-amz-server-side-encryption-customer-algorithm` = `AES256`</p> </li> <li> <p>`x-amz-server-side-encryption-customer-key`</p> </li> <li> <p>`x-amz-server-side-encryption-customer-key-MD5`</p> </li> </ul> <note> <ul> <li> <p>Encryption request headers, like `x-amz-server-side-encryption`, should not be sent for GET requests if your object uses the server-side encryption with IONOS Object Storage–managed encryption keys (SSE-S3). If your object does use this type of keys, you’ll get an HTTP 400 BadRequest error.</p> </li> <li> <p> The last modified property in this case is the creation date of the object.</p> </li> </ul> </note> <p>Request headers are limited to 8 KB in size.</p> <p>Consider the following when using request headers:</p> <ul> <li> <p> Consideration 1 – If both of the `If-Match` and `If-Unmodified-Since` headers are present in the request as follows:</p> <ul> <li> <p> `If-Match` condition evaluates to `true`, and;</p> </li> <li> <p> `If-Unmodified-Since` condition evaluates to `false`;</p> </li> </ul> <p>Then IONOS Object Storage returns `200 OK` and the data requested.</p> </li> <li> <p> Consideration 2 – If both of the `If-None-Match` and `If-Modified-Since` headers are present in the request as follows:</p> <ul> <li> <p> `If-None-Match` condition evaluates to `false`, and;</p> </li> <li> <p> `If-Modified-Since` condition evaluates to `true`;</p> </li> </ul> <p>Then IONOS Object Storage returns the `304 Not Modified` response code.</p> </li> </ul> <p>For more information about conditional requests, see <a href="https://tools.ietf.org/html/rfc7232">RFC 7232</a>.</p> <p> <b>Permissions</b> </p> <p>You need the relevant read object (or version) permission for this operation. If the object you request does not exist, the error IONOS Object Storage returns depends on whether you also have the ListBucket permission.</p> <ul> <li> <p>If you have the `ListBucket` permission on the bucket, IONOS Object Storage returns an HTTP status code 404 ("no such key") error.</p> </li> <li> <p>If you don’t have the `ListBucket` permission, IONOS Object Storage returns an HTTP status code 403 ("access denied") error.</p> </li> </ul>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @param key The object key.
- * @return ApiHeadObjectRequest
- */
-func (a *ObjectsApiService) HeadObject(ctx _context.Context, bucket string, key string) ApiHeadObjectRequest {
+HeadObject HeadObject
+
+<p>The HEAD operation retrieves metadata from an object without returning the object itself. This operation is useful if you're only interested in an object's metadata. To use HEAD, you must have READ access to the object.</p> <p>A `HEAD` request has the same options as a `GET` operation on an object. The response is identical to the `GET` response except that there is no response body. Because of this, if the `HEAD` request generates an error, it returns a generic `404 Not Found` or `403 Forbidden` code. It is not possible to retrieve the exact exception beyond these error codes.</p> <p>If you encrypt an object by using server-side encryption with customer-provided encryption keys (SSE-C) when you store the object in IONOS Object Storage, then when you retrieve the metadata from the object, you must use the following headers:</p> <ul> <li> <p>`x-amz-server-side-encryption-customer-algorithm` = `AES256`</p> </li> <li> <p>`x-amz-server-side-encryption-customer-key`</p> </li> <li> <p>`x-amz-server-side-encryption-customer-key-MD5`</p> </li> </ul> <note> <ul> <li> <p>Encryption request headers, like `x-amz-server-side-encryption`, should not be sent for GET requests if your object uses the server-side encryption with IONOS Object Storage–managed encryption keys (SSE-S3). If your object does use this type of keys, you’ll get an HTTP 400 BadRequest error.</p> </li> <li> <p> The last modified property in this case is the creation date of the object.</p> </li> </ul> </note> <p>Request headers are limited to 8 KB in size.</p> <p>Consider the following when using request headers:</p> <ul> <li> <p> Consideration 1 – If both of the `If-Match` and `If-Unmodified-Since` headers are present in the request as follows:</p> <ul> <li> <p> `If-Match` condition evaluates to `true`, and;</p> </li> <li> <p> `If-Unmodified-Since` condition evaluates to `false`;</p> </li> </ul> <p>Then IONOS Object Storage returns `200 OK` and the data requested.</p> </li> <li> <p> Consideration 2 – If both of the `If-None-Match` and `If-Modified-Since` headers are present in the request as follows:</p> <ul> <li> <p> `If-None-Match` condition evaluates to `false`, and;</p> </li> <li> <p> `If-Modified-Since` condition evaluates to `true`;</p> </li> </ul> <p>Then IONOS Object Storage returns the `304 Not Modified` response code.</p> </li> </ul> <p>For more information about conditional requests, see <a href="https://tools.ietf.org/html/rfc7232">RFC 7232</a>.</p> <p> <b>Permissions</b> </p> <p>You need the relevant read object (or version) permission for this operation. If the object you request does not exist, the error IONOS Object Storage returns depends on whether you also have the ListBucket permission.</p> <ul> <li> <p>If you have the `ListBucket` permission on the bucket, IONOS Object Storage returns an HTTP status code 404 ("no such key") error.</p> </li> <li> <p>If you don’t have the `ListBucket` permission, IONOS Object Storage returns an HTTP status code 403 ("access denied") error.</p> </li> </ul>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key The object key.
+	@return ApiHeadObjectRequest
+*/
+func (a *ObjectsApiService) HeadObject(ctx context.Context, bucket string, key string) ApiHeadObjectRequest {
 	return ApiHeadObjectRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -1204,18 +1304,15 @@ func (a *ObjectsApiService) HeadObject(ctx _context.Context, bucket string, key 
 	}
 }
 
-/*
- * Execute executes the request
- * @return HeadObjectOutput
- */
-func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (HeadObjectOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return HeadObjectOutput
+func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (*HeadObjectOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodHead
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  HeadObjectOutput
+		localVarHTTPMethod  = http.MethodHead
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *HeadObjectOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.HeadObject")
@@ -1226,12 +1323,12 @@ func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (HeadObjec
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -1303,13 +1400,12 @@ func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (HeadObjec
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -1317,7 +1413,6 @@ func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (HeadObjec
 		RequestURL:  localVarPath,
 		Operation:   "HeadObject",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1325,6 +1420,7 @@ func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (HeadObjec
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1359,7 +1455,7 @@ func (a *ObjectsApiService) HeadObjectExecute(r ApiHeadObjectRequest) (HeadObjec
 }
 
 type ApiListObjectsRequest struct {
-	ctx              _context.Context
+	ctx              context.Context
 	ApiService       *ObjectsApiService
 	bucket           string
 	delimiter        *string
@@ -1372,47 +1468,61 @@ type ApiListObjectsRequest struct {
 	marker2          *string
 }
 
+// A delimiter is a character you use to group keys.
 func (r ApiListObjectsRequest) Delimiter(delimiter string) ApiListObjectsRequest {
 	r.delimiter = &delimiter
 	return r
 }
+
 func (r ApiListObjectsRequest) EncodingType(encodingType string) ApiListObjectsRequest {
 	r.encodingType = &encodingType
 	return r
 }
+
+// Marker is where you want IONOS Object Storage to start listing from. IONOS Object Storage starts listing after this specified key. Marker can be any key in the bucket.
 func (r ApiListObjectsRequest) Marker(marker string) ApiListObjectsRequest {
 	r.marker = &marker
 	return r
 }
+
+// Sets the maximum number of keys returned in the response. By default the operation returns up to 1,000 key names. The response might contain fewer keys but will never contain more.
 func (r ApiListObjectsRequest) MaxKeys(maxKeys int32) ApiListObjectsRequest {
 	r.maxKeys = &maxKeys
 	return r
 }
+
+// Limits the response to keys that begin with the specified prefix.
 func (r ApiListObjectsRequest) Prefix(prefix string) ApiListObjectsRequest {
 	r.prefix = &prefix
 	return r
 }
+
+// Confirms that the requester knows that she or he will be charged for the list objects request. Bucket owners need not specify this parameter in their requests.
 func (r ApiListObjectsRequest) XAmzRequestPayer(xAmzRequestPayer string) ApiListObjectsRequest {
 	r.xAmzRequestPayer = &xAmzRequestPayer
 	return r
 }
+
+// Pagination limit
 func (r ApiListObjectsRequest) MaxKeys2(maxKeys2 string) ApiListObjectsRequest {
 	r.maxKeys2 = &maxKeys2
 	return r
 }
+
+// Pagination token
 func (r ApiListObjectsRequest) Marker2(marker2 string) ApiListObjectsRequest {
 	r.marker2 = &marker2
 	return r
 }
 
-func (r ApiListObjectsRequest) Execute() (ListObjectsOutput, *shared.APIResponse, error) {
+func (r ApiListObjectsRequest) Execute() (*ListObjectsOutput, *shared.APIResponse, error) {
 	return r.ApiService.ListObjectsExecute(r)
 }
 
 /*
-  - ListObjects ListObjects
-  - <p>Returns some or all (up to 1,000) of the objects in a bucket. You can
+ListObjects ListObjects
 
+<p>Returns some or all (up to 1,000) of the objects in a bucket. You can
 use the request parameters as selection criteria to return a subset of
 the objects in a bucket. A 200 OK response can contain valid or invalid
 XML. Be sure to design your application to parse the contents of the
@@ -1425,11 +1535,11 @@ to perform the `s3:ListBucket` operation using [Bucket Policy](#tag/Policy/opera
 #### S3 API Compatibility
 - The `x-amz-expected-bucket-owner` header isn't supported.
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiListObjectsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiListObjectsRequest
 */
-func (a *ObjectsApiService) ListObjects(ctx _context.Context, bucket string) ApiListObjectsRequest {
+func (a *ObjectsApiService) ListObjects(ctx context.Context, bucket string) ApiListObjectsRequest {
 	return ApiListObjectsRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -1437,18 +1547,15 @@ func (a *ObjectsApiService) ListObjects(ctx _context.Context, bucket string) Api
 	}
 }
 
-/*
- * Execute executes the request
- * @return ListObjectsOutput
- */
-func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (ListObjectsOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return ListObjectsOutput
+func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (*ListObjectsOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  ListObjectsOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ListObjectsOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.ListObjects")
@@ -1459,11 +1566,11 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (ListObj
 	}
 
 	localVarPath := localBasePath + "/{Bucket}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -1526,13 +1633,12 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (ListObj
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -1540,7 +1646,6 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (ListObj
 		RequestURL:  localVarPath,
 		Operation:   "ListObjects",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1548,6 +1653,7 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (ListObj
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1565,6 +1671,7 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (ListObj
 				return localVarReturnValue, localVarAPIResponse, newErr
 			}
 			newErr.SetModel(v)
+			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
@@ -1591,10 +1698,9 @@ func (a *ObjectsApiService) ListObjectsExecute(r ApiListObjectsRequest) (ListObj
 }
 
 type ApiListObjectsV2Request struct {
-	ctx               _context.Context
+	ctx               context.Context
 	ApiService        *ObjectsApiService
 	bucket            string
-	listType          *int32
 	delimiter         *string
 	encodingType      *string
 	maxKeys           *int32
@@ -1604,47 +1710,56 @@ type ApiListObjectsV2Request struct {
 	startAfter        *string
 }
 
-func (r ApiListObjectsV2Request) ListType(listType int32) ApiListObjectsV2Request {
-	r.listType = &listType
-	return r
-}
+// A delimiter is a character you use to group keys.
 func (r ApiListObjectsV2Request) Delimiter(delimiter string) ApiListObjectsV2Request {
 	r.delimiter = &delimiter
 	return r
 }
+
+// Encoding type used by IONOS Object Storage to encode object keys in the response.
 func (r ApiListObjectsV2Request) EncodingType(encodingType string) ApiListObjectsV2Request {
 	r.encodingType = &encodingType
 	return r
 }
+
+// Sets the maximum number of keys returned in the response. By default the operation returns up to 1000 key names. The response might contain fewer keys but will never contain more.
 func (r ApiListObjectsV2Request) MaxKeys(maxKeys int32) ApiListObjectsV2Request {
 	r.maxKeys = &maxKeys
 	return r
 }
+
+// Limits the response to keys that begin with the specified prefix.
 func (r ApiListObjectsV2Request) Prefix(prefix string) ApiListObjectsV2Request {
 	r.prefix = &prefix
 	return r
 }
+
+// ContinuationToken indicates IONOS Object Storage that the list is being continued on this bucket with a token. ContinuationToken is obfuscated and is not a real key.
 func (r ApiListObjectsV2Request) ContinuationToken(continuationToken string) ApiListObjectsV2Request {
 	r.continuationToken = &continuationToken
 	return r
 }
+
+// The owner field is not present in listV2 by default, if you want to return owner field with each key in the result then set the fetch owner field to true.
 func (r ApiListObjectsV2Request) FetchOwner(fetchOwner bool) ApiListObjectsV2Request {
 	r.fetchOwner = &fetchOwner
 	return r
 }
+
+// StartAfter is where you want to start listing from. IONOS Object Storage starts listing after this specified key. StartAfter can be any key in the bucket.
 func (r ApiListObjectsV2Request) StartAfter(startAfter string) ApiListObjectsV2Request {
 	r.startAfter = &startAfter
 	return r
 }
 
-func (r ApiListObjectsV2Request) Execute() (ListObjectsV2Output, *shared.APIResponse, error) {
+func (r ApiListObjectsV2Request) Execute() (*ListBucketResultV2, *shared.APIResponse, error) {
 	return r.ApiService.ListObjectsV2Execute(r)
 }
 
 /*
-  - ListObjectsV2 ListObjectsV2
-  - Retrieves a partial or complete list (with a maximum of 1000 objects per request) from a specified bucket.
+ListObjectsV2 ListObjectsV2
 
+Retrieves a partial or complete list (with a maximum of 1000 objects per request) from a specified bucket.
 The request parameters can serve as selection criteria to filter and return a subset of objects from the bucket.
 
 A `200 OK` response can contain either valid or invalid XML, so it's crucial to construct your application
@@ -1655,11 +1770,11 @@ are organized in ascending order according to their key names.
 You must be the contract owner or an administrator to perform this operation. If not, they can grant you permission
 to perform the `s3:ListBucket` operation using [Bucket Policy](#tag/Policy/operation/PutBucketPolicy).
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiListObjectsV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiListObjectsV2Request
 */
-func (a *ObjectsApiService) ListObjectsV2(ctx _context.Context, bucket string) ApiListObjectsV2Request {
+func (a *ObjectsApiService) ListObjectsV2(ctx context.Context, bucket string) ApiListObjectsV2Request {
 	return ApiListObjectsV2Request{
 		ApiService: a,
 		ctx:        ctx,
@@ -1667,18 +1782,15 @@ func (a *ObjectsApiService) ListObjectsV2(ctx _context.Context, bucket string) A
 	}
 }
 
-/*
- * Execute executes the request
- * @return ListObjectsV2Output
- */
-func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (ListObjectsV2Output, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return ListBucketResultV2
+func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (*ListBucketResultV2, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  ListObjectsV2Output
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ListBucketResultV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.ListObjectsV2")
@@ -1689,22 +1801,18 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (Lis
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?list-type=2"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.listType == nil {
-		return localVarReturnValue, nil, reportError("listType is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "list-type", r.listType, "")
 	if r.delimiter != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "delimiter", r.delimiter, "")
 	}
@@ -1713,6 +1821,9 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (Lis
 	}
 	if r.maxKeys != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "max-keys", r.maxKeys, "")
+	} else {
+		var defaultValue int32 = 1000
+		r.maxKeys = &defaultValue
 	}
 	if r.prefix != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "prefix", r.prefix, "")
@@ -1722,6 +1833,9 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (Lis
 	}
 	if r.fetchOwner != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "fetch-owner", r.fetchOwner, "")
+	} else {
+		var defaultValue bool = false
+		r.fetchOwner = &defaultValue
 	}
 	if r.startAfter != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "start-after", r.startAfter, "")
@@ -1757,13 +1871,12 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (Lis
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -1771,7 +1884,6 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (Lis
 		RequestURL:  localVarPath,
 		Operation:   "ListObjectsV2",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1779,6 +1891,7 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (Lis
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -1796,6 +1909,7 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (Lis
 				return localVarReturnValue, localVarAPIResponse, newErr
 			}
 			newErr.SetModel(v)
+			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
@@ -1822,7 +1936,7 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (Lis
 }
 
 type ApiOPTIONSObjectRequest struct {
-	ctx                         _context.Context
+	ctx                         context.Context
 	ApiService                  *ObjectsApiService
 	bucket                      string
 	origin                      *string
@@ -1830,14 +1944,19 @@ type ApiOPTIONSObjectRequest struct {
 	accessControlRequestHeaders *string
 }
 
+// &lt;p&gt;Identifies the origin of the cross-origin request to the IONOS Object Storage. &lt;/p&gt;
 func (r ApiOPTIONSObjectRequest) Origin(origin string) ApiOPTIONSObjectRequest {
 	r.origin = &origin
 	return r
 }
+
+// Identifies what HTTP method will be used in the actual request.
 func (r ApiOPTIONSObjectRequest) AccessControlRequestMethod(accessControlRequestMethod string) ApiOPTIONSObjectRequest {
 	r.accessControlRequestMethod = &accessControlRequestMethod
 	return r
 }
+
+// &lt;p&gt; A comma-delimited list of HTTP headers that will be sent in the actual request. &lt;/p&gt; &lt;p&gt; For example, to put an object with server-side encryption, this preflight request  will determine if it can include the &#x60;x-amz-server-side-encryption&#x60; header with the request. &lt;/p&gt;
 func (r ApiOPTIONSObjectRequest) AccessControlRequestHeaders(accessControlRequestHeaders string) ApiOPTIONSObjectRequest {
 	r.accessControlRequestHeaders = &accessControlRequestHeaders
 	return r
@@ -1848,13 +1967,15 @@ func (r ApiOPTIONSObjectRequest) Execute() (*shared.APIResponse, error) {
 }
 
 /*
- * OPTIONSObject OPTIONSObject
- * <p>This API is used to issue a  preflight request to the IONOS Object Storage to determine if it can send an  actual request with the specific origin, HTTP method, and headers.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @return ApiOPTIONSObjectRequest
- */
-func (a *ObjectsApiService) OPTIONSObject(ctx _context.Context, bucket string) ApiOPTIONSObjectRequest {
+OPTIONSObject OPTIONSObject
+
+<p>This API is used to issue a  preflight request to the IONOS Object Storage to determine if it can send an  actual request with the specific origin, HTTP method, and headers.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiOPTIONSObjectRequest
+*/
+func (a *ObjectsApiService) OPTIONSObject(ctx context.Context, bucket string) ApiOPTIONSObjectRequest {
 	return ApiOPTIONSObjectRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -1862,16 +1983,12 @@ func (a *ObjectsApiService) OPTIONSObject(ctx _context.Context, bucket string) A
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodOptions
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodOptions
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.OPTIONSObject")
@@ -1882,11 +1999,11 @@ func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*sh
 	}
 
 	localVarPath := localBasePath + "/{Bucket}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
@@ -1936,13 +2053,12 @@ func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*sh
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -1950,7 +2066,6 @@ func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*sh
 		RequestURL:  localVarPath,
 		Operation:   "OPTIONSObject",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -1958,6 +2073,7 @@ func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*sh
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}
@@ -1974,11 +2090,11 @@ func (a *ObjectsApiService) OPTIONSObjectExecute(r ApiOPTIONSObjectRequest) (*sh
 }
 
 type ApiPOSTObjectRequest struct {
-	ctx                                       _context.Context
+	ctx                                       context.Context
 	ApiService                                *ObjectsApiService
 	bucket                                    string
 	key                                       string
-	putObjectRequest                          *PutObjectRequest
+	pOSTObjectRequest                         *POSTObjectRequest
 	cacheControl                              *string
 	contentDisposition                        *string
 	contentEncoding                           *string
@@ -2002,90 +2118,130 @@ type ApiPOSTObjectRequest struct {
 	xAmzObjectLockLegalHold                   *string
 }
 
-func (r ApiPOSTObjectRequest) PutObjectRequest(putObjectRequest PutObjectRequest) ApiPOSTObjectRequest {
-	r.putObjectRequest = &putObjectRequest
+func (r ApiPOSTObjectRequest) POSTObjectRequest(pOSTObjectRequest POSTObjectRequest) ApiPOSTObjectRequest {
+	r.pOSTObjectRequest = &pOSTObjectRequest
 	return r
 }
+
+// Can be used to specify caching behavior along the request/reply chain. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9\&quot;&gt;Cache-Control&lt;/a&gt;.
 func (r ApiPOSTObjectRequest) CacheControl(cacheControl string) ApiPOSTObjectRequest {
 	r.cacheControl = &cacheControl
 	return r
 }
+
+// Specifies presentational information for the object. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html#sec19.5.1\&quot;&gt;Content-Disposition&lt;/a&gt;.
 func (r ApiPOSTObjectRequest) ContentDisposition(contentDisposition string) ApiPOSTObjectRequest {
 	r.contentDisposition = &contentDisposition
 	return r
 }
+
+// Specifies what content encodings have been applied to the object and thus what decoding mechanisms must be applied to obtain the media-type referenced by the Content-Type header field. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11\&quot;&gt;Content-Encoding&lt;/a&gt;.
 func (r ApiPOSTObjectRequest) ContentEncoding(contentEncoding string) ApiPOSTObjectRequest {
 	r.contentEncoding = &contentEncoding
 	return r
 }
+
+// The language the content is in.
 func (r ApiPOSTObjectRequest) ContentLanguage(contentLanguage string) ApiPOSTObjectRequest {
 	r.contentLanguage = &contentLanguage
 	return r
 }
+
+// Size of the body in bytes. This parameter is useful when the size of the body cannot be determined automatically. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.13\&quot;&gt;Content-Length&lt;/a&gt;.
 func (r ApiPOSTObjectRequest) ContentLength(contentLength int32) ApiPOSTObjectRequest {
 	r.contentLength = &contentLength
 	return r
 }
+
 func (r ApiPOSTObjectRequest) ContentMD5(contentMD5 string) ApiPOSTObjectRequest {
 	r.contentMD5 = &contentMD5
 	return r
 }
+
+// A standard MIME type describing the format of the contents. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17\&quot;&gt;Content-Type&lt;/a&gt;.
 func (r ApiPOSTObjectRequest) ContentType(contentType string) ApiPOSTObjectRequest {
 	r.contentType = &contentType
 	return r
 }
+
+// The date and time at which the object is no longer cacheable. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.21\&quot;&gt;Expires&lt;/a&gt;.
 func (r ApiPOSTObjectRequest) Expires(expires time.Time) ApiPOSTObjectRequest {
 	r.expires = &expires
 	return r
 }
+
+// The server-side encryption algorithm used when storing this object in IONOS Object Storage (AES256).
 func (r ApiPOSTObjectRequest) XAmzServerSideEncryption(xAmzServerSideEncryption string) ApiPOSTObjectRequest {
 	r.xAmzServerSideEncryption = &xAmzServerSideEncryption
 	return r
 }
+
+// IONOS Object Storage uses the STANDARD Storage Class to store newly created objects. The STANDARD storage class provides high durability and high availability.
 func (r ApiPOSTObjectRequest) XAmzStorageClass(xAmzStorageClass string) ApiPOSTObjectRequest {
 	r.xAmzStorageClass = &xAmzStorageClass
 	return r
 }
+
+// &lt;p&gt;If the bucket is configured as a website, redirects requests for this object to another object in the same bucket or to an external URL. IONOS Object Storage stores the value of this header in the object metadata.&lt;/p&gt; &lt;p&gt;In the following example, the request header sets the redirect to an object (anotherPage.html) in the same bucket:&lt;/p&gt; &lt;p&gt; &#x60;x-amz-website-redirect-location: /anotherPage.html&#x60; &lt;/p&gt; &lt;p&gt;In the following example, the request header sets the object redirect to another website:&lt;/p&gt; &lt;p&gt; &#x60;x-amz-website-redirect-location: http://www.example.com/&#x60; &lt;/p&gt;
 func (r ApiPOSTObjectRequest) XAmzWebsiteRedirectLocation(xAmzWebsiteRedirectLocation string) ApiPOSTObjectRequest {
 	r.xAmzWebsiteRedirectLocation = &xAmzWebsiteRedirectLocation
 	return r
 }
+
+// Specifies the algorithm to use to when encrypting the object (AES256).
 func (r ApiPOSTObjectRequest) XAmzServerSideEncryptionCustomerAlgorithm(xAmzServerSideEncryptionCustomerAlgorithm string) ApiPOSTObjectRequest {
 	r.xAmzServerSideEncryptionCustomerAlgorithm = &xAmzServerSideEncryptionCustomerAlgorithm
 	return r
 }
+
+// Specifies the customer-provided encryption key for IONOS Object Storage to use in encrypting data. This value is used to store the object and then it is discarded; IONOS Object Storage does not store the encryption key. The key must be appropriate for use with the algorithm specified in the &#x60;x-amz-server-side-encryption-customer-algorithm&#x60; header.
 func (r ApiPOSTObjectRequest) XAmzServerSideEncryptionCustomerKey(xAmzServerSideEncryptionCustomerKey string) ApiPOSTObjectRequest {
 	r.xAmzServerSideEncryptionCustomerKey = &xAmzServerSideEncryptionCustomerKey
 	return r
 }
+
+// Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS Object Storage uses this header for a message integrity check to ensure that the encryption key was transmitted without error.
 func (r ApiPOSTObjectRequest) XAmzServerSideEncryptionCustomerKeyMD5(xAmzServerSideEncryptionCustomerKeyMD5 string) ApiPOSTObjectRequest {
 	r.xAmzServerSideEncryptionCustomerKeyMD5 = &xAmzServerSideEncryptionCustomerKeyMD5
 	return r
 }
+
+// Specifies the IONOS Object Storage Encryption Context to use for object encryption. The value of this header is a base64-encoded UTF-8 string holding JSON with the encryption context key-value pairs.
 func (r ApiPOSTObjectRequest) XAmzServerSideEncryptionContext(xAmzServerSideEncryptionContext string) ApiPOSTObjectRequest {
 	r.xAmzServerSideEncryptionContext = &xAmzServerSideEncryptionContext
 	return r
 }
+
+// &lt;p&gt;Specifies whether IONOS Object Storage should use an S3 Bucket Key for object encryption with server-side encryption. Setting this header to &#x60;true&#x60; causes IONOS Object Storage to use an Object Storage bucket Key for object encryption.&lt;/p&gt; &lt;p&gt;Specifying this header with a PUT operation doesn’t affect bucket-level settings for S3 Bucket Key.&lt;/p&gt;
 func (r ApiPOSTObjectRequest) XAmzServerSideEncryptionBucketKeyEnabled(xAmzServerSideEncryptionBucketKeyEnabled bool) ApiPOSTObjectRequest {
 	r.xAmzServerSideEncryptionBucketKeyEnabled = &xAmzServerSideEncryptionBucketKeyEnabled
 	return r
 }
+
 func (r ApiPOSTObjectRequest) XAmzRequestPayer(xAmzRequestPayer string) ApiPOSTObjectRequest {
 	r.xAmzRequestPayer = &xAmzRequestPayer
 	return r
 }
+
+// The tag-set for the object. The tag-set must be encoded as URL Query parameters. (For example, \&quot;Key1&#x3D;Value1\&quot;)
 func (r ApiPOSTObjectRequest) XAmzTagging(xAmzTagging string) ApiPOSTObjectRequest {
 	r.xAmzTagging = &xAmzTagging
 	return r
 }
+
+// The Object Lock mode that you want to apply to this object.
 func (r ApiPOSTObjectRequest) XAmzObjectLockMode(xAmzObjectLockMode string) ApiPOSTObjectRequest {
 	r.xAmzObjectLockMode = &xAmzObjectLockMode
 	return r
 }
+
+// The date and time when you want this object&#39;s Object Lock to expire. Must be formatted as a timestamp parameter.
 func (r ApiPOSTObjectRequest) XAmzObjectLockRetainUntilDate(xAmzObjectLockRetainUntilDate time.Time) ApiPOSTObjectRequest {
 	r.xAmzObjectLockRetainUntilDate = &xAmzObjectLockRetainUntilDate
 	return r
 }
+
+// Specifies whether a legal hold will be applied to this object.
 func (r ApiPOSTObjectRequest) XAmzObjectLockLegalHold(xAmzObjectLockLegalHold string) ApiPOSTObjectRequest {
 	r.xAmzObjectLockLegalHold = &xAmzObjectLockLegalHold
 	return r
@@ -2096,14 +2252,16 @@ func (r ApiPOSTObjectRequest) Execute() (map[string]interface{}, *shared.APIResp
 }
 
 /*
- * POSTObject POSTObject
- * <p> The POST operation adds an object to a specified bucket using HTML forms. POST is an alternate form  of PUT that enables browser-based uploads of objects into buckets. Parameters passed to PUT via HTTP Headers are instead passed to POST as form fields in the multipart/form-data encoded message body. </p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @param key Key name of the object to post.
- * @return ApiPOSTObjectRequest
- */
-func (a *ObjectsApiService) POSTObject(ctx _context.Context, bucket string, key string) ApiPOSTObjectRequest {
+POSTObject POSTObject
+
+<p> The POST operation adds an object to a specified bucket using HTML forms. POST is an alternate form  of PUT that enables browser-based uploads of objects into buckets. Parameters passed to PUT via HTTP Headers are instead passed to POST as form fields in the multipart/form-data encoded message body. </p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key Key name of the object to post.
+	@return ApiPOSTObjectRequest
+*/
+func (a *ObjectsApiService) POSTObject(ctx context.Context, bucket string, key string) ApiPOSTObjectRequest {
 	return ApiPOSTObjectRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -2112,18 +2270,15 @@ func (a *ObjectsApiService) POSTObject(ctx _context.Context, bucket string, key 
 	}
 }
 
-/*
- * Execute executes the request
- * @return map[string]interface{}
- */
+// Execute executes the request
+//
+//	@return map[string]interface{}
 func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[string]interface{}, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPost
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.POSTObject")
@@ -2134,12 +2289,12 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
@@ -2149,8 +2304,8 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 	if shared.Strlen(r.key) < 1 {
 		return localVarReturnValue, nil, reportError("key must have at least 1 elements")
 	}
-	if r.putObjectRequest == nil {
-		return localVarReturnValue, nil, reportError("putObjectRequest is required and must be specified")
+	if r.pOSTObjectRequest == nil {
+		return localVarReturnValue, nil, reportError("pOSTObjectRequest is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -2234,7 +2389,7 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-object-lock-legal-hold", r.xAmzObjectLockLegalHold, "")
 	}
 	// body params
-	localVarPostBody = r.putObjectRequest
+	localVarPostBody = r.pOSTObjectRequest
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(shared.ContextAPIKeys).(map[string]shared.APIKey); ok {
@@ -2249,13 +2404,12 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -2263,7 +2417,6 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 		RequestURL:  localVarPath,
 		Operation:   "POSTObject",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -2271,6 +2424,7 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -2296,11 +2450,11 @@ func (a *ObjectsApiService) POSTObjectExecute(r ApiPOSTObjectRequest) (map[strin
 }
 
 type ApiPutObjectRequest struct {
-	ctx                                       _context.Context
+	ctx                                       context.Context
 	ApiService                                *ObjectsApiService
 	bucket                                    string
 	key                                       string
-	putObjectRequest                          *PutObjectRequest
+	body                                      *os.File
 	cacheControl                              *string
 	contentDisposition                        *string
 	contentEncoding                           *string
@@ -2321,90 +2475,135 @@ type ApiPutObjectRequest struct {
 	xAmzObjectLockMode                        *string
 	xAmzObjectLockRetainUntilDate             *time.Time
 	xAmzObjectLockLegalHold                   *string
+	xAmzMeta                                  *map[string]string
 }
 
-func (r ApiPutObjectRequest) PutObjectRequest(putObjectRequest PutObjectRequest) ApiPutObjectRequest {
-	r.putObjectRequest = &putObjectRequest
+func (r ApiPutObjectRequest) Body(body *os.File) ApiPutObjectRequest {
+	r.body = body
 	return r
 }
+
+// Can be used to specify caching behavior along the request/reply chain. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9\&quot;&gt;Cache-Control&lt;/a&gt;.
 func (r ApiPutObjectRequest) CacheControl(cacheControl string) ApiPutObjectRequest {
 	r.cacheControl = &cacheControl
 	return r
 }
+
+// Specifies presentational information for the object. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html#sec19.5.1\&quot;&gt;Content-Disposition&lt;/a&gt;.
 func (r ApiPutObjectRequest) ContentDisposition(contentDisposition string) ApiPutObjectRequest {
 	r.contentDisposition = &contentDisposition
 	return r
 }
+
+// Specifies what content encodings have been applied to the object and thus what decoding mechanisms must be applied to obtain the media-type referenced by the Content-Type header field. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11\&quot;&gt;Content-Encoding&lt;/a&gt;.
 func (r ApiPutObjectRequest) ContentEncoding(contentEncoding string) ApiPutObjectRequest {
 	r.contentEncoding = &contentEncoding
 	return r
 }
+
+// The language the content is in.
 func (r ApiPutObjectRequest) ContentLanguage(contentLanguage string) ApiPutObjectRequest {
 	r.contentLanguage = &contentLanguage
 	return r
 }
+
+// Size of the body in bytes. This parameter is useful when the size of the body cannot be determined automatically. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.13\&quot;&gt;Content-Length&lt;/a&gt;.
 func (r ApiPutObjectRequest) ContentLength(contentLength int32) ApiPutObjectRequest {
 	r.contentLength = &contentLength
 	return r
 }
+
 func (r ApiPutObjectRequest) ContentMD5(contentMD5 string) ApiPutObjectRequest {
 	r.contentMD5 = &contentMD5
 	return r
 }
+
+// A standard MIME type describing the format of the contents. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17\&quot;&gt;Content-Type&lt;/a&gt;.
 func (r ApiPutObjectRequest) ContentType(contentType string) ApiPutObjectRequest {
 	r.contentType = &contentType
 	return r
 }
+
+// The date and time at which the object is no longer cacheable. For more information, see &lt;a href&#x3D;\&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.21\&quot;&gt;Expires&lt;/a&gt;.
 func (r ApiPutObjectRequest) Expires(expires time.Time) ApiPutObjectRequest {
 	r.expires = &expires
 	return r
 }
+
+// The server-side encryption algorithm used when storing this object in IONOS Object Storage (AES256).
 func (r ApiPutObjectRequest) XAmzServerSideEncryption(xAmzServerSideEncryption string) ApiPutObjectRequest {
 	r.xAmzServerSideEncryption = &xAmzServerSideEncryption
 	return r
 }
+
+// The valid value is &#x60;STANDARD&#x60;.
 func (r ApiPutObjectRequest) XAmzStorageClass(xAmzStorageClass string) ApiPutObjectRequest {
 	r.xAmzStorageClass = &xAmzStorageClass
 	return r
 }
+
+// &lt;p&gt;If the bucket is configured as a website, redirects requests for this object to another object in the same bucket or to an external URL. IONOS Object Storage stores the value of this header in the object metadata.&lt;/p&gt; &lt;p&gt;In the following example, the request header sets the redirect to an object (anotherPage.html) in the same bucket:&lt;/p&gt; &lt;p&gt; &#x60;x-amz-website-redirect-location: /anotherPage.html&#x60; &lt;/p&gt; &lt;p&gt;In the following example, the request header sets the object redirect to another website:&lt;/p&gt; &lt;p&gt; &#x60;x-amz-website-redirect-location: http://www.example.com/&#x60; &lt;/p&gt;
 func (r ApiPutObjectRequest) XAmzWebsiteRedirectLocation(xAmzWebsiteRedirectLocation string) ApiPutObjectRequest {
 	r.xAmzWebsiteRedirectLocation = &xAmzWebsiteRedirectLocation
 	return r
 }
+
+// Specifies the algorithm to use to when encrypting the object. The valid option is &#x60;AES256&#x60;.
 func (r ApiPutObjectRequest) XAmzServerSideEncryptionCustomerAlgorithm(xAmzServerSideEncryptionCustomerAlgorithm string) ApiPutObjectRequest {
 	r.xAmzServerSideEncryptionCustomerAlgorithm = &xAmzServerSideEncryptionCustomerAlgorithm
 	return r
 }
+
+// Specifies the 256-bit, base64-encoded encryption key to use to encrypt and decrypt your data. For example, &#x60;4ZRNYBCCvL0YZeqo3f2+9qDyIfnLdbg5S99R2XWr0aw&#x3D;&#x60;.
 func (r ApiPutObjectRequest) XAmzServerSideEncryptionCustomerKey(xAmzServerSideEncryptionCustomerKey string) ApiPutObjectRequest {
 	r.xAmzServerSideEncryptionCustomerKey = &xAmzServerSideEncryptionCustomerKey
 	return r
 }
+
+// Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS Object Storage uses this header for a message integrity check to ensure that the encryption key was transmitted without error. For example, &#x60;bPU7G1zD2MlOi5gqnkRqZg&#x3D;&#x3D;&#x60;.
 func (r ApiPutObjectRequest) XAmzServerSideEncryptionCustomerKeyMD5(xAmzServerSideEncryptionCustomerKeyMD5 string) ApiPutObjectRequest {
 	r.xAmzServerSideEncryptionCustomerKeyMD5 = &xAmzServerSideEncryptionCustomerKeyMD5
 	return r
 }
+
+// Specifies the IONOS Object Storage Encryption Context to use for object encryption. The value of this header is a base64-encoded UTF-8 string holding JSON with the encryption context key-value pairs.
 func (r ApiPutObjectRequest) XAmzServerSideEncryptionContext(xAmzServerSideEncryptionContext string) ApiPutObjectRequest {
 	r.xAmzServerSideEncryptionContext = &xAmzServerSideEncryptionContext
 	return r
 }
+
 func (r ApiPutObjectRequest) XAmzRequestPayer(xAmzRequestPayer string) ApiPutObjectRequest {
 	r.xAmzRequestPayer = &xAmzRequestPayer
 	return r
 }
+
+// The tag-set for the object. The tag-set must be encoded as URL Query parameters. (For example, \&quot;Key1&#x3D;Value1\&quot;)
 func (r ApiPutObjectRequest) XAmzTagging(xAmzTagging string) ApiPutObjectRequest {
 	r.xAmzTagging = &xAmzTagging
 	return r
 }
+
+// The Object Lock mode that you want to apply to this object.
 func (r ApiPutObjectRequest) XAmzObjectLockMode(xAmzObjectLockMode string) ApiPutObjectRequest {
 	r.xAmzObjectLockMode = &xAmzObjectLockMode
 	return r
 }
+
+// The date and time when you want this object&#39;s Object Lock to expire. Must be formatted as a timestamp parameter.
 func (r ApiPutObjectRequest) XAmzObjectLockRetainUntilDate(xAmzObjectLockRetainUntilDate time.Time) ApiPutObjectRequest {
 	r.xAmzObjectLockRetainUntilDate = &xAmzObjectLockRetainUntilDate
 	return r
 }
+
+// Specifies whether a legal hold will be applied to this object.
 func (r ApiPutObjectRequest) XAmzObjectLockLegalHold(xAmzObjectLockLegalHold string) ApiPutObjectRequest {
 	r.xAmzObjectLockLegalHold = &xAmzObjectLockLegalHold
+	return r
+}
+
+// A map of metadata to store with the object in S3.
+func (r ApiPutObjectRequest) XAmzMeta(xAmzMeta map[string]string) ApiPutObjectRequest {
+	r.xAmzMeta = &xAmzMeta
 	return r
 }
 
@@ -2413,17 +2612,18 @@ func (r ApiPutObjectRequest) Execute() (*shared.APIResponse, error) {
 }
 
 /*
-  - PutObject PutObject
-  - <p>Adds an object to a bucket. You must have WRITE permissions on a bucket to add an object to it.</p> <p>IONOS Object Storage never adds partial objects; if you receive a success response, IONOS Object Storage added the entire object to the bucket.</p> <p>IONOS Object Storage is a distributed system. If it receives multiple write requests for the same object simultaneously, it overwrites all but the last object written. IONOS Object Storage does not provide object locking; if you need this, make sure to build it into your application layer or use versioning instead.</p> <p>To ensure that data is not corrupted traversing the network, use the `Content-MD5` header. When you use this header, IONOS Object Storage checks the object against the provided MD5 value and, if they do not match, returns an error. Additionally, you can calculate the MD5 while putting an object to IONOS Object Storage and compare the returned ETag to the calculated MD5 value.</p> <note> <ul> <li> <p>To successfully complete the `PutObject` request, you must have the `PutObject` in your permissions.</p> </li> <li> <p>To successfully change the objects acl of your `PutObject` request, you must have the `PutObjectAcl` in your permissions.</p> </li> <li> <p> The `Content-MD5` header is required for any request to upload an object with a retention period configured using IONOS Object Storage Object Lock </i>. </p> </li> </ul> </note> <p><b>Versioning</b></p> <p>If you enable versioning for a bucket, IONOS Object Storage automatically generates a unique version ID for the object being stored. IONOS Object Storage returns this ID in the response. When you enable versioning for a bucket, if IONOS Object Storage receives multiple write requests for the same object simultaneously, it stores all of the objects.</p>
+PutObject PutObject
 
+<p>Adds an object to a bucket. You must have WRITE permissions on a bucket to add an object to it.</p> <p>IONOS Object Storage never adds partial objects; if you receive a success response, IONOS Object Storage added the entire object to the bucket.</p> <p>IONOS Object Storage is a distributed system. If it receives multiple write requests for the same object simultaneously, it overwrites all but the last object written. IONOS Object Storage does not provide object locking; if you need this, make sure to build it into your application layer or use versioning instead.</p> <p>To ensure that data is not corrupted traversing the network, use the `Content-MD5` header. When you use this header, IONOS Object Storage checks the object against the provided MD5 value and, if they do not match, returns an error. Additionally, you can calculate the MD5 while putting an object to IONOS Object Storage and compare the returned ETag to the calculated MD5 value.</p> <note> <ul> <li> <p>To successfully complete the `PutObject` request, you must have the `PutObject` in your permissions.</p> </li> <li> <p>To successfully change the objects acl of your `PutObject` request, you must have the `PutObjectAcl` in your permissions.</p> </li> <li> <p> The `Content-MD5` header is required for any request to upload an object with a retention period configured using IONOS Object Storage Object Lock </i>. </p> </li> </ul> </note> <p><b>Versioning</b></p> <p>If you enable versioning for a bucket, IONOS Object Storage automatically generates a unique version ID for the object being stored. IONOS Object Storage returns this ID in the response. When you enable versioning for a bucket, if IONOS Object Storage receives multiple write requests for the same object simultaneously, it stores all of the objects.</p>
 <p><b>Server-side Encryption with IONOS Object Storage managed keys (SSE-S3)</b></p> <p>You can optionally request server-side encryption. With server-side encryption, IONOS Object Storage encrypts your data as it writes it to disks in its data centers and decrypts the data when you access it.  <ul> <li>the SSE-S3 encryption can be set as the default encryption for the bucket using <a href="#tag/Encryption/operation/PutBucketEncryption">PutBucketEncryption</a>. This way all the newly created objects will be protected with SSE-S3 encryption even it was not specified in the `PutObject` operation.</li> <li>the SSE-S3 encryption can be applied to the object at the time of upload by setting `x-amz-server-side-encryption` header to `AES256`. This can be skipped if the default encryption has been set up for the bucket as described in the previous clause.</li> </ul>
-<p><b>Server-side Encryption with customer managed keys (SSE-C)</b></p>   In order to apply encryption with customer-provided keys (SSE-C) to the uploading object add these headers to the request: <ul> <li>`x-amz-server-side-encryption-customer-algorithm` = `AES256`</li> <li>`x-amz-server-side-encryption-customer-key` &mdash; the 256-bit, base64-encoded encryption key to use to encrypt and decrypt your data. You might use these commands to generate it: <ol><li>to create the file with a key: `openssl rand 32 -out my-key.key`</li><li>to get base64-encoded string: `openssl enc -base64 -in my-key.key`, the example of the output: `4ZRNYBCCvL0YZeqo3f2+9qDyIfnLdbg5S99R2XWr0aw=`.</li></ul></li> <li>`x-amz-server-side-encryption-customer-key-MD5` &mdash; the base64-encoded 128-bit MD5 digest of the encryption key. Generate it with the following command: <br />`echo my-key.key | openssl dgst -md5 -binary | openssl enc -base64`.<br /> The example of the output: `bPU7G1zD2MlOi5gqnkRqZg==`.</li> </ul>  </p> <p><b>NOTE</b>:<br/> <ul> <li>The SSE-C encryption will override the SSE-S3 encryption if the last one was enabled as a default encryption for the bucket.</li> <li>In the response, IONOS Object Storage API returns the encryption algorithm and MD5 of the encryption key that you specified when uploading the object. The ETag that is returned is not the MD5 of the object. </ul>   </p>
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @param key Object key for which the PUT operation was initiated.
-  - @return ApiPutObjectRequest
+<p><b>Server-side Encryption with customer managed keys (SSE-C)</b></p>   In order to apply encryption with customer-provided keys (SSE-C) to the uploading object add these headers to the request: <ul> <li>`x-amz-server-side-encryption-customer-algorithm` = `AES256`</li> <li>`x-amz-server-side-encryption-customer-key` &mdash; the 256-bit, base64-encoded encryption key to use to encrypt and decrypt your data. You might use these commands to generate it: <ol><li>to create the file with a key: `openssl rand 32 -out my-key.key`</li><li>to get base64-encoded string: `openssl enc -base64 -in my-key.key`, the example of the output: `4ZRNYBCCvL0YZeqo3f2+9qDyIfnLdbg5S99R2XWr0aw=`.</li></ul></li> <li>`x-amz-server-side-encryption-customer-key-MD5` &mdash; the base64-encoded 128-bit MD5 digest of the encryption key. Generate it with the following command: <br />`echo my-key.key | openssl dgst -md5 -binary | openssl enc -base64`.<br /> The example of the output: `bPU7G1zD2MlOi5gqnkRqZg==`.</li> </ul>  </p> <p><b>NOTE</b>:<br/> <ul> <li>The SSE-C encryption will override the SSE-S3 encryption if the last one was enabled as a default encryption for the bucket.</li> <li>In the response, IONOS Object Storage returns the encryption algorithm and MD5 of the encryption key that you specified when uploading the object. The ETag that is returned is not the MD5 of the object. </ul>   </p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@param key Object key for which the PUT operation was initiated.
+	@return ApiPutObjectRequest
 */
-func (a *ObjectsApiService) PutObject(ctx _context.Context, bucket string, key string) ApiPutObjectRequest {
+func (a *ObjectsApiService) PutObject(ctx context.Context, bucket string, key string) ApiPutObjectRequest {
 	return ApiPutObjectRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -2432,16 +2632,12 @@ func (a *ObjectsApiService) PutObject(ctx _context.Context, bucket string, key s
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ObjectsApiService.PutObject")
@@ -2452,12 +2648,12 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.API
 	}
 
 	localVarPath := localBasePath + "/{Bucket}/{Key}"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", _neturl.PathEscape(parameterValueToString(r.key, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Key"+"}", parameterValueToString(r.key, "key"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
@@ -2467,8 +2663,8 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.API
 	if shared.Strlen(r.key) < 1 {
 		return nil, reportError("key must have at least 1 elements")
 	}
-	if r.putObjectRequest == nil {
-		return nil, reportError("putObjectRequest is required and must be specified")
+	if r.body == nil {
+		return nil, reportError("body is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -2548,8 +2744,11 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.API
 	if r.xAmzObjectLockLegalHold != nil {
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-object-lock-legal-hold", r.xAmzObjectLockLegalHold, "")
 	}
+	if r.xAmzMeta != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "x-amz-meta", r.xAmzMeta, "")
+	}
 	// body params
-	localVarPostBody = r.putObjectRequest
+	localVarPostBody = r.body
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(shared.ContextAPIKeys).(map[string]shared.APIKey); ok {
@@ -2564,13 +2763,12 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.API
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -2578,7 +2776,6 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.API
 		RequestURL:  localVarPath,
 		Operation:   "PutObject",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -2586,6 +2783,7 @@ func (a *ObjectsApiService) PutObjectExecute(r ApiPutObjectRequest) (*shared.API
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}

@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ListAllMyBucketsResult type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ListAllMyBucketsResult{}
 
 // ListAllMyBucketsResult struct for ListAllMyBucketsResult
 type ListAllMyBucketsResult struct {
-	Owner   *Owner   `json:"Owner,omitempty"`
-	Buckets []Bucket `json:"Buckets,omitempty"`
+	XMLName xml.Name `xml:"ListAllMyBucketsResult"`
+	Owner   *Owner   `json:"Owner,omitempty" xml:"Owner"`
+	Buckets []Bucket `json:"Buckets,omitempty" xml:"Buckets>Bucket"`
 }
 
 // NewListAllMyBucketsResult instantiates a new ListAllMyBucketsResult object

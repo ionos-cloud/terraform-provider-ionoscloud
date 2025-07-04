@@ -15,15 +15,18 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the RedirectAllRequestsTo type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &RedirectAllRequestsTo{}
 
 // RedirectAllRequestsTo Specifies the redirect behavior of all requests to a website endpoint of an IONOS Object Storage bucket.
 type RedirectAllRequestsTo struct {
+	XMLName xml.Name `xml:"RedirectAllRequestsTo"`
 	// Name of the host where requests are redirected.
-	HostName string `json:"HostName"`
+	HostName string `json:"HostName" xml:"HostName"`
 	// Protocol to use when redirecting requests. The default is the protocol that is used in the original request.
-	Protocol *string `json:"Protocol,omitempty"`
+	Protocol *string `json:"Protocol,omitempty" xml:"Protocol"`
 }
 
 // NewRedirectAllRequestsTo instantiates a new RedirectAllRequestsTo object

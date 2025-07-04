@@ -36,25 +36,20 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	"golang.org/x/oauth2"
 )
 
 var (
-	jsonCheck       = regexp.MustCompile(`(?i:(?:application|text)\/(?:vnd\.[^;]+|problem\+)?json)`)
-	xmlCheck        = regexp.MustCompile(`(?i:(?:application|text)/xml)`)
+	JsonCheck       = regexp.MustCompile(`(?i:(?:application|text)/(?:[^;]+\+)?json)`)
+	XmlCheck        = regexp.MustCompile(`(?i:(?:application|text)/(?:[^;]+\+)?xml)`)
 	queryParamSplit = regexp.MustCompile(`(^|&)([^&]+)`)
 	queryDescape    = strings.NewReplacer("%5B", "[", "%5D", "]")
 )
 
 const (
-	RequestStatusQueued  = "QUEUED"
-	RequestStatusRunning = "RUNNING"
-	RequestStatusFailed  = "FAILED"
-	RequestStatusDone    = "DONE"
-
-	Version               = "products/userobjectstorage/v2.0.0"
+	Version               = "1.0.0"
 	DefaultIonosServerUrl = "https://s3.eu-central-1.ionoscloud.com"
 	DefaultIonosBasePath  = ""
 )
@@ -74,8 +69,6 @@ type APIClient struct {
 	EncryptionApi *EncryptionApiService
 
 	LifecycleApi *LifecycleApiService
-
-	LoggingApi *LoggingApiService
 
 	ObjectLockApi *ObjectLockApiService
 
@@ -134,9 +127,20 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 		cfgCopy = &shared.Configuration{}
 		*cfgCopy = *cfg
 	}
-
 	if cfgCopy.UserAgent == "" {
-		cfgCopy.UserAgent = "sdk-go-bundle/products/userobjectstorage/v2.0.0"
+		cfgCopy.UserAgent = "sdk-go-bundle/1.0.0"
+	}
+
+	if cfg.Middleware != nil {
+		cfgCopy.Middleware = cfg.Middleware
+	}
+
+	if cfg.MiddlewareWithError != nil {
+		cfgCopy.MiddlewareWithError = cfg.MiddlewareWithError
+	}
+
+	if cfg.ResponseMiddleware != nil {
+		cfgCopy.ResponseMiddleware = cfg.ResponseMiddleware
 	}
 
 	// Initialize default values in the copied configuration
@@ -190,7 +194,6 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 	c.CORSApi = (*CORSApiService)(&c.common)
 	c.EncryptionApi = (*EncryptionApiService)(&c.common)
 	c.LifecycleApi = (*LifecycleApiService)(&c.common)
-	c.LoggingApi = (*LoggingApiService)(&c.common)
 	c.ObjectLockApi = (*ObjectLockApiService)(&c.common)
 	c.ObjectsApi = (*ObjectsApiService)(&c.common)
 	c.PolicyApi = (*PolicyApiService)(&c.common)
@@ -290,10 +293,10 @@ func selectHeaderAccept(accepts []string) string {
 	return strings.Join(accepts, ",")
 }
 
-// contains is a case insenstive match, finding needle in a haystack
+// contains is a case insensitive match, finding needle in a haystack
 func contains(haystack []string, needle string) bool {
 	for _, a := range haystack {
-		if strings.ToLower(a) == strings.ToLower(needle) {
+		if strings.EqualFold(a, needle) {
 			return true
 		}
 	}
@@ -309,42 +312,9 @@ func typeCheckParameter(obj interface{}, expected string, name string) error {
 
 	// Check the type is as expected.
 	if reflect.TypeOf(obj).String() != expected {
-		return fmt.Errorf("Expected %s to be of type %s but received %s.", name, expected, reflect.TypeOf(obj).String())
+		return fmt.Errorf("expected %s to be of type %s but received %s", name, expected, reflect.TypeOf(obj).String())
 	}
 	return nil
-}
-
-// parameterToString convert interface{} parameters to string, using a delimiter if format is provided.
-func parameterToString(obj interface{}, collectionFormat string) string {
-	var delimiter string
-
-	switch collectionFormat {
-	case "pipes":
-		delimiter = "|"
-	case "ssv":
-		delimiter = " "
-	case "tsv":
-		delimiter = "\t"
-	case "csv":
-		delimiter = ","
-	}
-
-	if reflect.TypeOf(obj).Kind() == reflect.Slice {
-		return strings.Trim(strings.Replace(fmt.Sprint(obj), " ", delimiter, -1), "[]")
-	} else if t, ok := obj.(time.Time); ok {
-		return t.Format(time.RFC3339)
-	}
-
-	return fmt.Sprintf("%v", obj)
-}
-
-// helper for converting interface{} parameters to json strings
-func parameterToJson(obj interface{}) (string, error) {
-	jsonBuf, err := json.Marshal(obj)
-	if err != nil {
-		return "", err
-	}
-	return string(jsonBuf), err
 }
 
 func parameterValueToString(obj interface{}, key string) string {
@@ -373,6 +343,7 @@ func parameterAddToHeaderOrQuery(headerOrQueryParams interface{}, keyPrefix stri
 		switch v.Kind() {
 		case reflect.Invalid:
 			value = "invalid"
+
 		case reflect.Struct:
 			if t, ok := obj.(MappedNullable); ok {
 				dataMap, err := t.ToMap()
@@ -383,7 +354,7 @@ func parameterAddToHeaderOrQuery(headerOrQueryParams interface{}, keyPrefix stri
 				return
 			}
 			if t, ok := obj.(time.Time); ok {
-				parameterAddToHeaderOrQuery(headerOrQueryParams, keyPrefix, t.Format(time.RFC3339), collectionType)
+				parameterAddToHeaderOrQuery(headerOrQueryParams, keyPrefix, t.Format(time.RFC3339Nano), collectionType)
 				return
 			}
 			value = v.Type().String() + " value"
@@ -398,6 +369,7 @@ func parameterAddToHeaderOrQuery(headerOrQueryParams interface{}, keyPrefix stri
 				parameterAddToHeaderOrQuery(headerOrQueryParams, keyPrefix, arrayValue.Interface(), collectionType)
 			}
 			return
+
 		case reflect.Map:
 			var indValue = reflect.ValueOf(obj)
 			if indValue == reflect.ValueOf(nil) {
@@ -406,14 +378,16 @@ func parameterAddToHeaderOrQuery(headerOrQueryParams interface{}, keyPrefix stri
 			iter := indValue.MapRange()
 			for iter.Next() {
 				k, v := iter.Key(), iter.Value()
-				parameterAddToHeaderOrQuery(headerOrQueryParams, fmt.Sprintf("%s[%s]", keyPrefix, k.String()), v.Interface(), collectionType)
+				parameterAddToHeaderOrQuery(headerOrQueryParams, fmt.Sprintf("%s-%s", keyPrefix, k.String()), v.Interface(), collectionType)
 			}
 			return
+
 		case reflect.Interface:
 			fallthrough
 		case reflect.Ptr:
 			parameterAddToHeaderOrQuery(headerOrQueryParams, keyPrefix, v.Elem().Interface(), collectionType)
 			return
+
 		case reflect.Int, reflect.Int8, reflect.Int16,
 			reflect.Int32, reflect.Int64:
 			value = strconv.FormatInt(v.Int(), 10)
@@ -430,6 +404,7 @@ func parameterAddToHeaderOrQuery(headerOrQueryParams interface{}, keyPrefix stri
 			value = v.Type().String() + " value"
 		}
 	}
+
 	switch valuesMap := headerOrQueryParams.(type) {
 	case url.Values:
 		if collectionType == "csv" && valuesMap.Get(keyPrefix) != "" {
@@ -442,6 +417,15 @@ func parameterAddToHeaderOrQuery(headerOrQueryParams interface{}, keyPrefix stri
 		valuesMap[keyPrefix] = value
 		break
 	}
+}
+
+// helper for converting interface{} parameters to json strings
+func parameterToJson(obj interface{}) (string, error) {
+	jsonBuf, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBuf), err
 }
 
 // callAPI do the request.
@@ -563,6 +547,12 @@ func (c *APIClient) GetConfig() *shared.Configuration {
 	return c.cfg
 }
 
+type formFile struct {
+	fileBytes    []byte
+	fileName     string
+	formFileName string
+}
+
 // prepareRequest build the request
 func (c *APIClient) prepareRequest(
 	ctx context.Context,
@@ -571,14 +561,12 @@ func (c *APIClient) prepareRequest(
 	headerParams map[string]string,
 	queryParams url.Values,
 	formParams url.Values,
-	formFileName string,
-	fileName string,
-	fileBytes []byte) (localVarRequest *http.Request, err error) {
+	formFiles []formFile) (localVarRequest *http.Request, err error) {
 
 	var body *bytes.Buffer
 
 	// Detect postBody type and post.
-	if postBody != nil {
+	if postBody != nil && !(reflect.ValueOf(postBody).Kind() == reflect.Ptr && reflect.ValueOf(postBody).IsNil()) {
 		contentType := headerParams["Content-Type"]
 		if contentType == "" {
 			contentType = detectContentType(postBody)
@@ -592,7 +580,7 @@ func (c *APIClient) prepareRequest(
 	}
 
 	// add form parameters and file if available.
-	if strings.HasPrefix(headerParams["Content-Type"], "multipart/form-data") && len(formParams) > 0 || (len(fileBytes) > 0 && fileName != "") {
+	if strings.HasPrefix(headerParams["Content-Type"], "multipart/form-data") && len(formParams) > 0 || (len(formFiles) > 0) {
 		if body != nil {
 			return nil, errors.New("Cannot specify postBody and multipart form at the same time.")
 		}
@@ -611,16 +599,17 @@ func (c *APIClient) prepareRequest(
 				}
 			}
 		}
-		if len(fileBytes) > 0 && fileName != "" {
-			w.Boundary()
-			//_, fileNm := filepath.Split(fileName)
-			part, err := w.CreateFormFile(formFileName, filepath.Base(fileName))
-			if err != nil {
-				return nil, err
-			}
-			_, err = part.Write(fileBytes)
-			if err != nil {
-				return nil, err
+		for _, formFile := range formFiles {
+			if len(formFile.fileBytes) > 0 && formFile.fileName != "" {
+				w.Boundary()
+				part, err := w.CreateFormFile(formFile.formFileName, filepath.Base(formFile.fileName))
+				if err != nil {
+					return nil, err
+				}
+				_, err = part.Write(formFile.fileBytes)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 
@@ -660,12 +649,6 @@ func (c *APIClient) prepareRequest(
 
 	// Adding Query Param
 	query := url.Query()
-	/* adding default query params */
-	for k, v := range c.cfg.DefaultQueryParams {
-		if _, ok := queryParams[k]; !ok {
-			queryParams[k] = v
-		}
-	}
 	for k, v := range queryParams {
 		for _, iv := range v {
 			query.Add(k, iv)
@@ -693,7 +676,7 @@ func (c *APIClient) prepareRequest(
 	if len(headerParams) > 0 {
 		headers := http.Header{}
 		for h, v := range headerParams {
-			headers.Set(h, v)
+			headers[h] = []string{v}
 		}
 		localVarRequest.Header = headers
 	}
@@ -701,46 +684,29 @@ func (c *APIClient) prepareRequest(
 	// Add the user agent to the request.
 	localVarRequest.Header.Add("User-Agent", c.cfg.UserAgent)
 
-	if c.cfg.Token != "" {
-		localVarRequest.Header.Add("Authorization", "Bearer "+c.cfg.Token)
-	} else {
-		if c.cfg.Username != "" {
-			localVarRequest.SetBasicAuth(c.cfg.Username, c.cfg.Password)
-		}
-	}
-
 	if ctx != nil {
 		// add context to the request
 		localVarRequest = localVarRequest.WithContext(ctx)
 
 		// Walk through any authentication.
 
-		// OAuth2 authentication
-		if tok, ok := ctx.Value(shared.ContextOAuth2).(oauth2.TokenSource); ok {
-			// We were able to grab an oauth2 token from the context
-			var latestToken *oauth2.Token
-			if latestToken, err = tok.Token(); err != nil {
-				return nil, err
-			}
-
-			latestToken.SetAuthHeader(localVarRequest)
-		}
-
-		// Basic HTTP Authentication
-		if auth, ok := ctx.Value(shared.ContextBasicAuth).(shared.BasicAuth); ok {
-			localVarRequest.SetBasicAuth(auth.UserName, auth.Password)
-		}
-
-		// AccessToken Authentication
-		if auth, ok := ctx.Value(shared.ContextAccessToken).(string); ok {
-			localVarRequest.Header.Add("Authorization", "Bearer "+auth)
-		}
-
 	}
 
 	for header, value := range c.cfg.DefaultHeader {
 		localVarRequest.Header.Add(header, value)
 	}
+
+	if c.cfg.Middleware != nil {
+		c.cfg.Middleware(localVarRequest)
+	}
+
+	if c.cfg.MiddlewareWithError != nil {
+		err = c.cfg.MiddlewareWithError(localVarRequest)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return localVarRequest, nil
 }
 
@@ -752,36 +718,63 @@ func (c *APIClient) decode(v interface{}, b []byte, contentType string) (err err
 		*s = string(b)
 		return nil
 	}
-	if xmlCheck.MatchString(contentType) {
+	if f, ok := v.(*os.File); ok {
+		f, err = os.CreateTemp("", "HttpClientFile")
+		if err != nil {
+			return
+		}
+		_, err = f.Write(b)
+		if err != nil {
+			return
+		}
+		_, err = f.Seek(0, io.SeekStart)
+		return
+	}
+	if f, ok := v.(**os.File); ok {
+		*f, err = os.CreateTemp("", "HttpClientFile")
+		if err != nil {
+			return
+		}
+		_, err = (*f).Write(b)
+		if err != nil {
+			return
+		}
+		_, err = (*f).Seek(0, io.SeekStart)
+		return
+	}
+	if XmlCheck.MatchString(contentType) {
 		if err = xml.Unmarshal(b, v); err != nil {
 			return err
 		}
 		return nil
 	}
-	if jsonCheck.MatchString(contentType) {
+	if JsonCheck.MatchString(contentType) {
 		if actualObj, ok := v.(interface{ GetActualInstance() interface{} }); ok { // oneOf, anyOf schemas
 			if unmarshalObj, ok := actualObj.(interface{ UnmarshalJSON([]byte) error }); ok { // make sure it has UnmarshalJSON defined
 				if err = unmarshalObj.UnmarshalJSON(b); err != nil {
 					return err
 				}
 			} else {
-				return errors.New("unknown type with GetActualInstance but no unmarshalObj.UnmarshalJSON defined")
+				return errors.New("Unknown type with GetActualInstance but no unmarshalObj.UnmarshalJSON defined")
 			}
 		} else if err = json.Unmarshal(b, v); err != nil { // simple model
 			return err
 		}
 		return nil
 	}
-	return fmt.Errorf("undefined response type for content %s", contentType)
+	return errors.New("undefined response type")
 }
 
 // Add a file to the multipart request
 func addFile(w *multipart.Writer, fieldName, path string) error {
-	file, err := os.Open(path)
+	file, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	err = file.Close()
+	if err != nil {
+		return err
+	}
 
 	part, err := w.CreateFormFile(fieldName, filepath.Base(path))
 	if err != nil {
@@ -792,11 +785,6 @@ func addFile(w *multipart.Writer, fieldName, path string) error {
 	return err
 }
 
-// Prevent trying to import "fmt"
-func reportError(format string, a ...interface{}) error {
-	return fmt.Errorf(format, a...)
-}
-
 // Set request body from an interface{}
 func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer, err error) {
 	if bodyBuf == nil {
@@ -805,16 +793,22 @@ func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer, err e
 
 	if reader, ok := body.(io.Reader); ok {
 		_, err = bodyBuf.ReadFrom(reader)
+	} else if fp, ok := body.(*os.File); ok {
+		_, err = bodyBuf.ReadFrom(fp)
 	} else if b, ok := body.([]byte); ok {
 		_, err = bodyBuf.Write(b)
 	} else if s, ok := body.(string); ok {
 		_, err = bodyBuf.WriteString(s)
 	} else if s, ok := body.(*string); ok {
 		_, err = bodyBuf.WriteString(*s)
-	} else if jsonCheck.MatchString(contentType) {
+	} else if JsonCheck.MatchString(contentType) {
 		err = json.NewEncoder(bodyBuf).Encode(body)
-	} else if xmlCheck.MatchString(contentType) {
-		err = xml.NewEncoder(bodyBuf).Encode(body)
+	} else if XmlCheck.MatchString(contentType) {
+		var bs []byte
+		bs, err = xml.Marshal(body)
+		if err == nil {
+			bodyBuf.Write(bs)
+		}
 	}
 
 	if err != nil {
@@ -822,7 +816,7 @@ func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer, err e
 	}
 
 	if bodyBuf.Len() == 0 {
-		err = fmt.Errorf("Invalid body type %s\n", contentType)
+		err = fmt.Errorf("invalid body type %s\n", contentType)
 		return nil, err
 	}
 	return bodyBuf, nil
@@ -897,4 +891,76 @@ func CacheExpires(r *http.Response) time.Time {
 		}
 	}
 	return expires
+}
+
+func strlen(s string) int {
+	return utf8.RuneCountInString(s)
+}
+
+// GenericOpenAPIError Provides access to the body, error and model on returned errors.
+type GenericOpenAPIError struct {
+	body       []byte
+	error      string
+	model      interface{}
+	statusCode int
+}
+
+// Error returns non-empty string if there was an error.
+func (e GenericOpenAPIError) Error() string {
+	return e.error
+}
+
+// SetError sets the error string
+func (e *GenericOpenAPIError) SetError(error string) {
+	e.error = error
+}
+
+// Body returns the raw bytes of the response
+func (e GenericOpenAPIError) Body() []byte {
+	return e.body
+}
+
+// SetBody sets the raw body of the error
+func (e *GenericOpenAPIError) SetBody(body []byte) {
+	e.body = body
+}
+
+// Model returns the unpacked model of the error
+func (e GenericOpenAPIError) Model() interface{} {
+	return e.model
+}
+
+// SetModel sets the model of the error
+func (e *GenericOpenAPIError) SetModel(model interface{}) {
+	e.model = model
+}
+
+// StatusCode returns the status code of the error
+func (e GenericOpenAPIError) StatusCode() int {
+	return e.statusCode
+}
+
+// SetStatusCode sets the status code of the error
+func (e *GenericOpenAPIError) SetStatusCode(statusCode int) {
+	e.statusCode = statusCode
+}
+
+// format error message using title and detail when model implements rfc7807
+func formatErrorMessage(status string, v interface{}) string {
+	str := ""
+	metaValue := reflect.ValueOf(v).Elem()
+
+	if metaValue.Kind() == reflect.Struct {
+		field := metaValue.FieldByName("Title")
+		if field != (reflect.Value{}) {
+			str = fmt.Sprintf("%s", field.Interface())
+		}
+
+		field = metaValue.FieldByName("Detail")
+		if field != (reflect.Value{}) {
+			str = fmt.Sprintf("%s (%s)", str, field.Interface())
+		}
+	}
+
+	return strings.TrimSpace(fmt.Sprintf("%s %s", status, str))
 }

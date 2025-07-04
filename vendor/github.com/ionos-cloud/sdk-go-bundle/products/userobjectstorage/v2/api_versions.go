@@ -12,28 +12,23 @@
 package userobjectstorage
 
 import (
-	_context "context"
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"net/http"
+	"net/url"
 	"strings"
-)
-
-// Linger please
-var (
-	_ _context.Context
 )
 
 // VersionsApiService VersionsApi service
 type VersionsApiService service
 
 type ApiListObjectVersionsRequest struct {
-	ctx              _context.Context
+	ctx              context.Context
 	ApiService       *VersionsApiService
 	bucket           string
-	versions         *bool
 	delimiter        *string
 	encodingType     *string
 	keyMarker        *string
@@ -45,59 +40,73 @@ type ApiListObjectVersionsRequest struct {
 	versionIdMarker2 *string
 }
 
-func (r ApiListObjectVersionsRequest) Versions(versions bool) ApiListObjectVersionsRequest {
-	r.versions = &versions
-	return r
-}
+// A delimiter is a character that you specify to group keys. All keys that contain the same string between the &#x60;prefix&#x60; and the first occurrence of the delimiter are grouped under a single result element in CommonPrefixes. These groups are counted as one result against the max-keys limitation. These keys are not returned elsewhere in the response.
 func (r ApiListObjectVersionsRequest) Delimiter(delimiter string) ApiListObjectVersionsRequest {
 	r.delimiter = &delimiter
 	return r
 }
+
 func (r ApiListObjectVersionsRequest) EncodingType(encodingType string) ApiListObjectVersionsRequest {
 	r.encodingType = &encodingType
 	return r
 }
+
+// Specifies the key to start with when listing objects in a bucket.
 func (r ApiListObjectVersionsRequest) KeyMarker(keyMarker string) ApiListObjectVersionsRequest {
 	r.keyMarker = &keyMarker
 	return r
 }
+
+// Sets the maximum number of keys returned in the response. By default the operation returns up to 1,000 key names. The response might contain fewer keys but will never contain more. If additional keys satisfy the search criteria, but were not returned because max-keys was exceeded, the response contains &amp;lt;isTruncated&amp;gt;true&amp;lt;/isTruncated&amp;gt;. To return the additional keys, see key-marker and version-id-marker.
 func (r ApiListObjectVersionsRequest) MaxKeys(maxKeys int32) ApiListObjectVersionsRequest {
 	r.maxKeys = &maxKeys
 	return r
 }
+
+// Use this parameter to select only those keys that begin with the specified prefix. You can use prefixes to separate a bucket into different groupings of keys. (You can think of using prefix to make groups in the same way you&#39;d use a folder in a file system.) You can use prefix with delimiter to roll up numerous objects into a single result under CommonPrefixes.
 func (r ApiListObjectVersionsRequest) Prefix(prefix string) ApiListObjectVersionsRequest {
 	r.prefix = &prefix
 	return r
 }
+
+// Specifies the object version you want to start listing from.
 func (r ApiListObjectVersionsRequest) VersionIdMarker(versionIdMarker string) ApiListObjectVersionsRequest {
 	r.versionIdMarker = &versionIdMarker
 	return r
 }
+
+// Pagination limit
 func (r ApiListObjectVersionsRequest) MaxKeys2(maxKeys2 string) ApiListObjectVersionsRequest {
 	r.maxKeys2 = &maxKeys2
 	return r
 }
+
+// Pagination token
 func (r ApiListObjectVersionsRequest) KeyMarker2(keyMarker2 string) ApiListObjectVersionsRequest {
 	r.keyMarker2 = &keyMarker2
 	return r
 }
+
+// Pagination token
 func (r ApiListObjectVersionsRequest) VersionIdMarker2(versionIdMarker2 string) ApiListObjectVersionsRequest {
 	r.versionIdMarker2 = &versionIdMarker2
 	return r
 }
 
-func (r ApiListObjectVersionsRequest) Execute() (ListObjectVersionsOutput, *shared.APIResponse, error) {
+func (r ApiListObjectVersionsRequest) Execute() (*ListObjectVersionsOutput, *shared.APIResponse, error) {
 	return r.ApiService.ListObjectVersionsExecute(r)
 }
 
 /*
- * ListObjectVersions ListObjectVersions
- * <p>Returns metadata about all versions of the objects in a bucket. You can also use request parameters as selection criteria to return metadata about a subset of all the object versions.</p> <important> <p> To use this operation, you must have permissions to perform the `ListBucketVersions` operation. Be aware of the name difference. </p> </important> <note> <p> A 200 OK response can contain valid or invalid XML. Make sure to design your application to parse the contents of the response and handle it appropriately.</p> </note> <p>To use this operation, you must have READ access to the bucket.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @return ApiListObjectVersionsRequest
- */
-func (a *VersionsApiService) ListObjectVersions(ctx _context.Context, bucket string) ApiListObjectVersionsRequest {
+ListObjectVersions ListObjectVersions
+
+<p>Returns metadata about all versions of the objects in a bucket. You can also use request parameters as selection criteria to return metadata about a subset of all the object versions.</p> <important> <p> To use this operation, you must have permissions to perform the `ListBucketVersions` operation. Be aware of the name difference. </p> </important> <note> <p> A 200 OK response can contain valid or invalid XML. Make sure to design your application to parse the contents of the response and handle it appropriately.</p> </note> <p>To use this operation, you must have READ access to the bucket.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiListObjectVersionsRequest
+*/
+func (a *VersionsApiService) ListObjectVersions(ctx context.Context, bucket string) ApiListObjectVersionsRequest {
 	return ApiListObjectVersionsRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -105,18 +114,15 @@ func (a *VersionsApiService) ListObjectVersions(ctx _context.Context, bucket str
 	}
 }
 
-/*
- * Execute executes the request
- * @return ListObjectVersionsOutput
- */
-func (a *VersionsApiService) ListObjectVersionsExecute(r ApiListObjectVersionsRequest) (ListObjectVersionsOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return ListObjectVersionsOutput
+func (a *VersionsApiService) ListObjectVersionsExecute(r ApiListObjectVersionsRequest) (*ListObjectVersionsOutput, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  ListObjectVersionsOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ListObjectVersionsOutput
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VersionsApiService.ListObjectVersions")
@@ -127,19 +133,16 @@ func (a *VersionsApiService) ListObjectVersionsExecute(r ApiListObjectVersionsRe
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?versions"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
-	}
-	if r.versions == nil {
-		return localVarReturnValue, nil, reportError("versions is required and must be specified")
 	}
 
 	if r.delimiter != nil {
@@ -169,7 +172,6 @@ func (a *VersionsApiService) ListObjectVersionsExecute(r ApiListObjectVersionsRe
 	if r.versionIdMarker2 != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "VersionIdMarker", r.versionIdMarker2, "")
 	}
-	parameterAddToHeaderOrQuery(localVarQueryParams, "versions", r.versions, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -201,13 +203,12 @@ func (a *VersionsApiService) ListObjectVersionsExecute(r ApiListObjectVersionsRe
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -215,7 +216,6 @@ func (a *VersionsApiService) ListObjectVersionsExecute(r ApiListObjectVersionsRe
 		RequestURL:  localVarPath,
 		Operation:   "ListObjectVersions",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -223,6 +223,7 @@ func (a *VersionsApiService) ListObjectVersionsExecute(r ApiListObjectVersionsRe
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}

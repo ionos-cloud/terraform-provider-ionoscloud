@@ -15,29 +15,32 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ListObjectsOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ListObjectsOutput{}
 
 // ListObjectsOutput struct for ListObjectsOutput
 type ListObjectsOutput struct {
+	XMLName xml.Name `xml:"ListBucketResult"`
 	// A flag that indicates whether IONOS Object Storage returned all of the results that satisfied the search criteria. If your results were truncated, you can make a follow-up paginated request using the NextKeyMarker and NextVersionIdMarker response parameters as a starting place in another request to return the rest of the results.
-	IsTruncated *bool `json:"IsTruncated,omitempty"`
+	IsTruncated *bool `json:"IsTruncated,omitempty" xml:"IsTruncated"`
 	// Indicates where in the bucket listing begins. Marker is included in the response if it was sent with the request.
-	Marker *string `json:"Marker,omitempty"`
+	Marker *string `json:"Marker,omitempty" xml:"Marker"`
 	// When response is truncated (the IsTruncated element value in the response is true), you can use the key name in this field as marker in the subsequent request to get next set of objects. IONOS Object Storage lists objects in alphabetical order Note: This element is returned only if you have delimiter request parameter specified. If response does not include the NextMarker and it is truncated, you can use the value of the last Key in the response as the marker in the subsequent request to get the next set of object keys.
-	NextMarker *string `json:"NextMarker,omitempty"`
+	NextMarker *string `json:"NextMarker,omitempty" xml:"NextMarker"`
 	// Metadata about each object returned.
-	Contents []Object `json:"Contents,omitempty"`
+	Contents []Object `json:"Contents,omitempty" xml:"Contents"`
 	// The bucket name.
-	Name *string `json:"Name,omitempty"`
+	Name *string `json:"Name,omitempty" xml:"Name"`
 	// Object key prefix that identifies one or more objects to which this rule applies. Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests.
-	Prefix    *string `json:"Prefix,omitempty"`
-	Delimiter *string `json:"Delimiter,omitempty"`
+	Prefix    *string `json:"Prefix,omitempty" xml:"Prefix"`
+	Delimiter *string `json:"Delimiter,omitempty" xml:"Delimiter"`
 	// The maximum number of keys returned in the response. By default the operation returns up to 1000 key names. The response might contain fewer keys but will never contain more.
-	MaxKeys *int32 `json:"MaxKeys,omitempty"`
+	MaxKeys *int32 `json:"MaxKeys,omitempty" xml:"MaxKeys"`
 	// All of the keys rolled up into a common prefix count as a single return when calculating the number of returns.
-	CommonPrefixes []CommonPrefix `json:"CommonPrefixes,omitempty"`
-	EncodingType   *EncodingType  `json:"EncodingType,omitempty"`
+	CommonPrefixes []CommonPrefix `json:"CommonPrefixes,omitempty" xml:"CommonPrefixes"`
+	EncodingType   *EncodingType  `json:"EncodingType,omitempty" xml:"EncodingType"`
 }
 
 // NewListObjectsOutput instantiates a new ListObjectsOutput object

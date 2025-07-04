@@ -1,4 +1,4 @@
-package objectstorage
+package userobjectstorage
 
 import (
 	"context"
@@ -32,14 +32,12 @@ type BucketDataSourceModel struct {
 
 // CreateBucket creates a new bucket.
 func (c *Client) CreateBucket(ctx context.Context, name, location types.String, objectLock types.Bool, tags types.Map, timeout time.Duration) error {
-	createBucketConfig := objstorage.CreateBucketRequest{
-		CreateBucketConfiguration: &objstorage.CreateBucketRequestCreateBucketConfiguration{
-			LocationConstraint: location.ValueStringPointer(),
-		},
+	createBucketConfig := objstorage.CreateBucketConfiguration{
+		LocationConstraint: location.ValueStringPointer(),
 	}
 
 	if _, err := c.client.BucketsApi.CreateBucket(ctx, name.ValueString()).
-		CreateBucketRequest(createBucketConfig).
+		CreateBucketConfiguration(createBucketConfig).
 		XAmzBucketObjectLockEnabled(objectLock.ValueBool()).
 		Execute(); err != nil {
 		return fmt.Errorf("failed to create user bucket: %w", err)
@@ -71,10 +69,10 @@ func (c *Client) GetBucket(ctx context.Context, name types.String) (*BucketModel
 		return nil, false, fmt.Errorf("failed to get bucket: %w", err)
 	}
 
-	location, err := c.GetBucketLocation(ctx, name)
-	if err != nil {
-		return nil, true, err
-	}
+	// location, err := c.GetBucketLocation(ctx, name)
+	// if err != nil {
+	// 	return nil, true, err
+	// }
 
 	lock, err := c.GetObjectLockEnabled(ctx, name)
 	if err != nil {
@@ -92,8 +90,8 @@ func (c *Client) GetBucket(ctx context.Context, name types.String) (*BucketModel
 	}
 
 	return &BucketModel{
-		Name:              name,
-		Region:            location,
+		Name: name,
+		// Region:            location,
 		ObjectLockEnabled: lock,
 		Tags:              tagsMap,
 	}, true, nil
@@ -129,10 +127,9 @@ func (c *Client) DeleteBucket(ctx context.Context, name types.String, objectLock
 	}
 
 	if isBucketNotEmptyError(err) && forceDestroy.ValueBool() {
-		// if _, err = c.EmptyBucket(ctx, name.ValueString(), objectLockEnabled.ValueBool()); err != nil {
-		// 	return fmt.Errorf("failed to empty bucket: %w", err)
-		// }
-
+		if _, err = c.EmptyBucket(ctx, name.ValueString(), objectLockEnabled.ValueBool()); err != nil {
+			return fmt.Errorf("failed to empty bucket: %w", err)
+		}
 		return c.DeleteBucket(ctx, name, objectLockEnabled, forceDestroy, timeout)
 	}
 
@@ -152,7 +149,7 @@ func (c *Client) DeleteBucket(ctx context.Context, name types.String, objectLock
 	return nil
 }
 
-// GetBucketLocation retrieves the location of a bucket.
+// GetBucketLocation should retrieve the location of a bucket. Currently does not work
 func (c *Client) GetBucketLocation(ctx context.Context, name types.String) (types.String, error) {
 	output, _, err := c.client.BucketsApi.GetBucketLocation(ctx, name.ValueString()).Execute()
 	if err != nil {

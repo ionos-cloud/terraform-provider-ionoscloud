@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the CommonPrefix type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CommonPrefix{}
 
 // CommonPrefix Container for all (if there are any) keys between Prefix and the next occurrence of the string specified by a delimiter. CommonPrefixes lists keys that act like subdirectories in the directory specified by Prefix. For example, if the prefix is `notes/` and the delimiter is a slash (`/“) as in `notes/summer/july“, the common prefix is `notes/summer/“.
 type CommonPrefix struct {
+	XMLName xml.Name `xml:"CommonPrefixes"`
 	// Object key prefix that identifies one or more objects to which this rule applies. Replacement must be made for object keys containing special characters (such as carriage returns) when using XML requests.
-	Prefix *string `json:"Prefix,omitempty"`
+	Prefix *string `json:"Prefix,omitempty" xml:"Prefix"`
 }
 
 // NewCommonPrefix instantiates a new CommonPrefix object

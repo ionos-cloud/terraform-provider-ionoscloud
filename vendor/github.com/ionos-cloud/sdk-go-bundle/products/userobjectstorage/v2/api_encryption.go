@@ -12,33 +12,23 @@
 package userobjectstorage
 
 import (
-	_context "context"
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"net/http"
+	"net/url"
 	"strings"
-)
-
-// Linger please
-var (
-	_ _context.Context
 )
 
 // EncryptionApiService EncryptionApi service
 type EncryptionApiService service
 
 type ApiDeleteBucketEncryptionRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *EncryptionApiService
 	bucket     string
-	encryption *bool
-}
-
-func (r ApiDeleteBucketEncryptionRequest) Encryption(encryption bool) ApiDeleteBucketEncryptionRequest {
-	r.encryption = &encryption
-	return r
 }
 
 func (r ApiDeleteBucketEncryptionRequest) Execute() (*shared.APIResponse, error) {
@@ -46,13 +36,15 @@ func (r ApiDeleteBucketEncryptionRequest) Execute() (*shared.APIResponse, error)
 }
 
 /*
- * DeleteBucketEncryption DeleteBucketEncryption
- * <p>This implementation of the DELETE operation removes default encryption from the bucket.</p> <p>In the current version, only the bucket owner is allowed to perform this operation. We currently do not support the use of bucket policies to extend bucket encryption permissions to users other than the bucket owner.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @return ApiDeleteBucketEncryptionRequest
- */
-func (a *EncryptionApiService) DeleteBucketEncryption(ctx _context.Context, bucket string) ApiDeleteBucketEncryptionRequest {
+DeleteBucketEncryption DeleteBucketEncryption
+
+<p>This implementation of the DELETE operation removes default encryption from the bucket.</p> <p>In the current version, only the bucket owner is allowed to perform this operation. We currently do not support the use of bucket policies to extend bucket encryption permissions to users other than the bucket owner.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiDeleteBucketEncryptionRequest
+*/
+func (a *EncryptionApiService) DeleteBucketEncryption(ctx context.Context, bucket string) ApiDeleteBucketEncryptionRequest {
 	return ApiDeleteBucketEncryptionRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -60,16 +52,12 @@ func (a *EncryptionApiService) DeleteBucketEncryption(ctx _context.Context, buck
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *EncryptionApiService) DeleteBucketEncryptionExecute(r ApiDeleteBucketEncryptionRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodDelete
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EncryptionApiService.DeleteBucketEncryption")
@@ -80,22 +68,18 @@ func (a *EncryptionApiService) DeleteBucketEncryptionExecute(r ApiDeleteBucketEn
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?encryption"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.encryption == nil {
-		return nil, reportError("encryption is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "encryption", r.encryption, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -127,13 +111,12 @@ func (a *EncryptionApiService) DeleteBucketEncryptionExecute(r ApiDeleteBucketEn
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -141,7 +124,6 @@ func (a *EncryptionApiService) DeleteBucketEncryptionExecute(r ApiDeleteBucketEn
 		RequestURL:  localVarPath,
 		Operation:   "DeleteBucketEncryption",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -149,6 +131,7 @@ func (a *EncryptionApiService) DeleteBucketEncryptionExecute(r ApiDeleteBucketEn
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}
@@ -165,29 +148,25 @@ func (a *EncryptionApiService) DeleteBucketEncryptionExecute(r ApiDeleteBucketEn
 }
 
 type ApiGetBucketEncryptionRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *EncryptionApiService
 	bucket     string
-	encryption *bool
 }
 
-func (r ApiGetBucketEncryptionRequest) Encryption(encryption bool) ApiGetBucketEncryptionRequest {
-	r.encryption = &encryption
-	return r
-}
-
-func (r ApiGetBucketEncryptionRequest) Execute() (GetBucketEncryptionOutput, *shared.APIResponse, error) {
+func (r ApiGetBucketEncryptionRequest) Execute() (*ServerSideEncryptionConfiguration, *shared.APIResponse, error) {
 	return r.ApiService.GetBucketEncryptionExecute(r)
 }
 
 /*
- * GetBucketEncryption GetBucketEncryption
- * <p>Returns the default encryption configuration for the bucket.</p>         <p>In the current version, only the bucket owner is allowed to perform this operation. We currently do not support the use of bucket policies to extend bucket encryption permissions to users other than the bucket owner.</p> <p>If the bucket does not have a default encryption configuration, GetBucketEncryption returns `404 ServerSideEncryptionConfigurationNotFoundError`.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @return ApiGetBucketEncryptionRequest
- */
-func (a *EncryptionApiService) GetBucketEncryption(ctx _context.Context, bucket string) ApiGetBucketEncryptionRequest {
+GetBucketEncryption GetBucketEncryption
+
+<p>Returns the default encryption configuration for the bucket.</p>         <p>In the current version, only the bucket owner is allowed to perform this operation. We currently do not support the use of bucket policies to extend bucket encryption permissions to users other than the bucket owner.</p> <p>If the bucket does not have a default encryption configuration, GetBucketEncryption returns `404 ServerSideEncryptionConfigurationNotFoundError`.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiGetBucketEncryptionRequest
+*/
+func (a *EncryptionApiService) GetBucketEncryption(ctx context.Context, bucket string) ApiGetBucketEncryptionRequest {
 	return ApiGetBucketEncryptionRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -195,18 +174,15 @@ func (a *EncryptionApiService) GetBucketEncryption(ctx _context.Context, bucket 
 	}
 }
 
-/*
- * Execute executes the request
- * @return GetBucketEncryptionOutput
- */
-func (a *EncryptionApiService) GetBucketEncryptionExecute(r ApiGetBucketEncryptionRequest) (GetBucketEncryptionOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return ServerSideEncryptionConfiguration
+func (a *EncryptionApiService) GetBucketEncryptionExecute(r ApiGetBucketEncryptionRequest) (*ServerSideEncryptionConfiguration, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  GetBucketEncryptionOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ServerSideEncryptionConfiguration
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EncryptionApiService.GetBucketEncryption")
@@ -217,22 +193,18 @@ func (a *EncryptionApiService) GetBucketEncryptionExecute(r ApiGetBucketEncrypti
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?encryption"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.encryption == nil {
-		return localVarReturnValue, nil, reportError("encryption is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "encryption", r.encryption, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -264,13 +236,12 @@ func (a *EncryptionApiService) GetBucketEncryptionExecute(r ApiGetBucketEncrypti
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -278,7 +249,6 @@ func (a *EncryptionApiService) GetBucketEncryptionExecute(r ApiGetBucketEncrypti
 		RequestURL:  localVarPath,
 		Operation:   "GetBucketEncryption",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -286,6 +256,7 @@ func (a *EncryptionApiService) GetBucketEncryptionExecute(r ApiGetBucketEncrypti
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -320,17 +291,12 @@ func (a *EncryptionApiService) GetBucketEncryptionExecute(r ApiGetBucketEncrypti
 }
 
 type ApiPutBucketEncryptionRequest struct {
-	ctx                        _context.Context
+	ctx                        context.Context
 	ApiService                 *EncryptionApiService
 	bucket                     string
-	encryption                 *bool
 	putBucketEncryptionRequest *PutBucketEncryptionRequest
 }
 
-func (r ApiPutBucketEncryptionRequest) Encryption(encryption bool) ApiPutBucketEncryptionRequest {
-	r.encryption = &encryption
-	return r
-}
 func (r ApiPutBucketEncryptionRequest) PutBucketEncryptionRequest(putBucketEncryptionRequest PutBucketEncryptionRequest) ApiPutBucketEncryptionRequest {
 	r.putBucketEncryptionRequest = &putBucketEncryptionRequest
 	return r
@@ -341,13 +307,15 @@ func (r ApiPutBucketEncryptionRequest) Execute() (*shared.APIResponse, error) {
 }
 
 /*
- * PutBucketEncryption PutBucketEncryption
- * <p>Sets the AES256 server-side encryption for a bucket with IONOS Object Storage managed keys (SSE-S3).</p> <p>With server-side encryption, Ionos Object Storage encrypts a newly uploaded object in the bucket before saving it to disk and decrypts it when you download the object. Encryption doesn't change the way that you access data as an authorized user. It only further protects your data.</p> <p>In the current version, only the bucket owner is allowed to perform this operation. We do not currently support the use of bucket policies to extend bucket encryption permissions to users other than the bucket owner.</p> <p>IONOS Object Storage API confirms that your object is stored with SSE-S3 encryption by returning the response header `x-amz-server-side-encryption` for the <a href="#tag/Basic-Operations/operation/GetObject">Object Read</a> operation.</p> <p>You can also apply encryption with a customer-provided key (SSE-C) to each object at the time of <a href="/#tag/Basic-Operations/operation/PutObject">uploading</a>. In this case, SSE-C encryption will override the SSE-S3 encryption.</p>
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param bucket
- * @return ApiPutBucketEncryptionRequest
- */
-func (a *EncryptionApiService) PutBucketEncryption(ctx _context.Context, bucket string) ApiPutBucketEncryptionRequest {
+PutBucketEncryption PutBucketEncryption
+
+<p>Sets the AES256 server-side encryption for a bucket with IONOS Object Storage managed keys (SSE-S3).</p> <p>With server-side encryption, S3 encrypts a newly uploaded object in the bucket before saving it to disk and decrypts it when you download the object. Encryption doesn't change the way that you access data as an authorized user. It only further protects your data.</p> <p>In the current version, only the bucket owner is allowed to perform this operation. We do not currently support the use of bucket policies to extend bucket encryption permissions to users other than the bucket owner.</p> <p>IONOS Object Storage confirms that your object is stored with SSE-S3 encryption by returning the response header `x-amz-server-side-encryption` for the <a href="#tag/Basic-Operations/operation/GetObject">Object Read</a> operation.</p> <p>You can also apply encryption with a customer-provided key (SSE-C) to each object at the time of <a href="/#tag/Basic-Operations/operation/PutObject">uploading</a>. In this case, SSE-C encryption will override the SSE-S3 encryption.</p>
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiPutBucketEncryptionRequest
+*/
+func (a *EncryptionApiService) PutBucketEncryption(ctx context.Context, bucket string) ApiPutBucketEncryptionRequest {
 	return ApiPutBucketEncryptionRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -355,16 +323,12 @@ func (a *EncryptionApiService) PutBucketEncryption(ctx _context.Context, bucket 
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *EncryptionApiService) PutBucketEncryptionExecute(r ApiPutBucketEncryptionRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EncryptionApiService.PutBucketEncryption")
@@ -375,25 +339,21 @@ func (a *EncryptionApiService) PutBucketEncryptionExecute(r ApiPutBucketEncrypti
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?encryption"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.encryption == nil {
-		return nil, reportError("encryption is required and must be specified")
-	}
 	if r.putBucketEncryptionRequest == nil {
 		return nil, reportError("putBucketEncryptionRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "encryption", r.encryption, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 
@@ -427,13 +387,12 @@ func (a *EncryptionApiService) PutBucketEncryptionExecute(r ApiPutBucketEncrypti
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -441,7 +400,6 @@ func (a *EncryptionApiService) PutBucketEncryptionExecute(r ApiPutBucketEncrypti
 		RequestURL:  localVarPath,
 		Operation:   "PutBucketEncryption",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -449,6 +407,7 @@ func (a *EncryptionApiService) PutBucketEncryptionExecute(r ApiPutBucketEncrypti
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}

@@ -12,33 +12,23 @@
 package userobjectstorage
 
 import (
-	_context "context"
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"io"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"net/http"
+	"net/url"
 	"strings"
-)
-
-// Linger please
-var (
-	_ _context.Context
 )
 
 // PolicyApiService PolicyApi service
 type PolicyApiService service
 
 type ApiDeleteBucketPolicyRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *PolicyApiService
 	bucket     string
-	policy     *bool
-}
-
-func (r ApiDeleteBucketPolicyRequest) Policy(policy bool) ApiDeleteBucketPolicyRequest {
-	r.policy = &policy
-	return r
 }
 
 func (r ApiDeleteBucketPolicyRequest) Execute() (*shared.APIResponse, error) {
@@ -46,8 +36,9 @@ func (r ApiDeleteBucketPolicyRequest) Execute() (*shared.APIResponse, error) {
 }
 
 /*
-  - DeleteBucketPolicy DeleteBucketPolicy
-  - Deletes the policy of a specified bucket.
+DeleteBucketPolicy DeleteBucketPolicy
+
+Deletes the policy of a specified bucket.
 
 #### Permissions
 You must be the contract owner or an administrator to perform this operation. If not, they can grant you permission
@@ -57,11 +48,11 @@ to perform the `s3:DeleteBucketPolicy` operation using [Bucket Policy](#tag/Poli
 #### S3 API Compatibility
 - The `x-amz-expected-bucket-owner` header isn't supported.
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiDeleteBucketPolicyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiDeleteBucketPolicyRequest
 */
-func (a *PolicyApiService) DeleteBucketPolicy(ctx _context.Context, bucket string) ApiDeleteBucketPolicyRequest {
+func (a *PolicyApiService) DeleteBucketPolicy(ctx context.Context, bucket string) ApiDeleteBucketPolicyRequest {
 	return ApiDeleteBucketPolicyRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -69,16 +60,12 @@ func (a *PolicyApiService) DeleteBucketPolicy(ctx _context.Context, bucket strin
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodDelete
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.DeleteBucketPolicy")
@@ -89,22 +76,18 @@ func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequ
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?policy"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.policy == nil {
-		return nil, reportError("policy is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "policy", r.policy, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -136,13 +119,12 @@ func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequ
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -150,7 +132,6 @@ func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequ
 		RequestURL:  localVarPath,
 		Operation:   "DeleteBucketPolicy",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -158,6 +139,7 @@ func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequ
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}
@@ -175,6 +157,7 @@ func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequ
 				return localVarAPIResponse, newErr
 			}
 			newErr.SetModel(v)
+			return localVarAPIResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
@@ -192,24 +175,19 @@ func (a *PolicyApiService) DeleteBucketPolicyExecute(r ApiDeleteBucketPolicyRequ
 }
 
 type ApiGetBucketPolicyRequest struct {
-	ctx        _context.Context
+	ctx        context.Context
 	ApiService *PolicyApiService
 	bucket     string
-	policy     *bool
 }
 
-func (r ApiGetBucketPolicyRequest) Policy(policy bool) ApiGetBucketPolicyRequest {
-	r.policy = &policy
-	return r
-}
-
-func (r ApiGetBucketPolicyRequest) Execute() (BucketPolicy, *shared.APIResponse, error) {
+func (r ApiGetBucketPolicyRequest) Execute() (*BucketPolicy, *shared.APIResponse, error) {
 	return r.ApiService.GetBucketPolicyExecute(r)
 }
 
 /*
-  - GetBucketPolicy GetBucketPolicy
-  - Returns the policy of a specified bucket.
+GetBucketPolicy GetBucketPolicy
+
+Returns the policy of a specified bucket.
 
 #### Permissions
 You must be the contract owner or an administrator to perform this operation. If not, they can grant you permission
@@ -219,11 +197,11 @@ to perform the `s3:GetBucketPolicy` operation using [Bucket Policy](#tag/Policy/
 #### S3 API Compatibility
 - The `x-amz-expected-bucket-owner` header isn't supported.
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiGetBucketPolicyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiGetBucketPolicyRequest
 */
-func (a *PolicyApiService) GetBucketPolicy(ctx _context.Context, bucket string) ApiGetBucketPolicyRequest {
+func (a *PolicyApiService) GetBucketPolicy(ctx context.Context, bucket string) ApiGetBucketPolicyRequest {
 	return ApiGetBucketPolicyRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -231,18 +209,15 @@ func (a *PolicyApiService) GetBucketPolicy(ctx _context.Context, bucket string) 
 	}
 }
 
-/*
- * Execute executes the request
- * @return BucketPolicy
- */
-func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (BucketPolicy, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return BucketPolicy
+func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (*BucketPolicy, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  BucketPolicy
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *BucketPolicy
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.GetBucketPolicy")
@@ -253,22 +228,18 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?policy"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.policy == nil {
-		return localVarReturnValue, nil, reportError("policy is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "policy", r.policy, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -300,13 +271,12 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -314,7 +284,6 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 		RequestURL:  localVarPath,
 		Operation:   "GetBucketPolicy",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -322,6 +291,7 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -339,6 +309,7 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 				return localVarReturnValue, localVarAPIResponse, newErr
 			}
 			newErr.SetModel(v)
+			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
@@ -365,24 +336,19 @@ func (a *PolicyApiService) GetBucketPolicyExecute(r ApiGetBucketPolicyRequest) (
 }
 
 type ApiGetBucketPolicyStatusRequest struct {
-	ctx          _context.Context
-	ApiService   *PolicyApiService
-	bucket       string
-	policyStatus *bool
+	ctx        context.Context
+	ApiService *PolicyApiService
+	bucket     string
 }
 
-func (r ApiGetBucketPolicyStatusRequest) PolicyStatus(policyStatus bool) ApiGetBucketPolicyStatusRequest {
-	r.policyStatus = &policyStatus
-	return r
-}
-
-func (r ApiGetBucketPolicyStatusRequest) Execute() (GetBucketPolicyStatusOutput, *shared.APIResponse, error) {
+func (r ApiGetBucketPolicyStatusRequest) Execute() (*PolicyStatus, *shared.APIResponse, error) {
 	return r.ApiService.GetBucketPolicyStatusExecute(r)
 }
 
 /*
-  - GetBucketPolicyStatus GetBucketPolicyStatus
-  - Retrieves the policy status of a bucket, indicating whether the bucket is public.
+GetBucketPolicyStatus GetBucketPolicyStatus
+
+Retrieves the policy status of a bucket, indicating whether the bucket is public.
 
 IONOS Object Storage considers a bucket policy to be "public" if any statement in the policy is public.
 A statement is considered public if the `Effect` is `Allow` and the `Principal` has a wildcard -- unless there
@@ -396,11 +362,11 @@ to perform the `s3:GetBucketPolicyStatus` operation using [Bucket Policy](#tag/P
 #### S3 API Compatibility
 - The `x-amz-expected-bucket-owner` header isn't supported.
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiGetBucketPolicyStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiGetBucketPolicyStatusRequest
 */
-func (a *PolicyApiService) GetBucketPolicyStatus(ctx _context.Context, bucket string) ApiGetBucketPolicyStatusRequest {
+func (a *PolicyApiService) GetBucketPolicyStatus(ctx context.Context, bucket string) ApiGetBucketPolicyStatusRequest {
 	return ApiGetBucketPolicyStatusRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -408,18 +374,15 @@ func (a *PolicyApiService) GetBucketPolicyStatus(ctx _context.Context, bucket st
 	}
 }
 
-/*
- * Execute executes the request
- * @return GetBucketPolicyStatusOutput
- */
-func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStatusRequest) (GetBucketPolicyStatusOutput, *shared.APIResponse, error) {
+// Execute executes the request
+//
+//	@return PolicyStatus
+func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStatusRequest) (*PolicyStatus, *shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  GetBucketPolicyStatusOutput
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PolicyStatus
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.GetBucketPolicyStatus")
@@ -430,22 +393,18 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?policyStatus"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return localVarReturnValue, nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.policyStatus == nil {
-		return localVarReturnValue, nil, reportError("policyStatus is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "policyStatus", r.policyStatus, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -477,13 +436,12 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -491,7 +449,6 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 		RequestURL:  localVarPath,
 		Operation:   "GetBucketPolicyStatus",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -499,6 +456,7 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarAPIResponse, err
 	}
@@ -516,6 +474,7 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 				return localVarReturnValue, localVarAPIResponse, newErr
 			}
 			newErr.SetModel(v)
+			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
@@ -542,22 +501,18 @@ func (a *PolicyApiService) GetBucketPolicyStatusExecute(r ApiGetBucketPolicyStat
 }
 
 type ApiPutBucketPolicyRequest struct {
-	ctx          _context.Context
+	ctx          context.Context
 	ApiService   *PolicyApiService
 	bucket       string
-	policy       *bool
 	bucketPolicy *BucketPolicy
 	contentMD5   *string
 }
 
-func (r ApiPutBucketPolicyRequest) Policy(policy bool) ApiPutBucketPolicyRequest {
-	r.policy = &policy
-	return r
-}
 func (r ApiPutBucketPolicyRequest) BucketPolicy(bucketPolicy BucketPolicy) ApiPutBucketPolicyRequest {
 	r.bucketPolicy = &bucketPolicy
 	return r
 }
+
 func (r ApiPutBucketPolicyRequest) ContentMD5(contentMD5 string) ApiPutBucketPolicyRequest {
 	r.contentMD5 = &contentMD5
 	return r
@@ -568,8 +523,9 @@ func (r ApiPutBucketPolicyRequest) Execute() (*shared.APIResponse, error) {
 }
 
 /*
-  - PutBucketPolicy PutBucketPolicy
-  - Applies a bucket policy to a bucket.
+PutBucketPolicy PutBucketPolicy
+
+Applies a bucket policy to a bucket.
 
 #### Permissions
 You must be the contract owner or an administrator to perform this operation. If not, they can grant you permission
@@ -580,11 +536,11 @@ to perform the `s3:PutBucketPolicy` operation using [Bucket Policy](#tag/Policy/
 - The `x-amz-expected-bucket-owner` header isn't supported.
 - The `x-amz-confirm-remove-self-bucket-access` header isn't supported.
 
-  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param bucket
-  - @return ApiPutBucketPolicyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param bucket
+	@return ApiPutBucketPolicyRequest
 */
-func (a *PolicyApiService) PutBucketPolicy(ctx _context.Context, bucket string) ApiPutBucketPolicyRequest {
+func (a *PolicyApiService) PutBucketPolicy(ctx context.Context, bucket string) ApiPutBucketPolicyRequest {
 	return ApiPutBucketPolicyRequest{
 		ApiService: a,
 		ctx:        ctx,
@@ -592,16 +548,12 @@ func (a *PolicyApiService) PutBucketPolicy(ctx _context.Context, bucket string) 
 	}
 }
 
-/*
- * Execute executes the request
- */
+// Execute executes the request
 func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (*shared.APIResponse, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.PutBucketPolicy")
@@ -612,25 +564,21 @@ func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (
 	}
 
 	localVarPath := localBasePath + "/{Bucket}?policy"
-	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", _neturl.PathEscape(parameterValueToString(r.bucket, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"Bucket"+"}", parameterValueToString(r.bucket, "bucket"), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if shared.Strlen(r.bucket) < 3 {
 		return nil, reportError("bucket must have at least 3 elements")
 	}
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.policy == nil {
-		return nil, reportError("policy is required and must be specified")
-	}
 	if r.bucketPolicy == nil {
 		return nil, reportError("bucketPolicy is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "policy", r.policy, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -667,13 +615,12 @@ func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (
 			}
 		}
 	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
 	}
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
-
 	localVarAPIResponse := &shared.APIResponse{
 		Response:    localVarHTTPResponse,
 		Method:      localVarHTTPMethod,
@@ -681,7 +628,6 @@ func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (
 		RequestURL:  localVarPath,
 		Operation:   "PutBucketPolicy",
 	}
-
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarAPIResponse, err
 	}
@@ -689,6 +635,7 @@ func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarAPIResponse.Payload = localVarBody
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarAPIResponse, err
 	}
@@ -706,6 +653,7 @@ func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (
 				return localVarAPIResponse, newErr
 			}
 			newErr.SetModel(v)
+			return localVarAPIResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
 			var v Error
@@ -715,6 +663,7 @@ func (a *PolicyApiService) PutBucketPolicyExecute(r ApiPutBucketPolicyRequest) (
 				return localVarAPIResponse, newErr
 			}
 			newErr.SetModel(v)
+			return localVarAPIResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error

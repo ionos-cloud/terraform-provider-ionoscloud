@@ -15,17 +15,20 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the CreateMultipartUploadOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &CreateMultipartUploadOutput{}
 
 // CreateMultipartUploadOutput struct for CreateMultipartUploadOutput
 type CreateMultipartUploadOutput struct {
+	XMLName xml.Name `xml:"CreateMultipartUploadOutput"`
 	// The bucket name.
-	Bucket *string `json:"Bucket,omitempty"`
+	Bucket *string `json:"Bucket,omitempty" xml:"Name"`
 	// The object key.
-	Key *string `json:"Key,omitempty"`
+	Key *string `json:"Key,omitempty" xml:"Key"`
 	// ID of the multipart upload.
-	UploadId *string `json:"UploadId,omitempty"`
+	UploadId *string `json:"UploadId,omitempty" xml:"UploadId"`
 }
 
 // NewCreateMultipartUploadOutput instantiates a new CreateMultipartUploadOutput object

@@ -15,34 +15,37 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ListMultipartUploadsOutput type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ListMultipartUploadsOutput{}
 
 // ListMultipartUploadsOutput struct for ListMultipartUploadsOutput
 type ListMultipartUploadsOutput struct {
+	XMLName xml.Name `xml:"ListMultipartUploadsOutput"`
 	// The bucket name.
-	Bucket *string `json:"Bucket,omitempty"`
+	Bucket *string `json:"Bucket,omitempty" xml:"Name"`
 	// The key at or after which the listing began.
-	KeyMarker *string `json:"KeyMarker,omitempty"`
+	KeyMarker *string `json:"KeyMarker,omitempty" xml:"KeyMarker"`
 	// Upload ID after which listing began.
-	UploadIdMarker *string `json:"UploadIdMarker,omitempty"`
+	UploadIdMarker *string `json:"UploadIdMarker,omitempty" xml:"UploadIdMarker"`
 	// When a list is truncated, this element specifies the value that should be used for the key-marker request parameter in a subsequent request.
-	NextKeyMarker *string `json:"NextKeyMarker,omitempty"`
+	NextKeyMarker *string `json:"NextKeyMarker,omitempty" xml:"NextKeyMarker"`
 	// When a prefix is provided in the request, this field contains the specified prefix. The result contains only keys starting with the specified prefix.
-	Prefix *string `json:"Prefix,omitempty"`
+	Prefix *string `json:"Prefix,omitempty" xml:"Prefix"`
 	// Contains the delimiter you specified in the request. If you don't specify a delimiter in your request, this element is absent from the response.
-	Delimiter *string `json:"Delimiter,omitempty"`
+	Delimiter *string `json:"Delimiter,omitempty" xml:"Delimiter"`
 	// When a list is truncated, this element specifies the value that should be used for the `upload-id-marker` request parameter in a subsequent request.
-	NextUploadIdMarker *string `json:"NextUploadIdMarker,omitempty"`
+	NextUploadIdMarker *string `json:"NextUploadIdMarker,omitempty" xml:"NextUploadIdMarker"`
 	// Maximum number of multipart uploads that could have been included in the response.
-	MaxUploads *int32 `json:"MaxUploads,omitempty"`
+	MaxUploads *int32 `json:"MaxUploads,omitempty" xml:"MaxUploads"`
 	// A flag that indicates whether IONOS Object Storage returned all of the results that satisfied the search criteria. If your results were truncated, you can make a follow-up paginated request using the NextKeyMarker and NextVersionIdMarker response parameters as a starting place in another request to return the rest of the results.
-	IsTruncated *bool `json:"IsTruncated,omitempty"`
+	IsTruncated *bool `json:"IsTruncated,omitempty" xml:"IsTruncated"`
 	// Container for elements related to a particular multipart upload. A response can contain zero or more `Upload` elements.
-	Uploads []MultipartUpload `json:"Uploads,omitempty"`
+	Uploads []MultipartUpload `json:"Uploads,omitempty" xml:"Uploads"`
 	// All of the keys rolled up into a common prefix count as a single return when calculating the number of returns.
-	CommonPrefixes []CommonPrefix `json:"CommonPrefixes,omitempty"`
-	EncodingType   *EncodingType  `json:"EncodingType,omitempty"`
+	CommonPrefixes []CommonPrefix `json:"CommonPrefixes,omitempty" xml:"CommonPrefixes"`
+	EncodingType   *EncodingType  `json:"EncodingType,omitempty" xml:"EncodingType"`
 }
 
 // NewListMultipartUploadsOutput instantiates a new ListMultipartUploadsOutput object

@@ -15,13 +15,16 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the AbortIncompleteMultipartUpload type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &AbortIncompleteMultipartUpload{}
 
 // AbortIncompleteMultipartUpload Specifies the days since the initiation of an incomplete multipart upload that IONOS Object Storage will wait before permanently removing all parts of the upload.
 type AbortIncompleteMultipartUpload struct {
+	XMLName xml.Name `xml:"AbortIncompleteMultipartUpload"`
 	// Specifies the number of days after which IONOS Object Storage aborts an incomplete multipart upload.
-	DaysAfterInitiation *int32 `json:"DaysAfterInitiation,omitempty"`
+	DaysAfterInitiation *int32 `json:"DaysAfterInitiation,omitempty" xml:"DaysAfterInitiation"`
 }
 
 // NewAbortIncompleteMultipartUpload instantiates a new AbortIncompleteMultipartUpload object

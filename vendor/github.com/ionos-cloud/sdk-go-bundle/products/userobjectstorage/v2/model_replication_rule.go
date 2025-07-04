@@ -15,18 +15,21 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the ReplicationRule type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ReplicationRule{}
 
 // ReplicationRule Specifies which IONOS Object Storage objects to replicate and where to store the replicas.
 type ReplicationRule struct {
+	XMLName xml.Name `xml:"ReplicationRule"`
 	// Container for the Contract Number of the owner.
-	ID *int32 `json:"ID,omitempty"`
+	ID *string `json:"ID,omitempty" xml:"ID"`
 	// An object key name prefix that identifies the subset of objects to which the rule applies. Replace the Object keys containing special characters, such as carriage returns, when using XML requests.
-	Prefix *string `json:"Prefix,omitempty"`
+	Prefix *string `json:"Prefix,omitempty" xml:"Prefix"`
 	// Specifies whether the rule is enabled.
-	Status      string      `json:"Status"`
-	Destination Destination `json:"Destination"`
+	Status      string      `json:"Status" xml:"Status"`
+	Destination Destination `json:"Destination" xml:"Destination"`
 }
 
 // NewReplicationRule instantiates a new ReplicationRule object
@@ -51,9 +54,9 @@ func NewReplicationRuleWithDefaults() *ReplicationRule {
 }
 
 // GetID returns the ID field value if set, zero value otherwise.
-func (o *ReplicationRule) GetID() int32 {
+func (o *ReplicationRule) GetID() string {
 	if o == nil || IsNil(o.ID) {
-		var ret int32
+		var ret string
 		return ret
 	}
 	return *o.ID
@@ -61,7 +64,7 @@ func (o *ReplicationRule) GetID() int32 {
 
 // GetIDOk returns a tuple with the ID field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ReplicationRule) GetIDOk() (*int32, bool) {
+func (o *ReplicationRule) GetIDOk() (*string, bool) {
 	if o == nil || IsNil(o.ID) {
 		return nil, false
 	}
@@ -77,8 +80,8 @@ func (o *ReplicationRule) HasID() bool {
 	return false
 }
 
-// SetID gets a reference to the given int32 and assigns it to the ID field.
-func (o *ReplicationRule) SetID(v int32) {
+// SetID gets a reference to the given string and assigns it to the ID field.
+func (o *ReplicationRule) SetID(v string) {
 	o.ID = &v
 }
 

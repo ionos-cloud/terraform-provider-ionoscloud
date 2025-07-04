@@ -15,17 +15,20 @@ import (
 	"encoding/json"
 )
 
+import "encoding/xml"
+
 // checks if the DeletionError type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &DeletionError{}
 
 // DeletionError Container for all error elements.
 type DeletionError struct {
+	XMLName xml.Name `xml:"Error"`
 	// The object key.
-	Key *string `json:"Key,omitempty"`
+	Key *string `json:"Key,omitempty" xml:"Key"`
 	// The version ID of the object.
-	VersionId *string `json:"VersionId,omitempty"`
-	Code      *string `json:"Code,omitempty"`
-	Message   *string `json:"Message,omitempty"`
+	VersionId *string `json:"VersionId,omitempty" xml:"VersionId"`
+	Code      *string `json:"Code,omitempty" xml:"Code"`
+	Message   *string `json:"Message,omitempty" xml:"Message"`
 }
 
 // NewDeletionError instantiates a new DeletionError object
