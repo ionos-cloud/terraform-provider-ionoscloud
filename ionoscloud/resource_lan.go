@@ -400,7 +400,7 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 		return false, fmt.Errorf("error checking LAN deletion status: %w", err)
 	}
 
-	log.Printf("[INFO] LAN %s not deleted yet deleted from the datacenter %s", d.Id(), dcId)
+	log.Printf("[INFO] LAN %s not yet deleted from the datacenter %s", d.Id(), dcId)
 
 	return false, nil
 }
