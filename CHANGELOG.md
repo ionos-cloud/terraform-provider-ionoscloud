@@ -1,6 +1,7 @@
 ## 6.7.11
 ### Fixes
 - Add `expose_serial` attribute to `ionoscloud_vcpu_server` resource and data source.
+- Make `expose_serial` attribute computed for `ionoscloud_server` `ionoscloud_volume` and `ionoscloud_cube_server` resources.
 ### Documentation 
 - Fix `ionoscloud_logging_pipeline` resource documentation.
 ## 6.7.10

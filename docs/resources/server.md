@@ -262,7 +262,7 @@ resource "ionoscloud_server" "test" {
 - `hostname` - (Optional)(Computed)[string] The hostname of the resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters. If no value provided explicitly, it will be populated with the name of the server
 - `cores` - (Optional)(Computed)[integer] Number of server CPU cores.
 - `ram` - (Optional)(Computed)[integer] The amount of memory for the server in MB.
-- `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
+- `image_name` - (Optional)[strin"g] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist. E.g: `AUTO`, `ZONE_1`, `ZONE_2`. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
 - `cpu_family` - (Optional)[string] CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource. E.g.: "INTEL_SKYLAKE" or "INTEL_XEON".
