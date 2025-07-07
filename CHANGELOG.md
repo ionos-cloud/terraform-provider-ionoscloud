@@ -1,3 +1,8 @@
+## 6.7.11
+### Fixes
+- Add `expose_serial` attribute to `ionoscloud_vcpu_server` resource and data source.
+### Documentation 
+- Fix `ionoscloud_logging_pipeline` resource documentation.
 ## 6.7.10
 ### Features
 - Add `key` to `ionoscloud_logging_pipeline` resource
