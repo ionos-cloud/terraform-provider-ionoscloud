@@ -445,6 +445,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
     name            = "` + constant.ServerTestResource + `"
     licence_type    = "LINUX"
     disk_type = "DAS"
+	expose_serial = false
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id

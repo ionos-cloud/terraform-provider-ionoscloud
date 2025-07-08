@@ -217,6 +217,14 @@ func resourceVCPUServer() *schema.Resource {
 							Description: "The UUID of the attached server.",
 							Computed:    true,
 						},
+						"expose_serial": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+							Description: "If set to `true` will expose the serial id of the disk attached to the server. " +
+								"If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. " +
+								"Exposing the serial can influence licensed software (e.g. Windows) behavior",
+						},
 					},
 				},
 			},

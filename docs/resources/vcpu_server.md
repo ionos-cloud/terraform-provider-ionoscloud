@@ -23,7 +23,7 @@ This section lists the limitations of [vCPU Servers](https://docs.ionos.com/clou
 data "ionoscloud_image" "example" {
     type                  = "HDD"
     image_alias           = "ubuntu:latest"
-    location              = "us/las"
+    location              = "de/txl"
 }
 
 resource "ionoscloud_datacenter" "example" {
@@ -50,7 +50,6 @@ resource "ionoscloud_vcpu_server" "example" {
     datacenter_id         = ionoscloud_datacenter.example.id
     cores                 = 1
     ram                   = 1024
-    availability_zone     = "ZONE_1"
     image_name            = data.ionoscloud_image.example.id
     image_password        = random_password.server_image_password.result
     volume {
@@ -59,7 +58,6 @@ resource "ionoscloud_vcpu_server" "example" {
         disk_type         = "SSD Standard"
         user_data         = "foo"
         bus               = "VIRTIO"
-        availability_zone = "ZONE_1"
     }
     nic {
         lan               = ionoscloud_lan.example.id
