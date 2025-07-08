@@ -1501,7 +1501,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-   = "ZONE_1"
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
