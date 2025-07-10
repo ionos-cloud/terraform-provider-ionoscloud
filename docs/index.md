@@ -194,7 +194,8 @@ The following arguments are supported:
 | `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS Object Storage API                                                                                          |
 | `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS Object Storage API                                                                                          |
 | `IONOS_S3_REGION`       | Region for IONOS Object Storage operations. Default value: eu-central-3. **If you use IONOS_API_URL_OBJECT_STORAGE, `IONOS_S3_REGION` is mandatory**                      |
-| `IONOS_CONFIG_FILE`     | Specify the path to the YAML configuration file. Default value: `~/.ionos/config.yaml`. 
+| `IONOS_CONFIG_FILE`     | Specify the path to the YAML configuration file. Default value: `~/.ionos/config.yaml`.                                                                                   |
+| `IONOS_CURRENT_PROFILE` | Specify the current profile to use from the YAML configuration file.                                                                                                      |
 
 ## Resource Timeout
 
