@@ -71,6 +71,55 @@ export TF_VAR_ionos_token="token"
 #export TF_VAR_ionos_s3_region="region"
 ```
 
+For more complex configurations, with multiple user profiles and environments with custom API URLs, you can use a YAML configuration file with the following structure:
+
+```yaml
+version: 1.0
+currentProfile: user # The current profile can also be overridden by the environment variable IONOS_CURRENT_PROFILE
+profiles:
+  - name: user
+    environment: prod
+    credentials:
+      # You can use either username and password, or token.
+      # If both username and password, as well as token are provided, the token will take precedence.
+      token: <token>
+  - name: user2
+    environment: dev
+    credentials:
+      username: <username>
+      password: <password>
+environments:
+  - name: prod
+    products:
+      - name: apigateway
+        endpoints:
+          - location: de/txl
+            name: https://apigateway.de-txl.ionos.com
+            skipTlsVerify: false
+          - location: gb/lhr
+            name: https://apigateway.gb-lhr.ionos.com
+            skipTlsVerify: false
+          - location: fr/par
+            name: https://apigateway.fr-par.ionos.com
+            skipTlsVerify: false
+          - location: es/vit
+            name: https://apigateway.es-vit.ionos.com
+            skipTlsVerify: false
+      - name: compute
+        endpoints:
+          - name: https://api.ionos.com/cloudapi/v6
+            skipTlsVerify: false
+  - name: dev
+    products:
+      - name: auth
+        endpoints:
+          - name: https://api.ionos.com/auth/v1
+            skipTlsVerify: false
+```
+
+The path to the file can be set using the `IONOS_CONFIG_FILE` environment variable, or it defaults to `~/.ionos/config.yaml`.
+Using a configuration file is incompatible with using the `token`, `username`, `password`, `endpoint`, `s3_access_key`, `s3_secret_key`
+and `s3_region` fields in the provider block or the corresponding environment variables. If you use a configuration file, you must not set any of these fields or environment variables.
 
 ## Example Usage
 
@@ -145,6 +194,7 @@ The following arguments are supported:
 | `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS Object Storage API                                                                                          |
 | `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS Object Storage API                                                                                          |
 | `IONOS_S3_REGION`       | Region for IONOS Object Storage operations. Default value: eu-central-3. **If you use IONOS_API_URL_OBJECT_STORAGE, `IONOS_S3_REGION` is mandatory**                      |
+| `IONOS_CONFIG_FILE`     | Specify the path to the YAML configuration file. Default value: `~/.ionos/config.yaml`. 
 
 ## Resource Timeout
 
