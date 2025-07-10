@@ -118,8 +118,11 @@ environments:
 ```
 
 The path to the file can be set using the `IONOS_CONFIG_FILE` environment variable, or it defaults to `~/.ionos/config.yaml`.
-Using a configuration file is incompatible with using the `token`, `username`, `password`, `endpoint`, `s3_access_key`, `s3_secret_key`
-and `s3_region` fields in the provider block or the corresponding environment variables. If you use a configuration file, you must not set any of these fields or environment variables.
+The file can either be written manually by the user, or generated through the `ionosctl login` command
+(see [ionosctl docs](https://github.com/ionos-cloud/ionosctl/blob/master/docs/subcommands/CLI%20Setup/login.md)).
+
+> **⚠️** Using a configuration file is incompatible with using the `token`, `username`, `password`, `endpoint`, `s3_access_key`, `s3_secret_key`
+> and `s3_region` fields in the provider block or the corresponding environment variables. If you use a configuration file, you must not set any of these fields or environment variables.
 
 ## Example Usage
 
