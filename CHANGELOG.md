@@ -1,3 +1,7 @@
+## 6.7.12 (upcoming release)
+### Fixes
+- Fix `ionoscloud_server_boot_device_selection` delete error when servers have no inital boot device.
+
 ## 6.7.11
 ### Fixes
 - Add `expose_serial` attribute to `ionoscloud_vcpu_server` resource and data source.
