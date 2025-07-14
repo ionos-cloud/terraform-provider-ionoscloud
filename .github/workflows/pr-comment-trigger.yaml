@@ -19,7 +19,7 @@ jobs:
             const repo = context.repo.repo;
             const owner = context.repo.owner;
 
-            await github.actions.createWorkflowDispatch({
+            await github.rest.actions.createWorkflowDispatch({
               owner: owner,
               repo: repo,
               workflow_id: 'e2e.yaml',

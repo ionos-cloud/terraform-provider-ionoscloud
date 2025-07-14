@@ -51,7 +51,7 @@ jobs:
             await github.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name: 'E2E Server Tests',
+              name: 'E2E Tests',
               head_sha: context.payload.pull_request.head.sha,
               status: 'completed',
               conclusion: conclusion,
