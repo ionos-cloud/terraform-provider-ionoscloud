@@ -121,9 +121,9 @@ The path to the file can be set using the `IONOS_CONFIG_FILE` environment variab
 The file can either be written manually by the user, or generated through the `ionosctl login` command
 (see [ionosctl docs](https://github.com/ionos-cloud/ionosctl/blob/master/docs/subcommands/CLI%20Setup/login.md)).
 
-Using a configuration file can be used in conjunction with the `token`, `username`, `password`, `endpoint`, `s3_access_key`, `s3_secret_key`
+A configuration file can be used in conjunction with the `token`, `username`, `password`, `endpoint`, `s3_access_key`, `s3_secret_key`
 and `s3_region` fields in the provider block or the corresponding environment variables, replacing the
-credentials set for the `currentProfile`.
+credentials set for the `currentProfile`. All endpoints defined in the `currentProfile` environment will still be used.
 
 ## Example Usage
 
