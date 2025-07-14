@@ -1,0 +1,62 @@
+name: E2E Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull request number'
+        required: true
+        type: string
+      tag:
+        description: 'Test tag'
+        required: true
+        type: string
+
+jobs:
+  run-e2e-tests:
+    env:
+      IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
+      IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
+      IONOS_TOKEN: ${{ secrets.IONOS_VDC_TOKEN_GO_V6 }}
+      IONOS_S3_ACCESS_KEY: ${{ secrets.IONOS_VDC_S3_ACCESS_KEY_GO_V6 }}
+      IONOS_S3_SECRET_KEY: ${{ secrets.IONOS_VDC_S3_SECRET_KEY_GO_V6 }}
+      TF_ACC: true
+      TF_LOG: "DEBUG"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      - name: Run E2E tests with specified tag
+        run: |
+          go test ./... -v -timeout 6h -tags "${{ github.event.inputs.tag }}"
+
+      - name: Create status check
+        uses: actions/github-script@v6
+        env:
+          PR_NUMBER: ${{ github.event.inputs.pr_number }}
+        with:
+          script: |
+            const conclusion = core.getInput('state') || 'success';
+            await github.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'E2E Server Tests',
+              head_sha: context.payload.pull_request.head.sha,
+              status: 'completed',
+              conclusion: conclusion,
+              output: {
+                title: `E2E ${context.payload.inputs.tag} Tests ${conclusion}`,
+                summary: `E2E tests for the ${context.payload.inputs.tag} tag ran ${conclusion}`,
+              }
+            });

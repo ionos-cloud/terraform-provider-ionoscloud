@@ -1,0 +1,31 @@
+name: PR Comment Trigger
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  comment-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if comment triggers E2E tests
+        if: ${{ (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'CONTRIBUTOR' ) &&
+          github.event.issue.pull_request &&
+          contains(github.event.comment.body,  '/test') }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.payload.issue.number;
+            const repo = context.repo.repo;
+            const owner = context.repo.owner;
+
+            await github.actions.createWorkflowDispatch({
+              owner: owner,
+              repo: repo,
+              workflow_id: 'e2e.yaml',
+              ref: context.payload.issue.pull_request.head.ref,
+              inputs: {
+                pr_number: prNumber.toString(),
+                tag: 'datacenter',  // You can pass other tags later if needed
+              }
+            });
