@@ -29,7 +29,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr checkout ${{ github.event.issue.number }}
+          gh pr checkout ${{ github.event.inputs.pr_number }}
           git submodule update --init --recursive
           OUTPUT=$(git log -1 --format='%H')
           echo "commit-sha=$OUTPUT" >> $GITHUB_OUTPUT
