@@ -75,7 +75,8 @@ jobs:
             /repos/${{ github.repository }}/statuses/${{ steps.checkout-pr.outputs.commit-sha }} \
             -f state='success' \
             -f target_url='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}' \
-            -f description='Passed'"
+            -f description='Passed' \
+            -f context="test-${{ github.event.inputs.tag }}"
 
       - name: Create Unsuccessful Status Check
         if: failure()
@@ -89,4 +90,5 @@ jobs:
             /repos/${{ github.repository }}/statuses/${{ steps.checkout-pr.outputs.commit-sha }} \
             -f state='failure' \
             -f target_url='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}' \
-            -f description='Failed'"
+            -f description='Failed' \
+            -f context="test-${{ github.event.inputs.tag }}"
