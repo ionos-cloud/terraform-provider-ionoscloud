@@ -18,6 +18,14 @@ jobs:
             const prNumber = context.payload.issue.number;
             const repo = context.repo.repo;
             const owner = context.repo.owner;
+            
+            // Extract the tagname from the comment
+            const commentBody = context.payload.comment.body.trim();
+            const tagMatch = commentBody.match(/^\/test\s+(\S+)/);
+            if (!tagMatch) {
+              throw new Error('Comment must be in the format: /test tagname');
+            }
+            const tagname = tagMatch[1];
 
             await github.rest.actions.createWorkflowDispatch({
               owner: owner,
@@ -26,7 +34,7 @@ jobs:
               ref: context.ref,
               inputs: {
                 pr_number: prNumber.toString(),
-                tag: 'datacenter',  // You can pass other tags later if needed
+                tag: tagname,
               }
             }).catch(error => error).then(response => {
               core.debug(response);

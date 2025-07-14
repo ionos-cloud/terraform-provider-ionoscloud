@@ -24,10 +24,33 @@ jobs:
       TF_LOG: "DEBUG"
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout PR
+        id: checkout-pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr checkout ${{ github.event.issue.number }}
+          git submodule update --init --recursive
+          OUTPUT=$(git log -1 --format='%H')
+          echo "commit-sha=$OUTPUT" >> $GITHUB_OUTPUT
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           submodules: true
+
+      - name: Create Pending Status Check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/statuses/${{ steps.checkout-pr.outputs.commit-sha }} \
+            -f state='pending' \
+            -f target_url='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}' \
+            -f description='Running...' \
+            -f context="test-${{ github.event.inputs.tag }}"
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -41,22 +64,29 @@ jobs:
         run: |
           go test ./... -v -timeout 6h -tags "${{ github.event.inputs.tag }}"
 
-      - name: Create status check
-        uses: actions/github-script@v6
+      - name: Create Successful Status Check
         env:
-          PR_NUMBER: ${{ github.event.inputs.pr_number }}
-        with:
-          script: |
-            const conclusion = core.getInput('state') || 'success';
-            await github.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'E2E Tests',
-              head_sha: context.payload.pull_request.head.sha,
-              status: 'completed',
-              conclusion: conclusion,
-              output: {
-                title: `E2E ${context.payload.inputs.tag} Tests ${conclusion}`,
-                summary: `E2E tests for the ${context.payload.inputs.tag} tag ran ${conclusion}`,
-              }
-            });
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXAMPLE_HASH: ${{ needs.get-example-list.outputs.example_hash }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/statuses/${{ steps.checkout-pr.outputs.commit-sha }} \
+            -f state='success' \
+            -f target_url='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}' \
+            -f description='Passed'"
+
+      - name: Create Unsuccessful Status Check
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXAMPLE_HASH: ${{ needs.get-example-list.outputs.example_hash }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/statuses/${{ steps.checkout-pr.outputs.commit-sha }} \
+            -f state='failure' \
+            -f target_url='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}' \
+            -f description='Failed'"
