@@ -1,3 +1,6 @@
+## 6.7.12
+### Documentation
+- Update Kafka documentation to state that version 3.9.0 is supported in all relevant resources and data sources.
 ## 6.7.11
 ### Fixes
 - Add `expose_serial` attribute to `ionoscloud_vcpu_server` resource and data source.
@@ -963,22 +966,6 @@ To fix, when you try to change immutable fields they will throw an error in the 
 ### Fixes:
 - `server`: can not create cube server, firewall not updated
 - `firewall`: using type argument throws error
-
-### Enhancements:
-- For `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
-  - made tests comprehensive
-  - optimized test duration by including both match by id and by name in the same test
-  - removed duplicated code from import, data_source and resource files (set parameters)
-  - updated documentation
-  - improved import functions
-
-### Features:
-- Data_source for `s3_key`
-
-## 6.0.0-beta.11
-### Fixes:
-- Added `image_alias` to volume
-- Removed `public` and `gateway_ip` properties from `k8s_cluster`
 
 ### Enhancements:
 - Updated sdk-go to `v6.0.0-beta.7`

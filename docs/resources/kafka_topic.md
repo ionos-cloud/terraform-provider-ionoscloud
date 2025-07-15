@@ -33,7 +33,7 @@ resource "ionoscloud_lan" "example" {
 resource "ionoscloud_kafka_cluster" "example" {
   name     = "example-kafka-cluster"
   location = ionoscloud_datacenter.example.location
-  version  = "3.8.0"
+  version  = "3.9.0"
   size     = "S"
   connections {
     datacenter_id = ionoscloud_datacenter.example.id
@@ -108,7 +108,7 @@ locals {
 resource "ionoscloud_kafka_cluster" "example" {
   name     = "example-kafka-cluster"
   location = ionoscloud_datacenter.example.location
-  version  = "3.8.0"
+  version  = "3.9.0"
   size     = "S"
   connections {
     datacenter_id    = ionoscloud_datacenter.example.id
