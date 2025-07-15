@@ -1,3 +1,7 @@
+## 6.7.12
+### Documentation
+- Update Kafka documentation to state that version 3.9.0 is supported in all relevant resources and data sources.
+
 ## 6.7.11
 ### Fixes
 - Add `expose_serial` attribute to `ionoscloud_vcpu_server` resource and data source.
@@ -1122,12 +1126,3 @@ FEATURES:
 
 FEATURES:
 - Terraform-provider-profitbricks rebranding to terraform-provider-ionoscloud
-
-### Features:
-- Update the NFS API's supported location list to include the following locations:
-  https://nfs.fr-par.ionos.com (Paris, France)
-  https://nfs.gb-lhr.ionos.com (London, Great Britain)
-  https://nfs.es-vit.ionos.com (Logroño, Spain)
-  https://nfs.us-las.ionos.com (Las Vegas, USA)
-  https://nfs.us-ewr.ionos.com (Newark, USA)
-  https://nfs.us-mci.ionos.com (Lenexa, USA)
