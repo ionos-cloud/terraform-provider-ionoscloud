@@ -22,6 +22,7 @@ import (
 const bootCdromImageIdCube = "83f21679-3321-11eb-a681-1e659523cb7b"
 
 func TestAccCubeServerBasic(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -233,6 +234,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 // }
 
 func TestAccCubeServerResolveImageName(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -297,6 +299,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 // }
 
 func TestAccCubeServerWithICMP(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{

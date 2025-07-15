@@ -18,6 +18,7 @@ import (
 )
 
 func TestAccNicBasic(t *testing.T) {
+	t.Parallel()
 	var nic ionoscloud.Nic
 	name := "testNic"
 
