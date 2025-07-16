@@ -1,4 +1,6 @@
 ## 6.7.12
+### Changes
+- No longer add `boot_volume` in the `inline_volume_ids` list on server and vcpu_server imports as it generated errors when using `ionoscloud_server_boot_device_selection` with a server with on boot device
 ### Fixes
 - Fix `ionoscloud_server_boot_device_selection` delete error when servers have no initial boot device and a cdrom is used. (https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/843)
 ### Documentation

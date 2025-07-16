@@ -1491,19 +1491,6 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		return err
 	}
 
-	// takes care of an upgrade from a version that does not have inline_volume_ids(pre 6.4.0)
-	// to one that has it(>6.4.0)
-	if _, ok := d.GetOk("inline_volume_ids"); !ok {
-		if bootVolumeItf, ok := d.GetOk("boot_volume"); ok {
-			bootVolume := bootVolumeItf.(string)
-			var inlineVolumeIds []string
-			inlineVolumeIds = append(inlineVolumeIds, bootVolume)
-			if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
-				return utils.GenerateSetError("server", "inline_volume_ids", err)
-			}
-		}
-	}
-
 	datacenterId := d.Get("datacenter_id").(string)
 	if server.Properties != nil {
 		if server.Properties.Name != nil {
