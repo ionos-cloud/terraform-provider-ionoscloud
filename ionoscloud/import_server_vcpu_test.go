@@ -28,7 +28,7 @@ func TestAccServerVCPUImportBasic(t *testing.T) {
 				ImportStateIdFunc:       testAccServerVCPUImportStateIdWithNicAndFw,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids"},
+				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume", "firewallrule_id", "primary_nic", "inline_volume_ids"},
 			},
 		},
 	})
@@ -50,7 +50,7 @@ func TestAccServerVCPUWithLabelsImport(t *testing.T) {
 				ImportStateIdFunc:       testAccServerVCPUImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids", "primary_ip"},
+				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume", "firewallrule_id", "primary_nic", "inline_volume_ids", "primary_ip"},
 			},
 		},
 	})
