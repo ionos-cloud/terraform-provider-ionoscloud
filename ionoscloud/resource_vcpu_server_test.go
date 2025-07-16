@@ -434,6 +434,7 @@ func TestAccServerVCPUBootCdromNoImageAndInlineFwRules(t *testing.T) {
 
 // create and updates 5 inline rules after the server is created
 func TestAccServerVCPUResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
