@@ -1,6 +1,8 @@
-## 6.7.12 (upcoming release)
+## 6.7.12
 ### Fixes
 - Fix `ionoscloud_server_boot_device_selection` delete error when servers have no inital boot device and a cdrom is used.
+### Documentation
+- Update Kafka documentation to state that version 3.9.0 is supported in all relevant resources and data sources.
 
 ## 6.7.11
 ### Fixes
@@ -1126,12 +1128,3 @@ FEATURES:
 
 FEATURES:
 - Terraform-provider-profitbricks rebranding to terraform-provider-ionoscloud
-
-### Features:
-- Update the NFS API's supported location list to include the following locations:
-  https://nfs.fr-par.ionos.com (Paris, France)
-  https://nfs.gb-lhr.ionos.com (London, Great Britain)
-  https://nfs.es-vit.ionos.com (Logroño, Spain)
-  https://nfs.us-las.ionos.com (Las Vegas, USA)
-  https://nfs.us-ewr.ionos.com (Newark, USA)
-  https://nfs.us-mci.ionos.com (Lenexa, USA)
