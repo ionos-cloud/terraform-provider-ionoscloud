@@ -1,6 +1,6 @@
 ## 6.7.12
 ### Fixes
-- Fix `ionoscloud_server_boot_device_selection` delete error when servers have no inital boot device and a cdrom is used.
+- Fix `ionoscloud_server_boot_device_selection` delete error when servers have no initial boot device and a cdrom is used. (https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/843)
 ### Documentation
 - Update Kafka documentation to state that version 3.9.0 is supported in all relevant resources and data sources.
 
