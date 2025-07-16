@@ -1491,7 +1491,6 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		return err
 	}
 
-
 	datacenterId := d.Get("datacenter_id").(string)
 	if server.Properties != nil {
 		if server.Properties.Name != nil {
