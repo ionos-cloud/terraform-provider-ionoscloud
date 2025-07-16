@@ -1,6 +1,6 @@
 ## 6.7.12 (upcoming release)
 ### Fixes
-- Fix `ionoscloud_server_boot_device_selection` delete error when servers have no inital boot device.
+- Fix `ionoscloud_server_boot_device_selection` delete error when servers have no inital boot device and a cdrom is used.
 
 ## 6.7.11
 ### Fixes
