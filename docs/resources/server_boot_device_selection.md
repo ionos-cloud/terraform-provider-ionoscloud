@@ -14,7 +14,7 @@ Manages the selection of a boot device for IonosCloud Servers.
 ## Example Usage
 
 The boot device of a `ionoscloud_server`, `ionoscloud_vcpu_server` or `ionoscloud_cube_server` can be selected with this resource.
-Deleting this resource will revert the boot device back to the default volume, which is the first inline volume created together with the server.
+Deleting this resource will revert the boot device back to the default volume, which is the first inline volume created together with the server. In case in which there is no default to revert to, when the server had no boot device, the current device will remain set as a boot device when this resource is deleted.
 This resource also allows switching between a `volume` and a `ionoscloud_image` CDROM. Note that CDROM images are detached after they are no longer set as boot devices.
 
 ### Select an external volume

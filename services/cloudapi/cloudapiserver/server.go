@@ -217,42 +217,47 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 	}
 
 	newBdType := constant.BootDeviceTypeCDROM
-	_, apiResponse, err := ss.Client.ImagesApi.ImagesFindById(ctx, newBootDeviceID).Execute()
-	if err != nil {
-		if !apiResponse.HttpNotFound() {
-			return err
+
+	if newBootDeviceID != "" {
+		_, apiResponse, err := ss.Client.ImagesApi.ImagesFindById(ctx, newBootDeviceID).Execute()
+		if err != nil {
+			if !apiResponse.HttpNotFound() {
+				return err
+			}
+			log.Printf("[DEBUG] no bootable image found with id : %s", newBootDeviceID)
+			newBdType = constant.BootDeviceTypeVolume
 		}
-		log.Printf("[DEBUG] no bootable image found with id : %s", newBootDeviceID)
-		newBdType = constant.BootDeviceTypeVolume
 	}
 
 	switch oldBdType {
 	case constant.BootDeviceTypeCDROM:
-		if strings.EqualFold(newBdType, constant.BootDeviceTypeVolume) {
-			// update to new boot volume
-			sp := ionoscloud.ServerProperties{BootVolume: ionoscloud.NewResourceReference(newBootDeviceID)}
-			if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
-				return err
-			}
-		} else {
-			// attach new cdrom
-			img := ionoscloud.Image{Id: &newBootDeviceID}
-			_, apiResponse, err := ss.Client.ServersApi.DatacentersServersCdromsPost(ctx, datacenterID, serverID).Cdrom(img).Execute()
-			if err != nil {
-				return err
-			}
-			if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-				return errState
-			}
-			log.Printf("[DEBUG] attached CDROM image to server: serverId: %s, imageId: %s", serverID, newBootDeviceID)
-			// update to new boot cdrom
-			sp := ionoscloud.ServerProperties{BootCdrom: ionoscloud.NewResourceReference(newBootDeviceID)}
-			if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
-				return err
+		if newBootDeviceID != "" {
+			if strings.EqualFold(newBdType, constant.BootDeviceTypeVolume) {
+				// update to new boot volume
+				sp := ionoscloud.ServerProperties{BootVolume: ionoscloud.NewResourceReference(newBootDeviceID)}
+				if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
+					return err
+				}
+			} else {
+				// attach new cdrom
+				img := ionoscloud.Image{Id: &newBootDeviceID}
+				_, apiResponse, err := ss.Client.ServersApi.DatacentersServersCdromsPost(ctx, datacenterID, serverID).Cdrom(img).Execute()
+				if err != nil {
+					return err
+				}
+				if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
+					return errState
+				}
+				log.Printf("[DEBUG] attached CDROM image to server: serverId: %s, imageId: %s", serverID, newBootDeviceID)
+				// update to new boot cdrom
+				sp := ionoscloud.ServerProperties{BootCdrom: ionoscloud.NewResourceReference(newBootDeviceID)}
+				if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
+					return err
+				}
 			}
 		}
 		// detach old cdrom
-		apiResponse, err = ss.Client.ServersApi.DatacentersServersCdromsDelete(ctx, datacenterID, serverID, oldBootDeviceID).Execute()
+		apiResponse, err := ss.Client.ServersApi.DatacentersServersCdromsDelete(ctx, datacenterID, serverID, oldBootDeviceID).Execute()
 		if err != nil {
 			return err
 		}
@@ -263,6 +268,9 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 
 	case constant.BootDeviceTypeVolume:
 		// no cdrom is detached, only update to the new boot device, regardless of type
+		if newBootDeviceID == "" {
+			return nil
+		}
 		sp := ionoscloud.ServerProperties{BootVolume: ionoscloud.NewResourceReference(newBootDeviceID)}
 		if strings.EqualFold(newBdType, constant.BootDeviceTypeCDROM) {
 			sp = ionoscloud.ServerProperties{BootCdrom: ionoscloud.NewResourceReference(newBootDeviceID)}
