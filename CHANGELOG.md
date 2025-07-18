@@ -1,3 +1,7 @@
+## 6.7.13
+### Documentation
+- Update the format of Attaching a NSG to a Datacenter documentation in the resources datacenter. 
+
 ## 6.7.12
 ### Documentation
 - Update Kafka documentation to state that version 3.9.0 is supported in all relevant resources and data sources.
