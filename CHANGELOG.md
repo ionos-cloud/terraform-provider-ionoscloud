@@ -1,12 +1,11 @@
-## 6.7.13
-### Documentation
-- Update the format of Attaching a NSG to a Datacenter documentation in the resources datacenter. 
-
 ## 6.7.12
 ### Fixes
 - Fix `ionoscloud_server_boot_device_selection` delete error when servers have no initial boot device and a cdrom is used. (https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/843)
 ### Documentation
+- Update the format of Attaching a NSG to a Datacenter documentation in the resources datacenter.
 - Update Kafka documentation to state that version 3.9.0 is supported in all relevant resources and data sources.
+### Fixes
+- Update go version to 1.24.4
 
 ## 6.7.11
 ### Fixes
