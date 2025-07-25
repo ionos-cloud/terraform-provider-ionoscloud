@@ -86,6 +86,63 @@ export TF_VAR_ionos_s3_access_key="accesskey"
 export TF_VAR_ionos_s3_secret_key="secretkey"
 export TF_VAR_ionos_s3_region="eu-central-3" # optional
 ```
+<details><summary title="Click to toggle">How to use a configuration file</summary>
+
+For more complex configurations, with multiple user profiles and environments with custom API URLs, you can use a YAML configuration file with the following structure:
+
+```yaml
+version: 1.0
+currentProfile: user # The current profile can also be overridden by the environment variable IONOS_CURRENT_PROFILE
+profiles:
+  - name: user
+    environment: prod
+    credentials:
+      # You can use either username and password, or token.
+      # If both username and password, as well as token are provided, the token will take precedence.
+      token: <token>
+  - name: user2
+    environment: dev
+    credentials:
+      username: <username>
+      password: <password>
+environments:
+  - name: prod
+    products:
+      - name: apigateway
+        endpoints:
+          - location: de/txl
+            name: https://apigateway.de-txl.ionos.com
+            skipTlsVerify: false
+          - location: gb/lhr
+            name: https://apigateway.gb-lhr.ionos.com
+            skipTlsVerify: false
+          - location: fr/par
+            name: https://apigateway.fr-par.ionos.com
+            skipTlsVerify: false
+          - location: es/vit
+            name: https://apigateway.es-vit.ionos.com
+            skipTlsVerify: false
+      - name: compute
+        endpoints:
+          - name: https://api.ionos.com/cloudapi/v6
+            skipTlsVerify: false
+  - name: dev
+    products:
+      - name: auth
+        endpoints:
+          - name: https://api.ionos.com/auth/v1
+            skipTlsVerify: false
+```
+
+The path to the file can be set using the `IONOS_CONFIG_FILE` environment variable, or it defaults to `~/.ionos/config.yaml`.
+The file can either be written manually by the user, or generated through the `ionosctl login` command
+(see [ionosctl docs](https://github.com/ionos-cloud/ionosctl/blob/master/docs/subcommands/CLI%20Setup/login.md)).
+
+A configuration file can be used in conjunction with the `token`, `username`, `password`, `endpoint`, `s3_access_key`, `s3_secret_key`
+and `s3_region` fields in the provider block or the corresponding environment variables, replacing the
+credentials set for the `currentProfile`. All endpoints defined in the `currentProfile` environment will still be used.
+
+</details>
 
 See the [IonosCloud Provider documentation](https://registry.terraform.io/providers/ionos-cloud/ionoscloud/latest/docs) for more details.
 
