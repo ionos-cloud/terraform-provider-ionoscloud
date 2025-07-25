@@ -86,6 +86,7 @@ export TF_VAR_ionos_s3_access_key="accesskey"
 export TF_VAR_ionos_s3_secret_key="secretkey"
 export TF_VAR_ionos_s3_region="eu-central-3" # optional
 ```
+<details><summary title="Click to toggle">How to use a configuration file</summary>
 
 For more complex configurations, with multiple user profiles and environments with custom API URLs, you can use a YAML configuration file with the following structure:
 
@@ -141,6 +142,7 @@ A configuration file can be used in conjunction with the `token`, `username`, `p
 and `s3_region` fields in the provider block or the corresponding environment variables, replacing the
 credentials set for the `currentProfile`. All endpoints defined in the `currentProfile` environment will still be used.
 
+</details>
 
 See the [IonosCloud Provider documentation](https://registry.terraform.io/providers/ionos-cloud/ionoscloud/latest/docs) for more details.
 
