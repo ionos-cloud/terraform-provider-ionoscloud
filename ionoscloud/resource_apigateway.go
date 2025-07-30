@@ -99,7 +99,7 @@ func resourceAPIGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating API Gateway: %w", err))
 	}
-	gatewayID := *response.Id
+	gatewayID := response.Id
 	d.SetId(gatewayID)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsGatewayReady)
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	ionoscloud "github.com/ionos-cloud/sdk-go-api-gateway"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/apigateway/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
@@ -171,7 +171,7 @@ func testAccCheckAPIGatewayExists(n string, apiGateway *ionoscloud.GatewayRead) 
 			return fmt.Errorf("error fetching API Gateway with ID %s: %v", rs.Primary.ID, err)
 		}
 
-		if found.Id != nil && *found.Id != rs.Primary.ID {
+		if found.Id != rs.Primary.ID {
 			return fmt.Errorf("API Gateway not found")
 		}
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	apigateway "github.com/ionos-cloud/sdk-go-api-gateway"
+	apigateway "github.com/ionos-cloud/sdk-go-bundle/products/apigateway/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -101,8 +101,8 @@ func dataSourceAPIGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		var results []apigateway.GatewayRead
-		for _, gw := range *gateways.Items {
-			if gw.Properties != nil && gw.Properties.Name != nil && utils.NameMatches(*gw.Properties.Name, name, partialMatch) {
+		for _, gw := range gateways.Items {
+			if utils.NameMatches(gw.Properties.Name, name, partialMatch) {
 				results = append(results, gw)
 			}
 		}
