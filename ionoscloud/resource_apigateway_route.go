@@ -126,7 +126,7 @@ func resourceAPIGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, 
 		return diags
 	}
 
-	d.SetId(*createdRoute.Id)
+	d.SetId(createdRoute.Id)
 	log.Printf("[INFO] Created API Gateway Route: %s", d.Id())
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsAPIGatewayRouteAvailable)

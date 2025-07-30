@@ -7,14 +7,15 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	apigateway "github.com/ionos-cloud/sdk-go-api-gateway"
+	apigateway "github.com/ionos-cloud/sdk-go-bundle/products/apigateway/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 // CreateRoute sends a POST request with the given data to the API to create a route.
-func (c *Client) CreateRoute(ctx context.Context, d *schema.ResourceData) (apigateway.RouteRead, *apigateway.APIResponse, error) {
+func (c *Client) CreateRoute(ctx context.Context, d *schema.ResourceData) (apigateway.RouteRead, *shared.APIResponse, error) {
 	request := setRoutePostRequest(d)
 	gatewayID := d.Get("gateway_id").(string)
 
@@ -24,7 +25,7 @@ func (c *Client) CreateRoute(ctx context.Context, d *schema.ResourceData) (apiga
 }
 
 // UpdateRoute sends a PUT request with the given data to the API to update the route.
-func (c *Client) UpdateRoute(ctx context.Context, d *schema.ResourceData) (apigateway.RouteRead, *apigateway.APIResponse, error) {
+func (c *Client) UpdateRoute(ctx context.Context, d *schema.ResourceData) (apigateway.RouteRead, *shared.APIResponse, error) {
 	request := setRoutePutRequest(d)
 	gatewayID := d.Get("gateway_id").(string)
 	routeID := d.Id()
@@ -35,21 +36,21 @@ func (c *Client) UpdateRoute(ctx context.Context, d *schema.ResourceData) (apiga
 }
 
 // GetRouteByID sends a GET request to the API to retrieve a route by ID from a given gateway.
-func (c *Client) GetRouteByID(ctx context.Context, gatewayID string, routeID string) (apigateway.RouteRead, *apigateway.APIResponse, error) {
+func (c *Client) GetRouteByID(ctx context.Context, gatewayID string, routeID string) (apigateway.RouteRead, *shared.APIResponse, error) {
 	route, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesFindById(ctx, gatewayID, routeID).Execute()
 	apiResponse.LogInfo()
 	return route, apiResponse, err
 }
 
 // ListRoutes sends a GET request to the API to retrieve all routes from a given gateway.
-func (c *Client) ListRoutes(ctx context.Context, gatewayID string) (apigateway.RouteReadList, *apigateway.APIResponse, error) {
+func (c *Client) ListRoutes(ctx context.Context, gatewayID string) (apigateway.RouteReadList, *shared.APIResponse, error) {
 	routes, apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesGet(ctx, gatewayID).Execute()
 	apiResponse.LogInfo()
 	return routes, apiResponse, err
 }
 
 // DeleteRoute sends a DELETE request to the API to delete a route by ID from a given gateway.
-func (c *Client) DeleteRoute(ctx context.Context, gatewayID string, routeID string) (*apigateway.APIResponse, error) {
+func (c *Client) DeleteRoute(ctx context.Context, gatewayID string, routeID string) (*shared.APIResponse, error) {
 	apiResponse, err := c.sdkClient.RoutesApi.ApigatewaysRoutesDelete(ctx, gatewayID, routeID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -65,11 +66,8 @@ func (c *Client) IsAPIGatewayRouteAvailable(ctx context.Context, d *schema.Resou
 		return false, err
 	}
 
-	if route.Metadata == nil || route.Metadata.Status == nil {
-		return false, fmt.Errorf("expected metadata, got empty for API Gateway Route with ID: %s", routeID)
-	}
-	log.Printf("[DEBUG] API Gateway Route status: %s", *route.Metadata.Status)
-	return strings.EqualFold(*route.Metadata.Status, constant.Available), nil
+	log.Printf("[DEBUG] API Gateway Route status: %s", route.Metadata.Status)
+	return strings.EqualFold(route.Metadata.Status, constant.Available), nil
 }
 
 // IsAPIGatewayRouteDeleted checks if the API Gateway Route has been deleted.
@@ -83,21 +81,10 @@ func (c *Client) IsAPIGatewayRouteDeleted(ctx context.Context, d *schema.Resourc
 
 // SetAPIGatewayRouteData sets the data for the API Gateway Route.
 func (c *Client) SetAPIGatewayRouteData(d *schema.ResourceData, route apigateway.RouteRead) error {
-	d.SetId(*route.Id)
+	d.SetId(route.Id)
 
-	if route.Properties == nil {
-		return fmt.Errorf("expected properties in the response for the API Gateway Route with ID: %s, but received 'nil' instead", *route.Id)
-	}
-
-	if route.Metadata == nil {
-		return fmt.Errorf("expected metadata in the response for the API Gateway Route with ID: %s, but received 'nil' instead", *route.Id)
-
-	}
-
-	if route.Properties.Name != nil {
-		if err := d.Set("name", *route.Properties.Name); err != nil {
-			return err
-		}
+	if err := d.Set("name", route.Properties.Name); err != nil {
+		return err
 	}
 
 	if route.Properties.Websocket != nil {
@@ -106,27 +93,21 @@ func (c *Client) SetAPIGatewayRouteData(d *schema.ResourceData, route apigateway
 		}
 	}
 
-	if route.Properties.Type != nil {
-		if err := d.Set("type", *route.Properties.Type); err != nil {
-			return err
-		}
+	if err := d.Set("type", route.Properties.Type); err != nil {
+		return err
 	}
 
-	if route.Properties.Paths != nil {
-		if err := d.Set("paths", *route.Properties.Paths); err != nil {
-			return err
-		}
+	if err := d.Set("paths", route.Properties.Paths); err != nil {
+		return err
 	}
 
-	if route.Properties.Methods != nil {
-		if err := d.Set("methods", *route.Properties.Methods); err != nil {
-			return err
-		}
+	if err := d.Set("methods", route.Properties.Methods); err != nil {
+		return err
 	}
 
 	if route.Properties.Upstreams != nil {
 		var upstreams []map[string]interface{}
-		for _, upstream := range *route.Properties.Upstreams {
+		for _, upstream := range route.Properties.Upstreams {
 			upstreamData := map[string]interface{}{}
 
 			utils.SetPropWithNilCheck(upstreamData, "scheme", upstream.Scheme)
@@ -139,7 +120,7 @@ func (c *Client) SetAPIGatewayRouteData(d *schema.ResourceData, route apigateway
 		}
 
 		if err := d.Set("upstreams", upstreams); err != nil {
-			return fmt.Errorf("error setting upstreams for the API Gateway Route with ID: %s", *route.Id)
+			return fmt.Errorf("error setting upstreams for the API Gateway Route with ID: %s", route.Id)
 		}
 	}
 
@@ -185,10 +166,10 @@ func setRouteConfig(d *schema.ResourceData) *apigateway.Route {
 		weight := int32(upstreamData["weight"].(int))
 
 		upstreamObj := apigateway.RouteUpstreams{
-			Scheme:       &scheme,
-			Host:         &host,
-			Port:         &port,
-			Loadbalancer: &loadbalancer,
+			Scheme:       scheme,
+			Host:         host,
+			Port:         port,
+			Loadbalancer: loadbalancer,
 			Weight:       &weight,
 		}
 

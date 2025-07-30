@@ -1,3 +1,7 @@
+## 6.7.13 -- upcoming release
+### Refactor
+- Use API Gateway bundle product instead of `sdk-go-api-gateway`
+
 ## 6.7.12
 ### Fixes
 - Fix `ionoscloud_server_boot_device_selection` delete error when servers have no initial boot device and a cdrom is used. (https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/843)
