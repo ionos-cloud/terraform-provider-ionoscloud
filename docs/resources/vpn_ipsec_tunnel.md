@@ -200,8 +200,7 @@ resource "ionoscloud_vpn_ipsec_tunnel" "example" {
 ## Argument reference
 
 * `name` - (Required)[string] The name of the IPSec Gateway Tunnel.
-* `location` - (Optional)[string] The location of the IPSec Gateway Tunnel. Supported locations: de/fra, de/txl, es/vit,
-  gb/lhr, us/ewr, us/las, us/mci, fr/par
+* `location` - (Optional)[string] The location of the IPSec Gateway Tunnel. Supported locations: de/fra, de/fra/2, de/txl, es/vit, gb/lhr, us/ewr, us/las, us/mci, fr/par.
 * `gateway_id` - (Required)[string] The ID of the IPSec Gateway that the tunnel belongs to.
 * `description` - (Optional)[string] The human-readable description of your IPSec Gateway Tunnel.
 * `remote_host` - (Required)[string] The remote peer host fully qualified domain name or public IPV4 IP to connect to.

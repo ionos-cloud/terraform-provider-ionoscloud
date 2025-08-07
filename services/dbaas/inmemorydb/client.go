@@ -56,15 +56,16 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 
 var (
 	locationToURL = map[string]string{
-		"":       "https://in-memory-db.de-fra.ionos.com",
-		"de/fra": "https://in-memory-db.de-fra.ionos.com",
-		"de/txl": "https://in-memory-db.de-txl.ionos.com",
-		"es/vit": "https://in-memory-db.es-vit.ionos.com",
-		"gb/lhr": "https://in-memory-db.gb-lhr.ionos.com",
-		"us/ewr": "https://in-memory-db.us-ewr.ionos.com",
-		"us/las": "https://in-memory-db.us-las.ionos.com",
-		"us/mci": "https://in-memory-db.us-mci.ionos.com",
-		"fr/par": "https://in-memory-db.fr-par.ionos.com",
+		"":         "https://in-memory-db.de-fra.ionos.com",
+		"de/fra":   "https://in-memory-db.de-fra.ionos.com",
+		"de/fra/2": "https://in-memory-db.de-fra.ionos.com",
+		"de/txl":   "https://in-memory-db.de-txl.ionos.com",
+		"es/vit":   "https://in-memory-db.es-vit.ionos.com",
+		"gb/lhr":   "https://in-memory-db.gb-lhr.ionos.com",
+		"us/ewr":   "https://in-memory-db.us-ewr.ionos.com",
+		"us/las":   "https://in-memory-db.us-las.ionos.com",
+		"us/mci":   "https://in-memory-db.us-mci.ionos.com",
+		"fr/par":   "https://in-memory-db.fr-par.ionos.com",
 	}
 	ionosAPIURLInMemoryDB = "IONOS_API_URL_INMEMORYDB"
 )

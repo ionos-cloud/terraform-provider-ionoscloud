@@ -45,7 +45,7 @@ data "ionoscloud_kafka_cluster_topic" "example" {
 * `name` - (Optional) Name of an existing Kafka Cluster Topic that you want to search for.
 * `cluster_id` - (Required) ID of the Kafka Cluster that the topic belongs to.
 * `location` - (Optional) The location of the Kafka Cluster Topic. Must be the same as the location of the Kafka
-  Cluster. Possible values: `de/fra`, `de/txl`
+  Cluster. Possible values: `de/fra`, `de/fra/2`, `de/txl`, `fr/par`, `es/vit`, `gb/lhr`, `gb/bhx`, `us/las`, `us/mci`, `us/ewr`.
 
 ## Attributes Reference
 

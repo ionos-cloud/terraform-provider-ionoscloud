@@ -20,7 +20,7 @@ resource "ionoscloud_datacenter" "example" {
   name                    = "example"
   location                = "de/txl"
   description             = "Datacenter for testing psql cluster"
-}
+} 
 
 resource "ionoscloud_lan"  "example" {
   datacenter_id           = ionoscloud_datacenter.example.id
@@ -33,7 +33,7 @@ resource "ionoscloud_pg_cluster" "example" {
   instances               = 1
   cores                   = 4
   ram                     = 2048
-  storage_size            = 2048
+  storage_size            = 10240
   storage_type            = "HDD"
   connection_pooler {
     enabled = true
@@ -103,7 +103,7 @@ resource "ionoscloud_pg_cluster" "example" {
   instances               = 1
   cores                   = 4
   ram                     = 2048
-  storage_size            = 2048
+  storage_size            = 10240
   storage_type            = "HDD"
   connection_pooler {
     enabled = true
@@ -152,7 +152,7 @@ resource "random_password" "cluster_password" {
   * `datacenter_id` - (Required)[true] The datacenter to connect your cluster to.
   * `lan_id` - (Required)[true] The LAN to connect your cluster to.
   * `cidr` - (Required)[true] The IP and subnet for the database. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24. Please enter in the correct format like IP/Subnet, exp: 192.168.10.0/24. See [Private IPs](https://www.ionos.com/help/server-cloud-infrastructure/private-network/private-ip-address-ranges/) and [Configuring the network](https://docs.ionos.com/cloud/compute-engine/networks/how-tos/configure-networks).
-* `location` - (Required)[string] The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation. Possible values are: `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `us/ewr`, `us/las`. This attribute is immutable(disallowed in update requests).
+* `location` - (Required)[string] The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation. Available locations: `de/fra`, `us/las`, `us/ewr`, `de/txl`, `gb/lhr`, `gb/bhx`, `es/vit`, `fr/par`, `us/mci`, `de/fra/2`. This attribute is immutable (disallowed in update requests).
 * `backup_location` - (Optional)(Computed)[string] The IONOS Object Storage location where the backups will be stored. Possible values are: `de`, `eu-south-2`, `eu-central-2`. This attribute is immutable (disallowed in update requests).
 * `display_name` - (Required)[string] The friendly name of your cluster.
 * `maintenance_window` - (Optional)(Computed) A weekly 4 hour-long window, during which maintenance might occur
