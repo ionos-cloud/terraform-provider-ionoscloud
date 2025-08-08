@@ -31,7 +31,7 @@ resource "ionoscloud_mongo_cluster" "example_mongo_cluster" {
     day_of_the_week  = "Sunday"
   time             = "09:00:00"
   }
-  mongodb_version = "5.0"
+  mongodb_version = "6.0"
   instances          = 1
   display_name = "example_mongo_cluster"
   location = ionoscloud_datacenter.datacenter_example.location
@@ -71,7 +71,7 @@ resource ionoscloud_mongo_cluster "example_mongo_cluster" {
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
   }
-  mongodb_version = "5.0"
+  mongodb_version = "6.0"
   instances          = 3
   display_name = "example_mongo_cluster"
   location = ionoscloud_datacenter.datacenter_example.location
@@ -103,7 +103,7 @@ resource "random_password" "cluster_password" {
 * `template_id` - (Optional)[string] The unique ID of the template, which specifies the number of cores, storage size, and memory. Updates to the value of the field force the cluster to be re-created. Required for playground and business editions. Must not be provided for enterprise edition.
 * `instances` - (Required)[int] The total number of instances in the cluster (one master and n-1 standbys). Example: 1, 3, 5, 7. Updates to the value of the field force the cluster to be re-created.
 * `display_name` - (Required)[string] The name of your cluster. Updates to the value of the field force the cluster to be re-created.
-* `location` - (Required)[string] The physical location where the cluster will be created. Property cannot be modified after datacenter creation (disallowed in update requests). Available locations: de/txl, gb/lhr, es/vit. Update forces cluster re-creation.
+* `location` - (Required)[string] The physical location where the cluster will be created. Property cannot be modified after datacenter creation (disallowed in update requests). Available locations: `de/fra`, `us/las`, `us/ewr`, `de/txl`, `gb/lhr`, `gb/bhx`, `es/vit`, `fr/par`, `us/mci`, `de/fra/2`. Update forces cluster re-creation.
 * `connections` - (Required)[List] Details about the network connection for your cluster. Updates to the value of the field force the cluster to be re-created.
     * `datacenter_id` - (Required)[string] The datacenter to connect your cluster to.
     * `lan_id` - (Required)[string] The LAN to connect your cluster to.

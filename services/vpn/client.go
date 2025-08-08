@@ -34,19 +34,20 @@ func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 var (
 	ionosAPIURLVPN = "IONOS_API_URL_VPN"
 	// AvailableLocations is a list of supported locations for VPN
-	AvailableLocations = []string{"de/fra", "de/txl", "es/vit", "gb/bhx", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par"}
+	AvailableLocations = []string{"de/fra", "de/fra/2", "de/txl", "es/vit", "gb/bhx", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par"}
 
 	locationToURL = map[string]string{
-		"":       "https://vpn.de-fra.ionos.com",
-		"de/fra": "https://vpn.de-fra.ionos.com",
-		"de/txl": "https://vpn.de-txl.ionos.com",
-		"es/vit": "https://vpn.es-vit.ionos.com",
-		"gb/bhx": "https://vpn.gb-bhx.ionos.com",
-		"gb/lhr": "https://vpn.gb-lhr.ionos.com",
-		"us/ewr": "https://vpn.us-ewr.ionos.com",
-		"us/las": "https://vpn.us-las.ionos.com",
-		"us/mci": "https://vpn.us-mci.ionos.com",
-		"fr/par": "https://vpn.fr-par.ionos.com",
+		"":         "https://vpn.de-fra.ionos.com",
+		"de/fra":   "https://vpn.de-fra.ionos.com",
+		"de/fra/2": "https://vpn.de-fra.ionos.com",
+		"de/txl":   "https://vpn.de-txl.ionos.com",
+		"es/vit":   "https://vpn.es-vit.ionos.com",
+		"gb/bhx":   "https://vpn.gb-bhx.ionos.com",
+		"gb/lhr":   "https://vpn.gb-lhr.ionos.com",
+		"us/ewr":   "https://vpn.us-ewr.ionos.com",
+		"us/las":   "https://vpn.us-las.ionos.com",
+		"us/mci":   "https://vpn.us-mci.ionos.com",
+		"fr/par":   "https://vpn.fr-par.ionos.com",
 	}
 )
 

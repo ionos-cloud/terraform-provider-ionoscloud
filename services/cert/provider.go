@@ -15,8 +15,9 @@ import (
 )
 
 var locationToURL = map[string]string{
-	"":       "https://certificate-manager.de-fra.ionos.com",
-	"de/fra": "https://certificate-manager.de-fra.ionos.com",
+	"":         "https://certificate-manager.de-fra.ionos.com",
+	"de/fra":   "https://certificate-manager.de-fra.ionos.com",
+	"de/fra/2": "https://certificate-manager.de-fra.ionos.com",
 }
 var ionosAPIURLCert = "IONOS_API_URL_CERT"
 

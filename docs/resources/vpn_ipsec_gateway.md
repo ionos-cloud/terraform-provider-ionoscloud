@@ -133,8 +133,7 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
 ## Argument reference
 
 * `name` - (Required)[string] The name of the IPSec Gateway.
-* `location` - (Optional)[string] The location of the IPSec Gateway. Supported locations: de/fra, de/txl, es/vit,
-  gb/bhx, gb/lhr, us/ewr, us/las, us/mci, fr/par.
+* `location` - (Optional)[string] The location of the IPSec Gateway. Supported locations: de/fra, de/fra/2, de/txl, es/vit, gb/bhx, gb/lhr, us/ewr, us/las, us/mci, fr/par.
 * `gateway_ip` - (Required)[string] Public IP address to be assigned to the gateway. Note: This must be an IP address in
   the same datacenter as the connections.
 * `description` - (Optional)[string] The human-readable description of the IPSec Gateway.

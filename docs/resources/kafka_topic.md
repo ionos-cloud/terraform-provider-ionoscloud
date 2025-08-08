@@ -132,7 +132,7 @@ resource "ionoscloud_kafka_cluster_topic" "example" {
 
 * `id` - (Computed)[string] The UUID of the Kafka Cluster Topic.
 * `name` - (Required)[string] Name of the Kafka Cluster.
-* `location` - (Optional)[string] The location of the Kafka Cluster Topic. Possible values: `de/fra`, `de/txl`. If this is not set and if no value is provided for the `IONOS_API_URL` env var, the default `location` will be: `de/fra`.
+* `location` - (Optional)[string] The location of the Kafka Cluster Topic. Possible values: `de/fra`, `de/fra/2`, `de/txl`, `fr/par`, `es/vit`, `gb/lhr`, `gb/bhx`, `us/las`, `us/mci`, `us/ewr`. If this is not set and if no value is provided for the `IONOS_API_URL` env var, the default `location` will be: `de/fra`.
 * `cluster_id` - (Required)[string] ID of the Kafka Cluster that the topic belongs to.
 * `replication_factor` - (Optional)[int] The number of replicas of the topic. The replication factor determines how many
   copies of the topic are stored on different brokers. The replication factor must be less than or equal to the number

@@ -81,15 +81,16 @@ func (c *Client) ChangeConfigURL(location string) {
 
 var (
 	locationToURL = map[string]string{
-		"":       "https://mariadb.de-txl.ionos.com",
-		"de/fra": "https://mariadb.de-fra.ionos.com",
-		"de/txl": "https://mariadb.de-txl.ionos.com",
-		"es/vit": "https://mariadb.es-vit.ionos.com",
-		"fr/par": "https://mariadb.fr-par.ionos.com",
-		"gb/lhr": "https://mariadb.gb-lhr.ionos.com",
-		"us/ewr": "https://mariadb.us-ewr.ionos.com",
-		"us/las": "https://mariadb.us-las.ionos.com",
-		"us/mci": "https://mariadb.us-mci.ionos.com",
+		"":         "https://mariadb.de-txl.ionos.com",
+		"de/fra":   "https://mariadb.de-fra.ionos.com",
+		"de/fra/2": "https://mariadb.de-fra.ionos.com",
+		"de/txl":   "https://mariadb.de-txl.ionos.com",
+		"es/vit":   "https://mariadb.es-vit.ionos.com",
+		"fr/par":   "https://mariadb.fr-par.ionos.com",
+		"gb/lhr":   "https://mariadb.gb-lhr.ionos.com",
+		"us/ewr":   "https://mariadb.us-ewr.ionos.com",
+		"us/las":   "https://mariadb.us-las.ionos.com",
+		"us/mci":   "https://mariadb.us-mci.ionos.com",
 	}
 	ionosAPIURLMariaDB = "IONOS_API_URL_MARIADB"
 )

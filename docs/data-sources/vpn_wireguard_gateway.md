@@ -30,7 +30,7 @@ The following arguments are supported:
 
 - `name` - (Optional)[String] The name of the WireGuard Gateway.
 - `id` - (Optional)[String] The ID of the WireGuard Gateway.
-- `location` - (Optional)[String] The location of the WireGuard Gateway.
+- `location` - (Optional)[String] The location of the WireGuard Gateway. Supported locations: de/fra, de/fra/2, de/txl, es/vit, gb/bhx, gb/lhr, us/ewr, us/las, us/mci, fr/par.
 
 ## Attributes Reference
 

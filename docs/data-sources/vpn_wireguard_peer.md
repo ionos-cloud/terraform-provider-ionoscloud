@@ -30,7 +30,7 @@ output "vpn_wireguard_peer_public_key" {
 The following arguments are supported:
 
 - `gateway_id` - (Required)[String] The ID of the WireGuard Gateway.
-- `location` - (Optional)[String] The location of the WireGuard Gateway.
+- `location` - (Optional)[String] The location of the WireGuard Gateway. Supported locations: de/fra, de/fra/2, de/txl, es/vit, gb/bhx, gb/lhr, us/ewr, us/las, us/mci, fr/par.
 - `name` - (Optional)[String] The name of the WireGuard Peer.
 - `id` - (Optional)[String] The ID of the WireGuard Peer.
 

@@ -33,7 +33,7 @@ data "ionoscloud_logging_pipeline" "example" {
 ```
 
 ## Argument reference
-* `location` - (Optional)[string] The location of the Logging pipeline. Default: `de/txl`. One of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`.
+* `location` - (Optional)[string] The location of the Logging pipeline. Default: `de/txl`, other available locations: `de/fra`, `de/fra/2`, `de/txl`, `es/vit`, `gb/bhx`, `gb/lhr`,  `fr/par`, `us/mci`.
 * `id` - (Optional)[string] The ID of the Logging pipeline you want to search for.
 * `name` - (Optional)[string] The name of the Logging pipeline you want to search for.
 

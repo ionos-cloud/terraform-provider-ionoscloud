@@ -36,7 +36,7 @@ data "ionoscloud_auto_certificate_provider" "example" {
 
 The following arguments are supported:
 
-* `location` - (Required)[string] The location of the provider.
+* `location` - (Required)[string] The location of the provider. Available locations: `de/fra`, `de/fra/2`
 * `name` - (Optional)[string] Name of an existing provider that you want to search for.
 * `id` - (Optional)[string] ID of the provider you want to search for.
 

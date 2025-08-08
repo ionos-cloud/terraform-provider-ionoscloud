@@ -41,7 +41,7 @@ data "ionoscloud_kafka_cluster" "example" {
 
 * `id` - (Optional) ID of an existing Kafka Cluster that you want to search for.
 * `name` - (Optional) Name of an existing Kafka Cluster that you want to search for.
-* `location` - (Required) The location of the Kafka Cluster. Possible values: `de/fra`, `de/txl`
+* `location` - (Required) The location of the Kafka Cluster. Possible values: `de/fra`, `de/fra/2`, `de/txl`, `fr/par`, `es/vit`, `gb/lhr`, `gb/bhx`, `us/las`, `us/mci`, `us/ewr`.
 
 ## Attributes Reference
 

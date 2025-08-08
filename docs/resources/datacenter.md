@@ -48,7 +48,7 @@ resource "ionoscloud_datacenter_nsg_selection" "example"{
 The following arguments are supported:
 
 * `name` - (Required)[string] The name of the Virtual Data Center.
-* `location` - (Required)[string] The regional location where the Virtual Data Center will be created. This argument is immutable.
+* `location` - (Required)[string] The regional location where the Virtual Data Center will be created. This argument is immutable. Available locations: `de/fra`, `us/las`, `us/ewr`, `de/txl`, `gb/lhr`, `gb/bhx`, `es/vit`, `fr/par`, `us/mci`, `de/fra/2` 
 * `description` - (Optional)[string] Description for the Virtual Data Center.
 * `sec_auth_protection` - (Optional) [bool] Boolean value representing if the data center requires extra protection e.g. two factor protection
 * `version` - (Computed) The version of that Data Center. Gets incremented with every change
