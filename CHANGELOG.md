@@ -1,4 +1,6 @@
 ## 6.7.13 -- upcoming release
+### Features
+- Add support for new location: `de/fra/2`
 ### Refactor
 - Use API Gateway bundle product instead of `sdk-go-api-gateway`
 
