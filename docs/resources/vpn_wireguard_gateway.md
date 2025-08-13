@@ -57,8 +57,7 @@ resource "ionoscloud_vpn_wireguard_gateway" "gateway" {
 
 The following arguments are supported by the `vpn_wireguard_gateway` resource:
 
-- `location` - (Optional)[String] The location of the WireGuard Gateway. Supported locations: de/fra, de/txl, es/vit,
-  gb/bhx, gb/lhr, us/ewr, us/las, us/mci, fr/par.
+- `location` - (Optional)[String] The location of the WireGuard Gateway. Supported locations: de/fra, de/fra/2, de/txl, es/vit, gb/bhx, gb/lhr, us/ewr, us/las, us/mci, fr/par.
 - `name` - (Required)[String] The name of the WireGuard Gateway.
 - `description` - (Optional)[String] A description of the WireGuard Gateway.
 - `endpoint` - (Optional, Block) The endpoint configuration for the WireGuard Gateway. This block supports fields documented below.

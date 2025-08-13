@@ -36,7 +36,7 @@ data "ionoscloud_auto_certificate" "example" {
 
 The following arguments are supported:
 
-* `location` - (Required)[string] The location of the auto-certificate.
+* `location` - (Required)[string] The location of the auto-certificate. Available locations: `de/fra`, `de/fra/2`.
 * `name` - (Optional)[string] Name of an existing auto-certificate that you want to search for.
 * `id` - (Optional)[string] ID of the auto-certificate you want to search for.
 

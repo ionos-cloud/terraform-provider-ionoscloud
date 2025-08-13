@@ -35,7 +35,7 @@ data "ionoscloud_datacenter" "example" {
 
  * `id` - (Optional) Id of an existing Virtual Data Center that you want to search for.
  * `name` - (Optional) Name of an existing Virtual Data Center that you want to search for.
- * `location` - (Optional) Id of the existing Virtual Data Center's location.
+ * `location` - (Optional) Id of the existing Virtual Data Center's location. Available locations: `de/fra`, `us/las`, `us/ewr`, `de/txl`, `gb/lhr`, `gb/bhx`, `es/vit`, `fr/par`, `us/mci`, `de/fra/2`
 
 Either `name`, `location` or `id` must be provided. If none, the datasource will return an error.
 
@@ -46,7 +46,7 @@ The following attributes are returned by the datasource:
 
 * `id` - UUID of the Virtual Data Center
 * `name` - The name of the Virtual Data Center
-* `location` - The regional location where the Virtual Data Center will be created
+* `location` - The regional location where the Virtual Data Center is created
 * `description` - Description for the Virtual Data Center
 * `version` - The version of that Data Center. Gets incremented with every change
 * `features` - List of features supported by the location this data center is part of

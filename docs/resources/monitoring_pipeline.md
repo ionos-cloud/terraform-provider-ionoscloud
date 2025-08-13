@@ -40,7 +40,7 @@ resource "ionoscloud_monitoring_pipeline" "example" {
 ## Argument reference
 
 * `name` - (Required)[string] The name of the Monitoring pipeline.
-* `location` - (Optional)[string] The location of the Monitoring pipeline. Default is `de/fra`. It can be one of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`. If this is not set and if no value is provided for the `IONOS_API_URL_MONITORING` env var, the default `location` will be: `de/fra`.
+* `location` - (Optional)[string] The location of the Monitoring pipeline. Default is `de/fra`. It can be one of `de/fra`, `de/fra/2`, `de/txl`, `es/vit`, `gb/bhx`, `gb/lhr`,`fr/par`, `us/mci`. If this is not set and if no value is provided for the `IONOS_API_URL_MONITORING` env var, the default `location` will be: `de/fra`.
 * `grafana_endpoint` - (Computed)[string] The endpoint of the Grafana instance.
 * `http_endpoint` - (Computed)[string] The HTTP endpoint of the monitoring instance.
 * `key` - (Computed)(Sensitive)[string] The key used to connect to the monitoring pipeline.

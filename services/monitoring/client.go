@@ -50,12 +50,13 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 var (
 	ionosAPIURLMonitoring = "IONOS_API_URL_MONITORING"
 	locationToURL         = map[string]string{
-		"":       "https://monitoring.de-fra.ionos.com",
-		"de/fra": "https://monitoring.de-fra.ionos.com",
-		"de/txl": "https://monitoring.de-txl.ionos.com",
-		"es/vit": "https://monitoring.es-vit.ionos.com",
-		"gb/lhr": "https://monitoring.gb-lhr.ionos.com",
-		"fr/par": "https://monitoring.fr-par.ionos.com",
+		"":         "https://monitoring.de-fra.ionos.com",
+		"de/fra":   "https://monitoring.de-fra.ionos.com",
+		"de/fra/2": "https://monitoring.de-fra.ionos.com",
+		"de/txl":   "https://monitoring.de-txl.ionos.com",
+		"es/vit":   "https://monitoring.es-vit.ionos.com",
+		"gb/lhr":   "https://monitoring.gb-lhr.ionos.com",
+		"fr/par":   "https://monitoring.fr-par.ionos.com",
 	}
 )
 

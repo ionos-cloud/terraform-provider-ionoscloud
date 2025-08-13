@@ -113,10 +113,19 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				},
 			},
 			"location": {
-				Type:             schema.TypeString,
-				Description:      "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
-				Required:         true,
-				ForceNew:         true,
+				Type:        schema.TypeString,
+				Description: "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
+				Required:    true,
+				ForceNew:    true,
+				// There is a small API bug: if the cluster is created in 'de/fra/2', on GET
+				// requests the location will be shown as 'de/fra' and this generates a drift.
+				// This is a workaround until the API bug (DB-4824) is solved.
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if old == "de/fra" && new == "de/fra/2" {
+						return true
+					}
+					return false
+				},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"allow_replace": {
@@ -233,6 +242,15 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 		return fmt.Errorf("storage_type %s", ImmutableError)
 	}
 	if diff.HasChange("location") {
+		// There is a small API bug: if the cluster is created in 'de/fra/2', on GET
+		// requests the location will be shown as 'de/fra' and this generates a drift.
+		// This is a workaround until the API bug (DB-4824) is solved.
+		oldValueIntf, newValueIntf := diff.GetChange("location")
+		oldValueStr := oldValueIntf.(string)
+		newValueStr := newValueIntf.(string)
+		if oldValueStr == "de/fra" && newValueStr == "de/fra/2" {
+			return nil
+		}
 		return fmt.Errorf("location %s", ImmutableError)
 	}
 	if diff.HasChange("backup_location") {
