@@ -112,7 +112,7 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsUserReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("updating %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the Mongo user to become available, user ID: %v, error: %w", clusterId+user.Properties.Username, err))
 	}
 
 	return diag.FromErr(dbaas.SetUserMongoData(d, &user))
@@ -124,19 +124,15 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 		Properties: mongo.NewPatchUserProperties(),
 	}
 
-	var clusterId string
-	if d.Get("cluster_id") != nil {
-		clusterId = d.Get("cluster_id").(string)
-	}
-	username := ""
-	if d.Get("username") != nil {
-		username = d.Get("username").(string)
-	}
+	clusterId := d.Get("cluster_id").(string)
+	username := d.Get("username").(string)
+
 	if d.HasChange("password") {
 		_, password := d.GetChange("password")
 		pwdStr := password.(string)
 		request.Properties.Password = &pwdStr
 	}
+
 	if d.HasChange("roles") {
 		_, rolesIntf := d.GetChange("roles")
 		roles := make([]mongo.UserRoles, 0)
@@ -158,13 +154,13 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	user, _, err := client.UpdateUser(ctx, clusterId, username, request)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a user to mongoDB cluster %s: %w", clusterId, err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a Mongo user, username: %v, cluster ID: %v, error: %w", username, clusterId, err))
 		return diags
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsUserReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("updating %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for a Mongo user to become available after an update, username: %v, cluster ID: %v, error: %w", username, clusterId, err))
 	}
 
 	return diag.FromErr(dbaas.SetUserMongoData(d, &user))
@@ -200,18 +196,14 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 	username := d.Get("username").(string)
 	_, err := client.DeleteUser(ctx, clusterId, username)
 	if err != nil {
-		diags := diag.FromErr(err)
+		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting the Mongo user with ID: %v, error: %w", d.Id(), err))
 		return diags
 	}
 
 	// Wait, catching any errors
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsUserDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("user deleted %w", err))
-	}
-
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("user deleted %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the Mongo user with ID: %v to be deleted, error: %w", d.Id(), err))
 	}
 
 	d.SetId("")
