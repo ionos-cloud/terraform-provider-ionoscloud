@@ -1,4 +1,4 @@
-## 6.7.13 -- upcoming release
+## 6.7.13
 ### Features
 - Add support for new location: `de/fra/2`
 ### Refactor
