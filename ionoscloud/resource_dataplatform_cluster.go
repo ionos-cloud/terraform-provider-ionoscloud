@@ -122,7 +122,7 @@ func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceDa
 	id, _, err := client.CreateCluster(ctx, d)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred  while creating a Dataplatform Cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating the Dataplatform cluster: %w", err))
 		return diags
 	}
 
@@ -130,7 +130,7 @@ func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceDa
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred  while dataplaform cluster waiting to be ready: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while waiting for the Dataplatform cluster with ID: %v to become available: %w", id, err))
 		return diags
 	}
 
@@ -146,15 +146,15 @@ func resourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceData
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Could not find cluster with ID %s", clusterId)
+			log.Printf("[INFO] Could not find Dataplatform cluster with ID: %s", clusterId)
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching Dataplatform Cluster %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching Dataplatform cluster with ID: %s, error: %w", d.Id(), err))
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retrieved Dataplatform Cluster %s: %+v", d.Id(), dataplatformCluster)
+	log.Printf("[INFO] Successfully retrieved Dataplatform cluster %s: %+v", d.Id(), dataplatformCluster)
 
 	if err := dataplatformService.SetDataplatformClusterData(d, dataplatformCluster); err != nil {
 		return diag.FromErr(err)
@@ -170,13 +170,13 @@ func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceDa
 
 	_, err := client.UpdateCluster(ctx, clusterId, d)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a Dataplatform Cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while updating the Dataplatform cluster with ID: %v, error: %w", clusterId, err))
 		return diags
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("waitforCluster update %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the Dataplatform cluster to become available after update, ID: %v, error: %w", clusterId, err))
 	}
 
 	return resourceDataplatformClusterRead(ctx, d, meta)
@@ -194,13 +194,13 @@ func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting Dataplatform Cluster %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting Dataplatform cluster with ID: %v, error: %w", d.Id(), err))
 		return diags
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		diag.FromErr(fmt.Errorf("an error occurred while deleting %w", err))
+		diag.FromErr(fmt.Errorf("an error occurred while waiting for the Dataplatform cluster with ID: %v to be deleted, error: %w", d.Id(), err))
 	}
 
 	return nil
@@ -216,12 +216,12 @@ func resourceDataplatformClusterImport(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("dataplatform Cluster does not exist %q", clusterId)
+			return nil, fmt.Errorf("dataplatform cluster with ID: %v does not exist", clusterId)
 		}
-		return nil, fmt.Errorf("an error occurred while trying to fetch the import of Dataplatform Cluster %q, error:%w", clusterId, err)
+		return nil, fmt.Errorf("an error occurred while trying to import the Dataplatform cluster with ID: %v, error: %w", clusterId, err)
 	}
 
-	log.Printf("[INFO] Dataplatform Cluster found: %+v", dataplatformCluster)
+	log.Printf("[INFO] Dataplatform cluster found: %+v", dataplatformCluster)
 
 	if err := dataplatformService.SetDataplatformClusterData(d, dataplatformCluster); err != nil {
 		return nil, err

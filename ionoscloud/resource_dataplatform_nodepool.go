@@ -179,7 +179,7 @@ func resourceDataplatformNodePoolCreate(ctx context.Context, d *schema.ResourceD
 	d.SetId(dataplatformNodePoolResponse.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsNodePoolReady)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while dataplaform nodepool waiting to be ready: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while waiting for the Dataplatform node pool with ID: %v to become available, cluster ID: %v, error: %w", dataplatformNodePoolResponse.Id, clusterId, err))
 		return diags
 	}
 
@@ -199,7 +199,7 @@ func resourceDataplatformNodePoolRead(ctx context.Context, d *schema.ResourceDat
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching Dataplatform Node Pool %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching Dataplatform node pool with ID: %v, cluster ID: %v, error: %w", d.Id(), clusterId, err))
 		return diags
 	}
 
@@ -228,7 +228,7 @@ func resourceDataplatformNodePoolUpdate(ctx context.Context, d *schema.ResourceD
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsNodePoolReady)
 	if err != nil {
-		diag.FromErr(fmt.Errorf("an error occurred waiting until ready %w", err))
+		diag.FromErr(fmt.Errorf("an error occurred while waiting for the Dataplatform node pool with ID: %v to become available after update, cluster ID: %v, error: %w", nodePoolId, clusterId, err))
 	}
 	return resourceDataplatformNodePoolRead(ctx, d, meta)
 }
@@ -250,7 +250,7 @@ func resourceDataplatformNodePoolDelete(ctx context.Context, d *schema.ResourceD
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsNodePoolDeleted)
 	if err != nil {
-		diag.FromErr(fmt.Errorf("deleting %w", err))
+		diag.FromErr(fmt.Errorf("an error occurred while waiting for the Dataplatform node pool with ID: %v to be deleted, cluster ID: %v, error: %w", nodePoolId, clusterId, err))
 	}
 
 	return nil

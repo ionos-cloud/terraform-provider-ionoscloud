@@ -3,6 +3,10 @@
 - Add support for new location: `de/fra/2`
 ### Refactor
 - Use API Gateway bundle product instead of `sdk-go-api-gateway`
+- Remove useless checks for some resources
+- Modify error messages for some resources for more clarity
+### Documentation
+- Fix documentation for DBaaS PgSQL cluster resource
 
 ## 6.7.12
 ### Fixes

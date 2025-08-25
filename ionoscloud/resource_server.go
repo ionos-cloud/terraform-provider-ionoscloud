@@ -1358,8 +1358,6 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil, err
 	}
 
-	d.SetId(parts[1])
-
 	return []*schema.ResourceData{d}, nil
 }
 
