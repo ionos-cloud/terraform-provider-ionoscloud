@@ -156,16 +156,6 @@
     * [Container Registry Token](../docs/data-sources/container_registry_token.md)
     * [Container Registry Locations](../docs/data-sources/container_registry_locations.md)
 
-* Data Platform
-  * Resources
-    * [Data Platform Cluster](../docs/resources/dataplatform_cluster.md)
-    * [Data Platform Node Pool](../docs/resources/dataplatform_node_pool.md)
-  * Data Sources
-    * [Data Platform Cluster](../docs/data-sources/dataplatform_cluster.md)
-    * [Data Platform Node Pool](../docs/data-sources/dataplatform_node_pool.md)
-    * [Data Platform Node Pools](../docs/data-sources/dataplatform_node_pools.md)
-    * [Data Platform Versions](../docs/data-sources/dataplatform_versions.md)
-
 * Certificate Manager
   * Resources
     * [Certificate](../docs/resources/certificate_manager_certificate.md)
