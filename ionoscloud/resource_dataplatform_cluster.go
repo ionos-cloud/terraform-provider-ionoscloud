@@ -200,7 +200,7 @@ func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceDa
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		diag.FromErr(fmt.Errorf("an error occurred while waiting for the Dataplatform cluster with ID: %v to be deleted, error: %w", err))
+		diag.FromErr(fmt.Errorf("an error occurred while waiting for the Dataplatform cluster with ID: %v to be deleted, error: %w", d.Id(), err))
 	}
 
 	return nil
@@ -216,7 +216,7 @@ func resourceDataplatformClusterImport(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("Dataplatform cluster with ID: %v does not exist", clusterId)
+			return nil, fmt.Errorf("dataplatform cluster with ID: %v does not exist", clusterId)
 		}
 		return nil, fmt.Errorf("an error occurred while trying to import the Dataplatform cluster with ID: %v, error: %w", clusterId, err)
 	}
