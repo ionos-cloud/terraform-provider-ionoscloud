@@ -123,7 +123,7 @@ resource "ionoscloud_nfs_cluster" "example" {
 The following arguments are supported:
 
 - `name` - (Required) The name of the Network File Storage cluster.
-- `location` - (Optional) The location where the Network File Storage cluster is located. If this is not set and if no value is provided for the `IONOS_API_URL` env var, the default `location` will be: `de/fra`.
+- `location` - (Optional) The location where the Network File Storage cluster is located. If this is not set and if no value is provided for the `IONOS_API_URL` env var, the default `location` will be: `de/fra`. Other available locations are: `de/fra/2`, `de/txl`, `fr/par`, `gb/lhr`, `es/vit`, `us/las`, `us/ewr`, `us/mci`.
   - `de/fra` - Frankfurt
   - `de/txl` - Berlin
 - `size` - (Required) The size of the Network File Storage cluster in TiB. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees. Default is `2`. The minimum value is `2` and the maximum value is `42`.

@@ -111,18 +111,19 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 
 var (
 	locationToURL = map[string]string{
-		"":       "https://nfs.de-fra.ionos.com",
-		"de/fra": "https://nfs.de-fra.ionos.com",
-		"de/txl": "https://nfs.de-txl.ionos.com",
-		"fr/par": "https://nfs.fr-par.ionos.com",
-		"gb/lhr": "https://nfs.gb-lhr.ionos.com",
-		"es/vit": "https://nfs.es-vit.ionos.com",
-		"us/las": "https://nfs.us-las.ionos.com",
-		"us/ewr": "https://nfs.us-ewr.ionos.com",
-		"us/mci": "https://nfs.us-mci.ionos.com",
+		"":         "https://nfs.de-fra.ionos.com",
+		"de/fra":   "https://nfs.de-fra.ionos.com",
+		"de/fra/2": "https://nfs.de-fra.ionos.com",
+		"de/txl":   "https://nfs.de-txl.ionos.com",
+		"fr/par":   "https://nfs.fr-par.ionos.com",
+		"gb/lhr":   "https://nfs.gb-lhr.ionos.com",
+		"es/vit":   "https://nfs.es-vit.ionos.com",
+		"us/las":   "https://nfs.us-las.ionos.com",
+		"us/ewr":   "https://nfs.us-ewr.ionos.com",
+		"us/mci":   "https://nfs.us-mci.ionos.com",
 	}
 	// ValidNFSLocations is a list of valid locations for the Network File Storage Cluster.
-	ValidNFSLocations = []string{"de/fra", "de/txl", "fr-par", "gb-lhr", "es/vit", "us/las", "us/ewr", "us/mci"}
+	ValidNFSLocations = []string{"de/fra", "de/fra/2", "de/txl", "fr-par", "gb-lhr", "es/vit", "us/las", "us/ewr", "us/mci"}
 )
 
 // ionosAPIURLNFS is the environment variable key for the NFS API URL.

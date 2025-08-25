@@ -1,12 +1,17 @@
+## 6.7.14 -- upcoming release
+### Features
+- Add support for new location for NFS: `de/fra/2`
+### Refactor
+- Remove useless checks for some resources
+- Modify error messages for some resources for more clarity
+### Documentation
+- Fix documentation for DBaaS PgSQL cluster resource
+
 ## 6.7.13
 ### Features
 - Add support for new location: `de/fra/2`
 ### Refactor
 - Use API Gateway bundle product instead of `sdk-go-api-gateway`
-- Remove useless checks for some resources
-- Modify error messages for some resources for more clarity
-### Documentation
-- Fix documentation for DBaaS PgSQL cluster resource
 
 ## 6.7.12
 ### Fixes
