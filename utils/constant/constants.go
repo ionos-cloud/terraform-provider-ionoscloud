@@ -320,27 +320,6 @@ const (
 	ContainerRegistryLocationsTest             = "test_container_registry_locations"
 )
 
-// Dataplatform Constants
-const (
-	DataplatformClusterResource              = "ionoscloud_dataplatform_cluster"
-	DataplatformClusterTestResource          = "test_dataplatform_cluster"
-	DataplatformClusterTestDataSourceById    = "test_dataplatform_cluster_id"
-	DataplatformClusterTestDataSourceByName  = "test_dataplatform_cluster_name"
-	DataplatformNodePoolResource             = "ionoscloud_dataplatform_node_pool"
-	DataplatformNodePoolTestResource         = "test_dataplatform_node_pool"
-	DataplatformNodePoolTestDataSourceById   = "test_dataplatform_node_pool_id"
-	DataplatformNodePoolTestDataSourceByName = "test_dataplatform_node_pool_name"
-	DataplatformNodePoolsDataSource          = "ionoscloud_dataplatform_node_pools"
-	DataplatformVersionsDataSource           = "ionoscloud_dataplatform_versions"
-	DataplatformNodePoolsTestDataSource      = "test_dataplatform_node_pools"
-	DataplatformVersionsTestDataSource       = "test_dataplatform_versions"
-	// DataPlatformVersion lowest 'available' version is now 24.3
-	DataPlatformVersion              = "24.11"
-	DataPlatformNameRegexConstraint  = "^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"
-	DataPlatformRegexNameError       = "name should match " + DataPlatformNameRegexConstraint
-	ResourceNameDataplatformNodePool = DataplatformNodePoolResource + "." + DataplatformNodePoolTestResource
-)
-
 // DNS Constants
 const (
 	DNSRecordDataSource         = "ionoscloud_dns_record"

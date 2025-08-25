@@ -19,7 +19,6 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.2.0
 	github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0
-	github.com/ionos-cloud/sdk-go-bundle/products/dataplatform/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1

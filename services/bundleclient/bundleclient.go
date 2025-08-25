@@ -11,7 +11,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
-	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
@@ -33,7 +32,6 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 		CertManagerClient:             cert.NewClient(clientOptions, fileConfig),
 		CloudApiClient:                cloudapi.NewClient(clientOptions, fileConfig),
 		ContainerClient:               crService.NewClient(clientOptions, fileConfig),
-		DataplatformClient:            dataplatformService.NewClient(clientOptions, fileConfig),
 		DNSClient:                     dnsService.NewClient(clientOptions, fileConfig),
 		LoggingClient:                 loggingService.NewClient(clientOptions, fileConfig),
 		MariaDBClient:                 mariadb.NewClient(clientOptions, fileConfig),
@@ -60,7 +58,6 @@ type SdkBundle struct {
 	NFSClient                     *nfsService.Client
 	CertManagerClient             *cert.Client
 	ContainerClient               *crService.Client
-	DataplatformClient            *dataplatformService.Client
 	DNSClient                     *dnsService.Client
 	LoggingClient                 *loggingService.Client
 	AutoscalingClient             *autoscalingService.Client
