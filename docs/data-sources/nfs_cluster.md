@@ -40,7 +40,7 @@ output "cluster_test_output" {
 
 ## Argument Reference
 
-* `location` - (Optional) The location where the Network File Storage cluster is located.
+* `location` - (Optional) The location where the Network File Storage cluster is located. Available locations: `de/fra`, `de/fra/2`, `de/txl`, `fr/par`, `gb/lhr`, `es/vit`, `us/las`, `us/ewr`, `us/mci`.
 * `name` - (Optional) Name of the Network File Storage cluster.
 * `id` - (Optional) ID of the Network File Storage cluster.
 * `partial_match` - (Optional) Whether partial matching is allowed or not when using the name filter. Defaults to `false`.

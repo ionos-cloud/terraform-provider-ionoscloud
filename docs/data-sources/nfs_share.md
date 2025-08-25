@@ -42,7 +42,7 @@ output "share_test_output" {
 
 ## Argument Reference
 
-- `location` - (Optional) The location where the Network File Storage share is located.
+- `location` - (Optional) The location where the Network File Storage share is located. Available locations: `de/fra`, `de/fra/2`, `de/txl`, `fr/par`, `gb/lhr`, `es/vit`, `us/las`, `us/ewr`, `us/mci`.
 - `cluster_id` - (Required) The ID of the Network File Storage cluster.
 - `name` - (Optional) Name of the Network File Storage share.
 - `id` - (Optional) ID of the Network File Storage share.
