@@ -1,9 +1,10 @@
-## 6.7.14 -- upcoming release
+## 6.7.14
 ### Features
 - Add support for new location for NFS: `de/fra/2`
 ### Refactor
 - Remove useless checks for some resources
 - Modify error messages for some resources for more clarity
+- Remove Dataplatform service
 ### Documentation
 - Fix documentation for DBaaS PgSQL cluster resource
 
