@@ -3,6 +3,7 @@ package objectstorage
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -32,6 +33,10 @@ type BucketDataSourceModel struct {
 
 // CreateBucket creates a new bucket.
 func (c *Client) CreateBucket(ctx context.Context, name, location types.String, objectLock types.Bool, tags types.Map, timeout time.Duration) error {
+	err := c.ChangeConfigURL(location.ValueString())
+	if err != nil {
+		return fmt.Errorf("failed to create bucket: %w", err)
+	}
 	createBucketConfig := objstorage.CreateBucketConfiguration{
 		LocationConstraint: location.ValueStringPointer(),
 	}
@@ -44,14 +49,14 @@ func (c *Client) CreateBucket(ctx context.Context, name, location types.String, 
 	}
 
 	// Wait for bucket creation
-	err := backoff.Retry(func() error {
+	err = backoff.Retry(func() error {
 		return c.bucketExistsCheck(ctx, name.ValueString())
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(timeout)))
 	if err != nil {
 		return fmt.Errorf("failed to wait for bucket creation: %w", err)
 	}
 
-	if err = c.CreateBucketTags(ctx, name.ValueString(), tftags.NewFromMap(tags)); err != nil {
+	if err = c.CreateBucketTags(ctx, name.ValueString(), location.ValueString(), tftags.NewFromMap(tags)); err != nil {
 		return fmt.Errorf("failed to create bucket tags: %w", err)
 	}
 
@@ -59,7 +64,11 @@ func (c *Client) CreateBucket(ctx context.Context, name, location types.String, 
 }
 
 // GetBucket retrieves a bucket.
-func (c *Client) GetBucket(ctx context.Context, name types.String) (*BucketModel, bool, error) {
+func (c *Client) GetBucket(ctx context.Context, name types.String, location types.String) (*BucketModel, bool, error) {
+	err := c.ChangeConfigURL(location.ValueString())
+	if err != nil {
+		return nil, false, fmt.Errorf("failed to get bucket: %w", err)
+	}
 	resp, err := c.client.BucketsApi.HeadBucket(ctx, name.ValueString()).Execute()
 	if resp.HttpNotFound() {
 		return nil, false, nil
@@ -69,7 +78,7 @@ func (c *Client) GetBucket(ctx context.Context, name types.String) (*BucketModel
 		return nil, false, fmt.Errorf("failed to get bucket: %w", err)
 	}
 
-	location, err := c.GetBucketLocation(ctx, name)
+	retrievedLocation, err := c.GetBucketLocation(ctx, name)
 	if err != nil {
 		return nil, true, err
 	}
@@ -91,7 +100,7 @@ func (c *Client) GetBucket(ctx context.Context, name types.String) (*BucketModel
 
 	return &BucketModel{
 		Name:              name,
-		Region:            location,
+		Region:            retrievedLocation,
 		ObjectLockEnabled: lock,
 		Tags:              tagsMap,
 	}, true, nil
@@ -99,17 +108,11 @@ func (c *Client) GetBucket(ctx context.Context, name types.String) (*BucketModel
 
 // GetBucketForDataSource retrieves a bucket for a data source.
 func (c *Client) GetBucketForDataSource(ctx context.Context, name types.String) (*BucketDataSourceModel, bool, error) {
-	resp, err := c.client.BucketsApi.HeadBucket(ctx, name.ValueString()).Execute()
-	if resp.HttpNotFound() {
-		return nil, false, nil
-	}
-
-	if err != nil {
-		return nil, false, fmt.Errorf("failed to get bucket: %w", err)
-	}
-
 	location, err := c.GetBucketLocation(ctx, name)
 	if err != nil {
+		if strings.Contains(err.Error(), "404 Not Found") {
+			return nil, false, nil
+		}
 		return nil, true, err
 	}
 
@@ -120,7 +123,11 @@ func (c *Client) GetBucketForDataSource(ctx context.Context, name types.String) 
 }
 
 // DeleteBucket deletes a bucket.
-func (c *Client) DeleteBucket(ctx context.Context, name types.String, objectLockEnabled, forceDestroy types.Bool, timeout time.Duration) error {
+func (c *Client) DeleteBucket(ctx context.Context, name types.String, objectLockEnabled, forceDestroy types.Bool, location types.String, timeout time.Duration) error {
+	err := c.ChangeConfigURL(location.ValueString())
+	if err != nil {
+		return fmt.Errorf("failed to delete bucket: %w", err)
+	}
 	apiResponse, err := c.client.BucketsApi.DeleteBucket(ctx, name.ValueString()).Execute()
 	if apiResponse.HttpNotFound() {
 		return nil
@@ -131,7 +138,7 @@ func (c *Client) DeleteBucket(ctx context.Context, name types.String, objectLock
 			return fmt.Errorf("failed to empty bucket: %w", err)
 		}
 
-		return c.DeleteBucket(ctx, name, objectLockEnabled, forceDestroy, timeout)
+		return c.DeleteBucket(ctx, name, objectLockEnabled, forceDestroy, location, timeout)
 	}
 
 	if err != nil {

@@ -3,7 +3,6 @@ package objectstorage
 import (
 	"context"
 	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -16,10 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -174,7 +173,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	bucket, found, err := r.client.GetBucket(ctx, data.Name)
+	bucket, found, err := r.client.GetBucket(ctx, data.Name, data.Region)
 	if err != nil {
 		resp.Diagnostics.AddError("Bucket API error", err.Error())
 		return
@@ -194,6 +193,24 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 // ImportState imports the state of the bucket.
 func (r *bucketResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	var name, region string
+
+	parts := strings.Split(req.ID, ":")
+	if len(parts) > 2 {
+		resp.Diagnostics.AddError("invalid import ID", "expected ID in the format 'region:bucket_name' OR 'bucket_name'")
+	}
+	if len(parts) == 2 {
+		region = parts[0]
+		name = parts[1]
+	} else if len(parts) == 1 {
+		name = parts[0]
+	}
+	if name == "" {
+		resp.Diagnostics.AddError("invalid bucket name", "please provide a non-empty string for the bucket name")
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region"), region)...)
+	req.ID = name
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
 
@@ -209,7 +226,7 @@ func (r *bucketResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	if !plan.Tags.Equal(state.Tags) {
-		if err := r.client.UpdateBucketTags(ctx, plan.Name.ValueString(), tags.NewFromMap(plan.Tags), tags.NewFromMap(state.Tags)); err != nil {
+		if err := r.client.UpdateBucketTags(ctx, plan.Name.ValueString(), plan.Region.ValueString(), tags.NewFromMap(plan.Tags), tags.NewFromMap(state.Tags)); err != nil {
 			resp.Diagnostics.AddError("failed to update tags", err.Error())
 			return
 		}
@@ -240,7 +257,7 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
 	defer cancel()
 
-	if err := r.client.DeleteBucket(ctx, data.Name, data.ObjectLockEnabled, data.ForceDestroy, deleteTimeout); err != nil {
+	if err := r.client.DeleteBucket(ctx, data.Name, data.ObjectLockEnabled, data.ForceDestroy, data.Region, deleteTimeout); err != nil {
 		resp.Diagnostics.AddError("failed to delete bucket", err.Error())
 		return
 	}

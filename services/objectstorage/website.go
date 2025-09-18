@@ -50,13 +50,31 @@ type redirect struct {
 
 // CreateBucketWebsite creates a new BucketWebsiteConfiguration.
 func (c *Client) CreateBucketWebsite(ctx context.Context, data *BucketWebsiteConfigurationModel) error {
-	_, err := c.client.WebsiteApi.PutBucketWebsite(ctx, data.Bucket.ValueString()).
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
+	_, err = c.client.WebsiteApi.PutBucketWebsite(ctx, data.Bucket.ValueString()).
 		PutBucketWebsiteRequest(buildBucketWebsiteConfigurationFromModel(data)).Execute()
 	return err
 }
 
 // GetBucketWebsite gets a BucketWebsiteConfiguration.
 func (c *Client) GetBucketWebsite(ctx context.Context, bucketName types.String) (*BucketWebsiteConfigurationModel, bool, error) {
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return nil, false, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, false, err
+	}
+
 	output, apiResponse, err := c.client.WebsiteApi.GetBucketWebsite(ctx, bucketName.ValueString()).Execute()
 	if apiResponse.HttpNotFound() {
 		return nil, false, nil
@@ -90,7 +108,16 @@ func (c *Client) UpdateBucketWebsite(ctx context.Context, data *BucketWebsiteCon
 
 // DeleteBucketWebsite deletes a BucketWebsiteConfiguration.
 func (c *Client) DeleteBucketWebsite(ctx context.Context, bucketName types.String) error {
-	_, err := c.client.WebsiteApi.DeleteBucketWebsite(ctx, bucketName.ValueString()).Execute()
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
+	_, err = c.client.WebsiteApi.DeleteBucketWebsite(ctx, bucketName.ValueString()).Execute()
 	return err
 }
 

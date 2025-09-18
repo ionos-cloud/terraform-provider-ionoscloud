@@ -29,12 +29,30 @@ func (v versioningConfiguration) AttributeTypes() map[string]attr.Type {
 
 // CreateBucketVersioning creates a new BucketVersioning.
 func (c *Client) CreateBucketVersioning(ctx context.Context, data *BucketVersioningResourceModel) error {
-	_, err := c.client.VersioningApi.PutBucketVersioning(ctx, data.Bucket.ValueString()).PutBucketVersioningRequest(buildPutVersioningRequestFromModel(data)).Execute()
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
+	_, err = c.client.VersioningApi.PutBucketVersioning(ctx, data.Bucket.ValueString()).PutBucketVersioningRequest(buildPutVersioningRequestFromModel(data)).Execute()
 	return err
 }
 
 // GetBucketVersioning gets a BucketVersioning.
 func (c *Client) GetBucketVersioning(ctx context.Context, bucketName types.String) (*BucketVersioningResourceModel, bool, error) {
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return nil, false, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, false, err
+	}
+
 	output, resp, err := c.client.VersioningApi.GetBucketVersioning(ctx, bucketName.ValueString()).Execute()
 	if resp.HttpNotFound() {
 		return nil, false, nil
@@ -69,12 +87,21 @@ func (c *Client) UpdateBucketVersioning(ctx context.Context, data *BucketVersion
 
 // DeleteBucketVersioning deletes a BucketVersioning.
 func (c *Client) DeleteBucketVersioning(ctx context.Context, data *BucketVersioningResourceModel) error {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	// Removing bucket versioning for un-versioned bucket from state
 	if data.VersioningConfiguration.Status.ValueString() == string(objstorage.BUCKETVERSIONINGSTATUS_SUSPENDED) {
 		return nil
 	}
 
-	_, err := c.client.VersioningApi.PutBucketVersioning(ctx, data.Bucket.ValueString()).
+	_, err = c.client.VersioningApi.PutBucketVersioning(ctx, data.Bucket.ValueString()).
 		PutBucketVersioningRequest(objstorage.PutBucketVersioningRequest{
 			Status: objstorage.BUCKETVERSIONINGSTATUS_SUSPENDED.Ptr(),
 		}).Execute()

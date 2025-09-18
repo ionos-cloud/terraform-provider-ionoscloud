@@ -18,12 +18,30 @@ type BucketPublicAccessBlockResourceModel struct {
 
 // CreateBucketPublicAccessBlock creates a new BucketPublicAccessBlock.
 func (c *Client) CreateBucketPublicAccessBlock(ctx context.Context, data *BucketPublicAccessBlockResourceModel) error {
-	_, err := c.client.PublicAccessBlockApi.PutPublicAccessBlock(ctx, data.Bucket.ValueString()).BlockPublicAccessPayload(buildPublicAccessBlockFromModel(data)).Execute()
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
+	_, err = c.client.PublicAccessBlockApi.PutPublicAccessBlock(ctx, data.Bucket.ValueString()).BlockPublicAccessPayload(buildPublicAccessBlockFromModel(data)).Execute()
 	return err
 }
 
 // GetBucketPublicAccessBlock gets a BucketPublicAccessBlock.
 func (c *Client) GetBucketPublicAccessBlock(ctx context.Context, bucketName types.String) (*BucketPublicAccessBlockResourceModel, bool, error) {
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return nil, false, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, false, err
+	}
+
 	output, apiResponse, err := c.client.PublicAccessBlockApi.GetPublicAccessBlock(ctx, bucketName.ValueString()).Execute()
 	if apiResponse.HttpNotFound() {
 		return nil, false, nil
@@ -57,6 +75,15 @@ func (c *Client) UpdateBucketPublicAccessBlock(ctx context.Context, data *Bucket
 
 // DeleteBucketPublicAccessBlock deletes a BucketPublicAccessBlock.
 func (c *Client) DeleteBucketPublicAccessBlock(ctx context.Context, bucketName types.String) error {
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	apiResponse, err := c.client.PublicAccessBlockApi.DeletePublicAccessBlock(ctx, bucketName.ValueString()).Execute()
 	if apiResponse.HttpNotFound() {
 		return nil

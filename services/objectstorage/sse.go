@@ -23,7 +23,16 @@ type applyServerSideEncryptionByDefault struct {
 
 // CreateBucketSSE creates a new ServerSideEncryptionConfiguration.
 func (c *Client) CreateBucketSSE(ctx context.Context, data *ServerSideEncryptionConfigurationModel) error {
-	_, err := c.client.EncryptionApi.PutBucketEncryption(ctx, data.Bucket.ValueString()).
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
+	_, err = c.client.EncryptionApi.PutBucketEncryption(ctx, data.Bucket.ValueString()).
 		PutBucketEncryptionRequest(buildServerSideEncryptionConfigurationFromModel(data)).
 		Execute()
 	return err
@@ -31,6 +40,15 @@ func (c *Client) CreateBucketSSE(ctx context.Context, data *ServerSideEncryption
 
 // GetBucketSSE gets a ServerSideEncryptionConfiguration.
 func (c *Client) GetBucketSSE(ctx context.Context, bucketName types.String) (*ServerSideEncryptionConfigurationModel, bool, error) {
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return nil, false, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, false, err
+	}
+
 	output, apiResponse, err := c.client.EncryptionApi.GetBucketEncryption(ctx, bucketName.ValueString()).Execute()
 	if apiResponse.HttpNotFound() {
 		return nil, false, nil
@@ -64,7 +82,16 @@ func (c *Client) UpdateBucketSSE(ctx context.Context, data *ServerSideEncryption
 
 // DeleteBucketSSE deletes a ServerSideEncryptionConfiguration.
 func (c *Client) DeleteBucketSSE(ctx context.Context, bucketName types.String) error {
-	_, err := c.client.EncryptionApi.DeleteBucketEncryption(ctx, bucketName.ValueString()).Execute()
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
+	_, err = c.client.EncryptionApi.DeleteBucketEncryption(ctx, bucketName.ValueString()).Execute()
 	return err
 }
 

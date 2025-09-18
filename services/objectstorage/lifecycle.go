@@ -49,6 +49,15 @@ type abortIncompleteMultipartUpload struct {
 
 // CreateBucketLifecycle creates a new bucket lifecycle configuration.
 func (c *Client) CreateBucketLifecycle(ctx context.Context, data *BucketLifecycleConfigurationModel) error {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	body := buildBucketLifecycleConfigurationFromModel(data)
 
 	bytes, err := xml.Marshal(body)
@@ -67,6 +76,15 @@ func (c *Client) CreateBucketLifecycle(ctx context.Context, data *BucketLifecycl
 
 // GetBucketLifecycle gets a bucket lifecycle configuration.
 func (c *Client) GetBucketLifecycle(ctx context.Context, bucketName types.String) (*BucketLifecycleConfigurationModel, bool, error) {
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return nil, false, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, false, err
+	}
+
 	output, apiResponse, err := c.client.LifecycleApi.GetBucketLifecycle(ctx, bucketName.ValueString()).Execute()
 	if apiResponse.HttpNotFound() {
 		return nil, false, nil
@@ -100,6 +118,15 @@ func (c *Client) UpdateBucketLifecycle(ctx context.Context, data *BucketLifecycl
 
 // DeleteBucketLifecycle deletes a bucket lifecycle configuration.
 func (c *Client) DeleteBucketLifecycle(ctx context.Context, bucketName types.String) error {
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	apiResponse, err := c.client.LifecycleApi.DeleteBucketLifecycle(ctx, bucketName.ValueString()).Execute()
 	if apiResponse.HttpNotFound() {
 		return nil

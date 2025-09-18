@@ -2,12 +2,38 @@ package fileconfiguration
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
+
+// Usage:
+//   // Load from default file
+//   cfg, err := fileconfiguration.New("")
+//   // From explicit path:
+//   cfg, err := fileconfiguration.New("/path/to/config")
+//   // From env:
+//   cfg, err := fileconfiguration.NewFromEnv()
+//
+//   // Read profiles list:
+//   profiles := fileconfiguration.ReadProfilesFromFile()
+//   // Switch/get current profile:
+//   prof := cfg.GetCurrentProfile()
+//   // Get environment names:
+//   envs := cfg.GetEnvironmentNames()
+//   // Get profile names:
+//   profs := cfg.GetProfileNames()
+//
+//   // Get endpoint for regionless API:
+//   ep := cfg.GetProductOverrides("psql")
+//   // Get endpoint for region-specific API:
+//   ep := cfg.GetProductLocationOverrides("dns", "de/fra")
+//   // Get endpoint for region-specific API with fallback to global endpoint: (combine the two funcs above)
+//   ep := cfg.GetOverride("dns", "de/fra")
+//   ep := cfg.GetOverride("psql", "")
 
 // products that do not have a location and will override the endpoint that is used globally
 const (
@@ -42,7 +68,7 @@ type Endpoint struct {
 	// Products that do not have a location and will override the endpoint that is used globally:
 	// cloud, objectstoragemanagement, kafka, dns, mongo, psql, dataplatform, creg, autoscaling, apigateway
 	// Products that have location-based endpoints: logging, monitoring, containerregistry, vpn, inmemorydb, nfs, objectstorage, mariadb
-	Location            string `yaml:"location"`
+	Location            string `yaml:"location,omitempty"`
 	Name                string `yaml:"name"`
 	SkipTLSVerify       bool   `yaml:"skipTlsVerify"`
 	CertificateAuthData string `yaml:"certificateAuthData,omitempty"`
@@ -79,10 +105,22 @@ type Profile struct {
 	Credentials shared.Credentials
 }
 
+// Version wraps float64 so we can control its YAML output.
+type Version float64
+
+// MarshalYAML ensures that, e.g., 1.0 is emitted as "1.0" instead of "1".
+func (v Version) MarshalYAML() (interface{}, error) {
+	return &yaml.Node{
+		Kind:  yaml.ScalarNode,
+		Tag:   "!!float",
+		Value: fmt.Sprintf("%.1f", float64(v)),
+	}, nil
+}
+
 // FileConfig is a struct that represents the loaded configuration
 type FileConfig struct {
 	// Version of the configuration
-	Version float64 `yaml:"version"`
+	Version Version `yaml:"version"`
 	// CurrentProfile active profile for configuration
 	CurrentProfile string `yaml:"currentProfile"`
 	// Profiles list of profiles
@@ -169,19 +207,65 @@ func NewFromEnv() (*FileConfig, error) {
 	return New(os.Getenv(shared.IonosFilePathEnvVar))
 }
 
+// GetProfileNames returns a list of profile names from the loaded configuration
+func (f *FileConfig) GetProfileNames() []string {
+	names := make([]string, len(f.Profiles))
+	for i, p := range f.Profiles {
+		names[i] = p.Name
+	}
+	return names
+}
+
+// GetEnvironmentNames returns a list of environment names from the loaded configuration
+func (f *FileConfig) GetEnvironmentNames() []string {
+	names := make([]string, len(f.Environments))
+	for i, e := range f.Environments {
+		names[i] = e.Name
+	}
+	return names
+}
+
+// GetOverride returns the endpoint for a specific product and location
+// with fallback to the global endpoint if no location is found.
+//
+// It is a helper function combining GetProductLocationOverrides and GetProductOverrides
+func (f *FileConfig) GetOverride(productName, location string) *Endpoint {
+	if locEp := f.GetProductLocationOverrides(productName, location); locEp != nil {
+		return locEp
+	}
+
+	if prod := f.GetProductOverrides(productName); prod != nil && len(prod.Endpoints) > 0 {
+		if prod.Endpoints[0].Location != "" && prod.Endpoints[0].Location != location {
+			// Check if we actually got a location-specific endpoint (e.g. the user asked for a wrong location
+			// and GetProductOverrides returned the first location-specific endpoint)
+			if shared.SdkLogLevel.Satisfies(shared.Debug) {
+				shared.SdkLogger.Printf("[DEBUG] Retrieved location-specific (%s) override '%s' for product '%s' "+
+					"when a location-less override was expected, discarding...", location, prod.Endpoints[0].Name, productName)
+			}
+			return nil
+		}
+		return &prod.Endpoints[0]
+	}
+	return nil
+}
+
 // GetCurrentProfile returns the current profile from the loaded configuration
 // if the current profile is not set, it returns nil
 // if the current profile is set and found in the loaded configuration, it returns the profile
-func (fileConfig *FileConfig) GetCurrentProfile() *Profile {
+func (f *FileConfig) GetCurrentProfile() *Profile {
+	if f == nil {
+		return nil
+	}
+
 	currentProfile := os.Getenv(shared.IonosCurrentProfileEnvVar)
 	if currentProfile == "" {
-		currentProfile = fileConfig.CurrentProfile
+		currentProfile = f.CurrentProfile
 	}
 	if currentProfile == "" {
 		shared.SdkLogger.Printf("[WARN] no current profile set")
 		return nil
 	}
-	for _, profile := range fileConfig.Profiles {
+	for _, profile := range f.Profiles {
 		if profile.Name == currentProfile {
 			if shared.SdkLogLevel.Satisfies(shared.Debug) {
 				shared.SdkLogger.Printf("[DEBUG] using profile %s", profile.Name)
@@ -195,11 +279,11 @@ func (fileConfig *FileConfig) GetCurrentProfile() *Profile {
 	return nil
 }
 
-func (fileConfig *FileConfig) GetEnvForCurrentProfile() string {
-	if fileConfig == nil {
+func (f *FileConfig) GetEnvForCurrentProfile() string {
+	if f == nil {
 		return ""
 	}
-	if currentProfile := fileConfig.GetCurrentProfile(); currentProfile != nil {
+	if currentProfile := f.GetCurrentProfile(); currentProfile != nil {
 		return currentProfile.Environment
 	}
 	return ""
@@ -207,8 +291,8 @@ func (fileConfig *FileConfig) GetEnvForCurrentProfile() string {
 
 // GetProductOverrides returns the overrides for a specific product for the current environment
 // if no current environment is found, the first environment is used for the product that matches productName is returned
-func (fileConfig *FileConfig) GetProductOverrides(productName string) *Product {
-	if fileConfig == nil {
+func (f *FileConfig) GetProductOverrides(productName string) *Product {
+	if f == nil {
 		return nil
 	}
 	if productName == "" {
@@ -217,8 +301,8 @@ func (fileConfig *FileConfig) GetProductOverrides(productName string) *Product {
 		}
 		return nil
 	}
-	currentEnv := fileConfig.GetEnvForCurrentProfile()
-	for _, environment := range fileConfig.Environments {
+	currentEnv := f.GetEnvForCurrentProfile()
+	for _, environment := range f.Environments {
 		if currentEnv != "" && environment.Name != currentEnv {
 			continue
 		}
@@ -235,11 +319,11 @@ func (fileConfig *FileConfig) GetProductOverrides(productName string) *Product {
 }
 
 // GetProductLocationOverrides returns the overrides for a specific product and location for the current environment
-func (fileConfig *FileConfig) GetProductLocationOverrides(productName, location string) *Endpoint {
-	if fileConfig == nil {
+func (f *FileConfig) GetProductLocationOverrides(productName, location string) *Endpoint {
+	if f == nil {
 		return nil
 	}
-	product := fileConfig.GetProductOverrides(productName)
+	product := f.GetProductOverrides(productName)
 	if product == nil || len(product.Endpoints) == 0 {
 		return nil
 	}

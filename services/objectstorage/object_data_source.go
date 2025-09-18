@@ -13,6 +13,15 @@ import (
 
 // GetObjectForDataSource retrieves an object for a data source.
 func (c *Client) GetObjectForDataSource(ctx context.Context, data *ObjectDataSourceModel) (*ObjectDataSourceModel, bool, error) {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return nil, false, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, false, err
+	}
+
 	_, apiResponse, err := c.findObject(ctx, &objectFindRequest{
 		Bucket:                                data.Bucket,
 		Key:                                   data.Key,

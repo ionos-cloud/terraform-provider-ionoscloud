@@ -9,16 +9,20 @@ import (
 )
 
 // CreateBucketTags creates tags for a bucket.
-func (c *Client) CreateBucketTags(ctx context.Context, bucketName string, tags tags.KeyValueTags) error {
+func (c *Client) CreateBucketTags(ctx context.Context, bucketName, region string, tags tags.KeyValueTags) error {
 	if len(tags) == 0 {
 		return nil
 	}
 
-	return c.UpdateBucketTags(ctx, bucketName, tags, nil)
+	return c.UpdateBucketTags(ctx, bucketName, region, tags, nil)
 }
 
 // UpdateBucketTags updates tags for a bucket.
-func (c *Client) UpdateBucketTags(ctx context.Context, bucketName string, new, old tags.KeyValueTags) error {
+func (c *Client) UpdateBucketTags(ctx context.Context, bucketName, region string, new, old tags.KeyValueTags) error {
+	err := c.ChangeConfigURL(region)
+	if err != nil {
+		return fmt.Errorf("failed to update bucket tags: %w", err)
+	}
 	allTags, err := c.ListBucketTags(ctx, bucketName)
 	if err != nil {
 		return err
