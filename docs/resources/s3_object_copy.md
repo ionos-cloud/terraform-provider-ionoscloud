@@ -78,3 +78,11 @@ The following arguments are supported:
 - `tags` - (Optional)[map] The tag-set for the object.
 - `version_id` - (Computed)[string] The version of the object.
 - `force_destroy` - (Optional)[bool] If true, the object will be destroyed if versioning is enabled then all versions will be destroyed. Default is `false`.
+
+## Import
+
+Resource Object Copy can be imported using the `bucket name` and `object copy key`
+
+```shell
+terraform import ionoscloud_s3_object.example target/example
+```

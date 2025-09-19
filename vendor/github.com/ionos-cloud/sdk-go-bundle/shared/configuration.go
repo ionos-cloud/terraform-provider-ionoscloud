@@ -9,6 +9,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -35,11 +36,13 @@ const (
 	IonosCurrentProfileEnvVar = "IONOS_CURRENT_PROFILE"
 	IonosS3AccessKeyEnvVar    = "IONOS_S3_ACCESS_KEY"
 	IonosS3SecretKeyEnvVar    = "IONOS_S3_SECRET_KEY"
+	IonosObjectStorageRegion  = "IONOS_OBJECT_STORAGE_REGION"
 	DefaultIonosServerUrl     = "https://api.ionos.com/"
 
-	defaultMaxRetries  = 3
-	defaultWaitTime    = time.Duration(100) * time.Millisecond
-	defaultMaxWaitTime = time.Duration(2000) * time.Millisecond
+	defaultMaxRetries   = 3
+	defaultWaitTime     = time.Duration(100) * time.Millisecond
+	defaultMaxWaitTime  = time.Duration(2000) * time.Millisecond
+	defaultPollInterval = 1 * time.Second
 )
 
 // contextKeys are used to identify the type of value in the context.
@@ -135,6 +138,7 @@ type Configuration struct {
 	MaxRetries         int           `json:"maxRetries,omitempty"`
 	WaitTime           time.Duration `json:"waitTime,omitempty"`
 	MaxWaitTime        time.Duration `json:"maxWaitTime,omitempty"`
+	PollInterval       time.Duration `json:"pollInterval,omitempty"`
 
 	Middleware          MiddlewareFunction          `json:"-"`
 	MiddlewareWithError MiddlewareFunctionWithError `json:"-"`
@@ -152,6 +156,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		Token:              token,
 		MaxRetries:         defaultMaxRetries,
 		MaxWaitTime:        defaultMaxWaitTime,
+		PollInterval:       defaultPollInterval,
 		WaitTime:           defaultWaitTime,
 		Servers:            ServerConfigurations{},
 		OperationServers:   map[string]ServerConfigurations{},
@@ -175,14 +180,16 @@ type ClientOptions struct {
 	SkipTLSVerify bool
 	// Certificate is the certificate that will be used for tls verification
 	Certificate string
+	// ObjectStorageRegion is the region that will be used for object storage authentication
+	ObjectStorageRegion string
 	// Credentials are the credentials that will be used for authentication
 	Credentials Credentials
 }
 
 // Credentials are the credentials that will be used for authentication
 type Credentials struct {
-	Username    string `yaml:"username"`
-	Password    string `yaml:"password"`
+	Username    string `yaml:"username,omitempty"`
+	Password    string `yaml:"password,omitempty"`
 	Token       string `yaml:"token"`
 	S3AccessKey string `yaml:"s3AccessKey"`
 	S3SecretKey string `yaml:"s3SecretKey"`
@@ -238,11 +245,46 @@ func CreateTransport(insecure bool, certificate string) *http.Transport {
 	return transport
 }
 
+// NewConfigurationFromEnv creates a new shared.Configuration object from the environment variables
 func NewConfigurationFromEnv() *Configuration {
-	return NewConfiguration(
-		os.Getenv(IonosUsernameEnvVar), os.Getenv(IonosPasswordEnvVar), os.Getenv(IonosTokenEnvVar),
-		os.Getenv(IonosApiUrlEnvVar),
-	)
+	cfg := NewConfiguration(os.Getenv(IonosUsernameEnvVar), os.Getenv(IonosPasswordEnvVar),
+		os.Getenv(IonosTokenEnvVar), os.Getenv(IonosApiUrlEnvVar))
+
+	options := ClientOptions{
+		ObjectStorageRegion: os.Getenv(IonosObjectStorageRegion),
+		Credentials: Credentials{
+			S3AccessKey: os.Getenv(IonosS3AccessKeyEnvVar),
+			S3SecretKey: os.Getenv(IonosS3SecretKeyEnvVar)},
+	}
+	if options.Credentials.S3AccessKey != "" && options.Credentials.S3SecretKey != "" {
+		cfg = cfg.WithObjectStorage(options)
+	}
+	return cfg
+}
+
+// WithObjectStorage configures the Configuration by setting the object storage middleware
+func (c *Configuration) WithObjectStorage(clientOptions ClientOptions) *Configuration {
+	signer := awsv4.NewSigner(credentials.NewStaticCredentials(clientOptions.Credentials.S3AccessKey, clientOptions.Credentials.S3SecretKey, ""))
+	c.MiddlewareWithError = func(r *http.Request) error {
+		var reader io.ReadSeeker
+		if r.Body != nil {
+			bodyBytes, err := io.ReadAll(r.Body)
+			if err != nil {
+				return err
+			}
+			reader = bytes.NewReader(bodyBytes)
+		}
+
+		if clientOptions.ObjectStorageRegion == "" {
+			clientOptions.ObjectStorageRegion = "eu-central-3"
+		}
+		_, err := signer.Sign(r, reader, "s3", clientOptions.ObjectStorageRegion, time.Now())
+		if errors.Is(err, credentials.ErrStaticCredentialsEmpty) {
+			return errors.New("object storage credentials are missing. Please set s3_access_key and s3_secret_key provider attributes or environment variables IONOS_S3_ACCESS_KEY and IONOS_S3_SECRET_KEY")
+		}
+		return err
+	}
+	return c
 }
 
 // AddDefaultHeader adds a new HTTP header to the default header in the request
@@ -288,7 +330,7 @@ func (sc ServerConfigurations) URL(index int, variables map[string]string) (stri
 			serverUrl = strings.Replace(serverUrl, "{"+name+"}", variable.DefaultValue, -1)
 		}
 	}
-	return serverUrl, nil
+	return EnsureURLFormat(serverUrl), nil
 }
 
 // ServerURL returns URL based on server settings
@@ -439,8 +481,7 @@ func OverrideLocationFor(configProvider ConfigProvider, location, endpoint strin
 		configProvider.GetConfig().Servers, ServerConfiguration{
 			URL:         endpoint,
 			Description: EndpointOverridden + location,
-		},
-	)
+		})
 }
 
 func SetSkipTLSVerify(configProvider ConfigProvider, skipTLSVerify bool) {
@@ -461,6 +502,8 @@ func AddCertsToClient(authorityData string) *x509.CertPool {
 	return rootCAs
 }
 
+// SignerMiddleware returns a middleware function that signs the request using AWS v4 signer.
+// Used for S3 compatible services.
 func SignerMiddleware(region, service, accessKey, secretKey string) MiddlewareFunctionWithError {
 	signer := awsv4.NewSigner(credentials.NewStaticCredentials(accessKey, secretKey, ""))
 

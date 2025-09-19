@@ -3,7 +3,7 @@ module github.com/ionos-cloud/terraform-provider-ionoscloud/v6
 go 1.24.5
 
 require (
-	github.com/aws/aws-sdk-go v1.55.6
+	github.com/aws/aws-sdk-go v1.55.7
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/gofrs/uuid/v5 v5.3.2
 	github.com/hashicorp/terraform-plugin-framework v1.15.0
@@ -28,11 +28,11 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.2.0
 	github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0
-	github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.1
+	github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.2
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
-	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.4
+	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.6
 	github.com/ionos-cloud/sdk-go/v6 v6.3.3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.10.0

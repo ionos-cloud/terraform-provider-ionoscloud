@@ -51,12 +51,21 @@ type bucketPolicyStatementCondition struct {
 
 // CreateBucketPolicy creates a new bucket policy.
 func (c *Client) CreateBucketPolicy(ctx context.Context, data *BucketPolicyModel) error {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	input, diags := buildBucketPolicyFromModel(data)
 	if diags.HasError() {
 		return fmt.Errorf("error building bucket policy: %v", diags)
 	}
 
-	_, err := c.client.PolicyApi.PutBucketPolicy(ctx, data.Bucket.ValueString()).BucketPolicy(input).Execute()
+	_, err = c.client.PolicyApi.PutBucketPolicy(ctx, data.Bucket.ValueString()).BucketPolicy(input).Execute()
 	if err != nil {
 		return err
 	}
@@ -77,6 +86,15 @@ func (c *Client) CreateBucketPolicy(ctx context.Context, data *BucketPolicyModel
 
 // GetBucketPolicy gets a bucket policy.
 func (c *Client) GetBucketPolicy(ctx context.Context, bucketName types.String) (*BucketPolicyModel, bool, error) {
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return nil, false, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, false, err
+	}
+
 	output, apiResponse, err := c.client.PolicyApi.GetBucketPolicy(ctx, bucketName.ValueString()).Execute()
 	if apiResponse.HttpNotFound() {
 		return nil, false, nil
@@ -95,6 +113,15 @@ func (c *Client) GetBucketPolicy(ctx context.Context, bucketName types.String) (
 
 // UpdateBucketPolicy updates a bucket policy.
 func (c *Client) UpdateBucketPolicy(ctx context.Context, data *BucketPolicyModel) error {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	if err := c.CreateBucketPolicy(ctx, data); err != nil {
 		return err
 	}
@@ -114,7 +141,16 @@ func (c *Client) UpdateBucketPolicy(ctx context.Context, data *BucketPolicyModel
 
 // DeleteBucketPolicy deletes a bucket policy.
 func (c *Client) DeleteBucketPolicy(ctx context.Context, bucketName types.String) error {
-	_, err := c.client.PolicyApi.DeleteBucketPolicy(ctx, bucketName.ValueString()).Execute()
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
+	_, err = c.client.PolicyApi.DeleteBucketPolicy(ctx, bucketName.ValueString()).Execute()
 	if err != nil {
 		return err
 	}

@@ -27,13 +27,31 @@ type corsRule struct {
 
 // CreateBucketCors creates a new bucket cors configuration.
 func (c *Client) CreateBucketCors(ctx context.Context, data *BucketCorsConfigurationModel) error {
-	_, err := c.client.CORSApi.PutBucketCors(ctx, data.Bucket.ValueString()).
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
+	_, err = c.client.CORSApi.PutBucketCors(ctx, data.Bucket.ValueString()).
 		PutBucketCorsRequest(buildBucketCorsConfigurationFromModel(data)).Execute()
 	return err
 }
 
 // GetBucketCors gets a bucket cors configuration.
 func (c *Client) GetBucketCors(ctx context.Context, bucketName types.String) (*BucketCorsConfigurationModel, bool, error) {
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return nil, false, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, false, err
+	}
+
 	output, apiResponse, err := c.client.CORSApi.GetBucketCors(ctx, bucketName.ValueString()).Execute()
 	if apiResponse.HttpNotFound() {
 		return nil, false, nil
@@ -48,6 +66,15 @@ func (c *Client) GetBucketCors(ctx context.Context, bucketName types.String) (*B
 
 // UpdateBucketCors updates a bucket cors configuration.
 func (c *Client) UpdateBucketCors(ctx context.Context, data *BucketCorsConfigurationModel) error {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	if err := c.CreateBucketCors(ctx, data); err != nil {
 		return err
 	}
@@ -68,6 +95,15 @@ func (c *Client) UpdateBucketCors(ctx context.Context, data *BucketCorsConfigura
 
 // DeleteBucketCors deletes a bucket cors configuration.
 func (c *Client) DeleteBucketCors(ctx context.Context, bucketName types.String) error {
+	region, err := c.GetBucketLocation(ctx, bucketName)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	apiResponse, err := c.client.CORSApi.DeleteBucketCors(ctx, bucketName.ValueString()).Execute()
 	if apiResponse.HttpNotFound() {
 		return nil

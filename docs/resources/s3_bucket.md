@@ -41,7 +41,7 @@ resource "ionoscloud_s3_bucket" "example" {
 The following arguments are supported:
 
 - `name` - (Required)[string] The bucket name. [ 3 .. 63 ] characters
-- `region` - (Optional)[string] Specifies the Region where the bucket will be created. Please refer to the list of available regions
+- `region` - (Optional)[string] Specifies the Region where the bucket will be created. Available regions are: `eu-central-3`, `eu-central-4`, `us-central-1`.
 - `object_lock_enabled` - (Optional)[bool] The object lock configuration status of the bucket. Must be `true` or `false`.
 - `tags` - (Optional) A mapping of tags to assign to the bucket.
 - `timeouts` - (Optional) Timeouts for this resource.

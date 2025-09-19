@@ -25,6 +25,15 @@ type ObjectsDataSourceModel struct {
 
 // ListObjects fetches objects from a bucket.
 func (c *Client) ListObjects(ctx context.Context, data *ObjectsDataSourceModel) error {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	input := &ListObjectsV2Input{
 		Bucket:       data.Bucket.ValueString(),
 		Delimiter:    data.Delimiter.ValueStringPointer(),

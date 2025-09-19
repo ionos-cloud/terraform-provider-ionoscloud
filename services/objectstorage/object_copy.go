@@ -50,8 +50,17 @@ type ObjectCopyResourceModel struct {
 
 // CopyObject copies an object.
 func (c *Client) CopyObject(ctx context.Context, data *ObjectCopyResourceModel) error {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	req := c.client.ObjectsApi.CopyObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
-	err := fillObjectCopyRequest(&req, data)
+	err = fillObjectCopyRequest(&req, data)
 	if err != nil {
 		return err
 	}
@@ -66,6 +75,15 @@ func (c *Client) CopyObject(ctx context.Context, data *ObjectCopyResourceModel) 
 
 // GetObjectCopy gets an object copy.
 func (c *Client) GetObjectCopy(ctx context.Context, data *ObjectCopyResourceModel) (*ObjectCopyResourceModel, bool, error) {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return nil, false, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, false, err
+	}
+
 	_, apiResponse, err := c.findObject(ctx, &objectFindRequest{
 		Bucket:                                data.Bucket,
 		Key:                                   data.Key,
@@ -92,6 +110,15 @@ func (c *Client) GetObjectCopy(ctx context.Context, data *ObjectCopyResourceMode
 
 // UpdateObjectCopy updates an object copy.
 func (c *Client) UpdateObjectCopy(ctx context.Context, plan, state *ObjectCopyResourceModel) error {
+	region, err := c.GetBucketLocation(ctx, state.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	if hasCopyConditions(plan) || hasObjectCopyContentChanges(plan, state) {
 		if err := c.CopyObject(ctx, plan); err != nil {
 			return err
@@ -121,10 +148,15 @@ func (c *Client) UpdateObjectCopy(ctx context.Context, plan, state *ObjectCopyRe
 
 // DeleteObjectCopy deletes an object copy.
 func (c *Client) DeleteObjectCopy(ctx context.Context, data *ObjectCopyResourceModel) error {
-	var (
-		err  error
-		resp *shared.APIResponse
-	)
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+	var resp *shared.APIResponse
 
 	if !data.VersionID.IsNull() {
 		_, err = DeleteAllObjectVersions(ctx, c.client, &DeleteRequest{

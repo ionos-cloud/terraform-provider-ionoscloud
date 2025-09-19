@@ -35,10 +35,6 @@ resource "ionoscloud_s3_object" "example" {
   website_redirect = "https://www.ionos.com"
   server_side_encryption = "AES256"
   
-  object_lock_mode = "GOVERNANCE"
-  object_lock_retain_until_date = "2024-10-07T12:34:56Z"
-  object_lock_legal_hold = "ON"
-
   tags = {
     tk = "tv"
   }

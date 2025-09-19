@@ -85,8 +85,17 @@ type ObjectDataSourceModel struct {
 
 // UploadObject uploads an object to a bucket.
 func (c *Client) UploadObject(ctx context.Context, data *ObjectResourceModel) (*shared.APIResponse, error) {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return nil, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, err
+	}
+
 	putReq := c.client.ObjectsApi.PutObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
-	err := fillPutObjectRequest(&putReq, data)
+	err = fillPutObjectRequest(&putReq, data)
 	if err != nil {
 		return nil, err
 	}
@@ -122,6 +131,15 @@ func (c *Client) UploadObject(ctx context.Context, data *ObjectResourceModel) (*
 
 // GetObject retrieves an object.
 func (c *Client) GetObject(ctx context.Context, data *ObjectResourceModel) (*ObjectResourceModel, bool, error) {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return nil, false, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, false, err
+	}
+
 	_, apiResponse, err := c.findObject(ctx, &objectFindRequest{
 		Bucket:                                data.Bucket,
 		Key:                                   data.Key,
@@ -149,6 +167,15 @@ func (c *Client) GetObject(ctx context.Context, data *ObjectResourceModel) (*Obj
 
 // UpdateObject updates an object.
 func (c *Client) UpdateObject(ctx context.Context, plan, state *ObjectResourceModel) error {
+	region, err := c.GetBucketLocation(ctx, state.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	if hasObjectContentChanges(plan, state) {
 		resp, err := c.UploadObject(ctx, plan)
 		if err != nil {
@@ -186,10 +213,16 @@ func (c *Client) UpdateObject(ctx context.Context, plan, state *ObjectResourceMo
 
 // DeleteObject deletes an object.
 func (c *Client) DeleteObject(ctx context.Context, data *ObjectResourceModel) error {
-	var (
-		err  error
-		resp *shared.APIResponse
-	)
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
+	var resp *shared.APIResponse
 
 	if !data.VersionID.IsNull() {
 		_, err = DeleteAllObjectVersions(ctx, c.client, &DeleteRequest{
