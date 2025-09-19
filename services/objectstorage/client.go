@@ -64,27 +64,14 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, config *filec
 		}
 	}
 
+	if clientOptions.StorageOptions.Region == "" {
+		clientOptions.StorageOptions.Region = "eu-central-3"
+	}
+
+	// TODO -- replace with WithObjectStorage from sdk-go-bundle
 	cfg := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)
 	signer := awsv4.NewSigner(credentials.NewStaticCredentials(clientOptions.StorageOptions.AccessKey, clientOptions.StorageOptions.SecretKey, ""))
-	cfg.MiddlewareWithError = func(r *http.Request) error {
-		var reader io.ReadSeeker
-		if r.Body != nil {
-			bodyBytes, err := io.ReadAll(r.Body)
-			if err != nil {
-				return err
-			}
-			reader = bytes.NewReader(bodyBytes)
-		}
-
-		if clientOptions.StorageOptions.Region == "" {
-			clientOptions.StorageOptions.Region = "eu-central-3"
-		}
-		_, err := signer.Sign(r, reader, "s3", clientOptions.StorageOptions.Region, time.Now())
-		if errors.Is(err, credentials.ErrStaticCredentialsEmpty) {
-			return errors.New("object storage credentials are missing. Please set s3_access_key and s3_secret_key provider attributes or environment variables IONOS_S3_ACCESS_KEY and IONOS_S3_SECRET_KEY")
-		}
-		return err
-	}
+	cfg.MiddlewareWithError = signerMiddleware(clientOptions.StorageOptions.Region, signer)
 	cfg.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		clientOptions.Version, objstorage.Version, clientOptions.TerraformVersion,
@@ -129,7 +116,14 @@ func (c *Client) ChangeConfigURL(bucketRegion string) error {
 			URL: regionToURL[region],
 		},
 	}
-	cfg.MiddlewareWithError = func(r *http.Request) error {
+	cfg.MiddlewareWithError = signerMiddleware(region, c.signer)
+	return nil
+}
+
+// signerMiddleware returns a middleware function that signs the request using the provided AWS v4 signer
+// and region.
+func signerMiddleware(region string, signer *awsv4.Signer) shared.MiddlewareFunctionWithError {
+	return func(r *http.Request) error {
 		var reader io.ReadSeeker
 		if r.Body != nil {
 			bodyBytes, err := io.ReadAll(r.Body)
@@ -139,11 +133,10 @@ func (c *Client) ChangeConfigURL(bucketRegion string) error {
 			reader = bytes.NewReader(bodyBytes)
 		}
 
-		_, err := c.signer.Sign(r, reader, "s3", region, time.Now())
+		_, err := signer.Sign(r, reader, "s3", region, time.Now())
 		if errors.Is(err, credentials.ErrStaticCredentialsEmpty) {
 			return errors.New("object storage credentials are missing. Please set s3_access_key and s3_secret_key provider attributes or environment variables IONOS_S3_ACCESS_KEY and IONOS_S3_SECRET_KEY")
 		}
 		return err
 	}
-	return nil
 }
