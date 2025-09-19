@@ -9,7 +9,6 @@ import (
 	"os"
 	"runtime"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -109,7 +108,7 @@ var (
 		"eu-central-4": "https://s3.eu-central-4.ionoscloud.com",
 		"us-central-1": "https://s3.us-central-1.ionoscloud.com",
 	}
-	ValidS3Locations = []string{"eu-central-3", "eu-central-4", "us-central-1"}
+	PublicS3Locations = []string{"eu-central-3", "eu-central-4", "us-central-1"}
 )
 
 func (c *Client) ChangeConfigURL(bucketRegion string) error {
@@ -119,8 +118,9 @@ func (c *Client) ChangeConfigURL(bucketRegion string) error {
 		return fmt.Errorf("global region: %v is different from the bucket region: %v, if you want to use the bucket region, please unset the global region", c.globalRegion, bucketRegion)
 	}
 	region = bucketRegion
-	if region != "" && !slices.Contains(ValidS3Locations, region) {
-		return fmt.Errorf("invalid region: %v, available regions are: %s", region, strings.Join(ValidS3Locations, ","))
+	if region != "" && !slices.Contains(PublicS3Locations, region) {
+		// Custom region, don't overwrite the URL.
+		return nil
 	}
 
 	cfg := c.client.GetConfig()
