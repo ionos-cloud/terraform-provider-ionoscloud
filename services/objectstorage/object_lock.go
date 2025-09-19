@@ -34,6 +34,15 @@ type defaultRetention struct {
 
 // CreateObjectLock creates a new bucket object lock configuration.
 func (c *Client) CreateObjectLock(ctx context.Context, data *ObjectLockConfigurationModel) error {
+	region, err := c.GetBucketLocation(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return err
+	}
+
 	input := buildObjectLockConfigurationFromModel(data)
 	bytes, err := xml.Marshal(input)
 	if err != nil {
@@ -50,6 +59,15 @@ func (c *Client) CreateObjectLock(ctx context.Context, data *ObjectLockConfigura
 
 // GetObjectLock gets a bucket object lock configuration.
 func (c *Client) GetObjectLock(ctx context.Context, name types.String) (*ObjectLockConfigurationModel, bool, error) {
+	region, err := c.GetBucketLocation(ctx, name)
+	if err != nil {
+		return nil, false, err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return nil, false, err
+	}
+
 	output, httpResp, err := c.client.ObjectLockApi.GetObjectLockConfiguration(ctx, name.ValueString()).Execute()
 	if httpResp.HttpNotFound() {
 		return nil, false, nil
@@ -65,6 +83,15 @@ func (c *Client) GetObjectLock(ctx context.Context, name types.String) (*ObjectL
 
 // GetObjectLockEnabled gets a bucket object lock configuration.
 func (c *Client) GetObjectLockEnabled(ctx context.Context, name types.String) (types.Bool, error) {
+	region, err := c.GetBucketLocation(ctx, name)
+	if err != nil {
+		return types.BoolValue(false), err
+	}
+	err = c.ChangeConfigURL(region.ValueString())
+	if err != nil {
+		return types.BoolValue(false), err
+	}
+
 	output, httpResp, err := c.client.ObjectLockApi.GetObjectLockConfiguration(ctx, name.ValueString()).Execute()
 	if httpResp.HttpNotFound() {
 		return types.BoolValue(false), nil

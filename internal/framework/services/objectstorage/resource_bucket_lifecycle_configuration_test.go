@@ -127,7 +127,7 @@ func TestAccBucketLifecycleConfigurationResourceMultipleRules(t *testing.T) {
 					resource.TestCheckResourceAttr(name, "rule.0.abort_incomplete_multipart_upload.days_after_initiation", "1"),
 					resource.TestCheckResourceAttr(name, "rule.1.id", "Rule 2"),
 					resource.TestCheckResourceAttr(name, "rule.1.status", "Enabled"),
-					resource.TestCheckResourceAttr(name, "rule.1.filter.prefix", "/logs"),
+					resource.TestCheckResourceAttr(name, "rule.1.filter.prefix", "rule2/"),
 					resource.TestCheckResourceAttr(name, "rule.1.expiration.days", "90"),
 				),
 			},

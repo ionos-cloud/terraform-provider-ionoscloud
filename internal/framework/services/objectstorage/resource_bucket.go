@@ -3,6 +3,8 @@ package objectstorage
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -18,7 +20,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
-	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -73,6 +74,9 @@ func (r *bucketResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Optional:    true,
 				Computed:    true,
 				Default:     stringdefault.StaticString("eu-central-3"),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"object_lock_enabled": schema.BoolAttribute{
 				Description: "Whether object lock is enabled for the bucket",

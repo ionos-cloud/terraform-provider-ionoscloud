@@ -112,7 +112,6 @@ var (
 	ValidS3Locations = []string{"eu-central-3", "eu-central-4", "us-central-1"}
 )
 
-// TODO -- Add validation for local/global regions
 func (c *Client) ChangeConfigURL(bucketRegion string) error {
 	var region string
 

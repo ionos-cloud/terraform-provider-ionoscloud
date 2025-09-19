@@ -1,3 +1,6 @@
+## 6.7.15
+### Features
+- Add support for the new S3 locations: `eu-central-4` and `us-central-1`
 ## 6.7.14
 ### Features
 - Add support for new location for NFS: `de/fra/2`
