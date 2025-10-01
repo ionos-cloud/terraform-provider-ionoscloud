@@ -1,3 +1,7 @@
+## 6.7.16 -- upcoming release
+### Fixes
+- Fix [#864](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/864) by marking `allow_replace` as `Computed` for PgSQL clusters
+
 ## 6.7.15
 ### Features
 - Add support for the new S3 locations: `eu-central-4` and `us-central-1`
