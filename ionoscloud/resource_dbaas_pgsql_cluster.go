@@ -131,7 +131,8 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 			"allow_replace": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Computed:    true,
+				Default:     nil,
 				Description: "When set to true, allows the update of immutable fields by destroying and re-creating the cluster.",
 			},
 			"backup_location": {

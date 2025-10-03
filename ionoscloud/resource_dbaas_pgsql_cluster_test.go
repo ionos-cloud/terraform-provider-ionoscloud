@@ -37,8 +37,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "1"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "1"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "2048"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "2048"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "4096"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "10240"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled", "false"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.pool_mode", "session"),
@@ -139,8 +139,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "2"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "2"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "3072"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "3072"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "5120"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "11264"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled", "true"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.pool_mode", "transaction"),
@@ -164,8 +164,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "2"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "2"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "3072"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "3072"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "5120"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "11264"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.enabled", "true"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connection_pooler.0.pool_mode", "transaction"),
@@ -192,7 +192,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 
 // sleepUntilBackupIsReady waits 60s until backup is ready
 func sleepUntilBackupIsReady() {
-	time.Sleep(60 * time.Second)
+	time.Sleep(180 * time.Second)
 }
 
 func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
@@ -213,8 +213,8 @@ func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "1"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "1"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "2048"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "2048"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "4096"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "4096"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_type", "HDD"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.datacenter_id", constant.DatacenterResource+".datacenter_example", "id"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "connections.0.lan_id", constant.LanResource+".lan_example", "id"),
@@ -306,8 +306,8 @@ resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResou
   postgres_version   = 12
   instances          = 1
   cores              = 1
-  ram                = 2048
-  storage_size       = 2048
+  ram                = 4096
+  storage_size       = 10240
   storage_type       = "HDD"
   connections   {
 	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
@@ -369,8 +369,8 @@ resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResou
   postgres_version   = 12
   instances          = 2
   cores              = 2
-  ram                = 3072
-  storage_size       = 3072
+  ram                = 5120
+  storage_size       = 11264
   storage_type       = "HDD"
   connection_pooler {
 	enabled = true
@@ -432,8 +432,8 @@ resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResou
   postgres_version   = 12
   instances          = 2
   cores              = 2
-  ram                = 3072
-  storage_size       = 3072
+  ram                = 5120
+  storage_size       = 11264
   storage_type       = "HDD"
   location = ` + constant.DatacenterResource + `.datacenter_example_update.location
   backup_location = "de"
@@ -502,8 +502,8 @@ resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResou
   postgres_version   = 12
   instances          = 1
   cores              = 1
-  ram                = 2048
-  storage_size       = 2048
+  ram                = 4096
+  storage_size       = 4096
   storage_type       = "HDD"
   display_name = "` + constant.DBaaSClusterTestResource + `"
   connections   {
