@@ -1,7 +1,7 @@
 ## 6.7.16 -- upcoming release
 ### Fixes
-- Fix [#864](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/864) by marking `allow_replace` as `Computed` for PgSQL clusters
 - Fix [#867](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/867)
+- Fix [#864](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/864)
 
 ## 6.7.15
 ### Features

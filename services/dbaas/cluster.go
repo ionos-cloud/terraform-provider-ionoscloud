@@ -753,7 +753,8 @@ func GetMongoClusterBackupData(d *schema.ResourceData) *mongo.BackupProperties {
 //	return &backup
 // }
 
-func SetPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterResponse) error {
+//nolint:gocyclo
+func SetPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterResponse, isDataSource bool) error {
 
 	resourceName := "psql cluster"
 
@@ -857,6 +858,17 @@ func SetPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterResponse) e
 	if cluster.Properties.DnsName != nil {
 		if err := d.Set("dns_name", *cluster.Properties.DnsName); err != nil {
 			return utils.GenerateSetError(resourceName, "dns_name", err)
+		}
+	}
+
+	// Fix "provider produced inconsistent final plan" error (#864) by explicitly setting the default
+	// value in state to avoid differences between the 'plan' command and the new values learned
+	// during 'apply'.
+	if !isDataSource {
+		if _, exists := d.GetOk("allow_replace"); !exists {
+			if err := d.Set("allow_replace", false); err != nil {
+				return utils.GenerateSetError(resourceName, "allow_replace", err)
+			}
 		}
 	}
 
