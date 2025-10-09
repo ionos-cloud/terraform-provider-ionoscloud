@@ -182,6 +182,10 @@ func resourceServer() *schema.Resource {
 			"volume": {
 				Type:     schema.TypeList,
 				Optional: true,
+				// Note: In the future, when implementing multiple inline volumes, make sure to
+				// review the existing code because, although the code was written with the idea in
+				// mind that multiple inline volumes would be allowed, it has not been tested and
+				// problems may occur.
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -1240,8 +1244,11 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, volumeId.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occurred while deleting volume with ID: %s of server ID %s %w", volumeId.(string), d.Id(), err))
-			return diags
+			if apiResponse.HttpNotFound() {
+				log.Printf("[INFO] volume with ID: %v was not found during the deletion process, datacenter ID: %v, server ID: %v", volumeId.(string), dcId, d.Id())
+				continue
+			}
+			return diag.FromErr(fmt.Errorf("error occurred while deleting volume with ID: %s of server ID %s %w", volumeId.(string), d.Id(), err))
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
@@ -1592,6 +1599,10 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), volumeId.(string)).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
+				if apiResponse.HttpNotFound() {
+					log.Printf("[INFO] volume with ID: %v was not found, datacenter ID: %v, server ID: %v", volumeId.(string), datacenterId, d.Id())
+					continue
+				}
 				return fmt.Errorf("error retrieving inline volume %w", err)
 			}
 			volumePath := fmt.Sprintf("volume.%d.", i)
