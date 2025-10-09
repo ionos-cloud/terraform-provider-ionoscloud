@@ -728,25 +728,29 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			foundFirstNic := (*foundServer.Entities.Nics.Items)[0]
 			var orderedRuleIds []string
 			if foundFirstNic.Entities != nil && foundFirstNic.Entities.Firewallrules != nil && foundFirstNic.Entities.Firewallrules.Items != nil {
-				// what we get from schema and send to the API
-				sentFirstNic := (*serverReq.Entities.Nics.Items)[0]
+				// Finding a NIC does not guarantee that we have sent one. In some scenarios, the API automatically creates a NIC.
+				// This check fixes Github issue #872.
+				if serverReq.Entities.Nics != nil && serverReq.Entities.Nics.Items != nil && len(*serverReq.Entities.Nics.Items) > 0 {
+					// what we get from schema and send to the API
+					sentFirstNic := (*serverReq.Entities.Nics.Items)[0]
 
-				if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
-					sentRules := *sentFirstNic.Entities.Firewallrules.Items
-					foundRules := *foundFirstNic.Entities.Firewallrules.Items
-					orderedRuleIds = cloudapifirewall.ExtractOrderedFirewallIds(foundRules, sentRules)
+					if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
+						sentRules := *sentFirstNic.Entities.Firewallrules.Items
+						foundRules := *foundFirstNic.Entities.Firewallrules.Items
+						orderedRuleIds = cloudapifirewall.ExtractOrderedFirewallIds(foundRules, sentRules)
+						if len(orderedRuleIds) > 0 {
+							if err := d.Set("firewallrule_id", orderedRuleIds[0]); err != nil {
+								diags := diag.FromErr(err)
+								return diags
+							}
+						}
+					}
 					if len(orderedRuleIds) > 0 {
-						if err := d.Set("firewallrule_id", orderedRuleIds[0]); err != nil {
+						if err := cloudapifirewall.SetIdsInSchema(d, orderedRuleIds); err != nil {
 							diags := diag.FromErr(err)
 							return diags
 						}
 					}
-				}
-			}
-			if len(orderedRuleIds) > 0 {
-				if err := cloudapifirewall.SetIdsInSchema(d, orderedRuleIds); err != nil {
-					diags := diag.FromErr(err)
-					return diags
 				}
 			}
 
