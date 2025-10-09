@@ -131,8 +131,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 			"allow_replace": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Computed:    true,
-				Default:     nil,
+				Default:     false,
 				Description: "When set to true, allows the update of immutable fields by destroying and re-creating the cluster.",
 			},
 			"backup_location": {
@@ -312,7 +311,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 
 	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
 
-	if err := dbaasService.SetPgSqlClusterData(d, cluster); err != nil {
+	if err := dbaasService.SetPgSqlClusterData(d, cluster, false); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -388,7 +387,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
 
-	if err := dbaasService.SetPgSqlClusterData(d, dbaasCluster); err != nil {
+	if err := dbaasService.SetPgSqlClusterData(d, dbaasCluster, false); err != nil {
 		return nil, err
 	}
 

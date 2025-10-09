@@ -19,6 +19,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
+const PgSQLVersion = "14"
+
 func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 	var dbaasCluster psql.ClusterResponse
 
@@ -34,7 +36,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", PgSQLVersion),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "1"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "4096"),
@@ -136,7 +138,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				Config: testAccCheckDbaasPgSqlClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", PgSQLVersion),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "2"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "5120"),
@@ -161,7 +163,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				Config: testAccCheckDbaasPgSqlClusterConfigUpdateRemoveConnections,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", PgSQLVersion),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "2"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "5120"),
@@ -210,7 +212,7 @@ func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 				Config: testAccFromBackup,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", "12"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", PgSQLVersion),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "1"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "4096"),
@@ -303,7 +305,7 @@ resource ` + constant.LanResource + ` "lan_example" {
 }
 
 resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
-  postgres_version   = 12
+  postgres_version   = ` + PgSQLVersion + `
   instances          = 1
   cores              = 1
   ram                = 4096
@@ -366,7 +368,7 @@ resource ` + constant.LanResource + ` "lan_example_update" {
 
 
 resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
-  postgres_version   = 12
+  postgres_version   = ` + PgSQLVersion + `
   instances          = 2
   cores              = 2
   ram                = 5120
@@ -429,7 +431,7 @@ resource ` + constant.LanResource + ` "lan_example_update" {
 
 
 resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
-  postgres_version   = 12
+  postgres_version   = ` + PgSQLVersion + `
   instances          = 2
   cores              = 2
   ram                = 5120
@@ -499,7 +501,7 @@ resource ` + constant.LanResource + ` "lan_example" {
 }
 
 resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
-  postgres_version   = 12
+  postgres_version   = ` + PgSQLVersion + `
   instances          = 1
   cores              = 1
   ram                = 4096

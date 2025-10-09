@@ -216,7 +216,7 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 
 	}
 
-	if err := dbaasService.SetPgSqlClusterData(d, cluster); err != nil {
+	if err := dbaasService.SetPgSqlClusterData(d, cluster, true); err != nil {
 		return diag.FromErr(err)
 	}
 
