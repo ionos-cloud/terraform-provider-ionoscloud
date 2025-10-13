@@ -3,68 +3,52 @@ on:
   issues:
     types: [ opened, reopened ]
 
+env:
+  ISSUE_CREATOR: ${{ github.event.issue.user.login }}
+  ISSUE_TITLE: ${{ github.event.issue.title }}
+  ISSUE_NUMBER: ${{ github.event.issue.number }}
+  ISSUE_URL: ${{ github.event.issue.html_url }}
+  ISSUE_LABELS: "- ${{ join(github.event.issue.labels.*.name) }}"
+  GITHUB_REPO: ${{ github.repository }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Git Issue Details
-        env:
-          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
-          echo "Issue creator: ${{ github.event.issue.user.login }}"
+          echo "Issue creator: $ISSUE_CREATOR"
           echo "Issue title: $ISSUE_TITLE"
-          echo "Issue number: ${{ github.event.issue.number }}"
-          echo "Issue url: ${{ github.event.issue.html_url }}"
+          echo "Issue number: $ISSUE_NUMBER"
+          echo "Issue url: $ISSUE_URL"
       - name: Google Chat Notification
         run: |
+          payload=$(jq -n \
+            --arg title "$ISSUE_TITLE" \
+            --arg subtitle "Issue No: #$ISSUE_NUMBER" \
+            --arg repo "$GITHUB_REPO" \
+            --arg labels "$ISSUE_LABELS" \
+            --arg url "$ISSUE_URL" \
+            '{
+              "cards": [
+                {
+                  "header": { "title": "New Issue 🔨", "subtitle": $subtitle },
+                  "sections": [
+                    {
+                      "widgets": [
+                        { "keyValue": { "topLabel": "Repository", "content": $repo } },
+                        { "keyValue": { "topLabel": "Title", "content": $title } },
+                        { "keyValue": { "topLabel": "Assigned Labels", "content": $labels } },
+                        { "buttons": [ { "textButton": { "text": "OPEN ISSUE", "onClick": { "openLink": { "url": $url } } } } ] }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }')
+          
           curl --location --request POST '${{ secrets.ISSUE_TRACKER_WEBHOOK }}' \
           --header 'Content-Type: application/json' \
-          --data-raw '{
-              "cards": [
-                  {
-                      "header": {
-                          "title": "New Issue 🔨",
-                          "subtitle": "Issue No: #${{ github.event.issue.number }}"
-                      },
-                      "sections": [
-                          {
-                              "widgets": [
-                                  {
-                                     "keyValue": {
-                                          "topLabel": "Repository",
-                                          "content": "${{ github.repository }}"
-                                      },
-                                   },
-                                   {
-                                     "keyValue": {
-                                          "topLabel": "Title",
-                                          "content": "$ISSUE_TITLE"
-                                      }
-                                   },
-                                   {
-                                     "keyValue": {
-                                          "topLabel": "Assigned Labels",
-                                          "content": "- ${{ join(github.event.issue.labels.*.name) }}"
-                                      }
-                                   },
-                                   {
-                                      "buttons": [
-                                          {
-                                              "textButton": {
-                                                  "text": "OPEN ISSUE",
-                                                  "onClick": {
-                                                      "openLink": {
-                                                          "url": "${{ github.event.issue.html_url }}"
-                                                      }
-                                                  }
-                                              }
-                                          }
-                                      ]
-                                  }
-                              ]
-                          }
-                      ]
-                  }
-              ]
-          }'
+          --data-raw "$payload"
+          
