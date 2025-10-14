@@ -3,6 +3,7 @@
 - Fix [#867](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/867)
 - Fix [#864](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/864)
 - Fix tests for `ionoscloud_pg_cluster` by modifying the PgSQL version
+- Fix functionality for S3 keys (read & delete bug)
 
 ## 6.7.15
 ### Features
