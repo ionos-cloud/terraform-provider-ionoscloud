@@ -210,7 +210,7 @@ func isS3KeyNotFound(err error) bool {
 	if !errors.As(err, &genericOpenAPIError) {
 		return false
 	}
-	return genericOpenAPIError.StatusCode() == 422 && strings.Contains(genericOpenAPIError.Error(), "[VDC-21-2] The access key cannot be found, please double-check the key id and try again.")
+	return genericOpenAPIError.StatusCode() == 422 && strings.Contains(genericOpenAPIError.Error(), "The access key cannot be found, please double-check the key id and try again.")
 }
 
 func s3KeyDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {

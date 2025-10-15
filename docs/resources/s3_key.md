@@ -21,6 +21,7 @@ resource "ionoscloud_user" "example" {
     password                = "abc123-321CBA"
     administrator           = false
     force_sec_auth          = false
+    active                  = true
 }
 
 resource "ionoscloud_s3_key" "example" {
