@@ -24,185 +24,19 @@ func resourceGroup() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceGroupImporter,
 		},
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-			},
-			"create_datacenter": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"create_snapshot": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"reserve_ip": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"access_activity_log": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"create_pcc": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"s3_privilege": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"create_backup_unit": {
-				Type:        schema.TypeBool,
-				Description: "Create backup unit privilege.",
-				Optional:    true,
-			},
-			"create_internet_access": {
-				Type:        schema.TypeBool,
-				Description: "Create internet access privilege.",
-				Optional:    true,
-			},
-			"create_k8s_cluster": {
-				Type:        schema.TypeBool,
-				Description: "Create Kubernetes cluster privilege.",
-				Optional:    true,
-			},
-			"create_flow_log": {
-				Type:        schema.TypeBool,
-				Description: "Create Flow Logs privilege.",
-				Optional:    true,
-			},
-			"access_and_manage_monitoring": {
-				Type: schema.TypeBool,
-				Description: "Privilege for a group to access and manage monitoring related functionality " +
-					"(access metrics, CRUD on alarms, alarm-actions etc) using Monotoring-as-a-Service (MaaS).",
-				Optional: true,
-			},
-			"access_and_manage_certificates": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage certificates.",
-				Optional:    true,
-			},
-			"manage_dbaas": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to manage DBaaS related functionality",
-				Optional:    true,
-			},
-			"access_and_manage_dns": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage dns records.",
-				Optional:    true,
-			},
-			"manage_registry": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for group accessing container registry related functionality.",
-				Optional:    true,
-			},
-			"manage_dataplatform": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage the Data Platform.",
-				Optional:    true,
-			},
-			"access_and_manage_logging": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage logging.",
-				Optional:    true,
-			},
-			"access_and_manage_cdn": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage Cdn.",
-				Optional:    true,
-			},
-			"access_and_manage_vpn": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage Vpn.",
-				Optional:    true,
-			},
-			"access_and_manage_api_gateway": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage ApiGateway.",
-				Optional:    true,
-			},
-			"access_and_manage_kaas": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage Kaas.",
-				Optional:    true,
-			},
-			"access_and_manage_network_file_storage": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage NetworkFileStorage.",
-				Optional:    true,
-			},
-			"access_and_manage_ai_model_hub": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage AiModelHub.",
-				Optional:    true,
-			},
-			"access_and_manage_iam_resources": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage IamResources.",
-				Optional:    true,
-			},
-			"create_network_security_groups": {
-				Type:        schema.TypeBool,
-				Description: "Create Network Security groups.",
-				Optional:    true,
-			},
-			"user_id": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"user_ids"},
-				Deprecated:    "Please use user_ids for adding users to the group, since user_id will be removed in the future",
-			},
-			"user_ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				ConflictsWith: []string{"user_id"},
-			},
-			"users": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"first_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"last_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"email": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"password": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"administrator": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"force_sec_auth": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-					},
-				},
+		Schema:        groupSchema(),
+		CustomizeDiff: customDiff,
+		Timeouts:      &resourceDefaultTimeouts,
+		SchemaVersion: 2,
+		StateUpgraders: []schema.StateUpgrader{
+			// Ensures a smooth upgrade (the user doesn't see any discrepancy) from the schema version
+			// that didn't contain 'get_users_data' attribute.
+			{
+				Version: 1,
+				Upgrade: resourceGroupStateUpgraderV1,
+				Type:    resourceIonoscloudGroupSchemaV1().CoreConfigSchema().ImpliedType(),
 			},
 		},
-		Timeouts:      &resourceDefaultTimeouts,
-		SchemaVersion: 1,
 		//StateUpgraders: []schema.StateUpgrader{
 		//	{
 		//		Type:    resourceGroup0().CoreConfigSchema().ImpliedType(),
@@ -238,6 +72,208 @@ func resourceGroup() *schema.Resource {
 //
 //	return state, nil
 //}
+
+func groupSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"name": {
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+		},
+		"create_datacenter": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"create_snapshot": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"reserve_ip": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"access_activity_log": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"create_pcc": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"s3_privilege": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"create_backup_unit": {
+			Type:        schema.TypeBool,
+			Description: "Create backup unit privilege.",
+			Optional:    true,
+		},
+		"create_internet_access": {
+			Type:        schema.TypeBool,
+			Description: "Create internet access privilege.",
+			Optional:    true,
+		},
+		"create_k8s_cluster": {
+			Type:        schema.TypeBool,
+			Description: "Create Kubernetes cluster privilege.",
+			Optional:    true,
+		},
+		"create_flow_log": {
+			Type:        schema.TypeBool,
+			Description: "Create Flow Logs privilege.",
+			Optional:    true,
+		},
+		"access_and_manage_monitoring": {
+			Type: schema.TypeBool,
+			Description: "Privilege for a group to access and manage monitoring related functionality " +
+				"(access metrics, CRUD on alarms, alarm-actions etc) using Monotoring-as-a-Service (MaaS).",
+			Optional: true,
+		},
+		"access_and_manage_certificates": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage certificates.",
+			Optional:    true,
+		},
+		"manage_dbaas": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to manage DBaaS related functionality",
+			Optional:    true,
+		},
+		"access_and_manage_dns": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage dns records.",
+			Optional:    true,
+		},
+		"manage_registry": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for group accessing container registry related functionality.",
+			Optional:    true,
+		},
+		"manage_dataplatform": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage the Data Platform.",
+			Optional:    true,
+		},
+		"access_and_manage_logging": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage logging.",
+			Optional:    true,
+		},
+		"access_and_manage_cdn": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage Cdn.",
+			Optional:    true,
+		},
+		"access_and_manage_vpn": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage Vpn.",
+			Optional:    true,
+		},
+		"access_and_manage_api_gateway": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage ApiGateway.",
+			Optional:    true,
+		},
+		"access_and_manage_kaas": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage Kaas.",
+			Optional:    true,
+		},
+		"access_and_manage_network_file_storage": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage NetworkFileStorage.",
+			Optional:    true,
+		},
+		"access_and_manage_ai_model_hub": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage AiModelHub.",
+			Optional:    true,
+		},
+		"access_and_manage_iam_resources": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage IamResources.",
+			Optional:    true,
+		},
+		"create_network_security_groups": {
+			Type:        schema.TypeBool,
+			Description: "Create Network Security groups.",
+			Optional:    true,
+		},
+		"user_id": {
+			Type:          schema.TypeString,
+			Optional:      true,
+			ConflictsWith: []string{"user_ids"},
+			Deprecated:    "Please use user_ids for adding users to the group, since user_id will be removed in the future",
+		},
+		"user_ids": {
+			Type:     schema.TypeSet,
+			Optional: true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			ConflictsWith: []string{"user_id"},
+		},
+		"get_users_data": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "When set to true, information about users will be stored in state",
+		},
+		"users": {
+			Type:     schema.TypeSet,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"first_name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"last_name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"email": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"password": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"administrator": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+					"force_sec_auth": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+				},
+			},
+		},
+	}
+}
+
+// resourceIonoscloudGroupSchemaV1 describes how the schema was looking before adding 'get_users_data' attribute.
+func resourceIonoscloudGroupSchemaV1() *schema.Resource {
+	schemaMap := groupSchema()
+	delete(schemaMap, "get_users_data")
+	return &schema.Resource{
+		Schema: schemaMap,
+	}
+}
+
+// resourceGroupStateUpgraderV1 sets the value in the state to ensure a smooth version transition
+func resourceGroupStateUpgraderV1(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	// TODO -- Add a default value here
+	rawState["get_users_data"] = true
+	return rawState, nil
+}
 
 func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CloudApiClient
@@ -724,51 +760,49 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			}
 		}
 
-		users, apiResponse, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			return fmt.Errorf("an error occurred while UmGroupsUsersGet %s %w", d.Id(), err)
-		}
-
 		usersEntries := make([]interface{}, 0)
-		if users.Items != nil && len(*users.Items) > 0 {
-			usersEntries = make([]interface{}, len(*users.Items))
-			for userIndex, user := range *users.Items {
-				userEntry := make(map[string]interface{})
-
-				if user.Id != nil {
-					userEntry["id"] = *user.Id
-				}
-
-				if user.Properties != nil {
-					if user.Properties.Firstname != nil {
-						userEntry["first_name"] = *user.Properties.Firstname
-					}
-
-					if user.Properties.Lastname != nil {
-						userEntry["last_name"] = *user.Properties.Lastname
-					}
-
-					if user.Properties.Email != nil {
-						userEntry["email"] = *user.Properties.Email
-					}
-
-					if user.Properties.Administrator != nil {
-						userEntry["administrator"] = *user.Properties.Administrator
-					}
-
-					if user.Properties.ForceSecAuth != nil {
-						userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
-					}
-				}
-				usersEntries[userIndex] = userEntry
+		if d.Get("get_users_data").(bool) {
+			users, apiResponse, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return fmt.Errorf("an error occurred while UmGroupsUsersGet %s %w", d.Id(), err)
 			}
+			if users.Items != nil && len(*users.Items) > 0 {
+				usersEntries = make([]interface{}, len(*users.Items))
+				for userIndex, user := range *users.Items {
+					userEntry := make(map[string]interface{})
 
-			if len(usersEntries) > 0 {
-				if err := d.Set("users", usersEntries); err != nil {
-					return err
+					if user.Id != nil {
+						userEntry["id"] = *user.Id
+					}
+
+					if user.Properties != nil {
+						if user.Properties.Firstname != nil {
+							userEntry["first_name"] = *user.Properties.Firstname
+						}
+
+						if user.Properties.Lastname != nil {
+							userEntry["last_name"] = *user.Properties.Lastname
+						}
+
+						if user.Properties.Email != nil {
+							userEntry["email"] = *user.Properties.Email
+						}
+
+						if user.Properties.Administrator != nil {
+							userEntry["administrator"] = *user.Properties.Administrator
+						}
+
+						if user.Properties.ForceSecAuth != nil {
+							userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
+						}
+					}
+					usersEntries[userIndex] = userEntry
 				}
 			}
+		}
+		if err := d.Set("users", usersEntries); err != nil {
+			return err
 		}
 	}
 
@@ -811,6 +845,28 @@ func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return errState
+	}
+
+	return nil
+}
+
+// Establishes the relationship between 'get_users_data' attribute and 'users'.
+func customDiff(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+	if d.HasChange("get_users_data") {
+		oldVal, newVal := d.GetChange("get_users_data")
+
+		// Turning the flag OFF
+		if oldVal.(bool) == true && newVal.(bool) == false {
+			// Explicitly set the new value in the plan to an empty list.
+			if err := d.SetNew("users", make([]interface{}, 0)); err != nil {
+				return err
+			}
+		}
+
+		// Turning the flag ON
+		if oldVal.(bool) == false && newVal.(bool) == true {
+			d.SetNewComputed("users")
+		}
 	}
 
 	return nil
