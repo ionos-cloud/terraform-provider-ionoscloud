@@ -1,6 +1,8 @@
-## 6.7.17 -- upcoming release
+## 6.7.17
 ### Features
 - Add `get_users_data` attribute to the `ionoscloud_group` resource  and data source, this makes fetching user details optional to prevent performance issues in environments with many users or groups.
+### Fixes
+- Fix [#872](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/872)
 
 ## 6.7.16
 ### Fixes
