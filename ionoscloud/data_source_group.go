@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -14,169 +15,199 @@ import (
 
 func dataSourceGroup() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceGroupRead,
-		Schema: map[string]*schema.Schema{
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+		ReadContext:   dataSourceGroupRead,
+		Schema:        groupDataSourceSchema(),
+		Timeouts:      &resourceDefaultTimeouts,
+		SchemaVersion: 1,
+		// Ensures a smooth upgrade (the user doesn't see any plan changes) from the schema version
+		// that didn't contain 'get_users_data' attribute.
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Version: 0,
+				Upgrade: groupStateUpgrader,
+				Type:    groupDataSourceSchemaV0().CoreConfigSchema().ImpliedType(),
 			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"create_datacenter": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"create_snapshot": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"reserve_ip": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"access_activity_log": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"create_pcc": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"s3_privilege": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"create_backup_unit": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"create_internet_access": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"create_k8s_cluster": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"create_flow_log": {
-				Type:        schema.TypeBool,
-				Description: "Create Flow Logs privilege.",
-				Computed:    true,
-			},
-			"access_and_manage_monitoring": {
-				Type: schema.TypeBool,
-				Description: "Privilege for a group to access and manage monitoring related functionality " +
-					"(access metrics, CRUD on alarms, alarm-actions etc) using Monotoring-as-a-Service (MaaS).",
-				Computed: true,
-			},
-			"access_and_manage_certificates": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage certificates.",
-				Computed:    true,
-			},
-			"manage_dbaas": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to manage DBaaS related functionality",
-				Computed:    true,
-			},
-			"access_and_manage_dns": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage dns records.",
-				Computed:    true,
-			},
-			"manage_registry": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for group accessing container registry related functionality.",
-				Computed:    true,
-			},
-			"manage_dataplatform": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage the Data Platform.",
-				Computed:    true,
-			},
-			"access_and_manage_logging": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage Logging.",
-				Computed:    true,
-			},
-			"access_and_manage_cdn": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage Cdn.",
-				Computed:    true,
-			},
-			"access_and_manage_vpn": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage Vpn.",
-				Computed:    true,
-			},
-			"access_and_manage_api_gateway": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage ApiGateway.",
-				Computed:    true,
-			},
-			"access_and_manage_kaas": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage Kaas.",
-				Computed:    true,
-			},
-			"access_and_manage_network_file_storage": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage NetworkFileStorage.",
-				Computed:    true,
-			},
-			"access_and_manage_ai_model_hub": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage AiModelHub.",
-				Computed:    true,
-			},
-			"access_and_manage_iam_resources": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to access and manage IamResources.",
-				Computed:    true,
-			},
-			"create_network_security_groups": {
-				Type:        schema.TypeBool,
-				Description: "Privilege for a group to create NetworkSecurityGroups.",
-				Computed:    true,
-			},
-			"users": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"first_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"last_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"email": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"administrator": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"force_sec_auth": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
+		},
+	}
+}
+
+// groupDataSourceSchema returns the current schema for the  group data source
+func groupDataSourceSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"id": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
+		"get_users_data": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     constant.DefaultGetUsersData,
+			Description: "When set to true, information about users will be stored in state",
+		},
+		"create_datacenter": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"create_snapshot": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"reserve_ip": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"access_activity_log": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"create_pcc": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"s3_privilege": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"create_backup_unit": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"create_internet_access": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"create_k8s_cluster": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"create_flow_log": {
+			Type:        schema.TypeBool,
+			Description: "Create Flow Logs privilege.",
+			Computed:    true,
+		},
+		"access_and_manage_monitoring": {
+			Type: schema.TypeBool,
+			Description: "Privilege for a group to access and manage monitoring related functionality " +
+				"(access metrics, CRUD on alarms, alarm-actions etc) using Monotoring-as-a-Service (MaaS).",
+			Computed: true,
+		},
+		"access_and_manage_certificates": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage certificates.",
+			Computed:    true,
+		},
+		"manage_dbaas": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to manage DBaaS related functionality",
+			Computed:    true,
+		},
+		"access_and_manage_dns": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage dns records.",
+			Computed:    true,
+		},
+		"manage_registry": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for group accessing container registry related functionality.",
+			Computed:    true,
+		},
+		"manage_dataplatform": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage the Data Platform.",
+			Computed:    true,
+		},
+		"access_and_manage_logging": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage Logging.",
+			Computed:    true,
+		},
+		"access_and_manage_cdn": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage Cdn.",
+			Computed:    true,
+		},
+		"access_and_manage_vpn": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage Vpn.",
+			Computed:    true,
+		},
+		"access_and_manage_api_gateway": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage ApiGateway.",
+			Computed:    true,
+		},
+		"access_and_manage_kaas": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage Kaas.",
+			Computed:    true,
+		},
+		"access_and_manage_network_file_storage": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage NetworkFileStorage.",
+			Computed:    true,
+		},
+		"access_and_manage_ai_model_hub": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage AiModelHub.",
+			Computed:    true,
+		},
+		"access_and_manage_iam_resources": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to access and manage IamResources.",
+			Computed:    true,
+		},
+		"create_network_security_groups": {
+			Type:        schema.TypeBool,
+			Description: "Privilege for a group to create NetworkSecurityGroups.",
+			Computed:    true,
+		},
+		"users": {
+			Type:     schema.TypeSet,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"first_name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"last_name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"email": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"administrator": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+					"force_sec_auth": {
+						Type:     schema.TypeBool,
+						Computed: true,
 					},
 				},
 			},
 		},
-		Timeouts: &resourceDefaultTimeouts,
+	}
+}
+
+// groupDataSourceSchemaV0 describes how the schema was looking before adding 'get_users_data' attribute.
+func groupDataSourceSchemaV0() *schema.Resource {
+	schemaMap := groupDataSourceSchema()
+	delete(schemaMap, "get_users_data")
+	return &schema.Resource{
+		Schema: schemaMap,
 	}
 }
 

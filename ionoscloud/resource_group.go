@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -24,17 +25,17 @@ func resourceGroup() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceGroupImporter,
 		},
-		Schema:        groupSchema(),
-		CustomizeDiff: customDiff,
+		Schema:        groupResourceSchema(),
+		CustomizeDiff: customGroupDiff,
 		Timeouts:      &resourceDefaultTimeouts,
 		SchemaVersion: 2,
 		StateUpgraders: []schema.StateUpgrader{
-			// Ensures a smooth upgrade (the user doesn't see any discrepancy) from the schema version
+			// Ensures a smooth upgrade (the user doesn't see any plan changes) from the schema version
 			// that didn't contain 'get_users_data' attribute.
 			{
 				Version: 1,
-				Upgrade: resourceGroupStateUpgraderV1,
-				Type:    resourceIonoscloudGroupSchemaV1().CoreConfigSchema().ImpliedType(),
+				Upgrade: groupStateUpgrader,
+				Type:    groupResourceSchemaV1().CoreConfigSchema().ImpliedType(),
 			},
 		},
 		//StateUpgraders: []schema.StateUpgrader{
@@ -73,7 +74,8 @@ func resourceGroup() *schema.Resource {
 //	return state, nil
 //}
 
-func groupSchema() map[string]*schema.Schema {
+// groupResourceSchema returns the current schema for the group resource
+func groupResourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
 			Type:             schema.TypeString,
@@ -217,7 +219,7 @@ func groupSchema() map[string]*schema.Schema {
 		"get_users_data": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Default:     true,
+			Default:     constant.DefaultGetUsersData,
 			Description: "When set to true, information about users will be stored in state",
 		},
 		"users": {
@@ -259,19 +261,18 @@ func groupSchema() map[string]*schema.Schema {
 	}
 }
 
-// resourceIonoscloudGroupSchemaV1 describes how the schema was looking before adding 'get_users_data' attribute.
-func resourceIonoscloudGroupSchemaV1() *schema.Resource {
-	schemaMap := groupSchema()
+// groupResourceSchemaV1 describes how the schema was looking before adding 'get_users_data' attribute.
+func groupResourceSchemaV1() *schema.Resource {
+	schemaMap := groupResourceSchema()
 	delete(schemaMap, "get_users_data")
 	return &schema.Resource{
 		Schema: schemaMap,
 	}
 }
 
-// resourceGroupStateUpgraderV1 sets the value in the state to ensure a smooth version transition
-func resourceGroupStateUpgraderV1(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
-	// TODO -- Add a default value here
-	rawState["get_users_data"] = true
+// groupStateUpgrader sets the default value in the state to ensure a smooth version transition.
+func groupStateUpgrader(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	rawState["get_users_data"] = constant.DefaultGetUsersData
 	return rawState, nil
 }
 
@@ -850,12 +851,12 @@ func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.
 	return nil
 }
 
-// Establishes the relationship between 'get_users_data' attribute and 'users'.
-func customDiff(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+// customGroupDiff establishes the relationship between 'get_users_data' attribute and 'users', when
+// the 'get_users_data' attribute will be modified, the 'users' list will be modified accordingly.
+func customGroupDiff(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 	if d.HasChange("get_users_data") {
 		oldVal, newVal := d.GetChange("get_users_data")
 
-		// Turning the flag OFF
 		if oldVal.(bool) == true && newVal.(bool) == false {
 			// Explicitly set the new value in the plan to an empty list.
 			if err := d.SetNew("users", make([]interface{}, 0)); err != nil {
@@ -863,7 +864,6 @@ func customDiff(ctx context.Context, d *schema.ResourceDiff, m interface{}) erro
 			}
 		}
 
-		// Turning the flag ON
 		if oldVal.(bool) == false && newVal.(bool) == true {
 			d.SetNewComputed("users")
 		}

@@ -30,6 +30,9 @@ const (
 // DefaultTier is the default tier value for Wireguard & IPSec gateways
 const DefaultTier = "STANDARD"
 
+// Group Constants
+const DefaultGetUsersData = true
+
 // ApplicationLoadBalancer Constants
 const (
 	ALBResource         = "ionoscloud_application_loadbalancer"
