@@ -34,7 +34,7 @@ func resourceServer() *schema.Resource {
 			StateContext: resourceServerImport,
 		},
 		CustomizeDiff: checkServerImmutableFields,
-
+		// Changes in schema should be kept in sync with changes in vcpu server. The vcpu server shares functions with this server resource.
 		Schema: map[string]*schema.Schema{
 			"template_uuid": {
 				Type:     schema.TypeString,
