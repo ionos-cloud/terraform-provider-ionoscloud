@@ -568,6 +568,10 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 
 	log.Printf("[INFO] group found: %+v", group)
 
+	if err := d.Set("get_users_data", constant.DefaultGetUsersData); err != nil {
+		return nil, fmt.Errorf("error while setting the default value for the 'get_users_data' attribute inside the import function, error: %w", err)
+	}
+
 	if err := setGroupData(ctx, client, d, &group); err != nil {
 		return nil, err
 	}
