@@ -3,8 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"log"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -857,15 +858,19 @@ func customGroupDiff(ctx context.Context, d *schema.ResourceDiff, m interface{})
 	if d.HasChange("get_users_data") {
 		oldVal, newVal := d.GetChange("get_users_data")
 
-		if oldVal.(bool) == true && newVal.(bool) == false {
+		// Flag is turned OFF
+		if oldVal.(bool) && !newVal.(bool) {
 			// Explicitly set the new value in the plan to an empty list.
 			if err := d.SetNew("users", make([]interface{}, 0)); err != nil {
 				return err
 			}
 		}
 
-		if oldVal.(bool) == false && newVal.(bool) == true {
-			d.SetNewComputed("users")
+		// Flag is turned ON
+		if !oldVal.(bool) && newVal.(bool) {
+			if err := d.SetNewComputed("users"); err != nil {
+				return err
+			}
 		}
 	}
 
