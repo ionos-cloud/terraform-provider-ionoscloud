@@ -102,6 +102,7 @@ resource "random_password" "user2_password" {
 * `manage_dbaas` - (Optional) [Boolean]  Privilege for a group to manage DBaaS related functionality.
 * `user_ids` - (Optional) [list] A list of users to add to the group.
 * `user_id` - (Optional) [string] The ID of the specific user to add to the group. Please use user_ids argument since this is **DEPRECATED**
+* `get_users_data` - (Optional) [Boolean] When set to true, information about users will be stored in state under `users` attribute, default value is `true`.
 * `users` - (Computed) List of users - See the [User](user.md) section
 
 **NOTE:** user_id/user_ids field cannot be used at the same time with group_ids field in user resource. Trying to add the same user to the same group in both ways in the same plan will result in a cyclic dependency error.

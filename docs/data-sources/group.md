@@ -33,6 +33,8 @@ data "ionoscloud_group" "example" {
 
 * `name` - (Optional) Name of an existing group that you want to search for.
 * `id` - (Optional) ID of the group you want to search for.
+* `get_users_data` - (Optional) [Boolean] When set to true, information about users will be stored in state under `users` attribute, default value is `true`.
+
 
 Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.
 
