@@ -1,3 +1,7 @@
+## 6.7.18
+### Fixes
+- Fix provider crash on `terraform plan / terraform refresh` after the external deletion of a server in a boot device selection resource
+
 ## 6.7.17
 ### Features
 - Add `get_users_data` attribute to the `ionoscloud_group` resource  and data source, this makes fetching user details optional to prevent performance issues in environments with many users or groups.
