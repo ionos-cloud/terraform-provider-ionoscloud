@@ -19,9 +19,9 @@ import (
 
 var (
 	// ErrSuspendCubeLast signals to the Server Resource UpdateContext that the cube server will be suspended so that the operation is deferred
-	ErrSuspendCubeLast error
+	ErrSuspendCubeLast = errors.New("suspend cube")
 	// ErrServerNotFound returned when the server with the requested ID does not exist
-	ErrServerNotFound error
+	ErrServerNotFound = errors.New("server not found")
 	// ErrNoBootDevice is returned if the Server does not have a boot cdrom or boot volume set
 	ErrNoBootDevice = errors.New("server has no boot device")
 )
