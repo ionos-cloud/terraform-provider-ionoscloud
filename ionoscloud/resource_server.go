@@ -519,6 +519,11 @@ func resourceServer() *schema.Resource {
 				Default:     false,
 				Description: "When set to true, allows the update of immutable fields by destroying and re-creating the resource.",
 			},
+			"nic_multi_queue": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Activate or deactivate the Multi Queue feature on all NICs of this server. This feature is beneficial to enable when the NICs are experiencing performance issues (e.g. low throughput). Toggling this feature will also initiate a restart of the server. If the specified value is `true`, the feature will be activated; if it is not specified or set to `false`, the feature will be deactivated.",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -562,6 +567,12 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 		if diff.HasChange("volume.0.availability_zone") {
 			return fmt.Errorf("volume.0.availability_zone %s", ImmutableError)
 		}
+	}
+	if diff.HasChange("type") {
+		return fmt.Errorf("type: %s", ImmutableError)
+	}
+	if diff.HasChange("nic_multi_queue") {
+
 	}
 	return nil
 
@@ -682,6 +693,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
+	serverReq.Properties.NicMultiQueue = nil
 	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, datacenterId).Server(serverReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
@@ -901,6 +913,9 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
 
+	// TODO -- Check how changing the value for the 'nic_multi_queue' impacts the server state and handle it accordingly
+	// It shouldn't impact the server state because it's restarting the server, it's not changing the state, but I still
+	// need to check.
 	currentVmState, err := ss.GetVmState(ctx, dcId, d.Id())
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("could not retrieve server vmState: %w", err))
@@ -945,11 +960,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		nInt := int32(n.(int))
 		request.Ram = &nInt
 	}
-	if d.HasChange("type") {
-		_, n := d.GetChange("type")
-		nStr := n.(string)
-		request.Type = &nStr
-	}
 
 	if d.HasChange("cpu_family") {
 		_, n := d.GetChange("cpu_family")
@@ -965,6 +975,12 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			ss := cloudapiserver.Service{Client: meta.(bundleclient.SdkBundle).CloudApiClient, Meta: meta, D: d}
 			ss.UpdateBootDevice(ctx, dcId, d.Id(), bootCdrom)
 		}
+	}
+
+	if d.HasChange("nic_multi_queue") {
+		_, n := d.GetChange("nic_multi_queue")
+		nicMultiQeueue := n.(bool)
+		request.NicMultiQueue = &nicMultiQeueue
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Depth(3).Execute()
@@ -1403,7 +1419,7 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 
 	serverType := d.Get("type").(string)
 
-	// create server object and populate with common attributes
+	// create server object and populate it with common attributes
 	server, err := getServerData(d)
 	if err != nil {
 		return ionoscloud.Server{}, err
@@ -1432,6 +1448,10 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 		if _, ok := d.GetOk("volume.0.size"); ok {
 			return *server, fmt.Errorf("volume.0.size argument can not be set for %s type of servers\n", serverType)
 		}
+
+		if _, ok := d.GetOk("nic_multi_queue"); ok {
+			return *server, fmt.Errorf("nic_multi_queue can not be enabled for %s type of servers\n", serverType)
+		}
 	default: // enterprise
 		if _, ok := d.GetOk("template_uuid"); ok {
 			return *server, fmt.Errorf("template_uuid argument can not be set only for %s type of servers\n", serverType)
@@ -1449,6 +1469,11 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 			server.Properties.Ram = &vInt
 		} else {
 			return *server, fmt.Errorf("ram argument is required for %s type of servers\n", serverType)
+		}
+
+		if v, ok := d.GetOk("nic_multi_queue"); ok {
+			nicMultiQueue := v.(bool)
+			server.Properties.NicMultiQueue = &nicMultiQueue
 		}
 	}
 	return *server, nil
@@ -1587,6 +1612,11 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 				if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
 					return err
 				}
+			}
+		}
+		if server.Properties.NicMultiQueue != nil {
+			if err := d.Set("nic_multi_queue", *server.Properties.NicMultiQueue); err != nil {
+				return fmt.Errorf("error setting nic_multi_queue: %w", err)
 			}
 		}
 	}
