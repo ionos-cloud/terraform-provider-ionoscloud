@@ -287,6 +287,7 @@ resource "ionoscloud_server" "test" {
 - `inline_volume_ids` - (Computed) A list with the IDs for the volumes that are defined inside the server resource.
 - `security_groups_ids` - (Optional) The list of Security Group IDs for the
 - `allow_replace` - (Optional)[bool] When set to true, allows the update of immutable fields by first destroying and then re-creating the server.
+- `nic_multi_queue` - (Optional)[bool] Activate or deactivate the Multi Queue feature on all NICs of the server. This feature is beneficial to enable when the NICs are experiencing performance issues (e.g. low throughput). Toggling this feature will also initiate a restart of the server. If the specified value is `true`, the feature will be activated; if it is not specified or set to `false`, the feature will be deactivated. The feature cannot be activated for `CUBE` servers.
 
 ⚠️ **_Warning: `allow_replace` - lets you update immutable fields, but it first destroys and then re-creates the server in order to do it. This field should be used with care, understanding the risks._**
 

@@ -131,3 +131,4 @@ The following attributes are returned by the datasource:
   * `key` - The key of the label
   * `value` - The value of the label
 * `security_groups_ids` - The list of Security Group IDs for the resource.
+* `nic_multi_queue` - Specifies whether the `nic_multi_queue` feature is enabled or not.

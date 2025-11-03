@@ -49,9 +49,6 @@ type ServerProperties struct {
 func NewServerProperties() *ServerProperties {
 	this := ServerProperties{}
 
-	var nicMultiQueue bool = false
-	this.NicMultiQueue = &nicMultiQueue
-
 	return &this
 }
 
@@ -60,8 +57,6 @@ func NewServerProperties() *ServerProperties {
 // but it doesn't guarantee that properties required by API are set
 func NewServerPropertiesWithDefaults() *ServerProperties {
 	this := ServerProperties{}
-	var nicMultiQueue bool = false
-	this.NicMultiQueue = &nicMultiQueue
 	return &this
 }
 

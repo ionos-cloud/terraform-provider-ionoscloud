@@ -572,7 +572,11 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 		return fmt.Errorf("type: %s", ImmutableError)
 	}
 	if diff.HasChange("nic_multi_queue") {
-
+		if v, ok := diff.GetOk("type"); ok {
+			if strings.ToUpper(v.(string)) == "CUBE" {
+				return fmt.Errorf("nic_multi_queue cannot be enabled for CUBE servers")
+			}
+		}
 	}
 	return nil
 
@@ -693,7 +697,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	serverReq.Properties.NicMultiQueue = nil
 	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, datacenterId).Server(serverReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
@@ -913,9 +916,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
 
-	// TODO -- Check how changing the value for the 'nic_multi_queue' impacts the server state and handle it accordingly
-	// It shouldn't impact the server state because it's restarting the server, it's not changing the state, but I still
-	// need to check.
 	currentVmState, err := ss.GetVmState(ctx, dcId, d.Id())
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("could not retrieve server vmState: %w", err))
@@ -979,8 +979,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if d.HasChange("nic_multi_queue") {
 		_, n := d.GetChange("nic_multi_queue")
-		nicMultiQeueue := n.(bool)
-		request.NicMultiQueue = &nicMultiQeueue
+		nicMultiQueue := n.(bool)
+		request.NicMultiQueue = &nicMultiQueue
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Depth(3).Execute()
@@ -1450,7 +1450,7 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 		}
 
 		if _, ok := d.GetOk("nic_multi_queue"); ok {
-			return *server, fmt.Errorf("nic_multi_queue can not be enabled for %s type of servers\n", serverType)
+			return *server, fmt.Errorf("nic_multi_queue can not be enabled for %s type of servers", serverType)
 		}
 	default: // enterprise
 		if _, ok := d.GetOk("template_uuid"); ok {

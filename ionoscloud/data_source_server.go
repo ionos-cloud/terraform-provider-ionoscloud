@@ -205,6 +205,10 @@ func dataSourceServer() *schema.Resource {
 				Computed: true,
 				Elem:     labelDataSource,
 			},
+			"nic_multi_queue": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -314,6 +318,12 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 			if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 				return err
+			}
+		}
+
+		if server.Properties.NicMultiQueue != nil {
+			if err := d.Set("nic_multi_queue", *server.Properties.NicMultiQueue); err != nil {
+				return fmt.Errorf("error setting 'nic_multi_queue': %w", err)
 			}
 		}
 	}

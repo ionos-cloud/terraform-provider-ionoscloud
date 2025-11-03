@@ -1,4 +1,6 @@
 ## 6.7.19
+### Features
+- Add new `nic_multi_queue` feature for `ENTERPRISE` servers.
 ### Fixes
 - Fix #881 error on s3 key creation immediately after user and group. "The user needs to be part of a group that has ACCESS_S3_OBJECT_STORAGE privilege"
 
