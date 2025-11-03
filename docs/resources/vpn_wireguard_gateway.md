@@ -68,8 +68,8 @@ The following arguments are supported by the `vpn_wireguard_gateway` resource:
 - `connections` - (Required)[Block] The connection configuration for the WireGuard Gateway. This block supports fields documented below.
   - `datacenter_id` - (Required)[String] The ID of the datacenter where the WireGuard Gateway is located.
   - `lan_id` - (Required)[String] The ID of the LAN where the WireGuard Gateway is connected.
-  - `ipv4_cidr` - (Required)[String] The IPv4 CIDR for the WireGuard Gateway connection.
-  - `ipv6_cidr` - (Optional)[String] The IPv6 CIDR for the WireGuard Gateway connection.
+  - `ipv4_cidr` - (Required)[String] A LAN IPv4 address in CIDR notation that will be assigned to the VPN Gateway. This will be the private gateway address for LAN clients to route traffic over the VPN Gateway, this should be within the subnet already assigned to the LAN.
+  - `ipv6_cidr` - (Optional)[String] A LAN IPv6 address in CIDR notation that will be assigned to the VPN Gateway. This will be the private gateway address for LAN clients to route traffic over the VPN Gateway, this should be within the subnet already assigned to the LAN.
   
 - `maintenance_window` - (Optional)(Computed) A weekly 4 hour-long window, during which maintenance might occur.
   - `time` - (Required)[string] Start of the maintenance window in UTC time.

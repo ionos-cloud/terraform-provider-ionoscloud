@@ -3,6 +3,8 @@
 - Add new `nic_multi_queue` feature for `ENTERPRISE` servers.
 ### Fixes
 - Fix #881 error on s3 key creation immediately after user and group. "The user needs to be part of a group that has ACCESS_S3_OBJECT_STORAGE privilege"
+### Documentation
+- Add reference to IONOS Object Storage documentation inside S3 bucket policy doc, update documentation for `IPv4`, `IPv6` addresses for `VPN` gateways, remove extra colons
 
 ## 6.7.18
 ### Fixes

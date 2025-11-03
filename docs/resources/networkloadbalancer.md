@@ -84,7 +84,7 @@ This will configure flowlog for ALL(rejected and accepted) ingress traffic and w
     - `direction` - (Required)[string] Specifies the traffic direction pattern. Valid values: INGRESS, EGRESS, BIDIRECTIONAL. Immutable, forces re-creation.
     - `name` - (Required)[string] Specifies the name of the flow log.
 
-⚠️ **Note:**: Removing the `flowlog` forces re-creation of the network load balancer resource.
+⚠️ **Note:** Removing the `flowlog` forces re-creation of the network load balancer resource.
 
 ## Import
 
