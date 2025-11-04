@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,6 +15,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -51,11 +55,8 @@ func resourceS3Key() *schema.Resource {
 
 func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	userId := d.Get("user_id").(string)
-	rsp, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysPost(ctx, userId).Execute()
-	logApiRequestTime(apiResponse)
-
+	rsp, apiResponse, err := createS3KeyWithRetry(ctx, d, meta)
 	if err != nil {
 		d.SetId("")
 		diags := diag.FromErr(fmt.Errorf("error creating Object Storage key: %w", err))
@@ -91,6 +92,41 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	return resourceS3KeyRead(ctx, d, meta)
+}
+
+// createS3KeyWithRetry uses retry.RetryContext to attempt to create an S3 key,
+// specifically retrying on privilege propagation errors.
+func createS3KeyWithRetry(ctx context.Context, d *schema.ResourceData, meta any) (ionoscloud.S3Key, *ionoscloud.APIResponse, error) {
+	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	userId := d.Get("user_id").(string)
+
+	var s3Key ionoscloud.S3Key
+	var apiResponse *ionoscloud.APIResponse
+	var err error
+
+	retryErr := retry.RetryContext(ctx, d.Timeout(schema.TimeoutCreate), func() *retry.RetryError {
+		s3Key, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPost(ctx, userId).Execute()
+		logApiRequestTime(apiResponse)
+
+		if err == nil {
+			// Success
+			return nil
+		}
+
+		if isS3KeyPrivilegeError(err) {
+			log.Printf("[INFO] Retrying S3 key creation due to privilege error: %v", err)
+			return retry.RetryableError(err)
+		}
+
+		// Any other error is not retryable.
+		return retry.NonRetryableError(err)
+	})
+
+	if retryErr != nil {
+		return ionoscloud.S3Key{}, apiResponse, retryErr
+	}
+
+	return s3Key, apiResponse, nil
 }
 
 func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -202,6 +238,30 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	return nil
+}
+
+// isS3KeyPrivilegeError checks if the error is the specific 422 Unprocessable Entity
+// error that indicates a privilege propagation delay IF IONOS_S3_KEY_CREATION_RETRY is set to true
+func isS3KeyPrivilegeError(err error) bool {
+	envVal, ok := os.LookupEnv("IONOS_S3_KEY_CREATION_RETRY")
+	retryEnabled := false
+	if ok {
+		if b, err := strconv.ParseBool(strings.TrimSpace(envVal)); err == nil {
+			retryEnabled = b
+		} else {
+			log.Printf("[WARN] invalid IONOS_S3_KEY_CREATION_RETRY value %q; defaulting to false", envVal)
+		}
+	}
+	if !retryEnabled {
+		return false
+	}
+	var genericOpenAPIError ionoscloud.GenericOpenAPIError
+	if !errors.As(err, &genericOpenAPIError) {
+		return false
+	}
+	// VDC-21-1 is the error code for "The user does not have the privilege to create S3 keys."
+	// which can happen due to eventual consistency.
+	return genericOpenAPIError.StatusCode() == http.StatusUnprocessableEntity && strings.Contains(string(genericOpenAPIError.Body()), "The user needs to be part of a group that has ACCESS_S3_OBJECT_STORAGE privilege")
 }
 
 // isS3KeyNotFound needed because api returns 422 instead of 404 on key being not found. will be removed once API issue is fixed

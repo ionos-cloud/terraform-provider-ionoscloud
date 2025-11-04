@@ -1,5 +1,9 @@
 ## 6.7.18
 ### Fixes
+- Fix #881 error on s3 key creation immediately after user and group. "The user needs to be part of a group that has ACCESS_S3_OBJECT_STORAGE privilege"
+
+## 6.7.18
+### Fixes
 - Fix provider crash on `terraform plan / terraform refresh` after the external deletion of a server in a boot device selection resource
 
 ## 6.7.17
