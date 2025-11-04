@@ -1,4 +1,4 @@
-## 6.7.18
+## 6.7.19
 ### Fixes
 - Fix #881 error on s3 key creation immediately after user and group. "The user needs to be part of a group that has ACCESS_S3_OBJECT_STORAGE privilege"
 
