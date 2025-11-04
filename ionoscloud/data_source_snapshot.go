@@ -94,6 +94,11 @@ func dataSourceSnapshot() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"require_legacy_bios": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Indicates if the image requires the legacy BIOS for compatibility or specific needs.",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}

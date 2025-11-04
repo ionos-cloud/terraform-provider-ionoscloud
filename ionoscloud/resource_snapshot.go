@@ -115,6 +115,12 @@ func resourceSnapshot() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"require_legacy_bios": {
+				Type:        schema.TypeBool,
+				Description: "Indicates if the image requires the legacy BIOS for compatibility or specific needs.",
+				Optional:    true,
+				Computed:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -213,6 +219,10 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	if d.HasChange("disc_virtio_hot_unplug") {
 		input.DiscVirtioHotUnplug = ionoscloud.ToPtr(d.Get("disc_virtio_hot_unplug").(bool))
 	}
+	if d.HasChange("require_legacy_bios") {
+		input.RequireLegacyBios = ionoscloud.ToPtr(d.Get("require_legacy_bios").(bool))
+	}
+
 	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(ctx, d.Id()).Snapshot(*input).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
@@ -365,6 +375,12 @@ func setSnapshotData(d *schema.ResourceData, snapshot *ionoscloud.Snapshot) erro
 
 		if snapshot.Properties.DiscScsiHotUnplug != nil {
 			if err := d.Set("disc_scsi_hot_unplug", *snapshot.Properties.DiscVirtioHotUnplug); err != nil {
+				return err
+			}
+		}
+
+		if snapshot.Properties.RequireLegacyBios != nil {
+			if err := d.Set("require_legacy_bios", *snapshot.Properties.RequireLegacyBios); err != nil {
 				return err
 			}
 		}

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
@@ -186,6 +187,11 @@ func dataSourceServer() *schema.Resource {
 							Description: "If set to `true` will expose the serial id of the disk attached to the server. " +
 								"If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. " +
 								"Exposing the serial can influence licensed software (e.g. Windows) behavior",
+						},
+						"require_legacy_bios": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Indicates if the image requires the legacy BIOS for compatibility or specific needs.",
 						},
 					},
 				},
@@ -374,6 +380,8 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["backup_unit_id"] = ionoscloud.ToValueDefault(volume.Properties.BackupunitId)
 			entry["user_data"] = ionoscloud.ToValueDefault(volume.Properties.UserData)
 			entry["boot_server"] = ionoscloud.ToValueDefault(volume.Properties.BootServer)
+
+			utils.SetPropWithNilCheck(entry, "require_legacy_bios", volume.Properties.RequireLegacyBios)
 
 			volumes = append(volumes, entry)
 		}
