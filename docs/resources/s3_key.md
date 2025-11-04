@@ -25,8 +25,13 @@ resource "ionoscloud_user" "example" {
 }
 
 resource "ionoscloud_s3_key" "example" {
-    user_id                 = ionoscloud_user.example.id
-    active                  = true
+  user_id                 = ionoscloud_user.example.id
+  active                  = true
+  timeouts {
+    create = "10m"
+    delete = "10m"
+    update = "10m"
+  }
 }
 ```
 

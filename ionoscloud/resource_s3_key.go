@@ -246,7 +246,7 @@ func isS3KeyPrivilegeError(err error) bool {
 	envVal, ok := os.LookupEnv("IONOS_S3_KEY_CREATION_RETRY")
 	retryEnabled := false
 	if ok {
-		if b, err := strconv.ParseBool(strings.TrimSpace(envVal)); err == nil {
+		if b, err := strconv.ParseBool(strings.ToLower(strings.TrimSpace(envVal))); err == nil {
 			retryEnabled = b
 		} else {
 			log.Printf("[WARN] invalid IONOS_S3_KEY_CREATION_RETRY value %q; defaulting to false", envVal)
@@ -259,8 +259,7 @@ func isS3KeyPrivilegeError(err error) bool {
 	if !errors.As(err, &genericOpenAPIError) {
 		return false
 	}
-	// VDC-21-1 is the error code for "The user does not have the privilege to create S3 keys."
-	// which can happen due to eventual consistency.
+
 	return genericOpenAPIError.StatusCode() == http.StatusUnprocessableEntity && strings.Contains(string(genericOpenAPIError.Body()), "The user needs to be part of a group that has ACCESS_S3_OBJECT_STORAGE privilege")
 }
 
