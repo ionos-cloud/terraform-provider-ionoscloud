@@ -1,0 +1,31 @@
+name: Broken Link Checker
+
+on:
+
+  schedule:
+    - cron: '0 6 * * MON-FRI'
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-verbose-mode: 'yes'
+        if: github.event_name == 'schedule' ||  github.event_name == 'workflow_dispatch'
+        
+      - uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-verbose-mode: 'yes'
+          check-modified-files-only: 'yes'
+          base-branch: 'master'
+        if: github.event_name == 'pull_request'
