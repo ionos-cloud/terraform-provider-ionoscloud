@@ -24,8 +24,8 @@ jobs:
           use-verbose-mode: 'yes'
         
       - uses: gaurav-nelson/github-action-markdown-link-check@v1
+        if: github.event_name == 'pull_request'
         with:
           use-verbose-mode: 'yes'
           check-modified-files-only: 'yes'
           base-branch: 'master'
-        if: github.event_name == 'pull_request'
