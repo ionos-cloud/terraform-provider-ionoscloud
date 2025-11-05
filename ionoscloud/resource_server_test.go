@@ -127,6 +127,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.source_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.2"),
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.target_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.3"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type", "EGRESS"),
+					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic_multi_queue", "false"),
 				),
 			},
 			{
@@ -157,6 +158,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.firewall_rules.0.source_ip", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.source_ip"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.firewall_rules.0.target_ip", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.target_ip"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nics.0.firewall_rules.0.type", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "nic_multi_queue", constant.ServerResource+"."+constant.ServerTestResource, "nic_multi_queue"),
 				),
 			},
 			{
@@ -187,6 +189,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceByName, "nics.0.firewall_rules.0.source_ip", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.source_ip"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceByName, "nics.0.firewall_rules.0.target_ip", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.target_ip"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceByName, "nics.0.firewall_rules.0.type", constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceByName, "nic_multi_queue", constant.ServerResource+"."+constant.ServerTestResource, "nic_multi_queue"),
 				),
 			},
 			{
@@ -261,6 +264,25 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.target_ip", "ionoscloud_ipblock.webserver_ipblock_update", "ips.3"),
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type", "INGRESS"),
 				),
+			},
+			{
+				Config: testAccCheckServerConfigBasicNicMultiQueue,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists("ionoscloud_server.test_server_nmq", &server),
+					resource.TestCheckResourceAttr("ionoscloud_server.test_server_nmq", "nic_multi_queue", "true"),
+				),
+			},
+			{
+				Config: testAccCheckDataSourceServerNicMultiQueueMatchID,
+				Check:  resource.TestCheckResourceAttrPair("data.ionoscloud_server.test_server_nmq", "nic_multi_queue", "ionoscloud_server.test_server_nmq", "nic_multi_queue"),
+			},
+			{
+				Config: testAccCheckDataSourceServerNicMultiQueueMatchName,
+				Check:  resource.TestCheckResourceAttrPair("data.ionoscloud_server.test_server_nmq", "nic_multi_queue", "ionoscloud_server.test_server_nmq", "nic_multi_queue"),
+			},
+			{
+				Config: testAccCheckServerConfigBasicNicMultiQueueUpdate,
+				Check:  resource.TestCheckResourceAttr("ionoscloud_server.test_server_nmq", "nic_multi_queue", "false"),
 			},
 		},
 	})
@@ -675,6 +697,20 @@ func TestAccServerCubeServer(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.#", "1"),
 				),
+			},
+			// The creation of a 'CUBE' server with 'nic_multi_queue' enabled should fail.
+			{
+				Config:      testAccCheckInvalidServerConfigCubeNicMultiQueue,
+				ExpectError: regexp.MustCompile("nic_multi_queue can not be enabled"),
+			},
+			{
+				Config: testAccCheckCubeServerConfig,
+				Check:  testAccCheckServerExists("ionoscloud_server.test_cube_server_nmq", &server),
+			},
+			// The update of a 'CUBE' server with 'nic_multi_queue' enabled should fail.
+			{
+				Config:      testAccCheckInvalidServerConfigCubeNicMultiQueue,
+				ExpectError: regexp.MustCompile("nic_multi_queue cannot be enabled"),
 			},
 		},
 	})

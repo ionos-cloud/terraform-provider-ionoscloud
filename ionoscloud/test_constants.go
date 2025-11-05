@@ -331,6 +331,169 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 }
 ` + ServerImagePassword
 
+const testAccCheckServerConfigBasicNicMultiQueue = `
+	resource "ionoscloud_datacenter" "test_datacenter_nmq" {
+		name                  = "Test datacenter for servers with nicMultiQueue"
+		location              = "de/fra"
+	}
+
+	resource "ionoscloud_lan" "test_lan_nmq" {
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_nmq.id
+		public                = false
+		name                  = "Test LAN for servers with nicMultiQueue"
+	}
+
+	resource "ionoscloud_server" "test_server_nmq" {
+		name                  = "Test Enterprise server with nicMultiQueue"
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_nmq.id
+		cores                 = 1
+		ram                   = 1024
+		image_name            = "ubuntu:latest"
+		image_password = ` + constant.RandomPassword + `.server_image_password.result
+		type                  = "ENTERPRISE"
+		volume {
+			name              = "system"
+			size              = 5
+			disk_type         = "SSD Standard"
+			user_data         = "foo"
+			bus               = "VIRTIO"
+			availability_zone = "ZONE_1"
+		}
+		nic {
+			lan               = ionoscloud_lan.test_lan_nmq.id
+			name              = "system"
+			dhcp              = true
+		}
+		nic_multi_queue = true
+	}
+` + ServerImagePassword
+
+const testAccCheckDataSourceServerNicMultiQueueMatchID = testAccCheckServerConfigBasicNicMultiQueue + `
+	data "ionoscloud_server" "test_server_nmq" {
+		datacenter_id = ionoscloud_datacenter.test_datacenter_nmq.id
+		id = ionoscloud_server.test_server_nmq.id
+	}
+`
+
+const testAccCheckDataSourceServerNicMultiQueueMatchName = testAccCheckServerConfigBasicNicMultiQueue + `
+	data "ionoscloud_server" "test_server_nmq" {
+		datacenter_id = ionoscloud_datacenter.test_datacenter_nmq.id
+		name = ionoscloud_server.test_server_nmq.name
+	}
+`
+
+const testAccCheckServerConfigBasicNicMultiQueueUpdate = `
+	resource "ionoscloud_datacenter" "test_datacenter_nmq" {
+		name                  = "Test datacenter for servers with nicMultiQueue"
+		location              = "de/fra"
+	}
+
+	resource "ionoscloud_lan" "test_lan_nmq" {
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_nmq.id
+		public                = false
+		name                  = "Test LAN for servers with nicMultiQueue"
+	}
+
+	resource "ionoscloud_server" "test_server_nmq" {
+		name                  = "Test Enterprise server with nicMultiQueue"
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_nmq.id
+		cores                 = 1
+		ram                   = 1024
+		image_name            = "ubuntu:latest"
+		image_password = ` + constant.RandomPassword + `.server_image_password.result
+		type                  = "ENTERPRISE"
+		volume {
+			name              = "system"
+			size              = 5
+			disk_type         = "SSD Standard"
+			user_data         = "foo"
+			bus               = "VIRTIO"
+			availability_zone = "ZONE_1"
+		}
+		nic {
+			lan               = ionoscloud_lan.test_lan_nmq.id
+			name              = "system"
+			dhcp              = true
+		}
+		nic_multi_queue = false
+	}
+` + ServerImagePassword
+
+const testAccCheckInvalidServerConfigCubeNicMultiQueue = `
+	resource "ionoscloud_datacenter" "test_datacenter_nmq" {
+    	name                  = "Test datacenter for Cube servers with nicMultiQueue"
+    	location              = "de/fra"
+	}
+
+	resource "ionoscloud_lan" "test_lan_nmq" {
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_nmq.id
+		public                = false
+		name                  = "Test LAN for Cube servers with nicMultiQueue"
+	}
+
+	data "ionoscloud_template" "xs_cube_template" {
+		name            = "Basic Cube XS"
+	}
+
+	resource "ionoscloud_server" "test_cube_server_nmq" {
+		  name              = "Cube Server"
+		  image_name        = "ubuntu:latest"
+		  type              = "CUBE"
+		  template_uuid     = data.ionoscloud_template.xs_cube_template.id
+		  image_password = ` + constant.RandomPassword + `.server_image_password.result
+		  datacenter_id     = ionoscloud_datacenter.test_datacenter_nmq.id
+		  volume {
+			name            = "Volume Example"
+			licence_type    = "LINUX"
+			disk_type       = "DAS"
+		  }
+		  nic {
+			lan             = ionoscloud_lan.test_lan_nmq.id
+			name            = "Nic Example"
+			dhcp            = true
+			firewall_active = true
+		  }
+		  nic_multi_queue  = true
+	}
+` + ServerImagePassword
+
+const testAccCheckCubeServerConfig = `
+	resource "ionoscloud_datacenter" "test_datacenter_nmq" {
+    	name                  = "Test datacenter for Cube servers with nicMultiQueue"
+    	location              = "de/fra"
+	}
+
+	resource "ionoscloud_lan" "test_lan_nmq" {
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_nmq.id
+		public                = false
+		name                  = "Test LAN for Cube servers with nicMultiQueue"
+	}
+
+	data "ionoscloud_template" "xs_cube_template" {
+		name            = "Basic Cube XS"
+	}
+
+	resource "ionoscloud_server" "test_cube_server_nmq" {
+		  name              = "Cube Server"
+		  image_name        = "ubuntu:latest"
+		  type              = "CUBE"
+		  template_uuid     = data.ionoscloud_template.xs_cube_template.id
+		  image_password = ` + constant.RandomPassword + `.server_image_password.result
+		  datacenter_id     = ionoscloud_datacenter.test_datacenter_nmq.id
+		  volume {
+			name            = "Volume Example"
+			licence_type    = "LINUX"
+			disk_type       = "DAS"
+		  }
+		  nic {
+			lan             = ionoscloud_lan.test_lan_nmq.id
+			name            = "Nic Example"
+			dhcp            = true
+			firewall_active = true
+		  }
+	}
+` + ServerImagePassword
+
 const testSnapshotServer = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name     = "server-test"
