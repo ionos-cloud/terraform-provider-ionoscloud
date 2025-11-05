@@ -66,13 +66,13 @@ func resourceVpnIPSecGateway() *schema.Resource {
 						},
 						"ipv4_cidr": {
 							Type:             schema.TypeString,
-							Description:      "Describes the private ipv4 subnet in your LAN that should be accessible by the VPN Gateway. Note: this should be the subnet already assigned to the LAN",
+							Description:      "A LAN IPv4 address in CIDR notation that will be assigned to the VPN Gateway. This will be the private gateway address for LAN clients to route traffic over the VPN Gateway, this should be within the subnet already assigned to the LAN.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IsCIDR),
 							Required:         true,
 						},
 						"ipv6_cidr": {
 							Type:             schema.TypeString,
-							Description:      "Describes the ipv6 subnet in your LAN that should be accessible by the VPN Gateway. Note: this should be the subnet already assigned to the LAN",
+							Description:      "A LAN IPv6 address in CIDR notation that will be assigned to the VPN Gateway. This will be the private gateway address for LAN clients to route traffic over the VPN Gateway, this should be within the subnet already assigned to the LAN.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IsCIDR),
 							Optional:         true,
 						},

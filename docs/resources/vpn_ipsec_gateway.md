@@ -141,10 +141,8 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
   same datacenter. Minimum items: 1. Maximum items: 10.
     * `datacenter_id` - (Required)[string] The datacenter to connect your VPN Gateway to.
     * `lan_id` - (Required)[string] The numeric LAN ID to connect your VPN Gateway to.
-    * `ipv4_cidr` - (Required)[string] Describes the private ipv4 subnet in your LAN that should be accessible by the
-      VPN Gateway. Note: this should be the subnet already assigned to the LAN
-    * `ipv6_cidr` - (Optional)[string] Describes the ipv6 subnet in your LAN that should be accessible by the VPN
-      Gateway. **Note**: this should be the subnet already assigned to the LAN
+    * `ipv4_cidr` - (Required)[string] A LAN IPv4 address in CIDR notation that will be assigned to the VPN Gateway. This will be the private gateway address for LAN clients to route traffic over the VPN Gateway, this should be within the subnet already assigned to the LAN.
+    * `ipv6_cidr` - (Optional)[string] A LAN IPv6 address in CIDR notation that will be assigned to the VPN Gateway. This will be the private gateway address for LAN clients to route traffic over the VPN Gateway, this should be within the subnet already assigned to the LAN.
 * `version` - (Required)[string] The IKE version that is permitted for the VPN tunnels. Default: `IKEv2`. Possible
   values: `IKEv2`.
 * `maintenance_window` - (Optional)(Computed) A weekly 4 hour-long window, during which maintenance might occur.

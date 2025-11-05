@@ -53,6 +53,8 @@ resource "ionoscloud_s3_bucket_policy" "example" {
 
 ```
 
+⚠️ **Note:** For more information about the bucket policy or the policy format, please see the [IonosCloud Object Storage documentation](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage/settings/bucket-policy#policy-format).
+
 ## Argument Reference
 
 The following arguments are supported:

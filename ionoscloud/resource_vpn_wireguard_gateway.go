@@ -59,12 +59,14 @@ func resourceVpnWireguardGateway() *schema.Resource {
 						},
 						"ipv4_cidr": {
 							Type:             schema.TypeString,
+							Description:      "A LAN IPv4 address in CIDR notation that will be assigned to the VPN Gateway. This will be the private gateway address for LAN clients to route traffic over the VPN Gateway, this should be within the subnet already assigned to the LAN.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IsCIDR),
 							Optional:         true,
 						},
 						"ipv6_cidr": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:        schema.TypeString,
+							Description: "A LAN IPv6 address in CIDR notation that will be assigned to the VPN Gateway. This will be the private gateway address for LAN clients to route traffic over the VPN Gateway, this should be within the subnet already assigned to the LAN.",
+							Optional:    true,
 						},
 					},
 				},

@@ -54,9 +54,8 @@ The following attributes are returned by the datasource:
 * `connections` - The network connection for your gateway.
     * `datacenter_id` - The datacenter to connect your VPN Gateway to.
     * `lan_id` - The numeric LAN ID to connect your VPN Gateway to.
-    * `ipv4_cidr` - Describes the private ipv4 subnet in your LAN that should be accessible by the
-      VPN Gateway.
-    * `ipv6_cidr` - Describes the ipv6 subnet in your LAN that should be accessible by the VPN Gateway.
+    * `ipv4_cidr` - The VPN Gateway IPv4 address in CIDR notation. This is the private gateway address for LAN clients to route traffic over the VPN Gateway, this should be within the subnet already assigned to the LAN.
+    * `ipv6_cidr` - The VPN Gateway IPv6 address in CIDR notation. This is the private gateway address for LAN clients to route traffic over the VPN Gateway, this should be within the subnet already assigned to the LAN.
 * `version` - The IKE version that is permitted for the VPN tunnels.
 * `maintenance_window` - A weekly 4 hour-long window, during which maintenance might occur.
   * `time` - Start of the maintenance window in UTC time.
