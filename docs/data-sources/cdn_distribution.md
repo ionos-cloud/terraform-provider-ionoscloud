@@ -51,7 +51,7 @@ Either `domain` or `id` must be provided. If none, or both of `domain` and `id` 
 The following attributes are returned by the datasource:
 
 - `domain` - The domain of the distribution.
-- `certificate_id` - The ID of the certificate to use for the distribution. You can create certificates with the [certificate](certificate.md) resource.
+- `certificate_id` - The ID of the certificate to use for the distribution. You can create certificates with the [certificate](certificate_manager_certificate.md) resource.
 - `routing_rules` - The routing rules for the distribution.
     - `scheme` - The scheme of the routing rule.
     - `prefix` - The prefix of the routing rule.

@@ -62,7 +62,7 @@ resource "ionoscloud_certificate" "cert" {
 The following arguments are supported:
 
 - `domain` - (Required)[string] The domain of the distribution.
-- `certificate_id` - (Required)[string] The ID of the certificate to use for the distribution. You can create certificates with the [certificate](certificate.md) resource.
+- `certificate_id` - (Required)[string] The ID of the certificate to use for the distribution. You can create certificates with the [certificate](certificate_manager_certificate.md) resource.
 - `routing_rules` - (Required)[list] The routing rules for the distribution.
     - `scheme` - (Required)[string] The scheme of the routing rule.
     - `prefix` - (Required)[string] The prefix of the routing rule.
