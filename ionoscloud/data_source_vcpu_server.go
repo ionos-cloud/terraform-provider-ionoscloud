@@ -191,6 +191,10 @@ func dataSourceVCPUServer() *schema.Resource {
 				Computed: true,
 				Elem:     labelDataSource,
 			},
+			"nic_multi_queue": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}

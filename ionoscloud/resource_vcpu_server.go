@@ -372,6 +372,11 @@ func resourceVCPUServer() *schema.Resource {
 					},
 				},
 			},
+			"nic_multi_queue": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Activate or deactivate the Multi Queue feature on all NICs of this server. This feature is beneficial to enable when the NICs are experiencing performance issues (e.g. low throughput). Toggling this feature will also initiate a restart of the server. If the specified value is `true`, the feature will be activated; if it is not specified or set to `false`, the feature will be deactivated.",
+			},
 			"label": {
 				Type:     schema.TypeSet,
 				Optional: true,
