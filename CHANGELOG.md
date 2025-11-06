@@ -1,3 +1,7 @@
+## 6.7.20
+### Fixes
+- Fix bug introduced by `6.7.19` for `VCPU` type server resource and data-source
+
 ## 6.7.19
 ### Features
 - Add new `nic_multi_queue` feature for `ENTERPRISE` servers.
