@@ -53,8 +53,8 @@ jobs:
 #      - name: Vendor Dependencies
 #        run: make vendor vendor.check
       - name: Lint
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: 'v2.0'
+          version: 'v2.6'
           only-new-issues: true
           args: --timeout 10m0s --verbose
