@@ -1,6 +1,6 @@
 module github.com/ionos-cloud/terraform-provider-ionoscloud/v6
 
-go 1.24.5
+go 1.25.3
 
 require (
 	github.com/aws/aws-sdk-go v1.55.7

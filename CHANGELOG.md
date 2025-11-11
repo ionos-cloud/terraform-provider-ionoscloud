@@ -1,3 +1,7 @@
+## 6.7.21
+### Chore
+- Update GO version to 1.25.3
+
 ## 6.7.20
 ### Fixes
 - Fix bug introduced by `6.7.19` for `VCPU` type server resource and data-source
