@@ -1,12 +1,13 @@
 package logging
 
 import (
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
@@ -137,7 +138,7 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 
 			// Verify the override worked
 			assert.Equal(t, tt.expectedURL, client.GetConfig().Servers[0].URL)
-			//assert.Equal(t, tt.expectedCert, client.GetConfig().Certificate)
+			// assert.Equal(t, tt.expectedCert, client.GetConfig().Certificate)
 			assert.Equal(t, tt.expectedSkipTLS, client.GetConfig().HTTPClient.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify)
 			expectedRootCa := shared.AddCertsToClient(tt.expectedCert)
 			configRootCA := client.GetConfig().HTTPClient.Transport.(*http.Transport).TLSClientConfig.RootCAs
