@@ -20,6 +20,7 @@ import (
 func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *ionoscloud.APIClient {
 	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Cloud)
 	config := ionoscloud.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
+	config.ContractNumber = clientOptions.ContractNumber
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		clientOptions.Version, ionoscloud.Version, clientOptions.TerraformVersion,
