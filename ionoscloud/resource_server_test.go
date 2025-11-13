@@ -25,6 +25,7 @@ const bootCdromImageId = "aa97f2f4-ca28-11ec-925c-46570854dba1"
 // ToDo: add backup unit back in tests when stable
 
 func TestAccServerBasic(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -290,6 +291,7 @@ func TestAccServerBasic(t *testing.T) {
 
 // issue #379 - also tests if a server can be created without a volume
 func TestAccServerNoBootVolumeBasic(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -371,6 +373,7 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 
 // tests server with no cdromimage and with multiple firewall rules inline
 func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -499,6 +502,7 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 
 // create and updates 5 inline rules after the server is created
 func TestAccServerResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -634,6 +638,7 @@ func TestAccServerResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 
 // also tests creating 5 fw rules inline
 func TestAccServerWithSnapshotAnd5FwRulesInline(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -666,6 +671,7 @@ func TestAccServerWithSnapshotAnd5FwRulesInline(t *testing.T) {
 }
 
 func TestAccServerCubeServer(t *testing.T) {
+	t.Parallel()
 
 	var server ionoscloud.Server
 
@@ -717,6 +723,7 @@ func TestAccServerCubeServer(t *testing.T) {
 }
 
 func TestAccServerWithICMP(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -782,6 +789,7 @@ func TestAccServerWithICMP(t *testing.T) {
 }
 
 func TestAccServerWithLabels(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -840,6 +848,7 @@ func TestAccServerWithLabels(t *testing.T) {
 }
 
 func TestAccServerBootDeviceSelection(t *testing.T) {
+	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
