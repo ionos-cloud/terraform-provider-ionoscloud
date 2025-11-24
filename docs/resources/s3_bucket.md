@@ -53,7 +53,7 @@ The following arguments are supported:
 
 - `id` - (Computed) Name of the bucket
 
-⚠️ **Note:** The name must be unique across all IONOS accounts in all IONOS Object Storage regions. The name should adhere to the following [restrictions](https://docs.ionos.com/cloud/storage-and-backup/s3-object-storage/concepts/buckets#naming-conventions).
+⚠️ **Note:** The name must be unique across all IONOS accounts in all IONOS Object Storage regions. The name should adhere to the following [restrictions](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage/concepts/buckets#naming-conventions).
 
 ## Import
 

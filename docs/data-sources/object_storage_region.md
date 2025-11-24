@@ -33,7 +33,7 @@ The following attributes are returned by the datasource:
 - `endpoint` - The endpoint URL for the region
 - `website` - The website URL for the region
 - `storage_classes` - The available classes in the region
-- `location` - The data center location of the region as per [Get Location](/docs/cloud/v6/#tag/Locations/operation/locationsGet). *Can't be used as `LocationConstraint` on bucket creation.*
+- `location` - The data center location of the region as per [Get Location](https://api.ionos.com/docs/cloud/v6/#tag/Locations/operation/locationsGet). *Can't be used as `LocationConstraint` on bucket creation.*
 - `capability` - The capabilities of the region
   * `iam` - Indicates if IAM policy based access is supported
   * `s3select` - Indicates if S3 Select is supported

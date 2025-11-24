@@ -1,0 +1,10 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "https://www.hashicorp.com/community-guidelines"
+    },
+    {
+      "pattern": "username@domain.tld"
+    }
+  ]
+}

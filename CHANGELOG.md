@@ -651,13 +651,13 @@ failover group. The resources that are created using Terraform cannot be modifie
 - Add option to search for images in the `ionoscloud_image` data source using `image_alias`. Search will be performed with exact match.
 - New Product: **DataPlatform**:
   - `Resources`:
-    - [ionoscloud_dataplatform_cluster](docs/resources/dataplatform_cluster.md)
-    - [ionoscloud_dataplatform_node_pool](docs/resources/dataplatform_node_pool.md)
+    - ionoscloud_dataplatform_cluster
+    - ionoscloud_dataplatform_node_pool
   - `Data Sources`:
-    - [ionoscloud_dataplatform_cluster](docs/data-sources/dataplatform_cluster.md)
-    - [ionoscloud_dataplatform_node_pool](docs/data-sources/dataplatform_node_pool.md)
-    - [ionoscloud_dataplatform_node_pools](docs/data-sources/dataplatform_node_pools.md):
-    - [ionoscloud_dataplatform_versions](docs/data-sources/dataplatform_versions.md):
+    - ionoscloud_dataplatform_cluster
+    - ionoscloud_dataplatform_node_pool
+    - ionoscloud_dataplatform_node_pools
+    - ionoscloud_dataplatform_versions
 
 ⚠️ **Note:** Data Platform is currently in the Early Access (EA) phase.
 We recommend keeping usage and testing to non-production critical applications.
