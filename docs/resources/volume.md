@@ -141,6 +141,7 @@ resource "random_password" "volume_image_password" {
 * `disc_virtio_hot_unplug` - (Computed)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 * `boot_server` - (Computed)[string] The UUID of the attached server.
 * `expose_serial` - (Optional)(Computed) [boolean] Defaults to `false` if not previously set by the image used to create the volume. If set to `true` will expose the serial id of the disk attached to the server. If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. Exposing the serial can influence licensed software (e.g. Windows) behavior
+* `require_legacy_bios` - (Optional)(Computed)[boolean] Indicates if the image requires the legacy BIOS for compatibility or specific needs. During creation, if an image is used, the value will be inherited from the image, regardless of the value set in the plan. Later on, the value can be updated.
 
 > **⚠ WARNING**
 >

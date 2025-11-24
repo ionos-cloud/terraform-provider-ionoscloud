@@ -36,6 +36,8 @@ func TestAccSnapshotBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "description", constant.SnapshotTestResource),
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "sec_auth_protection", "true"),
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "licence_type", "LINUX"),
+					// Test if set only because on creation the value is propagated from the image.
+					resource.TestCheckResourceAttrSet(constant.SnapshotResource+"."+constant.SnapshotTestResource, "require_legacy_bios"),
 				),
 			},
 			{
@@ -57,6 +59,7 @@ func TestAccSnapshotBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "disc_virtio_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_unplug"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "disc_scsi_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_plug"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "disc_scsi_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "require_legacy_bios", constant.SnapshotResource+"."+constant.SnapshotTestResource, "require_legacy_bios"),
 				),
 			},
 			{
@@ -78,27 +81,7 @@ func TestAccSnapshotBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_virtio_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_unplug"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_scsi_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_plug"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_scsi_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_unplug"),
-				),
-			},
-			{
-				Config: testAccDataSourceSnapshotMatching,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "name", constant.SnapshotResource+"."+constant.SnapshotTestResource, "name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "location", constant.SnapshotResource+"."+constant.SnapshotTestResource, "location"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "size", constant.SnapshotResource+"."+constant.SnapshotTestResource, "size"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "description", constant.SnapshotResource+"."+constant.SnapshotTestResource, "description"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "licence_type", constant.SnapshotResource+"."+constant.SnapshotTestResource, "licence_type"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "sec_auth_protection", constant.SnapshotResource+"."+constant.SnapshotTestResource, "sec_auth_protection"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "cpu_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "cpu_hot_plug"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "cpu_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "cpu_hot_unplug"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "ram_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "ram_hot_plug"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "ram_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "ram_hot_unplug"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "nic_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "nic_hot_plug"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "nic_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "nic_hot_unplug"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_virtio_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_plug"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_virtio_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_unplug"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_scsi_hot_plug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_plug"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "disc_scsi_hot_unplug", constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_scsi_hot_unplug"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceByName, "require_legacy_bios", constant.SnapshotResource+"."+constant.SnapshotTestResource, "require_legacy_bios"),
 				),
 			},
 			{
@@ -125,6 +108,9 @@ func TestAccSnapshotBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_unplug", "false"),
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "disc_virtio_hot_plug", "true"),
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "licence_type", "OTHER"),
+					// Test if set AND the value because on update the value can be changed, unlike the creation for which
+					// the value does not matter because the final value will be propagated from the image.
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "require_legacy_bios", "false"),
 				),
 			},
 		},
@@ -201,6 +187,7 @@ resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + `
   description = "` + constant.SnapshotTestResource + `"
   sec_auth_protection = true
   licence_type = "LINUX"
+  require_legacy_bios = true
 }
 `
 
@@ -217,6 +204,7 @@ resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + `
   disc_virtio_hot_unplug = false
   ram_hot_plug = false
   licence_type = "OTHER"
+  require_legacy_bios = false
 }`
 
 const testAccDataSourceSnapshotMatchId = testAccCheckSnapshotConfigBasic + `

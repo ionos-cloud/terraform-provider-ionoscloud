@@ -331,7 +331,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 }
 ` + ServerImagePassword
 
-const testAccCheckServerConfigBasicMultipleFeatures = `
+const testAccCheckServerConfigMultipleFeatures = `
 	resource "ionoscloud_datacenter" "test_datacenter_mf" {
 		name                  = "Test datacenter for servers with various features"
 		location              = "de/fra"
@@ -369,21 +369,21 @@ const testAccCheckServerConfigBasicMultipleFeatures = `
 	}
 ` + ServerImagePassword
 
-const testAccCheckDataSourceServerMultipleFeaturesMatchID = testAccCheckServerConfigBasicMultipleFeatures + `
+const testAccCheckDataSourceServerMultipleFeaturesMatchID = testAccCheckServerConfigMultipleFeatures + `
 	data "ionoscloud_server" "test_server_mf" {
 		datacenter_id = ionoscloud_datacenter.test_datacenter_mf.id
 		id = ionoscloud_server.test_server_mf.id
 	}
 `
 
-const testAccCheckDataSourceServerMultipleFeaturesMatchName = testAccCheckServerConfigBasicMultipleFeatures + `
+const testAccCheckDataSourceServerMultipleFeaturesMatchName = testAccCheckServerConfigMultipleFeatures + `
 	data "ionoscloud_server" "test_server_mf" {
 		datacenter_id = ionoscloud_datacenter.test_datacenter_mf.id
 		name = ionoscloud_server.test_server_mf.name
 	}
 `
 
-const testAccCheckServerConfigBasicMultipleFeaturesUpdate = `
+const testAccCheckServerConfigMultipleFeaturesUpdate = `
 	resource "ionoscloud_datacenter" "test_datacenter_mf" {
 		name                  = "Test datacenter for servers with various features"
 		location              = "de/fra"
@@ -875,6 +875,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
     licence_type    = "LINUX"
     disk_type = "DAS"
 	expose_serial = true
+	require_legacy_bios = false
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id

@@ -23,7 +23,6 @@ func TestAccVolumeImportBasic(t *testing.T) {
 			{
 				Config: testAccCheckVolumeConfigBasic,
 			},
-
 			{
 				ResourceName:            constant.VolumeResource + "." + constant.VolumeTestResource,
 				ImportStateIdFunc:       testAccVolumeImportStateId,

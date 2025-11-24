@@ -270,7 +270,7 @@ func TestAccServerBasic(t *testing.T) {
 			// add different tests for each option since the tests are almost identical and the testing time would
 			// increase significantly.
 			{
-				Config: testAccCheckServerConfigBasicMultipleFeatures,
+				Config: testAccCheckServerConfigMultipleFeatures,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists("ionoscloud_server.test_server_mf", &server),
 					resource.TestCheckResourceAttr("ionoscloud_server.test_server_mf", "nic_multi_queue", "true"),
@@ -293,10 +293,10 @@ func TestAccServerBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckServerConfigBasicMultipleFeaturesUpdate,
+				Config: testAccCheckServerConfigMultipleFeaturesUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_server.test_server_mf", "nic_multi_queue", "false"),
-					// Test if set AND the value because on update the value can be changed unlike the creation for which
+					// Test if set AND the value because on update the value can be changed, unlike the creation for which
 					// the value does not matter because the final value will be propagated from the image.
 					resource.TestCheckResourceAttr("ionoscloud_server.test_server_mf", "volume.0.require_legacy_bios", "true"),
 				),

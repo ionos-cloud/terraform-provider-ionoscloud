@@ -27,6 +27,7 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(imageTestName, "location", "de/txl"),
 					resource.TestCheckResourceAttr(imageTestName, "type", "HDD"),
 					resource.TestCheckResourceAttrSet(imageTestName, "expose_serial"),
+					resource.TestCheckResourceAttrSet(imageTestName, "require_legacy_bios"),
 				),
 			},
 			{
@@ -41,10 +42,11 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 				Config: testAccDataSourceImageBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(imageTestName, "cloud_init", "NONE"),
-					resource.TestCheckResourceAttr(imageTestName, "location", "de/fkb"),
+					resource.TestCheckResourceAttr(imageTestName, "location", "es/vit"),
 					resource.TestCheckResourceAttr(imageTestName, "name", "ubuntu-22.04-live-server-amd64.iso"),
 					resource.TestCheckResourceAttr(imageTestName, "type", "CDROM"),
 					resource.TestCheckResourceAttrSet(imageTestName, "expose_serial"),
+					resource.TestCheckResourceAttrSet(imageTestName, "require_legacy_bios"),
 				),
 			},
 			{
@@ -91,7 +93,7 @@ const testAccDataSourceImageBasic = `
 	  name = "ubuntu"
 	  type = "CDROM"
 	  version = "22.04-live-server-amd64.iso"
-	  location = "de/fkb"
+	  location = "es/vit"
 	  cloud_init = "NONE"
 	}
 `

@@ -1,4 +1,6 @@
-## 6.7.21
+## 6.7.21 - upcoming release
+### Features
+- Add `require_legacy_bios` option for volumes, snapshots, images and inline volumes (for all server types)
 ### Chore
 - Update GO version to 1.25.3
 
