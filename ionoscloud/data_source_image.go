@@ -103,6 +103,11 @@ func dataSourceImage() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"require_legacy_bios": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Indicates if the image requires the legacy BIOS for compatibility or specific needs.",
+			},
 			"image_aliases": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -375,6 +380,12 @@ func ImageSetData(d *schema.ResourceData, image *ionoscloud.Image) error {
 		if image.Properties.Location != nil {
 			err := d.Set("location", *image.Properties.Location)
 			if err != nil {
+				return err
+			}
+		}
+
+		if image.Properties.RequireLegacyBios != nil {
+			if err := d.Set("require_legacy_bios", *image.Properties.RequireLegacyBios); err != nil {
 				return err
 			}
 		}

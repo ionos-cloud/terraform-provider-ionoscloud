@@ -76,6 +76,7 @@ resource "random_password" "server_image_password" {
 * `disc_virtio_hot_unplug` - (Optional)(Computed)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines. Can only be updated.
 * `nic_hot_plug` - (Optional)(Computed)[string] Is capable of nic hot plug (no reboot required). Can only be updated.
 * `nic_hot_unplug` - (Optional)(Computed)[string] Is capable of nic hot unplug (no reboot required). Can only be updated.
+* `require_legacy_bios` - (Optional)(Computed)[boolean] Indicates if the image requires the legacy BIOS for compatibility or specific needs. During creation, if an image is used, the value will be inherited from the image, regardless of the value set in the plan. Later on, the value can be updated.
 
 ## Attribute reference
 

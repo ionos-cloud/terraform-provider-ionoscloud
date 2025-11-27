@@ -331,21 +331,21 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 }
 ` + ServerImagePassword
 
-const testAccCheckServerConfigBasicNicMultiQueue = `
-	resource "ionoscloud_datacenter" "test_datacenter_nmq" {
-		name                  = "Test datacenter for servers with nicMultiQueue"
+const testAccCheckServerConfigMultipleFeatures = `
+	resource "ionoscloud_datacenter" "test_datacenter_mf" {
+		name                  = "Test datacenter for servers with various features"
 		location              = "de/fra"
 	}
 
-	resource "ionoscloud_lan" "test_lan_nmq" {
-		datacenter_id         = ionoscloud_datacenter.test_datacenter_nmq.id
+	resource "ionoscloud_lan" "test_lan_mf" {
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_mf.id
 		public                = false
-		name                  = "Test LAN for servers with nicMultiQueue"
+		name                  = "Test LAN for servers with various features"
 	}
 
-	resource "ionoscloud_server" "test_server_nmq" {
-		name                  = "Test Enterprise server with nicMultiQueue"
-		datacenter_id         = ionoscloud_datacenter.test_datacenter_nmq.id
+	resource "ionoscloud_server" "test_server_mf" {
+		name                  = "Test Enterprise server with various features"
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_mf.id
 		cores                 = 1
 		ram                   = 1024
 		image_name            = "ubuntu:latest"
@@ -358,9 +358,10 @@ const testAccCheckServerConfigBasicNicMultiQueue = `
 			user_data         = "foo"
 			bus               = "VIRTIO"
 			availability_zone = "ZONE_1"
+			require_legacy_bios = false
 		}
 		nic {
-			lan               = ionoscloud_lan.test_lan_nmq.id
+			lan               = ionoscloud_lan.test_lan_mf.id
 			name              = "system"
 			dhcp              = true
 		}
@@ -368,35 +369,35 @@ const testAccCheckServerConfigBasicNicMultiQueue = `
 	}
 ` + ServerImagePassword
 
-const testAccCheckDataSourceServerNicMultiQueueMatchID = testAccCheckServerConfigBasicNicMultiQueue + `
-	data "ionoscloud_server" "test_server_nmq" {
-		datacenter_id = ionoscloud_datacenter.test_datacenter_nmq.id
-		id = ionoscloud_server.test_server_nmq.id
+const testAccCheckDataSourceServerMultipleFeaturesMatchID = testAccCheckServerConfigMultipleFeatures + `
+	data "ionoscloud_server" "test_server_mf" {
+		datacenter_id = ionoscloud_datacenter.test_datacenter_mf.id
+		id = ionoscloud_server.test_server_mf.id
 	}
 `
 
-const testAccCheckDataSourceServerNicMultiQueueMatchName = testAccCheckServerConfigBasicNicMultiQueue + `
-	data "ionoscloud_server" "test_server_nmq" {
-		datacenter_id = ionoscloud_datacenter.test_datacenter_nmq.id
-		name = ionoscloud_server.test_server_nmq.name
+const testAccCheckDataSourceServerMultipleFeaturesMatchName = testAccCheckServerConfigMultipleFeatures + `
+	data "ionoscloud_server" "test_server_mf" {
+		datacenter_id = ionoscloud_datacenter.test_datacenter_mf.id
+		name = ionoscloud_server.test_server_mf.name
 	}
 `
 
-const testAccCheckServerConfigBasicNicMultiQueueUpdate = `
-	resource "ionoscloud_datacenter" "test_datacenter_nmq" {
-		name                  = "Test datacenter for servers with nicMultiQueue"
+const testAccCheckServerConfigMultipleFeaturesUpdate = `
+	resource "ionoscloud_datacenter" "test_datacenter_mf" {
+		name                  = "Test datacenter for servers with various features"
 		location              = "de/fra"
 	}
 
-	resource "ionoscloud_lan" "test_lan_nmq" {
-		datacenter_id         = ionoscloud_datacenter.test_datacenter_nmq.id
+	resource "ionoscloud_lan" "test_lan_mf" {
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_mf.id
 		public                = false
-		name                  = "Test LAN for servers with nicMultiQueue"
+		name                  = "Test LAN for servers with various features"
 	}
 
-	resource "ionoscloud_server" "test_server_nmq" {
-		name                  = "Test Enterprise server with nicMultiQueue"
-		datacenter_id         = ionoscloud_datacenter.test_datacenter_nmq.id
+	resource "ionoscloud_server" "test_server_mf" {
+		name                  = "Test Enterprise server with various features"
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_mf.id
 		cores                 = 1
 		ram                   = 1024
 		image_name            = "ubuntu:latest"
@@ -409,9 +410,10 @@ const testAccCheckServerConfigBasicNicMultiQueueUpdate = `
 			user_data         = "foo"
 			bus               = "VIRTIO"
 			availability_zone = "ZONE_1"
+			require_legacy_bios = true
 		}
 		nic {
-			lan               = ionoscloud_lan.test_lan_nmq.id
+			lan               = ionoscloud_lan.test_lan_mf.id
 			name              = "system"
 			dhcp              = true
 		}
@@ -873,6 +875,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
     licence_type    = "LINUX"
     disk_type = "DAS"
 	expose_serial = true
+	require_legacy_bios = false
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id

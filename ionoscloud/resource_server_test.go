@@ -265,24 +265,41 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type", "INGRESS"),
 				),
 			},
+			// Test various features for servers: 'nic_multi_queue', inline volume 'require_legacy_bios', ...
+			// These are simple options, defined as "option = value" in the configuration file, so there is no need to
+			// add different tests for each option since the tests are almost identical and the testing time would
+			// increase significantly.
 			{
-				Config: testAccCheckServerConfigBasicNicMultiQueue,
+				Config: testAccCheckServerConfigMultipleFeatures,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerExists("ionoscloud_server.test_server_nmq", &server),
-					resource.TestCheckResourceAttr("ionoscloud_server.test_server_nmq", "nic_multi_queue", "true"),
+					testAccCheckServerExists("ionoscloud_server.test_server_mf", &server),
+					resource.TestCheckResourceAttr("ionoscloud_server.test_server_mf", "nic_multi_queue", "true"),
+					// Test if set only because on creation the value is propagated from the image.
+					resource.TestCheckResourceAttrSet("ionoscloud_server.test_server_mf", "volume.0.require_legacy_bios"),
 				),
 			},
 			{
-				Config: testAccCheckDataSourceServerNicMultiQueueMatchID,
-				Check:  resource.TestCheckResourceAttrPair("data.ionoscloud_server.test_server_nmq", "nic_multi_queue", "ionoscloud_server.test_server_nmq", "nic_multi_queue"),
+				Config: testAccCheckDataSourceServerMultipleFeaturesMatchID,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.ionoscloud_server.test_server_mf", "nic_multi_queue", "ionoscloud_server.test_server_mf", "nic_multi_queue"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_server.test_server_mf", "volumes.0.require_legacy_bios", "ionoscloud_server.test_server_mf", "volume.0.require_legacy_bios"),
+				),
 			},
 			{
-				Config: testAccCheckDataSourceServerNicMultiQueueMatchName,
-				Check:  resource.TestCheckResourceAttrPair("data.ionoscloud_server.test_server_nmq", "nic_multi_queue", "ionoscloud_server.test_server_nmq", "nic_multi_queue"),
+				Config: testAccCheckDataSourceServerMultipleFeaturesMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.ionoscloud_server.test_server_mf", "nic_multi_queue", "ionoscloud_server.test_server_mf", "nic_multi_queue"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_server.test_server_mf", "volumes.0.require_legacy_bios", "ionoscloud_server.test_server_mf", "volume.0.require_legacy_bios"),
+				),
 			},
 			{
-				Config: testAccCheckServerConfigBasicNicMultiQueueUpdate,
-				Check:  resource.TestCheckResourceAttr("ionoscloud_server.test_server_nmq", "nic_multi_queue", "false"),
+				Config: testAccCheckServerConfigMultipleFeaturesUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("ionoscloud_server.test_server_mf", "nic_multi_queue", "false"),
+					// Test if set AND the value because on update the value can be changed, unlike the creation for which
+					// the value does not matter because the final value will be propagated from the image.
+					resource.TestCheckResourceAttr("ionoscloud_server.test_server_mf", "volume.0.require_legacy_bios", "true"),
+				),
 			},
 		},
 	})

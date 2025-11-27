@@ -167,6 +167,11 @@ func dataSourceCubeServer() *schema.Resource {
 							Description: "The UUID of the attached server.",
 							Computed:    true,
 						},
+						"require_legacy_bios": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Indicates if the image requires the legacy BIOS for compatibility or specific needs.",
+						},
 					},
 				},
 			},
@@ -310,6 +315,8 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 			entry["backup_unit_id"] = shared.ToValueDefault(volume.Properties.BackupunitId)
 			entry["user_data"] = shared.ToValueDefault(volume.Properties.UserData)
 			entry["boot_server"] = shared.ToValueDefault(volume.Properties.BootServer)
+
+			utils.SetPropWithNilCheck(entry, "require_legacy_bios", volume.Properties.RequireLegacyBios)
 
 			volumes = append(volumes, entry)
 		}

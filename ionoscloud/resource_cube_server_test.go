@@ -62,6 +62,8 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.source_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.2"),
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.target_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.3"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type", "EGRESS"),
+					// Test if set only because on creation the value is propagated from the image.
+					resource.TestCheckResourceAttrSet(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.require_legacy_bios"),
 				),
 			},
 			{
@@ -91,6 +93,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.firewall_rules.0.source_ip", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.source_ip"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.firewall_rules.0.target_ip", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.target_ip"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.firewall_rules.0.type", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "volumes.0.require_legacy_bios", constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.require_legacy_bios"),
 				),
 			},
 			{
@@ -120,6 +123,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.firewall_rules.0.source_ip", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.source_ip"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.firewall_rules.0.target_ip", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.target_ip"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.firewall_rules.0.type", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "volumes.0.require_legacy_bios", constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.require_legacy_bios"),
 				),
 			},
 			{
@@ -154,6 +158,9 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.source_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.2"),
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.target_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.3"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type", "EGRESS"),
+					// Test if set AND the value because on update the value can be changed, unlike the creation for which
+					// the value does not matter because the final value will be propagated from the image.
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.require_legacy_bios", "true"),
 				),
 			},
 			{
@@ -446,6 +453,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
     licence_type    = "LINUX"
     disk_type = "DAS"
 	expose_serial = false
+	require_legacy_bios = true
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id

@@ -178,6 +178,11 @@ func dataSourceVCPUServer() *schema.Resource {
 								"If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. " +
 								"Exposing the serial can influence licensed software (e.g. Windows) behavior",
 						},
+						"require_legacy_bios": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Indicates if the image requires the legacy BIOS for compatibility or specific needs.",
+						},
 					},
 				},
 			},

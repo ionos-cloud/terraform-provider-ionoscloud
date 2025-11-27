@@ -243,6 +243,28 @@ func TestAccServerVCPUBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.type", "INGRESS"),
 				),
 			},
+			{
+				Config: multipleFeaturesConfig,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerVCPUExists("ionoscloud_vcpu_server.test_server_mf", &server),
+					// Test if set only because on creation the value is propagated from the image.
+					resource.TestCheckResourceAttrSet("ionoscloud_vcpu_server.test_server_mf", "volume.0.require_legacy_bios"),
+				),
+			},
+			{
+				Config: multipleFeaturesConfigDataSourceMatchID,
+				Check:  resource.TestCheckResourceAttrPair("data.ionoscloud_vcpu_server.test_server_mf", "volumes.0.require_legacy_bios", "ionoscloud_vcpu_server.test_server_mf", "volume.0.require_legacy_bios"),
+			},
+			{
+				Config: multipleFeaturesConfigDataSourceMatchName,
+				Check:  resource.TestCheckResourceAttrPair("data.ionoscloud_vcpu_server.test_server_mf", "volumes.0.require_legacy_bios", "ionoscloud_vcpu_server.test_server_mf", "volume.0.require_legacy_bios"),
+			},
+			{
+				Config: multipleFeaturesUpdateConfig,
+				// Test if set AND the value because on update the value can be changed, unlike the creation for which
+				// the value does not matter because the final value will be propagated from the image.
+				Check: resource.TestCheckResourceAttr("ionoscloud_vcpu_server.test_server_mf", "volume.0.require_legacy_bios", "true"),
+			},
 		},
 	})
 }
@@ -1708,3 +1730,89 @@ resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource
 	location = "de/txl"
 }
 `
+
+const multipleFeaturesConfig = `
+	resource "ionoscloud_datacenter" "test_datacenter_mf" {
+		name                  = "Test datacenter for VCPU servers with various features"
+		location              = "de/fra"
+	}
+
+	resource "ionoscloud_lan" "test_lan_mf" {
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_mf.id
+		public                = false
+		name                  = "Test LAN for VCPU servers with various features"
+	}
+
+	resource "ionoscloud_vcpu_server" "test_server_mf" {
+		name                  = "Test VCPU server with various features"
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_mf.id
+		cores                 = 1
+		ram                   = 1024
+		image_name            = "ubuntu:latest"
+		image_password = ` + constant.RandomPassword + `.server_image_password.result
+		volume {
+			name              = "system"
+			size              = 5
+			disk_type         = "SSD Standard"
+			user_data         = "foo"
+			bus               = "VIRTIO"
+			availability_zone = "ZONE_1"
+			require_legacy_bios = false
+		}
+		nic {
+			lan               = ionoscloud_lan.test_lan_mf.id
+			name              = "system"
+			dhcp              = true
+		}
+	}
+` + ServerImagePassword
+
+const multipleFeaturesConfigDataSourceMatchID = multipleFeaturesConfig + `
+	data "ionoscloud_vcpu_server" "test_server_mf" {
+		datacenter_id = ionoscloud_datacenter.test_datacenter_mf.id
+		id = ionoscloud_vcpu_server.test_server_mf.id
+	}
+`
+
+const multipleFeaturesConfigDataSourceMatchName = multipleFeaturesConfig + `
+	data "ionoscloud_vcpu_server" "test_server_mf" {
+		datacenter_id = ionoscloud_datacenter.test_datacenter_mf.id
+		name = ionoscloud_vcpu_server.test_server_mf.name
+	}
+`
+
+const multipleFeaturesUpdateConfig = `
+	resource "ionoscloud_datacenter" "test_datacenter_mf" {
+		name                  = "Test datacenter for VCPU servers with various features"
+		location              = "de/fra"
+	}
+
+	resource "ionoscloud_lan" "test_lan_mf" {
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_mf.id
+		public                = false
+		name                  = "Test LAN for VCPU servers with various features"
+	}
+
+	resource "ionoscloud_vcpu_server" "test_server_mf" {
+		name                  = "Test VCPU server with various features"
+		datacenter_id         = ionoscloud_datacenter.test_datacenter_mf.id
+		cores                 = 1
+		ram                   = 1024
+		image_name            = "ubuntu:latest"
+		image_password = ` + constant.RandomPassword + `.server_image_password.result
+		volume {
+			name              = "system"
+			size              = 5
+			disk_type         = "SSD Standard"
+			user_data         = "foo"
+			bus               = "VIRTIO"
+			availability_zone = "ZONE_1"
+			require_legacy_bios = true
+		}
+		nic {
+			lan               = ionoscloud_lan.test_lan_mf.id
+			name              = "system"
+			dhcp              = true
+		}
+	}
+` + ServerImagePassword

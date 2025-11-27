@@ -162,6 +162,12 @@ func resourceVolume() *schema.Resource {
 					"If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. " +
 					"Exposing the serial can influence licensed software (e.g. Windows) behavior",
 			},
+			"require_legacy_bios": {
+				Type:        schema.TypeBool,
+				Description: "Indicates if the image requires the legacy BIOS for compatibility or specific needs.",
+				Optional:    true,
+				Computed:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -368,6 +374,12 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, n := d.GetChange("expose_serial")
 		nBool := n.(bool)
 		properties.ExposeSerial = &nBool
+	}
+
+	if d.HasChange("require_legacy_bios") {
+		_, newValue := d.GetChange("require_legacy_bios")
+		requireLegacyBios := newValue.(bool)
+		properties.RequireLegacyBios = &requireLegacyBios
 	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
@@ -596,6 +608,12 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 		}
 	}
 
+	if volume.Properties.RequireLegacyBios != nil {
+		if err := d.Set("require_legacy_bios", *volume.Properties.RequireLegacyBios); err != nil {
+			return fmt.Errorf("error while setting require_legacy_bios property for volume with ID: %v, error: %w", d.Id(), err)
+		}
+	}
+
 	return nil
 
 }
@@ -688,6 +706,12 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 		val := v.(bool)
 		volume.ExposeSerial = &val
 	}
+
+	if v, ok := d.GetOk(path + "require_legacy_bios"); ok {
+		requireLegacyBios := v.(bool)
+		volume.RequireLegacyBios = &requireLegacyBios
+	}
+
 	return &volume, nil
 }
 

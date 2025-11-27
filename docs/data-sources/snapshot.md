@@ -63,3 +63,5 @@ The following attributes are returned by the datasource:
 * `disc_virtio_hot_unplug` -  Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 * `disc_scsi_hot_plug` -  Is capable of SCSI drive hot plug (no reboot required)
 * `disc_scsi_hot_unplug` -  Is capable of SCSI drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
+* `require_legacy_bios` - Indicates if the image requires the legacy BIOS for compatibility or specific needs.
+

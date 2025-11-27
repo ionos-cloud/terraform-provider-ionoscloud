@@ -46,7 +46,10 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_server", constant.ServerResource+"."+constant.ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "expose_serial", "true"),
-					utils.TestImageNotNull(constant.VolumeResource, "image")),
+					utils.TestImageNotNull(constant.VolumeResource, "image"),
+					// Test if set only because on creation the value is propagated from the image.
+					resource.TestCheckResourceAttrSet(constant.VolumeResource+"."+constant.VolumeTestResource, "require_legacy_bios"),
+				),
 			},
 			{
 				Config: testAccDataSourceVolumeMatchId,
@@ -66,6 +69,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "device_number", constant.VolumeResource+"."+constant.VolumeTestResource, "device_number"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "boot_server", constant.ServerResource+"."+constant.ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "expose_serial", constant.VolumeResource+"."+constant.VolumeTestResource, "expose_serial"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "require_legacy_bios", constant.VolumeResource+"."+constant.VolumeTestResource, "require_legacy_bios"),
 				),
 			},
 			{
@@ -85,6 +89,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "disc_virtio_hot_unplug", constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_unplug"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "device_number", constant.VolumeResource+"."+constant.VolumeTestResource, "device_number"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "boot_server", constant.ServerResource+"."+constant.ServerTestResource, "id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceByName, "require_legacy_bios", constant.VolumeResource+"."+constant.VolumeTestResource, "require_legacy_bios"),
 				),
 			},
 			{
@@ -102,7 +107,11 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(constant.VolumeResource+"."+constant.VolumeTestResource, "image_name"),
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "boot_server", constant.ServerResource+"."+constant.ServerTestResource+"updated", "id"),
 					resource.TestCheckResourceAttrPair(constant.VolumeResource+"."+constant.VolumeTestResource, "image_password", constant.RandomPassword+".server_image_password_updated", "result"),
-					utils.TestImageNotNull(constant.VolumeResource, "image")),
+					utils.TestImageNotNull(constant.VolumeResource, "image"),
+					// Test if set AND the value because on update the value can be changed, unlike the creation for which
+					// the value does not matter because the final value will be propagated from the image.
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "require_legacy_bios", "false"),
+				),
 			},
 		},
 	})
@@ -259,6 +268,7 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
 	image_password = ` + constant.RandomPassword + `.server_image_password.result
 	user_data = "foo"
 	expose_serial = true
+	require_legacy_bios = true
 }
 ` + ServerImagePassword
 
@@ -323,6 +333,7 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
 	image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
 	user_data = "foo"
 	expose_serial = false
+	require_legacy_bios = false
 }
 ` + ServerImagePassword + ServerImagePasswordUpdated
 

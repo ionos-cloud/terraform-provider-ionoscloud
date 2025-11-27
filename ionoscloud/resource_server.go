@@ -342,6 +342,12 @@ func resourceServer() *schema.Resource {
 								"If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. " +
 								"Exposing the serial can influence licensed software (e.g. Windows) behavior",
 						},
+						"require_legacy_bios": {
+							Type:        schema.TypeBool,
+							Description: "Indicates if the image requires the legacy BIOS for compatibility or specific needs.",
+							Optional:    true,
+							Computed:    true,
+						},
 					},
 				},
 			},
@@ -905,6 +911,7 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 		utils.SetPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
 		utils.SetPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
 		utils.SetPropWithNilCheck(volumeMap, "expose_serial", volume.Properties.ExposeSerial)
+		utils.SetPropWithNilCheck(volumeMap, "require_legacy_bios", volume.Properties.RequireLegacyBios)
 	}
 	return volumeMap
 }
@@ -1036,6 +1043,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 					_, newVal := d.GetChange(volumePath + "expose_serial")
 					exposeSerial := newVal.(bool)
 					properties.ExposeSerial = &exposeSerial
+				}
+				if d.HasChange(volumePath + "require_legacy_bios") {
+					_, newVal := d.GetChange(volumePath + "require_legacy_bios")
+					requireLegacyBios := newVal.(bool)
+					properties.RequireLegacyBios = &requireLegacyBios
 				}
 
 				_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), volumeIdStr).Volume(properties).Execute()
