@@ -325,11 +325,13 @@ func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit
 			}
 		}
 
-		if backupUnit.Properties.Name != nil && contractResources.Items != nil && len(*contractResources.Items) > 0 &&
-			(*contractResources.Items)[0].Properties.ContractNumber != nil {
-			err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *(*contractResources.Items)[0].Properties.ContractNumber))
-			if err != nil {
-				return fmt.Errorf("error while setting login property for backup unit %s: %w", d.Id(), err)
+		if backupUnit.Properties.Name != nil && contractResources.Items != nil && len(*contractResources.Items) > 0 {
+			firstContract := (*contractResources.Items)[0]
+			if firstContract.Properties != nil && firstContract.Properties.ContractNumber != nil {
+				err := d.Set("login", fmt.Sprintf("%d-%s", *firstContract.Properties.ContractNumber, *backupUnit.Properties.Name))
+				if err != nil {
+					return fmt.Errorf("error while setting login property for backup unit %s: %w", d.Id(), err)
+				}
 			}
 		} else {
 			if contractResources.Items == nil || len(*contractResources.Items) == 0 {

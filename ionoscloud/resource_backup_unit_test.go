@@ -35,6 +35,7 @@ func TestAccBackupUnitBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "name", constant.BackupUnitTestResource),
 					resource.TestCheckResourceAttr(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "email", "example@ionoscloud.com"),
 					resource.TestCheckResourceAttrPair(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "password", constant.RandomPassword+".backup_unit_password", "result"),
+					resource.TestCheckResourceAttrSet(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "login"),
 				),
 			},
 			{

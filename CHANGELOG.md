@@ -1,8 +1,10 @@
 ## 6.7.21 - upcoming release
-### Chore
-- Update GO version to 1.25.3
 ### Features
 - Add `require_legacy_bios` option for volumes, snapshots, images and inline volumes (for all server types)
+### Fixes
+- Fix the way in which `login` value is computed for backup unit resource (fixes [#898](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/898))
+### Chore
+- Update GO version to 1.25.3
 ### Documentation
 - Specify how to work with multiple resources of the same type but in different locations/regions, explain regions logic for S3 buckets
 
