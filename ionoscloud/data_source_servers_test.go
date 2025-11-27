@@ -48,6 +48,8 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 						constant.ServerResource+"."+serverTestResource2, "volume.0.disk_type"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.volumes.0.bus",
 						constant.ServerResource+"."+serverTestResource2, "volume.0.bus"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.volumes.0.require_legacy_bios",
+						constant.ServerResource+"."+serverTestResource2, "volume.0.require_legacy_bios"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.name",
 						constant.ServerResource+"."+serverTestResource2, "nic.0.name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.lan",
@@ -154,6 +156,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "IDE"
+	require_legacy_bios = true
 	}
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
