@@ -156,6 +156,127 @@ resource "ionoscloud_datacenter" "main" {
   # ...
 }
 ```
+### Working with multiple regions/locations
+When working with the same resource type on multiple regions/locations it is required to use multiple provider blocks with different aliases, one block for each region:
+
+#### Configuration example for S3 buckets in different regions:
+
+```hcl
+terraform {
+  required_providers {
+    ionoscloud = {
+      source = "ionos-cloud/ionoscloud"
+      version = "6.7.20"
+    }
+  }
+}
+
+resource "ionoscloud_s3_bucket" "firstbucket" {
+  name = "terraform-eu-central-3"
+  region = "eu-central-3"
+  provider = ionoscloud.eucentral3
+  object_lock_enabled = true
+  force_destroy = true
+}
+
+resource "ionoscloud_s3_bucket" "secondbucket" {
+  name = "terraform-eu-central-4"
+  region = "eu-central-4"
+  provider = ionoscloud
+  object_lock_enabled = true
+  force_destroy = true
+}
+
+# This provider will be used to manipulate resources in 'eu-central-3' region.
+provider "ionoscloud" {
+  s3_access_key = "S3_ACCESS_KEY"
+  s3_secret_key = "S3_SECRET_KEY"
+  token = "IONOS_TOKEN"
+  alias = "eucentral3"
+}
+
+# This provider will be used to manipulate resources in 'eu-central-4' region.
+provider "ionoscloud" {
+  s3_access_key = "S3_ACCESS_KEY"
+  s3_secret_key = "S3_SECRET_KEY"
+  token = "IONOS_TOKEN"
+}
+```
+
+#### Configuration example for resources with multiple available locations:
+
+```hcl
+terraform {
+  required_providers {
+    ionoscloud = {
+      source = "ionos-cloud/ionoscloud"
+      version = "6.7.20"
+    }
+  }
+}
+
+resource "ionoscloud_logging_pipeline" "firstpipeline" {
+  location = "de/fra"
+  name = "firstpipeline"
+  log {
+    source = "kubernetes"
+    tag = "tagexample"
+    protocol = "http"
+    destinations {
+      type = "loki"
+      retention_in_days = 7
+    }
+  }
+  provider = ionoscloud.frankfurt
+}
+
+resource "ionoscloud_logging_pipeline" "secondpipeline" {
+  location = "de/txl"
+  name = "secondpipeline"
+  log {
+    source = "kubernetes"
+    tag = "tagexample"
+    protocol = "http"
+    destinations {
+      type = "loki"
+      retention_in_days = 7
+    }
+  }
+  provider = ionoscloud.berlin
+}
+
+resource "ionoscloud_logging_pipeline" "thirdpipeline" {
+  location = "fr/par"
+  name = "thirdpipeline"
+  log {
+    source = "kubernetes"
+    tag = "tagexample"
+    protocol = "http"
+    destinations {
+      type = "loki"
+      retention_in_days = 7
+    }
+  }
+  provider = ionoscloud
+}
+
+# This provider will be used to manipulate resources in Frankfurt.
+provider "ionoscloud" {
+  token = "IONOS_TOKEN"
+  alias = "frankfurt"
+}
+
+# This provider will be used to manipulate resources in Berlin.
+provider "ionoscloud" {
+  token = "IONOS_TOKEN"
+  alias = "berlin"
+}
+
+# This provider will be used to manipulate resources in Paris.
+provider "ionoscloud" {
+  token = "IONOS_TOKEN"
+}
+```
 
 ### Important Notes
 * The `required_providers` section needs to be specified in order for terraform to be
@@ -181,7 +302,7 @@ The following arguments are supported:
 - `s3_access_key` - Required for managing IONOS Object Storage resources.
 
 - `s3_secret_key` - Required for managing IONOS Object Storage resources.
-- 
+
 - `s3_region` - Optional, defines the region of the Object Storage resource.
 
 ### Environment Variables

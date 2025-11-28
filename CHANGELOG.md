@@ -1,8 +1,10 @@
 ## 6.7.21 - upcoming release
-### Features
-- Add `require_legacy_bios` option for volumes, snapshots, images and inline volumes (for all server types)
 ### Chore
 - Update GO version to 1.25.3
+### Features
+- Add `require_legacy_bios` option for volumes, snapshots, images and inline volumes (for all server types)
+### Documentation
+- Specify how to work with multiple resources of the same type but in different locations/regions, explain regions logic for S3 buckets
 
 ## 6.7.20
 ### Fixes
