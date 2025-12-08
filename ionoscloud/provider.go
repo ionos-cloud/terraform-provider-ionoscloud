@@ -155,6 +155,7 @@ func Provider() *schema.Provider {
 			constant.ResourceResource:                          dataSourceResource(),
 			constant.SnapshotResource:                          dataSourceSnapshot(),
 			constant.LanResource:                               dataSourceLan(),
+			constant.GpuResource:                               dataSourceGpu(),
 			constant.PCCResource:                               dataSourcePcc(),
 			constant.ServerResource:                            dataSourceServer(),
 			constant.ServerCubeResource:                        dataSourceCubeServer(),
@@ -297,7 +298,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		ClientOptions: shared.ClientOptions{
 			Endpoint:      endpoint,
 			SkipTLSVerify: insecureBool,
-			//Certificate:   "",
+			// Certificate:   "",
 			Credentials: shared.Credentials{
 				Username: username,
 				Password: password,

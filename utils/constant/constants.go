@@ -124,6 +124,11 @@ const (
 	PrivateLANDataSourceByName = "private_lan_name"
 )
 
+// Gpu Constants
+const (
+	GpuResource = "ionoscloud_gpu"
+)
+
 // Group Constants
 const (
 	GroupResource         = "ionoscloud_group"
