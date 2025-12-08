@@ -279,18 +279,21 @@ func resourceVCPUServer() *schema.Resource {
 							Computed: true,
 						},
 						"ips": {
-							Type: schema.TypeList,
+							Type: schema.TypeSet,
 							Elem: &schema.Schema{
 								Type:             schema.TypeString,
-								DiffSuppressFunc: utils.DiffEmptyIps,
+								ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 							},
 							Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
 							Computed:    true,
 							Optional:    true,
 						},
 						"ipv6_ips": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+							Type: schema.TypeSet,
+							Elem: &schema.Schema{
+								Type:             schema.TypeString,
+								ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							},
 							Optional: true,
 							Computed: true,
 						},
