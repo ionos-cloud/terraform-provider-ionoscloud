@@ -281,7 +281,7 @@ func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn 
 
 // DecodeInterfaceToStruct can decode from interface{}, or from []interface
 // will turn "" into nil values
-// takes snake_case fields and decodes them into camelcase fields of struct
+// takes snake_case fields and decodes them into camelCase fields of struct
 // used to decode values from TypeList and TypeSet of schema(`d`) directly into sdk structs
 func DecodeInterfaceToStruct(input, output interface{}) error {
 	config := mapstructure.DecoderConfig{
