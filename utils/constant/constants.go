@@ -215,6 +215,7 @@ const (
 const (
 	ServerResource         = "ionoscloud_server"
 	ServerCubeResource     = "ionoscloud_cube_server"
+	ServerGPUResource      = "ionoscloud_gpu_server"
 	ServerVCPUResource     = "ionoscloud_vcpu_server"
 	ServerTestResource     = "test_server"
 	ServerTestHostname     = "myhostname"
@@ -441,6 +442,7 @@ wkv+4ThHJ677Dpi/P8F8iOJp
 
 // Server type constants
 const (
+	GpuType        = "GPU"
 	VCPUType       = "VCPU"
 	CubeType       = "CUBE"
 	EnterpriseType = "ENTERPRISE"

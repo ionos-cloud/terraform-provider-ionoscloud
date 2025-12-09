@@ -98,6 +98,7 @@ func Provider() *schema.Provider {
 			constant.ServerResource:                            resourceServer(),
 			constant.ServerCubeResource:                        resourceCubeServer(),
 			constant.ServerVCPUResource:                        resourceVCPUServer(),
+			constant.ServerGPUResource:                         resourceGPUServer(),
 			constant.VolumeResource:                            resourceVolume(),
 			constant.GroupResource:                             resourceGroup(),
 			constant.ShareResource:                             resourceShare(),
