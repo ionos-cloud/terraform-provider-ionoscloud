@@ -2,11 +2,13 @@ package ionoscloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
@@ -15,6 +17,11 @@ func dataSourceGpu() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceGpuRead,
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"datacenter_id": {
 				Type:             schema.TypeString,
 				Required:         true,
@@ -25,13 +32,9 @@ func dataSourceGpu() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			"gpu_id": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-			},
 			"name": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"vendor": {
@@ -80,18 +83,65 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	datacenterID := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
-	gpuID := d.Get("gpu_id").(string)
 
-	gpu, apiResponse, err := client.GraphicsProcessingUnitCardsApi.DatacentersServersGPUsFindById(
-		ctx, datacenterID, serverID, gpuID,
-	).Execute()
-	logApiRequestTime(apiResponse)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("failed to fetch GPU %s: %w", gpuID, err))
+	id, idOk := d.GetOk("id")
+	name, nameOk := d.GetOk("name")
+
+	if idOk && nameOk {
+		return diag.FromErr(errors.New("id and name cannot be both specified at the same time"))
+	}
+	if !idOk && !nameOk {
+		return diag.FromErr(errors.New("please provide either the GPU id or name"))
+	}
+
+	var gpu ionoscloud.GPU
+	var err error
+	var apiResponse *ionoscloud.APIResponse
+
+	if idOk {
+		/* search by ID */
+		gpu, apiResponse, err = client.GraphicsProcessingUnitCardsApi.
+			DatacentersServersGPUsFindById(ctx, datacenterID, serverID, id.(string)).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching GPU with ID %s: %w", id.(string), err))
+		}
+	} else {
+		/* search by name */
+		var gpus ionoscloud.GPUs
+		gpus, apiResponse, err = client.GraphicsProcessingUnitCardsApi.DatacentersServersGPUsGet(ctx, datacenterID, serverID).Depth(1).Execute()
+		logApiRequestTime(apiResponse)
+
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching GPUs: %w", err))
+		}
+
+		var results []ionoscloud.GPU
+		if gpus.Items != nil {
+			for _, g := range *gpus.Items {
+				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == name.(string) {
+					/* GPU found */
+					gpu, apiResponse, err = client.GraphicsProcessingUnitCardsApi.DatacentersServersGPUsFindById(ctx, datacenterID, serverID, *g.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching GPU %s: %w", *g.Id, err))
+					}
+					results = append(results, gpu)
+				}
+			}
+		}
+
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no GPU found with the specified criteria: name = %s", name.(string)))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one GPU found with the specified criteria: name = %s", name.(string)))
+		} else {
+			gpu = results[0]
+		}
 	}
 
 	if gpu.Id == nil {
-		return diag.FromErr(fmt.Errorf("GPU %s returned without an ID", gpuID))
+		return diag.FromErr(fmt.Errorf("GPU returned without an ID"))
 	}
 
 	d.SetId(*gpu.Id)
@@ -102,7 +152,7 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err := d.Set("server_id", serverID); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("gpu_id", *gpu.Id); err != nil {
+	if err := d.Set("id", *gpu.Id); err != nil {
 		return diag.FromErr(err)
 	}
 
