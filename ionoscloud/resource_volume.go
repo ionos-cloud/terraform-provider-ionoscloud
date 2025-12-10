@@ -615,8 +615,8 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 	}
 
 	return nil
-
 }
+
 func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud.VolumeProperties, error) {
 	volume := ionoscloud.VolumeProperties{}
 	volumeType := d.Get(path + "disk_type").(string)
@@ -651,7 +651,8 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 	}
 
 	var volumeSize float32
-	if !strings.EqualFold(serverType, constant.CubeType) {
+	if !strings.EqualFold(serverType, constant.CubeType) &&
+		!strings.EqualFold(serverType, constant.GpuType) {
 		volumeSize = float32(d.Get(path + "size").(int))
 		if volumeSize > 0 {
 			volume.Size = &volumeSize
