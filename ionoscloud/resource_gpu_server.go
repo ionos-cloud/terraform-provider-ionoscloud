@@ -40,6 +40,12 @@ func resourceGPUServer() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"datacenter_id": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
@@ -86,12 +92,6 @@ func resourceGPUServer() *schema.Resource {
 			"firewallrule_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"datacenter_id": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"image_password": {
 				Type:          schema.TypeString,
@@ -261,134 +261,6 @@ func resourceGPUServer() *schema.Resource {
 				Computed:         true,
 				Description:      "Sets the power state of the gpu server. Possible values: `RUNNING` or `SUSPENDED`.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.VMStateStart, constant.CubeVMStateStop}, true)),
-			},
-			"nic": {
-				Type:     schema.TypeList,
-				Required: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"mac": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-							ForceNew: true,
-						},
-						"lan": {
-							Type:     schema.TypeInt,
-							Required: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"dhcp": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"dhcpv6": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: "Indicates whether this NIC receives an IPv6 address through DHCP.",
-						},
-						"ipv6_cidr_block": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Computed:    true,
-							Description: "IPv6 CIDR block assigned to the NIC.",
-						},
-						"ips": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Computed: true,
-							Optional: true,
-						},
-						"ipv6_ips": {
-							Type:        schema.TypeList,
-							Elem:        &schema.Schema{Type: schema.TypeString},
-							Optional:    true,
-							Computed:    true,
-							Description: "Collection for IPv6 addresses assigned to a nic. Explicitly assigned IPv6 addresses need to come from inside the IPv6 CIDR block assigned to the nic.",
-						},
-						"firewall_active": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"firewall_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"device_number": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"pci_slot": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"security_groups_ids": {
-							Type:        schema.TypeSet,
-							Elem:        &schema.Schema{Type: schema.TypeString},
-							Optional:    true,
-							Description: "The list of Security Group IDs for the NIC",
-						},
-						"firewall": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"name": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"protocol": {
-										Type:             schema.TypeString,
-										Required:         true,
-										DiffSuppressFunc: utils.DiffToLower,
-										ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-									},
-									"source_mac": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"source_ip": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"target_ip": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"port_range_start": {
-										Type:             schema.TypeInt,
-										Optional:         true,
-										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
-									},
-									"port_range_end": {
-										Type:             schema.TypeInt,
-										Optional:         true,
-										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
-									},
-									"icmp_type": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"icmp_code": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"type": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-								},
-							},
-						},
-					},
-				},
 			},
 			"inline_volume_ids": {
 				Type:        schema.TypeList,
