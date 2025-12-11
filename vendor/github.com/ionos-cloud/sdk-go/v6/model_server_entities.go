@@ -20,7 +20,7 @@ type ServerEntities struct {
 	Volumes        *AttachedVolumes `json:"volumes,omitempty"`
 	Nics           *Nics            `json:"nics,omitempty"`
 	Securitygroups *SecurityGroups  `json:"securitygroups,omitempty"`
-	Gpus           *GPUs            `json:"gpus,omitempty"`
+	Gpus           *Gpus            `json:"gpus,omitempty"`
 }
 
 // NewServerEntities instantiates a new ServerEntities object
@@ -195,7 +195,7 @@ func (o *ServerEntities) HasSecuritygroups() bool {
 
 // GetGpus returns the Gpus field value
 // If the value is explicit nil, nil is returned
-func (o *ServerEntities) GetGpus() *GPUs {
+func (o *ServerEntities) GetGpus() *Gpus {
 	if o == nil {
 		return nil
 	}
@@ -207,7 +207,7 @@ func (o *ServerEntities) GetGpus() *GPUs {
 // GetGpusOk returns a tuple with the Gpus field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ServerEntities) GetGpusOk() (*GPUs, bool) {
+func (o *ServerEntities) GetGpusOk() (*Gpus, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -216,7 +216,7 @@ func (o *ServerEntities) GetGpusOk() (*GPUs, bool) {
 }
 
 // SetGpus sets field value
-func (o *ServerEntities) SetGpus(v GPUs) {
+func (o *ServerEntities) SetGpus(v Gpus) {
 
 	o.Gpus = &v
 

@@ -14,8 +14,8 @@ import (
 	"encoding/json"
 )
 
-// GPUs struct for GPUs
-type GPUs struct {
+// Gpus struct for Gpus
+type Gpus struct {
 	// The resource's unique identifier.
 	Id *string `json:"id,omitempty"`
 	// The type of object that has been created.
@@ -23,7 +23,7 @@ type GPUs struct {
 	// The URL to the object representation (absolute path).
 	Href *string `json:"href,omitempty"`
 	// Array of items in the collection.
-	Items *[]GPU `json:"items,omitempty"`
+	Items *[]Gpu `json:"items,omitempty"`
 	// The offset (if specified in the request).
 	Offset *float32 `json:"offset,omitempty"`
 	// The limit (if specified in the request).
@@ -31,27 +31,27 @@ type GPUs struct {
 	Links *PaginationLinks `json:"_links,omitempty"`
 }
 
-// NewGPUs instantiates a new GPUs object
+// NewGpus instantiates a new Gpus object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGPUs() *GPUs {
-	this := GPUs{}
+func NewGpus() *Gpus {
+	this := Gpus{}
 
 	return &this
 }
 
-// NewGPUsWithDefaults instantiates a new GPUs object
+// NewGpusWithDefaults instantiates a new Gpus object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewGPUsWithDefaults() *GPUs {
-	this := GPUs{}
+func NewGpusWithDefaults() *Gpus {
+	this := Gpus{}
 	return &this
 }
 
 // GetId returns the Id field value
 // If the value is explicit nil, nil is returned
-func (o *GPUs) GetId() *string {
+func (o *Gpus) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -63,7 +63,7 @@ func (o *GPUs) GetId() *string {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GPUs) GetIdOk() (*string, bool) {
+func (o *Gpus) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -72,14 +72,14 @@ func (o *GPUs) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *GPUs) SetId(v string) {
+func (o *Gpus) SetId(v string) {
 
 	o.Id = &v
 
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *GPUs) HasId() bool {
+func (o *Gpus) HasId() bool {
 	if o != nil && o.Id != nil {
 		return true
 	}
@@ -89,7 +89,7 @@ func (o *GPUs) HasId() bool {
 
 // GetType returns the Type field value
 // If the value is explicit nil, nil is returned
-func (o *GPUs) GetType() *Type {
+func (o *Gpus) GetType() *Type {
 	if o == nil {
 		return nil
 	}
@@ -101,7 +101,7 @@ func (o *GPUs) GetType() *Type {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GPUs) GetTypeOk() (*Type, bool) {
+func (o *Gpus) GetTypeOk() (*Type, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -110,14 +110,14 @@ func (o *GPUs) GetTypeOk() (*Type, bool) {
 }
 
 // SetType sets field value
-func (o *GPUs) SetType(v Type) {
+func (o *Gpus) SetType(v Type) {
 
 	o.Type = &v
 
 }
 
 // HasType returns a boolean if a field has been set.
-func (o *GPUs) HasType() bool {
+func (o *Gpus) HasType() bool {
 	if o != nil && o.Type != nil {
 		return true
 	}
@@ -127,7 +127,7 @@ func (o *GPUs) HasType() bool {
 
 // GetHref returns the Href field value
 // If the value is explicit nil, nil is returned
-func (o *GPUs) GetHref() *string {
+func (o *Gpus) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -139,7 +139,7 @@ func (o *GPUs) GetHref() *string {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GPUs) GetHrefOk() (*string, bool) {
+func (o *Gpus) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -148,14 +148,14 @@ func (o *GPUs) GetHrefOk() (*string, bool) {
 }
 
 // SetHref sets field value
-func (o *GPUs) SetHref(v string) {
+func (o *Gpus) SetHref(v string) {
 
 	o.Href = &v
 
 }
 
 // HasHref returns a boolean if a field has been set.
-func (o *GPUs) HasHref() bool {
+func (o *Gpus) HasHref() bool {
 	if o != nil && o.Href != nil {
 		return true
 	}
@@ -165,7 +165,7 @@ func (o *GPUs) HasHref() bool {
 
 // GetItems returns the Items field value
 // If the value is explicit nil, nil is returned
-func (o *GPUs) GetItems() *[]GPU {
+func (o *Gpus) GetItems() *[]Gpu {
 	if o == nil {
 		return nil
 	}
@@ -177,7 +177,7 @@ func (o *GPUs) GetItems() *[]GPU {
 // GetItemsOk returns a tuple with the Items field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GPUs) GetItemsOk() (*[]GPU, bool) {
+func (o *Gpus) GetItemsOk() (*[]Gpu, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -186,14 +186,14 @@ func (o *GPUs) GetItemsOk() (*[]GPU, bool) {
 }
 
 // SetItems sets field value
-func (o *GPUs) SetItems(v []GPU) {
+func (o *Gpus) SetItems(v []Gpu) {
 
 	o.Items = &v
 
 }
 
 // HasItems returns a boolean if a field has been set.
-func (o *GPUs) HasItems() bool {
+func (o *Gpus) HasItems() bool {
 	if o != nil && o.Items != nil {
 		return true
 	}
@@ -203,7 +203,7 @@ func (o *GPUs) HasItems() bool {
 
 // GetOffset returns the Offset field value
 // If the value is explicit nil, nil is returned
-func (o *GPUs) GetOffset() *float32 {
+func (o *Gpus) GetOffset() *float32 {
 	if o == nil {
 		return nil
 	}
@@ -215,7 +215,7 @@ func (o *GPUs) GetOffset() *float32 {
 // GetOffsetOk returns a tuple with the Offset field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GPUs) GetOffsetOk() (*float32, bool) {
+func (o *Gpus) GetOffsetOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -224,14 +224,14 @@ func (o *GPUs) GetOffsetOk() (*float32, bool) {
 }
 
 // SetOffset sets field value
-func (o *GPUs) SetOffset(v float32) {
+func (o *Gpus) SetOffset(v float32) {
 
 	o.Offset = &v
 
 }
 
 // HasOffset returns a boolean if a field has been set.
-func (o *GPUs) HasOffset() bool {
+func (o *Gpus) HasOffset() bool {
 	if o != nil && o.Offset != nil {
 		return true
 	}
@@ -241,7 +241,7 @@ func (o *GPUs) HasOffset() bool {
 
 // GetLimit returns the Limit field value
 // If the value is explicit nil, nil is returned
-func (o *GPUs) GetLimit() *float32 {
+func (o *Gpus) GetLimit() *float32 {
 	if o == nil {
 		return nil
 	}
@@ -253,7 +253,7 @@ func (o *GPUs) GetLimit() *float32 {
 // GetLimitOk returns a tuple with the Limit field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GPUs) GetLimitOk() (*float32, bool) {
+func (o *Gpus) GetLimitOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -262,14 +262,14 @@ func (o *GPUs) GetLimitOk() (*float32, bool) {
 }
 
 // SetLimit sets field value
-func (o *GPUs) SetLimit(v float32) {
+func (o *Gpus) SetLimit(v float32) {
 
 	o.Limit = &v
 
 }
 
 // HasLimit returns a boolean if a field has been set.
-func (o *GPUs) HasLimit() bool {
+func (o *Gpus) HasLimit() bool {
 	if o != nil && o.Limit != nil {
 		return true
 	}
@@ -279,7 +279,7 @@ func (o *GPUs) HasLimit() bool {
 
 // GetLinks returns the Links field value
 // If the value is explicit nil, nil is returned
-func (o *GPUs) GetLinks() *PaginationLinks {
+func (o *Gpus) GetLinks() *PaginationLinks {
 	if o == nil {
 		return nil
 	}
@@ -291,7 +291,7 @@ func (o *GPUs) GetLinks() *PaginationLinks {
 // GetLinksOk returns a tuple with the Links field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GPUs) GetLinksOk() (*PaginationLinks, bool) {
+func (o *Gpus) GetLinksOk() (*PaginationLinks, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -300,14 +300,14 @@ func (o *GPUs) GetLinksOk() (*PaginationLinks, bool) {
 }
 
 // SetLinks sets field value
-func (o *GPUs) SetLinks(v PaginationLinks) {
+func (o *Gpus) SetLinks(v PaginationLinks) {
 
 	o.Links = &v
 
 }
 
 // HasLinks returns a boolean if a field has been set.
-func (o *GPUs) HasLinks() bool {
+func (o *Gpus) HasLinks() bool {
 	if o != nil && o.Links != nil {
 		return true
 	}
@@ -315,7 +315,7 @@ func (o *GPUs) HasLinks() bool {
 	return false
 }
 
-func (o GPUs) MarshalJSON() ([]byte, error) {
+func (o Gpus) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
@@ -348,38 +348,38 @@ func (o GPUs) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableGPUs struct {
-	value *GPUs
+type NullableGpus struct {
+	value *Gpus
 	isSet bool
 }
 
-func (v NullableGPUs) Get() *GPUs {
+func (v NullableGpus) Get() *Gpus {
 	return v.value
 }
 
-func (v *NullableGPUs) Set(val *GPUs) {
+func (v *NullableGpus) Set(val *Gpus) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableGPUs) IsSet() bool {
+func (v NullableGpus) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableGPUs) Unset() {
+func (v *NullableGpus) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableGPUs(val *GPUs) *NullableGPUs {
-	return &NullableGPUs{value: val, isSet: true}
+func NewNullableGpus(val *Gpus) *NullableGpus {
+	return &NullableGpus{value: val, isSet: true}
 }
 
-func (v NullableGPUs) MarshalJSON() ([]byte, error) {
+func (v NullableGpus) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableGPUs) UnmarshalJSON(src []byte) error {
+func (v *NullableGpus) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

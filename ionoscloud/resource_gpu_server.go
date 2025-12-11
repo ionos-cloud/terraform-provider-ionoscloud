@@ -295,6 +295,8 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	templateUuid := d.Get("template_uuid").(string)
 	server.Properties.TemplateUuid = &templateUuid
 
+	server.Properties.Type = ionoscloud.PtrString(constant.GpuType)
+
 	if v, ok := d.GetOk("availability_zone"); ok {
 		vStr := v.(string)
 		server.Properties.AvailabilityZone = &vStr
@@ -370,7 +372,10 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		},
 	}
 
-	createdServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(server).Execute()
+	log.Printf("[DEBUG] done setting up server object for creation")
+
+	createdServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx,
+		d.Get("datacenter_id").(string)).Server(server).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -379,6 +384,8 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	d.SetId(*createdServer.Id)
 
+	log.Printf("[DEBUG] done creating server, waiting for it to be in a final state")
+
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
 			log.Printf("[DEBUG] failed to create createdServer resource")
@@ -386,6 +393,8 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 		return diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
 	}
+
+	log.Printf("[DEBUG] getting server details after creation")
 
 	// get additional data for schema
 	createdServer, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *createdServer.Id).Depth(3).Execute()
@@ -396,6 +405,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		return diags
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
+		log.Printf("[DEBUG] setting security groups for the server")
 		raw := v.(*schema.Set).List()
 		nsgService := nsg.Service{Client: client, Meta: meta, D: d}
 		if diagnostic := nsgService.PutServerNSG(ctx, dcID, *createdServer.Id, raw); diagnostic != nil {
@@ -405,6 +415,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	// Set inline volumes
 	if createdServer.Entities.Volumes != nil && createdServer.Entities.Volumes.Items != nil {
+		log.Printf("[DEBUG] setting inline volume IDs for the server")
 		var inlineVolumeIds []string
 		for _, volume := range *createdServer.Entities.Volumes.Items {
 			inlineVolumeIds = append(inlineVolumeIds, *volume.Id)
@@ -415,17 +426,22 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
+	log.Printf("[DEBUG] checking initial state")
+
 	if initialState, ok := d.GetOk("vm_state"); ok {
 		ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 		initialState := initialState.(string)
 
 		if strings.EqualFold(initialState, constant.CubeVMStateStop) {
+			log.Printf("[DEBUG] state; SUSPENDED, trying to stop")
 			err := ss.Stop(ctx, dcID, d.Id(), constant.GpuType)
 			if err != nil {
 				return diag.FromErr(err)
 			}
 		}
 	}
+
+	log.Printf("[DEBUG] now reading the server to set all properties in state")
 
 	return resourceGpuServerRead(ctx, d, meta)
 }
@@ -484,7 +500,7 @@ func resourceGpuServerRead(ctx context.Context, d *schema.ResourceData, meta int
 		}
 	}
 
-	// upgrade from version without inline_volume_ids in GPU server
+	// TODO: Test this
 	if _, ok := d.GetOk("inline_volume_ids"); !ok {
 		if bootVolume, ok := d.GetOk("boot_volume"); ok {
 			bootVolume := bootVolume.(string)
@@ -496,13 +512,15 @@ func resourceGpuServerRead(ctx context.Context, d *schema.ResourceData, meta int
 		}
 	}
 
-	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+	if server.Entities != nil && server.Entities.Securitygroups != nil &&
+		server.Entities.Securitygroups.Items != nil {
 		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
-	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
+	if server.Entities != nil && server.Entities.Volumes != nil &&
+		server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
 		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 			diags := diag.FromErr(err)

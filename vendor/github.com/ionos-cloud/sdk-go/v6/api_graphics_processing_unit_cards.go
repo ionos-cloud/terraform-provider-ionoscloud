@@ -51,7 +51,7 @@ func (r ApiDatacentersServersGPUsFindByIdRequest) XContractNumber(xContractNumbe
 	return r
 }
 
-func (r ApiDatacentersServersGPUsFindByIdRequest) Execute() (GPU, *APIResponse, error) {
+func (r ApiDatacentersServersGPUsFindByIdRequest) Execute() (Gpu, *APIResponse, error) {
 	return r.ApiService.DatacentersServersGPUsFindByIdExecute(r)
 }
 
@@ -76,16 +76,16 @@ func (a *GraphicsProcessingUnitCardsApiService) DatacentersServersGPUsFindById(c
 
 /*
  * Execute executes the request
- * @return GPU
+ * @return Gpu
  */
-func (a *GraphicsProcessingUnitCardsApiService) DatacentersServersGPUsFindByIdExecute(r ApiDatacentersServersGPUsFindByIdRequest) (GPU, *APIResponse, error) {
+func (a *GraphicsProcessingUnitCardsApiService) DatacentersServersGPUsFindByIdExecute(r ApiDatacentersServersGPUsFindByIdRequest) (Gpu, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  GPU
+		localVarReturnValue  Gpu
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GraphicsProcessingUnitCardsApiService.DatacentersServersGPUsFindById")
@@ -253,7 +253,7 @@ func (r ApiDatacentersServersGPUsGetRequest) MaxResults(maxResults int32) ApiDat
 	return r
 }
 
-func (r ApiDatacentersServersGPUsGetRequest) Execute() (GPUs, *APIResponse, error) {
+func (r ApiDatacentersServersGPUsGetRequest) Execute() (Gpus, *APIResponse, error) {
 	return r.ApiService.DatacentersServersGPUsGetExecute(r)
 }
 
@@ -277,16 +277,16 @@ func (a *GraphicsProcessingUnitCardsApiService) DatacentersServersGPUsGet(ctx _c
 
 /*
  * Execute executes the request
- * @return GPUs
+ * @return Gpus
  */
-func (a *GraphicsProcessingUnitCardsApiService) DatacentersServersGPUsGetExecute(r ApiDatacentersServersGPUsGetRequest) (GPUs, *APIResponse, error) {
+func (a *GraphicsProcessingUnitCardsApiService) DatacentersServersGPUsGetExecute(r ApiDatacentersServersGPUsGetRequest) (Gpus, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  GPUs
+		localVarReturnValue  Gpus
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GraphicsProcessingUnitCardsApiService.DatacentersServersGPUsGet")

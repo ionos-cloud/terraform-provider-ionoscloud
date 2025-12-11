@@ -94,7 +94,7 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.FromErr(errors.New("please provide either the GPU id or name"))
 	}
 
-	var gpu ionoscloud.GPU
+	var gpu ionoscloud.Gpu
 	var err error
 	var apiResponse *ionoscloud.APIResponse
 
@@ -108,7 +108,7 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 	} else {
 		/* search by name */
-		var gpus ionoscloud.GPUs
+		var gpus ionoscloud.Gpus
 		gpus, apiResponse, err = client.GraphicsProcessingUnitCardsApi.DatacentersServersGPUsGet(ctx, datacenterID, serverID).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
@@ -116,7 +116,7 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching GPUs: %w", err))
 		}
 
-		var results []ionoscloud.GPU
+		var results []ionoscloud.Gpu
 		if gpus.Items != nil {
 			for _, g := range *gpus.Items {
 				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == name.(string) {

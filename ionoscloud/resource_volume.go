@@ -619,8 +619,11 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 
 func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud.VolumeProperties, error) {
 	volume := ionoscloud.VolumeProperties{}
-	volumeType := d.Get(path + "disk_type").(string)
-	volume.Type = &volumeType
+
+	if !strings.EqualFold(serverType, constant.GpuType) {
+		volumeType := d.Get(path + "disk_type").(string)
+		volume.Type = &volumeType
+	}
 
 	if v, ok := d.GetOk(path + "availability_zone"); ok {
 		vStr := v.(string)
