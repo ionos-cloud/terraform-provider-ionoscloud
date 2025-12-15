@@ -127,6 +127,7 @@ func resourceGPUServer() *schema.Resource {
 						"disk_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
+							Computed:         true,
 							ForceNew:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},

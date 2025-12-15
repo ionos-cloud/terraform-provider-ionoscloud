@@ -621,6 +621,7 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 	volume := ionoscloud.VolumeProperties{}
 
 	if !strings.EqualFold(serverType, constant.GpuType) {
+		// For GPU servers, disk_type is set to "SSD Premium" by default and cannot (yet) be changed
 		volumeType := d.Get(path + "disk_type").(string)
 		volume.Type = &volumeType
 	}
