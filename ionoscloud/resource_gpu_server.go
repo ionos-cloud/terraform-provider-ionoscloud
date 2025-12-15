@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -12,6 +13,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
@@ -31,17 +34,10 @@ func resourceGPUServer() *schema.Resource {
 		CustomizeDiff: checkServerImmutableFields,
 
 		Schema: map[string]*schema.Schema{
-			// GPU Server parameters
 			"template_uuid": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-			"datacenter_id": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"name": {
 				Type:             schema.TypeString,
@@ -90,6 +86,12 @@ func resourceGPUServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"datacenter_id": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
 			"image_password": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -118,14 +120,13 @@ func resourceGPUServer() *schema.Resource {
 			},
 			"volume": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"disk_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Computed:         true,
 							ForceNew:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
@@ -178,12 +179,11 @@ func resourceGPUServer() *schema.Resource {
 							Optional: true,
 						},
 						"availability_zone": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-							ForceNew: true,
-							ValidateDiagFunc: validation.ToDiagFunc(
-								validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 						},
 						"cpu_hot_plug": {
 							Type:     schema.TypeBool,
@@ -260,6 +260,134 @@ func resourceGPUServer() *schema.Resource {
 				Description:      "Sets the power state of the gpu server. Possible values: `RUNNING` or `SUSPENDED`.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.VMStateStart, constant.CubeVMStateStop}, true)),
 			},
+			"nic": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"mac": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"lan": {
+							Type:     schema.TypeInt,
+							Required: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"dhcp": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"dhcpv6": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Indicates whether this NIC receives an IPv6 address through DHCP.",
+						},
+						"ipv6_cidr_block": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "IPv6 CIDR block assigned to the NIC.",
+						},
+						"ips": {
+							Type:     schema.TypeList,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Computed: true,
+							Optional: true,
+						},
+						"ipv6_ips": {
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Computed:    true,
+							Description: "Collection for IPv6 addresses assigned to a nic. Explicitly assigned IPv6 addresses need to come from inside the IPv6 CIDR block assigned to the nic.",
+						},
+						"firewall_active": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"firewall_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"device_number": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"pci_slot": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"security_groups_ids": {
+							Type:        schema.TypeSet,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Description: "The list of Security Group IDs for the NIC",
+						},
+						"firewall": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"protocol": {
+										Type:             schema.TypeString,
+										Required:         true,
+										DiffSuppressFunc: utils.DiffToLower,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+									},
+									"source_mac": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"source_ip": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"target_ip": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"port_range_start": {
+										Type:             schema.TypeInt,
+										Optional:         true,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
+									},
+									"port_range_end": {
+										Type:             schema.TypeInt,
+										Optional:         true,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
+									},
+									"icmp_type": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"icmp_code": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"type": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			"inline_volume_ids": {
 				Type:        schema.TypeList,
 				Description: "A list that contains the IDs for the volumes defined inside the gpu server resource.",
@@ -296,12 +424,13 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	templateUuid := d.Get("template_uuid").(string)
 	server.Properties.TemplateUuid = &templateUuid
 
-	server.Properties.Type = ionoscloud.PtrString(constant.GpuType)
-
 	if v, ok := d.GetOk("availability_zone"); ok {
 		vStr := v.(string)
 		server.Properties.AvailabilityZone = &vStr
 	}
+
+	serverType := constant.GpuType
+	server.Properties.Type = &serverType
 
 	if v, ok := d.GetOk("hostname"); ok {
 		if v.(string) != "" {
@@ -324,57 +453,100 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	var err error
 	var volume *ionoscloud.VolumeProperties
-	volume, err = getVolumeData(d, "volume.0.", constant.GpuType)
-	if err != nil {
-		diags := diag.FromErr(err)
-		return diags
-	}
-	image, imageAlias, err = getImage(ctx, client, d, *volume)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if image != "" {
-		volume.Image = &image
-	} else {
-		volume.Image = nil
-	}
-
-	if imageAlias != "" {
-		volume.ImageAlias = &imageAlias
-	} else {
-		volume.ImageAlias = nil
-	}
-	if backupUnitID, ok := d.GetOk("volume.0.backup_unit_id"); ok {
-		if utils.IsValidUUID(backupUnitID.(string)) {
-			if image == "" && imageAlias == "" {
-				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property"))
-				return diags
-			}
-			backupUnitID := backupUnitID.(string)
-			volume.BackupunitId = &backupUnitID
-		}
-	}
-	if userData, ok := d.GetOk("volume.0.user_data"); ok {
-		if image == "" && imageAlias == "" {
-			diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property "))
+	if _, ok := d.GetOk("volume"); ok {
+		volume, err = getVolumeData(d, "volume.0.", constant.GpuType)
+		if err != nil {
+			diags := diag.FromErr(err)
 			return diags
 		}
-		userData := userData.(string)
-		volume.UserData = &userData
-	}
-	server.Entities = &ionoscloud.ServerEntities{
-		Volumes: &ionoscloud.AttachedVolumes{
-			Items: &[]ionoscloud.Volume{
-				{
-					Properties: volume,
+		image, imageAlias, err = getImage(ctx, client, d, *volume)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if image != "" {
+			volume.Image = &image
+		} else {
+			volume.Image = nil
+		}
+
+		if imageAlias != "" {
+			volume.ImageAlias = &imageAlias
+		} else {
+			volume.ImageAlias = nil
+		}
+		if backupUnitID, ok := d.GetOk("volume.0.backup_unit_id"); ok {
+			if utils.IsValidUUID(backupUnitID.(string)) {
+				if image == "" && imageAlias == "" {
+					diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property"))
+					return diags
+				}
+				backupUnitID := backupUnitID.(string)
+				volume.BackupunitId = &backupUnitID
+			}
+		}
+		if userData, ok := d.GetOk("volume.0.user_data"); ok {
+			if image == "" && imageAlias == "" {
+				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property "))
+				return diags
+			}
+			userData := userData.(string)
+			volume.UserData = &userData
+		}
+		server.Entities = &ionoscloud.ServerEntities{
+			Volumes: &ionoscloud.AttachedVolumes{
+				Items: &[]ionoscloud.Volume{
+					{
+						Properties: volume,
+					},
 				},
 			},
-		},
+		}
 	}
 
-	createdServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx,
-		d.Get("datacenter_id").(string)).Server(server).Execute()
+	var primaryNic *ionoscloud.Nic
+	if _, ok := d.GetOk("nic"); ok {
+		nic, err := cloudapinic.GetNicFromSchemaCreate(d, "nic.0.")
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("gpu error occurred while getting nic from schema: %w", err))
+			return diags
+		}
+
+		server.Entities.Nics = &ionoscloud.Nics{
+			Items: &[]ionoscloud.Nic{
+				nic,
+			},
+		}
+		primaryNic = &(*server.Entities.Nics.Items)[0]
+		log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
+		log.Printf("[DEBUG] primaryNic dhcp %t", *primaryNic.Properties.Dhcp)
+
+		firewall := ionoscloud.FirewallRule{
+			Properties: &ionoscloud.FirewallruleProperties{},
+		}
+		if _, ok := d.GetOk("nic.0.firewall"); ok {
+			var diags diag.Diagnostics
+			firewall, diags = getFirewallData(d, "nic.0.firewall.0.", false)
+			if diags != nil {
+				return diags
+			}
+			(*server.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
+				Firewallrules: &ionoscloud.FirewallRules{
+					Items: &[]ionoscloud.FirewallRule{
+						firewall,
+					},
+				},
+			}
+		}
+
+		if primaryNic != nil && primaryNic.Properties != nil && primaryNic.Properties.Ips != nil {
+			if len(*primaryNic.Properties.Ips) == 0 {
+				*primaryNic.Properties.Ips = nil
+			}
+		}
+	}
+
+	createdServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(server).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -400,7 +572,6 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		return diags
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
-		log.Printf("[DEBUG] setting security groups for the server")
 		raw := v.(*schema.Set).List()
 		nsgService := nsg.Service{Client: client, Meta: meta, D: d}
 		if diagnostic := nsgService.PutServerNSG(ctx, dcID, *createdServer.Id, raw); diagnostic != nil {
@@ -408,9 +579,58 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
+	if createdServer.Entities != nil && createdServer.Entities.Nics != nil && len(*createdServer.Entities.Nics.Items) > 0 {
+		firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
+			*createdServer.Id, *(*createdServer.Entities.Nics.Items)[0].Id).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %w", err))
+			return diags
+		}
+
+		if firewallRules.Items != nil {
+			if len(*firewallRules.Items) > 0 {
+				if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
+					diags := diag.FromErr(err)
+					return diags
+				}
+			}
+		}
+
+		if (*createdServer.Entities.Nics.Items)[0].Id != nil {
+			primaryNicID := *(*createdServer.Entities.Nics.Items)[0].Id
+			err := d.Set("primary_nic", primaryNicID)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
+				return diags
+			}
+			if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
+				raw := v.(*schema.Set).List()
+				nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+				if diagnostic := nsgService.PutNICNSG(ctx, dcID, d.Id(), primaryNicID, raw); diagnostic != nil {
+					return diagnostic
+				}
+			}
+		}
+
+		if (*createdServer.Entities.Nics.Items)[0].Properties.Ips != nil &&
+			len(*(*createdServer.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
+			createdServer.Entities.Volumes != nil &&
+			createdServer.Entities.Volumes.Items != nil &&
+			len(*createdServer.Entities.Volumes.Items) > 0 &&
+			(*createdServer.Entities.Volumes.Items)[0].Properties != nil &&
+			(*createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword != nil {
+
+			d.SetConnInfo(map[string]string{
+				"type":     "ssh",
+				"host":     (*(*createdServer.Entities.Nics.Items)[0].Properties.Ips)[0],
+				"password": *(*createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword,
+			})
+		}
+	}
+
 	// Set inline volumes
-	if createdServer.Entities.Volumes != nil && createdServer.Entities.Volumes.Items != nil {
-		log.Printf("[DEBUG] setting inline volume IDs for the server")
+	if createdServer.Entities != nil && createdServer.Entities.Volumes != nil && createdServer.Entities.Volumes.Items != nil {
 		var inlineVolumeIds []string
 		for _, volume := range *createdServer.Entities.Volumes.Items {
 			inlineVolumeIds = append(inlineVolumeIds, *volume.Id)
@@ -426,8 +646,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		initialState := initialState.(string)
 
 		if strings.EqualFold(initialState, constant.CubeVMStateStop) {
-			log.Printf("[DEBUG] state; SUSPENDED, trying to stop")
-			err := ss.Stop(ctx, dcID, d.Id(), constant.GpuType)
+			err := ss.Stop(ctx, dcID, d.Id(), serverType)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -491,7 +710,7 @@ func resourceGpuServerRead(ctx context.Context, d *schema.ResourceData, meta int
 		}
 	}
 
-	// TODO: Test this
+	// upgrade from version without inline_volume_ids in GPU server
 	if _, ok := d.GetOk("inline_volume_ids"); !ok {
 		if bootVolume, ok := d.GetOk("boot_volume"); ok {
 			bootVolume := bootVolume.(string)
@@ -503,18 +722,62 @@ func resourceGpuServerRead(ctx context.Context, d *schema.ResourceData, meta int
 		}
 	}
 
-	if server.Entities != nil && server.Entities.Securitygroups != nil &&
-		server.Entities.Securitygroups.Items != nil {
+	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
 		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
-	if server.Entities != nil && server.Entities.Volumes != nil &&
-		server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
+	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
 		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 			diags := diag.FromErr(err)
+			return diags
+		}
+	}
+
+	if primarynic, ok := d.GetOk("primary_nic"); ok {
+		if err := d.Set("primary_nic", primarynic.(string)); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
+		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
+
+		nic, _, err := ns.Get(ctx, dcId, serverId, primarynic.(string), 0)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error occurred while fetching nic %s for server ID %s %s", primarynic.(string), d.Id(), err))
+			return diags
+		}
+
+		if len(*nic.Properties.Ips) > 0 {
+			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+
+		network := cloudapinic.SetNetworkProperties(*nic)
+
+		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+			network["ips"] = *nic.Properties.Ips
+		}
+
+		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
+			firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error occurred while fetching firewallrule %s for server ID %s %s", firewallId.(string), serverId, err))
+				return diags
+			}
+
+			fw := cloudapifirewall.SetProperties(firewall)
+
+			network["firewall"] = []map[string]interface{}{fw}
+		}
+
+		networks := []map[string]interface{}{network}
+		if err := d.Set("nic", networks); err != nil {
+			diags := diag.FromErr(fmt.Errorf("[ERROR] unable to save nic to state IonosCloud Server (%s): %w", serverId, err))
 			return diags
 		}
 	}
@@ -606,8 +869,7 @@ func resourceGpuServerUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	// TODO
-	_, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Depth(3).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -676,6 +938,156 @@ func resourceGpuServerUpdate(ctx context.Context, d *schema.ResourceData, meta i
 
 				if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 					return diag.FromErr(errState)
+				}
+			}
+		}
+	}
+
+	// Nic stuff
+	if d.HasChange("nic") {
+		nic := &ionoscloud.Nic{}
+		nicStr := d.Get("primary_nic").(string)
+		for _, n := range *server.Entities.Nics.Items {
+			if *n.Id == nicStr {
+				nic = &n
+				break
+			}
+		}
+
+		lan := int32(d.Get("nic.0.lan").(int))
+		properties := ionoscloud.NicProperties{
+			Lan: &lan,
+		}
+
+		if v, ok := d.GetOk("nic.0.name"); ok {
+			vStr := v.(string)
+			properties.Name = &vStr
+		}
+
+		if v, ok := d.GetOk("nic.0.ips"); ok {
+			raw := v.([]interface{})
+			if raw != nil && len(raw) > 0 {
+				ips := make([]string, 0)
+				for _, rawIp := range raw {
+					ip := rawIp.(string)
+					ips = append(ips, ip)
+				}
+				if ips != nil && len(ips) > 0 {
+					properties.Ips = &ips
+				}
+			}
+		}
+
+		if v, ok := d.GetOk("nic.0.ipv6_cidr_block"); ok {
+			ipv6Block := v.(string)
+			properties.Ipv6CidrBlock = &ipv6Block
+		}
+
+		if v, ok := d.GetOk("nic.0.ipv6_ips"); ok {
+			raw := v.([]interface{})
+			ipv6Ips := make([]string, len(raw))
+			if err := utils.DecodeInterfaceToStruct(raw, ipv6Ips); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+			if len(ipv6Ips) > 0 {
+				properties.Ipv6Ips = &ipv6Ips
+			}
+		}
+
+		if d.HasChange("nic.0.dhcpv6") {
+			if dhcpv6, ok := d.GetOk("nic.0.dhcpv6"); ok {
+				dhcpv6 := dhcpv6.(bool)
+				properties.Dhcpv6 = &dhcpv6
+			} else {
+				properties.SetDhcpv6Nil()
+			}
+		}
+
+		dhcp := d.Get("nic.0.dhcp").(bool)
+		fwRule := d.Get("nic.0.firewall_active").(bool)
+		properties.Dhcp = &dhcp
+		properties.FirewallActive = &fwRule
+
+		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
+			vStr := v.(string)
+			properties.FirewallType = &vStr
+		}
+
+		if d.HasChange("nic.0.firewall") {
+
+			firewallId := d.Get("firewallrule_id").(string)
+			update := true
+			if firewallId == "" {
+				update = false
+			}
+
+			firewall, diags := getFirewallData(d, "nic.0.firewall.0.", update)
+			if diags != nil {
+				return diags
+			}
+
+			_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, *nic.Id, firewallId).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				if !httpNotFound(apiResponse) {
+					diags := diag.FromErr(fmt.Errorf("error occurred at checking existence of firewall %s %w", firewallId, err))
+					return diags
+				} else if httpNotFound(apiResponse) {
+					diags := diag.FromErr(fmt.Errorf("firewall does not exist %s", firewallId))
+					return diags
+				}
+			}
+			if update == false {
+
+				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, dcId, *server.Id, *nic.Id).Firewallrule(firewall).Execute()
+			} else {
+				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, *nic.Id, firewallId).Firewallrule(*firewall.Properties).Execute()
+
+			}
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("an error occurred while running firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %s", dcId, *server.Id, *nic.Id, firewallId, err))
+				return diags
+			}
+
+			if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+				return diag.FromErr(fmt.Errorf("on gpu update an error occurred while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, errState))
+			}
+
+			if firewallId == "" && firewall.Id != nil {
+				if err := d.Set("firewallrule_id", firewall.Id); err != nil {
+					diags := diag.FromErr(err)
+					return diags
+				}
+			}
+
+			nic.Entities = &ionoscloud.NicEntities{
+				Firewallrules: &ionoscloud.FirewallRules{
+					Items: &[]ionoscloud.FirewallRule{
+						firewall,
+					},
+				},
+			}
+
+		}
+		mProp, _ := json.Marshal(properties)
+
+		log.Printf("[DEBUG] Updating props: %s", string(mProp))
+		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
+		_, _, err := ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error updating nic (%w)", err))
+			return diags
+		}
+
+		if d.HasChange("nic.0.security_groups_ids") {
+			if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
+				raw := v.(*schema.Set).List()
+				nsgService := nsg.Service{Client: client, Meta: meta, D: d}
+				if diagnostic := nsgService.PutNICNSG(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, raw); diagnostic != nil {
+					return diagnostic
 				}
 			}
 		}
@@ -766,6 +1178,16 @@ func resourceGpuServerImport(ctx context.Context, d *schema.ResourceData, meta i
 
 	d.SetId(*server.Id)
 
+	firstNicItem := (*server.Entities.Nics.Items)[0]
+	if server.Entities != nil && server.Entities.Nics != nil && firstNicItem.Properties != nil &&
+		firstNicItem.Properties.Ips != nil &&
+		len(*firstNicItem.Properties.Ips) > 0 {
+		log.Printf("[DEBUG] set primary_ip to %s", (*firstNicItem.Properties.Ips)[0])
+		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
+			return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
+		}
+	}
+
 	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
 		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
 			return nil, err
@@ -804,6 +1226,58 @@ func resourceGpuServerImport(ctx context.Context, d *schema.ResourceData, meta i
 		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 			return nil, fmt.Errorf("error setting boot_image %w", err)
+		}
+	}
+
+	if server.Entities != nil && server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
+		primaryNic := *(*server.Entities.Nics.Items)[0].Id
+		if err := d.Set("primary_nic", primaryNic); err != nil {
+			return nil, fmt.Errorf("error setting primary_nic %w", err)
+		}
+		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
+
+		nic, apiResponse, err := ns.Get(ctx, datacenterId, serverId, primaryNic, 0)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(*nic.Properties.Ips) > 0 {
+			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+				return nil, fmt.Errorf("error setting primary_ip %w", err)
+			}
+		}
+
+		network := cloudapinic.SetNetworkProperties(*nic)
+		firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, primaryNic).Execute()
+		logApiRequestTime(apiResponse)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if firewallRules.Items != nil {
+			if len(*firewallRules.Items) > 0 {
+				if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
+					return nil, fmt.Errorf("error setting firewallrule_id %w", err)
+				}
+			}
+		}
+
+		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
+			firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, primaryNic, firewallId.(string)).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return nil, err
+			}
+
+			fw := cloudapifirewall.SetProperties(firewall)
+
+			network["firewall"] = []map[string]interface{}{fw}
+		}
+
+		networks := []map[string]interface{}{network}
+		if err := d.Set("nic", networks); err != nil {
+			return nil, fmt.Errorf("error setting nic %w", err)
 		}
 	}
 
