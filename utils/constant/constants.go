@@ -126,7 +126,8 @@ const (
 
 // Gpu Constants
 const (
-	GpuResource = "ionoscloud_gpu"
+	GpuResource  = "ionoscloud_gpu"
+	GpusResource = "ionoscloud_gpus"
 )
 
 // Group Constants

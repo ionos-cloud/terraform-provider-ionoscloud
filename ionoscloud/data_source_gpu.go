@@ -97,7 +97,7 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	var gpu ionoscloud.Gpu
 	var err error
 	var apiResponse *ionoscloud.APIResponse
-
+	
 	if idOk {
 		/* search by ID */
 		gpu, apiResponse, err = client.GraphicsProcessingUnitCardsApi.

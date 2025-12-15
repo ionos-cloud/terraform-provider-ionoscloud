@@ -124,7 +124,8 @@ func resourceGPUServer() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"disk_type": {
 							Type:             schema.TypeString,
-							Required:         true,
+							Optional:         true,
+							Computed:         true,
 							ForceNew:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
@@ -372,8 +373,6 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		},
 	}
 
-	log.Printf("[DEBUG] done setting up server object for creation")
-
 	createdServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx,
 		d.Get("datacenter_id").(string)).Server(server).Execute()
 	logApiRequestTime(apiResponse)
@@ -384,8 +383,6 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	d.SetId(*createdServer.Id)
 
-	log.Printf("[DEBUG] done creating server, waiting for it to be in a final state")
-
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
 			log.Printf("[DEBUG] failed to create createdServer resource")
@@ -393,8 +390,6 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 		return diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
 	}
-
-	log.Printf("[DEBUG] getting server details after creation")
 
 	// get additional data for schema
 	createdServer, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *createdServer.Id).Depth(3).Execute()
@@ -426,8 +421,6 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	log.Printf("[DEBUG] checking initial state")
-
 	if initialState, ok := d.GetOk("vm_state"); ok {
 		ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 		initialState := initialState.(string)
@@ -440,8 +433,6 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 			}
 		}
 	}
-
-	log.Printf("[DEBUG] now reading the server to set all properties in state")
 
 	return resourceGpuServerRead(ctx, d, meta)
 }

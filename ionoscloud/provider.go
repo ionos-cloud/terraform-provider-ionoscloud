@@ -157,6 +157,7 @@ func Provider() *schema.Provider {
 			constant.SnapshotResource:                          dataSourceSnapshot(),
 			constant.LanResource:                               dataSourceLan(),
 			constant.GpuResource:                               dataSourceGpu(),
+			constant.GpusResource:                              dataSourceGpus(),
 			constant.PCCResource:                               dataSourcePcc(),
 			constant.ServerResource:                            dataSourceServer(),
 			constant.ServerCubeResource:                        dataSourceCubeServer(),
