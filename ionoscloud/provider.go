@@ -160,6 +160,7 @@ func Provider() *schema.Provider {
 			constant.GpusResource:                              dataSourceGpus(),
 			constant.PCCResource:                               dataSourcePcc(),
 			constant.ServerResource:                            dataSourceServer(),
+			constant.ServerGPUResource:                         dataSourceGpuServer(),
 			constant.ServerCubeResource:                        dataSourceCubeServer(),
 			constant.ServerVCPUResource:                        dataSourceVCPUServer(),
 			constant.ServersDataSource:                         dataSourceServers(),
