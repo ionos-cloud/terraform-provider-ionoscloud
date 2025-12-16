@@ -1115,6 +1115,7 @@ func SetGpuVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 	if volume.Properties != nil {
 		utils.SetPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
 		utils.SetPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
+		utils.SetPropWithNilCheck(volumeMap, "pci_slot", volume.Properties.PciSlot)
 		utils.SetPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
 		utils.SetPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
 		utils.SetPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
@@ -1295,6 +1296,7 @@ func resourceGpuServerImport(ctx context.Context, d *schema.ResourceData, meta i
 			if volumeObj.Properties != nil {
 				utils.SetPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
 				utils.SetPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
+				utils.SetPropWithNilCheck(volumeItem, "pci_slot", volumeObj.Properties.PciSlot)
 				utils.SetPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
 				utils.SetPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
 				utils.SetPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
