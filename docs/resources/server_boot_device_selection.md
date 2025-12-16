@@ -107,7 +107,7 @@ resource "ionoscloud_volume" "example" {
 ```hcl
 resource "ionoscloud_server_boot_device_selection" "example"{
   datacenter_id  = ionoscloud_datacenter.example.id
-  server_id      = ionoscloud_server.example.inline_volume_ids[0]
+  server_id      = ionoscloud_server.example.id
   boot_device_id = data.ionoscloud_image.example.id
 }
 
@@ -155,8 +155,8 @@ data "ionoscloud_image" "example" {
 ### Perform a network boot
 ```hcl
 resource "ionoscloud_server_boot_device_selection" "example"{
-  datacenter_id  = ionoscloud_datacenter.example.id
-  server_id      = ionoscloud_server.example.inline_volume_ids[0]
+  datacenter_id = ionoscloud_datacenter.example.id
+  server_id     = ionoscloud_server.example.id
   # boot_device_id = data.ionoscloud_image.example.id   VM will boot in the PXE shell when boot_device_id is omitted
 }
 
