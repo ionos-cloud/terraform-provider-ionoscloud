@@ -308,7 +308,7 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
   vm_state = "RUNNING"
 
   volume {
-    name = "` + constant.ServerTestResource + `"
+    name = "system"
     licence_type = "LINUX"
     disk_type = "SSD Premium"
     bus = "VIRTIO"
