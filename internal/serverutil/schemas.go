@@ -7,6 +7,10 @@ import (
 )
 
 var SchemaNicElem = map[string]*schema.Schema{
+	"id": {
+		Type:     schema.TypeString,
+		Computed: true,
+	},
 	"mac": {
 		Type:     schema.TypeString,
 		Optional: true,
@@ -37,10 +41,14 @@ var SchemaNicElem = map[string]*schema.Schema{
 		Description: "IPv6 CIDR block assigned to the NIC.",
 	},
 	"ips": {
-		Type:     schema.TypeList,
-		Elem:     &schema.Schema{Type: schema.TypeString},
-		Computed: true,
-		Optional: true,
+		Type: schema.TypeList,
+		Elem: &schema.Schema{
+			Type:             schema.TypeString,
+			DiffSuppressFunc: utils.DiffEmptyIps,
+		},
+		Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
+		Computed:    true,
+		Optional:    true,
 	},
 	"ipv6_ips": {
 		Type:        schema.TypeList,
@@ -73,9 +81,10 @@ var SchemaNicElem = map[string]*schema.Schema{
 		Description: "The list of Security Group IDs for the NIC",
 	},
 	"firewall": {
-		Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
+		Description: "Firewall rules created in the server resource. The rules can also be created as separate resources outside the server resource",
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"name": {
