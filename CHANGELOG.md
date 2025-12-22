@@ -1,4 +1,4 @@
-## 6.7.21 - upcoming release
+## 6.7.21
 ### Features
 - Add `require_legacy_bios` option for volumes, snapshots, images and inline volumes (for all server types)
 ### Fixes
