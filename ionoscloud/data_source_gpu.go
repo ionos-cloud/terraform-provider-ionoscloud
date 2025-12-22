@@ -54,30 +54,6 @@ func dataSourceGpu() *schema.Resource {
 	}
 }
 
-/* example response:
-{
-  "id": "f9cba8aa-5847-4681-a488-342880f710ef",
-  "type": "gpu",
-  "href": "https://api.ionos.com/cloudapi/v6/datacenters/e0045d38-db36-48ed-9775-905968bead77/servers/cf6c8a6f-c652-4db2-8422-472726e6da8c/gpus/f9cba8aa-5847-4681-a488-342880f710ef",
-  "metadata": {
-    "etag": "5c9dd5532478dde25f2d7349c56f62ff",
-    "createdDate": "2025-12-08T11:12:35Z",
-    "createdBy": "terraform-v6@cloud.ionos.com",
-    "createdByUserId": "4df59ddd-94d3-4a86-99f0-411536964cbf",
-    "lastModifiedDate": "2025-12-08T11:12:35Z",
-    "lastModifiedBy": "terraform-v6@cloud.ionos.com",
-    "lastModifiedByUserId": "4df59ddd-94d3-4a86-99f0-411536964cbf",
-    "state": "AVAILABLE"
-  },
-  "properties": {
-    "name": "GPU NVIDIA Corporation GH100 [H200 NVL] 1",
-    "vendor": "NVIDIA Corporation",
-    "type": "passthrough",
-    "model": "GH100 [H200 NVL]"
-  }
-}
-*/
-
 func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
@@ -97,7 +73,7 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	var gpu ionoscloud.Gpu
 	var err error
 	var apiResponse *ionoscloud.APIResponse
-	
+
 	if idOk {
 		/* search by ID */
 		gpu, apiResponse, err = client.GraphicsProcessingUnitCardsApi.
@@ -150,9 +126,6 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.FromErr(err)
 	}
 	if err := d.Set("server_id", serverID); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("id", *gpu.Id); err != nil {
 		return diag.FromErr(err)
 	}
 
