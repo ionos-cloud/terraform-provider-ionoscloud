@@ -495,7 +495,7 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		return diag.FromErr(errors.New("ID and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
 		return diag.FromErr(errors.New("please provide either the server id or name"))

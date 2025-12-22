@@ -18,9 +18,10 @@ func dataSourceGpu() *schema.Resource {
 		ReadContext: dataSourceGpuRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
 				Type:             schema.TypeString,
@@ -64,10 +65,20 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified at the same time"))
+		return diag.FromErr(errors.New("ID and name cannot be both specified at the same time"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the GPU id or name"))
+		return diag.FromErr(errors.New("please provide either the GPU ID or name"))
+	}
+
+	idStr, idIsString := id.(string)
+	if idOk && (!idIsString || idStr == "") {
+		return diag.FromErr(errors.New("the provided ID is not valid"))
+	}
+
+	nameStr, nameIsString := name.(string)
+	if nameOk && (!nameIsString || nameStr == "") {
+		return diag.FromErr(errors.New("the provided name is not valid"))
 	}
 
 	var gpu ionoscloud.Gpu
@@ -77,10 +88,10 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	if idOk {
 		/* search by ID */
 		gpu, apiResponse, err = client.GraphicsProcessingUnitCardsApi.
-			DatacentersServersGPUsFindById(ctx, datacenterID, serverID, id.(string)).Execute()
+			DatacentersServersGPUsFindById(ctx, datacenterID, serverID, idStr).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching GPU with ID %s: %w", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching GPU with ID %s: %w", idOk, err))
 		}
 	} else {
 		/* search by name */
@@ -95,8 +106,11 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		var results []ionoscloud.Gpu
 		if gpus.Items != nil {
 			for _, g := range *gpus.Items {
-				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == name.(string) {
+				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == nameStr {
 					/* GPU found */
+					if g.Id == nil {
+						return diag.FromErr(fmt.Errorf("GPU found with name %s but returned without an ID", nameStr))
+					}
 					gpu, apiResponse, err = client.GraphicsProcessingUnitCardsApi.DatacentersServersGPUsFindById(ctx, datacenterID, serverID, *g.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
@@ -108,9 +122,9 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no GPU found with the specified criteria: name = %s", name.(string)))
+			return diag.FromErr(fmt.Errorf("no GPU found with the specified criteria: name = %s", nameStr))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one GPU found with the specified criteria: name = %s", name.(string)))
+			return diag.FromErr(fmt.Errorf("more than one GPU found with the specified criteria: name = %s", nameStr))
 		} else {
 			gpu = results[0]
 		}

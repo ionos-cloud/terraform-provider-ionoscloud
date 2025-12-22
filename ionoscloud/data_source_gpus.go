@@ -49,10 +49,6 @@ func dataSourceGpus() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"state": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 					},
 				},
 			},
@@ -95,9 +91,6 @@ func dataSourceGpusRead(ctx context.Context, d *schema.ResourceData, meta interf
 				if gpu.Properties.Model != nil {
 					gpuMap["model"] = *gpu.Properties.Model
 				}
-			}
-			if gpu.Metadata != nil && gpu.Metadata.State != nil {
-				gpuMap["state"] = *gpu.Metadata.State
 			}
 			gpuList = append(gpuList, gpuMap)
 		}
