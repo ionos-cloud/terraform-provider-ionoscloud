@@ -26,7 +26,7 @@ import (
 func resourceGPUServer() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceGpuServerCreate,
-		ReadContext:   resourceGpuServerRead,
+		ReadContext:   resourceCubeServerRead,
 		UpdateContext: resourceGpuServerUpdate,
 		DeleteContext: serverutil.ResourceCommonServerDelete,
 		Importer: &schema.ResourceImporter{
@@ -535,167 +535,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	return resourceGpuServerRead(ctx, d, meta)
-}
-
-func resourceGpuServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
-	dcId := d.Get("datacenter_id").(string)
-	serverId := d.Id()
-
-	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Depth(2).Execute()
-	logApiRequestTime(apiResponse)
-	if err != nil {
-		if httpNotFound(apiResponse) {
-			log.Printf("[DEBUG] cannot find server by id \n")
-			d.SetId("")
-			return nil
-		}
-		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a server ID %s %w", d.Id(), err))
-		return diags
-	}
-	if server.Properties != nil {
-		if server.Properties.TemplateUuid != nil {
-			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-
-		if server.Properties.Name != nil {
-			if err := d.Set("name", *server.Properties.Name); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-
-		if server.Properties.Hostname != nil {
-			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-
-		if server.Properties.AvailabilityZone != nil {
-			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-
-		if server.Properties.VmState != nil {
-			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-	}
-
-	// upgrade from version without inline_volume_ids in GPU server
-	if _, ok := d.GetOk("inline_volume_ids"); !ok {
-		if bootVolume, ok := d.GetOk("boot_volume"); ok {
-			bootVolume := bootVolume.(string)
-			var inlineVolumeIds []string
-			inlineVolumeIds = append(inlineVolumeIds, bootVolume)
-			if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
-				return diag.FromErr(utils.GenerateSetError("gpu_server", "inline_volume_ids", err))
-			}
-		}
-	}
-
-	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
-		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if primarynic, ok := d.GetOk("primary_nic"); ok {
-		if err := d.Set("primary_nic", primarynic.(string)); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
-
-		nic, _, err := ns.Get(ctx, dcId, serverId, primarynic.(string), 0)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occurred while fetching nic %s for server ID %s %s", primarynic.(string), d.Id(), err))
-			return diags
-		}
-
-		if len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-
-		network := cloudapinic.SetNetworkProperties(*nic)
-
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			network["ips"] = *nic.Properties.Ips
-		}
-
-		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
-			firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error occurred while fetching firewallrule %s for server ID %s %s", firewallId.(string), serverId, err))
-				return diags
-			}
-
-			fw := cloudapifirewall.SetProperties(firewall)
-
-			network["firewall"] = []map[string]interface{}{fw}
-		}
-
-		networks := []map[string]interface{}{network}
-		if err := d.Set("nic", networks); err != nil {
-			diags := diag.FromErr(fmt.Errorf("[ERROR] unable to save nic to state IonosCloud Server (%s): %w", serverId, err))
-			return diags
-		}
-	}
-
-	inlineVolumeIds := d.Get("inline_volume_ids")
-	if inlineVolumeIds != nil {
-		inlineVolumeIds := inlineVolumeIds.([]any)
-		var volumes []any
-
-		for i, volumeId := range inlineVolumeIds {
-			volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), volumeId.(string)).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("error retrieving inline volume %w", err))
-			}
-			volumePath := fmt.Sprintf("volume.%d.", i)
-			entry := serverutil.SetServerVolumeProperties(volume)
-			userData := d.Get(volumePath + "user_data")
-			entry["user_data"] = userData
-			backupUnit := d.Get(volumePath + "backup_unit_id")
-			entry["backup_unit_id"] = backupUnit
-			volumes = append(volumes, entry)
-		}
-		if err := d.Set("volume", volumes); err != nil {
-			return diag.FromErr(fmt.Errorf("[DEBUG] Error saving inline volumes to state for GPU server (%s): %w", d.Id(), err))
-		}
-	}
-
-	if server.Properties.BootCdrom != nil {
-		if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	return nil
+	return resourceCubeServerRead(ctx, d, meta)
 }
 
 func resourceGpuServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -987,7 +827,7 @@ func resourceGpuServerUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	return resourceGpuServerRead(ctx, d, meta)
+	return resourceCubeServerRead(ctx, d, meta)
 }
 
 func resourceGpuServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
