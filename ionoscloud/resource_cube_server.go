@@ -28,7 +28,7 @@ func resourceCubeServer() *schema.Resource {
 		CreateContext: resourceCubeServerCreate,
 		ReadContext:   resourceCubeServerRead,
 		UpdateContext: resourceCubeServerUpdate,
-		DeleteContext: resourceCubeServerDelete,
+		DeleteContext: serverutil.ResourceCommonServerDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceCubeServerImport,
 		},
@@ -500,6 +500,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if (*createdServer.Entities.Nics.Items)[0].Properties.Ips != nil &&
 		len(*(*createdServer.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
+		createdServer.Entities.Volumes != nil &&
 		createdServer.Entities.Volumes.Items != nil &&
 		len(*createdServer.Entities.Volumes.Items) > 0 &&
 		(*createdServer.Entities.Volumes.Items)[0].Properties != nil &&
@@ -677,7 +678,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 				return diag.FromErr(fmt.Errorf("error retrieving inline volume %w", err))
 			}
 			volumePath := fmt.Sprintf("volume.%d.", i)
-			entry := SetCubeVolumeProperties(volume)
+			entry := serverutil.SetServerVolumeProperties(volume)
 			userData := d.Get(volumePath + "user_data")
 			entry["user_data"] = userData
 			backupUnit := d.Get(volumePath + "backup_unit_id")
@@ -989,51 +990,6 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return resourceCubeServerRead(ctx, d, meta)
-}
-
-func SetCubeVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
-
-	volumeMap := map[string]interface{}{}
-	if volume.Properties != nil {
-		utils.SetPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
-		utils.SetPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
-		utils.SetPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
-		utils.SetPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
-		utils.SetPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
-		utils.SetPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
-		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
-		utils.SetPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
-		utils.SetPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
-		utils.SetPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
-		utils.SetPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
-		utils.SetPropWithNilCheck(volumeMap, "expose_serial", volume.Properties.ExposeSerial)
-		utils.SetPropWithNilCheck(volumeMap, "require_legacy_bios", volume.Properties.RequireLegacyBios)
-	}
-	return volumeMap
-}
-
-func resourceCubeServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-	dcId := d.Get("datacenter_id").(string)
-
-	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
-	logApiRequestTime(apiResponse)
-	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a server ID %s %w", d.Id(), err))
-		return diags
-
-	}
-
-	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(fmt.Errorf("error getting state change for cube server delete %w", errState))
-	}
-
-	d.SetId("")
-	return nil
 }
 
 func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

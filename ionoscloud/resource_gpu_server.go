@@ -28,7 +28,7 @@ func resourceGPUServer() *schema.Resource {
 		CreateContext: resourceGpuServerCreate,
 		ReadContext:   resourceGpuServerRead,
 		UpdateContext: resourceGpuServerUpdate,
-		DeleteContext: resourceGpuServerDelete,
+		DeleteContext: serverutil.ResourceCommonServerDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceGpuServerImport,
 		},
@@ -676,7 +676,7 @@ func resourceGpuServerRead(ctx context.Context, d *schema.ResourceData, meta int
 				return diag.FromErr(fmt.Errorf("error retrieving inline volume %w", err))
 			}
 			volumePath := fmt.Sprintf("volume.%d.", i)
-			entry := SetGpuVolumeProperties(volume)
+			entry := serverutil.SetServerVolumeProperties(volume)
 			userData := d.Get(volumePath + "user_data")
 			entry["user_data"] = userData
 			backupUnit := d.Get(volumePath + "backup_unit_id")
@@ -988,52 +988,6 @@ func resourceGpuServerUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	return resourceGpuServerRead(ctx, d, meta)
-}
-
-func SetGpuVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
-
-	volumeMap := map[string]interface{}{}
-	if volume.Properties != nil {
-		utils.SetPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
-		utils.SetPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
-		utils.SetPropWithNilCheck(volumeMap, "pci_slot", volume.Properties.PciSlot)
-		utils.SetPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
-		utils.SetPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
-		utils.SetPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
-		utils.SetPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
-		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
-		utils.SetPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
-		utils.SetPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
-		utils.SetPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
-		utils.SetPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
-		utils.SetPropWithNilCheck(volumeMap, "expose_serial", volume.Properties.ExposeSerial)
-		utils.SetPropWithNilCheck(volumeMap, "require_legacy_bios", volume.Properties.RequireLegacyBios)
-	}
-	return volumeMap
-}
-
-func resourceGpuServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-	dcId := d.Get("datacenter_id").(string)
-
-	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
-	logApiRequestTime(apiResponse)
-	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a server ID %s %w", d.Id(), err))
-		return diags
-
-	}
-
-	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(fmt.Errorf("error getting state change for gpu server delete %w", errState))
-	}
-
-	d.SetId("")
-	return nil
 }
 
 func resourceGpuServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
