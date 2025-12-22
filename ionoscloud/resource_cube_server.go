@@ -713,7 +713,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 	if strings.EqualFold(currentVmState, constant.CubeVMStateStop) && !d.HasChange("vm_state") {
-		diags := diag.FromErr(fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"))
+		diags := diag.FromErr(fmt.Errorf("cannot update a suspended Templated Server, must change the state to RUNNING first"))
 		return diags
 	}
 
@@ -1047,7 +1047,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 				return nil, fmt.Errorf("error setting hostname %w", err)
 			}
 		}
-		if server.Properties.Name != nil {
+		if server.Properties.TemplateUuid != nil {
 			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
 				return nil, fmt.Errorf("error setting template uuid %w", err)
 			}
@@ -1133,6 +1133,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 			if volumeObj.Properties != nil {
 				utils.SetPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
 				utils.SetPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
+				utils.SetPropWithNilCheck(volumeItem, "pci_slot", volumeObj.Properties.PciSlot)
 				utils.SetPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
 				utils.SetPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
 				utils.SetPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
