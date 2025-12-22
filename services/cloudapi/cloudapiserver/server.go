@@ -12,7 +12,7 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -183,7 +183,7 @@ func (ss *Service) UpdateVmState(ctx context.Context, datacenterID, serverID, ne
 			return ss.Stop(ctx, datacenterID, serverID, serverType)
 		}
 
-	case constant.CubeType:
+	case constant.CubeType, constant.GpuType:
 		if strings.EqualFold(newVmState, constant.VMStateStop) {
 			return fmt.Errorf("cannot shut down a %s server, set to %s instead", serverType, constant.CubeVMStateStop)
 		}
@@ -324,7 +324,7 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 		log.Printf("[DEBUG] %s server powered on: serverId: %s", serverType, serverID)
 		return nil
 
-	case constant.CubeType:
+	case constant.CubeType, constant.GpuType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersResumePost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
@@ -364,7 +364,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 		log.Printf("[DEBUG] %s server powered off: serverId: %s", serverType, serverID)
 		return nil
 
-	case constant.CubeType:
+	case constant.CubeType, constant.GpuType:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersSuspendPost(ctx, datacenterID, serverID).Execute()
 		apiResponse.LogInfo()
 		if err != nil {

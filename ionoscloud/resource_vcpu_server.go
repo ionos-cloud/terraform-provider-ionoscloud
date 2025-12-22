@@ -6,8 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -246,136 +246,7 @@ func resourceVCPUServer() *schema.Resource {
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"mac": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-							ForceNew: true,
-						},
-						"lan": {
-							Type:     schema.TypeInt,
-							Required: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"dhcp": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"dhcpv6": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"ipv6_cidr_block": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"ips": {
-							Type: schema.TypeList,
-							Elem: &schema.Schema{
-								Type:             schema.TypeString,
-								DiffSuppressFunc: utils.DiffEmptyIps,
-							},
-							Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
-							Computed:    true,
-							Optional:    true,
-						},
-						"ipv6_ips": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Optional: true,
-							Computed: true,
-						},
-						"firewall_active": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"firewall_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"device_number": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"pci_slot": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"security_groups_ids": {
-							Type:        schema.TypeSet,
-							Elem:        &schema.Schema{Type: schema.TypeString},
-							Optional:    true,
-							Description: "The list of Security Group IDs for the NIC",
-						},
-						"firewall": {
-							Description: "Firewall rules created in the server resource. The rules can also be created as separate resources outside the server resource",
-							Type:        schema.TypeList,
-							Optional:    true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"protocol": {
-										Type:             schema.TypeString,
-										Required:         true,
-										DiffSuppressFunc: utils.DiffToLower,
-										ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-									},
-									"source_mac": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"source_ip": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"target_ip": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"port_range_start": {
-										Type:             schema.TypeInt,
-										Optional:         true,
-										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
-									},
-									"port_range_end": {
-										Type:             schema.TypeInt,
-										Optional:         true,
-										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
-									},
-									"icmp_type": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"icmp_code": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"type": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-								},
-							},
-						},
-					},
+					Schema: serverutil.SchemaNicElem,
 				},
 			},
 			"nic_multi_queue": {

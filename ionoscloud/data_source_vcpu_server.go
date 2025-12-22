@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
 )
 
 func dataSourceVCPUServer() *schema.Resource {
@@ -71,7 +72,7 @@ func dataSourceVCPUServer() *schema.Resource {
 			"cdroms": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     cdromsServerDSResource,
+				Elem:     serverutil.CdromsServerDSResource,
 			},
 			"security_groups_ids": {
 				Type:     schema.TypeList,
@@ -189,7 +190,7 @@ func dataSourceVCPUServer() *schema.Resource {
 			"nics": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     nicServerDSResource,
+				Elem:     serverutil.NicServerDSResource,
 			},
 			"labels": {
 				Type:     schema.TypeList,

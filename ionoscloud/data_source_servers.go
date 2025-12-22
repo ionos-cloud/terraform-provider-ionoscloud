@@ -12,6 +12,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
@@ -95,7 +96,7 @@ func dataSourceServers() *schema.Resource {
 						"cdroms": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Elem:     cdromsServerDSResource,
+							Elem:     serverutil.CdromsServerDSResource,
 						},
 						"volumes": {
 							Type:     schema.TypeList,
@@ -208,7 +209,7 @@ func dataSourceServers() *schema.Resource {
 						"nics": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Elem:     nicServerDSResource,
+							Elem:     serverutil.NicServerDSResource,
 						},
 						"labels": {
 							Type:     schema.TypeList,

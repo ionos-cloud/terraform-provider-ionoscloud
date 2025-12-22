@@ -3,6 +3,7 @@ package nsg
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -24,6 +25,8 @@ func (nsg *Service) PutServerNSG(ctx context.Context, dcID, serverID string, raw
 	if dcID == "" || serverID == "" {
 		return diag.Errorf("dcID and serverID must be set")
 	}
+
+	log.Printf("[DEBUG] Updating security groups of server %s in datacenter %s to %v", serverID, dcID, rawIDs)
 
 	ids := make([]string, 0)
 	for _, rawID := range rawIDs {
