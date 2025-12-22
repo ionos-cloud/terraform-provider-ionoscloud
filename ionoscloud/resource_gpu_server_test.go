@@ -245,7 +245,7 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
   hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
-  template_uuid = "e15d15e7-ea9a-48ae-a60a-29b9463f4519"
+  template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   vm_state = "RUNNING"
@@ -302,7 +302,7 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
   hostname = "updatedhostname"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
-  template_uuid = "e15d15e7-ea9a-48ae-a60a-29b9463f4519"
+  template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
   vm_state = "RUNNING"
@@ -363,7 +363,7 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
   hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
-  template_uuid = "e15d15e7-ea9a-48ae-a60a-29b9463f4519"
+  template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   vm_state = "` + constant.CubeVMStateStop + `"
@@ -403,7 +403,7 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
   hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
-  template_uuid = "e15d15e7-ea9a-48ae-a60a-29b9463f4519"
+  template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   vm_state = "` + constant.CubeVMStateStop + `"
