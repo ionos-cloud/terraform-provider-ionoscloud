@@ -127,14 +127,14 @@ var nicServerDSResource = &schema.Resource{
 			Computed: true,
 		},
 		"ips": {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Computed: true,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 		},
 		"ipv6_ips": {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
 			Computed: true,

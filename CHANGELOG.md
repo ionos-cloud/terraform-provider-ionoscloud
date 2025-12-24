@@ -1,3 +1,6 @@
+## 6.7.22 -- upcoming release
+### Fixes
+- Fix an issue related to the IPs order for a NIC that led to continuous changes: [#903](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/903) 
 ## 6.7.21
 ### Features
 - Add `require_legacy_bios` option for volumes, snapshots, images and inline volumes (for all server types)

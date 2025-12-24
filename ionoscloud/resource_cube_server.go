@@ -297,14 +297,20 @@ func resourceCubeServer() *schema.Resource {
 							Description: "IPv6 CIDR block assigned to the NIC.",
 						},
 						"ips": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+							Type: schema.TypeSet,
+							Elem: &schema.Schema{
+								Type:             schema.TypeString,
+								ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							},
 							Computed: true,
 							Optional: true,
 						},
 						"ipv6_ips": {
-							Type:        schema.TypeList,
-							Elem:        &schema.Schema{Type: schema.TypeString},
+							Type: schema.TypeSet,
+							Elem: &schema.Schema{
+								Type:             schema.TypeString,
+								ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							},
 							Optional:    true,
 							Computed:    true,
 							Description: "Collection for IPv6 addresses assigned to a nic. Explicitly assigned IPv6 addresses need to come from inside the IPv6 CIDR block assigned to the nic.",
@@ -503,9 +509,6 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		},
 	}
 	var primaryNic *ionoscloud.Nic
-	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 {
-		primaryNic = &(*server.Entities.Nics.Items)[0]
-	}
 	// Nic Arguments
 	nic := ionoscloud.Nic{
 		Properties: &ionoscloud.NicProperties{},
@@ -966,35 +969,25 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			properties.Name = &vStr
 		}
 
-		if v, ok := d.GetOk("nic.0.ips"); ok {
-			raw := v.([]interface{})
-			if raw != nil && len(raw) > 0 {
-				ips := make([]string, 0)
-				for _, rawIp := range raw {
-					ip := rawIp.(string)
-					ips = append(ips, ip)
-				}
-				if ips != nil && len(ips) > 0 {
-					properties.Ips = &ips
-				}
-			}
+		ips, err := cloudapinic.GetNicIPsFromSchema(d, "nic.0.ips")
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if ips != nil {
+			properties.Ips = &ips
+		}
+
+		ipv6IPs, err := cloudapinic.GetNicIPsFromSchema(d, "nic.0.ipv6_ips")
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if ipv6IPs != nil {
+			properties.Ipv6Ips = &ipv6IPs
 		}
 
 		if v, ok := d.GetOk("nic.0.ipv6_cidr_block"); ok {
 			ipv6Block := v.(string)
 			properties.Ipv6CidrBlock = &ipv6Block
-		}
-
-		if v, ok := d.GetOk("nic.0.ipv6_ips"); ok {
-			raw := v.([]interface{})
-			ipv6Ips := make([]string, len(raw))
-			if err := utils.DecodeInterfaceToStruct(raw, ipv6Ips); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-			if len(ipv6Ips) > 0 {
-				properties.Ipv6Ips = &ipv6Ips
-			}
 		}
 
 		if d.HasChange("nic.0.dhcpv6") {
@@ -1078,7 +1071,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 		log.Printf("[DEBUG] Updating props: %s", string(mProp))
 		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
-		_, _, err := ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
+		_, _, err = ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error updating nic (%w)", err))
 			return diags
