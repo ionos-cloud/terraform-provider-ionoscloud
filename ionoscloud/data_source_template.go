@@ -40,6 +40,36 @@ func dataSourceTemplate() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"category": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"gpus": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"count": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"model": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"vendor": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -156,6 +186,27 @@ func setTemplateData(d *schema.ResourceData, template *ionoscloud.Template) erro
 			}
 		}
 
+		if template.Properties.Category != nil {
+			if err := d.Set("category", *template.Properties.Category); err != nil {
+				return err
+			}
+		}
+
+		if template.Properties.Gpus != nil {
+			var gpus []map[string]interface{}
+			for _, gpu := range *template.Properties.Gpus {
+				gpuMap := map[string]interface{}{
+					"count":  gpu.Count,
+					"model":  gpu.Model,
+					"type":   gpu.Type,
+					"vendor": gpu.Vendor,
+				}
+				gpus = append(gpus, gpuMap)
+			}
+			if err := d.Set("gpus", gpus); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

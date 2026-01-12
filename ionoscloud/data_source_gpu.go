@@ -91,7 +91,7 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			DatacentersServersGPUsFindById(ctx, datacenterID, serverID, idStr).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching GPU with ID %s: %w", idOk, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching GPU with ID %s: %w", idStr, err))
 		}
 	} else {
 		/* search by name */
