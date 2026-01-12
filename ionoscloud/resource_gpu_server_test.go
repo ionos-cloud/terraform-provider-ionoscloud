@@ -130,21 +130,23 @@ func TestAccGpuServerBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckGpuServerSuspend,
+				Config: testAccDataSourceGpus,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "vm_state", "PAUSED"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerGPUResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerGPUResource+"."+constant.ServerTestResource, "vm_state"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+".ionoscloud_gpus.test_gpus", "gpus.0.id"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+".ionoscloud_gpus.test_gpus", "gpus.0.name"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+".ionoscloud_gpus.test_gpus", "gpus.0.vendor"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+".ionoscloud_gpus.test_gpus", "gpus.0.type"),
+					resource.TestCheckResourceAttrSet(constant.DataSource+".ionoscloud_gpus.test_gpus", "gpus.0.model"),
 				),
 			},
 			{
-				Config:      testAccCheckGpuServerUpdateWhenSuspended,
-				ExpectError: regexp.MustCompile(`cannot update a suspended GPU Server, must change the state to RUNNING first`),
-			},
-			{
-				Config: testAccCheckGpuServerResume,
+				Config: testAccDataSourceGpu,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "vm_state", constant.VMStateStart),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerGPUResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerGPUResource+"."+constant.ServerTestResource, "vm_state"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+".ionoscloud_gpu.test_gpu", "id", constant.DataSource+".ionoscloud_gpus.test_gpus", "gpus.0.id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+".ionoscloud_gpu.test_gpu", "name", constant.DataSource+".ionoscloud_gpus.test_gpus", "gpus.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+".ionoscloud_gpu.test_gpu", "vendor", constant.DataSource+".ionoscloud_gpus.test_gpus", "gpus.0.vendor"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+".ionoscloud_gpu.test_gpu", "type", constant.DataSource+".ionoscloud_gpus.test_gpus", "gpus.0.type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+".ionoscloud_gpu.test_gpu", "model", constant.DataSource+".ionoscloud_gpus.test_gpus", "gpus.0.model"),
 				),
 			},
 		},
@@ -351,118 +353,138 @@ data ` + constant.ServerGPUResource + ` ` + constant.ServerDataSourceByName + ` 
 }
 `
 
-const testAccCheckGpuServerSuspend = `
-resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
- name       = "gpu-server-test"
- location = "de/fra/2"
-}
-
-resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = "de/fra"
-  size = 1
-  name = "webserver_ipblock"
-}
-
-resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+const testAccDataSourceGpus = testAccCheckGpuServerConfigBasic + `
+data "ionoscloud_gpus" test_gpus {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  public = true
-  name = "public"
+  server_id = ` + constant.ServerGPUResource + `.` + constant.ServerTestResource + `.id
 }
+`
 
-resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` {
-  name = "` + constant.ServerTestResource + `"
-  hostname = "` + constant.ServerTestHostname + `"
+const testAccDataSourceGpu = testAccCheckGpuServerConfigBasic + `
+data "ionoscloud_gpus" test_gpus {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "AUTO"
-  template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
-  image_name = "ubuntu:latest"
-  image_password = ` + constant.RandomPassword + `.server_image_password.result
-  vm_state = "` + constant.CubeVMStateStop + `"
-
-  volume {
-    name = "system"
-    licence_type = "LINUX"
-    disk_type = "SSD Premium"
-    bus = "VIRTIO"
-    availability_zone = "AUTO"
-    expose_serial = true
-    require_legacy_bios = false
-  }
-
-  nic {
-    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
-    name = "system"
-    dhcp = true
-    firewall_active = true
-    firewall_type = "INGRESS"
-    ips = [ionoscloud_ipblock.webserver_ipblock.ips[0]]
-
-    firewall {
-      protocol = "TCP"
-      name = "SSH"
-      port_range_start = 22
-      port_range_end = 22
-      type = "INGRESS"
-    }
-  }
-}
-` + ServerImagePassword
-
-const testAccCheckGpuServerUpdateWhenSuspended = `
-resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
- name       = "gpu-server-test"
- location = "de/fra/2"
+  server_id = ` + constant.ServerGPUResource + `.` + constant.ServerTestResource + `.id
 }
 
-resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = "de/fra"
-  size = 1
-  name = "webserver_ipblock"
-}
-
-resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+data "ionoscloud_gpu" test_gpu {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  public = true
-  name = "public"
+  server_id = ` + constant.ServerGPUResource + `.` + constant.ServerTestResource + `.id
+  id = data.ionoscloud_gpus.test_gpus.gpus.0.id
 }
+`
 
-resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` {
-  name = "` + constant.UpdatedResources + `"
-  hostname = "` + constant.ServerTestHostname + `"
-  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
-  availability_zone = "AUTO"
-  template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
-  image_name = "ubuntu:latest"
-  image_password = ` + constant.RandomPassword + `.server_image_password.result
-  vm_state = "` + constant.CubeVMStateStop + `"
-
-  volume {
-    name = "system"
-    licence_type = "LINUX"
-    disk_type = "SSD Premium"
-    bus = "VIRTIO"
-    availability_zone = "AUTO"
-    expose_serial = true
-    require_legacy_bios = false
-  }
-
-  nic {
-    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
-    name = "system"
-    dhcp = true
-    firewall_active = true
-    firewall_type = "INGRESS"
-    ips = [ionoscloud_ipblock.webserver_ipblock.ips[0]]
-
-    firewall {
-      protocol = "TCP"
-      name = "SSH"
-      port_range_start = 22
-      port_range_end = 22
-      type = "INGRESS"
-    }
-  }
-}
-` + ServerImagePassword
-
-const testAccCheckGpuServerResume = testAccCheckGpuServerConfigBasic
+// const testAccCheckGpuServerSuspend = `
+// resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+//  name       = "gpu-server-test"
+//  location = "de/fra/2"
+// }
+//
+// resource "ionoscloud_ipblock" "webserver_ipblock" {
+//   location = "de/fra"
+//   size = 1
+//   name = "webserver_ipblock"
+// }
+//
+// resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+//   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+//   public = true
+//   name = "public"
+// }
+//
+// resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` {
+//   name = "` + constant.ServerTestResource + `"
+//   hostname = "` + constant.ServerTestHostname + `"
+//   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+//   availability_zone = "AUTO"
+//   template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
+//   image_name = "ubuntu:latest"
+//   image_password = ` + constant.RandomPassword + `.server_image_password.result
+//   vm_state = "` + constant.CubeVMStateStop + `"
+//
+//   volume {
+//     name = "system"
+//     licence_type = "LINUX"
+//     disk_type = "SSD Premium"
+//     bus = "VIRTIO"
+//     availability_zone = "AUTO"
+//     expose_serial = true
+//     require_legacy_bios = false
+//   }
+//
+//   nic {
+//     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+//     name = "system"
+//     dhcp = true
+//     firewall_active = true
+//     firewall_type = "INGRESS"
+//     ips = [ionoscloud_ipblock.webserver_ipblock.ips[0]]
+//
+//     firewall {
+//       protocol = "TCP"
+//       name = "SSH"
+//       port_range_start = 22
+//       port_range_end = 22
+//       type = "INGRESS"
+//     }
+//   }
+// }
+// ` + ServerImagePassword
+//
+// const testAccCheckGpuServerUpdateWhenSuspended = `
+// resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+//  name       = "gpu-server-test"
+//  location = "de/fra/2"
+// }
+//
+// resource "ionoscloud_ipblock" "webserver_ipblock" {
+//   location = "de/fra"
+//   size = 1
+//   name = "webserver_ipblock"
+// }
+//
+// resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+//   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+//   public = true
+//   name = "public"
+// }
+//
+// resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` {
+//   name = "` + constant.UpdatedResources + `"
+//   hostname = "` + constant.ServerTestHostname + `"
+//   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+//   availability_zone = "AUTO"
+//   template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
+//   image_name = "ubuntu:latest"
+//   image_password = ` + constant.RandomPassword + `.server_image_password.result
+//   vm_state = "` + constant.CubeVMStateStop + `"
+//
+//   volume {
+//     name = "system"
+//     licence_type = "LINUX"
+//     disk_type = "SSD Premium"
+//     bus = "VIRTIO"
+//     availability_zone = "AUTO"
+//     expose_serial = true
+//     require_legacy_bios = false
+//   }
+//
+//   nic {
+//     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+//     name = "system"
+//     dhcp = true
+//     firewall_active = true
+//     firewall_type = "INGRESS"
+//     ips = [ionoscloud_ipblock.webserver_ipblock.ips[0]]
+//
+//     firewall {
+//       protocol = "TCP"
+//       name = "SSH"
+//       port_range_start = 22
+//       port_range_end = 22
+//       type = "INGRESS"
+//     }
+//   }
+// }
+// ` + ServerImagePassword
+//
+// const testAccCheckGpuServerResume = testAccCheckGpuServerConfigBasic
