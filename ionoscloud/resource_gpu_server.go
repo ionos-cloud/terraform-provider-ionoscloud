@@ -136,10 +136,7 @@ func resourceGPUServer() *schema.Resource {
 							Deprecated:    "Please use image_password under server level",
 							ConflictsWith: []string{"image_password"},
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if d.Get("image_password").(string) == new {
-									return true
-								}
-								return false
+								return d.Get("image_password").(string) == new
 							},
 						},
 						"licence_type": {
@@ -400,10 +397,8 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		primaryNic = &(*server.Entities.Nics.Items)[0]
 		log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
 		log.Printf("[DEBUG] primaryNic dhcp %t", *primaryNic.Properties.Dhcp)
-
-		firewall := ionoscloud.FirewallRule{
-			Properties: &ionoscloud.FirewallruleProperties{},
-		}
+		
+		var firewall ionoscloud.FirewallRule
 		if _, ok := d.GetOk("nic.0.firewall"); ok {
 			var diags diag.Diagnostics
 			firewall, diags = getFirewallData(d, "nic.0.firewall.0.", false)
