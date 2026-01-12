@@ -452,6 +452,7 @@ const (
 // Server power state constants
 const (
 	CubeVMStateStop = "SUSPENDED"
+	GpuVMStateStop  = "PAUSED"
 	VMStateStart    = "RUNNING"
 	VMStateStop     = "SHUTOFF"
 )

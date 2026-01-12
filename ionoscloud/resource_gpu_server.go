@@ -258,7 +258,7 @@ func resourceGPUServer() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				Description:      "Sets the power state of the gpu server. Possible values: `RUNNING` or `SUSPENDED`.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.VMStateStart, constant.CubeVMStateStop}, true)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.VMStateStart, constant.CubeVMStateStop, "PAUSED"}, true)),
 			},
 			"nic": {
 				Type:     schema.TypeList,
@@ -525,12 +525,14 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 		initialState := initialState.(string)
 
-		if strings.EqualFold(initialState, constant.CubeVMStateStop) {
+		if strings.EqualFold(initialState, constant.CubeVMStateStop) ||
+			strings.EqualFold(initialState, constant.GpuVMStateStop) {
 			err := ss.Stop(ctx, dcID, d.Id(), serverType)
 			if err != nil {
 				return diag.FromErr(err)
 			}
 		}
+
 	}
 
 	return resourceCubeServerRead(ctx, d, meta)

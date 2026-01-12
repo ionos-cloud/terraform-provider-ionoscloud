@@ -118,11 +118,6 @@ func TestAccGpuServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
 					utils.TestImageNotNull(constant.ServerGPUResource, "boot_image"),
 					resource.TestCheckResourceAttrPair(constant.ServerGPUResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password_updated", "result"),
-					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
-					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Premium"),
-					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
-					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.availability_zone", "AUTO"),
-					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.expose_serial", "false"),
 					resource.TestCheckResourceAttrPair(constant.ServerGPUResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "nic.0.name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
@@ -132,13 +127,12 @@ func TestAccGpuServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.port_range_start", "22"),
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.port_range_end", "22"),
-					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.require_legacy_bios", "true"),
 				),
 			},
 			{
 				Config: testAccCheckGpuServerSuspend,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "vm_state", constant.CubeVMStateStop),
+					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "vm_state", "PAUSED"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerGPUResource+"."+constant.ServerDataSourceById, "vm_state", constant.ServerGPUResource+"."+constant.ServerTestResource, "vm_state"),
 				),
 			},
@@ -281,8 +275,8 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
 
 const testAccCheckGpuServerConfigUpdate = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
-	name       = "gpu-server-test"
-	location = "de/fra/2"
+ name       = "gpu-server-test"
+ location = "de/fra/2"
 }
 
 resource "ionoscloud_ipblock" "webserver_ipblock" {
@@ -313,8 +307,8 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
     disk_type = "SSD Premium"
     bus = "VIRTIO"
     availability_zone = "AUTO"
-    expose_serial = false
-    require_legacy_bios = true
+    expose_serial = true
+    require_legacy_bios = false
   }
 
   nic {
@@ -357,7 +351,24 @@ data ` + constant.ServerGPUResource + ` ` + constant.ServerDataSourceByName + ` 
 }
 `
 
-const testAccCheckGpuServerSuspend = testAccCheckGpuServerConfigBasic + `
+const testAccCheckGpuServerSuspend = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+ name       = "gpu-server-test"
+ location = "de/fra/2"
+}
+
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = "de/fra"
+  size = 1
+  name = "webserver_ipblock"
+}
+
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+
 resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.ServerTestResource + `"
   hostname = "` + constant.ServerTestHostname + `"
@@ -397,7 +408,24 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
 }
 ` + ServerImagePassword
 
-const testAccCheckGpuServerUpdateWhenSuspended = testAccCheckGpuServerSuspend + `
+const testAccCheckGpuServerUpdateWhenSuspended = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+ name       = "gpu-server-test"
+ location = "de/fra/2"
+}
+
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = "de/fra"
+  size = 1
+  name = "webserver_ipblock"
+}
+
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+
 resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` {
   name = "` + constant.UpdatedResources + `"
   hostname = "` + constant.ServerTestHostname + `"

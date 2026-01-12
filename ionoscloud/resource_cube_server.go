@@ -718,7 +718,10 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Unsuspend a Cube server first, before applying other changes
-	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, constant.CubeVMStateStop) {
+	if d.HasChange("vm_state") &&
+		// and is it suspended / paused ?
+		(strings.EqualFold(currentVmState, constant.CubeVMStateStop) ||
+			strings.EqualFold(currentVmState, constant.GpuVMStateStop)) {
 		err := ss.Start(ctx, dcId, d.Id(), constant.CubeType)
 		if err != nil {
 			diags := diag.FromErr(err)
@@ -980,7 +983,8 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	// Suspend a Cube server last, after applying other changes
 	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, constant.VMStateStart) {
 		_, newVmState := d.GetChange("vm_state")
-		if strings.EqualFold(newVmState.(string), constant.CubeVMStateStop) {
+		if strings.EqualFold(newVmState.(string), constant.CubeVMStateStop) ||
+			strings.EqualFold(newVmState.(string), constant.GpuVMStateStop) {
 			err := ss.Stop(ctx, dcId, d.Id(), constant.CubeType)
 			if err != nil {
 				diags := diag.FromErr(err)
