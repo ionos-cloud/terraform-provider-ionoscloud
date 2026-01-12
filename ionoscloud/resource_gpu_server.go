@@ -397,7 +397,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		primaryNic = &(*server.Entities.Nics.Items)[0]
 		log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
 		log.Printf("[DEBUG] primaryNic dhcp %t", *primaryNic.Properties.Dhcp)
-		
+
 		var firewall ionoscloud.FirewallRule
 		if _, ok := d.GetOk("nic.0.firewall"); ok {
 			var diags diag.Diagnostics
