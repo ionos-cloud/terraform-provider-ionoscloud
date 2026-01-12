@@ -326,7 +326,9 @@ const (
 // DNS Constants
 const (
 	DNSRecordDataSource         = "ionoscloud_dns_record"
+	DNSReverseRecordDataSource  = "ionoscloud_dns_reverse_record"
 	DNSRecordResource           = "ionoscloud_dns_record"
+	DNSReverseRecordResource    = "ionoscloud_dns_reverse_record"
 	DNSZoneDataSource           = "ionoscloud_dns_zone"
 	DNSZoneResource             = "ionoscloud_dns_zone"
 	DNSZoneTestResourceName     = "test_dns_zone"
