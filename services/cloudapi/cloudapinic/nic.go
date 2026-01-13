@@ -2,9 +2,9 @@ package cloudapinic
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
-	"slices"
 	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
@@ -323,16 +323,20 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 // and using d.GetOk() function is that d.GetOk() function ignores the case in which the user explicitly sets an empty
 // list of IPs in the plan: 'ips = []' in the TF plan => d.GetOk('ips') will return: _, false.
 func GetNicIPsFromSchema(d *schema.ResourceData, attr string) ([]string, error) {
-	rawConfig := d.GetRawConfig()
-	mainErrorMessage := "error when reading the raw NIC IPs configuration:"
-
-	if rawConfig.IsNull() {
-		return nil, fmt.Errorf("%s expected a valid configuration but received null instead", mainErrorMessage)
+	mainError := errors.New("error when reading the raw NIC IPs configuration:")
+	allowedAttrs := map[string]struct{}{
+		"ips":            {},
+		"ipv6_ips":       {},
+		"nic.0.ips":      {},
+		"nic.0.ipv6_ips": {},
+	}
+	if _, ok := allowedAttrs[attr]; !ok {
+		return nil, fmt.Errorf("%w provided attribute is not supported: %s", mainError, attr)
 	}
 
-	allowedAttrs := []string{"ips", "ipv6_ips", "nic.0.ips", "nic.0.ipv6_ips"}
-	if !slices.Contains(allowedAttrs, attr) {
-		return nil, fmt.Errorf("%s provided attribute is not supported", mainErrorMessage)
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() {
+		return nil, fmt.Errorf("%w expected a valid configuration but received null instead", mainError)
 	}
 
 	parts := strings.Split(attr, ".")
@@ -343,33 +347,39 @@ func GetNicIPsFromSchema(d *schema.ResourceData, attr string) ([]string, error) 
 	// In the future, if multiple inline NICs will be allowed, the functionality needs to be extended in order to
 	// support more attributes: 'nic.1.ips', 'nic.2.ips', 'nic.i.ips', etc.
 	// 'ips' or 'ipv6_ips'
-	if partsLen == 1 {
+	switch partsLen {
+	// 'ips', 'ipv6_ips'
+	case 1:
 		rawIPs = rawConfig.GetAttr(attr)
-
-		// 'nic.0.ips' or 'nic.0.ipv6_ips'
-	} else if partsLen == 3 {
-		rawNICList := rawConfig.GetAttr(parts[0])
-		if rawNICList.IsNull() {
-			return nil, fmt.Errorf("%s expected a valid list of inline NICs configuration but received null instead", mainErrorMessage)
+	// 'nic.0.ips' or 'nic.0.ipv6_ips'
+	case 3:
+		rawNICsList := rawConfig.GetAttr(parts[0])
+		if rawNICsList.IsNull() {
+			return nil, fmt.Errorf("%w expected a valid list of inline NICs configuration but received null instead", mainError)
 		}
-		rawNIC := rawNICList.Index(cty.NumberIntVal(0))
+		if rawNICsList.LengthInt() == 0 {
+			return nil, fmt.Errorf("%w expected at least one inline NIC in the configuration but received 0 instead", mainError)
+		}
+		rawNIC := rawNICsList.Index(cty.NumberIntVal(0))
 		if rawNIC.IsNull() {
-			return nil, fmt.Errorf("%s expected a valid NIC configuration but received null instead", mainErrorMessage)
+			return nil, fmt.Errorf("%w expected a valid NIC configuration but received null instead", mainError)
 		}
 		rawIPs = rawNIC.GetAttr(parts[2])
+	default:
+		return nil, fmt.Errorf("%w provided attribute is not supported", mainError)
 	}
 
 	// if attribute is specified in the tf plan, doesn't matter if it's an empty or a non-empty list
 	if !rawIPs.IsNull() {
 		rawSetOfIPs, ok := d.Get(attr).(*schema.Set)
 		if !ok {
-			return nil, fmt.Errorf("failed type assertion for NIC IPs, expected type: *schema.Set, actual type: %T", rawSetOfIPs)
+			return nil, fmt.Errorf("%w failed type assertion for NIC IPs, expected type: *schema.Set, actual type: %T", mainError, rawSetOfIPs)
 		}
 		ips := make([]string, 0, rawSetOfIPs.Len())
 		for _, rawIP := range rawSetOfIPs.List() {
 			ip, ok := rawIP.(string)
 			if !ok {
-				return nil, fmt.Errorf("failed type assertion for NIC IP, expected type: string, actual type: %T", rawIP)
+				return nil, fmt.Errorf("%w failed type assertion for NIC IP, expected type: string, actual type: %T", mainError, rawIP)
 			}
 			ips = append(ips, ip)
 		}

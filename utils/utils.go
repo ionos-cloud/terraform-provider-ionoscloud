@@ -427,3 +427,12 @@ func CleanURL(url string) string {
 
 	return url
 }
+
+// ToInterfaceSlice converts any slice of type T into a slice of interfaces.
+func ToInterfaceSlice[T any](slice []T) []interface{} {
+	r := make([]interface{}, len(slice))
+	for i, v := range slice {
+		r[i] = v
+	}
+	return r
+}
