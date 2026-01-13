@@ -25,6 +25,12 @@ func dataSourceDNSReverseRecord() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 			},
+			"ip": {
+				Type:        schema.TypeString,
+				Description: "The IP of your DNS Reverse Record.",
+				Optional:    true,
+				Computed:    true,
+			},
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of your DNS Reverse Record.",
@@ -37,30 +43,9 @@ func dataSourceDNSReverseRecord() *schema.Resource {
 				Default:     false,
 				Optional:    true,
 			},
-			"type": {
+			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"content": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"ttl": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"priority": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"fqdn": {
-				Type:        schema.TypeString,
-				Description: "Fully qualified domain name",
-				Computed:    true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -72,15 +57,30 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 	partialMatch := d.Get("partial_match").(bool)
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	ipValue, ipOk := d.GetOk("ip")
 	recordId := idValue.(string)
 	recordName := nameValue.(string)
+	recordIp := ipValue.(string)
 
-	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
+	count := 0
+	if idOk {
+		count++
 	}
-	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the DNS Reverse Record ID or name"))
+	if nameOk {
+		count++
 	}
+	if ipOk {
+		count++
+	}
+
+	if count > 1 {
+		return diag.FromErr(fmt.Errorf("only one of [ID, name, ip] can be specified at the same time"))
+	}
+
+	if count == 0 {
+		return diag.FromErr(fmt.Errorf("please provide one of: id, name, or ip to look up the record"))
+	}
+
 	if partialMatch && !nameOk {
 		return diag.FromErr(fmt.Errorf("partial_match can only be used together with the name attribute"))
 	}
@@ -94,38 +94,45 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the DNS Reverse Record with ID: %s, error: %w", recordId, err))
 		}
 	} else {
+
 		var results []dns.ReverseRecordRead
-		log.Printf("[INFO] Populating data source for DNS Reverse Record using name: %s and partial_match: %t", recordName, partialMatch)
-		if partialMatch {
-			// In order to have an exact name match, we must retrieve all the DNS Reverse Records and then
-			// build a list of partial matches based on the response
-			records, _, err := client.ListReverseRecords(ctx, nil)
+		if nameOk {
+			log.Printf("[INFO] Populating data source for DNS Reverse Record using name: %s and partial_match: %t", recordName, partialMatch)
+			if partialMatch {
+				// In order to have an exact name match, we must retrieve all the DNS Reverse Records and then
+				// build a list of partial matches based on the response
+				records, _, err := client.ListReverseRecords(ctx, nil)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err))
+				}
+				for _, recordItem := range records.Items {
+					if strings.Contains(recordItem.Properties.Name, recordName) {
+						results = append(results, recordItem)
+					}
+				}
+			} else {
+				// In order to have an exact name match, we must retrieve all the DNS Reverse Records and then
+				// build a list of exact matches based on the response
+				records, _, err := client.ListReverseRecords(ctx, nil)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err))
+				}
+				for _, recordItem := range records.Items {
+					if strings.EqualFold(recordItem.Properties.Name, recordName) {
+						results = append(results, recordItem)
+					}
+				}
+			}
+		} else {
+			records, _, err := client.ListReverseRecords(ctx, []string{recordIp})
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err))
-			}
-			for _, recordItem := range records.Items {
-				if len(results) == 1 {
-					break
-				}
-				if strings.Contains(recordItem.Properties.Name, recordName) {
-					results = append(results, recordItem)
-				}
 			}
 			results = records.Items
-		} else {
-			// In order to have an exact name match, we must retrieve all the DNS Reverse Records and then
-			// build a list of exact matches based on the response
-			records, _, err := client.ListReverseRecords(ctx, nil)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err))
-			}
-			for _, recordItem := range records.Items {
-				if strings.EqualFold(recordItem.Properties.Name, recordName) {
-					results = append(results, recordItem)
-				}
-			}
+
 		}
-		if results == nil || len(results) == 0 {
+
+		if len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no DNS Reverse Record found with the specified name = %s", recordName))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one DNS Reverse Record found with the specified name = %s", recordName))

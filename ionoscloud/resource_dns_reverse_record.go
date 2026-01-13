@@ -78,7 +78,7 @@ func reverseRecordUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while updating the DNS Reverse Record with ID: %s, error: %w", recordId, err))
 	}
-	return recordRead(ctx, d, meta)
+	return reverseRecordRead(ctx, d, meta)
 }
 
 func reverseRecordDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -93,7 +93,7 @@ func reverseRecordDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 		return diag.FromErr(fmt.Errorf("error while deleting DNS Reverse Record with ID: %s, error: %w", recordId, err))
 	}
-	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsRecordDeleted)
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsReverseRecordDeleted)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the DNS Reverse Record with ID: %s to be deleted, error: %w", recordId, err))
 	}

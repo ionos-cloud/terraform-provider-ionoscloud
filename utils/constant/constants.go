@@ -327,6 +327,7 @@ const (
 const (
 	DNSRecordDataSource         = "ionoscloud_dns_record"
 	DNSReverseRecordDataSource  = "ionoscloud_dns_reverse_record"
+	DNSReverseRecordDataSources = "ionoscloud_dns_reverse_records"
 	DNSRecordResource           = "ionoscloud_dns_record"
 	DNSReverseRecordResource    = "ionoscloud_dns_reverse_record"
 	DNSZoneDataSource           = "ionoscloud_dns_zone"

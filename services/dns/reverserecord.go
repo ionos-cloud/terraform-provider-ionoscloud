@@ -31,10 +31,10 @@ func (c *Client) GetReverseRecordById(ctx context.Context, recordID string) (dns
 }
 
 // ListReverseRecords lists reverse records
-func (c *Client) ListReverseRecords(ctx context.Context, ip []string) (dns.ReverseRecordsReadList, *shared.APIResponse, error) {
+func (c *Client) ListReverseRecords(ctx context.Context, ips []string) (dns.ReverseRecordsReadList, *shared.APIResponse, error) {
 	request := c.sdkClient.ReverseRecordsApi.ReverserecordsGet(ctx)
-	if ip != nil {
-		request = request.FilterRecordIp(ip)
+	if ips != nil {
+		request = request.FilterRecordIp(ips)
 	}
 	records, apiResponse, err := c.sdkClient.ReverseRecordsApi.ReverserecordsGetExecute(request)
 	apiResponse.LogInfo()
