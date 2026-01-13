@@ -253,10 +253,14 @@ func resourceGPUServer() *schema.Resource {
 				},
 			},
 			"vm_state": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Computed:         true,
-				Description:      "Sets the power state of the gpu server. Possible values: `RUNNING` or `SUSPENDED`.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Sets the power state of the gpu server. Possible values: `RUNNING` or `SUSPENDED`.",
+				// SUSPENDING a RUNNING GPU server sometimes results in a PAUSED state.
+				// The API doesn't really support this yet fully
+				// Allow users to set it to PAUSED if they notice their server is in that state after suspending it
+				// to prevent Terraform from trying to start it again on the next apply
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{constant.VMStateStart, constant.CubeVMStateStop, "PAUSED"}, true)),
 			},
 			"nic": {
