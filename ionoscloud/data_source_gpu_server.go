@@ -9,7 +9,7 @@ import (
 func dataSourceGpuServer() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceCubeServerRead,
-		Schema:      serverutil.SchemaTemplatedServerDatasource,
+		Schema:      serverutil.SchemaTemplatedDatasource,
 		Timeouts:    &resourceDefaultTimeouts,
 	}
 }

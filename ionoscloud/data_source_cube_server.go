@@ -21,7 +21,7 @@ import (
 func dataSourceCubeServer() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceCubeServerRead,
-		Schema:      serverutil.SchemaTemplatedServerDatasource,
+		Schema:      serverutil.SchemaTemplatedDatasource,
 		Timeouts:    &resourceDefaultTimeouts,
 	}
 }
