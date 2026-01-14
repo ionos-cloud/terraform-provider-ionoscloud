@@ -74,11 +74,11 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	if count > 1 {
-		return diag.FromErr(fmt.Errorf("only one of [ID, name, ip] can be specified at the same time"))
+		return diag.FromErr(fmt.Errorf("only one of [Id, name, ip] can be specified at the same time"))
 	}
 
 	if count == 0 {
-		return diag.FromErr(fmt.Errorf("please provide one of: id, name, or ip to look up the record"))
+		return diag.FromErr(fmt.Errorf("please provide either the DNS Record Id, name or IP"))
 	}
 
 	if partialMatch && !nameOk {
@@ -131,11 +131,17 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 			results = records.Items
 
 		}
+		var usedFilter string
+		if ipOk {
+			usedFilter = recordId
+		} else if nameOk {
+			usedFilter = recordName
+		}
 
 		if len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no DNS Reverse Record found with the specified name = %s", recordName))
+			return diag.FromErr(fmt.Errorf("no DNS Reverse Record found with the specified filter = %s", usedFilter))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one DNS Reverse Record found with the specified name = %s", recordName))
+			return diag.FromErr(fmt.Errorf("more than one DNS Reverse Record found with the specified name = %s", usedFilter))
 		} else {
 			record = results[0]
 		}

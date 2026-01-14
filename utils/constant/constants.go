@@ -325,17 +325,21 @@ const (
 
 // DNS Constants
 const (
-	DNSRecordDataSource         = "ionoscloud_dns_record"
-	DNSReverseRecordDataSource  = "ionoscloud_dns_reverse_record"
-	DNSReverseRecordDataSources = "ionoscloud_dns_reverse_records"
-	DNSRecordResource           = "ionoscloud_dns_record"
-	DNSReverseRecordResource    = "ionoscloud_dns_reverse_record"
-	DNSZoneDataSource           = "ionoscloud_dns_zone"
-	DNSZoneResource             = "ionoscloud_dns_zone"
-	DNSZoneTestResourceName     = "test_dns_zone"
-	DNSZoneTestDataSourceName   = "test_dns_zone_data_source"
-	DNSRecordTestResourceName   = "test_dns_record"
-	DNSRecordTestDataSourceName = "test_dns_record_data_source"
+	DNSRecordDataSource                 = "ionoscloud_dns_record"
+	DNSReverseRecordDataSource          = "ionoscloud_dns_reverse_record"
+	DNSReverseRecordDataSources         = "ionoscloud_dns_reverse_records"
+	DNSRecordResource                   = "ionoscloud_dns_record"
+	DNSReverseRecordResource            = "ionoscloud_dns_reverse_record"
+	DNSZoneDataSource                   = "ionoscloud_dns_zone"
+	DNSZoneResource                     = "ionoscloud_dns_zone"
+	DNSZoneTestResourceName             = "test_dns_zone"
+	DNSZoneTestDataSourceName           = "test_dns_zone_data_source"
+	DNSRecordTestResourceName           = "test_dns_record"
+	DNSReverseRecordTestResourceName    = "test_dns_reverse_record"
+	DNSReverseRecordTestResourceName2   = "test_dns_reverse_record2"
+	DNSRecordTestDataSourceName         = "test_dns_record_data_source"
+	DNSReverseRecordTestDataSourceName  = "test_dns_reverse_record_data_source"
+	DNSReverseRecordsTestDataSourceName = "test_dns_reverse_records_data_source"
 )
 const (
 	ShareResource         = "ionoscloud_share"
