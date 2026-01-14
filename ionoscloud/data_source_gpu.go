@@ -122,11 +122,12 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			}
 		}
 
-		if results == nil || len(results) == 0 {
+		switch {
+		case results == nil || len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no GPU found with the specified criteria: name = %s", nameStr))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one GPU found with the specified criteria: name = %s", nameStr))
-		} else {
+		default:
 			gpu = results[0]
 		}
 	}

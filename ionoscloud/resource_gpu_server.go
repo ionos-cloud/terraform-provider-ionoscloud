@@ -330,7 +330,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	if _, ok := d.GetOk("boot_volume"); ok {
-		diags := diag.FromErr(fmt.Errorf("boot_volume argument can be set only in update requests \n"))
+		diags := diag.FromErr(fmt.Errorf("boot_volume argument can be set only in update requests"))
 		return diags
 	}
 
