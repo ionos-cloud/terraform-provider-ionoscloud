@@ -249,6 +249,7 @@ func resourceGPUServer() *schema.Resource {
 	}
 }
 
+//nolint:gocyclo
 func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CloudApiClient
 

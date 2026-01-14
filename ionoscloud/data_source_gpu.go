@@ -56,6 +56,7 @@ func dataSourceGpu() *schema.Resource {
 	}
 }
 
+//nolint:gocyclo
 func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
@@ -123,7 +124,7 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 
 		switch {
-		case results == nil || len(results) == 0:
+		case len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no GPU found with the specified criteria: name = %s", nameStr))
 		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one GPU found with the specified criteria: name = %s", nameStr))
