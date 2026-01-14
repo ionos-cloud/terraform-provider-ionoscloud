@@ -18,7 +18,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -63,13 +62,6 @@ func resourceGPUServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"boot_cdrom": {
-				Type:             schema.TypeString,
-				Computed:         true,
-				Optional:         true,
-				Deprecated:       "Please use the 'ionoscloud_server_boot_device_selection' resource for managing the boot device of the server.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
-			},
 			"boot_image": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -94,11 +86,10 @@ func resourceGPUServer() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"image_password": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Sensitive:     true,
-				Computed:      true,
-				ConflictsWith: []string{"volume.0.image_password"},
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+				Computed:  true,
 			},
 			"image_name": {
 				Type:     schema.TypeString,
@@ -107,11 +98,10 @@ func resourceGPUServer() *schema.Resource {
 				ForceNew: true,
 			},
 			"ssh_key_path": {
-				Type:          schema.TypeList,
-				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"volume.0.ssh_key_path"},
-				Optional:      true,
-				Computed:      true,
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				Computed: true,
 			},
 			"security_groups_ids": {
 				Type:        schema.TypeSet,
@@ -132,41 +122,10 @@ func resourceGPUServer() *schema.Resource {
 							ForceNew:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
-						"image_password": {
-							Type:          schema.TypeString,
-							Optional:      true,
-							Deprecated:    "Please use image_password under server level",
-							ConflictsWith: []string{"image_password"},
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								return d.Get("image_password").(string) == new
-							},
-						},
 						"licence_type": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
-						},
-						"ssh_key_path": {
-							Type:       schema.TypeList,
-							Elem:       &schema.Schema{Type: schema.TypeString},
-							Optional:   true,
-							Deprecated: "Please use ssh_key_path under server level",
-							Computed:   true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if k == "volume.0.ssh_key_path.#" {
-									if d.Get("ssh_key_path.#") == new {
-										return true
-									}
-								}
-
-								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
-								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
-
-								if len(slice.DiffString(slice.AnyToString(sshKeyPath), slice.AnyToString(oldSshKeyPath))) == 0 {
-									return true
-								}
-								return false
-							},
 						},
 						"bus": {
 							Type:     schema.TypeString,
@@ -319,13 +278,6 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		if v.(string) != "" {
 			vStr := v.(string)
 			server.Properties.Hostname = &vStr
-		}
-	}
-
-	if _, ok := d.GetOk("boot_cdrom"); ok {
-		resId := d.Get("boot_cdrom").(string)
-		server.Properties.BootCdrom = &ionoscloud.ResourceReference{
-			Id: &resId,
 		}
 	}
 
@@ -528,8 +480,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 		if strings.EqualFold(initialState, constant.CubeVMStateStop) ||
 			strings.EqualFold(initialState, constant.GpuVMStateStop) {
-			err := ss.Stop(ctx, dcID, d.Id(), serverType)
-			if err != nil {
+			if err := ss.Stop(ctx, dcID, d.Id(), serverType); err != nil {
 				return diag.FromErr(err)
 			}
 		}
