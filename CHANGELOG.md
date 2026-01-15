@@ -1,3 +1,10 @@
+## 6.7.22
+### Features
+- Added resource for GPU type servers: `ionoscloud_gpu_server`
+- Added datasource for GPU type servers: `ionoscloud_gpu_server`
+- Added datasources for GPU / GPUs: `ionoscloud_gpu`, `ionoscloud_gpus`
+- Added support for the GPU fields within the existing template datasource.
+
 ## 6.7.21
 ### Features
 - Add `require_legacy_bios` option for volumes, snapshots, images and inline volumes (for all server types)

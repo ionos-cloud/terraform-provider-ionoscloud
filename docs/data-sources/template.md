@@ -49,6 +49,7 @@ data "ionoscloud_template" "example" {
 * `cores` - (Optional) The CPU cores count.
 * `ram` - (Optional) The RAM size in MB.
 * `storage_size` - (Optional) The storage size in GB.
+* `category` - (Optional) The category of the template.
 
 Any of the arguments ca be provided. If none, the datasource will return an error.
 
@@ -61,3 +62,9 @@ The following attributes are returned by the datasource:
 * `cores`- The CPU cores count
 * `ram` - The RAM size in MB
 * `storage_size` - The storage size in GB
+* `category` - The category of the template
+* `gpus` - List of GPUs in the template
+  * `count` - The number of GPUs
+  * `model` - The model of the GPU
+  * `type` - The type of the GPU
+  * `vendor` - The vendor of the GPU
