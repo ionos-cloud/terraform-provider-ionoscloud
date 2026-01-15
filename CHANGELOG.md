@@ -1,3 +1,7 @@
+## 6.7.22 (future release)
+### Features
+- Added Reverse DNS resource and data sources
+
 ## 6.7.21
 ### Features
 - Add `require_legacy_bios` option for volumes, snapshots, images and inline volumes (for all server types)

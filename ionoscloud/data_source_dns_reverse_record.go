@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
 	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
@@ -138,11 +137,12 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 			usedFilter = recordName
 		}
 
-		if len(results) == 0 {
+		switch {
+		case len(results) == 0:
 			return diag.FromErr(fmt.Errorf("no DNS Reverse Record found with the specified filter = %s", usedFilter))
-		} else if len(results) > 1 {
+		case len(results) > 1:
 			return diag.FromErr(fmt.Errorf("more than one DNS Reverse Record found with the specified name = %s", usedFilter))
-		} else {
+		default:
 			record = results[0]
 		}
 	}
