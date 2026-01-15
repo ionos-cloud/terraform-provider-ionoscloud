@@ -1961,9 +1961,9 @@ resource ` + constant.DNSReverseRecordResource + ` ` + constant.DNSReverseRecord
   ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
 }
 ` + `
-resource ` + constant.DNSReverseRecordResource + ` ` + constant.DNSReverseRecordTestResourceName + ` {
+resource ` + constant.DNSReverseRecordResource + ` ` + constant.DNSReverseRecordTestResourceName2 + ` {
   name = "` + reverseRecordNameValueUpdated + `"
-  description = "` + reverseRecordDescValue + `"
+  description = "` + reverseRecordDescValueUpdated + `"
   ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[1]
 }
 `

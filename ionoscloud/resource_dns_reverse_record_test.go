@@ -38,37 +38,33 @@ func TestAccDNSReverseRecord(t *testing.T) {
 			{
 				Config: DNSReverseRecordDataSourceMatchById,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDNSReverseRecordExistenceCheck(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, &ReverseRecord),
-					resource.TestCheckResourceAttr(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "name", reverseRecordNameValue),
-					resource.TestCheckResourceAttr(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "description", reverseRecordDescValue),
-					resource.TestCheckResourceAttrSet(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "ip"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "name", reverseRecordNameValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "description", reverseRecordDescValue),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "ip"),
 				),
 			},
 			{
 				Config: DNSReverseRecordDataSourceMatchByName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDNSReverseRecordExistenceCheck(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, &ReverseRecord),
-					resource.TestCheckResourceAttr(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "name", reverseRecordNameValue),
-					resource.TestCheckResourceAttr(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "description", reverseRecordDescValue),
-					resource.TestCheckResourceAttrSet(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "ip"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "name", reverseRecordNameValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "description", reverseRecordDescValue),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "ip"),
 				),
 			},
 			{
 				Config: DNSReverseRecordDataSourceMatchByIp,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDNSReverseRecordExistenceCheck(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, &ReverseRecord),
-					resource.TestCheckResourceAttr(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "name", reverseRecordNameValue),
-					resource.TestCheckResourceAttr(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "description", reverseRecordDescValue),
-					resource.TestCheckResourceAttrSet(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "ip"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "name", reverseRecordNameValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "description", reverseRecordDescValue),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "ip"),
 				),
 			},
 			{
 				Config: DNSReverseRecordDataSourceMatchByNamePartialMatch,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDNSReverseRecordExistenceCheck(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, &ReverseRecord),
-					resource.TestCheckResourceAttr(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "name", reverseRecordNameValue),
-					resource.TestCheckResourceAttr(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "description", reverseRecordDescValue),
-					resource.TestCheckResourceAttrSet(constant.DNSReverseRecordResource+"."+constant.DNSReverseRecordTestResourceName, "ip"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "name", reverseRecordNameValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "description", reverseRecordDescValue),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.DNSReverseRecordDataSource+"."+constant.DNSReverseRecordTestDataSourceName, "ip"),
 				),
 			},
 			{
@@ -94,6 +90,51 @@ func TestAccDNSReverseRecord(t *testing.T) {
 			{
 				Config:      DNSReverseRecordDataSourceWrongIpError,
 				ExpectError: regexp.MustCompile("no DNS Reverse Record found with the specified filter"),
+			},
+			{
+				Config: DNSReverseRecordsDataSourceMatchByName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.#", "1"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.0.name", reverseRecordNameValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.0.description", reverseRecordDescValue),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.0.ip"),
+				),
+			},
+			{
+				Config: DNSReverseRecordsDataSourceMatchByNamePartial,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.#", "2"),
+				),
+			},
+			{
+				Config: DNSReverseRecordsDataSourceMatchByIp,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.#", "1"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.0.name", reverseRecordNameValue),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.0.description", reverseRecordDescValue),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.0.ip"),
+				),
+			},
+			{
+				Config: DNSReverseRecordsDataSourceMatchByIpAndNameNoMatch,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.#", "0"),
+				),
+			},
+			{
+				Config: DNSReverseRecordsDataSourceMatchByIpAndNamePartialMatch,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.#", "1"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.0.name", reverseRecordNameValueUpdated),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.0.description", reverseRecordDescValueUpdated),
+					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.0.ip"),
+				),
+			},
+			{
+				Config: DNSReverseRecordsDataSourceMatchByIps,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DNSReverseRecordsDataSource+"."+constant.DNSReverseRecordsTestDataSourceName, "reverse_records.#", "2"),
+				),
 			},
 			{
 				Config: DNSReverseRecordConfigUpdate,
@@ -154,7 +195,7 @@ func testAccDNSReverseRecordExistenceCheck(path string, record *dns.ReverseRecor
 }
 
 const DNSReverseRecordDataSourceMatchById = DNSReverseRecordConfig + `
-` + constant.DataSource + ` ` + constant.DNSReverseRecordResource + ` ` + constant.DNSRecordTestDataSourceName + ` {
+` + constant.DataSource + ` ` + constant.DNSReverseRecordResource + ` ` + constant.DNSReverseRecordTestDataSourceName + ` {
 	id = ` + constant.DNSReverseRecordResource + `.` + constant.DNSReverseRecordTestResourceName + `.id
 }
 `
@@ -210,10 +251,43 @@ const DNSReverseRecordDataSourceWrongPartialNameError = DNSReverseRecordConfig +
 }
 `
 
-const DNSReverseRecordsDataSource = DNSReverseRecordConfig + `
-` + constant.DataSource + ` ` + constant.DNSReverseRecordResource + ` ` + constant.DNSReverseRecordTestDataSourceName + ` {
-	name = "nonexistent"
+const DNSReverseRecordsDataSourceMatchByName = DNSReverseRecordsConfig + `
+` + constant.DataSource + ` ` + constant.DNSReverseRecordsDataSource + ` ` + constant.DNSReverseRecordsTestDataSourceName + ` {
+	name = ` + constant.DNSReverseRecordResource + `.` + constant.DNSReverseRecordTestResourceName + `.name
+}
+`
+
+const DNSReverseRecordsDataSourceMatchByNamePartial = DNSReverseRecordsConfig + `
+` + constant.DataSource + ` ` + constant.DNSReverseRecordsDataSource + ` ` + constant.DNSReverseRecordsTestDataSourceName + ` {
+	name = ` + constant.DNSReverseRecordResource + `.` + constant.DNSReverseRecordTestResourceName + `.name
 	partial_match = true
+}
+`
+
+const DNSReverseRecordsDataSourceMatchByIp = DNSReverseRecordsConfig + `
+` + constant.DataSource + ` ` + constant.DNSReverseRecordsDataSource + ` ` + constant.DNSReverseRecordsTestDataSourceName + ` {
+	ips = [` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]]
+}
+`
+
+const DNSReverseRecordsDataSourceMatchByIpAndNameNoMatch = DNSReverseRecordsConfig + `
+` + constant.DataSource + ` ` + constant.DNSReverseRecordsDataSource + ` ` + constant.DNSReverseRecordsTestDataSourceName + ` {
+	ips = [` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[1]]
+	name = ` + constant.DNSReverseRecordResource + `.` + constant.DNSReverseRecordTestResourceName + `.name
+}
+`
+
+const DNSReverseRecordsDataSourceMatchByIpAndNamePartialMatch = DNSReverseRecordsConfig + `
+` + constant.DataSource + ` ` + constant.DNSReverseRecordsDataSource + ` ` + constant.DNSReverseRecordsTestDataSourceName + ` {
+	ips = [` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[1]]
+	name = ` + constant.DNSReverseRecordResource + `.` + constant.DNSReverseRecordTestResourceName + `.name
+	partial_match = true
+}
+`
+
+const DNSReverseRecordsDataSourceMatchByIps = DNSReverseRecordsConfig + `
+` + constant.DataSource + ` ` + constant.DNSReverseRecordsDataSource + ` ` + constant.DNSReverseRecordsTestDataSourceName + ` {
+	ips = [` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0], ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[1]]
 }
 `
 

@@ -208,7 +208,7 @@ func Provider() *schema.Provider {
 			constant.DNSZoneDataSource:                         dataSourceDNSZone(),
 			constant.DNSRecordDataSource:                       dataSourceDNSRecord(),
 			constant.DNSReverseRecordDataSource:                dataSourceDNSReverseRecord(),
-			constant.DNSReverseRecordDataSources:               dataSourceDNSReverseRecords(),
+			constant.DNSReverseRecordsDataSource:               dataSourceDNSReverseRecords(),
 			constant.LoggingPipelineDataSource:                 dataSourceLoggingPipeline(),
 			constant.AutoscalingGroupResource:                  DataSourceAutoscalingGroup(),
 			constant.AutoscalingGroupServersResource:           DataSourceAutoscalingGroupServers(),
