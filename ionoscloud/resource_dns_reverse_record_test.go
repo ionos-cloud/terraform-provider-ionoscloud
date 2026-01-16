@@ -1,4 +1,4 @@
-//go:build all || revdns
+//go:build all || dns
 
 package ionoscloud
 

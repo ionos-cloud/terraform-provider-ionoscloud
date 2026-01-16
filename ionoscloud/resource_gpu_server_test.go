@@ -1,3 +1,5 @@
+//go:build all || gpu
+
 package ionoscloud
 
 import (
