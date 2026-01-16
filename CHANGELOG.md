@@ -4,6 +4,8 @@
 - Added datasource for GPU type servers: `ionoscloud_gpu_server`
 - Added datasources for GPU / GPUs: `ionoscloud_gpu`, `ionoscloud_gpus`
 - Added support for the GPU fields within the existing template datasource.
+### Fixes
+- Fix an issue related to the IPs order for a NIC that led to continuous changes: [#903](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/903)
 
 ## 6.7.21
 ### Features

@@ -2,9 +2,12 @@ package cloudapinic
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	"strings"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
@@ -162,32 +165,20 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 		nic.Properties.FirewallType = &raw
 	}
 
-	if v, ok := d.GetOk(path + "ips"); ok {
-		raw := v.([]interface{})
-		if raw != nil && len(raw) > 0 {
-			ips := make([]string, 0)
-			for _, rawIp := range raw {
-				if rawIp != nil {
-					ip := rawIp.(string)
-					ips = append(ips, ip)
-				}
-			}
-			if ips != nil && len(ips) > 0 {
-				nic.Properties.Ips = &ips
-			}
-		}
+	ips, err := GetNicIPsFromSchema(d, path+"ips")
+	if err != nil {
+		return nic, err
+	}
+	if ips != nil {
+		nic.Properties.Ips = &ips
 	}
 
-	if v, ok := d.GetOk(path + "ipv6_ips"); ok {
-		raw := v.([]interface{})
-		ipv6Ips := make([]string, len(raw))
-		err := utils.DecodeInterfaceToStruct(raw, ipv6Ips)
-		if err != nil {
-			return nic, err
-		}
-		if len(ipv6Ips) > 0 {
-			nic.Properties.Ipv6Ips = &ipv6Ips
-		}
+	ipv6IPs, err := GetNicIPsFromSchema(d, path+"ipv6_ips")
+	if err != nil {
+		return nic, err
+	}
+	if ipv6IPs != nil {
+		nic.Properties.Ipv6Ips = &ipv6IPs
 	}
 
 	if v, ok := d.GetOk(path + "ipv6_cidr_block"); ok {
@@ -323,4 +314,76 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 	}
 
 	return nil
+}
+
+// GetNicIPsFromSchema receives the resource data and an attribute that specifies how to access the IPs (to differentiate
+// between the inline NICs and the independent NIC resource) and returns the IPs or IPv6IPs for a specific NIC and any
+// error that may occur while reading the configuration.
+// Information about the IPs is obtained using the raw configuration. The difference between reading the raw config
+// and using d.GetOk() function is that d.GetOk() function ignores the case in which the user explicitly sets an empty
+// list of IPs in the plan: 'ips = []' in the TF plan => d.GetOk('ips') will return: _, false.
+func GetNicIPsFromSchema(d *schema.ResourceData, attr string) ([]string, error) {
+	mainError := errors.New("error when reading the raw NIC IPs configuration")
+	allowedAttrs := map[string]struct{}{
+		"ips":            {},
+		"ipv6_ips":       {},
+		"nic.0.ips":      {},
+		"nic.0.ipv6_ips": {},
+	}
+	if _, ok := allowedAttrs[attr]; !ok {
+		return nil, fmt.Errorf("%w provided attribute is not supported: %s", mainError, attr)
+	}
+
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() {
+		return nil, fmt.Errorf("%w expected a valid configuration but received null instead", mainError)
+	}
+
+	parts := strings.Split(attr, ".")
+	partsLen := len(parts)
+	var rawIPs cty.Value
+
+	// Extract the raw IPs from the configuration.
+	// In the future, if multiple inline NICs will be allowed, the functionality needs to be extended in order to
+	// support more attributes: 'nic.1.ips', 'nic.2.ips', 'nic.i.ips', etc.
+	// 'ips' or 'ipv6_ips'
+	switch partsLen {
+	// 'ips', 'ipv6_ips'
+	case 1:
+		rawIPs = rawConfig.GetAttr(attr)
+	// 'nic.0.ips' or 'nic.0.ipv6_ips'
+	case 3:
+		rawNICsList := rawConfig.GetAttr(parts[0])
+		if rawNICsList.IsNull() {
+			return nil, fmt.Errorf("%w expected a valid list of inline NICs configuration but received null instead", mainError)
+		}
+		if rawNICsList.LengthInt() == 0 {
+			return nil, fmt.Errorf("%w expected at least one inline NIC in the configuration but received 0 instead", mainError)
+		}
+		rawNIC := rawNICsList.Index(cty.NumberIntVal(0))
+		if rawNIC.IsNull() {
+			return nil, fmt.Errorf("%w expected a valid NIC configuration but received null instead", mainError)
+		}
+		rawIPs = rawNIC.GetAttr(parts[2])
+	default:
+		return nil, fmt.Errorf("%w provided attribute is not supported", mainError)
+	}
+
+	// if attribute is specified in the tf plan, doesn't matter if it's an empty or a non-empty list
+	if !rawIPs.IsNull() {
+		rawSetOfIPs, ok := d.Get(attr).(*schema.Set)
+		if !ok {
+			return nil, fmt.Errorf("%w failed type assertion for NIC IPs, expected type: *schema.Set, actual type: %T", mainError, rawSetOfIPs)
+		}
+		ips := make([]string, 0, rawSetOfIPs.Len())
+		for _, rawIP := range rawSetOfIPs.List() {
+			ip, ok := rawIP.(string)
+			if !ok {
+				return nil, fmt.Errorf("%w failed type assertion for NIC IP, expected type: string, actual type: %T", mainError, rawIP)
+			}
+			ips = append(ips, ip)
+		}
+		return ips, nil
+	}
+	return nil, nil
 }

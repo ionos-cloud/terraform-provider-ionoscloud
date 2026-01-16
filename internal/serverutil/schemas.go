@@ -42,18 +42,21 @@ var SchemaNicElem = map[string]*schema.Schema{
 		Description: "IPv6 CIDR block assigned to the NIC.",
 	},
 	"ips": {
-		Type: schema.TypeList,
+		Type: schema.TypeSet,
 		Elem: &schema.Schema{
 			Type:             schema.TypeString,
-			DiffSuppressFunc: utils.DiffEmptyIps,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPv4Address),
 		},
 		Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
 		Computed:    true,
 		Optional:    true,
 	},
 	"ipv6_ips": {
-		Type:        schema.TypeList,
-		Elem:        &schema.Schema{Type: schema.TypeString},
+		Type: schema.TypeSet,
+		Elem: &schema.Schema{
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPv6Address),
+		},
 		Optional:    true,
 		Computed:    true,
 		Description: "Collection for IPv6 addresses assigned to a nic. Explicitly assigned IPv6 addresses need to come from inside the IPv6 CIDR block assigned to the nic.",
@@ -328,14 +331,14 @@ var NicServerDSResource = &schema.Resource{
 			Computed: true,
 		},
 		"ips": {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Computed: true,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 		},
 		"ipv6_ips": {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
 			Computed: true,

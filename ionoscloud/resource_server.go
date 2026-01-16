@@ -987,32 +987,20 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				nicProperties.Ipv6CidrBlock = &ipv6Block
 			}
 
-			if v, ok := d.GetOk("nic.0.ips"); ok {
-				raw := v.([]interface{})
-				if raw != nil && len(raw) > 0 {
-					ips := make([]string, 0)
-					for _, rawIp := range raw {
-						if rawIp != nil {
-							ip := rawIp.(string)
-							ips = append(ips, ip)
-						}
-					}
-					if ips != nil && len(ips) > 0 {
-						nicProperties.Ips = &ips
-					}
-				}
+			ips, err := cloudapinic.GetNicIPsFromSchema(d, "nic.0.ips")
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			if ips != nil {
+				nicProperties.Ips = &ips
 			}
 
-			if v, ok := d.GetOk("nic.0.ipv6_ips"); ok {
-				raw := v.([]interface{})
-				ipv6Ips := make([]string, len(raw))
-				if err := utils.DecodeInterfaceToStruct(raw, ipv6Ips); err != nil {
-					diags := diag.FromErr(err)
-					return diags
-				}
-				if len(ipv6Ips) > 0 {
-					nicProperties.Ipv6Ips = &ipv6Ips
-				}
+			ipv6IPs, err := cloudapinic.GetNicIPsFromSchema(d, "nic.0.ipv6_ips")
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			if ipv6IPs != nil {
+				nicProperties.Ipv6Ips = &ipv6IPs
 			}
 
 			dhcp := d.Get("nic.0.dhcp").(bool)
@@ -1335,7 +1323,7 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 		}
 	default: // enterprise
 		if _, ok := d.GetOk("template_uuid"); ok {
-			return *server, fmt.Errorf("template_uuid argument can not be set only for %s type of servers\n", serverType)
+			return *server, errors.New("template_uuid argument can be set only for CUBE type servers")
 		}
 
 		if v, ok := d.GetOk("cores"); ok {
