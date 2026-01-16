@@ -18,6 +18,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
@@ -262,6 +263,7 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		objectstoragemanagement.DataSources(),
 		monitoring.DataSources(),
 		compute.DataSources(),
+		kafka.DataSources(),
 	}
 
 	for _, r := range dataSources {
