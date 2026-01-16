@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
@@ -86,7 +87,7 @@ func dataSourceServer() *schema.Resource {
 			"cdroms": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     cdromsServerDSResource,
+				Elem:     serverutil.CdromsServerDSResource,
 			},
 			"volumes": {
 				Type:     schema.TypeList,
@@ -199,7 +200,7 @@ func dataSourceServer() *schema.Resource {
 			"nics": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     nicServerDSResource,
+				Elem:     serverutil.NicServerDSResource,
 			},
 			"security_groups_ids": {
 				Type:     schema.TypeList,
@@ -494,7 +495,7 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		return diag.FromErr(errors.New("ID and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
 		return diag.FromErr(errors.New("please provide either the server id or name"))

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
@@ -27,7 +28,7 @@ func resourceCubeServer() *schema.Resource {
 		CreateContext: resourceCubeServerCreate,
 		ReadContext:   resourceCubeServerRead,
 		UpdateContext: resourceCubeServerUpdate,
-		DeleteContext: resourceCubeServerDelete,
+		DeleteContext: serverutil.ResourceCommonServerDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceCubeServerImport,
 		},
@@ -266,127 +267,7 @@ func resourceCubeServer() *schema.Resource {
 				Required: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"mac": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-							ForceNew: true,
-						},
-						"lan": {
-							Type:     schema.TypeInt,
-							Required: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"dhcp": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"dhcpv6": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: "Indicates whether this NIC receives an IPv6 address through DHCP.",
-						},
-						"ipv6_cidr_block": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Computed:    true,
-							Description: "IPv6 CIDR block assigned to the NIC.",
-						},
-						"ips": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Computed: true,
-							Optional: true,
-						},
-						"ipv6_ips": {
-							Type:        schema.TypeList,
-							Elem:        &schema.Schema{Type: schema.TypeString},
-							Optional:    true,
-							Computed:    true,
-							Description: "Collection for IPv6 addresses assigned to a nic. Explicitly assigned IPv6 addresses need to come from inside the IPv6 CIDR block assigned to the nic.",
-						},
-						"firewall_active": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"firewall_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"device_number": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"pci_slot": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"security_groups_ids": {
-							Type:        schema.TypeSet,
-							Elem:        &schema.Schema{Type: schema.TypeString},
-							Optional:    true,
-							Description: "The list of Security Group IDs for the NIC",
-						},
-						"firewall": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"name": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"protocol": {
-										Type:             schema.TypeString,
-										Required:         true,
-										DiffSuppressFunc: utils.DiffToLower,
-										ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-									},
-									"source_mac": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"source_ip": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"target_ip": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"port_range_start": {
-										Type:             schema.TypeInt,
-										Optional:         true,
-										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
-									},
-									"port_range_end": {
-										Type:             schema.TypeInt,
-										Optional:         true,
-										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
-									},
-									"icmp_type": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"icmp_code": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"type": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-								},
-							},
-						},
-					},
+					Schema: serverutil.SchemaNicElem,
 				},
 			},
 			"inline_volume_ids": {
@@ -448,7 +329,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if _, ok := d.GetOk("boot_volume"); ok {
-		diags := diag.FromErr(fmt.Errorf("boot_volume argument can be set only in update requests \n"))
+		diags := diag.FromErr(fmt.Errorf("boot_volume argument can be set only in update requests"))
 		return diags
 	}
 
@@ -619,6 +500,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if (*createdServer.Entities.Nics.Items)[0].Properties.Ips != nil &&
 		len(*(*createdServer.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
+		createdServer.Entities.Volumes != nil &&
 		createdServer.Entities.Volumes.Items != nil &&
 		len(*createdServer.Entities.Volumes.Items) > 0 &&
 		(*createdServer.Entities.Volumes.Items)[0].Properties != nil &&
@@ -796,7 +678,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 				return diag.FromErr(fmt.Errorf("error retrieving inline volume %w", err))
 			}
 			volumePath := fmt.Sprintf("volume.%d.", i)
-			entry := SetCubeVolumeProperties(volume)
+			entry := serverutil.SetServerVolumeProperties(volume)
 			userData := d.Get(volumePath + "user_data")
 			entry["user_data"] = userData
 			backupUnit := d.Get(volumePath + "backup_unit_id")
@@ -831,12 +713,15 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 	if strings.EqualFold(currentVmState, constant.CubeVMStateStop) && !d.HasChange("vm_state") {
-		diags := diag.FromErr(fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"))
+		diags := diag.FromErr(fmt.Errorf("cannot update a suspended Templated Server, must change the state to RUNNING first"))
 		return diags
 	}
 
 	// Unsuspend a Cube server first, before applying other changes
-	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, constant.CubeVMStateStop) {
+	if d.HasChange("vm_state") &&
+		// and is it suspended / paused ?
+		(strings.EqualFold(currentVmState, constant.CubeVMStateStop) ||
+			strings.EqualFold(currentVmState, constant.GpuVMStateStop)) {
 		err := ss.Start(ctx, dcId, d.Id(), constant.CubeType)
 		if err != nil {
 			diags := diag.FromErr(err)
@@ -998,7 +883,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if d.HasChange("nic.0.dhcpv6") {
-			if dhcpv6, ok := d.GetOkExists("nic.0.dhcpv6"); ok {
+			if dhcpv6, ok := d.GetOk("nic.0.dhcpv6"); ok {
 				dhcpv6 := dhcpv6.(bool)
 				properties.Dhcpv6 = &dhcpv6
 			} else {
@@ -1098,7 +983,8 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	// Suspend a Cube server last, after applying other changes
 	if d.HasChange("vm_state") && strings.EqualFold(currentVmState, constant.VMStateStart) {
 		_, newVmState := d.GetChange("vm_state")
-		if strings.EqualFold(newVmState.(string), constant.CubeVMStateStop) {
+		if strings.EqualFold(newVmState.(string), constant.CubeVMStateStop) ||
+			strings.EqualFold(newVmState.(string), constant.GpuVMStateStop) {
 			err := ss.Stop(ctx, dcId, d.Id(), constant.CubeType)
 			if err != nil {
 				diags := diag.FromErr(err)
@@ -1108,51 +994,6 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return resourceCubeServerRead(ctx, d, meta)
-}
-
-func SetCubeVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
-
-	volumeMap := map[string]interface{}{}
-	if volume.Properties != nil {
-		utils.SetPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
-		utils.SetPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
-		utils.SetPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
-		utils.SetPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
-		utils.SetPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
-		utils.SetPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
-		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
-		utils.SetPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
-		utils.SetPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
-		utils.SetPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
-		utils.SetPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
-		utils.SetPropWithNilCheck(volumeMap, "expose_serial", volume.Properties.ExposeSerial)
-		utils.SetPropWithNilCheck(volumeMap, "require_legacy_bios", volume.Properties.RequireLegacyBios)
-	}
-	return volumeMap
-}
-
-func resourceCubeServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-	dcId := d.Get("datacenter_id").(string)
-
-	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
-	logApiRequestTime(apiResponse)
-	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a server ID %s %w", d.Id(), err))
-		return diags
-
-	}
-
-	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(fmt.Errorf("error getting state change for cube server delete %w", errState))
-	}
-
-	d.SetId("")
-	return nil
 }
 
 func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -1210,7 +1051,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 				return nil, fmt.Errorf("error setting hostname %w", err)
 			}
 		}
-		if server.Properties.Name != nil {
+		if server.Properties.TemplateUuid != nil {
 			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
 				return nil, fmt.Errorf("error setting template uuid %w", err)
 			}
@@ -1296,6 +1137,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 			if volumeObj.Properties != nil {
 				utils.SetPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
 				utils.SetPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
+				utils.SetPropWithNilCheck(volumeItem, "pci_slot", volumeObj.Properties.PciSlot)
 				utils.SetPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
 				utils.SetPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
 				utils.SetPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)

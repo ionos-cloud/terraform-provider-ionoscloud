@@ -124,6 +124,12 @@ const (
 	PrivateLANDataSourceByName = "private_lan_name"
 )
 
+// Gpu Constants
+const (
+	GpuResource  = "ionoscloud_gpu"
+	GpusResource = "ionoscloud_gpus"
+)
+
 // Group Constants
 const (
 	GroupResource         = "ionoscloud_group"
@@ -210,6 +216,7 @@ const (
 const (
 	ServerResource         = "ionoscloud_server"
 	ServerCubeResource     = "ionoscloud_cube_server"
+	ServerGPUResource      = "ionoscloud_gpu_server"
 	ServerVCPUResource     = "ionoscloud_vcpu_server"
 	ServerTestResource     = "test_server"
 	ServerTestHostname     = "myhostname"
@@ -443,6 +450,7 @@ wkv+4ThHJ677Dpi/P8F8iOJp
 
 // Server type constants
 const (
+	GpuType        = "GPU"
 	VCPUType       = "VCPU"
 	CubeType       = "CUBE"
 	EnterpriseType = "ENTERPRISE"
@@ -451,6 +459,7 @@ const (
 // Server power state constants
 const (
 	CubeVMStateStop = "SUSPENDED"
+	GpuVMStateStop  = "PAUSED"
 	VMStateStart    = "RUNNING"
 	VMStateStop     = "SHUTOFF"
 )

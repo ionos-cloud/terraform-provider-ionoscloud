@@ -98,6 +98,7 @@ func Provider() *schema.Provider {
 			constant.ServerResource:                            resourceServer(),
 			constant.ServerCubeResource:                        resourceCubeServer(),
 			constant.ServerVCPUResource:                        resourceVCPUServer(),
+			constant.ServerGPUResource:                         resourceGPUServer(),
 			constant.VolumeResource:                            resourceVolume(),
 			constant.GroupResource:                             resourceGroup(),
 			constant.ShareResource:                             resourceShare(),
@@ -156,8 +157,11 @@ func Provider() *schema.Provider {
 			constant.ResourceResource:                          dataSourceResource(),
 			constant.SnapshotResource:                          dataSourceSnapshot(),
 			constant.LanResource:                               dataSourceLan(),
+			constant.GpuResource:                               dataSourceGpu(),
+			constant.GpusResource:                              dataSourceGpus(),
 			constant.PCCResource:                               dataSourcePcc(),
 			constant.ServerResource:                            dataSourceServer(),
+			constant.ServerGPUResource:                         dataSourceGpuServer(),
 			constant.ServerCubeResource:                        dataSourceCubeServer(),
 			constant.ServerVCPUResource:                        dataSourceVCPUServer(),
 			constant.ServersDataSource:                         dataSourceServers(),
@@ -300,7 +304,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		ClientOptions: shared.ClientOptions{
 			Endpoint:      endpoint,
 			SkipTLSVerify: insecureBool,
-			//Certificate:   "",
+			// Certificate:   "",
 			Credentials: shared.Credentials{
 				Username: username,
 				Password: password,
