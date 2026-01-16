@@ -23,7 +23,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.5
-	github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.0
+	github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.2
 	github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.2.0
 	github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2 v2.0.0

@@ -1,5 +1,6 @@
 ## 6.7.22
 ### Features
+- Added Reverse DNS resource and data sources: `resource_dns_reverse_record`, `data_source_dns_reverse_record` and `data_source_dns_reverse_records`
 - Added resource for GPU type servers: `ionoscloud_gpu_server`
 - Added datasource for GPU type servers: `ionoscloud_gpu_server`
 - Added datasources for GPU / GPUs: `ionoscloud_gpu`, `ionoscloud_gpus`

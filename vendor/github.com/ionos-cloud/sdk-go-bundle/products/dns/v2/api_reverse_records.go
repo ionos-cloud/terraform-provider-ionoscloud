@@ -451,7 +451,7 @@ func (a *ReverseRecordsApiService) ReverserecordsGetExecute(r ApiReverserecordsG
 		if reflect.TypeOf(t).Kind() == reflect.Slice {
 			s := reflect.ValueOf(t)
 			for i := 0; i < s.Len(); i++ {
-				parameterAddToHeaderOrQuery(localVarQueryParams, "filter.recordIp", s.Index(i), "multi")
+				parameterAddToHeaderOrQuery(localVarQueryParams, "filter.recordIp", s.Index(i).Interface(), "multi")
 			}
 		} else {
 			parameterAddToHeaderOrQuery(localVarQueryParams, "filter.recordIp", t, "multi")

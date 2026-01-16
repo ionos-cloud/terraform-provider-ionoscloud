@@ -1919,6 +1919,11 @@ const recordEnabledAttribute = "enabled"
 const recordEnabledValue = "true"
 const recordUpdatedEnabledValue = "false"
 
+const reverseRecordNameValue = "test.dns.record.com"
+const reverseRecordNameValueUpdated = "updated.test.dns.record.com"
+const reverseRecordDescValue = "test desc"
+const reverseRecordDescValueUpdated = "test desc updated"
+
 const DNSRecordConfig = DNSZoneConfig + `
 resource ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestResourceName + ` {
 	zone_id = ` + constant.DNSZoneResource + `.` + constant.DNSZoneTestResourceName + `.id
@@ -1928,6 +1933,38 @@ resource ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestResourceNa
 	` + recordTtlAttribute + ` = ` + recordTtlValue + `
 	` + recordPriorityAttribute + ` = ` + recordPriorityValue + `
 	` + recordEnabledAttribute + ` = ` + recordEnabledValue + `
+}
+`
+
+const DNSReverseRecordConfig = `
+resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
+  location = "de/fra"
+  size = 1
+  name = "` + constant.IpBlockTestResource + `"
+}` + `
+resource ` + constant.DNSReverseRecordResource + ` ` + constant.DNSReverseRecordTestResourceName + ` {
+  name = "` + reverseRecordNameValue + `"
+  description = "` + reverseRecordDescValue + `"
+  ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
+}
+`
+
+const DNSReverseRecordsConfig = `
+resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
+  location = "de/fra"
+  size = 2
+  name = "` + constant.IpBlockTestResource + `"
+}` + `
+resource ` + constant.DNSReverseRecordResource + ` ` + constant.DNSReverseRecordTestResourceName + ` {
+  name = "` + reverseRecordNameValue + `"
+  description = "` + reverseRecordDescValue + `"
+  ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[0]
+}
+` + `
+resource ` + constant.DNSReverseRecordResource + ` ` + constant.DNSReverseRecordTestResourceName2 + ` {
+  name = "` + reverseRecordNameValueUpdated + `"
+  description = "` + reverseRecordDescValueUpdated + `"
+  ip = ` + constant.IpBlockResource + `.` + constant.IpBlockTestResource + `.ips[1]
 }
 `
 
