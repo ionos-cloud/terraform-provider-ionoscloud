@@ -45,7 +45,7 @@ var SchemaNicElem = map[string]*schema.Schema{
 		Type: schema.TypeSet,
 		Elem: &schema.Schema{
 			Type:             schema.TypeString,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPv4Address),
 		},
 		Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
 		Computed:    true,
@@ -55,7 +55,7 @@ var SchemaNicElem = map[string]*schema.Schema{
 		Type: schema.TypeSet,
 		Elem: &schema.Schema{
 			Type:             schema.TypeString,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPv6Address),
 		},
 		Optional:    true,
 		Computed:    true,
