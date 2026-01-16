@@ -323,7 +323,7 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 // and using d.GetOk() function is that d.GetOk() function ignores the case in which the user explicitly sets an empty
 // list of IPs in the plan: 'ips = []' in the TF plan => d.GetOk('ips') will return: _, false.
 func GetNicIPsFromSchema(d *schema.ResourceData, attr string) ([]string, error) {
-	mainError := errors.New("error when reading the raw NIC IPs configuration:")
+	mainError := errors.New("error when reading the raw NIC IPs configuration")
 	allowedAttrs := map[string]struct{}{
 		"ips":            {},
 		"ipv6_ips":       {},

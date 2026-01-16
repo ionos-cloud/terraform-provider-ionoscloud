@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -78,6 +79,12 @@ func TestGetNicIPsFromSchema(t *testing.T) {
 		{
 			name:          "valid IPs",
 			ips:           []string{"192.168.8.5", "192.168.8.4", "192.168.8.3"},
+			ipAttr:        "ips",
+			partialErrMsg: "",
+		},
+		{
+			name:          "empty string IPs",
+			ips:           []string{""},
 			ipAttr:        "ips",
 			partialErrMsg: "",
 		},
