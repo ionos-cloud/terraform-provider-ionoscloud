@@ -7,6 +7,7 @@ import (
 	"runtime/debug"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -236,9 +237,11 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 
 	client := bundleclient.New(clientOptions, fileConfig)
 	resp.DataSourceData = client
+	resp.EphemeralResourceData = client
 	resp.ResourceData = client
 }
 
+// TODO -- Implement a generic function instead of having 3 similar functions.
 // Resources returns the resources for the provider.
 func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Resource {
 	var finalResult []func() resource.Resource
@@ -270,5 +273,18 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		finalResult = append(finalResult, r...)
 	}
 
+	return finalResult
+}
+
+// EphemeralResources returns the ephemeral resources for the provider.
+func (p *IonosCloudProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
+	var finalResult []func() ephemeral.EphemeralResource
+	ephemeralResources := [][]func() ephemeral.EphemeralResource{
+		kafka.EphemeralResources(),
+	}
+
+	for _, r := range ephemeralResources {
+		finalResult = append(finalResult, r...)
+	}
 	return finalResult
 }
