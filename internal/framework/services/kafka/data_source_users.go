@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	kafkaSDK "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -27,6 +29,7 @@ type usersDataSourceModel struct {
 	ClusterID types.String          `tfsdk:"cluster_id"`
 	Location  types.String          `tfsdk:"location"`
 	Users     []userDataSourceModel `tfsdk:"users"`
+	Timeouts  timeouts.Value        `tfsdk:"timeouts"`
 }
 
 type userDataSourceModel struct {
@@ -44,7 +47,7 @@ func (d *usersDataSource) Metadata(ctx context.Context, req datasource.MetadataR
 	resp.TypeName = req.ProviderTypeName + "_kafka_users"
 }
 
-// Configure configures the data source.
+// Configure configures the data source client.
 func (d *usersDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -91,6 +94,7 @@ func (d *usersDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 				},
 				Computed: true,
 			},
+			"timeouts": timeouts.Attributes(ctx),
 		},
 	}
 }
@@ -99,6 +103,7 @@ func (d *usersDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	if d.client == nil {
 		resp.Diagnostics.AddError("Unconfigured Kafka API client", "Expected configured Kafka client. Please report this issue to the provider developers.")
+		return
 	}
 
 	var data usersDataSourceModel
@@ -106,6 +111,14 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	readTimeout, diags := data.Timeouts.Read(ctx, utils.DefaultTimeout)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, readTimeout)
+	defer cancel()
 
 	clusterID := data.ClusterID.ValueString()
 	location := data.Location.ValueString()
@@ -116,7 +129,6 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		return
 	}
 	data.Users = buildUsersFromAPIResp(users)
-	// TODO - Timeouts
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
