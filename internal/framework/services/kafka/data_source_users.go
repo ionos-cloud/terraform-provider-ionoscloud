@@ -4,19 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	kafkaSDK "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	kafkaSDK "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/utils/validators"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 var _ datasource.DataSourceWithConfigure = (*usersDataSource)(nil)
@@ -122,12 +121,12 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	clusterID := data.ClusterID.ValueString()
 	location := data.Location.ValueString()
-
 	users, _, err := d.client.GetUsers(ctx, clusterID, location)
 	if err != nil {
 		resp.Diagnostics.AddError("API Error Reading Kafka Users", fmt.Sprintf("Failed to retrieve the list of Kafka users for cluster with ID: %s, error: %s", clusterID, err))
 		return
 	}
+
 	data.Users = buildUsersFromAPIResp(users)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

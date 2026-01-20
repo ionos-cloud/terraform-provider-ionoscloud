@@ -11,8 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	kafkaSDK "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/utils/validators"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
@@ -27,14 +26,8 @@ type userCredentialsDataSource struct {
 }
 
 type userCredentialsDataSourceModel struct {
-	ClusterID            types.String   `tfsdk:"cluster_id"`
-	ID                   types.String   `tfsdk:"id"`
-	Username             types.String   `tfsdk:"username"`
-	Location             types.String   `tfsdk:"location"`
-	CertificateAuthority types.String   `tfsdk:"certificate_authority"`
-	PrivateKey           types.String   `tfsdk:"private_key"`
-	Certificate          types.String   `tfsdk:"certificate"`
-	Timeouts             timeouts.Value `tfsdk:"timeouts"`
+	userCredentialsModel
+	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
 // NewUserCredentialsDataSource creates a new user credentials data source.
@@ -138,42 +131,16 @@ func (d *userCredentialsDataSource) Read(ctx context.Context, req datasource.Rea
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	clusterID := data.ClusterID.ValueString()
-	userID := data.ID.ValueString()
-	username := data.Username.ValueString()
-	location := data.Location.ValueString()
-
-	var userCredentials kafkaSDK.UserReadAccess
-	var err error
-	// TODO -- Move the GET logic inside another function
-	if userID != "" {
-		userCredentials, _, err = d.client.GetUserCredentialsByID(ctx, clusterID, userID, location)
-		if err != nil {
-			resp.Diagnostics.AddError("API Error Reading Kafka User Credentials", fmt.Sprintf("Failed to retrieve user credentials for user with ID: %s, cluster ID: %s, error: %s", userID, clusterID, err))
-			return
-		}
-	} else if username != "" {
-		userCredentials, _, err = d.client.GetUserCredentialsByName(ctx, clusterID, username, location)
-		if err != nil {
-			resp.Diagnostics.AddError("API Error Reading Kafka User Credentials", fmt.Sprintf("Failed to retrieve user credentials for user with name: %s, cluster ID: %s, error: %s", username, clusterID, err))
-			return
-		}
-	}
-
-	if hasMissingData(userCredentials) {
-		resp.Diagnostics.AddError("Invalid API Response Format Kafka User Credentials", fmt.Sprintf("Expected valid string values in the API response but received 'nil' instead, user ID: %s, cluster ID: %s", userID, clusterID))
+	userCredentials, diags := getUserCredentials(ctx, *d.client, data.userCredentialsModel)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
-	populateUserCredentialsDataSourceModel(&data, userCredentials)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
+	if hasMissingData(userCredentials) {
+		resp.Diagnostics.AddError("Invalid API Response Format Kafka User Credentials", fmt.Sprintf("Expected valid string values in the API response but received 'nil' instead, user ID: %s, cluster ID: %s", userCredentials.Id, data.ClusterID.ValueString()))
+		return
+	}
 
-// populateUserCredentialsDataSourceModel populates the user credentials ephemeral model with information retrieved from the API.
-func populateUserCredentialsDataSourceModel(data *userCredentialsDataSourceModel, userCredentials kafkaSDK.UserReadAccess) {
-	data.CertificateAuthority = types.StringValue(*userCredentials.Metadata.CertificateAuthority)
-	data.PrivateKey = types.StringValue(*userCredentials.Metadata.PrivateKey)
-	data.Certificate = types.StringValue(*userCredentials.Metadata.Certificate)
-	// TODO -- Check if these two need to be here or in another place
-	data.ID = types.StringValue(userCredentials.Id)
-	data.Username = types.StringValue(userCredentials.Properties.Name)
+	populateUserCredentialsModel(&data.userCredentialsModel, userCredentials)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
