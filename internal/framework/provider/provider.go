@@ -241,7 +241,6 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	resp.ResourceData = client
 }
 
-// TODO -- Implement a generic function instead of having 3 similar functions.
 // Resources returns the resources for the provider.
 func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Resource {
 	var finalResult []func() resource.Resource
