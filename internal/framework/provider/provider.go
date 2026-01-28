@@ -7,6 +7,7 @@ import (
 	"runtime/debug"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -18,6 +19,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
@@ -235,6 +237,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 
 	client := bundleclient.New(clientOptions, fileConfig)
 	resp.DataSourceData = client
+	resp.EphemeralResourceData = client
 	resp.ResourceData = client
 }
 
@@ -262,11 +265,25 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		objectstoragemanagement.DataSources(),
 		monitoring.DataSources(),
 		compute.DataSources(),
+		kafka.DataSources(),
 	}
 
 	for _, r := range dataSources {
 		finalResult = append(finalResult, r...)
 	}
 
+	return finalResult
+}
+
+// EphemeralResources returns the ephemeral resources for the provider.
+func (p *IonosCloudProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
+	var finalResult []func() ephemeral.EphemeralResource
+	ephemeralResources := [][]func() ephemeral.EphemeralResource{
+		kafka.EphemeralResources(),
+	}
+
+	for _, r := range ephemeralResources {
+		finalResult = append(finalResult, r...)
+	}
 	return finalResult
 }

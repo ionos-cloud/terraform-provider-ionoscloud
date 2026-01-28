@@ -210,11 +210,14 @@ github.com/hashicorp/terraform-plugin-framework/types/basetypes
 github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes
 # github.com/hashicorp/terraform-plugin-framework-timeouts v0.5.0
 ## explicit; go 1.22.0
+github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts
+github.com/hashicorp/terraform-plugin-framework-timeouts/ephemeral/timeouts
 github.com/hashicorp/terraform-plugin-framework-timeouts/internal/validators
 github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts
 # github.com/hashicorp/terraform-plugin-framework-validators v0.17.0
 ## explicit; go 1.22.0
 github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator
+github.com/hashicorp/terraform-plugin-framework-validators/ephemeralvalidator
 github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag
 github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatorfuncerr
 github.com/hashicorp/terraform-plugin-framework-validators/int64validator
@@ -283,6 +286,7 @@ github.com/hashicorp/terraform-plugin-sdk/v2/terraform
 ## explicit; go 1.23.0
 github.com/hashicorp/terraform-plugin-testing/compare
 github.com/hashicorp/terraform-plugin-testing/config
+github.com/hashicorp/terraform-plugin-testing/echoprovider
 github.com/hashicorp/terraform-plugin-testing/helper/resource
 github.com/hashicorp/terraform-plugin-testing/internal/addrs
 github.com/hashicorp/terraform-plugin-testing/internal/configs/configschema
