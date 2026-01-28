@@ -118,10 +118,39 @@ func TestAccUserCredentialsDataSource(t *testing.T) {
 }
 
 const (
-	// TODO -- Change this with an actual kafka resource that will be created.
-	kafkaUsersDataSource = `
+	// SETUP CONFIGURATIONS
+	kafkaSetupConfig = `
+		resource "ionoscloud_datacenter" "example" {
+		  name     = "terraform-test-kafka-datacenter"
+		  location = "de/fra"
+		}
+
+		resource "ionoscloud_lan" "example" {
+		  datacenter_id = ionoscloud_datacenter.example.id
+		  public        = false
+		  name          = "terraform-test-kafka-lan"
+		}
+
+		resource "ionoscloud_kafka_cluster" "example" {
+		  name     = "terraform-test-kafka-cluster"
+		  location = "de/fra"
+		  version  = "3.9.0"
+		  size     = "S"
+		  connections {
+			datacenter_id = ionoscloud_datacenter.example.id
+			lan_id = ionoscloud_lan.example.id
+			broker_addresses = [
+				"192.168.1.101/24",
+				"192.168.1.102/24",
+				"192.168.1.103/24",
+				]
+		  }
+		}
+	`
+
+	kafkaUsersDataSource = kafkaSetupConfig + `
 		data "ionoscloud_kafka_users" "kafka_users_ds" {
-		  cluster_id = "92ca35f4-5fb8-438a-9c94-1806e76b63dd"
+		  cluster_id = ionoscloud_kafka_cluster.example.id
 		  location = "de/fra"
 		}
 	`

@@ -57,16 +57,7 @@ func TestAccUsersDataSource(t *testing.T) {
 }
 
 const (
-	// TODO - Write the configuration for the Kafka Cluster and reuse it in other configurations.
-	testAccUsersDataSourceConfig_valid = `
-		data "ionoscloud_kafka_users" "kafka_users_ds" {
-		  cluster_id = "92ca35f4-5fb8-438a-9c94-1806e76b63dd"
-		  location = "de/fra"
-          timeouts = {
-			read = "1m"
-		  }
-		}
-	`
+	// INVALID CONFIGURATIONS
 	testAccUsersDataSourceConfig_nonexistentCluster = `
 		data "ionoscloud_kafka_users" "kafka_users_ds" {
 		  cluster_id = "92ca35f4-5fb8-438a-9c94-1806e76b63de"
@@ -93,6 +84,17 @@ const (
 		  location = "de/fra"
           timeouts = {
 			read = "1ms"
+		  }
+		}
+	`
+
+	// VALID CONFIGURATIONS
+	testAccUsersDataSourceConfig_valid = kafkaSetupConfig + `
+		data "ionoscloud_kafka_users" "kafka_users_ds" {
+		  cluster_id = ionoscloud_kafka_cluster.example.id
+		  location = "de/fra"
+          timeouts = {
+			read = "1m"
 		  }
 		}
 	`
