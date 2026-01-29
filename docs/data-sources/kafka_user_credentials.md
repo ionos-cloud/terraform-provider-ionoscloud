@@ -11,7 +11,7 @@ description: |-
 
 The **Kafka user credentials** data source can be used to retrieve access credentials for a specific user. 
 
-> ⚠️  In order to avoid storing sensitive data in the state, the analogue [ephemeral resource](./../ephemerals/kafka_user_credentials.md) can be used.
+> ⚠️  In order to avoid storing sensitive data in the state, the user credentials [ephemeral resource](./../ephemerals/kafka_user_credentials.md) can be used.
 
 ## Example Usage
 
