@@ -54,10 +54,6 @@ func TestAccUserCredentialsEphemeral(t *testing.T) {
 				ExpectError: regexp.MustCompile("context deadline exceeded"),
 			},
 			{
-				Config:      testAccUserCredentialsEphemeralConfig_invalidLocation,
-				ExpectError: regexp.MustCompile("Attribute location value must be one of"),
-			},
-			{
 				Config:      testAccUserCredentialsEphemeralConfig_bothUserIDUsername,
 				ExpectError: regexp.MustCompile("Exactly one of these attributes must be configured"),
 			},
@@ -189,17 +185,6 @@ const (
 		  location = "de/fra"
 		  timeouts = {
 			open = "1ms"
-		  }
-		}
-	`
-
-	testAccUserCredentialsEphemeralConfig_invalidLocation = kafkaUsersDataSource + `
-		ephemeral "ionoscloud_kafka_user_credentials" "user_credentials_ephemeral" {
-		  cluster_id = data.ionoscloud_kafka_users.kafka_users_ds.cluster_id
-		  id = data.ionoscloud_kafka_users.kafka_users_ds.users[0].id
-		  location = "nonexistent"
-		  timeouts = {
-			open = "2m"
 		  }
 		}
 	`

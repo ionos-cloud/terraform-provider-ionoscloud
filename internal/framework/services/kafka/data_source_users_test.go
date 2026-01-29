@@ -30,10 +30,6 @@ func TestAccUsersDataSource(t *testing.T) {
 				ExpectError: regexp.MustCompile("String must be a valid UUID"),
 			},
 			{
-				Config:      testAccUsersDataSourceConfig_invalidLocation,
-				ExpectError: regexp.MustCompile("Attribute location value must be one of"),
-			},
-			{
 				Config:      testAccUsersDataSourceConfig_smallTimeoutValue,
 				ExpectError: regexp.MustCompile("context deadline exceeded"),
 			},
@@ -72,12 +68,6 @@ const (
 		}
 	`
 
-	testAccUsersDataSourceConfig_invalidLocation = `
-		data "ionoscloud_kafka_users" "kafka_users_ds" {
-		  cluster_id = "92ca35f4-5fb8-438a-9c94-1806e76b63dd"
-		  location = "invalid"
-		}
-	`
 	testAccUsersDataSourceConfig_smallTimeoutValue = `
 		data "ionoscloud_kafka_users" "kafka_users_ds" {
 		  cluster_id = "92ca35f4-5fb8-438a-9c94-1806e76b63dd"

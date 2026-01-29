@@ -5,14 +5,13 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/datasource/timeouts"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	kafkaSDK "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/utils/validators"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/validators"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -74,9 +73,6 @@ func (d *usersDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 			"location": schema.StringAttribute{
 				Description: "The location of the Kafka cluster",
 				Optional:    true,
-				Validators: []validator.String{
-					stringvalidator.OneOf(kafkaService.AvailableLocations...),
-				},
 			},
 			"users": schema.ListNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
