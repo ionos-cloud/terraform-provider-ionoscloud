@@ -57,8 +57,14 @@ The following arguments are supported:
 
 ## Import
 
-Resource Bucket can be imported using the `bucket name`
+A bucket can be imported using the `bucket name` and the `region`:
 
 ```shell
-terraform import ionoscloud_s3_bucket.example example
+terraform import ionoscloud_s3_bucket.example region:bucket_name
+```
+
+The `region` can be omitted, in which case the bucket will be imported from the default location: `eu-central-3`.
+
+```shell
+terraform import ionoscloud_s3_bucket.example bucket_name
 ```
