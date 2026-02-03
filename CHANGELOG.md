@@ -1,6 +1,8 @@
 ## 6.7.23 -- upcoming release
 ### Features
-- Added Kafka users data source: `ionoscloud_kafka_users`, user access credentials data source: `ionoscloud_kafka_user_credentials` and user access credentials ephemeral resource: `ionoscloud_kafka_user_credentials`
+- Added Kafka users data source: `ionoscloud_kafka_users`, user access credentials data source: `ionoscloud_kafka_user_credentials` and user access credentials ephemeral resource: `ionoscloud_kafka_user_credentials`.
+### Documentation
+- Updated documentation for S3 buckets.
 
 ## 6.7.22
 ### Features
