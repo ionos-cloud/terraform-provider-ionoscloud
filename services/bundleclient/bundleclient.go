@@ -30,6 +30,7 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 		AutoscalingClient:             autoscalingService.NewClient(clientOptions, fileConfig),
 		CertManagerClient:             cert.NewClient(clientOptions, fileConfig),
 		CloudApiClient:                cloudapi.NewClient(clientOptions, fileConfig),
+		CloudAPIConfig:                cloudapi.NewConfig(clientOptions, fileConfig),
 		ContainerClient:               crService.NewClient(clientOptions, fileConfig),
 		DNSClient:                     dnsService.NewClient(clientOptions, fileConfig),
 		LoggingClient:                 loggingService.NewClient(clientOptions, fileConfig),
@@ -49,6 +50,7 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 // SdkBundle is a struct that defines the bundle client. It is used for both sdkv2 and plugin framework
 type SdkBundle struct {
 	CloudApiClient                *ionoscloud.APIClient
+	CloudAPIConfig                *cloudapi.Config
 	InMemoryDBClient              *inmemorydb.Client
 	PsqlClient                    *dbaasService.PsqlClient
 	MongoClient                   *dbaasService.MongoClient
