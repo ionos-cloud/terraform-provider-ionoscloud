@@ -110,3 +110,38 @@ func httpNotFound(resp *ionoscloud.APIResponse) bool {
 	}
 	return false
 }
+
+// splitImportIdentifier splits the provided import id into location and resource IDs, assuming that one of the two
+// templates (with or without location) is followed. The delimiter should be the same as the one used in the templates.
+//
+// Example:
+//
+//	id = "de-fra/0000000-0000-0000-0000-000000000000/0"
+//	idTemplateWithoutLocation = "<datacenter_id>/<lan_id>"
+//	idTemplateWithLocation = "<location>/<datacenter_id>/<lan_id>"
+//	delimiter = "/"
+func splitImportIdentifier(id, idTemplateWithoutLocation, idTemplateWithLocation, delimiter string) (location string, resourceIDs []string, err error) {
+	parts := strings.Split(id, delimiter)
+
+	switch len(parts) {
+	case len(strings.Split(idTemplateWithoutLocation, delimiter)):
+		return "", parts, nil
+	case len(strings.Split(idTemplateWithLocation, delimiter)):
+		return parts[0], parts[1:], nil
+	default:
+		return "", nil, fmt.Errorf("invalid identifier: expected %s or %s, got %q", idTemplateWithoutLocation, idTemplateWithLocation, id)
+	}
+}
+
+// validateImportIdentifiers checks that all resource IDs within the import identifier are non-empty, returning an error
+// if any of them is invalid. The importID parameter is used as context in the error message.
+func validateImportIdentifiers(importID string, resourceIDs []string) error {
+	for _, id := range resourceIDs {
+		if id == "" {
+			// TODO: is this error message good enough?
+			return fmt.Errorf("invalid identifier: resource IDs within the import identifier must all be non-empty, got %q", importID)
+		}
+	}
+
+	return nil
+}
