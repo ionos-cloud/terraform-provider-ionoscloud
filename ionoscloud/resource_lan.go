@@ -44,6 +44,10 @@ func resourceLan() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"pcc": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -89,7 +93,10 @@ func resourceLan() *schema.Resource {
 }
 
 func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	location := d.Get("location").(string)
+	client := config.NewAPIClientWithServerOverrides(location)
+
 	public := d.Get("public").(bool)
 	request := ionoscloud.Lan{
 		Properties: &ionoscloud.LanProperties{
@@ -168,7 +175,9 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	location := d.Get("location").(string)
+	client := config.NewAPIClientWithServerOverrides(location)
 
 	dcid := d.Get("datacenter_id").(string)
 
@@ -196,7 +205,10 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	location := d.Get("location").(string)
+	client := config.NewAPIClientWithServerOverrides(location)
+
 	properties := &ionoscloud.LanProperties{}
 	newValue := d.Get("public")
 	public := newValue.(bool)
@@ -247,8 +259,10 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	location := d.Get("location").(string)
+	client := config.NewAPIClientWithServerOverrides(location)
 
 	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
 		return diag.FromErr(err)
@@ -291,16 +305,27 @@ func isDeleteProtected(apiResponse *ionoscloud.APIResponse, errMessage string) b
 }
 
 func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{lan}", d.Id())
+	location, resourceIDs, err := splitImportIdentifier(
+		d.Id(), "<datacenter_id>/<lan_id>", "<location>/<datacenter_id>/<lan_id>", "/",
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing import identifier: %w", err)
 	}
 
-	datacenterId := parts[0]
-	lanId := parts[1]
+	if err := validateImportIdentifiers(d.Id(), resourceIDs); err != nil {
+		return nil, fmt.Errorf("error validating import identifier: %w", err)
+	}
+
+	// replace '-' with '/' in location, since the API client expects locations to be in the format 'de/fra', but we use
+	// 'de-fra' in the import identifier to avoid conflicts with the '/' delimiter
+	// TODO: On other location-based resources, we use ':' as a delimiter, so that location can be specified as the API
+	//  expects. We should use the same approach for all resources, to avoid confusion and the need for such replacements.
+	location = strings.ReplaceAll(location, "-", "/")
+	datacenterId := resourceIDs[0]
+	lanId := resourceIDs[1]
+
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	client := config.NewAPIClientWithServerOverrides(location)
 
 	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, datacenterId, lanId).Execute()
 	logApiRequestTime(apiResponse)

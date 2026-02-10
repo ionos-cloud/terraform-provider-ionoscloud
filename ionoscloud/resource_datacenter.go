@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -91,11 +92,11 @@ func resourceDatacenter() *schema.Resource {
 }
 
 func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
 
 	datacenterName := d.Get("name").(string)
 	datacenterLocation := d.Get("location").(string)
+	client := config.NewAPIClientWithServerOverrides(datacenterLocation)
 
 	datacenter := ionoscloud.DatacenterPost{
 		Properties: &ionoscloud.DatacenterPropertiesPost{
@@ -135,7 +136,9 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	datacenterLocation := d.Get("location").(string)
+	client := config.NewAPIClientWithServerOverrides(datacenterLocation)
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -158,8 +161,11 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	obj := ionoscloud.DatacenterPropertiesPut{}
+
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	datacenterLocation := d.Get("location").(string)
+	client := config.NewAPIClientWithServerOverrides(datacenterLocation)
 
 	if d.HasChange("name") {
 		_, newName := d.GetChange("name")
@@ -202,7 +208,9 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	datacenterLocation := d.Get("location").(string)
+	client := config.NewAPIClientWithServerOverrides(datacenterLocation)
 
 	apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -221,11 +229,28 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location, resourceIDs, err := splitImportIdentifier(
+		d.Id(), "<datacenter_id>", "<location>/<datacenter_id>", "/",
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing import identifier: %w", err)
+	}
 
-	dcId := d.Id()
+	if err := validateImportIdentifiers(d.Id(), resourceIDs); err != nil {
+		return nil, fmt.Errorf("error validating import identifier: %w", err)
+	}
 
-	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
+	// replace '-' with '/' in location, since the API client expects locations to be in the format 'de/fra', but we use
+	// 'de-fra' in the import identifier to avoid conflicts with the '/' delimiter
+	// TODO: On other location-based resources, we use ':' as a delimiter, so that location can be specified as the API
+	//  expects. We should use the same approach for all resources, to avoid confusion and the need for such replacements.
+	location = strings.ReplaceAll(location, "-", "/")
+	dcId := resourceIDs[0]
+
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	client := config.NewAPIClientWithServerOverrides(location)
+
+	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
