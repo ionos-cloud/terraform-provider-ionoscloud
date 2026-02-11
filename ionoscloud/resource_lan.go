@@ -305,22 +305,18 @@ func isDeleteProtected(apiResponse *ionoscloud.APIResponse, errMessage string) b
 }
 
 func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	location, resourceIDs, err := splitImportIdentifier(
-		d.Id(), "<datacenter_id>/<lan_id>", "<location>/<datacenter_id>/<lan_id>", "/",
-	)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing import identifier: %w", err)
+	location, resourceIDs := splitImportID(d.Id(), "/")
+	if len(resourceIDs) != 2 {
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected format '<location>:<datacenter_id>/<lan_id>' "+
+				"or '<datacenter_id>/<lan_id>', got: %s", d.Id(),
+		)
 	}
 
-	if err := validateImportIdentifiers(d.Id(), resourceIDs); err != nil {
+	if err := validateImportIDParts(d.Id(), resourceIDs); err != nil {
 		return nil, fmt.Errorf("error validating import identifier: %w", err)
 	}
 
-	// replace '-' with '/' in location, since the API client expects locations to be in the format 'de/fra', but we use
-	// 'de-fra' in the import identifier to avoid conflicts with the '/' delimiter
-	// TODO: On other location-based resources, we use ':' as a delimiter, so that location can be specified as the API
-	//  expects. We should use the same approach for all resources, to avoid confusion and the need for such replacements.
-	location = strings.ReplaceAll(location, "-", "/")
 	datacenterId := resourceIDs[0]
 	lanId := resourceIDs[1]
 

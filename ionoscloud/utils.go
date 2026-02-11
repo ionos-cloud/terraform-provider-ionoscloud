@@ -111,35 +111,36 @@ func httpNotFound(resp *ionoscloud.APIResponse) bool {
 	return false
 }
 
-// splitImportIdentifier splits the provided import id into location and resource IDs, assuming that one of the two
-// templates (with or without location) is followed. The delimiter should be the same as the one used in the templates.
+// splitImportID splits the import ID into location and a slice of resource identifiers. The import ID
+// is expected to be in the format "<location>:<compound-identifier>", where compound-identifier is
+// "<id-1><del><id-2><del>...<del><id-n>". If the import ID does not contain a colon, it returns an empty location and
+// splits the entire import ID by the provided delimiter.
 //
-// Example:
+// Example
 //
-//	id = "de-fra/0000000-0000-0000-0000-000000000000/0"
-//	idTemplateWithoutLocation = "<datacenter_id>/<lan_id>"
-//	idTemplateWithLocation = "<location>/<datacenter_id>/<lan_id>"
-//	delimiter = "/"
-func splitImportIdentifier(id, idTemplateWithoutLocation, idTemplateWithLocation, delimiter string) (location string, resourceIDs []string, err error) {
-	parts := strings.Split(id, delimiter)
-
-	switch len(parts) {
-	case len(strings.Split(idTemplateWithoutLocation, delimiter)):
-		return "", parts, nil
-	case len(strings.Split(idTemplateWithLocation, delimiter)):
-		return parts[0], parts[1:], nil
-	default:
-		return "", nil, fmt.Errorf("invalid identifier: expected %s or %s, got %q", idTemplateWithoutLocation, idTemplateWithLocation, id)
+//	Code:
+//		splitImportID("de/fra:00000000-0000-0000-0000-000000000000/1", "/")
+//		splitImportID("de/fra:00000000-0000-0000-0000-000000000000:1", ":")
+//		splitImportID("00000000-0000-0000-0000-000000000000/1", "/")
+//	Output:
+//		"de/fra", []string{"00000000-0000-0000-0000-000000000000", "1"}
+//		"de/fra", []string{"00000000-0000-0000-0000-000000000000", "1"}
+//		"", []string{"00000000-0000-0000-0000-000000000000", "1"}
+func splitImportID(importID, del string) (location string, resourceIDs []string) {
+	before, after, found := strings.Cut(importID, ":")
+	if !found {
+		return "", strings.Split(before, del)
 	}
+
+	return before, strings.Split(after, del)
 }
 
-// validateImportIdentifiers checks that all resource IDs within the import identifier are non-empty, returning an error
+// validateImportIDParts checks that all resource IDs within the import identifier are non-empty, returning an error
 // if any of them is invalid. The importID parameter is used as context in the error message.
-func validateImportIdentifiers(importID string, resourceIDs []string) error {
-	for _, id := range resourceIDs {
+func validateImportIDParts(importID string, parts []string) error {
+	for _, id := range parts {
 		if id == "" {
-			// TODO: is this error message good enough?
-			return fmt.Errorf("invalid identifier: resource IDs within the import identifier must all be non-empty, got %q", importID)
+			return fmt.Errorf("invalid identifier: all parts of an import ID must be provided and non-empty, got %q", importID)
 		}
 	}
 
