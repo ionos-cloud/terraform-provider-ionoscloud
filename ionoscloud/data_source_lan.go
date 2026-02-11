@@ -113,7 +113,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	location := d.Get("location").(string)
 	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClientWithServerOverrides(location)
+	client := config.NewAPIClient(location)
 
 	if idOk {
 		/* search by ID */
