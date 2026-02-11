@@ -22,7 +22,7 @@ import (
 
 type Config struct {
 	fileConfig   *fileconfiguration.FileConfig
-	clientConfig *ionoscloud.Configuration
+	clientConfig ionoscloud.Configuration
 }
 
 // NewConfig returns a new Config struct based on the provided client options and configuration file.
@@ -43,82 +43,65 @@ func NewConfig(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 
 	return &Config{
 		fileConfig:   fileConfig,
-		clientConfig: config,
+		clientConfig: *config,
 	}
 }
 
 // CopyClientConfig creates a deep copy of the client configuration to ensure that modifications to the returned configuration
 // do not affect the original configuration stored in Config.
-func (c *Config) CopyClientConfig() *ionoscloud.Configuration {
-	if c == nil {
-		return nil
-	}
-
-	if c.clientConfig == nil {
-		return nil
-	}
-
+func (c Config) CopyClientConfig() ionoscloud.Configuration {
 	// Copy directly what can be copied with a simple assignment
-	newConfig := *c.clientConfig
+	// Also allows for unmarshalling into the Logger interface without issues
+	newConfig := c.clientConfig
 
-	// If deepcopy fails, log as a warning and default to nil for that field to avoid using shallow-copied data.
-	if err := utils.Deepcopy(c.clientConfig.DefaultHeader, &newConfig.DefaultHeader); err != nil {
-		log.Printf("[WARN] Failed to deepcopy DefaultHeader configuration, will default to nil: %v", err)
-		newConfig.DefaultHeader = nil
-	}
-
-	if err := utils.Deepcopy(c.clientConfig.DefaultQueryParams, &newConfig.DefaultQueryParams); err != nil {
-		log.Printf("[WARN] Failed to deepcopy DefaultQueryParams configuration, will default to nil: %v", err)
-		newConfig.DefaultQueryParams = nil
-	}
-
-	if err := utils.Deepcopy(c.clientConfig.Servers, &newConfig.Servers); err != nil {
-		log.Printf("[WARN] Failed to deepcopy Servers configuration, will default to nil: %v", err)
-		newConfig.Servers = nil
-	}
-
-	if err := utils.Deepcopy(c.clientConfig.OperationServers, &newConfig.OperationServers); err != nil {
-		log.Printf("[WARN] Failed to deepcopy OperationServers configuration, will default to nil: %v", err)
-		newConfig.OperationServers = nil
-	}
-
+	// Create a copy of the HTTPClient if it exists
+	// http.DefaultClient is the control value
+	httpClientCopy := http.DefaultClient
 	if c.clientConfig.HTTPClient != nil {
+		httpClientCopy = c.clientConfig.HTTPClient
+		// Temporarily set to nil to avoid deepcopy issues with http.Client
+		c.clientConfig.HTTPClient = nil
+	}
+
+	err := utils.Deepcopy(c.clientConfig, &newConfig)
+	if err != nil {
+		log.Printf("[ERROR] Failed to deepcopy client configuration, using a shallow copy: %v", err)
+		if httpClientCopy != http.DefaultClient {
+			c.clientConfig.HTTPClient = httpClientCopy
+		}
+		return c.clientConfig
+	}
+
+	if httpClientCopy != http.DefaultClient {
 		// Since http.Client contains either primitive, non-pointer types or interfaces, we can create a new
 		// instance and copy the values directly.
-		newHTTPClient := *c.clientConfig.HTTPClient
+		newHTTPClient := *httpClientCopy
 		newConfig.HTTPClient = &newHTTPClient
 	}
 
-	return &newConfig
+	return newConfig
 }
 
-// NewAPIClient create a new API client with server overrides based on the provided location. The server overrides are
+// NewAPIClient creates a new API client with server overrides based on the provided location. The server overrides are
 // retrieved from the configuration file and applied to a copy of the client configuration, ensuring that the original
 // configuration stored in Config remains unchanged. If the IONOS_API_URL environment variable is set, it will take
 // precedence over any configuration file overrides.
-func (c *Config) NewAPIClient(location string) *ionoscloud.APIClient {
-	if c == nil {
-		return nil
-	}
-
+func (c Config) NewAPIClient(location string) *ionoscloud.APIClient {
 	clientCfg := c.CopyClientConfig()
-	if clientCfg == nil {
-		return nil
-	}
 
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
 		log.Printf("[DEBUG] Using custom endpoint %s from IONOS_API_URL env variable\n", os.Getenv(shared.IonosApiUrlEnvVar))
-		return ionoscloud.NewAPIClient(clientCfg)
+		return ionoscloud.NewAPIClient(&clientCfg)
 	}
 
 	if c.fileConfig == nil {
-		return ionoscloud.NewAPIClient(clientCfg)
+		return ionoscloud.NewAPIClient(&clientCfg)
 	}
 
 	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.Cloud, location)
 	if endpoint == nil {
-		log.Printf("[WARN] Missing endpoint for %s in location %s and no global endpoints defined", fileconfiguration.Cloud, location)
-		return ionoscloud.NewAPIClient(clientCfg)
+		log.Printf("[WARN] Missing endpoint for %s product in location %s and no global endpoints defined", fileconfiguration.Cloud, location)
+		return ionoscloud.NewAPIClient(&clientCfg)
 	}
 	clientCfg.Servers = ionoscloud.ServerConfigurations{
 		{
@@ -128,7 +111,7 @@ func (c *Config) NewAPIClient(location string) *ionoscloud.APIClient {
 	}
 	clientCfg.HTTPClient = &http.Client{}
 	clientCfg.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
-	return ionoscloud.NewAPIClient(clientCfg)
+	return ionoscloud.NewAPIClient(&clientCfg)
 }
 
 func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *ionoscloud.APIClient {
