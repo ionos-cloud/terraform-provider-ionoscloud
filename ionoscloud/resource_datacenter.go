@@ -97,7 +97,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	datacenterName := d.Get("name").(string)
 	datacenterLocation := d.Get("location").(string)
-	client := config.NewAPIClientWithServerOverrides(datacenterLocation)
+	client := config.NewAPIClient(datacenterLocation)
 
 	datacenter := ionoscloud.DatacenterPost{
 		Properties: &ionoscloud.DatacenterPropertiesPost{
@@ -139,7 +139,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
 	datacenterLocation := d.Get("location").(string)
-	client := config.NewAPIClientWithServerOverrides(datacenterLocation)
+	client := config.NewAPIClient(datacenterLocation)
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -166,7 +166,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
 	datacenterLocation := d.Get("location").(string)
-	client := config.NewAPIClientWithServerOverrides(datacenterLocation)
+	client := config.NewAPIClient(datacenterLocation)
 
 	if d.HasChange("name") {
 		_, newName := d.GetChange("name")
@@ -211,7 +211,7 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
 	datacenterLocation := d.Get("location").(string)
-	client := config.NewAPIClientWithServerOverrides(datacenterLocation)
+	client := config.NewAPIClient(datacenterLocation)
 
 	apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -249,7 +249,7 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 	dcId := resourceIDs[0]
 
 	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClientWithServerOverrides(location)
+	client := config.NewAPIClient(location)
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 	logApiRequestTime(apiResponse)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
@@ -46,19 +47,8 @@ func NewConfig(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	}
 }
 
-// NewAPIClient creates a new API client using a copy of the client configuration stored in Config.
-// This ensures that any modifications to the returned API client do not affect the original configuration stored in Config, allowing for safe concurrent use
-// of multiple clients with different configurations if needed.
-func (c *Config) NewAPIClient() *ionoscloud.APIClient {
-	if c == nil {
-		return nil
-	}
-
-	clientCfg := c.CopyClientConfig()
-	return ionoscloud.NewAPIClient(clientCfg)
-}
-
-// CopyClientConfig creates a deep copy of the client configuration to ensure that modifications to the returned configuration do not affect the original configuration stored in Config.
+// CopyClientConfig creates a deep copy of the client configuration to ensure that modifications to the returned configuration
+// do not affect the original configuration stored in Config.
 func (c *Config) CopyClientConfig() *ionoscloud.Configuration {
 	if c == nil {
 		return nil
@@ -68,8 +58,33 @@ func (c *Config) CopyClientConfig() *ionoscloud.Configuration {
 		return nil
 	}
 
+	// Copy directly what can be copied with a simple assignment
 	newConfig := *c.clientConfig
+
+	// If deepcopy fails, log as a warning and default to nil for that field to avoid using shallow-copied data.
+	if err := utils.Deepcopy(c.clientConfig.DefaultHeader, &newConfig.DefaultHeader); err != nil {
+		log.Printf("[WARN] Failed to deepcopy DefaultHeader configuration, will default to nil: %v", err)
+		newConfig.DefaultHeader = nil
+	}
+
+	if err := utils.Deepcopy(c.clientConfig.DefaultQueryParams, &newConfig.DefaultQueryParams); err != nil {
+		log.Printf("[WARN] Failed to deepcopy DefaultQueryParams configuration, will default to nil: %v", err)
+		newConfig.DefaultQueryParams = nil
+	}
+
+	if err := utils.Deepcopy(c.clientConfig.Servers, &newConfig.Servers); err != nil {
+		log.Printf("[WARN] Failed to deepcopy Servers configuration, will default to nil: %v", err)
+		newConfig.Servers = nil
+	}
+
+	if err := utils.Deepcopy(c.clientConfig.OperationServers, &newConfig.OperationServers); err != nil {
+		log.Printf("[WARN] Failed to deepcopy OperationServers configuration, will default to nil: %v", err)
+		newConfig.OperationServers = nil
+	}
+
 	if c.clientConfig.HTTPClient != nil {
+		// Since http.Client contains either primitive, non-pointer types or interfaces, we can create a new
+		// instance and copy the values directly.
 		newHTTPClient := *c.clientConfig.HTTPClient
 		newConfig.HTTPClient = &newHTTPClient
 	}
@@ -77,10 +92,11 @@ func (c *Config) CopyClientConfig() *ionoscloud.Configuration {
 	return &newConfig
 }
 
-// NewAPIClientWithServerOverrides create a new API client with server overrides based on the provided location. The server overrides are retrieved from the configuration file
-// and applied to a copy of the client configuration, ensuring that the original configuration stored in Config remains unchanged. If the IONOS_API_URL environment variable is set,
-// it will take precedence over any configuration file overrides.
-func (c *Config) NewAPIClientWithServerOverrides(location string) *ionoscloud.APIClient {
+// NewAPIClient create a new API client with server overrides based on the provided location. The server overrides are
+// retrieved from the configuration file and applied to a copy of the client configuration, ensuring that the original
+// configuration stored in Config remains unchanged. If the IONOS_API_URL environment variable is set, it will take
+// precedence over any configuration file overrides.
+func (c *Config) NewAPIClient(location string) *ionoscloud.APIClient {
 	if c == nil {
 		return nil
 	}

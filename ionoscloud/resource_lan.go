@@ -96,7 +96,7 @@ func resourceLan() *schema.Resource {
 func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
 	location := d.Get("location").(string)
-	client := config.NewAPIClientWithServerOverrides(location)
+	client := config.NewAPIClient(location)
 
 	public := d.Get("public").(bool)
 	request := ionoscloud.Lan{
@@ -178,7 +178,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
 	location := d.Get("location").(string)
-	client := config.NewAPIClientWithServerOverrides(location)
+	client := config.NewAPIClient(location)
 
 	dcid := d.Get("datacenter_id").(string)
 
@@ -208,7 +208,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
 	location := d.Get("location").(string)
-	client := config.NewAPIClientWithServerOverrides(location)
+	client := config.NewAPIClient(location)
 
 	properties := &ionoscloud.LanProperties{}
 	newValue := d.Get("public")
@@ -263,7 +263,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	dcId := d.Get("datacenter_id").(string)
 	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
 	location := d.Get("location").(string)
-	client := config.NewAPIClientWithServerOverrides(location)
+	client := config.NewAPIClient(location)
 
 	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
 		return diag.FromErr(err)
@@ -326,7 +326,7 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	lanId := resourceIDs[1]
 
 	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClientWithServerOverrides(location)
+	client := config.NewAPIClient(location)
 
 	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, datacenterId, lanId).Execute()
 	logApiRequestTime(apiResponse)

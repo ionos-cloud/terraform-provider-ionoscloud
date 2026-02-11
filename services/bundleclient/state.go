@@ -38,7 +38,7 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, requestLocatio
 func resourceStateRefreshFunc(meta interface{}, location, path string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		config := meta.(SdkBundle).CloudAPIConfig
-		client := config.NewAPIClientWithServerOverrides(location)
+		client := config.NewAPIClient(location)
 
 		log.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {
