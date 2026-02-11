@@ -12,6 +12,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func resourceDatacenter() *schema.Resource {
@@ -116,8 +117,8 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	createdDatacenter, apiResponse, err := client.DataCentersApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating data center (%s) (%w)", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{RequestLocation: requestLocation})
 	}
 	d.SetId(*createdDatacenter.Id)
 
@@ -127,7 +128,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	return resourceDatacenterRead(ctx, d, meta)
@@ -145,12 +146,11 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching a data center ID %s %w", d.Id(), err))
-		return diags
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	if err := setDatacenterData(d, &datacenter); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -175,8 +175,8 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("location") {
 		oldLocation, newLocation := d.GetChange("location")
-		diags := diag.FromErr(fmt.Errorf("data center is created in %s location. You can not change location of the data center to %s; it requires recreation of the data center", oldLocation, newLocation))
-		return diags
+
+		return utils.ToDiags(d, fmt.Sprintf("data center is created in %s location. You can not change location of the data center to %s; it requires recreation of the data center", oldLocation, newLocation), nil)
 	}
 
 	if d.HasChange("sec_auth_protection") {
@@ -189,12 +189,12 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while update the data center ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{RequestLocation: requestLocation})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceDatacenterRead(ctx, d, meta)
@@ -208,12 +208,12 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(err)
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{RequestLocation: requestLocation})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")

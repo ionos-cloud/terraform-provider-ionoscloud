@@ -3,10 +3,12 @@ package utils
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"reflect"
 	"regexp"
@@ -16,6 +18,7 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -435,4 +438,63 @@ func ToInterfaceSlice[T any](slice []T) []interface{} {
 		r[i] = v
 	}
 	return r
+}
+
+var requestIDPattern = regexp.MustCompile(`/requests/([-A-Fa-f0-9]+)/`)
+
+// DiagsOpts contains optional fields for enhancing error messages.
+type DiagsOpts struct {
+	Timeout            string
+	ResourceNameString string // The schema key for the resource name (e.g., "name", "display_name")
+	RequestLocation    *url.URL
+}
+
+// ToDiags wraps an error into a Terraform diagnostic with additional context.
+func ToDiags(d *schema.ResourceData, err string, opts *DiagsOpts) diag.Diagnostics {
+	targetField := "name"
+	if opts != nil && opts.ResourceNameString != "" {
+		targetField = opts.ResourceNameString
+	}
+
+	var sb strings.Builder
+
+	sb.WriteString("Error: ")
+	sb.WriteString(err)
+
+	if strings.Contains(err, "500") {
+		sb.WriteString(" This is an API Error. Please contact API support.")
+	}
+
+	if d.Id() != "" {
+		fmt.Fprintf(&sb, "\nResource ID: %s", d.Id())
+	}
+
+	if v, ok := d.GetOk(targetField); ok {
+		if nameVal, isString := v.(string); isString {
+			fmt.Fprintf(&sb, "\nResource Name: %s", nameVal)
+		}
+	}
+
+	if opts != nil {
+		if opts.Timeout != "" {
+			fmt.Fprintf(&sb, "\nConfigured timeout: %s", opts.Timeout)
+		}
+		if opts.RequestLocation != nil {
+			reqID := extractRequestId(opts.RequestLocation.String())
+			if reqID != "" {
+				fmt.Fprintf(&sb, "\nRequest ID: %s", reqID)
+			}
+		}
+	}
+
+	return diag.FromErr(errors.New(sb.String()))
+}
+
+// extractRequestId parses the HTTP header string to find the UUID request ID.
+func extractRequestId(loc string) string {
+	matches := requestIDPattern.FindStringSubmatch(loc)
+	if len(matches) > 1 {
+		return matches[1]
+	}
+	return ""
 }
