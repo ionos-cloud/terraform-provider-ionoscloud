@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -12,7 +11,7 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func resourceNSG() *schema.Resource {
@@ -44,17 +43,23 @@ func resourceNSG() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	datacenterID := d.Get("datacenter_id").(string)
 	sgName := d.Get("name").(string)
 	sgDescription := d.Get("description").(string)
+	location := d.Get("location").(string)
+
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	client := config.NewAPIClient(location)
 
 	sg := ionoscloud.SecurityGroupRequest{
 		Properties: &ionoscloud.SecurityGroupProperties{
@@ -69,7 +74,7 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 		return diag.FromErr(fmt.Errorf("an error occurred while creating a Network Security Group for datacenter dcID: %s, %w", datacenterID, err))
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %w", datacenterID, err))
+		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %w", datacenterID, errState))
 	}
 	d.SetId(*securityGroup.Id)
 
@@ -77,8 +82,11 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 }
 
 func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	datacenterID := d.Get("datacenter_id").(string)
+	location := d.Get("location").(string)
+
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	client := config.NewAPIClient(location)
 
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, d.Id()).Depth(2).Execute()
 	apiResponse.LogInfo()
@@ -93,11 +101,13 @@ func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	datacenterID := d.Get("datacenter_id").(string)
 	sgName := d.Get("name").(string)
 	sgDescription := d.Get("description").(string)
+	location := d.Get("location").(string)
+
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	client := config.NewAPIClient(location)
 
 	sg := ionoscloud.SecurityGroupRequest{
 		Properties: &ionoscloud.SecurityGroupProperties{
@@ -121,9 +131,11 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	datacenterID := d.Get("datacenter_id").(string)
+	location := d.Get("location").(string)
+
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	client := config.NewAPIClient(location)
 
 	apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsDelete(ctx, datacenterID, d.Id()).Execute()
 	apiResponse.LogInfo()
@@ -140,16 +152,20 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location, parts := splitImportID(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import identifier: expected format <location>:<datacenter-id>/<nsg-id> or <datacenter-id>/<nsg-id>, got: %s", d.Id())
+	}
 
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) < 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter UUID}/{nsg UUID}", d.Id())
+	if err := validateImportIDParts(d.Id(), parts); err != nil {
+		return nil, fmt.Errorf("error validating import identifier: %w", err)
 	}
 
 	datacenterID := parts[0]
 	nsgID := parts[1]
+
+	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
+	client := config.NewAPIClient(location)
 
 	nsg, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, nsgID).Execute()
 	logApiRequestTime(apiResponse)
