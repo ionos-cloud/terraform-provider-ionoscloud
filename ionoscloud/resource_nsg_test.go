@@ -227,8 +227,6 @@ func TestAccNSGFirewallRules(t *testing.T) {
 }
 
 func testAccCheckNSGDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -239,6 +237,10 @@ func testAccCheckNSGDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.NSGResource {
 			continue
 		}
+
+		config := testAccProvider.Meta().(bundleclient.SdkBundle).CloudAPIConfig
+		client := config.NewAPIClient(rs.Primary.Attributes["location"])
+
 		_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
@@ -256,8 +258,6 @@ func testAccCheckNSGDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNSGExists(n string, nsg *ionoscloud.SecurityGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -274,6 +274,9 @@ func testAccCheckNSGExists(n string, nsg *ionoscloud.SecurityGroup) resource.Tes
 			defer cancel()
 		}
 
+		config := testAccProvider.Meta().(bundleclient.SdkBundle).CloudAPIConfig
+		client := config.NewAPIClient(rs.Primary.Attributes["location"])
+
 		foundNSG, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
@@ -288,8 +291,6 @@ func testAccCheckNSGExists(n string, nsg *ionoscloud.SecurityGroup) resource.Tes
 }
 
 func testAccCheckNSGRuleDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -300,6 +301,10 @@ func testAccCheckNSGRuleDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.NSGFirewallRuleResource {
 			continue
 		}
+
+		config := testAccProvider.Meta().(bundleclient.SdkBundle).CloudAPIConfig
+		client := config.NewAPIClient(rs.Primary.Attributes["location"])
+
 		_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["nsg_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
@@ -317,8 +322,6 @@ func testAccCheckNSGRuleDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNSGFirewallRuleExists(n string, rule *ionoscloud.FirewallRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -334,6 +337,9 @@ func testAccCheckNSGFirewallRuleExists(n string, rule *ionoscloud.FirewallRule) 
 		if cancel != nil {
 			defer cancel()
 		}
+
+		config := testAccProvider.Meta().(bundleclient.SdkBundle).CloudAPIConfig
+		client := config.NewAPIClient(rs.Primary.Attributes["location"])
 
 		foundRule, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["nsg_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
