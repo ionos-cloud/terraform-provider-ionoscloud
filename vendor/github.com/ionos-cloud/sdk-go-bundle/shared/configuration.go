@@ -124,28 +124,29 @@ type ResponseMiddlewareFunction func(*http.Response, []byte) error
 
 // Configuration stores the configuration of the API client
 type Configuration struct {
-	Host               string            `json:"host,omitempty"`
-	Scheme             string            `json:"scheme,omitempty"`
-	DefaultHeader      map[string]string `json:"defaultHeader,omitempty"`
-	DefaultQueryParams url.Values        `json:"defaultQueryParams,omitempty"`
-	UserAgent          string            `json:"userAgent,omitempty"`
-	Servers            ServerConfigurations
-	OperationServers   map[string]ServerConfigurations
-	HTTPClient         *http.Client
-	Username           string        `json:"username,omitempty"`
-	Password           string        `json:"password,omitempty"`
-	Token              string        `json:"token,omitempty"`
-	MaxRetries         int           `json:"maxRetries,omitempty"`
-	WaitTime           time.Duration `json:"waitTime,omitempty"`
-	MaxWaitTime        time.Duration `json:"maxWaitTime,omitempty"`
-	PollInterval       time.Duration `json:"pollInterval,omitempty"`
+	Host               string                          `json:"host,omitempty"`
+	Scheme             string                          `json:"scheme,omitempty"`
+	DefaultHeader      map[string]string               `json:"defaultHeader,omitempty"`
+	DefaultQueryParams url.Values                      `json:"defaultQueryParams,omitempty"`
+	UserAgent          string                          `json:"userAgent,omitempty"`
+	Servers            ServerConfigurations            `json:"-"`
+	OperationServers   map[string]ServerConfigurations `json:"-"`
+	HTTPClient         *http.Client                    `json:"-"` // blank out to avoid serialization on DeepCopy etc.
+	Username           string                          `json:"username,omitempty"`
+	Password           string                          `json:"password,omitempty"`
+	Token              string                          `json:"token,omitempty"`
+	MaxRetries         int                             `json:"maxRetries,omitempty"`
+	WaitTime           time.Duration                   `json:"waitTime,omitempty"`
+	MaxWaitTime        time.Duration                   `json:"maxWaitTime,omitempty"`
+	PollInterval       time.Duration                   `json:"pollInterval,omitempty"`
 
 	Middleware          MiddlewareFunction          `json:"-"`
 	MiddlewareWithError MiddlewareFunctionWithError `json:"-"`
 	ResponseMiddleware  ResponseMiddlewareFunction  `json:"-"`
 }
 
-// NewConfiguration returns a new shared.Configuration object
+// NewConfiguration returns a new shared.Configuration object.
+// We recommend using NewConfigurationFromOptions, which allows to set more options and initializes the object storage middleware
 func NewConfiguration(username, password, token, hostUrl string) *Configuration {
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
@@ -220,6 +221,9 @@ func NewConfigurationFromOptions(clientOptions ClientOptions) *Configuration {
 		}
 	}
 	cfg.HTTPClient.Transport = CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)
+	if clientOptions.Credentials.S3AccessKey != "" && clientOptions.Credentials.S3SecretKey != "" {
+		cfg = cfg.WithObjectStorage(clientOptions)
+	}
 	return cfg
 }
 
@@ -292,8 +296,15 @@ func (c *Configuration) AddDefaultHeader(key string, value string) {
 	c.DefaultHeader[key] = value
 }
 
+// AddDefaultQueryParam stores default query parameters as slices.
+// Each call adds a value to the slice for that key, allowing multiple
+// query parameters with the same name to be sent in the final request.
 func (c *Configuration) AddDefaultQueryParam(key string, value string) {
-	c.DefaultQueryParams[key] = []string{value}
+	if c.DefaultQueryParams[key] == nil {
+		c.DefaultQueryParams[key] = []string{value}
+		return
+	}
+	c.DefaultQueryParams[key] = append(c.DefaultQueryParams[key], value)
 }
 
 // URL formats template on a index using given variables

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -97,8 +97,6 @@ func resourceIPBlock() *schema.Resource {
 }
 
 func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	size := d.Get("size").(int)
 	sizeConverted := int32(size)
 	location := d.Get("location").(string)
@@ -110,6 +108,8 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 			Name:     &name,
 		},
 	}
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	ipblock, apiResponse, err := client.IPBlocksApi.IpblocksPost(ctx).Ipblock(ipblock).Execute()
 	logApiRequestTime(apiResponse)
@@ -131,7 +131,9 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -154,7 +156,9 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	request := ionoscloud.IpBlockProperties{}
 
@@ -177,7 +181,9 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -195,9 +201,20 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	importID := d.Id()
 
-	ipBlockId := d.Id()
+	location, parts := splitImportID(importID, ":")
+	if len(parts) != 1 {
+		return nil, fmt.Errorf("invalid import identifier: expected format 'location:ipBlockId' or 'ipBlockId', got: %q", importID)
+	}
+
+	if err := validateImportIDParts(importID, parts); err != nil {
+		return nil, fmt.Errorf("error validating import identifier: %w", err)
+	}
+
+	ipBlockId := parts[0]
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, ipBlockId).Execute()
 	logApiRequestTime(apiResponse)

@@ -44,6 +44,10 @@ func resourceLan() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"pcc": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -89,7 +93,9 @@ func resourceLan() *schema.Resource {
 }
 
 func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+
 	public := d.Get("public").(bool)
 	request := ionoscloud.Lan{
 		Properties: &ionoscloud.LanProperties{
@@ -168,7 +174,8 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	dcid := d.Get("datacenter_id").(string)
 
@@ -196,7 +203,9 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+
 	properties := &ionoscloud.LanProperties{}
 	newValue := d.Get("public")
 	public := newValue.(bool)
@@ -247,8 +256,9 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
 		return diag.FromErr(err)
@@ -291,16 +301,24 @@ func isDeleteProtected(apiResponse *ionoscloud.APIResponse, errMessage string) b
 }
 
 func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	importID := d.Id()
 
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{lan}", d.Id())
+	location, resourceIDs := splitImportID(importID, "/")
+	if len(resourceIDs) != 2 {
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected format '<location>:<datacenter_id>/<lan_id>' "+
+				"or '<datacenter_id>/<lan_id>', got: %s", importID,
+		)
 	}
 
-	datacenterId := parts[0]
-	lanId := parts[1]
+	if err := validateImportIDParts(importID, resourceIDs); err != nil {
+		return nil, fmt.Errorf("error validating import identifier: %w", err)
+	}
+
+	datacenterId := resourceIDs[0]
+	lanId := resourceIDs[1]
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, datacenterId, lanId).Execute()
 	logApiRequestTime(apiResponse)

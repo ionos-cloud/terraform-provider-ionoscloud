@@ -91,11 +91,9 @@ func resourceDatacenter() *schema.Resource {
 }
 
 func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	datacenterName := d.Get("name").(string)
 	datacenterLocation := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
 
 	datacenter := ionoscloud.DatacenterPost{
 		Properties: &ionoscloud.DatacenterPropertiesPost{
@@ -135,7 +133,8 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	datacenterLocation := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -158,8 +157,10 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	obj := ionoscloud.DatacenterPropertiesPut{}
+
+	datacenterLocation := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
 
 	if d.HasChange("name") {
 		_, newName := d.GetChange("name")
@@ -202,7 +203,8 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	datacenterLocation := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
 
 	apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -221,11 +223,21 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	importID := d.Id()
+	location, resourceIDs := splitImportID(importID, ":")
+	if len(resourceIDs) != 1 {
+		return nil, fmt.Errorf("invalid import identifier: expected format <location>:<datacenter-id> or <datacenter-id>")
+	}
 
-	dcId := d.Id()
+	if err := validateImportIDParts(importID, resourceIDs); err != nil {
+		return nil, fmt.Errorf("error validating import identifier: %w", err)
+	}
 
-	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
+	dcId := resourceIDs[0]
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+
+	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
