@@ -520,7 +520,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 }
 ` + ServerImagePassword
 
-// Solves  #372 crash when ips field in nic resource is a list with an empty string
 const testAccCheckServerConfigEmptyNicIps = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
@@ -1581,7 +1580,6 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
 }
 ` + ServerImagePassword
 
-// Solves  #372 crash when ips field in nic resource is a list with an empty string
 const testAccCheckServerVCPUConfigEmptyNicIps = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
