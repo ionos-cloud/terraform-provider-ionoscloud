@@ -91,6 +91,10 @@ var SchemaNicElem = map[string]*schema.Schema{
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				"id": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
 				"name": {
 					Type:     schema.TypeString,
 					Optional: true,

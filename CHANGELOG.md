@@ -3,6 +3,10 @@
 - Added Kafka users data source: `ionoscloud_kafka_users`, user access credentials data source: `ionoscloud_kafka_user_credentials` and user access credentials ephemeral resource: `ionoscloud_kafka_user_credentials`.
 ### Documentation
 - Updated documentation for S3 buckets.
+### Fixes
+- Add back missing `id` field in `ionoscloud_server.nic.firewall` sub-resource, which caused an error when trying to create a server with firewall rules defined on a nic.
+### Tests
+- Fix server tests.
 
 ## 6.7.22
 ### Features
