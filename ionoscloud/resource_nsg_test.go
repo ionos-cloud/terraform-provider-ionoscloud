@@ -238,9 +238,7 @@ func testAccCheckNSGDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		config := testAccProvider.Meta().(bundleclient.SdkBundle).CloudAPIConfig
-		client := config.NewAPIClient(rs.Primary.Attributes["location"])
-
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
 		_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
@@ -274,9 +272,7 @@ func testAccCheckNSGExists(n string, nsg *ionoscloud.SecurityGroup) resource.Tes
 			defer cancel()
 		}
 
-		config := testAccProvider.Meta().(bundleclient.SdkBundle).CloudAPIConfig
-		client := config.NewAPIClient(rs.Primary.Attributes["location"])
-
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
 		foundNSG, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
@@ -302,9 +298,7 @@ func testAccCheckNSGRuleDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		config := testAccProvider.Meta().(bundleclient.SdkBundle).CloudAPIConfig
-		client := config.NewAPIClient(rs.Primary.Attributes["location"])
-
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
 		_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["nsg_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
@@ -338,9 +332,7 @@ func testAccCheckNSGFirewallRuleExists(n string, rule *ionoscloud.FirewallRule) 
 			defer cancel()
 		}
 
-		config := testAccProvider.Meta().(bundleclient.SdkBundle).CloudAPIConfig
-		client := config.NewAPIClient(rs.Primary.Attributes["location"])
-
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
 		foundRule, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["nsg_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {

@@ -109,8 +109,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 		},
 	}
 
-	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	ipblock, apiResponse, err := client.IPBlocksApi.IpblocksPost(ctx).Ipblock(ipblock).Execute()
 	logApiRequestTime(apiResponse)
@@ -134,8 +133,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
 
-	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -160,8 +158,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
 
-	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	request := ionoscloud.IpBlockProperties{}
 
@@ -186,8 +183,7 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
 
-	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -218,8 +214,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta i
 
 	ipBlockId := parts[0]
 
-	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, ipBlockId).Execute()
 	logApiRequestTime(apiResponse)
