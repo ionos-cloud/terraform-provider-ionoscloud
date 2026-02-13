@@ -305,15 +305,17 @@ func isDeleteProtected(apiResponse *ionoscloud.APIResponse, errMessage string) b
 }
 
 func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	location, resourceIDs := splitImportID(d.Id(), "/")
+	importID := d.Id()
+
+	location, resourceIDs := splitImportID(importID, "/")
 	if len(resourceIDs) != 2 {
 		return nil, fmt.Errorf(
 			"invalid import identifier: expected format '<location>:<datacenter_id>/<lan_id>' "+
-				"or '<datacenter_id>/<lan_id>', got: %s", d.Id(),
+				"or '<datacenter_id>/<lan_id>', got: %s", importID,
 		)
 	}
 
-	if err := validateImportIDParts(d.Id(), resourceIDs); err != nil {
+	if err := validateImportIDParts(importID, resourceIDs); err != nil {
 		return nil, fmt.Errorf("error validating import identifier: %w", err)
 	}
 

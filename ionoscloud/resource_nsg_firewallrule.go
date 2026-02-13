@@ -201,12 +201,17 @@ func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	location, parts := splitImportID(d.Id(), "/")
+	importID := d.Id()
+
+	location, parts := splitImportID(importID, "/")
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{nsg}/{firewall}", d.Id())
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected format <location>:<datacenter-id>/<nsg-id>/<firewall-id> "+
+				"or <datacenter-id>/<nsg-id>/<firewall-id>, got: %s", importID,
+		)
 	}
 
-	if err := validateImportIDParts(d.Id(), parts); err != nil {
+	if err := validateImportIDParts(importID, parts); err != nil {
 		return nil, fmt.Errorf("error validating import id: %w", err)
 	}
 
