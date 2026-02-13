@@ -112,8 +112,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	var apiResponse *ionoscloud.APIResponse
 
 	location := d.Get("location").(string)
-	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	if idOk {
 		/* search by ID */

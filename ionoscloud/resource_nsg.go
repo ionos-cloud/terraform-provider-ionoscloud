@@ -59,8 +59,7 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	sgDescription := d.Get("description").(string)
 	location := d.Get("location").(string)
 
-	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	sg := ionoscloud.SecurityGroupRequest{
 		Properties: &ionoscloud.SecurityGroupProperties{
@@ -86,8 +85,7 @@ func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface
 	datacenterID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, d.Id()).Depth(2).Execute()
 	apiResponse.LogInfo()
@@ -107,8 +105,7 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	sgDescription := d.Get("description").(string)
 	location := d.Get("location").(string)
 
-	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	sg := ionoscloud.SecurityGroupRequest{
 		Properties: &ionoscloud.SecurityGroupProperties{
@@ -135,8 +132,7 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	datacenterID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsDelete(ctx, datacenterID, d.Id()).Execute()
 	apiResponse.LogInfo()
@@ -167,8 +163,7 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	datacenterID := parts[0]
 	nsgID := parts[1]
 
-	config := meta.(bundleclient.SdkBundle).CloudAPIConfig
-	client := config.NewAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	nsg, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, nsgID).Execute()
 	logApiRequestTime(apiResponse)
