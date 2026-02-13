@@ -174,8 +174,6 @@ func TestAccVolumeResolveImageName(t *testing.T) {
 }
 
 func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
@@ -186,6 +184,9 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.VolumeResource {
 			continue
 		}
+
+		location := rs.Primary.Attributes["location"]
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 		_, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
@@ -204,8 +205,6 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 
 func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -221,6 +220,9 @@ func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.Test
 		if cancel != nil {
 			defer cancel()
 		}
+
+		location := rs.Primary.Attributes["location"]
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 		foundServer, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)

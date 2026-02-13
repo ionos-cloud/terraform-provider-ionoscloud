@@ -82,6 +82,7 @@ type SdkBundle struct {
 	fileConfig    *fileconfiguration.FileConfig
 }
 
+// newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.
 func (c SdkBundle) newCloudAPIClientConfig() *ionoscloud.Configuration {
 	config := ionoscloud.NewConfiguration(
 		c.clientOptions.Credentials.Username, c.clientOptions.Credentials.Password, c.clientOptions.Credentials.Token, c.clientOptions.Endpoint,
@@ -101,6 +102,7 @@ func (c SdkBundle) newCloudAPIClientConfig() *ionoscloud.Configuration {
 	return config
 }
 
+// NewCloudAPIClient creates a new *ionoscloud.APIClient using the client options and file config defined in the SdkBundle struct.
 func (c SdkBundle) NewCloudAPIClient(location string) *ionoscloud.APIClient {
 	config := c.newCloudAPIClientConfig()
 
