@@ -47,8 +47,7 @@ func NewConfig(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	}
 }
 
-// CopyClientConfig creates a deep copy of the client configuration to ensure that modifications to the returned configuration
-// do not affect the original configuration stored in Config.
+// CopyClientConfig creates a deep copy of the client configuration.
 func (c Config) CopyClientConfig() ionoscloud.Configuration {
 	// Copy directly what can be copied with a simple assignment
 	// Also allows for unmarshalling into the Logger interface without issues

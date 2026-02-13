@@ -140,7 +140,7 @@ func splitImportID(importID, del string) (location string, resourceIDs []string)
 func validateImportIDParts(importID string, parts []string) error {
 	for _, id := range parts {
 		if id == "" {
-			return fmt.Errorf("invalid identifier: all parts of an import ID must be provided and non-empty, got %q", importID)
+			return fmt.Errorf("invalid identifier: all parts of an import ID must be provided and non-empty, got: %q", importID)
 		}
 	}
 

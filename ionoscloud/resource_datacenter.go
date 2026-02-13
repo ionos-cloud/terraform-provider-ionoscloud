@@ -229,12 +229,13 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	location, resourceIDs := splitImportID(d.Id(), ":")
+	importID := d.Id()
+	location, resourceIDs := splitImportID(importID, ":")
 	if len(resourceIDs) != 1 {
 		return nil, fmt.Errorf("invalid import identifier: expected format <location>:<datacenter-id> or <datacenter-id>")
 	}
 
-	if err := validateImportIDParts(d.Id(), resourceIDs); err != nil {
+	if err := validateImportIDParts(importID, resourceIDs); err != nil {
 		return nil, fmt.Errorf("error validating import identifier: %w", err)
 	}
 
