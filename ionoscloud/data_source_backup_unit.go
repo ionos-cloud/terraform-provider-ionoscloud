@@ -44,7 +44,7 @@ func dataSourceBackupUnit() *schema.Resource {
 }
 
 func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")

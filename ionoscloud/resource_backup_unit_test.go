@@ -81,8 +81,6 @@ func TestAccBackupUnitBasic(t *testing.T) {
 }
 
 func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -94,6 +92,8 @@ func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.BackupUnitResource {
 			continue
 		}
+
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 		_, apiResponse, err := BackupUnitFindByID(ctx, rs.Primary.ID, client)
 		logApiRequestTime(apiResponse)
@@ -113,8 +113,6 @@ func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 
 func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -130,6 +128,8 @@ func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 		if cancel != nil {
 			defer cancel()
 		}
+
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 		foundBackupUnit, apiResponse, err := BackupUnitFindByID(ctx, rs.Primary.ID, client)
 		logApiRequestTime(apiResponse)
