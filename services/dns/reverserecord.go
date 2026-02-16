@@ -15,7 +15,7 @@ import (
 var reverseRecordResourceName = "DNS Reverse Record"
 
 // CreateReverseRecord creates a new reverse record
-func (c *Client) CreateReverseRecord(ctx context.Context, d *schema.ResourceData) (recordResponse dns.ReverseRecordRead, responseInfo utils.ApiResponseInfo, err error) {
+func (c *Client) CreateReverseRecord(ctx context.Context, d *schema.ResourceData) (recordResponse dns.ReverseRecordRead, responseInfo *shared.APIResponse, err error) {
 	recordUUID := uuidgen.ResourceUuid()
 	request := setReverseRecordPutRequest(d)
 	reverseRecordResponse, apiResponse, err := c.sdkClient.ReverseRecordsApi.ReverserecordsPut(ctx, recordUUID.String()).ReverseRecordEnsure(request).Execute()
@@ -59,7 +59,7 @@ func (c *Client) SetReverseRecordData(d *schema.ResourceData, record dns.Reverse
 	return nil
 }
 
-func (c *Client) DeleteReverseRecord(ctx context.Context, recordID string) (utils.ApiResponseInfo, error) {
+func (c *Client) DeleteReverseRecord(ctx context.Context, recordID string) (*shared.APIResponse, error) {
 	_, apiResponse, err := c.sdkClient.ReverseRecordsApi.ReverserecordsDelete(ctx, recordID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -72,7 +72,7 @@ func (c *Client) IsReverseRecordDeleted(ctx context.Context, d *schema.ResourceD
 	return apiResponse.HttpNotFound(), err
 }
 
-func (c *Client) UpdateReverseRecord(ctx context.Context, recordID string, d *schema.ResourceData) (dns.ReverseRecordRead, utils.ApiResponseInfo, error) {
+func (c *Client) UpdateReverseRecord(ctx context.Context, recordID string, d *schema.ResourceData) (dns.ReverseRecordRead, *shared.APIResponse, error) {
 	request := setReverseRecordPutRequest(d)
 	recordResponse, apiResponse, err := c.sdkClient.ReverseRecordsApi.ReverserecordsPut(ctx, recordID).ReverseRecordEnsure(request).Execute()
 	apiResponse.LogInfo()

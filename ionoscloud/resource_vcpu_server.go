@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -282,7 +283,7 @@ func resourceVCPUServer() *schema.Resource {
 
 func resourceVCPUServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	if err := d.Set("type", constant.VCPUType); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	return resourceServerCreate(ctx, d, meta)
 }

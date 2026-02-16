@@ -219,7 +219,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	// create volume object with data to be used for image
 	volumeProperties, err := getVolumeData(d, "", "")
 	if err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	volume := ionoscloud.Volume{
@@ -227,7 +227,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 	image, imageAlias, err = getImage(ctx, client, d, *volume.Properties)
 	if err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	if image != "" {
@@ -244,8 +244,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if userData, ok := d.GetOk("user_data"); ok {
 		if image == "" && imageAlias == "" {
-			diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with user_data property "))
-			return diags
+			return utils.ToDiags(d, "it is mandatory to provide either public image that has cloud-init compatibility in conjunction with user_data property ", nil)
 		} else {
 			userData := userData.(string)
 			volume.Properties.UserData = &userData
@@ -255,15 +254,13 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	if backupUnitId, ok := d.GetOk("backup_unit_id"); ok {
 		if utils.IsValidUUID(backupUnitId.(string)) {
 			if image == "" && imageAlias == "" {
-				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property "))
-				return diags
+				return utils.ToDiags(d, "it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property ", nil)
 			} else {
 				backupUnitID := backupUnitId.(string)
 				volume.Properties.BackupunitId = &backupUnitID
 			}
 		} else {
-			diags := diag.FromErr(fmt.Errorf("the backup_unit_id that you specified is not a valid UUID"))
-			return diags
+			return utils.ToDiags(d, "the backup_unit_id that you specified is not a valid UUID", nil)
 		}
 	}
 
@@ -271,8 +268,8 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a volume: %w", err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating a volume: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*volume.Id)
@@ -281,7 +278,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	volumeToAttach := ionoscloud.Volume{Id: volume.Id}
@@ -289,24 +286,23 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volumeToAttach.Id, err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volumeToAttach.Id, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	sErr := d.Set("server_id", serverId)
 
 	if sErr != nil {
-		diags := diag.FromErr(fmt.Errorf("error while setting serverId %s: %w", serverId, sErr))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error while setting serverId %s: %s", serverId, sErr), nil)
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
 			if sErr := d.Set("server_id", ""); sErr != nil {
-				return diag.FromErr(fmt.Errorf("error while setting serverId: %s", sErr))
+				return utils.ToDiags(d, fmt.Sprintf("error while setting serverId: %s", sErr), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 			}
 		}
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), nil)
 	}
 
 	return resourceVolumeRead(ctx, d, meta)
@@ -327,21 +323,20 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occurred while fetching volume with ID %s: %w", d.Id(), err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error occurred while fetching volume with: %s", err), nil)
 	}
 
 	_, apiResponse, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if err2 := d.Set("server_id", ""); err2 != nil {
-			diags := diag.FromErr(err2)
-			return diags
+			requestLocation, _ := apiResponse.Location()
+			return utils.ToDiags(d, err2.Error(), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 		}
 	}
 
 	if err := setVolumeData(d, &volume); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -386,19 +381,19 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating volume with ID %s: %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while updating volume with: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 
 	}
 
 	// Wait, catching any errors
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode > 299 {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a volume ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while updating a volume: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if d.HasChange("server_id") {
@@ -408,13 +403,13 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volumeToAttach).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
-				dcId, serverID, *volume.Id, err))
-			return diags
+			requestLocation, _ := apiResponse.Location()
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
+				dcId, serverID, *volume.Id, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-			return diag.FromErr(errState)
+			return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 		}
 	}
 
@@ -429,13 +424,13 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a volume ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while deleting a volume: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -445,7 +440,7 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
+		return nil, utils.ToError(d, "invalid import. Expecting {datacenter}/{server}/{volume}", nil)
 	}
 
 	client := meta.(bundleclient.SdkBundle).CloudApiClient
@@ -460,24 +455,24 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("volume does not exist %q", volumeId)
+			return nil, utils.ToError(d, fmt.Sprintf("volume does not exist %q", volumeId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while trying to find the volume %q", volumeId)
+		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while trying to find the volume %q", volumeId), nil)
 	}
 
 	log.Printf("[INFO] volume found: %+v", volume)
 
 	d.SetId(*volume.Id)
 	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	if err := d.Set("server_id", srvId); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	if err := setVolumeData(d, &volume); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

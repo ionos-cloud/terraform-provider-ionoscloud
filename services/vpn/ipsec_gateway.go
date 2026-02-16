@@ -45,7 +45,7 @@ func (c *Client) ListIPSecGateway(ctx context.Context, location string) (vpn.IPS
 }
 
 // DeleteIPSecGateway deletes a VPN IPSec Gateway by its ID and location
-func (c *Client) DeleteIPSecGateway(ctx context.Context, id string, location string) (utils.ApiResponseInfo, error) {
+func (c *Client) DeleteIPSecGateway(ctx context.Context, id string, location string) (*shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.APIGateway, location)
 	apiResponse, err := c.sdkClient.IPSecGatewaysApi.IpsecgatewaysDelete(ctx, id).Execute()
 	apiResponse.LogInfo()

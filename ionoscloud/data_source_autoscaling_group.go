@@ -374,7 +374,7 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	name, nameOk := d.GetOk("name")
 
 	if err := validateIDAndName(idOk, nameOk); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	var (
@@ -389,12 +389,12 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	d.SetId(group.Id)
 	if err = setAutoscalingGroupData(d, &group.Properties); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	apigateway "github.com/ionos-cloud/sdk-go-bundle/products/apigateway/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -113,23 +114,24 @@ func dataSourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, 
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
+		return utils.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the API Gateway Route ID or name"))
+		return utils.ToDiags(d, "please provide either the API Gateway Route ID or name", nil)
 	}
 
 	var route apigateway.RouteRead
+	var apiResponse *shared.APIResponse
 	var err error
 	if idOk {
-		route, _, err = client.GetRouteByID(ctx, gatewayID, id)
+		route, apiResponse, err = client.GetRouteByID(ctx, gatewayID, id)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the API Gateway Route with ID: %s, error: %w", idValue, err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the API Gateway Route with ID: %s, error: %s", idValue, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
-		routes, _, err := client.ListRoutes(ctx, gatewayID)
+		routes, apiResponse, err := client.ListRoutes(ctx, gatewayID)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching API Gateway Route: %w", err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching API Gateway Route: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []apigateway.RouteRead
@@ -141,16 +143,16 @@ func dataSourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, 
 
 		switch {
 		case len(results) == 0:
-			return diag.FromErr(fmt.Errorf("no API Gateway Route found with the specified name: %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("no API Gateway Route found with the specified name: %s", name), nil)
 		case len(results) > 1:
-			return diag.FromErr(fmt.Errorf("more than one API Gateway Route found with the specified name: %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("more than one API Gateway Route found with the specified name: %s", name), nil)
 		default:
 			route = results[0]
 		}
 	}
 
 	if err = client.SetAPIGatewayRouteData(d, route); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

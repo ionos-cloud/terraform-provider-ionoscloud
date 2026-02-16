@@ -7,9 +7,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	vpnSdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 )
 
@@ -114,24 +116,25 @@ func dataSourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, 
 	location := d.Get("location").(string)
 
 	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
+		return utils.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the IPSec Gateway ID or name"))
+		return utils.ToDiags(d, "please provide either the IPSec Gateway ID or name", nil)
 	}
 
 	var gateway vpnSdk.IPSecGatewayRead
+	var apiResponse *shared.APIResponse
 	var err error
 	if idOk {
-		gateway, _, err = client.GetIPSecGatewayByID(ctx, id, location)
+		gateway, apiResponse, err = client.GetIPSecGatewayByID(ctx, id, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the IPSec Gateway with ID: %s, error: %w", id, err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the IPSec Gateway with ID: %s, error: %s", id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []vpnSdk.IPSecGatewayRead
-		gateways, _, err := client.ListIPSecGateway(ctx, location)
+		gateways, apiResponse, err := client.ListIPSecGateway(ctx, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching IPSec Gateways: %w", err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching IPSec Gateways: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		for _, recordItem := range gateways.Items {
@@ -146,19 +149,19 @@ func dataSourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, 
 
 		switch {
 		case len(results) == 0:
-			return diag.FromErr(fmt.Errorf("no VPN IPSec Gateway found with the specified name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("no VPN IPSec Gateway found with the specified name = %s", name), nil)
 		case len(results) > 1:
-			return diag.FromErr(fmt.Errorf("more than one VPN IPSec Gateway found with the specified name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("more than one VPN IPSec Gateway found with the specified name = %s", name), nil)
 		default:
 			gateway = results[0]
 		}
 	}
 	if err := d.Set("id", gateway.Id); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	if err := vpn.SetIPSecGatewayData(d, gateway); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }

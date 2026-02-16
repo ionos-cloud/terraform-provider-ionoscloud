@@ -122,8 +122,8 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("an error occurred while creating LAN: %w", err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating LAN: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*rsp.Id)
@@ -136,7 +136,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 				d.SetId("")
 			}
 		}
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	for {
@@ -145,8 +145,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		lanReady, rsErr := lanAvailable(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of LAN %s: %w", *rsp.Id, rsErr))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("error while checking readiness status of LAN %s: %s", *rsp.Id, rsErr), nil)
 		}
 
 		if lanReady {
@@ -159,8 +158,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] lan creation timed out")
-			diags := diag.FromErr(fmt.Errorf("lan creation timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags
+			return utils.ToDiags(d, "lan creation timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", nil)
 		}
 	}
 
@@ -182,14 +180,13 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 			return nil
 		}
 
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a LAN %s: %w", d.Id(), err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching a LAN: %s", err), nil)
 	}
 
 	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
 
 	if err := setLanData(d, &lan); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -235,12 +232,12 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while patching a lan ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while patching a lan: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceLanRead(ctx, d, meta)
@@ -251,7 +248,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	dcId := d.Get("datacenter_id").(string)
 
 	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	err := retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
@@ -271,11 +268,11 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 		return nil
 	})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while deleting lan dcId %s %s", dcId, err), nil)
 	}
 
 	if err := waitForLanDeletion(ctx, client, d); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	d.SetId("")
@@ -296,7 +293,7 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{lan}", d.Id())
+		return nil, utils.ToError(d, "invalid import. Expecting {datacenter}/{lan}", nil)
 	}
 
 	datacenterId := parts[0]
@@ -308,19 +305,19 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find lan %q", lanId)
+			return nil, utils.ToError(d, fmt.Sprintf("unable to find lan %q", lanId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving the lan %q, %w", lanId, err)
+		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while retrieving the lan %q, %s", lanId, err), nil)
 	}
 
 	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
-		return nil, fmt.Errorf("error while setting datacenter_id property for lan %q: %w", lanId, err)
+		return nil, utils.ToError(d, fmt.Sprintf("error while setting datacenter_id property for lan %q: %s", lanId, err), nil)
 	}
 
 	if err := setLanData(d, &lan); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

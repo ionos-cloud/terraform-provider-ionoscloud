@@ -121,20 +121,20 @@ func resourceLoggingPipeline() *schema.Resource {
 
 func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).LoggingClient
-	pipelineResponse, _, err := client.CreatePipeline(ctx, d)
+	pipelineResponse, apiResponse, err := client.CreatePipeline(ctx, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while creating a Logging pipeline: %w", err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating a Logging pipeline: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(pipelineResponse.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the pipeline with ID: %s to become available: %w", pipelineResponse.Id, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for the pipeline with ID: %s to become available: %s", pipelineResponse.Id, err), nil)
 	}
 	// only received in the create response
 	if pipelineResponse.Properties.Key != nil {
 		err = d.Set("key", pipelineResponse.Properties.Key)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while setting the key for the Logging pipeline with ID: %s, error: %w", pipelineResponse.Id, err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while setting the key for the Logging pipeline with ID: %s, error: %s", pipelineResponse.Id, err), nil)
 		}
 	}
 	// Make another read and set the data in the state because 'grafanaAddress` is not returned in the create response
@@ -155,12 +155,12 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("error while fetching Logging pipeline with ID: %s, err: %w", pipelineID, err))
+		return utils.ToDiags(d, fmt.Sprintf("error while fetching Logging pipeline: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retrieved Logging pipeline with ID: %s: %+v", pipelineID, pipeline)
 	if err := client.SetPipelineData(d, pipeline); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -176,12 +176,12 @@ func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("error while deleting Logging pipeline with ID: %s, location %s, error: %w", pipelineID, location, err))
+		return utils.ToDiags(d, fmt.Sprintf("error while deleting Logging pipeline, location %s, error: %s", location, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsPipelineDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while wainting for Logging pipeline with ID: %s to be deleted, error: %w", pipelineID, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Logging pipeline to be deleted: %s", err), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 	return nil
 }
@@ -190,16 +190,16 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineID := d.Id()
 
-	pipelineResponse, _, err := client.UpdatePipeline(ctx, pipelineID, d)
+	pipelineResponse, apiResponse, err := client.UpdatePipeline(ctx, pipelineID, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while updating the Logging pipeline with ID: %s, error: %w", pipelineID, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while updating the Logging pipeline: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while waiting for the Logging pipeline with ID: %s to become available: %w", pipelineID, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for the Logging pipeline to become available: %s", err), nil)
 	}
 	if err := client.SetPipelineData(d, pipelineResponse); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }
@@ -207,18 +207,18 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 func pipelineImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("expected ID in the format location:id")
+		return nil, utils.ToError(d, "expected ID in the format location:id", nil)
 	}
 
 	location := parts[0]
 	if err := d.Set("location", location); err != nil {
-		return nil, fmt.Errorf("failed to set location for Logging Pipeline import: %w", err)
+		return nil, utils.ToError(d, fmt.Sprintf("failed to set location for Logging Pipeline import: %s", err), nil)
 	}
 	d.SetId(parts[1])
 
 	diags := pipelineRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
-		return nil, fmt.Errorf("%s", diags[0].Summary)
+		return nil, utils.ToError(d, diags[0].Summary, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

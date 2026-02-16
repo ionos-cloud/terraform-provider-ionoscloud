@@ -2,7 +2,6 @@ package ionoscloud
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -10,8 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
 
@@ -253,30 +254,27 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 	name, nameOk := d.GetOk("display_name")
 
 	if idOk && nameOk {
-		diags := diag.FromErr(errors.New("id and display_name cannot be both specified in the same time"))
-		return diags
+		return utils.ToDiags(d, "id and display_name cannot be both specified in the same time", nil)
 	}
 	if !idOk && !nameOk {
-		diags := diag.FromErr(errors.New("please provide either the dbaas cluster id or display_name"))
-		return diags
+		return utils.ToDiags(d, "please provide either the dbaas cluster id or display_name", nil)
 	}
 
 	var cluster mongo.ClusterResponse
+	var apiResponse *shared.APIResponse
 	var err error
 
 	if idOk {
 		/* search by ID */
-		cluster, _, err = client.GetCluster(ctx, id.(string))
+		cluster, apiResponse, err = client.GetCluster(ctx, id.(string))
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the dbaas mongo cluster with ID %s: %w", id.(string), err))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the dbaas mongo cluster with ID %s: %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
-		clusters, _, err := client.ListClusters(ctx, "")
+		clusters, apiResponse, err := client.ListClusters(ctx, "")
 
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas mongo clusters: %w", err))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching dbaas mongo clusters: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []mongo.ClusterResponse
@@ -291,9 +289,9 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 
 		switch {
 		case len(results) == 0:
-			return diag.FromErr(fmt.Errorf("no DBaaS mongo cluster found with the specified name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("no DBaaS mongo cluster found with the specified name = %s", name), nil)
 		case len(results) > 1:
-			return diag.FromErr(fmt.Errorf("more than one DBaaS mongo cluster found with the specified criteria name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("more than one DBaaS mongo cluster found with the specified criteria name = %s", name), nil)
 		default:
 			cluster = results[0]
 		}
@@ -301,7 +299,7 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 	}
 
 	if err := dbaasService.SetMongoDBClusterData(d, cluster); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

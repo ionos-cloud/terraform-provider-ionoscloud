@@ -119,11 +119,10 @@ func resourceAPIGatewayRoute() *schema.Resource {
 func resourceAPIGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).APIGatewayClient
 
-	createdRoute, _, err := client.CreateRoute(ctx, d)
+	createdRoute, apiResponse, err := client.CreateRoute(ctx, d)
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating API Gateway Route: %w", err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error creating API Gateway Route: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(createdRoute.Id)
@@ -131,8 +130,7 @@ func resourceAPIGatewayRouteCreate(ctx context.Context, d *schema.ResourceData, 
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsAPIGatewayRouteAvailable)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error waiting for API Gateway Route to be ready: %w", err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error waiting for API Gateway Route to be ready: %s", err), nil)
 	}
 
 	return resourceAPIGatewayRouteRead(ctx, d, meta)
@@ -151,13 +149,12 @@ func resourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, me
 			return nil
 		}
 
-		diags := diag.FromErr(fmt.Errorf("error while fetching API Gateway Route %s: %w", d.Id(), err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error while fetching API Gateway Route: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retreived API Gateway Route %s: %+v", d.Id(), route)
 	if err = client.SetAPIGatewayRouteData(d, route); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -166,20 +163,18 @@ func resourceAPIGatewayRouteRead(ctx context.Context, d *schema.ResourceData, me
 func resourceAPIGatewayRouteUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).APIGatewayClient
 
-	updatedRoute, _, err := client.UpdateRoute(ctx, d)
+	updatedRoute, apiResponse, err := client.UpdateRoute(ctx, d)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error updating API Gateway Route: %w", err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error updating API Gateway Route: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsAPIGatewayRouteAvailable)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error waiting for API Gateway Route to be ready: %w", err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error waiting for API Gateway Route to be ready: %s", err), nil)
 	}
 
 	if err = client.SetAPIGatewayRouteData(d, updatedRoute); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -196,14 +191,12 @@ func resourceAPIGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error deleting API Gateway Route: %w", err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error deleting API Gateway Route: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsAPIGatewayRouteDeleted)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error waiting for API Gateway Route to be deleted: %w", err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error waiting for API Gateway Route to be deleted: %s", err), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	return nil
@@ -212,7 +205,7 @@ func resourceAPIGatewayRouteDelete(ctx context.Context, d *schema.ResourceData, 
 func resourceAPIGatewayRouteImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("expected ID in the format gateway_id:route_id")
+		return nil, utils.ToError(d, "expected ID in the format gateway_id:route_id", nil)
 	}
 
 	if err := d.Set("gateway_id", parts[0]); err != nil {
@@ -222,7 +215,7 @@ func resourceAPIGatewayRouteImport(ctx context.Context, d *schema.ResourceData, 
 
 	diags := resourceAPIGatewayRouteRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
-		return nil, fmt.Errorf("%s", diags[0].Summary)
+		return nil, utils.ToError(d, diags[0].Summary, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

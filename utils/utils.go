@@ -234,12 +234,6 @@ func DiffEmptyIps(_, old, new string, _ *schema.ResourceData) bool {
 	return false
 }
 
-// ApiResponseInfo - interface over different ApiResponse types from sdks
-type ApiResponseInfo interface {
-	HttpNotFound() bool
-	LogInfo()
-}
-
 // ResourceReadyFunc polls api to see if resource exists based on id
 type ResourceReadyFunc func(ctx context.Context, d *schema.ResourceData) (bool, error)
 
@@ -447,10 +441,11 @@ type DiagsOpts struct {
 	Timeout            string
 	ResourceNameString string // The schema key for the resource name (e.g., "name", "display_name")
 	RequestLocation    *url.URL
+	StatusCode         int // HTTP status code from API response; 0 means not available
 }
 
-// ToDiags wraps an error into a Terraform diagnostic with additional context.
-func ToDiags(d *schema.ResourceData, err string, opts *DiagsOpts) diag.Diagnostics {
+// buildErrorMessage constructs an enriched error message with resource context.
+func buildErrorMessage(d *schema.ResourceData, err string, opts *DiagsOpts) string {
 	targetField := "name"
 	if opts != nil && opts.ResourceNameString != "" {
 		targetField = opts.ResourceNameString
@@ -461,8 +456,8 @@ func ToDiags(d *schema.ResourceData, err string, opts *DiagsOpts) diag.Diagnosti
 	sb.WriteString("Error: ")
 	sb.WriteString(err)
 
-	if strings.Contains(err, "500") {
-		sb.WriteString(" This is an API Error. Please contact API support.")
+	if opts != nil && opts.StatusCode >= 500 {
+		sb.WriteString("\nThis is an API Error. Please contact API support.")
 	}
 
 	if d.Id() != "" {
@@ -487,7 +482,18 @@ func ToDiags(d *schema.ResourceData, err string, opts *DiagsOpts) diag.Diagnosti
 		}
 	}
 
-	return diag.FromErr(errors.New(sb.String()))
+	return sb.String()
+}
+
+// ToDiags wraps an error into a Terraform diagnostic with additional context.
+func ToDiags(d *schema.ResourceData, err string, opts *DiagsOpts) diag.Diagnostics {
+	return diag.FromErr(errors.New(buildErrorMessage(d, err, opts)))
+}
+
+// ToError wraps an error message with resource context, similar to ToDiags but returns an error.
+// This is used in import functions and helper functions that return (T, error) instead of diag.Diagnostics.
+func ToError(d *schema.ResourceData, err string, opts *DiagsOpts) error {
+	return errors.New(buildErrorMessage(d, err, opts))
 }
 
 // extractRequestId parses the HTTP header string to find the UUID request ID.

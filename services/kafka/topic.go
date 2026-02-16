@@ -7,16 +7,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	kafka "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 // CreateTopic creates a new Kafka Cluster Topic
 func (c *Client) CreateTopic(ctx context.Context, d *schema.ResourceData) (
-	kafka.TopicRead, utils.ApiResponseInfo, error,
+	kafka.TopicRead, *shared.APIResponse, error,
 ) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, d.Get("location").(string))
 
@@ -31,7 +31,7 @@ func (c *Client) CreateTopic(ctx context.Context, d *schema.ResourceData) (
 
 // GetTopicByID retrieves a Kafka Cluster Topic by its ID
 func (c *Client) GetTopicByID(ctx context.Context, clusterID string, topicID string, location string) (
-	kafka.TopicRead, utils.ApiResponseInfo, error,
+	kafka.TopicRead, *shared.APIResponse, error,
 ) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 
@@ -43,7 +43,7 @@ func (c *Client) GetTopicByID(ctx context.Context, clusterID string, topicID str
 
 // ListTopics retrieves a list of Kafka Cluster Topics
 func (c *Client) ListTopics(ctx context.Context, clusterID string, location string) (
-	kafka.TopicReadList, utils.ApiResponseInfo, error,
+	kafka.TopicReadList, *shared.APIResponse, error,
 ) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 
@@ -54,7 +54,7 @@ func (c *Client) ListTopics(ctx context.Context, clusterID string, location stri
 }
 
 // DeleteTopic deletes a Kafka Cluster Topic
-func (c *Client) DeleteTopic(ctx context.Context, clusterID string, topicID string, location string) (utils.ApiResponseInfo, error) {
+func (c *Client) DeleteTopic(ctx context.Context, clusterID string, topicID string, location string) (*shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 
 	apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsDelete(ctx, clusterID, topicID).Execute()

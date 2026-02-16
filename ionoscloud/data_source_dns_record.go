@@ -11,7 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceDNSRecord() *schema.Resource {
@@ -83,22 +85,23 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 	recordName := nameValue.(string)
 
 	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
+		return utils.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the DNS Record ID or name"))
+		return utils.ToDiags(d, "please provide either the DNS Record ID or name", nil)
 	}
 	if partialMatch && !nameOk {
-		return diag.FromErr(fmt.Errorf("partial_match can only be used together with the name attribute"))
+		return utils.ToDiags(d, "partial_match can only be used together with the name attribute", nil)
 	}
 
 	var record dns.RecordRead
+	var apiResponse *shared.APIResponse
 	var err error
 
 	if idOk {
-		record, _, err = client.GetRecordById(ctx, zoneId, recordId)
+		record, apiResponse, err = client.GetRecordById(ctx, zoneId, recordId)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the DNS Record with ID: %s, DNS Zone ID: %s, error: %w", recordId, zoneId, err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the DNS Record with ID: %s, DNS Zone ID: %s, error: %s", recordId, zoneId, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []dns.RecordRead
@@ -106,18 +109,18 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 		if partialMatch {
 			// By default, when providing the name as a filter, for the GET requests, partial match
 			// is true.
-			records, _, err := client.ListRecords(ctx, recordName)
+			records, apiResponse, err := client.ListRecords(ctx, recordName)
 			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Records: %w", err))
+				return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Records: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 			}
 			results = records.Items
 		} else {
 			// In order to have an exact name match, we must retrieve all the DNS Records and then
 			// build a list of exact matches based on the response, there is no other way since using
 			// filter.name only does a partial match.
-			records, _, err := client.ListRecords(ctx, "")
+			records, apiResponse, err := client.ListRecords(ctx, "")
 			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Records: %w", err))
+				return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Records: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 			}
 			for _, recordItem := range records.Items {
 				// Since each record has a unique name, there is no need to keep on searching if
@@ -131,16 +134,16 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no DNS Record found with the specified name = %s", recordName))
+			return utils.ToDiags(d, fmt.Sprintf("no DNS Record found with the specified name = %s", recordName), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one DNS Record found with the specified name = %s", recordName))
+			return utils.ToDiags(d, fmt.Sprintf("more than one DNS Record found with the specified name = %s", recordName), nil)
 		} else {
 			record = results[0]
 		}
 	}
 
 	if err := client.SetRecordData(d, record); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

@@ -118,7 +118,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{RequestLocation: requestLocation})
+		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(*createdDatacenter.Id)
 
@@ -190,7 +190,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{RequestLocation: requestLocation})
+		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -209,7 +209,7 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{RequestLocation: requestLocation})
+		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
@@ -231,15 +231,15 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find datacenter %q", dcId)
+			return nil, utils.ToError(d, fmt.Sprintf("unable to find datacenter %q", dcId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving the datacenter %q, error:%w", dcId, err)
+		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while retrieving the datacenter: %s", err), nil)
 	}
 
 	log.Printf("[INFO] Datacenter found: %+v", datacenter)
 
 	if err := setDatacenterData(d, &datacenter); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

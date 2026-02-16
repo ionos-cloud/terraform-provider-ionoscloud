@@ -84,10 +84,10 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
+		return utils.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the Kafka Cluster Topic ID or name"))
+		return utils.ToDiags(d, "please provide either the Kafka Cluster Topic ID or name", nil)
 	}
 
 	partialMatch := d.Get("partial_match").(bool)
@@ -97,14 +97,14 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 	if idOk {
 		topic, _, err = client.GetTopicByID(ctx, clusterID, id, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Kafka Cluster Topic with ID: %s, error: %w", id, err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the Kafka Cluster Topic with ID: %s, error: %s", id, err), nil)
 		}
 	} else {
 		var results []kafkaSdk.TopicRead
 
 		topics, _, err := client.ListTopics(ctx, clusterID, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching Kafka Cluster Topics: %w", err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching Kafka Cluster Topics: %s", err), nil)
 		}
 
 		for _, t := range topics.Items {
@@ -115,16 +115,16 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		switch {
 		case len(results) == 0:
-			return diag.FromErr(fmt.Errorf("no Kafka Cluster Topic found with the specified name: %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("no Kafka Cluster Topic found with the specified name: %s", name), nil)
 		case len(results) > 1:
-			return diag.FromErr(fmt.Errorf("more than one Kafka Cluster Topic found with the specified name: %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("more than one Kafka Cluster Topic found with the specified name: %s", name), nil)
 		default:
 			topic = results[0]
 		}
 	}
 
 	if err = client.SetKafkaTopicData(d, &topic); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

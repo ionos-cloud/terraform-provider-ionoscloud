@@ -9,8 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceDNSReverseRecords() *schema.Resource {
@@ -83,12 +85,13 @@ func dataSourceReverseRecordReads(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	var err error
+	var apiResponse *shared.APIResponse
 
 	var results []dns.ReverseRecordRead
 
-	records, _, err := client.ListReverseRecords(ctx, filterIps)
+	records, apiResponse, err := client.ListReverseRecords(ctx, filterIps)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Reverse Records: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if nameOk {
 		log.Printf("[INFO] Filtering Reverse Records in data source for DNS Reverse Records using name: %s and partial_match: %t", recordName, partialMatch)
@@ -110,7 +113,7 @@ func dataSourceReverseRecordReads(ctx context.Context, d *schema.ResourceData, m
 
 	d.SetId("dns_reverse_records")
 	if err := d.Set("reverse_records", reverseRecordsObjToIntf(records.Items)); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

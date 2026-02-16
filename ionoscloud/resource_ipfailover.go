@@ -71,12 +71,12 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 	lan, apiResponse, err := cloudapilan.FindLanById(*client, ctx, dcId, lanId)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			return diag.FromErr(fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId))
+			return utils.ToDiags(d, fmt.Sprintf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId), nil)
 		}
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	if lan.Properties == nil || lan.Properties.IpFailover == nil {
-		return diag.FromErr(fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"))
+		return utils.ToDiags(d, "expected a LAN response containing IP failover groups but received 'nil' instead", nil)
 	}
 
 	// Add the new IP failover group to the list
@@ -89,11 +89,12 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 	lan, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while patching a lans IP failover group, LAN ID: %s, error: %w", lanId, err))
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while patching a lans IP failover group, LAN ID: %s, error: %s", lanId, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	// Use the IP in order to generate the resource ID
@@ -112,12 +113,12 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return diag.FromErr(fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId))
+			return utils.ToDiags(d, fmt.Sprintf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId), nil)
 		}
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	if lan.Properties == nil || lan.Properties.IpFailover == nil {
-		return diag.FromErr(fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"))
+		return utils.ToDiags(d, "expected a LAN response containing IP failover groups but received 'nil' instead", nil)
 	}
 
 	// Iterate through IP Failover groups and select the proper one using the IP (the IP acts like
@@ -128,7 +129,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 		for _, ipFailoverGroup := range *ipFailoverGroups {
 			if *ipFailoverGroup.Ip == ip {
 				if err := d.Set("nicuuid", *ipFailoverGroup.NicUuid); err != nil {
-					return diag.FromErr(utils.GenerateSetError(constant.ResourceIpFailover, "nicuuid", err))
+					return utils.ToDiags(d, utils.GenerateSetError(constant.ResourceIpFailover, "nicuuid", err).Error(), nil)
 				}
 				ipFailoverGroupFound = true
 				break
@@ -161,12 +162,12 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 		lan, apiResponse, err := cloudapilan.FindLanById(*client, ctx, dcId, lanId)
 		if err != nil {
 			if apiResponse.HttpNotFound() {
-				return diag.FromErr(fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId))
+				return utils.ToDiags(d, fmt.Sprintf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId), nil)
 			}
-			return diag.FromErr(err)
+			return utils.ToDiags(d, err.Error(), nil)
 		}
 		if lan.Properties == nil || lan.Properties.IpFailover == nil {
-			return diag.FromErr(fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"))
+			return utils.ToDiags(d, "expected a LAN response containing IP failover groups but received 'nil' instead", nil)
 		}
 
 		// Add the new IP failover group to the list
@@ -184,12 +185,12 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 		_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while patching the lan with ID: %s, error: %w", lanId, err))
-			return diags
+			requestLocation, _ := apiResponse.Location()
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while patching the lan with ID: %s, error: %s", lanId, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-			return diag.FromErr(errState)
+			return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
 		}
 	}
 	return nil
@@ -206,12 +207,12 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 	lan, apiResponse, err := cloudapilan.FindLanById(*client, ctx, dcId, lanId)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			return diag.FromErr(fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId))
+			return utils.ToDiags(d, fmt.Sprintf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId), nil)
 		}
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	if lan.Properties == nil || lan.Properties.IpFailover == nil {
-		return diag.FromErr(fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"))
+		return utils.ToDiags(d, "expected a LAN response containing IP failover groups but received 'nil' instead", nil)
 	}
 
 	// Remove the failover group from the list
@@ -223,12 +224,12 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 	_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while removing an IP failover group with IP: %s for the LAN with ID: %s, datacenter ID: %s, error: %w", ip, lanId, dcId, err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while removing an IP failover group with IP: %s for the LAN with ID: %s, datacenter ID: %s, error: %s", ip, lanId, dcId, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -238,7 +239,7 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, fmt.Errorf("invalid import ID: %s. Expecting {datacenter}/{lan}/{ip}", d.Id())
+		return nil, utils.ToError(d, "invalid import. Expecting {datacenter}/{lan}/{ip}", nil)
 	}
 	dcId := parts[0]
 	lanId := parts[1]
@@ -252,9 +253,9 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId)
+			return nil, utils.ToError(d, fmt.Sprintf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId), nil)
 		}
-		return nil, fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanId, dcId, err)
+		return nil, utils.ToError(d, fmt.Sprintf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %s", lanId, dcId, err), nil)
 	}
 
 	log.Printf("[INFO] lan found: %+v", lan)
@@ -285,5 +286,5 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 			}
 		}
 	}
-	return nil, fmt.Errorf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanId, dcId)
+	return nil, utils.ToError(d, fmt.Sprintf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanId, dcId), nil)
 }

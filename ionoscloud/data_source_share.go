@@ -50,19 +50,19 @@ func dataSourceShareRead(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			return diag.FromErr(fmt.Errorf("group_id %s resource_id %s not found", groupID, resourceID))
+			return utils.ToDiags(d, fmt.Sprintf("group_id %s resource_id %s not found", groupID, resourceID), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching a share with group_id %s resource_id %s %w", groupID, resourceID, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching a share with group_id %s resource_id %s %s", groupID, resourceID, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if rsp.Properties == nil {
-		return diag.FromErr(fmt.Errorf("no properties found in the response"))
+		return utils.ToDiags(d, "no properties found in the response", nil)
 	}
 	d.SetId(*rsp.Id)
 	if err := d.Set("edit_privilege", *rsp.Properties.EditPrivilege); err != nil {
-		return diag.FromErr(utils.GenerateSetError("share", "edit_privilege", err))
+		return utils.ToDiags(d, utils.GenerateSetError("share", "edit_privilege", err).Error(), nil)
 	}
 	if err := d.Set("share_privilege", *rsp.Properties.SharePrivilege); err != nil {
-		return diag.FromErr(utils.GenerateSetError("share", "share_privilege", err))
+		return utils.ToDiags(d, utils.GenerateSetError("share", "share_privilege", err).Error(), nil)
 	}
 	return nil
 }

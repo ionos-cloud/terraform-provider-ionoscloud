@@ -63,13 +63,13 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 	clusters, apiResponse, err := req.Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %w", err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching k8s clusters: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if clusters.Items != nil && len(*clusters.Items) == 0 {
-		return diag.FromErr(fmt.Errorf("no clusters found"))
+		return utils.ToDiags(d, "no clusters found", nil)
 	}
 	if err := setDataSourceK8sSetClusters(ctx, d, *clusters.Items, client); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }

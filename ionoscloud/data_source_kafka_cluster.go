@@ -102,10 +102,10 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 	location := d.Get("location").(string)
 
 	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
+		return utils.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the Kafka Cluster ID or name"))
+		return utils.ToDiags(d, "please provide either the Kafka Cluster ID or name", nil)
 	}
 
 	partialMatch := d.Get("partial_match").(bool)
@@ -114,14 +114,14 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 	if idOk {
 		cluster, _, err = client.GetClusterByID(ctx, id, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Kafka Cluster with ID: %s, error: %w", id, err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the Kafka Cluster with ID: %s, error: %s", id, err), nil)
 		}
 	} else {
 		var results []kafkaSdk.ClusterRead
 
 		clusters, _, err := client.ListClusters(ctx, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching Kafka Cluster: %w", err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching Kafka Cluster: %s", err), nil)
 		}
 
 		for _, cluster := range clusters.Items {
@@ -132,16 +132,16 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 
 		switch {
 		case len(results) == 0:
-			return diag.FromErr(fmt.Errorf("no Kafka Clusters found with the specified name: %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("no Kafka Clusters found with the specified name: %s", name), nil)
 		case len(results) > 1:
-			return diag.FromErr(fmt.Errorf("more than one Kafka Cluster found with the specified name: %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("more than one Kafka Cluster found with the specified name: %s", name), nil)
 		default:
 			cluster = results[0]
 		}
 	}
 
 	if err := client.SetKafkaClusterData(d, &cluster); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

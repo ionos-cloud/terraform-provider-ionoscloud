@@ -82,28 +82,28 @@ func resourceAPIGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	logs, ok := d.GetOk("logs")
 	if ok && logs.(bool) {
-		central, _, err := logClient.GetCentralLogging(ctx)
+		central, apiResponse, err := logClient.GetCentralLogging(ctx)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting Central Logging: %w", err))
+			return utils.ToDiags(d, fmt.Sprintf("error getting Central Logging: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		if len(central.Items) == 0 {
-			return diag.FromErr(fmt.Errorf("central Logging is not enabled, please use Logging API to enable Central Logging"))
+			return utils.ToDiags(d, "central Logging is not enabled, please use Logging API to enable Central Logging", nil)
 		}
 		// will only be one item in the list, we just have to check if it is enabled
 		if !central.Items[0].Properties.Enabled {
-			return diag.FromErr(fmt.Errorf("cannot create API Gateway with logs disabled, please use Logging API to enable Central Logging"))
+			return utils.ToDiags(d, "cannot create API Gateway with logs disabled, please use Logging API to enable Central Logging", nil)
 		}
 	}
 
-	response, _, err := client.CreateAPIGateway(ctx, d)
+	response, apiResponse, err := client.CreateAPIGateway(ctx, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error creating API Gateway: %w", err))
+		return utils.ToDiags(d, fmt.Sprintf("error creating API Gateway: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	gatewayID := response.Id
 	d.SetId(gatewayID)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsGatewayReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error checking status for API Gateway with ID %v: %w", gatewayID, err))
+		return utils.ToDiags(d, fmt.Sprintf("error checking status for API Gateway with ID %v: %s", gatewayID, err), nil)
 	}
 
 	return resourceAPIGatewayRead(ctx, d, meta)
@@ -115,26 +115,26 @@ func resourceAPIGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	logs, ok := d.GetOk("logs")
 	if ok && logs.(bool) {
-		central, _, err := logClient.GetCentralLogging(ctx)
+		central, apiResponse, err := logClient.GetCentralLogging(ctx)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting Central Logging: %w", err))
+			return utils.ToDiags(d, fmt.Sprintf("error getting Central Logging: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		if len(central.Items) == 0 {
-			return diag.FromErr(fmt.Errorf("central Logging is not enabled, please use Logging API to enable Central Logging"))
+			return utils.ToDiags(d, "central Logging is not enabled, please use Logging API to enable Central Logging", nil)
 		}
 		// will only be one item in the list, we just have to check if it is enabled
 		if !central.Items[0].Properties.Enabled {
-			return diag.FromErr(fmt.Errorf("cannot create API Gateway with logs disabled, please use Logging API to enable Central Logging"))
+			return utils.ToDiags(d, "cannot create API Gateway with logs disabled, please use Logging API to enable Central Logging", nil)
 		}
 	}
 
-	_, _, err := client.UpdateAPIGateway(ctx, d)
+	_, apiResponse, err := client.UpdateAPIGateway(ctx, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error updating API Gateway: %w", err))
+		return utils.ToDiags(d, fmt.Sprintf("error updating API Gateway: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsGatewayReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error checking status for API Gateway %w", err))
+		return utils.ToDiags(d, fmt.Sprintf("error checking status for API Gateway %s", err), nil)
 	}
 
 	return resourceAPIGatewayRead(ctx, d, meta)
@@ -143,13 +143,13 @@ func resourceAPIGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceAPIGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).APIGatewayClient
 	gatewayID := d.Id()
-	_, err := client.DeleteAPIGateway(ctx, gatewayID)
+	apiResponse, err := client.DeleteAPIGateway(ctx, gatewayID)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error deleting API Gateway with ID: %v, error: %w", gatewayID, err))
+		return utils.ToDiags(d, fmt.Sprintf("error deleting API Gateway with ID: %v, error: %s", gatewayID, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsGatewayDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("deletion check failed for API Gateway with ID: %v, error: %w", gatewayID, err))
+		return utils.ToDiags(d, fmt.Sprintf("deletion check failed for API Gateway with ID: %v, error: %s", gatewayID, err), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 	return nil
 }
@@ -157,7 +157,7 @@ func resourceAPIGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 func resourceAPIGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	_, err := resourceAPIGatewayImport(ctx, d, meta)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error reading API Gateway with ID: %v, error: %w", d.Id(), err))
+		return utils.ToDiags(d, fmt.Sprintf("error reading API Gateway: %s", err), nil)
 	}
 	return nil
 }
@@ -169,14 +169,14 @@ func resourceAPIGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		if resp.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("API Gateway does not exist, error: %w", err)
+			return nil, utils.ToError(d, fmt.Sprintf("API Gateway does not exist, error: %s", err), &utils.DiagsOpts{StatusCode: resp.StatusCode})
 		}
-		return nil, fmt.Errorf("error importing API Gateway with ID: %v, error: %w", gatewayID, err)
+		return nil, utils.ToError(d, fmt.Sprintf("error importing API Gateway with ID: %v, error: %s", gatewayID, err), &utils.DiagsOpts{StatusCode: resp.StatusCode})
 	}
 	log.Printf("[INFO] Gateway found: %+v", gateway)
 
 	if err := client.SetAPIGatewayData(d, gateway); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

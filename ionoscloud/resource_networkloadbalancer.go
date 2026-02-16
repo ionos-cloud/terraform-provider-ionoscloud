@@ -109,24 +109,21 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 		name := name.(string)
 		networkLoadBalancer.Properties.Name = &name
 	} else {
-		diags := diag.FromErr(fmt.Errorf("name must be provided for network loadbalancer"))
-		return diags
+		return utils.ToDiags(d, "name must be provided for network loadbalancer", nil)
 	}
 
 	if listenerLan, listenerLanOk := d.GetOk("listener_lan"); listenerLanOk {
 		listenerLan := int32(listenerLan.(int))
 		networkLoadBalancer.Properties.ListenerLan = &listenerLan
 	} else {
-		diags := diag.FromErr(fmt.Errorf("listener lan must be provided for network loadbalancer"))
-		return diags
+		return utils.ToDiags(d, "listener lan must be provided for network loadbalancer", nil)
 	}
 
 	if targetLan, targetLanOk := d.GetOk("target_lan"); targetLanOk {
 		targetLan := int32(targetLan.(int))
 		networkLoadBalancer.Properties.TargetLan = &targetLan
 	} else {
-		diags := diag.FromErr(fmt.Errorf("target lan must be provided for network loadbalancer"))
-		return diags
+		return utils.ToDiags(d, "target lan must be provided for network loadbalancer", nil)
 	}
 
 	if centralLogging, centralLoggingOk := d.GetOk("central_logging"); centralLoggingOk {
@@ -182,8 +179,8 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %w, %s", err, responseBody(apiResponse)))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("error creating network loadbalancer: %s, %s", err, responseBody(apiResponse)), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*networkLoadBalancerResp.Id)
@@ -192,7 +189,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
@@ -217,7 +214,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 	log.Printf("[INFO] Successfully retrieved network load balancer %s: %+v", d.Id(), networkLoadBalancer)
 
 	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -274,8 +271,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		if len(ips) > 0 {
 			request.Properties.Ips = &ips
 		} else {
-			diags := diag.FromErr(fmt.Errorf("you can not empty the ips field for networkloadbalancer %s", d.Id()))
-			return diags
+			return utils.ToDiags(d, "you can not empty the ips field for networkloadbalancer", nil)
 		}
 	}
 
@@ -290,8 +286,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 			}
 		}
 		if len(lbPrivateIps) == 0 {
-			diags := diag.FromErr(fmt.Errorf("you can not empty the lbPrivateIps field for networkloadbalancer %s", d.Id()))
-			return diags
+			return utils.ToDiags(d, "you can not empty the lbPrivateIps field for networkloadbalancer", nil)
 		}
 		request.Properties.LbPrivateIps = &lbPrivateIps
 	}
@@ -318,7 +313,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 						if firstFlowLogId == "" {
 							_ = d.Set("flowlog", nil)
 						}
-						return diag.FromErr(err)
+						return utils.ToDiags(d, err.Error(), nil)
 					}
 				}
 			}
@@ -329,12 +324,12 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse)))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while updating a network loadbalancer: %s \n ApiError: %s", err, responseBody(apiResponse)), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
@@ -349,12 +344,12 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a network loadbalancer %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while deleting a network loadbalancer: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -367,7 +362,7 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{networkloadbalancer}", d.Id())
+		return nil, utils.ToError(d, "invalid import. Expecting {datacenter}/{networkloadbalancer}", nil)
 	}
 
 	dcId := parts[0]
@@ -380,17 +375,17 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find network load balancer %q", networkLoadBalancerId)
+			return nil, utils.ToError(d, fmt.Sprintf("unable to find network load balancer %q", networkLoadBalancerId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving network load balancer  %q: %q ", networkLoadBalancerId, err)
+		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while retrieving network load balancer  %q: %q ", networkLoadBalancerId, err), nil)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

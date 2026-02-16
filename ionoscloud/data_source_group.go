@@ -2,9 +2,9 @@ package ionoscloud
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -218,12 +218,10 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		diags := diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
-		return diags
+		return utils.ToDiags(d, "id and name cannot be both specified in the same time", nil)
 	}
 	if !idOk && !nameOk {
-		diags := diag.FromErr(errors.New("please provide either the group id or name"))
-		return diags
+		return utils.ToDiags(d, "please provide either the group id or name", nil)
 	}
 	var group ionoscloud.Group
 	var err error
@@ -234,8 +232,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching group with ID %s: %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -244,8 +241,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching groups: %w", err))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching groups: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []ionoscloud.Group
@@ -257,8 +253,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 					group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err))
-						return diags
+						return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching group %s: %s", *g.Id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 					}
 					results = append(results, g)
 				}
@@ -266,9 +261,9 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no group found with the specified name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("no group found with the specified name = %s", name), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one group found with the specified criteria name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("more than one group found with the specified criteria name = %s", name), nil)
 		} else {
 			group = results[0]
 		}
@@ -276,7 +271,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	if err = setGroupData(ctx, client, d, &group); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

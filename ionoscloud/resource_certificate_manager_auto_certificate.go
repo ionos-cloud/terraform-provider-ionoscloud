@@ -77,16 +77,16 @@ func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta int
 	location := d.Get("location").(string)
 
 	autoCertificateCreateData := cert.GetAutoCertificateDataCreate(d)
-	response, _, err := client.CreateAutoCertificate(ctx, location, *autoCertificateCreateData)
+	response, apiResponse, err := client.CreateAutoCertificate(ctx, location, *autoCertificateCreateData)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while creating an auto-certificate: %w", err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating an auto-certificate: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	autoCertificateID := response.Id
 	d.SetId(autoCertificateID)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsAutoCertificateReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while checking the creation status for the auto-certificate with ID: %v, error: %w", autoCertificateID, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while checking the creation status for the auto-certificate with ID: %v, error: %s", autoCertificateID, err), nil)
 	}
 	// Return with another read call because 'last_issued_certificate_id' is not provided in the
 	// creation response.
@@ -103,11 +103,11 @@ func autoCertificateRead(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("error while fetching auto-certificate with ID: %v, error: %w", autoCertificateID, err))
+		return utils.ToDiags(d, fmt.Sprintf("error while fetching auto-certificate: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	log.Printf("[INFO] Successfully retrieved auto-certificate with ID: %v, auto-certificate info: %+v", autoCertificateID, autoCertificate)
 	if err := cert.SetAutoCertificateData(d, autoCertificate); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }
@@ -118,15 +118,15 @@ func autoCertificateUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	location := d.Get("location").(string)
 
 	autoCertificateUpdateData := cert.GetAutoCertificateDataUpdate(d)
-	autoCertificate, _, err := client.UpdateAutoCertificate(ctx, autoCertificateID, location, *autoCertificateUpdateData)
+	autoCertificate, apiResponse, err := client.UpdateAutoCertificate(ctx, autoCertificateID, location, *autoCertificateUpdateData)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while updating auto-certificate with ID: %v, error: %w", autoCertificateID, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while updating auto-certificate: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsAutoCertificateReady); err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while checking the update status for the auto-certificate with ID: %v, error: %w", autoCertificateID, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while checking the update status for the auto-certificate: %s", err), nil)
 	}
 	if err = cert.SetAutoCertificateData(d, autoCertificate); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }
@@ -141,11 +141,11 @@ func autoCertificateDelete(ctx context.Context, d *schema.ResourceData, meta int
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("error while deleting auto-certificate with ID: %v, error: %w", autoCertificateID, err))
+		return utils.ToDiags(d, fmt.Sprintf("error while deleting auto-certificate: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsAutoCertificateDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("deletion check failed for auto-certificate with ID: %v, error: %w", autoCertificateID, err))
+		return utils.ToDiags(d, fmt.Sprintf("deletion check failed for auto-certificate: %s", err), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 	return nil
 }
@@ -154,7 +154,7 @@ func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta int
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid import ID: %v, expected ID in the format: '<location>:<auto_certificate_ID>", d.Id())
+		return nil, utils.ToError(d, "invalid import, expected ID in the format: '<location>:<auto_certificate_ID>", nil)
 	}
 	location := parts[0]
 	autoCertificateID := parts[1]
@@ -162,16 +162,16 @@ func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("auto-certificate with ID: %v does not exist", autoCertificateID)
+			return nil, utils.ToError(d, fmt.Sprintf("auto-certificate with ID: %v does not exist", autoCertificateID), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, fmt.Errorf("an error occurred while trying to import auto-certificate with ID: %v, error: %w", autoCertificateID, err)
+		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while trying to import auto-certificate with ID: %v, error: %s", autoCertificateID, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	log.Printf("[INFO] auto-certificate found: %+v", autoCertificate)
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("Auto-certificate", "location", err)
 	}
 	if err := cert.SetAutoCertificateData(d, autoCertificate); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -13,6 +12,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 type KubeConfig struct {
@@ -274,10 +274,10 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		return utils.ToDiags(d, "id and name cannot be both specified in the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the k8s cluster id or name"))
+		return utils.ToDiags(d, "please provide either the k8s cluster id or name", nil)
 	}
 	var cluster ionoscloud.KubernetesCluster
 	var err error
@@ -288,7 +288,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		cluster, apiResponse, err = client.KubernetesApi.K8sFindByClusterId(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %w", id.(string), err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the k8s cluster with ID %s: %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -297,7 +297,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %w", err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching k8s clusters: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		if clusters.Items != nil {
@@ -308,7 +308,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 					tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %w", *c.Id, err))
+						return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 					}
 					results = append(results, tmpCluster)
 					break
@@ -316,9 +316,9 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 			}
 
 			if results == nil || len(results) == 0 {
-				return diag.FromErr(fmt.Errorf("no cluster found with the specified name %s", name.(string)))
+				return utils.ToDiags(d, fmt.Sprintf("no cluster found with the specified name %s", name.(string)), nil)
 			} else if len(results) > 1 {
-				return diag.FromErr(fmt.Errorf("more than one cluster found with the specified name %s", name.(string)))
+				return utils.ToDiags(d, fmt.Sprintf("more than one cluster found with the specified name %s", name.(string)), nil)
 			} else {
 				cluster = results[0]
 			}
@@ -327,11 +327,11 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if err = setK8sClusterData(d, &cluster); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	if err = setAdditionalK8sClusterData(d, &cluster, client); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

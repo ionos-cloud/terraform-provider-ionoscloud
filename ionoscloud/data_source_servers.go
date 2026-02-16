@@ -2,7 +2,6 @@ package ionoscloud
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 
@@ -248,7 +247,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return diag.FromErr(errors.New("no datacenter_id was specified"))
+		return utils.ToDiags(d, "no datacenter_id was specified", nil)
 	}
 	req := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Depth(5)
 	filters, filtersOk := d.GetOk("filter")
@@ -269,7 +268,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	servers, apiResponse, err := req.Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching servers: %w", err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching servers: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	serverEntry := make(map[string]interface{})
 	var serversIntf []interface{}
@@ -314,25 +313,24 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 			}
 
 			if server.Id == nil {
-				return diag.FromErr(fmt.Errorf("expected a valid server ID from the API but received nil instead"))
+				return utils.ToDiags(d, "expected a valid server ID from the API but received nil instead", nil)
 			}
 			// Labels logic
 			ls := LabelsService{ctx: ctx, client: client}
 			labels, err := ls.datacentersServersLabelsGet(datacenterId.(string), *server.Id, true)
 			if err != nil {
-				return diag.FromErr(err)
+				return utils.ToDiags(d, err.Error(), nil)
 			}
 			serverEntry["labels"] = labels
 		}
 		serversIntf = append(serversIntf, serverEntry)
 	}
 	if serversIntf == nil || len(serversIntf) == 0 {
-		return diag.FromErr(fmt.Errorf("no servers found for criteria, please check your filter configuration"))
+		return utils.ToDiags(d, "no servers found for criteria, please check your filter configuration", nil)
 	}
 	err = d.Set("servers", &serversIntf)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error while setting servers: %w", err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error while setting servers: %s", err), nil)
 	}
 
 	return nil

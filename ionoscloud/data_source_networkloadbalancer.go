@@ -2,7 +2,6 @@ package ionoscloud
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -11,6 +10,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 )
 
@@ -92,7 +92,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return diag.FromErr(errors.New("no datacenter_id was specified"))
+		return utils.ToDiags(d, "no datacenter_id was specified", nil)
 	}
 	dcID := datacenterId.(string)
 
@@ -100,10 +100,10 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		return utils.ToDiags(d, "id and name cannot be both specified in the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the lan id or name"))
+		return utils.ToDiags(d, "please provide either the lan id or name", nil)
 	}
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
 	var err error
@@ -114,7 +114,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		networkLoadBalancer, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcID, id.(string)).Depth(4).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the network loadbalancer %s, dcID %s : %w", id.(string), dcID, err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the network loadbalancer %s, dcID %s : %s", id.(string), dcID, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -123,7 +123,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, dcID).Depth(4).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers, dcID %s : %w", dcID, err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching network loadbalancers, dcID %s : %s", dcID, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []ionoscloud.NetworkLoadBalancer
@@ -133,7 +133,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 					tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcID, *nlb.Id).Depth(4).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %w", *nlb.Id, err))
+						return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching network loadbalancer with ID %s: %s", *nlb.Id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 					}
 					results = append(results, tmpNetworkLoadBalancer)
 				}
@@ -141,16 +141,16 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no network load balancer found with the specified criteria: name = %s", name.(string)))
+			return utils.ToDiags(d, fmt.Sprintf("no network load balancer found with the specified criteria: name = %s", name.(string)), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one network load balancer found with the specified criteria: name = %s", name.(string)))
+			return utils.ToDiags(d, fmt.Sprintf("more than one network load balancer found with the specified criteria: name = %s", name.(string)), nil)
 		} else {
 			networkLoadBalancer = results[0]
 		}
 	}
 
 	if err = setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
