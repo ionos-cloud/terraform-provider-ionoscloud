@@ -110,7 +110,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					utils.TestImageNotNull(constant.VolumeResource, "image"),
 					// Test if set AND the value because on update the value can be changed, unlike the creation for which
 					// the value does not matter because the final value will be propagated from the image.
-					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "require_legacy_bios", "false"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "require_legacy_bios", "true"),
 				),
 			},
 		},
@@ -270,7 +270,7 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
 	image_password = ` + constant.RandomPassword + `.server_image_password.result
 	user_data = "foo"
 	expose_serial = true
-	require_legacy_bios = true
+	require_legacy_bios = false
 }
 ` + ServerImagePassword
 
@@ -335,7 +335,7 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
 	image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
 	user_data = "foo"
 	expose_serial = false
-	require_legacy_bios = false
+	require_legacy_bios = true
 }
 ` + ServerImagePassword + ServerImagePasswordUpdated
 

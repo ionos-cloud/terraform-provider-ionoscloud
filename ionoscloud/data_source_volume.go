@@ -146,7 +146,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 	var apiResponse *ionoscloud.APIResponse
 
 	location := d.Get("location").(string)
-	client := meta.(*bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	if idOk {
 		/* search by ID */

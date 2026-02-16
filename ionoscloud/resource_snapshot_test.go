@@ -37,6 +37,8 @@ func TestAccSnapshotBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "sec_auth_protection", "true"),
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "licence_type", "LINUX"),
 					// Test if set only because on creation the value is propagated from the image.
+					// `require_legacy_bios` is set to false in the configuration to ensure that it coincides with the value propagated from
+					// the image, and the `terraform plan` after the creation does not show any changes related to this property.
 					resource.TestCheckResourceAttrSet(constant.SnapshotResource+"."+constant.SnapshotTestResource, "require_legacy_bios"),
 				),
 			},
@@ -110,7 +112,7 @@ func TestAccSnapshotBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "licence_type", "OTHER"),
 					// Test if set AND the value because on update the value can be changed, unlike the creation for which
 					// the value does not matter because the final value will be propagated from the image.
-					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "require_legacy_bios", "false"),
+					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "require_legacy_bios", "true"),
 				),
 			},
 		},
@@ -118,8 +120,6 @@ func TestAccSnapshotBasic(t *testing.T) {
 }
 
 func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
@@ -129,6 +129,8 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.SnapshotResource {
 			continue
 		}
+
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
 
 		_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
@@ -147,8 +149,6 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 
 func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -163,6 +163,9 @@ func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resourc
 		if cancel != nil {
 			defer cancel()
 		}
+
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
+
 		foundServer, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
@@ -187,7 +190,7 @@ resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + `
   description = "` + constant.SnapshotTestResource + `"
   sec_auth_protection = true
   licence_type = "LINUX"
-  require_legacy_bios = true
+  require_legacy_bios = false
 }
 `
 
@@ -204,7 +207,7 @@ resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + `
   disc_virtio_hot_unplug = false
   ram_hot_plug = false
   licence_type = "OTHER"
-  require_legacy_bios = false
+  require_legacy_bios = true
 }`
 
 const testAccDataSourceSnapshotMatchId = testAccCheckSnapshotConfigBasic + `

@@ -457,7 +457,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	if len(parts) != 3 {
 		return nil, fmt.Errorf(
 			"invalid import identifier: expected one of <location>:<datacenter-id>/<server-id>/<volume-id> "+
-				"or <datacenter-id>/<server-id>/<volume-id>, got %s", d.Id(),
+				"or <datacenter-id>/<server-id>/<volume-id>, got: %s", d.Id(),
 		)
 	}
 
