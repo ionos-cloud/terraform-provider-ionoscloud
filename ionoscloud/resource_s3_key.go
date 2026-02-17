@@ -54,7 +54,7 @@ func resourceS3Key() *schema.Resource {
 }
 
 func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 	userId := d.Get("user_id").(string)
 	rsp, apiResponse, err := createS3KeyWithRetry(ctx, d, meta)
 	if err != nil {
@@ -97,7 +97,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 // createS3KeyWithRetry uses retry.RetryContext to attempt to create an S3 key,
 // specifically retrying on privilege propagation errors.
 func createS3KeyWithRetry(ctx context.Context, d *schema.ResourceData, meta any) (ionoscloud.S3Key, *ionoscloud.APIResponse, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 	userId := d.Get("user_id").(string)
 
 	var s3Key ionoscloud.S3Key
@@ -130,7 +130,7 @@ func createS3KeyWithRetry(ctx context.Context, d *schema.ResourceData, meta any)
 }
 
 func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 	userId := d.Get("user_id").(string)
 
@@ -160,7 +160,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 	request := ionoscloud.S3Key{}
 	request.Properties = &ionoscloud.S3KeyProperties{}
@@ -193,7 +193,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 	userId := d.Get("user_id").(string)
 	apiResponse, err := client.UserS3KeysApi.UmUsersS3keysDelete(ctx, userId, d.Id()).Execute()
@@ -308,7 +308,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	userId := parts[0]
 	keyId := parts[1]
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, keyId).Execute()
 	logApiRequestTime(apiResponse)

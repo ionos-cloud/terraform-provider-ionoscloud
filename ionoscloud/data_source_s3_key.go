@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -50,7 +51,7 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(fmt.Errorf("please provide the userID"))
 	}
 	userID := userIDItf.(string)
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 	var s3Keys ionoscloud.S3Keys
 	var s3Key ionoscloud.S3Key
 	var err error
