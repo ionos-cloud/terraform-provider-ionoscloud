@@ -133,13 +133,20 @@ func resourceK8sNodePool() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "The UUID of the VDC",
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"k8s_cluster_id": {
 				Type:             schema.TypeString,
 				Description:      "The UUID of an existing kubernetes cluster",
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"cpu_family": {
 				Type:             schema.TypeString,
@@ -205,7 +212,7 @@ func resourceK8sNodePool() *schema.Resource {
 			//	Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
 			//	ForceNew:    true,
 			//	Optional:    true,
-			//},
+			// },
 			"labels": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -411,8 +418,10 @@ func getAutoscalingData(d *schema.ResourceData) (*ionoscloud.KubernetesAutoScali
 
 	return &autoscaling, nil
 }
+
 func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	name := d.Get("name").(string)
 	datacenterId := d.Get("datacenter_id").(string)
@@ -501,7 +510,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	// if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
 	//	gatewayIp := gatewayIp.(string)
 	//	k8sNodepool.Properties.GatewayIp = &gatewayIp
-	//}
+	// }
 
 	labelsProp, ok := d.GetOk("labels")
 	if ok {
@@ -564,7 +573,8 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -589,7 +599,8 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	request := ionoscloud.KubernetesNodePoolForPut{}
 
@@ -789,7 +800,8 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -831,17 +843,20 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	location, parts := splitImportID(importID, "/")
 
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {k8sClusterId}/{k8sNodePoolId}", d.Id())
+	if len(parts) != 2 {
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected <location>:<k8s-cluster-id>/<k8s-nodepool-id> "+
+				"or <k8s-cluster-id>/<k8s-nodepool-id>, got: %s", d.Id(),
+		)
 	}
 
 	clusterId := parts[0]
 	npId := parts[1]
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, npId).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -986,7 +1001,7 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 		//	if err := d.Set("gateway_ip", *nodePool.Properties.GatewayIp); err != nil {
 		//		return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %w", d.Id(), err)
 		//	}
-		//}
+		// }
 
 		labels := make(map[string]interface{})
 		if nodePool.Properties.Labels != nil && len(*nodePool.Properties.Labels) > 0 {
@@ -1015,6 +1030,7 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 
 	return nil
 }
+
 func k8sNodepoolReady(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	resource, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)

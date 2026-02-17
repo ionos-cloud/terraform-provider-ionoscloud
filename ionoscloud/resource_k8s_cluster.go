@@ -161,7 +161,8 @@ func checkClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _
 
 }
 func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	clusterName := d.Get("name").(string)
 	cluster := ionoscloud.KubernetesClusterForPost{
@@ -292,7 +293,8 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -316,8 +318,8 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	request := ionoscloud.KubernetesClusterForPut{}
 
@@ -460,8 +462,8 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	apiResponse, err := client.KubernetesApi.K8sDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -505,19 +507,26 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	importID := d.Id()
 
-	clusterId := d.Id()
+	location, parts := splitImportID(importID, ":")
+	if len(parts) != 1 {
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<cluster-id> or <cluster-id>, got: %s", importID)
+	}
 
-	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, clusterId).Execute()
+	clusterID := parts[0]
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+
+	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, clusterID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find k8s cluster %q", clusterId)
+			return nil, fmt.Errorf("unable to find k8s cluster %q", clusterID)
 		}
-		return nil, fmt.Errorf("unable to retrieve k8s cluster %q, error:%w", d.Id(), err)
+		return nil, fmt.Errorf("unable to retrieve k8s cluster %q, error:%w", clusterID, err)
 	}
 
 	log.Printf("[INFO] K8s cluster found: %+v", cluster)
