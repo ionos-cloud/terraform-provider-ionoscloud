@@ -15,7 +15,6 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.13.2
 	github.com/huandu/xstrings v1.5.0
 	github.com/iancoleman/strcase v0.3.0
-	github.com/ionos-cloud/sdk-go-bundle/products/apigateway/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.2.0
 	github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0

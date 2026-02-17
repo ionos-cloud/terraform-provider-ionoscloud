@@ -224,14 +224,6 @@
   * Data Sources
     * [CDN Distribution](../docs/data-sources/cdn_distribution.md)
 
-* API Gateway
-  * Resources
-    * [API Gateway](../docs/resources/apigateway.md)
-    * [API Gateway Route](../docs/resources/apigateway_route.md)
-  * Data Sources
-    * [API Gateway](../docs/data-sources/apigateway.md)
-    * [API Gateway Route](../docs/data-sources/apigateway_route.md)
-
 * VPN
   * Resources
     * [VPN IPSEC Gateway](../docs/resources/vpn_ipsec_gateway.md)
