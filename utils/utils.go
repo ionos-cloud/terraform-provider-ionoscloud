@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -436,20 +435,4 @@ func ToInterfaceSlice[T any](slice []T) []interface{} {
 		r[i] = v
 	}
 	return r
-}
-
-// Deepcopy performs a deep copy of the input struct using JSON marshal and unmarshal. This is a generic function
-// that can be used for any type, but it relies on the type being JSON serializable.
-func Deepcopy[T any](in T, target *T) error {
-	data, err := json.Marshal(in)
-	if err != nil {
-		return fmt.Errorf("failed to marshal data for deep copy: %w", err)
-	}
-
-	err = json.Unmarshal(data, target)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal data for deep copy: %w", err)
-	}
-
-	return nil
 }
