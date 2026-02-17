@@ -126,15 +126,6 @@ func dataSourceImage() *schema.Resource {
 }
 
 func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
-	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching IonosCloud images %w", err))
-	}
-
 	nameValue, nameOk := d.GetOk("name")
 	imageTypeValue, imageTypeOk := d.GetOk("type")
 	locationValue, locationOk := d.GetOk("location")
@@ -149,6 +140,15 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	cloudInit := cloudInitValue.(string)
 	imgAlias := imgAliasVal.(string)
 	var results []ionoscloud.Image
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+
+	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching IonosCloud images %w", err))
+	}
 
 	// if version value is present then concatenate name - version
 	// otherwise search by name or part of the name
