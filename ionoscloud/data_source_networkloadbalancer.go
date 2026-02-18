@@ -73,6 +73,10 @@ func dataSourceNetworkLoadBalancer() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"flowlog": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -88,7 +92,8 @@ and log the extent to which your instances are being accessed.`,
 }
 
 func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
