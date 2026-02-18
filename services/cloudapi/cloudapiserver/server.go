@@ -47,8 +47,8 @@ type Service struct {
 // NewUnboundService creates an UnboundService with a subset of the underlying Service methods
 // The concrete Service is created with a dummy ResourceData reference which has the ID of the Server this service will interact with
 // This ensure state tracking functions such as WaitForResourceToBeReady use the correct ID
-func NewUnboundService(serverID string, meta any) UnboundService {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+func NewUnboundService(serverID string, location string, meta any) UnboundService {
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	d := &schema.ResourceData{}
 	d.SetId(serverID)
 	return &Service{client, meta, d}
