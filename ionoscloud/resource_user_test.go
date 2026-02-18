@@ -174,7 +174,7 @@ func TestUserWriteOnlyPassword(t *testing.T) {
 }
 
 func testAccCheckUserDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
