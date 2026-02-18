@@ -244,10 +244,6 @@ func groupResourceSchema() map[string]*schema.Schema {
 						Type:     schema.TypeString,
 						Computed: true,
 					},
-					"password": {
-						Type:     schema.TypeString,
-						Computed: true,
-					},
 					"administrator": {
 						Type:     schema.TypeBool,
 						Computed: true,

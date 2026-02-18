@@ -8,6 +8,7 @@
 - Removed API Gateway documentation and examples.
 ### Fixes
 - Add back missing `id` field in `ionoscloud_server.nic.firewall` sub-resource, which caused an error when trying to create a server with firewall rules defined on a nic.
+- Remove unused `password` field from `users` attribute in `ionoscloud_group` resource schema.
 - Fixed VPN IPSec Gateway to use correct `fileconfiguration.VPN` constant instead of incorrect `fileconfiguration.APIGateway`.
 - Fixed typo in VPN IPSec Gateway data source documentation heading.
 
