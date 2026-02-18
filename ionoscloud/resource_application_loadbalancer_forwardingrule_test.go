@@ -172,7 +172,6 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 }
 
 func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
@@ -187,6 +186,9 @@ func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		albId := rs.Primary.Attributes["application_loadbalancer_id"]
 		ruleId := rs.Primary.ID
+		location := rs.Primary.Attributes["location"]
+
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 		_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, albId, ruleId).Execute()
 		logApiRequestTime(apiResponse)
@@ -205,7 +207,6 @@ func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.
 
 func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *ionoscloud.ApplicationLoadBalancerForwardingRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -225,6 +226,9 @@ func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *iono
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		albId := rs.Primary.Attributes["application_loadbalancer_id"]
 		ruleId := rs.Primary.ID
+		location := rs.Primary.Attributes["location"]
+
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 		foundAlbFw, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, albId, ruleId).Execute()
 		logApiRequestTime(apiResponse)
