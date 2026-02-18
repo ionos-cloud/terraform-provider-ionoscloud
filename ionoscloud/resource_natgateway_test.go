@@ -79,7 +79,6 @@ func TestAccNatGatewayBasic(t *testing.T) {
 }
 
 func testAccCheckNatGatewayDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
@@ -90,6 +89,9 @@ func testAccCheckNatGatewayDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.NatGatewayResource {
 			continue
 		}
+
+		location := rs.Primary.Attributes["location"]
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 		_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
@@ -108,7 +110,6 @@ func testAccCheckNatGatewayDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNatGatewayExists(n string, natGateway *ionoscloud.NatGateway) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -124,6 +125,9 @@ func testAccCheckNatGatewayExists(n string, natGateway *ionoscloud.NatGateway) r
 		if cancel != nil {
 			defer cancel()
 		}
+
+		location := rs.Primary.Attributes["location"]
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 		foundNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)

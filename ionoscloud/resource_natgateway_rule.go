@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 func resourceNatGatewayRule() *schema.Resource {
@@ -103,6 +103,11 @@ func resourceNatGatewayRule() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -110,7 +115,8 @@ func resourceNatGatewayRule() *schema.Resource {
 
 func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	natGatewayRule := ionoscloud.NatGatewayRule{
 		Properties: &ionoscloud.NatGatewayRuleProperties{},
@@ -208,7 +214,8 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	dcId := d.Get("datacenter_id").(string)
 	ngId := d.Get("natgateway_id").(string)
@@ -233,7 +240,8 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	request := ionoscloud.NatGatewayRule{
 		Properties: &ionoscloud.NatGatewayRuleProperties{},
 	}
@@ -330,7 +338,8 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	dcId := d.Get("datacenter_id").(string)
 	ngId := d.Get("natgateway_id").(string)
@@ -353,16 +362,25 @@ func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	importID := d.Id()
 
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{natgateway}/{natgateway_rule}", d.Id())
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected one of <location>:<datacenter-id>/<nat-id>/<rule-id> or "+
+				"<datacenter-id>/<nat-id>/<rule-id>, got: %s", importID,
+		)
+	}
+
+	if err := validateImportIDParts(location, parts); err != nil {
+		return nil, fmt.Errorf("error validating import identifier: %w", err)
 	}
 
 	dcId := parts[0]
 	natGatewayId := parts[1]
 	natGatewayRuleId := parts[2]
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	natGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, dcId, natGatewayId, natGatewayRuleId).Execute()
 	logApiRequestTime(apiResponse)
