@@ -183,7 +183,7 @@ func (d *contractsDataSource) Configure(_ context.Context, req datasource.Config
 		return
 	}
 
-	d.client = client.CloudApiClient
+	d.client = client.NewCloudAPIClient("")
 }
 
 // contractAttributesModel defines the attributes for a contract.
