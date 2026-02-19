@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -170,7 +170,7 @@ func resourceTargetGroup() *schema.Resource {
 }
 
 func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 	targetGroup := ionoscloud.TargetGroup{
 		Properties: &ionoscloud.TargetGroupProperties{},
@@ -226,7 +226,7 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 	rsp, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -248,7 +248,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 	targetGroup := ionoscloud.TargetGroupPut{
 		Properties: &ionoscloud.TargetGroupProperties{},
@@ -302,7 +302,7 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 	apiResponse, err := client.TargetGroupsApi.TargetGroupsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -322,7 +322,7 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
 
 	groupIp := d.Id()
 
