@@ -258,8 +258,8 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 		)
 	}
 
-	if err := validateImportIDParts(location, parts); err != nil {
-		return nil, fmt.Errorf("failed validating import ID: error: %w", err)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
 	dcId := parts[0]

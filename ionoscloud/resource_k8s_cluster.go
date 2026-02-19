@@ -514,6 +514,10 @@ func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<cluster-id> or <cluster-id>, got: %s", importID)
 	}
 
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+
 	clusterID := parts[0]
 
 	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)

@@ -848,9 +848,13 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 
 	if len(parts) != 2 {
 		return nil, fmt.Errorf(
-			"invalid import identifier: expected <location>:<k8s-cluster-id>/<k8s-nodepool-id> "+
-				"or <k8s-cluster-id>/<k8s-nodepool-id>, got: %s", d.Id(),
+			"invalid import identifier: expected one of <location>:<k8s-cluster-id>/<k8s-nodepool-id> "+
+				"or <k8s-cluster-id>/<k8s-nodepool-id>, got: %s", importID,
 		)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
 	clusterId := parts[0]

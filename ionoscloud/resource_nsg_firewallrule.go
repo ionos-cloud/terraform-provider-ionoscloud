@@ -203,13 +203,13 @@ func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 3 {
 		return nil, fmt.Errorf(
-			"invalid import identifier: expected format <location>:<datacenter-id>/<nsg-id>/<firewall-id> "+
+			"invalid import identifier: expected one of <location>:<datacenter-id>/<nsg-id>/<firewall-id> "+
 				"or <datacenter-id>/<nsg-id>/<firewall-id>, got: %s", importID,
 		)
 	}
 
-	if err := validateImportIDParts(importID, parts); err != nil {
-		return nil, fmt.Errorf("error validating import id: %w", err)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
 	dcID := parts[0]

@@ -356,13 +356,13 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 3 {
 		return nil, fmt.Errorf(
-			"invalid import identifier: expected one of <datacenter>/<server>/<nic> or "+
-				"<location>:<datacenter>/<server>/<nic>, got %s", importID,
+			"invalid import identifier: expected one of <location>:<datacenter>/<server>/<nic> or "+
+				"<datacenter>/<server>/<nic>, got: %s", importID,
 		)
 	}
 
-	if err := validateImportIDParts(importID, parts); err != nil {
-		return nil, fmt.Errorf("error validating import identifier: %w", err)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
 	dcId := parts[0]

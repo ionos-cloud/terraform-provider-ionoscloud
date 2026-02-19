@@ -1198,15 +1198,15 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 
-	if len(parts) < 2 {
+	if len(parts) != 2 {
 		return nil, fmt.Errorf(
 			"invalid import identifier: expected one of <location>:<datacenter-id>/<server-id> "+
 				"or <datacenter-id>/<server-id>, got: %s", importID,
 		)
 	}
 
-	if err := validateImportIDParts(importID, parts); err != nil {
-		return nil, fmt.Errorf("error validating import identifier: %w", err)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
 	datacenterId := parts[0]

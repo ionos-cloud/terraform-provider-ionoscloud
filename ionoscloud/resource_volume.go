@@ -457,12 +457,12 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	if len(parts) != 3 {
 		return nil, fmt.Errorf(
 			"invalid import identifier: expected one of <location>:<datacenter-id>/<server-id>/<volume-id> "+
-				"or <datacenter-id>/<server-id>/<volume-id>, got: %s", d.Id(),
+				"or <datacenter-id>/<server-id>/<volume-id>, got: %s", importID,
 		)
 	}
 
-	if err := validateImportIDParts(importID, parts); err != nil {
-		return nil, fmt.Errorf("failed validating import identifier: %w", err)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
 	dcId := parts[0]

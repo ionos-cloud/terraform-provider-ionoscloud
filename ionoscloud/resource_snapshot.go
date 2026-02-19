@@ -269,7 +269,11 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 
 	location, parts := splitImportID(importID, ":")
 	if len(parts) != 1 {
-		return nil, fmt.Errorf("invalid import identifier: expected <location>:<snapshot-id> or <snapshot-id>, got: %s", importID)
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<snapshot-id> or <snapshot-id>, got: %s", importID)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
 	snapshotID := parts[0]

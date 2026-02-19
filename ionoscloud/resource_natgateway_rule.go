@@ -372,8 +372,8 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 		)
 	}
 
-	if err := validateImportIDParts(location, parts); err != nil {
-		return nil, fmt.Errorf("error validating import identifier: %w", err)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
 	dcId := parts[0]
