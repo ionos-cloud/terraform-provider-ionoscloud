@@ -16,7 +16,6 @@ import (
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
@@ -38,7 +37,6 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 		CDNClient:                     cdnService.NewClient(clientOptions, fileConfig),
 		AutoscalingClient:             autoscalingService.NewClient(clientOptions, fileConfig),
 		CertManagerClient:             cert.NewClient(clientOptions, fileConfig),
-		CloudApiClient:                cloudapi.NewClient(clientOptions, fileConfig),
 		ContainerClient:               crService.NewClient(clientOptions, fileConfig),
 		DNSClient:                     dnsService.NewClient(clientOptions, fileConfig),
 		LoggingClient:                 loggingService.NewClient(clientOptions, fileConfig),
@@ -60,7 +58,6 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 
 // SdkBundle is a struct that defines the bundle client. It is used for both sdkv2 and plugin framework
 type SdkBundle struct {
-	CloudApiClient                *ionoscloud.APIClient
 	InMemoryDBClient              *inmemorydb.Client
 	PsqlClient                    *dbaasService.PsqlClient
 	MongoClient                   *dbaasService.MongoClient
