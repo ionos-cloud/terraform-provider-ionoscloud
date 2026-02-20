@@ -105,7 +105,10 @@ func resourceFirewall() *schema.Resource {
 
 func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	firewall, diags := getFirewallData(d, "", false)
 	if diags != nil {
@@ -135,7 +138,10 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, d.Get("datacenter_id").(string),
 		d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
@@ -161,7 +167,10 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	firewall, diags := getFirewallData(d, "", true)
 	if diags != nil {
@@ -184,7 +193,10 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	apiResponse, err := client.FirewallRulesApi.
 		DatacentersServersNicsFirewallrulesDelete(
@@ -226,7 +238,10 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta in
 	nicId := parts[2]
 	firewallId := parts[3]
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId,
 		serverId, nicId, firewallId).Execute()

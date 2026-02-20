@@ -297,7 +297,10 @@ func resourceCubeServer() *schema.Resource {
 
 func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	server := ionoscloud.Server{
 		Properties: &ionoscloud.ServerProperties{},
@@ -340,7 +343,6 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
-	var err error
 	var volume *ionoscloud.VolumeProperties
 	volume, err = getVolumeData(d, "volume.0.", constant.CubeType)
 	if err != nil {
@@ -546,7 +548,10 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Id()
@@ -707,7 +712,10 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -1010,7 +1018,10 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 	datacenterId := parts[0]
 	serverId := parts[1]
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Depth(3).Execute()
 	logApiRequestTime(apiResponse)

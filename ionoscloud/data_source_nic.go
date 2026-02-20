@@ -119,7 +119,10 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	serverId = st.(string)
 
 	location := data.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	var name string
 	id, idOk := data.GetOk("id")

@@ -93,7 +93,10 @@ and log the extent to which your instances are being accessed.`,
 
 func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -111,7 +114,6 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(errors.New("please provide either the lan id or name"))
 	}
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

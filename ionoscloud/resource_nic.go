@@ -185,7 +185,10 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ inte
 }
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
 	nic, err := cloudapinic.GetNicFromSchemaCreate(d, "")
@@ -247,7 +250,10 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcid := d.Get("datacenter_id").(string)
@@ -273,13 +279,15 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcID := d.Get("datacenter_id").(string)
 	srvID := d.Get("server_id").(string)
 	nicID := d.Id()
-	var err error
 	if d.HasChange("flowlog") {
 		oldV, newV := d.GetChange("flowlog")
 		var firstFlowLogId = ""
@@ -335,13 +343,16 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-	_, err := ns.Delete(ctx, dcid, srvid, nicid)
+	_, err = ns.Delete(ctx, dcid, srvid, nicid)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
 		return diags
@@ -369,7 +380,10 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	sId := parts[1]
 	nicId := parts[2]
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, sId, nicId).Execute()
 	logApiRequestTime(apiResponse)

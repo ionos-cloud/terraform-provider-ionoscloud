@@ -51,10 +51,12 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(fmt.Errorf("please provide the userID"))
 	}
 	userID := userIDItf.(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	var s3Keys ionoscloud.S3Keys
 	var s3Key ionoscloud.S3Key
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 	if IDItf, idOk := d.GetOk("id"); idOk {
 		id := IDItf.(string)

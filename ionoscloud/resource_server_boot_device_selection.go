@@ -66,7 +66,10 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 	serverId := d.Get("server_id").(string)
 	location := d.Get("location").(string)
 
-	ss := cloudapiserver.NewUnboundService(serverId, location, meta)
+	ss, err := cloudapiserver.NewUnboundService(serverId, location, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	// The bootable device to which the server will revert if this resource is destroyed.
 	defaultBootVolume, err := ss.GetDefaultBootVolume(ctx, dcId, serverId)
@@ -96,7 +99,10 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 
 func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -123,7 +129,10 @@ func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.Reso
 	serverId := d.Get("server_id").(string)
 	location := d.Get("location").(string)
 
-	ss := cloudapiserver.NewUnboundService(serverId, location, meta)
+	ss, err := cloudapiserver.NewUnboundService(serverId, location, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if d.HasChange("boot_device_id") {
 		bootDeviceIDValue, bootDeviceIDOk := d.GetOk("boot_device_id")
@@ -143,7 +152,10 @@ func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.Reso
 
 func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)

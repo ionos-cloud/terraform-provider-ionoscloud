@@ -219,7 +219,10 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	serverId := d.Get("server_id").(string)
 	location := d.Get("location").(string)
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	// create volume object with data to be used for image
 	volumeProperties, err := getVolumeData(d, "", "")
@@ -323,7 +326,10 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 	volumeID := d.Id()
 	location := d.Get("location").(string)
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
 	logApiRequestTime(apiResponse)
@@ -358,7 +364,10 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	dcId := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if d.HasChange("name") {
 		_, newValue := d.GetChange("name")
@@ -432,7 +441,10 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	dcId := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -469,7 +481,10 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	srvId := parts[1]
 	volumeId := parts[2]
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeId).Execute()
 	logApiRequestTime(apiResponse)

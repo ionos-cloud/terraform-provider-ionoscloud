@@ -121,7 +121,10 @@ func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	location := d.Get("location").(string)
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if idOk {
 		securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, id.(string)).Depth(3).Execute()

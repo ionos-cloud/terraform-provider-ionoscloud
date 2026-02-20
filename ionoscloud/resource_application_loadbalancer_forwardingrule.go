@@ -182,7 +182,10 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 
 func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	applicationLoadBalancerForwardingRule := ionoscloud.ApplicationLoadBalancerForwardingRule{
 		Properties: &ionoscloud.ApplicationLoadBalancerForwardingRuleProperties{},
@@ -261,7 +264,10 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -287,7 +293,10 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 
 func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	request := ionoscloud.ApplicationLoadBalancerForwardingRule{
 		Properties: &ionoscloud.ApplicationLoadBalancerForwardingRuleProperties{},
@@ -364,7 +373,10 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 
 func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 	albID := d.Get("application_loadbalancer_id").(string)
@@ -406,7 +418,10 @@ func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d 
 	albId := parts[1]
 	ruleId := parts[2]
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	albForwardingRule, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, ruleId).Execute()
 	logApiRequestTime(apiResponse)

@@ -95,7 +95,10 @@ func resourceLan() *schema.Resource {
 
 func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	public := d.Get("public").(bool)
 	request := ionoscloud.Lan{
@@ -176,7 +179,10 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcid := d.Get("datacenter_id").(string)
 
@@ -205,7 +211,10 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	properties := &ionoscloud.LanProperties{}
 	newValue := d.Get("public")
@@ -259,13 +268,16 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
 		return diag.FromErr(err)
 	}
 
-	err := retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
+	err = retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
 		apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
 		if err != nil {
 			if isDeleteProtected(apiResponse, err.Error()) {
@@ -319,7 +331,10 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	datacenterId := parts[0]
 	lanId := parts[1]
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, datacenterId, lanId).Execute()
 	logApiRequestTime(apiResponse)

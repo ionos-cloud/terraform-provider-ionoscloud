@@ -48,7 +48,10 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	req := client.KubernetesApi.K8sGet(ctx).Depth(1)
 
 	filters, filtersOk := d.GetOk("filter")

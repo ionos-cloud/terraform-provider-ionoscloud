@@ -99,7 +99,10 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 	nsgID := d.Get("nsg_id").(string)
 	dcID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	fw, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFirewallrulesPost(ctx, dcID, nsgID).FirewallRule(firewall).Execute()
 	logApiRequestTime(apiResponse)
@@ -120,7 +123,10 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 
 func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	fw, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, d.Get("datacenter_id").(string),
 		d.Get("nsg_id").(string), d.Id()).Execute()
@@ -153,7 +159,10 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 	dcID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesPatch(ctx, dcID, nsgID, d.Id()).Rule(*firewall.Properties).Execute()
 	logApiRequestTime(apiResponse)
@@ -175,7 +184,10 @@ func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta
 	nsgID := d.Get("nsg_id").(string)
 	location := d.Get("location").(string)
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	apiResponse, err := client.SecurityGroupsApi.
 		DatacentersSecuritygroupsFirewallrulesDelete(
@@ -216,7 +228,10 @@ func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta
 	nsgID := parts[1]
 	firewallID := parts[2]
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	fw, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, dcID,
 		nsgID, firewallID).Execute()

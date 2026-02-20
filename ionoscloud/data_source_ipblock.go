@@ -112,7 +112,10 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 	var err error
 	var apiResponse *ionoscloud.APIResponse
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if !idOk && !nameOk && !locationOk {
 		return diag.FromErr(fmt.Errorf("either id, location or name must be set"))

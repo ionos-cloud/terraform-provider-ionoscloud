@@ -205,7 +205,10 @@ func dataSourceK8sNodePool() *schema.Resource {
 
 func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterId := d.Get("k8s_cluster_id")
 	id, idOk := d.GetOk("id")
@@ -218,7 +221,6 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(errors.New("please provide either the lan id or name"))
 	}
 	var nodePool ionoscloud.KubernetesNodePool
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 	if idOk {
 		/* search by ID */

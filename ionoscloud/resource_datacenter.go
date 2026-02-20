@@ -94,7 +94,10 @@ func resourceDatacenter() *schema.Resource {
 func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	datacenterName := d.Get("name").(string)
 	datacenterLocation := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenter := ionoscloud.DatacenterPost{
 		Properties: &ionoscloud.DatacenterPropertiesPost{
@@ -135,7 +138,10 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	datacenterLocation := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -161,7 +167,10 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	obj := ionoscloud.DatacenterPropertiesPut{}
 
 	datacenterLocation := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if d.HasChange("name") {
 		_, newName := d.GetChange("name")
@@ -205,7 +214,10 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	datacenterLocation := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -236,7 +248,10 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	dcId := parts[0]
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 	logApiRequestTime(apiResponse)
