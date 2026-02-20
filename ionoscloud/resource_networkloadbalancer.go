@@ -414,7 +414,7 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find network load balancer %q", networkLoadBalancerId)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving network load balancer  %q: %q ", networkLoadBalancerId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving network load balancer  %q: %w ", networkLoadBalancerId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {

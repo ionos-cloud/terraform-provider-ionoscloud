@@ -555,7 +555,7 @@ func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *sche
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find network load balancer rule %q", networkLoadBalancerRuleId)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving network load balancer rule  %q: %q ", networkLoadBalancerRuleId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving network load balancer rule  %q: %w ", networkLoadBalancerRuleId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {

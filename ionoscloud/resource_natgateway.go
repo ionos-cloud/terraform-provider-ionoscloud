@@ -347,7 +347,7 @@ func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find nat gateway  %q", natGatewayId)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving nat gateway  %q: %q ", natGatewayId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving nat gateway  %q: %w ", natGatewayId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {

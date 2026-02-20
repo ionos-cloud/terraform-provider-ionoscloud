@@ -406,7 +406,7 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find nat gateway rule %q", natGatewayRuleId)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving nat gateway rule  %q: %q ", natGatewayRuleId, err)
+		return nil, fmt.Errorf("an error occurred while retrieving nat gateway rule  %q: %w ", natGatewayRuleId, err)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {
