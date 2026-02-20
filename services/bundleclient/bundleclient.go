@@ -104,11 +104,16 @@ func (c SdkBundle) NewCloudAPIClient(location string) *ionoscloud.APIClient {
 	config := c.newCloudAPIClientConfig()
 
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint %s from IONOS_API_URL env variable\n", os.Getenv(shared.IonosApiUrlEnvVar))
+		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
 		return ionoscloud.NewAPIClient(config)
 	}
 
 	if c.fileConfig == nil {
+		return ionoscloud.NewAPIClient(config)
+	}
+
+	if c.fileConfig.GetProductOverrides(fileconfiguration.Cloud) == nil {
+		log.Printf("[WARN] Missing config for %s product in file config, using SDK defaults", fileconfiguration.Cloud)
 		return ionoscloud.NewAPIClient(config)
 	}
 

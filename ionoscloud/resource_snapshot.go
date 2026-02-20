@@ -227,7 +227,6 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		input.DiscVirtioHotUnplug = ionoscloud.ToPtr(d.Get("disc_virtio_hot_unplug").(bool))
 	}
 	if d.HasChange("require_legacy_bios") {
-		log.Printf("[DEBUG] require_legacy_bios has changed for snapshot %s, updating value to %t", d.Id(), d.Get("require_legacy_bios").(bool))
 		input.RequireLegacyBios = ionoscloud.ToPtr(d.Get("require_legacy_bios").(bool))
 	}
 
