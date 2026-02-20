@@ -9,15 +9,13 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 const bootCdromImageId = "aa97f2f4-ca28-11ec-925c-46570854dba1"
