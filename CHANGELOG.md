@@ -1,10 +1,16 @@
 ## 6.7.23 -- upcoming release
 ### Features
 - Added Kafka users data source: `ionoscloud_kafka_users`, user access credentials data source: `ionoscloud_kafka_user_credentials` and user access credentials ephemeral resource: `ionoscloud_kafka_user_credentials`.
+### Breaking Changes
+- **Removed API Gateway resources and data sources**: `ionoscloud_apigateway`, `ionoscloud_apigateway_route` and their corresponding data sources have been removed from the provider. All API Gateway related code, tests, documentation, and examples have been removed.
 ### Documentation
 - Updated documentation for S3 buckets.
+- Removed API Gateway documentation and examples.
 ### Fixes
 - Add back missing `id` field in `ionoscloud_server.nic.firewall` sub-resource, which caused an error when trying to create a server with firewall rules defined on a nic.
+- Remove unused `password` field from `users` attribute in `ionoscloud_group` resource schema.
+- Fixed VPN IPSec Gateway to use correct `fileconfiguration.VPN` constant instead of incorrect `fileconfiguration.APIGateway`.
+- Fixed typo in VPN IPSec Gateway data source documentation heading.
 
 ## 6.7.22
 ### Features

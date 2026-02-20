@@ -39,6 +39,11 @@ func resourceServerBootDeviceSelection() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"boot_device_id": {
 				Type:             schema.TypeString,
 				Description:      "ID of the entity to set as primary boot device. Possible boot devices are CDROM Images and Volumes. If omitted, server will boot from PXE",
@@ -59,8 +64,9 @@ func resourceServerBootDeviceSelection() *schema.Resource {
 func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
+	location := d.Get("location").(string)
 
-	ss := cloudapiserver.NewUnboundService(serverId, meta)
+	ss := cloudapiserver.NewUnboundService(serverId, location, meta)
 
 	// The bootable device to which the server will revert if this resource is destroyed.
 	defaultBootVolume, err := ss.GetDefaultBootVolume(ctx, dcId, serverId)
@@ -89,7 +95,9 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 }
 
 func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ss := cloudapiserver.Service{Client: meta.(bundleclient.SdkBundle).CloudApiClient, Meta: meta, D: d}
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
@@ -113,8 +121,9 @@ func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.Resour
 func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
+	location := d.Get("location").(string)
 
-	ss := cloudapiserver.NewUnboundService(serverId, meta)
+	ss := cloudapiserver.NewUnboundService(serverId, location, meta)
 
 	if d.HasChange("boot_device_id") {
 		bootDeviceIDValue, bootDeviceIDOk := d.GetOk("boot_device_id")
@@ -133,7 +142,9 @@ func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.Reso
 }
 
 func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ss := cloudapiserver.Service{Client: meta.(bundleclient.SdkBundle).CloudApiClient, Meta: meta, D: d}
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)

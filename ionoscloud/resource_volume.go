@@ -154,6 +154,11 @@ func resourceVolume() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"expose_serial": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -208,13 +213,13 @@ func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 }
 
 func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	var image, imageAlias string
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
+	location := d.Get("location").(string)
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	// create volume object with data to be used for image
 	volumeProperties, err := getVolumeData(d, "", "")
@@ -313,11 +318,12 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	dcId := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
 	volumeID := d.Id()
+	location := d.Get("location").(string)
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
 	logApiRequestTime(apiResponse)
@@ -348,10 +354,11 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	properties := ionoscloud.VolumeProperties{}
 	dcId := d.Get("datacenter_id").(string)
+	location := d.Get("location").(string)
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	if d.HasChange("name") {
 		_, newValue := d.GetChange("name")
@@ -422,9 +429,10 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	dcId := d.Get("datacenter_id").(string)
+	location := d.Get("location").(string)
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -443,16 +451,25 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
+	importID := d.Id()
+
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected one of <location>:<datacenter-id>/<server-id>/<volume-id> "+
+				"or <datacenter-id>/<server-id>/<volume-id>, got: %s", importID,
+		)
 	}
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
 
 	dcId := parts[0]
 	srvId := parts[1]
 	volumeId := parts[2]
+
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeId).Execute()
 	logApiRequestTime(apiResponse)

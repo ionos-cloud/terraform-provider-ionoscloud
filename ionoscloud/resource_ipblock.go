@@ -205,11 +205,11 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta i
 
 	location, parts := splitImportID(importID, ":")
 	if len(parts) != 1 {
-		return nil, fmt.Errorf("invalid import identifier: expected format 'location:ipBlockId' or 'ipBlockId', got: %q", importID)
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<ipblock-id> or <ipblock-id>, got: %s", importID)
 	}
 
-	if err := validateImportIDParts(importID, parts); err != nil {
-		return nil, fmt.Errorf("error validating import identifier: %w", err)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
 	ipBlockId := parts[0]

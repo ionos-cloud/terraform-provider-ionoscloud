@@ -85,6 +85,11 @@ func resourceGPUServer() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"image_password": {
 				Type:      schema.TypeString,
 				Optional:  true,
@@ -251,7 +256,8 @@ func resourceGPUServer() *schema.Resource {
 
 //nolint:gocyclo
 func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	server := ionoscloud.Server{
 		Properties: &ionoscloud.ServerProperties{},

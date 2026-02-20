@@ -34,6 +34,7 @@ func resourceDatacenter() *schema.Resource {
 			"location": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -224,16 +225,16 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
-	location, resourceIDs := splitImportID(importID, ":")
-	if len(resourceIDs) != 1 {
-		return nil, fmt.Errorf("invalid import identifier: expected format <location>:<datacenter-id> or <datacenter-id>")
+	location, parts := splitImportID(importID, ":")
+	if len(parts) != 1 {
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<datacenter-id> or <datacenter-id>, got: %s", importID)
 	}
 
-	if err := validateImportIDParts(importID, resourceIDs); err != nil {
-		return nil, fmt.Errorf("error validating import identifier: %w", err)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
-	dcId := resourceIDs[0]
+	dcId := parts[0]
 
 	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 

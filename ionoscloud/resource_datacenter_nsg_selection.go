@@ -25,18 +25,19 @@ func resourceDatacenterNSGSelection() *schema.Resource {
 			"location": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"datacenter_id": {
 				Type:             schema.TypeString,
 				Description:      "ID of the Datacenter to which the NSG will be attached.",
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"nsg_id": {
 				Type:             schema.TypeString,
 				Description:      "ID of the NSG which will be attached to the datacenter. If an empty string is specified and a NSG was attached previously, it will be unset.",
 				Required:         true,
-				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.Any(validation.IsUUID, validation.StringIsEmpty)),
 			},
 		},

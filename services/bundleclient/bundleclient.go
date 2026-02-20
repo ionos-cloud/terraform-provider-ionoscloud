@@ -13,12 +13,10 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
-	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
@@ -40,7 +38,7 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 		CDNClient:                     cdnService.NewClient(clientOptions, fileConfig),
 		AutoscalingClient:             autoscalingService.NewClient(clientOptions, fileConfig),
 		CertManagerClient:             cert.NewClient(clientOptions, fileConfig),
-		CloudApiClient:                cloudapi.NewClient(clientOptions, fileConfig),
+		ContainerClient:               crService.NewClient(clientOptions, fileConfig),
 		DNSClient:                     dnsService.NewClient(clientOptions, fileConfig),
 		LoggingClient:                 loggingService.NewClient(clientOptions, fileConfig),
 		MariaDBClient:                 mariadb.NewClient(clientOptions, fileConfig),
@@ -48,7 +46,6 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 		NFSClient:                     nfsService.NewClient(clientOptions, fileConfig),
 		PsqlClient:                    dbaasService.NewPSQLClient(clientOptions, fileConfig),
 		KafkaClient:                   kafkaService.NewClient(clientOptions, fileConfig),
-		APIGatewayClient:              apiGatewayService.NewClient(clientOptions, fileConfig),
 		VPNClient:                     vpn.NewClient(clientOptions, fileConfig),
 		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, fileConfig),
 		S3Client:                      objectStorageService.NewClient(clientOptions, fileConfig),
@@ -62,7 +59,6 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 
 // SdkBundle is a struct that defines the bundle client. It is used for both sdkv2 and plugin framework
 type SdkBundle struct {
-	CloudApiClient                *ionoscloud.APIClient
 	InMemoryDBClient              *inmemorydb.Client
 	PsqlClient                    *dbaasService.PsqlClient
 	MongoClient                   *dbaasService.MongoClient
@@ -75,7 +71,6 @@ type SdkBundle struct {
 	AutoscalingClient             *autoscalingService.Client
 	KafkaClient                   *kafkaService.Client
 	CDNClient                     *cdnService.Client
-	APIGatewayClient              *apiGatewayService.Client
 	VPNClient                     *vpn.Client
 	S3Client                      *objectStorageService.Client
 	ObjectStorageManagementClient *objectStorageManagementService.Client
@@ -127,6 +122,7 @@ func (c SdkBundle) NewContainerRegistryClient(location string) *crService.Client
 	return crService.NewClientFromConfig(config)
 }
 
+// newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.
 func (c SdkBundle) newCloudAPIClientConfig() *ionoscloud.Configuration {
 	config := ionoscloud.NewConfiguration(
 		c.clientOptions.Credentials.Username, c.clientOptions.Credentials.Password, c.clientOptions.Credentials.Token, c.clientOptions.Endpoint,
@@ -146,6 +142,7 @@ func (c SdkBundle) newCloudAPIClientConfig() *ionoscloud.Configuration {
 	return config
 }
 
+// NewCloudAPIClient creates a new *ionoscloud.APIClient using the client options and file config defined in the SdkBundle struct.
 func (c SdkBundle) NewCloudAPIClient(location string) *ionoscloud.APIClient {
 	config := c.newCloudAPIClientConfig()
 

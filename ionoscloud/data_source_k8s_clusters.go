@@ -31,6 +31,10 @@ func dataSourceK8sClusters() *schema.Resource {
 				Computed: true,
 			},
 			"filter": dataSourceFiltersSchema(),
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -43,7 +47,8 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 		"k8s_version": "k8sVersion",
 	}
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	req := client.KubernetesApi.K8sGet(ctx).Depth(1)
 
 	filters, filtersOk := d.GetOk("filter")

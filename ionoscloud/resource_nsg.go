@@ -46,6 +46,7 @@ func resourceNSG() *schema.Resource {
 			"location": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -152,11 +153,11 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid import identifier: expected format <location>:<datacenter-id>/<nsg-id> or <datacenter-id>/<nsg-id>, got: %s", importID)
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<datacenter-id>/<nsg-id> or <datacenter-id>/<nsg-id>, got: %s", importID)
 	}
 
-	if err := validateImportIDParts(importID, parts); err != nil {
-		return nil, fmt.Errorf("error validating import identifier: %w", err)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
 	datacenterID := parts[0]

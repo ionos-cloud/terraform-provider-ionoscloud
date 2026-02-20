@@ -115,14 +115,16 @@ func dataSourceVolume() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
 		return diag.FromErr(errors.New("no datacenter_id was specified"))
@@ -142,6 +144,9 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 	var volume ionoscloud.Volume
 	var err error
 	var apiResponse *ionoscloud.APIResponse
+
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	if idOk {
 		/* search by ID */

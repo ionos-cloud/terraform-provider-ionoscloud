@@ -135,12 +135,11 @@ func splitImportID(importID, del string) (location string, resourceIDs []string)
 	return before, strings.Split(after, del)
 }
 
-// validateImportIDParts checks that all resource IDs within the import identifier are non-empty, returning an error
-// if any of them is invalid. The importID parameter is used as context in the error message.
-func validateImportIDParts(importID string, parts []string) error {
+// validateImportIDParts checks that all resource IDs within the import identifier are non-empty.
+func validateImportIDParts(parts []string) error {
 	for _, id := range parts {
 		if id == "" {
-			return fmt.Errorf("invalid identifier: all parts of an import ID must be provided and non-empty, got: %q", importID)
+			return fmt.Errorf("all parts of the import identifier must be non-empty")
 		}
 	}
 

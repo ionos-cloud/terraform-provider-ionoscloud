@@ -76,8 +76,6 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 
 func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
@@ -90,6 +88,9 @@ func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		lanId := rs.Primary.Attributes["lan_id"]
 		ip := rs.Primary.Attributes["ip"]
+		location := rs.Primary.Attributes["location"]
+
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
@@ -112,8 +113,6 @@ func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 }
 
 func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	defer cancel()
 
@@ -126,6 +125,9 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		lanId := rs.Primary.Attributes["lan_id"]
 		nicUuid := rs.Primary.Attributes["nicuuid"]
 		ip := rs.Primary.Attributes["ip"]
+		location := rs.Primary.Attributes["location"]
+
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 		lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 		logApiRequestTime(apiResponse)

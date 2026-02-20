@@ -220,6 +220,7 @@ func dataSourceK8sClusterSchema() map[string]*schema.Schema {
 		"location": {
 			Type:     schema.TypeString,
 			Computed: true,
+			Optional: true,
 		},
 		"node_pools": {
 			Type:     schema.TypeList,
@@ -268,7 +269,8 @@ func dataSourceK8sCluster() *schema.Resource {
 }
 
 func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")

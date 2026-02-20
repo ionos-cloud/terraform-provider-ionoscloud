@@ -39,6 +39,10 @@ func dataSourceK8sNodePool() *schema.Resource {
 				Computed:    true,
 				Description: "The UUID of the VDC",
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"state": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -193,14 +197,15 @@ func dataSourceK8sNodePool() *schema.Resource {
 			//	Type:        schema.TypeString,
 			//	Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
 			//	Computed:    true,
-			//},
+			// },
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
 	clusterId := d.Get("k8s_cluster_id")
 	id, idOk := d.GetOk("id")
