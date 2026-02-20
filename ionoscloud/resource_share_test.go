@@ -57,7 +57,10 @@ func TestAccShareBasic(t *testing.T) {
 }
 
 func testAccCheckShareDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+	if err != nil {
+		return err
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
@@ -91,7 +94,10 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 
 func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+		if err != nil {
+			return err
+		}
 
 		rs, ok := s.RootModule().Resources[n]
 

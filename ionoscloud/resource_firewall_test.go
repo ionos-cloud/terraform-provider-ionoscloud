@@ -156,7 +156,10 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],
 			rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID).Execute()
@@ -193,7 +196,10 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		foundServer, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],
 			rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID).Execute()

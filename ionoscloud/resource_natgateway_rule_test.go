@@ -105,7 +105,10 @@ func testAccCheckNatGatewayRuleDestroyCheck(s *terraform.State) error {
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesDelete(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["natgateway_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
@@ -141,7 +144,10 @@ func testAccCheckNatGatewayRuleExists(n string, natGateway *ionoscloud.NatGatewa
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		foundNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["natgateway_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)

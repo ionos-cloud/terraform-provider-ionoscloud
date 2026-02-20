@@ -130,7 +130,10 @@ func testAccCheckNetworkLoadBalancerDestroyCheck(s *terraform.State) error {
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
@@ -166,7 +169,10 @@ func testAccCheckNetworkLoadBalancerExists(n string, networkLoadBalancer *ionosc
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		foundNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
