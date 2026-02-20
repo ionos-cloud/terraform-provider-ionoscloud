@@ -296,6 +296,10 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 
 	log.Printf("[INFO] lan found: %+v", lan)
 
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
+
 	ipFailoverGroups := lan.Properties.IpFailover
 	if lan.Properties != nil && ipFailoverGroups != nil && len(*ipFailoverGroups) > 0 {
 		for _, ipFailoverGroup := range *ipFailoverGroups {

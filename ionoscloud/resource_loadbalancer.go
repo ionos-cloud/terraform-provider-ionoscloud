@@ -302,6 +302,9 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	if err := d.Set("datacenter_id", dcId); err != nil {
 		return nil, err
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
 
 	if loadbalancer.Properties.Name != nil {
 		if err := d.Set("name", *loadbalancer.Properties.Name); err != nil {

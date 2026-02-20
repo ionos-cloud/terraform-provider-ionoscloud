@@ -264,6 +264,9 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta in
 	if err := d.Set("nic_id", nicId); err != nil {
 		return nil, err
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
 
 	if err := setFirewallData(d, &fw); err != nil {
 		return nil, err

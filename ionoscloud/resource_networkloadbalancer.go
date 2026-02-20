@@ -420,6 +420,9 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("datacenter_id", dcId); err != nil {
 		return nil, err
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
 
 	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
 		return nil, err

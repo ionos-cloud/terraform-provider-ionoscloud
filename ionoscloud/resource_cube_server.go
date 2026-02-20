@@ -1055,6 +1055,10 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, err
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
+
 	if server.Properties != nil {
 		if server.Properties.Name != nil {
 			if err := d.Set("name", *server.Properties.Name); err != nil {

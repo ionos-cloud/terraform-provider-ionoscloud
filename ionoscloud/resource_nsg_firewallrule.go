@@ -251,6 +251,9 @@ func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta
 	if err := d.Set("nsg_id", nsgID); err != nil {
 		return nil, err
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
 
 	if err := setFirewallData(d, &fw); err != nil {
 		return nil, err

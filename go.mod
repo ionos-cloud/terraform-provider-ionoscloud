@@ -31,6 +31,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
+	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.7-0.20260209105343-d884c00c537c
 	github.com/ionos-cloud/sdk-go/v6 v6.3.6
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.10.0
@@ -41,7 +42,6 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
-	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.7-0.20260209105343-d884c00c537c // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

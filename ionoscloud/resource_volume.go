@@ -508,6 +508,10 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 		return nil, err
 	}
 
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
+
 	if err := setVolumeData(d, &volume); err != nil {
 		return nil, err
 	}

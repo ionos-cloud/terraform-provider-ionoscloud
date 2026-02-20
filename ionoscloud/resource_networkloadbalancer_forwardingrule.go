@@ -564,6 +564,9 @@ func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *sche
 	if err := d.Set("networkloadbalancer_id", networkLoadBalancerId); err != nil {
 		return nil, err
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
 
 	if err := setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
 		return nil, err

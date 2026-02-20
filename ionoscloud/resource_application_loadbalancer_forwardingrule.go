@@ -440,6 +440,9 @@ func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d 
 	if err := d.Set("application_loadbalancer_id", albId); err != nil {
 		return nil, fmt.Errorf("error while setting application_loadbalancer_id property for  alb forwarding rule %q: %w", ruleId, err)
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, fmt.Errorf("error while setting location property for imported alb forwarding rule %q: %w", ruleId, err)
+	}
 
 	if err := setApplicationLoadBalancerForwardingRuleData(d, &albForwardingRule); err != nil {
 		return nil, err

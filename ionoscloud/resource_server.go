@@ -1273,6 +1273,9 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, err
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
 
 	if len(parts) > 3 {
 		var rules []string

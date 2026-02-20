@@ -415,6 +415,9 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 	if err := d.Set("natgateway_id", natGatewayId); err != nil {
 		return nil, err
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
 
 	if err := setNatGatewayRuleData(d, &natGatewayRule); err != nil {
 		return nil, err

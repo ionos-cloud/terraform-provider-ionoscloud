@@ -406,6 +406,9 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		return nil, err
 	}
+	if err = d.Set("location", location); err != nil {
+		return nil, err
+	}
 
 	if err := cloudapinic.NicSetData(d, &nic); err != nil {
 		return nil, err

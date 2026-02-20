@@ -195,6 +195,9 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err = d.Set("datacenter_id", datacenterID); err != nil {
 		return nil, err
 	}
+	if err = d.Set("location", location); err != nil {
+		return nil, err
+	}
 	if err = setNSGData(d, &nsg); err != nil {
 		return nil, err
 	}

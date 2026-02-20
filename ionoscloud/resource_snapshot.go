@@ -293,7 +293,7 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 		return nil, err
 	}
 
-	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
+	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, snapshotID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -304,7 +304,7 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 		return nil, fmt.Errorf("an error occurred while retrieving the snapshot %q, %w", snapshotID, err)
 	}
 
-	log.Printf("[INFO] snapshot %s found: %+v", d.Id(), snapshot)
+	log.Printf("[INFO] snapshot %s found: %+v", importID, snapshot)
 
 	if err = setSnapshotData(d, &snapshot); err != nil {
 		return nil, err

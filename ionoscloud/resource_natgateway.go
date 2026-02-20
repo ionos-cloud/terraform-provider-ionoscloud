@@ -353,6 +353,9 @@ func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set("datacenter_id", dcId); err != nil {
 		return nil, err
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
 
 	if err := setNatGatewayData(d, &natGateway); err != nil {
 		return nil, err

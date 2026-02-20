@@ -894,6 +894,9 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	if err := d.Set("k8s_cluster_id", clusterId); err != nil {
 		return nil, fmt.Errorf("error while setting k8s_cluster_id property for k8s node pool %q: %q", npId, err)
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, fmt.Errorf("error while setting location property for k8s node pool %q: %q", npId, err)
+	}
 
 	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {
 		return nil, err

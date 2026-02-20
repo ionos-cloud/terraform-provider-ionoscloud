@@ -425,12 +425,17 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, fmt.Errorf("error while setting datacenter_id property for alb %q: %w", albId, err)
 	}
+	if err = d.Set("location", location); err != nil {
+		return nil, fmt.Errorf("error while setting location property for alb %q: %w", albId, err)
+	}
+
 	fw := cloudapiflowlog.Service{
 		Client: client,
 		Meta:   meta,
 		D:      d,
 	}
-	flowLog, apiResponse, err := fw.GetFlowLogForALB(ctx, datacenterId, d.Id(), 0)
+
+	flowLog, apiResponse, err := fw.GetFlowLogForALB(ctx, datacenterId, albId, 0)
 	if err != nil {
 		if !apiResponse.HttpNotFound() {
 			return nil, fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse))
