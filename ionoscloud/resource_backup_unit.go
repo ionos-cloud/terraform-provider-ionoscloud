@@ -61,7 +61,10 @@ func resourceBackupUnit() *schema.Resource {
 }
 
 func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	backupUnitName := d.Get("name").(string)
 	backupUnitPassword := d.Get("password").(string)
@@ -95,8 +98,10 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	backupUnit, apiResponse, err := BackupUnitFindByID(ctx, d.Id(), client)
 	logApiRequestTime(apiResponse)
@@ -130,7 +135,10 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	request := ionoscloud.BackupUnit{}
 	request.Properties = &ionoscloud.BackupUnitProperties{}
@@ -206,7 +214,10 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 }
 
 func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	apiResponse, err := client.BackupUnitsApi.BackupunitsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -249,7 +260,10 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	if err != nil {
+		return nil, err
+	}
 
 	buId := d.Id()
 

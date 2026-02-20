@@ -8,13 +8,14 @@ import (
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *ionoscloud.APIClient {

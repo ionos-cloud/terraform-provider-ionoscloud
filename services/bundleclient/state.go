@@ -15,11 +15,16 @@ import (
 )
 
 // GetStateChangeConf gets the default configuration for tracking a request progress
-func GetStateChangeConf(meta interface{}, d *schema.ResourceData, location string, timeoutType string) *retry.StateChangeConf {
+func GetStateChangeConf(meta interface{}, d *schema.ResourceData, requestLocation string, timeoutType string) *retry.StateChangeConf {
+	var apiLocation string
+	if temp, ok := d.GetOk("location"); ok {
+		apiLocation = temp.(string)
+	}
+
 	stateConf := &retry.StateChangeConf{
 		Pending:        resourcePendingStates,
 		Target:         resourceTargetStates,
-		Refresh:        resourceStateRefreshFunc(meta, location),
+		Refresh:        resourceStateRefreshFunc(meta, apiLocation, requestLocation),
 		Timeout:        d.Timeout(timeoutType),
 		MinTimeout:     5 * time.Second,
 		Delay:          0,    // Don't delay the start
@@ -30,9 +35,12 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, location strin
 }
 
 // resourceStateRefreshFunc tracks progress of a request
-func resourceStateRefreshFunc(meta interface{}, path string) retry.StateRefreshFunc {
+func resourceStateRefreshFunc(meta interface{}, location, path string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client := meta.(SdkBundle).CloudApiClient
+		client, err := meta.(SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return nil, "", err
+		}
 
 		log.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {

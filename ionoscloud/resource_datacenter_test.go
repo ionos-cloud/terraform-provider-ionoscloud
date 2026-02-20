@@ -105,8 +105,6 @@ func TestAccDataCenterBasic(t *testing.T) {
 }
 
 func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -118,6 +116,7 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
 		_, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
@@ -135,8 +134,6 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 
 func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -153,6 +150,7 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 			defer cancel()
 		}
 
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
 		foundDC, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 

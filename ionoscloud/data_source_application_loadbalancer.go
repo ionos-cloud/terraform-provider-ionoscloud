@@ -76,6 +76,10 @@ func dataSourceApplicationLoadBalancer() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"flowlog": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -91,7 +95,11 @@ and log the extent to which your instances are being accessed.`,
 }
 
 func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenterId := d.Get("datacenter_id").(string)
 
@@ -109,7 +117,6 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 	}
 
 	var applicationLoadBalancer ionoscloud.ApplicationLoadBalancer
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

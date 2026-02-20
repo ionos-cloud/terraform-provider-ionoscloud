@@ -436,3 +436,63 @@ func ToInterfaceSlice[T any](slice []T) []interface{} {
 	}
 	return r
 }
+
+// ExecuteWithFallback makes an API request using the provided 'execute' function, retrying on alternative servers if a retryable error occurs.
+// If the request succeeds, it returns a response containing information about a specific entity, the API response and a nil error.
+// The fallback loop terminates immediately upon success, a nil API response, or a non-retryable error.
+// The fallback loop works by updating the server index inside the context. The server index indicates to which server (from the list of server URLs configured at client level) the request should be sent.
+func ExecuteWithFallback[T any](baseCtx context.Context, serversCount int, execute func(retryCtx context.Context) (T, *ionoscloud.APIResponse, error)) (T, *ionoscloud.APIResponse, error) {
+	var err error
+	var apiResp *ionoscloud.APIResponse
+	var resp T
+
+	if serversCount == 0 {
+		return resp, nil, fmt.Errorf("no server URLs configured for the client")
+	}
+
+	for i := 0; i < serversCount; i++ {
+		retryCtx := context.WithValue(baseCtx, ionoscloud.ContextServerIndex, i)
+		// TODO -- Check what happens for POST requests in this scenario:
+		// 1. POST request is sent to the server
+		// 2. The server is unreachable.
+		// 3. Is it ok to iterate to the next server and also send the request there?
+		// In the SDK, we have this:
+		//switch resp.StatusCode {
+		//case http.StatusServiceUnavailable,
+		//	http.StatusGatewayTimeout,
+		//	http.StatusBadGateway:
+		//	if request.Method == http.MethodPost { <- THIS PART HERE
+		//		return resp, httpRequestTime, err
+		//	}
+		//	backoffTime = c.GetConfig().WaitTime
+
+		resp, apiResp, err = execute(retryCtx)
+		// The API response will always contain some information, even in case of errors.
+		if apiResp == nil {
+			return resp, nil, fmt.Errorf("expected a valid API response, got nil")
+		}
+		if err == nil {
+			return resp, apiResp, nil
+		}
+		if !isRetryable(apiResp) {
+			return resp, apiResp, err
+		}
+	}
+
+	return resp, apiResp, err
+}
+
+// isRetryable checks if the API response status code indicates a retryable error.
+func isRetryable(apiResp *ionoscloud.APIResponse) bool {
+	if apiResp == nil {
+		return false
+	}
+
+	// TODO -- Make sure this covers all possible scenarios.
+	switch apiResp.StatusCode {
+	case http.StatusServiceUnavailable, http.StatusGatewayTimeout, http.StatusBadGateway:
+		return true
+	default:
+		return false
+	}
+}

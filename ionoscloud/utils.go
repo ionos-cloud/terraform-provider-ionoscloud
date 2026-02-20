@@ -110,3 +110,38 @@ func httpNotFound(resp *ionoscloud.APIResponse) bool {
 	}
 	return false
 }
+
+// splitImportID splits the import ID into location and a slice of resource identifiers. The import ID
+// is expected to be in the format "<location>:<compound-identifier>", where compound-identifier is
+// "<id-1><del><id-2><del>...<del><id-n>". If the import ID does not contain a colon, it returns an empty location and
+// splits the entire import ID by the provided delimiter.
+//
+// Example
+//
+//	Code:
+//		splitImportID("de/fra:00000000-0000-0000-0000-000000000000/1", "/")
+//		splitImportID("de/fra:00000000-0000-0000-0000-000000000000:1", ":")
+//		splitImportID("00000000-0000-0000-0000-000000000000/1", "/")
+//	Output:
+//		"de/fra", []string{"00000000-0000-0000-0000-000000000000", "1"}
+//		"de/fra", []string{"00000000-0000-0000-0000-000000000000", "1"}
+//		"", []string{"00000000-0000-0000-0000-000000000000", "1"}
+func splitImportID(importID, del string) (location string, resourceIDs []string) {
+	before, after, found := strings.Cut(importID, ":")
+	if !found {
+		return "", strings.Split(before, del)
+	}
+
+	return before, strings.Split(after, del)
+}
+
+// validateImportIDParts checks that all resource IDs within the import identifier are non-empty.
+func validateImportIDParts(parts []string) error {
+	for _, id := range parts {
+		if id == "" {
+			return fmt.Errorf("all parts of the import identifier must be non-empty")
+		}
+	}
+
+	return nil
+}

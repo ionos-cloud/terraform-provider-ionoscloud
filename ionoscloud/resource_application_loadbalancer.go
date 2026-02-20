@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -75,6 +74,11 @@ func resourceApplicationLoadBalancer() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"flowlog": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -91,7 +95,11 @@ and log the extent to which your instances are being accessed.`,
 }
 
 func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	applicationLoadBalancer := ionoscloud.ApplicationLoadBalancer{
 		Properties: &ionoscloud.ApplicationLoadBalancerProperties{},
@@ -206,7 +214,11 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 }
 
 func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -239,7 +251,11 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 }
 
 func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	request := ionoscloud.ApplicationLoadBalancer{
 		Properties: &ionoscloud.ApplicationLoadBalancerProperties{},
@@ -346,7 +362,11 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 }
 
 func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -368,16 +388,28 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 }
 
 func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	importID := d.Id()
 
-	parts := strings.Split(d.Id(), "/")
+	location, parts := splitImportID(importID, "/")
 
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{alb}", d.Id())
+	if len(parts) != 2 {
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected one of <location>:<datacenter-id>/<alb> or "+
+				"<datacenter-id>/<alb>, got: %s", importID,
+		)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
 	datacenterId := parts[0]
 	albId := parts[1]
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	alb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, albId).Execute()
 	logApiRequestTime(apiResponse)
