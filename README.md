@@ -108,20 +108,6 @@ profiles:
 environments:
   - name: prod
     products:
-      - name: apigateway
-        endpoints:
-          - location: de/txl
-            name: https://apigateway.de-txl.ionos.com
-            skipTlsVerify: false
-          - location: gb/lhr
-            name: https://apigateway.gb-lhr.ionos.com
-            skipTlsVerify: false
-          - location: fr/par
-            name: https://apigateway.fr-par.ionos.com
-            skipTlsVerify: false
-          - location: es/vit
-            name: https://apigateway.es-vit.ionos.com
-            skipTlsVerify: false
       - name: compute
         endpoints:
           - name: https://api.ionos.com/cloudapi/v6

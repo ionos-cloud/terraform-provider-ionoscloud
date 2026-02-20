@@ -39,41 +39,8 @@ func resourceGroup() *schema.Resource {
 				Type:    groupResourceSchemaV1().CoreConfigSchema().ImpliedType(),
 			},
 		},
-		//StateUpgraders: []schema.StateUpgrader{
-		//	{
-		//		Type:    resourceGroup0().CoreConfigSchema().ImpliedType(),
-		//		Upgrade: resourceGroupUpgradeV0,
-		//		Version: 0,
-		//	},
-		// },
 	}
 }
-
-//
-// func resourceGroup0() *schema.Resource {
-//	return &schema.Resource{
-//		Schema: map[string]*schema.Schema{
-//			"user_id": {
-//				Type:     schema.TypeString,
-//				Optional: true,
-//			},
-//		},
-//		Timeouts: &resourceDefaultTimeouts,
-//	}
-//}
-//
-//func resourceGroupUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
-//	oldState := state
-//	var oldData string
-//	if d, ok := oldState["user_id"].(string); ok {
-//		oldData = d
-//		var users []string
-//		users = append(users, oldData)
-//		state["user_ids"] = users
-//	}
-//
-//	return state, nil
-//}
 
 // groupResourceSchema returns the current schema for the group resource
 func groupResourceSchema() map[string]*schema.Schema {
@@ -241,10 +208,6 @@ func groupResourceSchema() map[string]*schema.Schema {
 						Computed: true,
 					},
 					"email": {
-						Type:     schema.TypeString,
-						Computed: true,
-					},
-					"password": {
 						Type:     schema.TypeString,
 						Computed: true,
 					},

@@ -4,7 +4,6 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	apiGatewayService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/apigateway"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
@@ -39,7 +38,6 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 		NFSClient:                     nfsService.NewClient(clientOptions, fileConfig),
 		PsqlClient:                    dbaasService.NewPSQLClient(clientOptions, fileConfig),
 		KafkaClient:                   kafkaService.NewClient(clientOptions, fileConfig),
-		APIGatewayClient:              apiGatewayService.NewClient(clientOptions, fileConfig),
 		VPNClient:                     vpn.NewClient(clientOptions, fileConfig),
 		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, fileConfig),
 		S3Client:                      objectStorageService.NewClient(clientOptions, fileConfig),
@@ -63,7 +61,6 @@ type SdkBundle struct {
 	AutoscalingClient             *autoscalingService.Client
 	KafkaClient                   *kafkaService.Client
 	CDNClient                     *cdnService.Client
-	APIGatewayClient              *apiGatewayService.Client
 	VPNClient                     *vpn.Client
 	S3Client                      *objectStorageService.Client
 	ObjectStorageManagementClient *objectStorageManagementService.Client

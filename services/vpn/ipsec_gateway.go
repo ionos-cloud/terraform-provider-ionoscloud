@@ -21,7 +21,7 @@ const ipsecGatewayResourceName = "VPN IPSec Gateway"
 // CreateIPSecGateway creates a new VPN IPSec Gateway
 func (c *Client) CreateIPSecGateway(ctx context.Context, d *schema.ResourceData) (vpn.IPSecGatewayRead, *shared.APIResponse, error) {
 	location := d.Get("location").(string)
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.APIGateway, location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	request := setIPSecGatewayCreateRequest(d)
 	gateway, apiResponse, err := c.sdkClient.IPSecGatewaysApi.IpsecgatewaysPost(ctx).IPSecGatewayCreate(request).Execute()
 	apiResponse.LogInfo()
@@ -30,7 +30,7 @@ func (c *Client) CreateIPSecGateway(ctx context.Context, d *schema.ResourceData)
 
 // GetIPSecGatewayByID retrieves a VPN IPSec Gateway by its ID and location
 func (c *Client) GetIPSecGatewayByID(ctx context.Context, id string, location string) (vpn.IPSecGatewayRead, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.APIGateway, location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	gateway, apiResponse, err := c.sdkClient.IPSecGatewaysApi.IpsecgatewaysFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return gateway, apiResponse, err
@@ -38,7 +38,7 @@ func (c *Client) GetIPSecGatewayByID(ctx context.Context, id string, location st
 
 // ListIPSecGateway retrieves all VPN IPSec Gateways from a given location
 func (c *Client) ListIPSecGateway(ctx context.Context, location string) (vpn.IPSecGatewayReadList, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.APIGateway, location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	gateways, apiResponse, err := c.sdkClient.IPSecGatewaysApi.IpsecgatewaysGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return gateways, apiResponse, err
@@ -46,7 +46,7 @@ func (c *Client) ListIPSecGateway(ctx context.Context, location string) (vpn.IPS
 
 // DeleteIPSecGateway deletes a VPN IPSec Gateway by its ID and location
 func (c *Client) DeleteIPSecGateway(ctx context.Context, id string, location string) (*shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.APIGateway, location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	apiResponse, err := c.sdkClient.IPSecGatewaysApi.IpsecgatewaysDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -54,7 +54,7 @@ func (c *Client) DeleteIPSecGateway(ctx context.Context, id string, location str
 
 // UpdateIPSecGateway updates a VPN IPSec Gateway
 func (c *Client) UpdateIPSecGateway(ctx context.Context, d *schema.ResourceData) (vpn.IPSecGatewayRead, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.APIGateway, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, d.Get("location").(string))
 	request := setIPSecGatewayPutRequest(d)
 	gateway, apiResponse, err := c.sdkClient.IPSecGatewaysApi.IpsecgatewaysPut(ctx, d.Id()).IPSecGatewayEnsure(request).Execute()
 	apiResponse.LogInfo()
@@ -65,7 +65,7 @@ func (c *Client) UpdateIPSecGateway(ctx context.Context, d *schema.ResourceData)
 func (c *Client) IsIPSecGatewayReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	id := d.Id()
 	location := d.Get("location").(string)
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.APIGateway, location)
+	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	gateway, _, err := c.GetIPSecGatewayByID(ctx, id, location)
 	if err != nil {
 		return false, err

@@ -7,7 +7,7 @@ description: |-
   Reads IonosCloud VPN IPSec Gateway objects.
 ---
 
-# ionoscloud_apigateway_route
+# ionoscloud_vpn_ipsec_gateway
 
 The **VPN IPSec Gateway data source** can be used to search for and return an existing IPSec Gateway.
 You can provide a string for the name parameter which will be compared with provisioned IPSec Gateways.
