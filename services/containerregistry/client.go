@@ -40,3 +40,10 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 
 	return client
 }
+
+// NewClientFromConfig creates a *Client from an existing shared.Configuration
+func NewClientFromConfig(config *shared.Configuration) *Client {
+	return &Client{
+		sdkClient: *cr.NewAPIClient(config),
+	}
+}

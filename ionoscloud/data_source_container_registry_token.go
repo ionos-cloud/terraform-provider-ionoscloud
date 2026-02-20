@@ -83,13 +83,19 @@ func dataSourceContainerRegistryToken() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the container registry.",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 
 	registryId := d.Get("registry_id").(string)
 	idValue, idOk := d.GetOk("id")

@@ -109,7 +109,8 @@ func resourceContainerRegistry() *schema.Resource {
 }
 
 func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 
 	containerRegistry, err := crService.GetRegistryDataCreate(d)
 	if err != nil {
@@ -134,8 +135,8 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 
 	registry, apiResponse, err := client.GetRegistry(ctx, d.Id())
 	if err != nil {
@@ -157,7 +158,8 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 
 	containerRegistry, err := crService.GetRegistryDataUpdate(d)
 	if err != nil {
@@ -187,7 +189,8 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 
 	registryId := d.Id()
 
@@ -206,7 +209,8 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 
 	registryId := d.Id()
 

@@ -12,6 +12,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
+	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
@@ -77,6 +78,48 @@ type SdkBundle struct {
 
 	clientOptions clientoptions.TerraformClientOptions
 	fileConfig    *fileconfiguration.FileConfig
+}
+
+func (c SdkBundle) newBundleClientConfig(userAgent string) *shared.Configuration {
+	config := shared.NewConfiguration(c.clientOptions.Credentials.Username, c.clientOptions.Credentials.Password, c.clientOptions.Credentials.Token, c.clientOptions.Endpoint)
+	config.MaxRetries = constant.MaxRetries
+	config.MaxWaitTime = constant.MaxWaitTime
+	config.UserAgent = userAgent
+	config.HTTPClient = &http.Client{Transport: shared.CreateTransport(c.clientOptions.SkipTLSVerify, c.clientOptions.Certificate)}
+	return config
+}
+
+// NewContainerRegistryClient creates a new Container Registry client for a specific location
+func (c SdkBundle) NewContainerRegistryClient(location string) *crService.Client {
+	config := c.newBundleClientConfig(fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-container-cr/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		c.clientOptions.Version, cr.Version, c.clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	))
+
+	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
+		log.Printf("[DEBUG] Using custom endpoint %s from IONOS_API_URL env variable\n", os.Getenv(shared.IonosApiUrlEnvVar))
+		return crService.NewClientFromConfig(config)
+	}
+
+	if c.fileConfig == nil {
+		return crService.NewClientFromConfig(config)
+	}
+
+	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.ContainerRegistry, location)
+	if endpoint == nil {
+		log.Printf("[WARN] Missing endpoint for %s product in location %s and no global endpoints defined", fileconfiguration.ContainerRegistry, location)
+		return crService.NewClientFromConfig(config)
+	}
+	config.Servers = shared.ServerConfigurations{
+		{
+			URL:         endpoint.Name,
+			Description: shared.EndpointOverridden + location,
+		},
+	}
+	config.HTTPClient = &http.Client{}
+	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
+	return crService.NewClientFromConfig(config)
 }
 
 // newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.

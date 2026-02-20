@@ -129,8 +129,8 @@ type Configuration struct {
 	DefaultHeader      map[string]string               `json:"defaultHeader,omitempty"`
 	DefaultQueryParams url.Values                      `json:"defaultQueryParams,omitempty"`
 	UserAgent          string                          `json:"userAgent,omitempty"`
-	Servers            ServerConfigurations            `json:"-"`
-	OperationServers   map[string]ServerConfigurations `json:"-"`
+	Servers            ServerConfigurations            `json:"servers,omitempty"`
+	OperationServers   map[string]ServerConfigurations `json:"operationServers,omitempty"`
 	HTTPClient         *http.Client                    `json:"-"` // blank out to avoid serialization on DeepCopy etc.
 	Username           string                          `json:"username,omitempty"`
 	Password           string                          `json:"password,omitempty"`
