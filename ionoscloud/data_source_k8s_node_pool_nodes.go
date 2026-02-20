@@ -29,6 +29,10 @@ func dataSourceK8sNodePoolNodes() *schema.Resource {
 				Description:      "The UUID of an existing nodepool",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"nodes": {
 				Type:        schema.TypeList,
 				Description: "list of nodes in the nodepool",
@@ -68,7 +72,12 @@ func dataSourceK8sNodePoolNodes() *schema.Resource {
 }
 
 func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	clusterId := d.Get("k8s_cluster_id")
 	nodePoolId := d.Get("node_pool_id")
 	nodePoolIdStr := nodePoolId.(string)

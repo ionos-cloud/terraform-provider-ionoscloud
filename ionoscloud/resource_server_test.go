@@ -913,8 +913,6 @@ func TestAccServerBootDeviceSelection(t *testing.T) {
 }
 
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -927,6 +925,11 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 		}
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
+		location := rs.Primary.Attributes["location"]
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
@@ -946,8 +949,6 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 
 func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
 
@@ -957,6 +958,11 @@ func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc
 		}
 
 		dcId := datacenterResourceState.Primary.ID
+		location := datacenterResourceState.Primary.Attributes["location"]
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		// Since we are creating only ONE server in the data center, we can use
 		// DatacentersServersGet to check if the server was deleted properly.
@@ -989,8 +995,6 @@ func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc
 
 func testAccCheckServerExists(serverName string, server *ionoscloud.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		rs, ok := s.RootModule().Resources[serverName]
 
 		if !ok {
@@ -1005,6 +1009,12 @@ func testAccCheckServerExists(serverName string, server *ionoscloud.Server) reso
 
 		if cancel != nil {
 			defer cancel()
+		}
+
+		location := rs.Primary.Attributes["location"]
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
 		}
 
 		foundServer, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()

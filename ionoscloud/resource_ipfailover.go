@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilan"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
@@ -55,13 +54,23 @@ func resourceLanIPFailover() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -102,7 +111,12 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -147,7 +161,12 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -196,7 +215,12 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	dcId := d.Get("datacenter_id").(string)
 	lanId := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
@@ -236,15 +260,28 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, fmt.Errorf("invalid import ID: %s. Expecting {datacenter}/{lan}/{ip}", d.Id())
+	importID := d.Id()
+
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected one of <location>:<datacenter>/<lan>/<ip> "+
+				"or <datacenter>/<lan>/<ip>, got: %s", importID,
+		)
 	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+
 	dcId := parts[0]
 	lanId := parts[1]
 	ip := parts[2]
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 	apiResponse.LogInfo()
@@ -258,6 +295,10 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	log.Printf("[INFO] lan found: %+v", lan)
+
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
 
 	ipFailoverGroups := lan.Properties.IpFailover
 	if lan.Properties != nil && ipFailoverGroups != nil && len(*ipFailoverGroups) > 0 {

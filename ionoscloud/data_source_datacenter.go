@@ -84,7 +84,6 @@ func dataSourceDataCenter() *schema.Resource {
 }
 
 func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
 
 	var name, location string
 	id, idOk := d.GetOk("id")
@@ -99,8 +98,12 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		location = t.(string)
 	}
 
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	var datacenter ionoscloud.Datacenter
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if !idOk && !nameOk && !locationOk {

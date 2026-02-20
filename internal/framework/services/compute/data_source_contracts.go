@@ -183,7 +183,12 @@ func (d *contractsDataSource) Configure(_ context.Context, req datasource.Config
 		return
 	}
 
-	d.client = client.CloudApiClient
+	apiClient, err := client.NewCloudAPIClient("")
+	if err != nil {
+		resp.Diagnostics.AddError("Cloud API Client Error", err.Error())
+		return
+	}
+	d.client = apiClient
 }
 
 // contractAttributesModel defines the attributes for a contract.

@@ -39,6 +39,10 @@ func dataSourceK8sNodePool() *schema.Resource {
 				Computed:    true,
 				Description: "The UUID of the VDC",
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"state": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -193,14 +197,18 @@ func dataSourceK8sNodePool() *schema.Resource {
 			//	Type:        schema.TypeString,
 			//	Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
 			//	Computed:    true,
-			//},
+			// },
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterId := d.Get("k8s_cluster_id")
 	id, idOk := d.GetOk("id")
@@ -213,7 +221,6 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(errors.New("please provide either the lan id or name"))
 	}
 	var nodePool ionoscloud.KubernetesNodePool
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 	if idOk {
 		/* search by ID */

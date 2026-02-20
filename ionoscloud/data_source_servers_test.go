@@ -101,8 +101,6 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 }
 
 func testAccCheckServersDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -115,6 +113,12 @@ func testAccCheckServersDestroyCheck(s *terraform.State) error {
 		}
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
+		location := rs.Primary.Attributes["location"]
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
@@ -156,7 +160,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "IDE"
-	require_legacy_bios = true
+	require_legacy_bios = false
 	}
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id

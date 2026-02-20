@@ -31,7 +31,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
-	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.6
+	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.7-0.20260209105343-d884c00c537c
 	github.com/ionos-cloud/sdk-go/v6 v6.3.6
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.10.0
