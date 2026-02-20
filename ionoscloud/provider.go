@@ -286,13 +286,6 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	endpoint := utils.CleanURL(d.Get("endpoint").(string))
 
-	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
-		// will inject x-contract-number to sdks
-		if err := os.Setenv(ionoscloud.IonosContractNumber, contractNumber.(string)); err != nil {
-			return nil, diag.FromErr(err)
-		}
-	}
-
 	if insecureSet {
 		insecureBool = insecure.(bool)
 	}
@@ -309,6 +302,10 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		},
 		Version:          "",
 		TerraformVersion: terraformVersion,
+	}
+
+	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
+		clientOptions.ContractNumber = contractNumber.(string)
 	}
 
 	info, ok := debug.ReadBuildInfo()
