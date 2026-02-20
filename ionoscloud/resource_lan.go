@@ -316,14 +316,8 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
-	if err := validateImportIDParts(importID, resourceIDs); err != nil {
-		return nil, fmt.Errorf("error validating import identifier: %w", err)
-	}
-
-	datacenterId := resourceIDs[0]
-	lanId := resourceIDs[1]
-
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	datacenterId := parts[0]
+	lanId := parts[1]
 
 	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 
