@@ -8,16 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourceBackupUnit() *schema.Resource {
@@ -192,7 +190,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			return utils.ToDiags(d, fmt.Sprintf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated " +
+			return utils.ToDiags(d, fmt.Sprintf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated "+
 				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
 		}
 	}
@@ -231,7 +229,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			return utils.ToDiags(d, fmt.Sprintf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted " +
+			return utils.ToDiags(d, fmt.Sprintf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted "+
 				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
 		}
 	}

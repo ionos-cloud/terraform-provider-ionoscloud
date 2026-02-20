@@ -58,7 +58,7 @@ func zoneCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 	}
 	if zoneResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 		// This is a temporary error message since right now the API is not returning errors that we can work with.
-		return utils.ToDiags(d, fmt.Sprintf("zone creation has failed, this can happen if the data in the request is not correct, " +
+		return utils.ToDiags(d, fmt.Sprintf("zone creation has failed, this can happen if the data in the request is not correct, "+
 			"please check again the values defined in the plan"), nil)
 	}
 	d.SetId(zoneResponse.Id)
@@ -97,7 +97,7 @@ func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 	}
 	if zoneResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 		// This is a temporary error message since right now the API is not returning errors that we can work with.
-		return utils.ToDiags(d, fmt.Sprintf("zone update has failed, this can happen if the data in the request is not correct, " +
+		return utils.ToDiags(d, fmt.Sprintf("zone update has failed, this can happen if the data in the request is not correct, "+
 			"please check again the values defined in the plan"), nil)
 	}
 	return nil

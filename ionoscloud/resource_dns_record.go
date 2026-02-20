@@ -77,7 +77,7 @@ func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 	if recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 		// This is a temporary error message since right now the API is not returning errors that we can work with.
-		return utils.ToDiags(d, fmt.Sprintf("record creation has failed, this can happen if the data in the request is not correct, " +
+		return utils.ToDiags(d, fmt.Sprintf("record creation has failed, this can happen if the data in the request is not correct, "+
 			"please check again the values defined in the plan"), nil)
 	}
 	d.SetId(recordResponse.Id)
@@ -115,7 +115,7 @@ func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 	if recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 		// This is a temporary error message since right now the API is not returning errors that we can work with.
-		return utils.ToDiags(d, fmt.Sprintf("record update has failed, this can happen if the data in the request is not correct, " +
+		return utils.ToDiags(d, fmt.Sprintf("record update has failed, this can happen if the data in the request is not correct, "+
 			"please check again the values defined in the plan"), nil)
 	}
 	return recordRead(ctx, d, meta)

@@ -7,14 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func resourcePrivateCrossConnect() *schema.Resource {
@@ -320,7 +320,7 @@ func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *io
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] update timed out")
-			return utils.ToDiags(d, fmt.Sprintf("pcc readiness check timed out! WARNING: your pcc will still probably be created/updated after some time " +
+			return utils.ToDiags(d, fmt.Sprintf("pcc readiness check timed out! WARNING: your pcc will still probably be created/updated after some time "+
 				"but the terraform state wont reflect that; check your Ionos Cloud account to see the updates"), nil)
 		}
 	}

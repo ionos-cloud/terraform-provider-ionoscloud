@@ -71,7 +71,7 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating a Network Security Group for datacenter dcID: %s, %s", datacenterID, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %s", datacenterID, err), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %s", datacenterID, errState), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 	d.SetId(*securityGroup.Id)
 
@@ -116,7 +116,7 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %s", datacenterID, err), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %s", datacenterID, errState), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceNSGRead(ctx, d, meta)
@@ -135,7 +135,7 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %s", datacenterID, err), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %s", datacenterID, errState), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	return nil
