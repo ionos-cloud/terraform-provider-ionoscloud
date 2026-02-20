@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 	pgsql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -16,63 +17,63 @@ import (
 )
 
 // CreateUser - creates a user for the mongo cluster
-func (c *MongoClient) CreateUser(ctx context.Context, clusterID string, user mongo.User) (mongo.User, utils.ApiResponseInfo, error) {
+func (c *MongoClient) CreateUser(ctx context.Context, clusterID string, user mongo.User) (mongo.User, *shared.APIResponse, error) {
 	userResp, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersPost(ctx, clusterID).User(user).Execute()
 	apiResponse.LogInfo()
 	return userResp, apiResponse, err
 }
 
 // CreateUser - creates a user for the pgsql cluster
-func (c *PsqlClient) CreateUser(ctx context.Context, clusterID string, user pgsql.User) (pgsql.UserResource, utils.ApiResponseInfo, error) {
+func (c *PsqlClient) CreateUser(ctx context.Context, clusterID string, user pgsql.User) (pgsql.UserResource, *shared.APIResponse, error) {
 	userResp, apiResponse, err := c.sdkClient.UsersApi.UsersPost(ctx, clusterID).User(user).Execute()
 	apiResponse.LogInfo()
 	return userResp, apiResponse, err
 }
 
 // UpdateUser - updates the user for the mongo cluster
-func (c *MongoClient) UpdateUser(ctx context.Context, clusterID, username string, patchUserReq mongo.PatchUserRequest) (mongo.User, utils.ApiResponseInfo, error) {
+func (c *MongoClient) UpdateUser(ctx context.Context, clusterID, username string, patchUserReq mongo.PatchUserRequest) (mongo.User, *shared.APIResponse, error) {
 	user, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersPatch(ctx, clusterID, username).PatchUserRequest(patchUserReq).Execute()
 	apiResponse.LogInfo()
 	return user, apiResponse, err
 }
 
 // UpdateUser - updates the user for the pgsql cluster
-func (c *PsqlClient) UpdateUser(ctx context.Context, clusterID, username string, patchUserReq pgsql.UsersPatchRequest) (pgsql.UserResource, utils.ApiResponseInfo, error) {
+func (c *PsqlClient) UpdateUser(ctx context.Context, clusterID, username string, patchUserReq pgsql.UsersPatchRequest) (pgsql.UserResource, *shared.APIResponse, error) {
 	user, apiResponse, err := c.sdkClient.UsersApi.UsersPatch(ctx, clusterID, username).UsersPatchRequest(patchUserReq).Execute()
 	apiResponse.LogInfo()
 	return user, apiResponse, err
 }
 
 // GetUsers - gets the list of users for the mongo cluster
-func (c *MongoClient) GetUsers(ctx context.Context, clusterID string) (mongo.UsersList, utils.ApiResponseInfo, error) {
+func (c *MongoClient) GetUsers(ctx context.Context, clusterID string) (mongo.UsersList, *shared.APIResponse, error) {
 	users, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return users, apiResponse, err
 }
 
 // FindUserByUsername - finds the user by username for the mongo cluster
-func (c *MongoClient) FindUserByUsername(ctx context.Context, clusterID, username string) (mongo.User, utils.ApiResponseInfo, error) {
+func (c *MongoClient) FindUserByUsername(ctx context.Context, clusterID, username string) (mongo.User, *shared.APIResponse, error) {
 	user, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersFindById(ctx, clusterID, username).Execute()
 	apiResponse.LogInfo()
 	return user, apiResponse, err
 }
 
 // FindUserByUsername - finds the user by username for the pgsql cluster
-func (c *PsqlClient) FindUserByUsername(ctx context.Context, clusterID, username string) (pgsql.UserResource, utils.ApiResponseInfo, error) {
+func (c *PsqlClient) FindUserByUsername(ctx context.Context, clusterID, username string) (pgsql.UserResource, *shared.APIResponse, error) {
 	user, apiResponse, err := c.sdkClient.UsersApi.UsersGet(ctx, clusterID, username).Execute()
 	apiResponse.LogInfo()
 	return user, apiResponse, err
 }
 
 // DeleteUser - deletes the user for the mongo cluster
-func (c *MongoClient) DeleteUser(ctx context.Context, clusterID, username string) (utils.ApiResponseInfo, error) {
+func (c *MongoClient) DeleteUser(ctx context.Context, clusterID, username string) (*shared.APIResponse, error) {
 	_, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersDelete(ctx, clusterID, username).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
 // DeleteUser - deletes the user for the pgsql cluster
-func (c *PsqlClient) DeleteUser(ctx context.Context, clusterID, username string) (utils.ApiResponseInfo, error) {
+func (c *PsqlClient) DeleteUser(ctx context.Context, clusterID, username string) (*shared.APIResponse, error) {
 	apiResponse, err := c.sdkClient.UsersApi.UsersDelete(ctx, clusterID, username).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err

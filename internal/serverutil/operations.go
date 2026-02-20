@@ -51,13 +51,13 @@ func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a server ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while deleting a server: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(fmt.Errorf("error getting state change for server delete %w", errState))
+		return utils.ToDiags(d, fmt.Sprintf("error getting state change for server delete %s", errState), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")

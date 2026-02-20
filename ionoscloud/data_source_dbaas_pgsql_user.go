@@ -10,6 +10,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceDbaasPgSqlUser() *schema.Resource {
@@ -46,12 +47,12 @@ func dataSourceDbaasPgSqlReadUser(ctx context.Context, d *schema.ResourceData, m
 	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			return diag.FromErr(fmt.Errorf("no PgSql user found with the specified username: %s and cluster ID: %s", username, clusterId))
+			return utils.ToDiags(d, fmt.Sprintf("no PgSql user found with the specified username: %s and cluster ID: %s", username, clusterId), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching the PgSql user: %s, cluster ID: %s, err: %w", username, clusterId, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the PgSql user: %s, cluster ID: %s, err: %s", username, clusterId, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if err := dbaas.SetUserPgSqlData(d, &user); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }

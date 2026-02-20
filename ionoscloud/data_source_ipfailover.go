@@ -57,12 +57,12 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return diag.FromErr(fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId))
+			return utils.ToDiags(d, fmt.Sprintf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return diag.FromErr(fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanId, dcId, err))
+		return utils.ToDiags(d, fmt.Sprintf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %s", lanId, dcId, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if lan.Properties == nil || lan.Properties.IpFailover == nil {
-		return diag.FromErr(fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"))
+		return utils.ToDiags(d, "expected a LAN response containing IP failover groups but received 'nil' instead", nil)
 	}
 
 	ipFailoverGroups := lan.Properties.IpFailover
@@ -76,7 +76,7 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 				d.SetId(uuidgen.GenerateUuidFromName(ip))
 
 				if err := d.Set("nicuuid", *ipFailoverGroup.NicUuid); err != nil {
-					return diag.FromErr(utils.GenerateSetError(constant.ResourceIpFailover, "nicuuid", err))
+					return utils.ToDiags(d, utils.GenerateSetError(constant.ResourceIpFailover, "nicuuid", err).Error(), nil)
 				}
 				ipFailoverGroupFound = true
 				// After we find the IP Failover Group, we can stop searching since the IP is unique
@@ -86,7 +86,7 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if !ipFailoverGroupFound {
-		return diag.FromErr(fmt.Errorf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanId, dcId))
+		return utils.ToDiags(d, fmt.Sprintf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanId, dcId), nil)
 	}
 	return nil
 }

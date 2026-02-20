@@ -7,12 +7,13 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	certmanager "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceCertificate() *schema.Resource {
@@ -58,21 +59,22 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	var certificate certmanager.CertificateRead
+	var apiResponse *shared.APIResponse
 	var err error
 
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("either id, or name must be set"))
+		return utils.ToDiags(d, "either id, or name must be set", nil)
 	}
 
 	if idOk {
-		certificate, _, err = client.GetCertificate(ctx, idStr)
+		certificate, apiResponse, err = client.GetCertificate(ctx, idStr)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting certificate with id %s %w", idStr, err))
+			return utils.ToDiags(d, fmt.Sprintf("error getting certificate with id %s %s", idStr, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		if nameOk {
 			if !strings.EqualFold(certificate.Properties.Name, name) {
-				return diag.FromErr(fmt.Errorf("name of cert (UUID=%s, name=%s) does not match expected name: %s",
-					certificate.Id, certificate.Properties.Name, name))
+				return utils.ToDiags(d, fmt.Sprintf("name of cert (UUID=%s, name=%s) does not match expected name: %s",
+					certificate.Id, certificate.Properties.Name, name), nil)
 			}
 		}
 		log.Printf("[INFO] Got certificate [Name=%s]", certificate.Properties.Name)
@@ -80,9 +82,9 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 	} else {
 		log.Printf("[INFO] Using data source for certificate with name: %s", name)
 
-		certificates, _, err := client.ListCertificates(ctx)
+		certificates, apiResponse, err := client.ListCertificates(ctx)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching certificates: %w ", err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching certificates: %s ", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []certmanager.CertificateRead
@@ -96,16 +98,16 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 			}
 
 			if certsFound == nil {
-				return diag.FromErr(fmt.Errorf("no certificate found with the specified criteria: name = %s", name))
+				return utils.ToDiags(d, fmt.Sprintf("no certificate found with the specified criteria: name = %s", name), nil)
 			} else {
 				results = certsFound
 			}
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no certificate found with the specified criteria: name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("no certificate found with the specified criteria: name = %s", name), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one certificate found with the specified criteria: name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("more than one certificate found with the specified criteria: name = %s", name), nil)
 		} else {
 			certificate = results[0]
 		}
@@ -113,7 +115,7 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if err := cert.SetCertificateData(d, &certificate); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

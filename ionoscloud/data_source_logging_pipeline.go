@@ -9,9 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceLoggingPipeline() *schema.Resource {
@@ -119,24 +121,25 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta in
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
+		return utils.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the Logging pipeline ID or name"))
+		return utils.ToDiags(d, "please provide either the Logging pipeline ID or name", nil)
 	}
 
 	var pipeline logging.PipelineRead
+	var apiResponse *shared.APIResponse
 	var err error
 	if idOk {
-		pipeline, _, err = client.GetPipelineByID(ctx, location, id)
+		pipeline, apiResponse, err = client.GetPipelineByID(ctx, location, id)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Logging pipeline with ID: %s, error: %w", id, err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the Logging pipeline with ID: %s, error: %s", id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []logging.PipelineRead
-		pipelines, _, err := client.ListPipelines(ctx, location)
+		pipelines, apiResponse, err := client.ListPipelines(ctx, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching Logging pipelines: %w", err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching Logging pipelines: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		for _, pipelineItem := range pipelines.Items {
 			if strings.EqualFold(pipelineItem.Properties.Name, name) {
@@ -144,15 +147,15 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta in
 			}
 		}
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no Logging pipelines found with the specified name: %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("no Logging pipelines found with the specified name: %s", name), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one Logging pipeline found with the specified name: %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("more than one Logging pipeline found with the specified name: %s", name), nil)
 		} else {
 			pipeline = results[0]
 		}
 	}
 	if err := client.SetPipelineData(d, pipeline); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }

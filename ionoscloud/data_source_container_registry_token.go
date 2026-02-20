@@ -2,7 +2,6 @@ package ionoscloud
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -10,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
@@ -99,31 +99,28 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		diags := diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
-		return diags
+		return utils.ToDiags(d, "id and name cannot be both specified in the same time", nil)
 	}
 	if !idOk && !nameOk {
-		diags := diag.FromErr(errors.New("please provide either the token id or name"))
-		return diags
+		return utils.ToDiags(d, "please provide either the token id or name", nil)
 	}
 
 	var token cr.TokenResponse
+	var apiResponse *shared.APIResponse
 	var err error
 
 	if idOk {
 		/* search by ID */
-		token, _, err = client.GetToken(ctx, registryId, id)
+		token, apiResponse, err = client.GetToken(ctx, registryId, id)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the token with ID %s: %w", id, err))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the token with ID %s: %s", id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []cr.TokenResponse
 
-		tokens, _, err := client.ListTokens(ctx, registryId)
+		tokens, apiResponse, err := client.ListTokens(ctx, registryId)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching registry tokens: %w", err))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching registry tokens: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		partialMatch := d.Get("partial_match").(bool)
@@ -140,9 +137,9 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 		}
 
 		if len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no token found with the specified name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("no token found with the specified name = %s", name), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one token found with the specified criteria: name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("more than one token found with the specified criteria: name = %s", name), nil)
 		}
 
 		token = results[0]
@@ -153,14 +150,14 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 	}
 
 	if err := crService.SetTokenData(d, token.Properties); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	var credentials []any
 	credentialsEntry := crService.SetCredentials(token.Properties.Credentials)
 	credentials = append(credentials, credentialsEntry)
 	if err := d.Set("credentials", credentials); err != nil {
-		return diag.FromErr(utils.GenerateSetError("token", "credentials", err))
+		return utils.ToDiags(d, utils.GenerateSetError("token", "credentials", err).Error(), nil)
 	}
 	return nil
 

@@ -12,6 +12,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceNIC() *schema.Resource {
@@ -109,7 +110,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	t, dIdOk := data.GetOk("datacenter_id")
 	st, sIdOk := data.GetOk("server_id")
 	if !dIdOk || !sIdOk {
-		return diag.FromErr(fmt.Errorf("datacenter id and server id must be set"))
+		return utils.ToDiags(data, "datacenter id and server id must be set", nil)
 	}
 	var datacenterId, serverId string
 
@@ -129,24 +130,24 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	var nic ionoscloud.Nic
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: data}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("either id, or name must be set"))
+		return utils.ToDiags(data, "either id, or name must be set", nil)
 	}
 	if idOk {
 		foundNic, _, err := ns.Get(ctx, datacenterId, serverId, id.(string), 3)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting nic with id %s %w", id.(string), err))
+			return utils.ToDiags(data, fmt.Sprintf("error getting nic with id %s %s", id.(string), err), nil)
 		}
 		if nameOk {
 			if foundNic.Properties != nil && *foundNic.Properties.Name != name {
-				return diag.FromErr(fmt.Errorf("name of nic (UUID=%s, name=%s) does not match expected name: %s",
-					*foundNic.Id, *foundNic.Properties.Name, name))
+				return utils.ToDiags(data, fmt.Sprintf("name of nic (UUID=%s, name=%s) does not match expected name: %s",
+					*foundNic.Id, *foundNic.Properties.Name, name), nil)
 			}
 		}
 		nic = *foundNic
 	} else {
 		nics, err := ns.List(ctx, datacenterId, serverId, 3)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching nics: %w ", err))
+			return utils.ToDiags(data, fmt.Sprintf("an error occurred while fetching nics: %s ", err), nil)
 		}
 
 		var results []ionoscloud.Nic
@@ -160,16 +161,16 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no nic found with the specified criteria: name = %s", name))
+			return utils.ToDiags(data, fmt.Sprintf("no nic found with the specified criteria: name = %s", name), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one nic found with the specified criteria: name = %s", name))
+			return utils.ToDiags(data, fmt.Sprintf("more than one nic found with the specified criteria: name = %s", name), nil)
 		} else {
 			nic = results[0]
 		}
 	}
 
 	if err := cloudapinic.NicSetData(data, &nic); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(data, err.Error(), nil)
 	}
 
 	return nil

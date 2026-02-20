@@ -19,7 +19,7 @@ import (
 var wireguardResourceName = "vpnSdk wireguard gateway"
 
 // CreateWireguardGateway creates a new wireguard gateway
-func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceData) (vpnsdk.WireguardGatewayRead, utils.ApiResponseInfo, error) {
+func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceData) (vpnsdk.WireguardGatewayRead, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, d.Get("location").(string))
 	request := setWireguardGWPostRequest(d)
 	wireguard, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysPost(ctx).WireguardGatewayCreate(*request).Execute()
@@ -42,7 +42,7 @@ func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceDat
 }
 
 // UpdateWireguardGateway updates a wireguard gateway
-func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schema.ResourceData) (vpnsdk.WireguardGatewayRead, utils.ApiResponseInfo, error) {
+func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schema.ResourceData) (vpnsdk.WireguardGatewayRead, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, d.Get("location").(string))
 	request := setWireguardGatewayPutRequest(d)
 	wireguardResponse, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysPut(ctx, id).WireguardGatewayEnsure(*request).Execute()
@@ -51,7 +51,7 @@ func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schem
 }
 
 // DeleteWireguardGateway deletes a wireguard gateway
-func (c *Client) DeleteWireguardGateway(ctx context.Context, id, location string) (utils.ApiResponseInfo, error) {
+func (c *Client) DeleteWireguardGateway(ctx context.Context, id, location string) (*shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysDelete(ctx, id).Execute()
 	apiResponse.LogInfo()

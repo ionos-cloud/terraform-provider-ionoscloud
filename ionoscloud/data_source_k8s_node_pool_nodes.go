@@ -11,6 +11,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceK8sNodePoolNodes() *schema.Resource {
@@ -76,13 +77,13 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 	nodesList, apiResponse, err := client.KubernetesApi.K8sNodepoolsNodesGet(ctx, clusterId.(string), nodePoolIdStr).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodes: %w", err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching k8s nodes: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if nodesList.Items == nil {
-		return diag.FromErr(fmt.Errorf("no nodes found for nodepool with id %s", nodePoolIdStr))
+		return utils.ToDiags(d, fmt.Sprintf("no nodes found for nodepool with id %s", nodePoolIdStr), nil)
 	}
 	if len(*nodesList.Items) == 0 {
-		return diag.FromErr(fmt.Errorf("nodes list is empty for of nodepool with id %s", nodePoolIdStr))
+		return utils.ToDiags(d, fmt.Sprintf("nodes list is empty for of nodepool with id %s", nodePoolIdStr), nil)
 	}
 	if len(*nodesList.Items) > 0 {
 		var nodes []interface{}
@@ -92,8 +93,7 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 		}
 		err := d.Set("nodes", nodes)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting nodes: %w", err))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("error while setting nodes: %s", err), nil)
 		}
 	}
 	return nil

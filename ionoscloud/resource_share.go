@@ -13,6 +13,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func resourceShare() *schema.Resource {
@@ -63,8 +64,8 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a share: %w", err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating a share: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(*rsp.Id)
 
@@ -72,7 +73,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	return resourceShareRead(ctx, d, meta)
@@ -88,17 +89,14 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a Share ID %s %w", d.Id(), err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching a Share: %s", err), nil)
 	}
 
 	if err := d.Set("edit_privilege", *rsp.Properties.EditPrivilege); err != nil {
-		diags := diag.FromErr(err)
-		return diags
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	if err := d.Set("share_privilege", *rsp.Properties.SharePrivilege); err != nil {
-		diags := diag.FromErr(err)
-		return diags
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }
@@ -120,12 +118,12 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while patching a share ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while patching a share: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceShareRead(ctx, d, meta)
@@ -141,11 +139,11 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if !httpNotFound(apiResponse) {
-			return diag.FromErr(err)
+			return utils.ToDiags(d, err.Error(), nil)
 		}
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -155,7 +153,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {group}/{resource}", d.Id())
+		return nil, utils.ToError(d, "invalid import. Expecting {group}/{resource}", nil)
 	}
 
 	grpId := parts[0]
@@ -168,9 +166,9 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occurred while trying to fetch the share of resource %q for group %q", rscId, grpId)
+			return nil, utils.ToError(d, fmt.Sprintf("an error occurred while trying to fetch the share of resource %q for group %q", rscId, grpId), nil)
 		}
-		return nil, fmt.Errorf("share does not exist of resource %q for group %q", rscId, grpId)
+		return nil, utils.ToError(d, fmt.Sprintf("share does not exist of resource %q for group %q", rscId, grpId), nil)
 	}
 
 	log.Printf("[INFO] share found: %+v", share)
@@ -178,22 +176,22 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 	d.SetId(*share.Id)
 
 	if err := d.Set("group_id", grpId); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	if err := d.Set("resource_id", rscId); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	if share.Properties.EditPrivilege != nil {
 		if err := d.Set("edit_privilege", *share.Properties.EditPrivilege); err != nil {
-			return nil, err
+			return nil, utils.ToError(d, err.Error(), nil)
 		}
 	}
 
 	if share.Properties.SharePrivilege != nil {
 		if err := d.Set("share_privilege", *share.Properties.SharePrivilege); err != nil {
-			return nil, err
+			return nil, utils.ToError(d, err.Error(), nil)
 		}
 	}
 

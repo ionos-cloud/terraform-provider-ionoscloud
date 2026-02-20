@@ -13,6 +13,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func resourceNSG() *schema.Resource {
@@ -66,14 +67,15 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPost(ctx, datacenterID).SecurityGroup(sg).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while creating a Network Security Group for datacenter dcID: %s, %w", datacenterID, err))
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating a Network Security Group for datacenter dcID: %s, %s", datacenterID, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %w", datacenterID, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %s", datacenterID, errState), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 	d.SetId(*securityGroup.Id)
 
-	return diag.FromErr(setNSGData(d, &securityGroup))
+	return utils.ToDiags(d, setNSGData(d, &securityGroup).Error(), nil)
 }
 
 func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -83,11 +85,11 @@ func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, d.Id()).Depth(2).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while retrieving a network security group: %w", err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while retrieving a network security group: %s", err), nil)
 	}
 
 	if err := setNSGData(d, &securityGroup); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }
@@ -109,12 +111,12 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPut(ctx, datacenterID, d.Id()).SecurityGroup(sg).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating network security group: dcID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while updating network security group: dcID: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %w", datacenterID, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %s", datacenterID, errState), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceNSGRead(ctx, d, meta)
@@ -128,12 +130,12 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsDelete(ctx, datacenterID, d.Id()).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a network security group: %w", err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while deleting a network security group: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %w", datacenterID, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %s", datacenterID, errState), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	return nil
@@ -145,7 +147,7 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) < 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter UUID}/{nsg UUID}", d.Id())
+		return nil, utils.ToError(d, "invalid import. Expecting {datacenter UUID}/{nsg UUID}", nil)
 	}
 
 	datacenterID := parts[0]
@@ -157,17 +159,17 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find Network Security Group %q", nsgID)
+			return nil, utils.ToError(d, fmt.Sprintf("unable to find Network Security Group %q", nsgID), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving the Network Security Group %q, %w", d.Id(), err)
+		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while retrieving the Network Security Group, %s", err), nil)
 	}
 
 	log.Printf("[INFO] Datacenter found: %+v", nsg)
 	if err = d.Set("datacenter_id", datacenterID); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 	if err = setNSGData(d, &nsg); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

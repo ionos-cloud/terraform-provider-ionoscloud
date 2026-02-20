@@ -10,6 +10,7 @@ import (
 
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 // DataSourceAutoscalingGroupServers defines the schema for the Autoscaling Group Servers data source
@@ -44,12 +45,12 @@ func dataSourceAutoscalingServersRead(ctx context.Context, d *schema.ResourceDat
 	id, idOk := d.GetOk("group_id")
 
 	if !idOk {
-		return diag.FromErr(fmt.Errorf("autoscaling group_id has to be provided in order to search for its servers"))
+		return utils.ToDiags(d, "autoscaling group_id has to be provided in order to search for its servers", nil)
 	}
 
-	groupServers, _, err := client.GetAllGroupServers(ctx, id.(string))
+	groupServers, apiResponse, err := client.GetAllGroupServers(ctx, id.(string))
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching the servers for the group with ID %s: %w", id.(string), err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the servers for the group with ID %s: %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	return autoscalingService.SetAutoscalingServersData(d, groupServers)

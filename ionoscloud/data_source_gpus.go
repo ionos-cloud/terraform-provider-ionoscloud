@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceGpus() *schema.Resource {
@@ -67,7 +68,7 @@ func dataSourceGpusRead(ctx context.Context, d *schema.ResourceData, meta interf
 	gpus, apiResponse, err := client.GraphicsProcessingUnitCardsApi.DatacentersServersGPUsGet(ctx, datacenterID, serverID).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching GPUs for server %s in datacenter %s: %w", serverID, datacenterID, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching GPUs for server %s in datacenter %s: %s", serverID, datacenterID, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(fmt.Sprintf("%s/gpus", serverID))
@@ -98,7 +99,7 @@ func dataSourceGpusRead(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	if err := d.Set("gpus", gpuList); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

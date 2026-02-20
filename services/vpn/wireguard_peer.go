@@ -17,7 +17,7 @@ import (
 )
 
 // CreateWireguardGatewayPeers creates a new wireguard peer
-func (c *Client) CreateWireguardGatewayPeers(ctx context.Context, d *schema.ResourceData, gatewayID string) (vpn.WireguardPeerRead, utils.ApiResponseInfo, error) {
+func (c *Client) CreateWireguardGatewayPeers(ctx context.Context, d *schema.ResourceData, gatewayID string) (vpn.WireguardPeerRead, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, d.Get("location").(string))
 	request, err := setWireguardPeersPostRequest(d)
 	if err != nil {
@@ -43,7 +43,7 @@ func (c *Client) IsWireguardPeerAvailable(ctx context.Context, d *schema.Resourc
 }
 
 // UpdateWireguardPeer updates a wireguard peer
-func (c *Client) UpdateWireguardPeer(ctx context.Context, gatewayID, id string, d *schema.ResourceData) (vpn.WireguardPeerRead, utils.ApiResponseInfo, error) {
+func (c *Client) UpdateWireguardPeer(ctx context.Context, gatewayID, id string, d *schema.ResourceData) (vpn.WireguardPeerRead, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, d.Get("location").(string))
 	request, err := setWireguardPeerPatchRequest(d)
 	if err != nil {
@@ -55,7 +55,7 @@ func (c *Client) UpdateWireguardPeer(ctx context.Context, gatewayID, id string, 
 }
 
 // DeleteWireguardPeer deletes a wireguard peer
-func (c *Client) DeleteWireguardPeer(ctx context.Context, gatewayID, id, location string) (utils.ApiResponseInfo, error) {
+func (c *Client) DeleteWireguardPeer(ctx context.Context, gatewayID, id, location string) (*shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	apiResponse, err := c.sdkClient.WireguardPeersApi.WireguardgatewaysPeersDelete(ctx, gatewayID, id).Execute()
 	apiResponse.LogInfo()

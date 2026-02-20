@@ -2,12 +2,12 @@ package ionoscloud
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -165,10 +165,10 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		return utils.ToDiags(d, "id and name cannot be both specified in the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the target group id or name"))
+		return utils.ToDiags(d, "please provide either the target group id or name", nil)
 	}
 	var targetGroup ionoscloud.TargetGroup
 	var err error
@@ -181,7 +181,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the target group %s: %w", id, err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the target group %s: %s", id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -196,7 +196,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching target groups: %w", err))
+				return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching target groups: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 			}
 
 			results = *targetGroups.Items
@@ -205,7 +205,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching target groups: %w", err))
+				return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching target groups: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 			}
 
 			if targetGroups.Items != nil {
@@ -214,7 +214,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 						tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching target group with ID %s: %w", *t.Id, err))
+							return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching target group with ID %s: %s", *t.Id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 						}
 						results = append(results, tmpTargetGroup)
 
@@ -224,9 +224,9 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no target group found with the specified criteria: name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("no target group found with the specified criteria: name = %s", name), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one target group found with the specified criteria: name = %s", name))
+			return utils.ToDiags(d, fmt.Sprintf("more than one target group found with the specified criteria: name = %s", name), nil)
 		}
 
 		targetGroup = results[0]
@@ -234,7 +234,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if err = setTargetGroupData(d, &targetGroup); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

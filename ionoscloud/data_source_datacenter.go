@@ -11,6 +11,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceDataCenter() *schema.Resource {
@@ -104,25 +105,25 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 	var apiResponse *ionoscloud.APIResponse
 
 	if !idOk && !nameOk && !locationOk {
-		return diag.FromErr(fmt.Errorf("either id, location or name must be set"))
+		return utils.ToDiags(d, "either id, location or name must be set", nil)
 	}
 
 	if idOk {
 		datacenter, apiResponse, err = client.DataCentersApi.DatacentersFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting datacenter with id %s %w", id.(string), err))
+			return utils.ToDiags(d, fmt.Sprintf("error getting datacenter with id %s %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		if nameOk {
 			if *datacenter.Properties.Name != name {
-				return diag.FromErr(fmt.Errorf("name of dc (UUID=%s, name=%s) does not match expected name: %s",
-					*datacenter.Id, *datacenter.Properties.Name, name))
+				return utils.ToDiags(d, fmt.Sprintf("name of dc (UUID=%s, name=%s) does not match expected name: %s",
+					*datacenter.Id, *datacenter.Properties.Name, name), nil)
 			}
 		}
 		if locationOk {
 			if *datacenter.Properties.Location != location {
-				return diag.FromErr(fmt.Errorf("location of dc (UUID=%s, location=%s) does not match expected location: %s",
-					*datacenter.Id, *datacenter.Properties.Location, location))
+				return utils.ToDiags(d, fmt.Sprintf("location of dc (UUID=%s, location=%s) does not match expected location: %s",
+					*datacenter.Id, *datacenter.Properties.Location, location), nil)
 			}
 		}
 		if datacenter.Properties != nil {
@@ -134,7 +135,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching datacenters: %w ", err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching datacenters: %s ", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []ionoscloud.Datacenter
@@ -148,7 +149,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 
 			if resultsByDatacenter == nil {
-				return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: name = %s", name))
+				return utils.ToDiags(d, fmt.Sprintf("no datacenter found with the specified criteria: name = %s", name), nil)
 			} else {
 				results = resultsByDatacenter
 			}
@@ -171,16 +172,16 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 				}
 			}
 			if resultsByLocation == nil {
-				return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: location = %s", location))
+				return utils.ToDiags(d, fmt.Sprintf("no datacenter found with the specified criteria: location = %s", location), nil)
 			} else {
 				results = resultsByLocation
 			}
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: name = %s location = %s", name, location))
+			return utils.ToDiags(d, fmt.Sprintf("no datacenter found with the specified criteria: name = %s location = %s", name, location), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one datacenter found with the specified criteria: name = %s location = %s", name, location))
+			return utils.ToDiags(d, fmt.Sprintf("more than one datacenter found with the specified criteria: name = %s location = %s", name, location), nil)
 		} else {
 			datacenter = results[0]
 		}
@@ -188,7 +189,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if err := setDatacenterData(d, &datacenter); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

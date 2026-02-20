@@ -237,8 +237,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 					s3Bucket.Name = &name
 					addBucket = true
 				} else {
-					diags := diag.FromErr(fmt.Errorf("name must be provided for Object Storage bucket"))
-					return diags
+					return utils.ToDiags(d, "name must be provided for Object Storage bucket", nil)
 				}
 				if addBucket {
 					s3Buckets = append(s3Buckets, s3Bucket)
@@ -255,8 +254,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating k8s cluster: %w", err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error creating k8s cluster: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*createdCluster.Id)
@@ -268,8 +266,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		clusterReady, rsErr := k8sClusterReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s cluster %s: %w", d.Id(), rsErr))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("error while checking readiness status of k8s cluster: %s", rsErr), nil)
 		}
 
 		if clusterReady {
@@ -282,8 +279,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("k8s cluster creation timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates"))
-			return diags
+			return utils.ToDiags(d, "k8s cluster creation timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", nil)
 		}
 
 	}
@@ -302,14 +298,13 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching k8s cluster %s: %w", d.Id(), err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error while fetching k8s cluster: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
 
 	if err := setK8sClusterData(d, &cluster); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -427,8 +422,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating k8s cluster: %w", err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error while updating k8s cluster: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	for {
@@ -437,8 +431,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		clusterReady, rsErr := k8sClusterReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s cluster %s: %w", d.Id(), rsErr))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("error while checking readiness status of k8s cluster: %s", rsErr), nil)
 		}
 
 		if clusterReady {
@@ -450,8 +443,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("k8s cluster update timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags
+			return utils.ToDiags(d, "k8s cluster update timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", nil)
 		}
 
 	}
@@ -471,8 +463,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting k8s cluster %s: %w", d.Id(), err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error while deleting k8s cluster: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	for {
@@ -481,8 +472,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 		clusterDeleted, dsErr := k8sClusterDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of k8s cluster %s: %w", d.Id(), dsErr))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("error while checking deletion status of k8s cluster: %s", dsErr), nil)
 		}
 
 		if clusterDeleted {
@@ -494,8 +484,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("k8s cluster deletion timed out! WARNING: your k8s cluster will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags
+			return utils.ToDiags(d, "k8s cluster deletion timed out! WARNING: your k8s cluster will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", nil)
 		}
 	}
 
@@ -515,15 +504,15 @@ func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find k8s cluster %q", clusterId)
+			return nil, utils.ToError(d, fmt.Sprintf("unable to find k8s cluster %q", clusterId), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, fmt.Errorf("unable to retrieve k8s cluster %q, error:%w", d.Id(), err)
+		return nil, utils.ToError(d, fmt.Sprintf("unable to retrieve k8s cluster, error:%s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] K8s cluster found: %+v", cluster)
 
 	if err := setK8sClusterData(d, &cluster); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

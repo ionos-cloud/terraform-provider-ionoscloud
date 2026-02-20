@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	kafka "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 )
 
 // GetUsers returns the list of users for a cluster using the cluster ID and the location in which the cluster resides
-func (c *Client) GetUsers(ctx context.Context, clusterID, location string) (kafka.UserReadList, utils.ApiResponseInfo, error) {
+func (c *Client) GetUsers(ctx context.Context, clusterID, location string) (kafka.UserReadList, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 	users, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
@@ -20,7 +20,7 @@ func (c *Client) GetUsers(ctx context.Context, clusterID, location string) (kafk
 }
 
 // GetUserCredentials returns the access credentials using the cluster ID, user ID and location.
-func (c *Client) GetUserCredentialsByID(ctx context.Context, clusterID, userID, location string) (kafka.UserReadAccess, utils.ApiResponseInfo, error) {
+func (c *Client) GetUserCredentialsByID(ctx context.Context, clusterID, userID, location string) (kafka.UserReadAccess, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 	userCredentials, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersAccessGet(ctx, clusterID, userID).Execute()
 	apiResponse.LogInfo()
@@ -28,7 +28,7 @@ func (c *Client) GetUserCredentialsByID(ctx context.Context, clusterID, userID, 
 }
 
 // GetUserCredentialsByName returns the user access credentials using the cluster ID, username and location.
-func (c *Client) GetUserCredentialsByName(ctx context.Context, clusterID, username, location string) (kafka.UserReadAccess, utils.ApiResponseInfo, error) {
+func (c *Client) GetUserCredentialsByName(ctx context.Context, clusterID, username, location string) (kafka.UserReadAccess, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 	var userCredentials kafka.UserReadAccess
 	var temp kafka.UserRead

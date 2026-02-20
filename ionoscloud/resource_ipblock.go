@@ -115,8 +115,8 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while reserving an ip block: %w", err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while reserving an ip block: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(*ipblock.Id)
 
@@ -124,7 +124,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	return resourceIPBlockRead(ctx, d, meta)
@@ -141,14 +141,13 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching an ip block ID %s %w", d.Id(), err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching an ip block: %s", err), nil)
 	}
 
 	log.Printf("[INFO] IPS: %s", strings.Join(*ipBlock.Properties.Ips, ","))
 
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -168,8 +167,8 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating an ip block ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while updating an ip block: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	return nil
@@ -182,12 +181,12 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta int
 	apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while releasing an ipblock ID: %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while releasing an ipblock: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -205,9 +204,9 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("ipBlock does not exist %q", ipBlockId)
+			return nil, utils.ToError(d, fmt.Sprintf("ipBlock does not exist %q", ipBlockId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while trying to fetch the ipBlock %q, error:%w", ipBlockId, err)
+		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while trying to fetch the ipBlock %q, error:%s", ipBlockId, err), nil)
 
 	}
 
@@ -216,7 +215,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta i
 	d.SetId(*ipBlock.Id)
 
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

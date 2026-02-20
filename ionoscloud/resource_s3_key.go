@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -59,17 +60,16 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	rsp, apiResponse, err := createS3KeyWithRetry(ctx, d, meta)
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating Object Storage key: %w", err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error creating Object Storage key: %s", err), nil)
 	}
 
 	if rsp.Id == nil {
-		return diag.FromErr(fmt.Errorf("the API didn't return an Object Storage key ID"))
+		return utils.ToDiags(d, "the API didn't return an Object Storage key ID", nil)
 	}
 	keyId := *rsp.Id
 	d.SetId(keyId)
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	log.Printf("[INFO] Created Object Storage key: %s", d.Id())
@@ -84,11 +84,12 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	_, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, keyId).S3Key(s3Key).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error saving key data %s: %w", keyId, err))
+		requestLocation, _ := apiResponse.Location()
+		return utils.ToDiags(d, fmt.Sprintf("error saving key data %s: %s", keyId, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceS3KeyRead(ctx, d, meta)
@@ -142,8 +143,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while reading Object Storage key %s: %w, %+v", d.Id(), err, s3Key))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error while reading Object Storage key: %s, %+v", err, s3Key), nil)
 	}
 
 	log.Printf("[INFO] Successfully retrieved Object Storage key %+v \n", *s3Key.Id)
@@ -153,7 +153,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -181,12 +181,11 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating Object Storage key %s: %w", d.Id(), err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error while updating Object Storage key: %s", err), nil)
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceS3KeyRead(ctx, d, meta)
@@ -204,8 +203,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting Object Storage key %s: %w", d.Id(), err))
-		return diags
+		return utils.ToDiags(d, fmt.Sprintf("error while deleting Object Storage key: %s", err), nil)
 	}
 
 	for {
@@ -218,8 +216,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 				log.Printf("[INFO] Successfully deleted Object Storage key: %s", d.Id())
 				return nil
 			}
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of Object Storage key %s: %w", d.Id(), dsErr))
-			return diags
+			return utils.ToDiags(d, fmt.Sprintf("error while checking deletion status of Object Storage key: %s", dsErr), nil)
 		}
 
 		if s3KeyDeleted {
@@ -232,8 +229,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] delete timed out")
-			diags := diag.FromErr(fmt.Errorf("Object Storage key delete timed out! WARNING: your Object Storage key will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags
+			return utils.ToDiags(d, "Object Storage key delete timed out! WARNING: your Object Storage key will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", nil)
 		}
 	}
 
@@ -302,7 +298,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {userId}/{s3KeyId}", d.Id())
+		return nil, utils.ToError(d, "invalid import. Expecting {userId}/{s3KeyId}", nil)
 	}
 
 	userId := parts[0]
@@ -316,17 +312,17 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	if err != nil {
 		if httpNotFound(apiResponse) || isS3KeyNotFound(err) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find Object Storage key %q", keyId)
+			return nil, utils.ToError(d, fmt.Sprintf("unable to find Object Storage key %q", keyId), nil)
 		}
-		return nil, fmt.Errorf("unable to retrieve Object Storage key %q, error:%w", keyId, err)
+		return nil, utils.ToError(d, fmt.Sprintf("unable to retrieve Object Storage key %q, error:%s", keyId, err), nil)
 	}
 
 	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	if err := d.Set("user_id", userId); err != nil {
-		return nil, err
+		return nil, utils.ToError(d, err.Error(), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

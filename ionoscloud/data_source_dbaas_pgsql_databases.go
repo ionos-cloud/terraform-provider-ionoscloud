@@ -59,10 +59,10 @@ func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceDa
 
 	retrievedDatabases, _, err := client.GetDatabases(ctx, clusterId)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching PgSql databases for the cluster with ID: %s, error: %w", clusterId, err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching PgSql databases for the cluster with ID: %s, error: %s", clusterId, err), nil)
 	}
 	if retrievedDatabases.Items == nil {
-		return diag.FromErr(fmt.Errorf("expected a list of PgSql databases, but received 'nil' instead, cluster ID: %s", clusterId))
+		return utils.ToDiags(d, fmt.Sprintf("expected a list of PgSql databases, but received 'nil' instead, cluster ID: %s", clusterId), nil)
 	}
 	var databases []interface{}
 	for _, retrievedDatabase := range retrievedDatabases.Items {
@@ -83,7 +83,7 @@ func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceDa
 		d.SetId(clusterId)
 	}
 	if err := d.Set("databases", databases); err != nil {
-		return diag.FromErr(utils.GenerateSetError(resourceName, "databases", err))
+		return utils.ToDiags(d, utils.GenerateSetError(resourceName, "databases", err).Error(), nil)
 	}
 	return nil
 }

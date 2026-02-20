@@ -8,8 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
@@ -151,26 +153,27 @@ func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta 
 	location := d.Get("location").(string)
 
 	if idOk && displayNameOk {
-		return diag.FromErr(fmt.Errorf("ID and display_name cannot be both specified at the same time"))
+		return utils.ToDiags(d, "ID and display_name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !displayNameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the InMemoryDB replicaset ID or display_name"))
+		return utils.ToDiags(d, "please provide either the InMemoryDB replicaset ID or display_name", nil)
 	}
 
 	var replica inmemorydb.ReplicaSetRead
+	var apiResponse *shared.APIResponse
 	var err error
 
 	if idOk {
 		// search by ID
-		replica, _, err = client.GetReplicaSet(ctx, id.(string), location)
+		replica, apiResponse, err = client.GetReplicaSet(ctx, id.(string), location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the InMemoryDB replica set with ID %v: %w", id.(string), err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the InMemoryDB replica set with ID %v: %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		// list, then filter by name
-		clusters, _, err := client.ListReplicaSets(ctx, displayName.(string), location)
+		clusters, apiResponse, err := client.ListReplicaSets(ctx, displayName.(string), location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching InMemoryDB replica sets: %w", err))
+			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching InMemoryDB replica sets: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []inmemorydb.ReplicaSetRead
@@ -184,20 +187,20 @@ func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no InMemoryDB replica set found with the specified display name: %v", displayName))
+			return utils.ToDiags(d, fmt.Sprintf("no InMemoryDB replica set found with the specified display name: %v", displayName), nil)
 		}
 		if len(results) > 1 {
 			var ids []string
 			for _, r := range results {
 				ids = append(ids, r.Id)
 			}
-			return diag.FromErr(fmt.Errorf("more than one InMemoryDB replica set found with the specified criteria name '%v': (%v)", displayName, strings.Join(ids, ", ")))
+			return utils.ToDiags(d, fmt.Sprintf("more than one InMemoryDB replica set found with the specified criteria name '%v': (%v)", displayName, strings.Join(ids, ", ")), nil)
 		}
 		replica = results[0]
 	}
 
 	if err := client.SetReplicaSetData(d, replica); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }

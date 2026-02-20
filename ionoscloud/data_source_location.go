@@ -10,6 +10,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceLocation() *schema.Resource {
@@ -69,7 +70,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 	feature, featureOk := d.GetOk("feature")
 
 	if !nameOk && !featureOk {
-		return diag.FromErr(fmt.Errorf("either 'name' or 'feature' must be provided"))
+		return utils.ToDiags(d, "either 'name' or 'feature' must be provided", nil)
 	}
 
 	request := client.LocationsApi.LocationsGet(ctx).Depth(1)
@@ -82,7 +83,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching locations: %w", err))
+		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching locations: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	var results []ionoscloud.Location
 
@@ -99,13 +100,13 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 	var location ionoscloud.Location
 
 	if results == nil || len(results) == 0 {
-		return diag.FromErr(fmt.Errorf("no location found with the specified criteria: name = %s, feature = %s", name.(string), feature.(string)))
+		return utils.ToDiags(d, fmt.Sprintf("no location found with the specified criteria: name = %s, feature = %s", name.(string), feature.(string)), nil)
 	} else {
 		location = results[0]
 	}
 
 	if err := setLocationData(d, &location); err != nil {
-		return diag.FromErr(err)
+		return utils.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
