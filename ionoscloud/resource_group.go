@@ -305,7 +305,11 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	request.Properties.AccessAndManageAiModelHub = &tempAccessAndManageAiModelHub
 	tempAccessAndManageIamResources := d.Get("access_and_manage_iam_resources").(bool)
 	request.Properties.AccessAndManageIamResources = &tempAccessAndManageIamResources
-	group, apiResponse, err := client.UserManagementApi.UmGroupsPost(ctx).Group(request).Execute()
+
+	group, apiResponse, err := utils.ExecuteWithFallback(ctx, len(client.GetConfig().Servers), func(retryCtx context.Context) (ionoscloud.Group, *ionoscloud.APIResponse, error) {
+		return client.UserManagementApi.UmGroupsPost(retryCtx).Group(request).Execute()
+	})
+
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -354,7 +358,9 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.FromErr(err)
 	}
 
-	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
+	group, apiResponse, err := utils.ExecuteWithFallback(ctx, len(client.GetConfig().Servers), func(retryCtx context.Context) (ionoscloud.Group, *ionoscloud.APIResponse, error) {
+		return client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
+	})
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -509,7 +515,11 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(err)
 	}
 
-	apiResponse, err := client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
+	_, apiResponse, err := utils.ExecuteWithFallback(ctx, len(client.GetConfig().Servers), func(retryCtx context.Context) (any, *ionoscloud.APIResponse, error) {
+		apiResponse, err := client.UserManagementApi.UmGroupsDelete(retryCtx, d.Id()).Execute()
+		return nil, apiResponse, err
+	})
+
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(err)
