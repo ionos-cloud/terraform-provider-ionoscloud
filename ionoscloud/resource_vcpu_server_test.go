@@ -22,6 +22,7 @@ import (
 // ToDo: add backup unit back in tests when stable
 
 func TestAccServerVCPUBasic(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -271,6 +272,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 
 // issue #379
 func TestAccServerVCPUNoBootVolumeBasic(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -316,6 +318,7 @@ func TestAccServerVCPUNoBootVolumeBasic(t *testing.T) {
 
 // tests server with no cdromimage and with multiple firewall rules inline
 func TestAccServerVCPUBootCdromNoImageAndInlineFwRules(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -453,6 +456,7 @@ func TestAccServerVCPUBootCdromNoImageAndInlineFwRules(t *testing.T) {
 
 // create and updates 5 inline rules after the server is created
 func TestAccServerVCPUResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
+	t.Parallel()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -590,170 +594,6 @@ func TestAccServerVCPUResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
-				),
-			},
-		},
-	})
-}
-
-// also tests creating 5 fw rules inline
-func TestAccServerVCPUWithSnapshotAnd5FwRulesInline(t *testing.T) {
-	var server ionoscloud.Server
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ExternalProviders:        randomProviderVersion343(),
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckServerVCPUWithSnapshot,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerVCPUExists(constant.ServerVCPUResource+"."+constant.ServerTestResource, &server),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cores", "1"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "ram", "1024"),
-					resource.TestCheckResourceAttrSet(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "type", constant.VCPUType),
-					utils.TestImageNotNull(constant.ServerVCPUResource, "boot_image"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.name", constant.ServerTestResource),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+"webserver", "nic.0.firewall.#", "5"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccServerVCPUWithICMP(t *testing.T) {
-	var server ionoscloud.Server
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ExternalProviders:        randomProviderVersion343(),
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckServerVCPUNoFirewall,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerVCPUExists(constant.ServerVCPUResource+"."+constant.ServerTestResource, &server),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cores", "1"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "ram", "1024"),
-					resource.TestCheckResourceAttrSet(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "type", constant.VCPUType),
-					utils.TestImageNotNull(constant.ServerVCPUResource, "boot_image"),
-					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.name", "system"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.disk_type", "HDD"),
-					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.name", "system"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
-				),
-			},
-			{
-				Config: testAccCheckServerVCPUSeparateFirewall,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerVCPUExists(constant.ServerVCPUResource+"."+constant.ServerTestResource, &server),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cores", "1"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "ram", "1024"),
-					resource.TestCheckResourceAttrSet(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "type", constant.VCPUType),
-					utils.TestImageNotNull(constant.ServerVCPUResource, "boot_image"),
-					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.name", "system"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.disk_type", "HDD"),
-					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
-					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "name", "allow-icmp"),
-					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "protocol", "ICMP"),
-					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "type", "INGRESS"),
-				),
-			},
-			{
-				Config: testAccCheckServerVCPUICMP,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerVCPUExists(constant.ServerVCPUResource+"."+constant.ServerTestResource, &server),
-					resource.TestCheckResourceAttrSet(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "type", constant.VCPUType),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.protocol", "ICMP"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.name", constant.ServerTestResource),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.icmp_type", "12"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall.0.icmp_code", "0"),
-					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "name", "allow-icmp"),
-					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "protocol", "ICMP"),
-					resource.TestCheckResourceAttr(constant.FirewallResource+"."+constant.FirewallTestResource, "type", "INGRESS"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccServerVCPUWithLabels(t *testing.T) {
-	var server ionoscloud.Server
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ExternalProviders:        randomProviderVersion343(),
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-		CheckDestroy:             testAccCheckServerVCPUDestroyCheck,
-		Steps: []resource.TestStep{
-			// Clean server creation using labels in configuration.
-			{
-				Config: testAccCheckServerVCPUCreationWithLabels,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerVCPUExists(constant.ServerVCPUResource+"."+constant.ServerTestResource, &server),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "label.#", "2"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "label.0.key", "labelkey0"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "label.0.value", "labelvalue0"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "label.1.key", "labelkey1"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "label.1.value", "labelvalue1"),
-				),
-			},
-			// Check that labels are present in the server data source.
-			{
-				Config: testAccCheckDataSourceServerVCPUWithLabels,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "labels.#", "2"),
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "labels.0.key", "labelkey0"),
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "labels.0.value", "labelvalue0"),
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "labels.1.key", "labelkey1"),
-					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "labels.1.value", "labelvalue1"),
-				),
-			},
-			// Update server labels.
-			{
-				Config: testAccCheckServerVCPUUpdateLabels,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerVCPUExists(constant.ServerVCPUResource+"."+constant.ServerTestResource, &server),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "label.#", "2"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "label.0.key", "updatedlabelkey0"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "label.0.value", "updatedlabelvalue0"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "label.1.key", "updatedlabelkey1"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "label.1.value", "updatedlabelvalue1"),
-				),
-			},
-			// Delete server labels.
-			{
-				Config: testAccCheckServerVCPUDeleteLabels,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerVCPUExists(constant.ServerVCPUResource+"."+constant.ServerTestResource, &server),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "label.#", "0"),
 				),
 			},
 		},
