@@ -98,7 +98,7 @@ func (c SdkBundle) NewContainerRegistryClient(location string) *crService.Client
 	))
 
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint %q from IONOS_API_URL env variable\n", os.Getenv(shared.IonosApiUrlEnvVar))
+		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
 		return crService.NewClientFromConfig(config)
 	}
 
