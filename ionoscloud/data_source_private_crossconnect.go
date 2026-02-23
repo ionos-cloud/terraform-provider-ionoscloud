@@ -31,6 +31,10 @@ func dataSourcePcc() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"peers": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -161,7 +165,8 @@ func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnec
 }
 
 func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
 		return diag.FromErr(err)
 	}

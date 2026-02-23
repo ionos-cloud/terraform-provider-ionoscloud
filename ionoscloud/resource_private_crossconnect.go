@@ -37,6 +37,11 @@ func resourcePrivateCrossConnect() *schema.Resource {
 				Description: "The desired description",
 				Optional:    true,
 			},
+			"location": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"connectable_datacenters": {
 				Type:        schema.TypeList,
 				Description: "A list containing all the connectable datacenters",
@@ -103,7 +108,8 @@ func resourcePrivateCrossConnect() *schema.Resource {
 }
 
 func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -140,7 +146,8 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -166,7 +173,8 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -214,7 +222,8 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -260,12 +269,22 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	importID := d.Id()
+	location, parts := splitImportID(importID, ":")
+	if len(parts) != 1 {
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<pcc-id> or <pcc-id>, got: %s", importID)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+
+	pccId := parts[0]
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
 		return nil, err
 	}
-
-	pccId := d.Id()
 
 	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
